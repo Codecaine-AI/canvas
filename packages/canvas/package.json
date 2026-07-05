@@ -1,0 +1,45 @@
+{
+  "name": "@codecaine-ai/canvas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./actions": "./src/actions.ts",
+    "./geometry": "./src/geometry.ts",
+    "./theme": "./src/theme.ts",
+    "./figjam-tokens": "./src/figjam-tokens.ts",
+    "./chrome": "./src/chrome/index.ts",
+    "./connection-overlay": "./src/connection-overlay.ts",
+    "./fixtures/*": "./src/fixtures/*.ts",
+    "./ui/cn": "./src/ui/cn.ts",
+    "./ui/button": "./src/ui/button.tsx",
+    "./ui/input": "./src/ui/input.tsx",
+    "./ui/textarea": "./src/ui/textarea.tsx",
+    "./ui/badge": "./src/ui/badge.tsx"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.563.0",
+    "radix-ui": "^1.4.3",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.9.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/bun": "latest",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "happy-dom": "^20.9.0",
+    "typescript": "^5"
+  }
+}

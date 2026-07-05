@@ -6,3 +6,30 @@ for creating and editing boards without a host app.
 
 Extracted from the Spectre monorepo (see PROVENANCE.md). Part of the
 Codecaine suite alongside pi-agent-kernel and docs-framework.
+
+## Layout
+
+```
+packages/
+  canvas/     @codecaine-ai/canvas — the engine (schema, actions, geometry,
+              interaction state machine, rendering, chrome components,
+              fixtures). See packages/canvas/src/index.ts for the barrel
+              and docs/00-overview.md for the architecture map.
+  studio/     @codecaine-ai/studio — a minimal standalone Vite+React app
+              for creating/editing boards without a host app.
+docs/         00-overview.md — engine architecture, one page.
+board-design-reference/
+              FigJam/AFFiNE reference recordings + pixel-sampled style
+              analysis the engine's visual constants are derived from.
+```
+
+## Getting started
+
+```bash
+bun install
+bun test packages/canvas/src   # engine test suite
+bun run dev:studio             # standalone board editor, http://localhost:3999
+```
+
+See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite
+(MPL-2.0) vendoring/licensing notes.

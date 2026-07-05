@@ -1,0 +1,246 @@
+{
+  "meta": {
+    "scaleFactorExportPxPerLogicalPx": 2,
+    "notes": "V2 Flow.png (9952x4224) is a 2x export: logical = export / 2. Established via author-attribution text (17-18px export ascender = 12px logical font) and section-chip labels (33px export bbox = 16px logical font); all strokes are a crisp 8px export = 4px logical. All *Px fields are LOGICAL px unless suffixed Export. Colors sampled as statistical mode of multi-pixel regions. Text colors on colored fills are alpha blends: implement as rgba(0,0,0,alpha) over the fill, not fixed hexes.",
+    "acceptanceTarget": "board-design-reference/my_diagrams/V2 Flow.png",
+    "fontFamilyGuess": "Inter",
+    "textRules": {
+      "bodyOnFill": "rgba(0,0,0,0.8)",
+      "authorOnFill": "rgba(0,0,0,0.4)",
+      "chipLabel": "#000000",
+      "onSaturatedFill": "#FFFFFF"
+    }
+  },
+  "font": {
+    "canvasContentFamily": "Simple",
+    "verdict": "Inter-like geometric sans, not the rounded/casual face. Applies uniformly across all observed text roles (sticky body text, shape labels, bold standalone labels, section/frame title chips) - no rounded-casual face found anywhere on canvas.",
+    "adjudication": "FigJam's font-picker (video frame fj-021.png) lists four named families: Simple (checked/selected), Bookish (serif), Technical (monospace), Scribbled (script). The picker renders each family name as a live preview in its own font; 'Simple' renders as a plain geometric grotesque, not a rounded/comic-style face - the name 'Simple' is FigJam's friendly label for its default sans, not a description of letterform shape. Direct letterform comparison across four independent high-resolution samples in V2 Flow.png (9952x4224 export) confirms one consistent geometric sans-serif used everywhere on the canvas. Reconciliation of the prior disagreement: Analyst A correctly identified the font-picker selection ('Simple' is checked) but mischaracterized its shape as rounded/casual; Analyst B correctly identified the geometric/Inter-like visual character from shape labels. Both were partially right; the letterform evidence settles it toward Inter-like for every role.",
+    "letterformEvidence": {
+      "aShape": "Double-story 'a' with a clean geometric bowl (sticky body text, 'Overall Context is why we are doing the interview...').",
+      "gShape": "Single-story 'g' with a simple hook descender, not a double-story/looped 'g' (seen in 'doing', 'goal', 'accomplish').",
+      "tTerminal": "Flat, straight-cut terminal on 't' (not curved/rounded) - consistent across sticky body text, shape label 'Get Next Question', and bold label 'AI Asks Question'.",
+      "qTail": "'Q' has a straight diagonal tail cutting through the bowl ('Get Next Question', section chip 'Question' labels) - typical of Inter/Helvetica-style grotesques, not soft/rounded faces.",
+      "consistencyAcrossRoles": "Section title chip ('Interview Inputs'), sticky body text, plain shape label, and bold standalone label all show matching letterform construction, differing only in weight/size."
+    },
+    "roles": {
+      "stickyBody": { "family": "Simple (Inter-like)", "confidence": "high" },
+      "shapeLabel": { "family": "Simple (Inter-like)", "confidence": "high" },
+      "boldStandaloneLabel": { "family": "Simple (Inter-like)", "confidence": "high" },
+      "sectionTitleChip": { "family": "Simple (Inter-like)", "confidence": "high" },
+      "codeBlock": { "family": "monospace, distinct face from canvas 'Simple' family", "confidence": "medium" }
+    }
+  },
+  "canvas": {
+    "bg": "#F5F5F5",
+    "exportBg": "#FFFFFF",
+    "gridDot": {
+      "colorSampled": "#DDDDDD",
+      "colorRecommended": "rgba(0,0,0,0.13)",
+      "diameterLogicalPxAt100Zoom": 2,
+      "baseSpacingLogicalPx": 8,
+      "adaptive": "spacing = 8 * 2^n chosen so on-screen spacing stays ~6.5-13px; observed 32px logical at both 21% and 30.5% zoom (6.9px and 9.8px on screen)",
+      "observed": [
+        { "zoom": 0.305, "screenSpacingPx": 9.8, "logicalSpacingPx": 32, "frame": "fj-050" },
+        { "zoom": 0.21, "screenSpacingPx": 6.9, "logicalSpacingPx": 33, "frame": "fj-001" }
+      ]
+    }
+  },
+  "sections": {
+    "geometry": {
+      "cornerRadiusPx": 8.5,
+      "borderWidthPx": 2,
+      "borderColorRule": "same as titleChip fill",
+      "titleChip": {
+        "shape": "stadium",
+        "heightPx": 27,
+        "borderWidthPx": 2,
+        "textColor": "#000000",
+        "fontSizePx": 16,
+        "fontWeight": "medium",
+        "paddingXPx": 10,
+        "insetFromSectionCornerPx": 3
+      }
+    },
+    "pastel": {
+      "green":  { "tint": "#EBFFEE", "chipFill": "#CDF4D3", "chipBorder": "#66D575" },
+      "purple": { "tint": "#F8F5FF", "chipFill": "#DCCCFF", "chipBorder": "#874FFF" },
+      "orange": { "tint": "#FFF7F0", "chipFill": "#FFE0C2", "chipBorder": "#FF9E42" },
+      "yellow": { "tint": "#FFFBF0", "chipFill": "#FFECBD", "chipBorder": "#FFC943" },
+      "gray":   { "tint": "#F9F9F9", "chipFill": "#D9D9D9", "chipBorder": "#B9B9B9" },
+      "white":  { "tint": "#FFFFFF", "chipFill": "#E6E6E6", "chipBorder": "#C4C4C4" },
+      "pink":   { "tint": "#FFF0FA", "chipFill": "#FFC2EC", "chipBorder": "#F849C1" },
+      "red":    { "tint": "#FFF5F5", "chipFill": "#FFC7C2", "chipBorder": "#F24822" },
+      "blue":   { "tint": "#F5FBFF", "chipFill": "#C2E5FF", "chipBorder": "#3DADFF" },
+      "teal":   { "tint": "#C6FAF6", "chipFill": null, "chipBorder": null }
+    },
+    "saturated": {
+      "green":  { "tint": "#DCF3E7", "border": "#14AE5C" },
+      "yellow": { "tint": "#FFF7DF", "border": "#FFCD29" },
+      "blue":   { "tint": "#DBF0FF", "border": "#3DADFF" }
+    }
+  },
+  "sticky": {
+    "geometry": {
+      "cornerRadiusPx": 0,
+      "foldedCorner": false,
+      "defaultObservedSizePx": [416, 420],
+      "textInsetLeftPx": 21,
+      "textInsetTopPx": 28,
+      "bodyFontSizePx": 24,
+      "bodyLineHeightPx": 36,
+      "bodyTextColor": "rgba(0,0,0,0.8)",
+      "author": {
+        "text": "username, bottom-left",
+        "fontSizePx": 12,
+        "color": "rgba(0,0,0,0.4)",
+        "insetLeftPx": 20,
+        "baselineFromBottomPx": 24
+      },
+      "shadow": {
+        "cssApproxLogical": "0 3px 12px rgba(0,0,0,0.15)",
+        "sampledBottomEdge": "13% black at edge fading over ~15 logical px",
+        "sampledSideEdge": "5% black at edge fading over ~7 logical px"
+      }
+    },
+    "colors": {
+      "yellow":   { "bg": "#FFE299", "text80": "#332D1F", "author40": "#99885C" },
+      "red":      { "bg": "#FFAFA3", "text80": "#332321" },
+      "pink":     { "bg": "#FFA8DB", "text80": "#33222C" },
+      "blue":     { "bg": "#80CAFF" },
+      "lightBlue":{ "bg": "#A8DAFF", "text80": "#222C33" },
+      "blueGray": { "bg": "#AFBCCF", "text80": "#232629" }
+    }
+  },
+  "shapes": {
+    "strokeWidthPx": 4,
+    "textColor": "rgba(0,0,0,0.8)",
+    "textColorOnSaturated": "#FFFFFF",
+    "fontSizePx": 15,
+    "shadow": "none",
+    "roundedRect": { "fill": "#FFFFFF", "stroke": "#757575", "textColor": "#333333" },
+    "pill": { "fill": "#FFFFFF", "stroke": "#757575", "radius": "height/2", "observedHeightPx": 84 },
+    "predefinedProcessButton": {
+      "fill": "#C2E5FF",
+      "stroke": "#3DADFF",
+      "cornerRadiusPx": 5,
+      "innerVerticalBars": { "count": 2, "widthPx": 4, "insetFromEndsPx": 17.5 },
+      "observedSizePx": [371, 83],
+      "note": "not a double border; FigJam flowchart 'predefined process' shape"
+    },
+    "chevronArrow": {
+      "fill": "#FFECBD",
+      "stroke": "#FFC943",
+      "observedSizePx": [361, 100],
+      "bodyHeightPx": 53,
+      "headHeightPx": 100,
+      "headLengthPx": 136,
+      "headLengthFractionOfWidth": 0.38,
+      "headToBodyHeightRatio": 1.89,
+      "bodyCornerRadiusPx": 10,
+      "joins": "rounded, slightly rounded tip"
+    },
+    "emphasisBox": { "fill": "#FFC7C2", "stroke": "#F24822", "cornerRadiusPx": 7.5 },
+    "diamond": {
+      "variants": [
+        { "fill": "#E4CCFF", "stroke": null, "source": "Agent Flows" },
+        { "fill": "#FFC7C2", "stroke": "#F24822", "source": "MR Walls" },
+        { "fill": "#FCD19C", "stroke": null, "source": "INK Diagrams" }
+      ]
+    },
+    "pentagon": { "fill": "#DCCCFF", "stroke": "#874FFF", "source": "MR Walls" },
+    "octagon": { "fill": "#FFC7C2", "stroke": "#F24822", "source": "MR Walls" },
+    "circle": { "fill": "#FFCD29", "stroke": null, "source": "Agent Flows" },
+    "cylinder": { "fill": "#E4CCFF", "stroke": null, "source": "Agent Flows" },
+    "parallelogram": { "fill": "#F24822", "stroke": null, "textColor": "#FFFFFF", "source": "INK" },
+    "hexagon": { "fill": "#14AE5C", "stroke": null, "textColor": "#FFFFFF", "source": "INK" },
+    "flatRect": { "fill": "#BDE3FF", "stroke": null, "source": "Agent Flows" },
+    "nestedCard": { "fill": "#F9F9F9", "stroke": "#D9D9D9", "strokeWidthPx": 2, "cornerRadiusPx": 8, "shadow": "none" },
+    "questionCard": { "fill": "#FFFBF0", "stroke": "#FFECBD", "strokeWidthPx": 2 }
+  },
+  "palette": {
+    "pastelPairs": {
+      "gray":   { "fill": "#E6E6E6", "stroke": "#C4C4C4" },
+      "gray2":  { "fill": "#D9D9D9", "stroke": "#B3B3B3" },
+      "blue":   { "fill": "#C2E5FF", "stroke": "#3DADFF" },
+      "yellow": { "fill": "#FFECBD", "stroke": "#FFC943" },
+      "orange": { "fill": "#FFE0C2", "stroke": "#FF9E42" },
+      "red":    { "fill": "#FFC7C2", "stroke": "#F24822" },
+      "green":  { "fill": "#DDF8E2", "stroke": "#66D575" },
+      "greenChip": { "fill": "#CDF4D3", "stroke": "#66D575" },
+      "purple": { "fill": "#DCCCFF", "stroke": "#874FFF" },
+      "purple2":{ "fill": "#E4CCFF", "stroke": "#874FFF" },
+      "teal":   { "fill": "#5AD8CC", "stroke": "#369E94" },
+      "pink":   { "fill": "#FFC2EC", "stroke": "#F849C1" }
+    },
+    "saturated": ["#F24822", "#FF9E42", "#FFCD29", "#14AE5C", "#0D99FF", "#9747FF", "#FFA8DB", "#B3B3B3"]
+  },
+  "connectors": {
+    "strokeWidthPx": 4,
+    "colors": {
+      "gray": "#757575",
+      "orange": "#EB7500",
+      "green": "#3E9B4B",
+      "red": "#F24822",
+      "purple": "#9747FF",
+      "darkYellow": "#E8A302"
+    },
+    "redObservedThickerPx": 8.5,
+    "elbowCornerRadiusPx": 21.5,
+    "elbowCornerRadiusNote": "centerline radius on an unconstrained turn (outer edge 23.5); likely clamps on short segments",
+    "dash": { "dashPx": 19, "gapPx": 7, "caps": "butt" },
+    "arrowhead": {
+      "type": "solid filled triangle, stroke color",
+      "baseWidthPx": 20,
+      "lengthPx": 18,
+      "baseWidthToStrokeRatio": 5,
+      "lengthToStrokeRatio": 4.5,
+      "tip": "slightly rounded"
+    },
+    "attachGapPx": { "plainEnd": 8, "arrowheadTip": 12, "note": "connectors never touch the target border" }
+  },
+  "icons": {
+    "strokeWidthPx": 4.5,
+    "approxSizePx": 130,
+    "chatBubble": { "fill": "#FF9E42", "stroke": "#EB7500", "construction": "circle + curved tail merging bottom-left" },
+    "person": { "fill": "#66D575", "stroke": "#3E9B4B", "construction": "circle head + round-top trapezoid shoulders, flat bottom" },
+    "cpu": { "fill": "#FFE0C2", "stroke": "#FF9E42", "construction": "rounded square + inner square outline + 8 pins (2 per side)" },
+    "envelope": { "construction": "rounded rect + V flap, family colors", "source": "MR Walls" },
+    "terminal": { "construction": "dark rounded-square outline + >_ glyph", "source": "Bubba Voice" }
+  },
+  "codeBlock": {
+    "bg": "#282A36",
+    "cornerRadiusPx": 10,
+    "paddingTopPx": 25,
+    "gutter": { "lineNumberColor": "#999999", "numberColumnFromLeftPx": 35, "codeStartFromLeftPx": 66, "wrappedLines": "no number, hang at gutter" },
+    "syntax": {
+      "theme": "Dracula",
+      "fg": "#F8F8F2",
+      "keyword": "#FF79C6",
+      "string": "#F1FA8C",
+      "type": "#8BE9FD",
+      "comment": "not observed (Dracula standard would be #6272A4)"
+    },
+    "shadow": "none",
+    "fontGuess": "monospace with curved-tail l (Source Code Pro-like, unverified)"
+  },
+  "text": {
+    "fontFamilyGuess": "Inter",
+    "sizesPx": {
+      "chipLabel": 16,
+      "stickyBody": 24,
+      "stickyLineHeight": 36,
+      "stickyAuthor": 12,
+      "boldLabel": 20,
+      "shapeText": 15
+    }
+  },
+  "chrome": {
+    "topBarBg": "#E6E6E6",
+    "topBarBorderBottom": "#DFDFDF",
+    "canvasBg": "#F5F5F5",
+    "bottomToolbar": { "bg": "#FFFFFF", "shape": "floating pill ~546x37 css px", "shadow": "soft below, ~#D0D0D0 adjacent fading over ~8px" },
+    "contextToolbarBg": "#1D1D1D",
+    "accentPurple": "#8C2EF2",
+    "selectionBlue": "#0D99FF"
+  }
+}

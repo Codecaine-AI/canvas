@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/*
+ * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved
+ * "spectre-light" design tokens (apps/frontend/src/theme/themes/spectre-light.json,
+ * resolved via apps/frontend/src/theme/css-vars.ts at extraction time). Spectre
+ * itself resolves these at runtime from a small theme engine
+ * (apps/frontend/src/theme/**) with multiple themes + dark mode; the studio
+ * app intentionally does not vendor that engine — it just needs *some*
+ * sane, self-contained values for the `--color-*` Tailwind theme mapping
+ * below so `@codecaine-ai/canvas`'s `var(--primary)`-style CSS and the
+ * vendored shadcn-style UI primitives render correctly standalone.
+ */
+:root {
+  --radius: 0.5rem;
+  color-scheme: light;
+
+  --background: #f5f3ef;
+  --foreground: #111111;
+  --card: #fffefa;
+  --card-foreground: #111111;
+  --popover: #fffefa;
+  --popover-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #fffefa;
+  --secondary: #eceae6;
+  --secondary-foreground: #403d38;
+  --muted: #eceae6;
+  --muted-foreground: #62666d;
+  --accent: #e8eef8;
+  --accent-foreground: #111111;
+  --destructive: #9f1d1d;
+  --border: #d8d5ce;
+  --input: #c4c0b9;
+  --ring: #aeb8c6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}

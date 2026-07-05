@@ -1,0 +1,197 @@
+import { afterEach, describe, expect, it } from "bun:test";
+import { cleanup, render } from "@testing-library/react";
+import { InteractiveCanvasViewer } from "../InteractiveCanvasViewer";
+import { v2FlowElementsCanvas } from "../fixtures/v2-flow-elements";
+
+afterEach(() => {
+  cleanup();
+});
+
+/**
+ * jsdom/happy-dom performs no real layout, so getBoundingClientRect() on the
+ * measured `.interactive-canvas-shell` element returns all-zero by default —
+ * same mock pattern as viewer-view-crop.test.tsx.
+ */
+function withMeasuredShell<T>(width: number, height: number, run: () => T): T {
+  const originalRect = HTMLElement.prototype.getBoundingClientRect;
+  HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+    if ((this as HTMLElement).classList.contains("interactive-canvas-shell")) {
+      return {
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        width,
+        height,
+        right: width,
+        bottom: height,
+        toJSON: () => ({}),
+      } as DOMRect;
+    }
+    return originalRect.call(this);
+  };
+  try {
+    return run();
+  } finally {
+    HTMLElement.prototype.getBoundingClientRect = originalRect;
+  }
+}
+
+const SCREEN = { width: 1600, height: 900 };
+
+describe("W2 render smoke: every new object type renders without throwing", () => {
+  it("renders one of each new W2 shape/section type", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      for (const object of v2FlowElementsCanvas.objects) {
+        const node = container.querySelector(`[data-canvas-object-id="${object.id}"]`);
+        expect(node).toBeTruthy();
+      }
+    });
+  });
+
+  it("renders sections with a title chip showing their `title` (not `label`)", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const outer = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
+      expect(outer).toBeTruthy();
+      expect(outer!.textContent).toContain("Memory pipeline");
+
+      const inner = container.querySelector('[data-canvas-object-id="inner-section"]') as HTMLElement | null;
+      expect(inner).toBeTruthy();
+      expect(inner!.textContent).toContain("New memory");
+    });
+  });
+
+  it("renders sections below non-section objects in DOM order", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const allObjectNodes = Array.from(container.querySelectorAll("[data-canvas-object-id]"));
+      const sectionIndex = allObjectNodes.findIndex(
+        (node) => node.getAttribute("data-canvas-object-id") === "outer-section",
+      );
+      const pillIndex = allObjectNodes.findIndex(
+        (node) => node.getAttribute("data-canvas-object-id") === "captured-pill",
+      );
+      expect(sectionIndex).toBeGreaterThanOrEqual(0);
+      expect(pillIndex).toBeGreaterThanOrEqual(0);
+      expect(sectionIndex).toBeLessThan(pillIndex);
+    });
+  });
+
+  it("renders the chip-icon silhouette", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const chipSvg = container.querySelector('[data-canvas-shape-silhouette="chip-icon"]');
+      expect(chipSvg).toBeTruthy();
+    });
+  });
+
+  it("renders the restyled person/chat labels BELOW the icon, not overlaid", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const person = container.querySelector('[data-canvas-object-id="restyled-person"]');
+      expect(person?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe("Interviewee");
+
+      const chat = container.querySelector('[data-canvas-object-id="restyled-chat"]');
+      expect(chat?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe("Live Q&A");
+    });
+  });
+
+  it("hides the compact person's label under 100px height", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const compactPerson = container.querySelector('[data-canvas-object-id="compact-person"]');
+      expect(compactPerson?.querySelector(".interactive-canvas-label-below-icon")).toBeNull();
+    });
+  });
+
+  it("renders sticky author text and bullet lines", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const sticky = container.querySelector('[data-canvas-object-id="partial-overlap-note"]') as HTMLElement | null;
+      expect(sticky).toBeTruthy();
+
+      const author = sticky!.querySelector(".interactive-canvas-sticky-author");
+      expect(author?.textContent).toBe("Ford");
+
+      const bulletLines = sticky!.querySelectorAll('.interactive-canvas-sticky-line[data-bullet="true"]');
+      expect(bulletLines.length).toBe(2);
+      expect(bulletLines[0]?.textContent).toBe("bullet one");
+      expect(bulletLines[1]?.textContent).toBe("bullet two");
+    });
+  });
+
+  it("renders the code-block with a line-number gutter and tokenized spans", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const codeBlock = container.querySelector('[data-canvas-object-id="captured-code-block"]') as HTMLElement | null;
+      expect(codeBlock).toBeTruthy();
+
+      const lineNumbers = codeBlock!.querySelectorAll(".interactive-canvas-code-block-line-number");
+      expect(lineNumbers.length).toBe(5);
+      expect(lineNumbers[0]?.textContent).toBe("1");
+
+      expect(codeBlock!.textContent).toContain("class Agent(BaseModel):");
+    });
+  });
+
+  it("renders arrow-shape objects pointing in their configured direction", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+
+      const rightArrow = container.querySelector('[data-canvas-object-id="outside-arrow"] .interactive-canvas-arrow-shape-silhouette') as SVGElement | null;
+      const leftArrow = container.querySelector('[data-canvas-object-id="outside-arrow-left"] .interactive-canvas-arrow-shape-silhouette') as SVGElement | null;
+      expect(rightArrow).toBeTruthy();
+      expect(leftArrow).toBeTruthy();
+      // W4 — the silhouette SVG traces the full 7-point chevron in the object's direction.
+      expect(rightArrow!.getAttribute("data-canvas-arrow-direction")).toBe("right");
+      expect(leftArrow!.getAttribute("data-canvas-arrow-direction")).toBe("left");
+      const rightPolygon = rightArrow!.querySelector("polygon");
+      expect(rightPolygon?.getAttribute("points")?.split(" ").length).toBe(7);
+    });
+  });
+
+  it("renders predefined-process's two inner bars", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const node = container.querySelector('[data-canvas-object-id="predefined-process-node"]');
+      const bars = node?.querySelectorAll(".interactive-canvas-predefined-process-bar");
+      expect(bars?.length).toBe(2);
+    });
+  });
+
+  it("gives a selected section corner-only resize handles (no edge midpoints)", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(
+        <InteractiveCanvasViewer document={v2FlowElementsCanvas} selectedObjectIds={["outer-section"]} />,
+      );
+      const handles = Array.from(container.querySelectorAll("[data-canvas-handle]"));
+      expect(handles.length).toBeGreaterThan(0);
+      const handleNames = handles.map((node) => node.getAttribute("data-canvas-handle"));
+      // Corner handles are 2-letter compass directions (nw/ne/sw/se); edge
+      // midpoints are single-letter (n/s/e/w) and must be absent for sections.
+      for (const name of handleNames) {
+        expect(name?.length).toBe(2);
+      }
+    });
+  });
+
+  it("gives a selected non-section object the full 8-handle set, including edge midpoints", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = render(
+        <InteractiveCanvasViewer document={v2FlowElementsCanvas} selectedObjectIds={["captured-pill"]} />,
+      );
+      const handles = Array.from(container.querySelectorAll("[data-canvas-handle]"));
+      const handleNames = handles.map((node) => node.getAttribute("data-canvas-handle"));
+      expect(handleNames).toContain("n");
+      expect(handleNames.length).toBe(8);
+    });
+  });
+});

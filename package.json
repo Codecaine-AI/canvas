@@ -1,0 +1,19 @@
+{
+  "name": "codecaine-canvas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "test": "bun test packages/canvas/src",
+    "typecheck": "bun run typecheck:canvas && bun run typecheck:studio",
+    "typecheck:canvas": "bunx --bun tsc -p packages/canvas/tsconfig.json --noEmit",
+    "typecheck:studio": "bunx --bun tsc -p packages/studio/tsconfig.json --noEmit",
+    "dev:studio": "bun run --cwd packages/studio dev"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.9.0",
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}
