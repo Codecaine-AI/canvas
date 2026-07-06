@@ -29,7 +29,6 @@ import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
 import type { CanvasTool } from "../model/actions";
 import {
-  ARROW_SHAPE_GEOMETRY,
   CANVAS_BG,
   CANVAS_FONT_FAMILY,
   CHROME,
@@ -323,12 +322,6 @@ export function CanvasStage({
           outline-offset: 2px;
           box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 22%, transparent);
         }
-        .interactive-canvas-object-diamond {
-          align-items: center;
-          text-align: center;
-          clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-          padding: 18px 28px;
-        }
         /* Sticky rules live on the sticky def (objects/sticky/def.tsx) — except
            this one: the sticky body span carries BOTH .interactive-canvas-object-body
            and .interactive-canvas-sticky-body (same specificity), and this rule's
@@ -343,17 +336,10 @@ export function CanvasStage({
           font-size: ${STICKY_GEOMETRY.bodyFontSizePx}px;
           line-height: ${STICKY_GEOMETRY.bodyLineHeightPx}px;
         }
-        .interactive-canvas-object-marker {
-          align-items: center;
-          justify-content: center;
-          border-radius: 999px;
-          padding: 0;
-        }
         .interactive-canvas-object-page-corner {
           clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%);
           border-radius: 2px 8px 8px 8px;
         }
-        .interactive-canvas-object-document,
         .interactive-canvas-object-folder,
         .interactive-canvas-object-document-stack,
         .interactive-canvas-object-cylinder-horizontal,
@@ -427,91 +413,11 @@ export function CanvasStage({
           top: 15%;
           height: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
         }
-        .interactive-canvas-object-database,
-        .interactive-canvas-object-chat,
-        .interactive-canvas-object-chip-icon {
-          /* The SVG silhouette (ShapeSilhouette) paints the fill/border-free
-             shape itself — the button chrome stays fully transparent so only
-             one outline is visible. */
-          border: none;
-          border-radius: 0;
-          background: transparent !important;
-          box-shadow: none;
-          padding: 8px;
-        }
-        .interactive-canvas-object-chip-icon {
-          align-items: center;
-          justify-content: flex-end;
-          text-align: center;
-          padding-bottom: 10%;
-        }
-        .interactive-canvas-object-database {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding-top: 14%;
-        }
-        .interactive-canvas-object-chat {
-          align-items: center;
-          justify-content: flex-end;
-          text-align: center;
-          padding-bottom: 10%;
-        }
-        .interactive-canvas-object-database:hover,
-        .interactive-canvas-object-database[data-selected="true"],
-        .interactive-canvas-object-chat:hover,
-        .interactive-canvas-object-chat[data-selected="true"],
-        .interactive-canvas-object-chip-icon:hover,
-        .interactive-canvas-object-chip-icon[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
         .interactive-canvas-label-below-icon {
           position: relative;
           z-index: 1;
           font-weight: 700;
           color: #000000;
-        }
-        /* W2 — pill: true stadium shape, radius = height/2 (computed inline via CSS calc). */
-        .interactive-canvas-object-pill {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          border-radius: 999px;
-        }
-        /* W2/W4 — arrow-shape: the SVG silhouette (interactive-canvas-arrow-
-           shape-silhouette) paints the full 7-point chevron (fill + stroke),
-           so the button chrome stays fully transparent — one outline only. */
-        .interactive-canvas-object-arrow-shape {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          border: none;
-          border-radius: ${ARROW_SHAPE_GEOMETRY.bodyCornerRadiusPx}px;
-          background: transparent !important;
-          overflow: visible;
-        }
-        .interactive-canvas-arrow-shape-silhouette {
-          z-index: 0;
-        }
-        .interactive-canvas-object-arrow-shape .interactive-canvas-object-label {
-          position: relative;
-          z-index: 1;
-        }
-        /* W2 — predefined-process: rect + two inner vertical bars near each edge. */
-        .interactive-canvas-object-predefined-process {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          border-radius: ${PREDEFINED_PROCESS_GEOMETRY.cornerRadiusPx}px;
-        }
-        .interactive-canvas-predefined-process-bar {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx}px;
-          background: currentColor;
-          opacity: 0.6;
         }
         .interactive-canvas-object-label {
           position: relative;

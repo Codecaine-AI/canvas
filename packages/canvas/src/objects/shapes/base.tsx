@@ -51,11 +51,13 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
         {object.body && !compact && !compactGlyph && shape.text.kind !== "none" && (
           <span className="interactive-canvas-object-body">{object.body}</span>
         )}
-        {shape.text.kind === "label-below-icon" && !hideLabel && !compactGlyph && (
-          <span className="interactive-canvas-object-label interactive-canvas-label-below-icon">
-            {object.label}
-          </span>
-        )}
+        {shape.text.kind === "label-below-icon" &&
+          !hideLabel &&
+          (!compactGlyph || shape.text.compactDrops === "body") && (
+            <span className="interactive-canvas-object-label interactive-canvas-label-below-icon">
+              {object.label}
+            </span>
+          )}
         {showPorts && <EdgePorts object={object} zoom={zoom} />}
       </ObjectButtonChrome>
     );
@@ -68,7 +70,12 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
     css: shape.css ?? "",
     defaults: {
       // Shape-family placement default matches defaultGeometryFor's x/y.
-      geometry: { x: 160, y: 160, width: shape.defaultSize.width, height: shape.defaultSize.height },
+      geometry: {
+        x: shape.defaultPosition?.x ?? 160,
+        y: shape.defaultPosition?.y ?? 160,
+        width: shape.defaultSize.width,
+        height: shape.defaultSize.height,
+      },
       tone: shape.defaultTone ?? "neutral",
       shape: shape.shape,
       label: shape.catalog.label,

@@ -60,6 +60,12 @@ export interface TextZoneSpec {
    * and body are dropped so the silhouette stays legible (person: 100px).
    */
   compactBelowHeightPx?: number;
+  /**
+   * What the compact threshold suppresses. Person (the default,
+   * "label-and-body") drops BOTH the below-icon label and the body; chat
+   * ("body") keeps its below-icon label and drops only the body copy.
+   */
+  compactDrops?: "label-and-body" | "body";
   /** Per-shape inline label style (e.g. arrow-shape/chevron center the label within the body, not the bbox). */
   labelStyle?: (object: InteractiveCanvasObject) => CSSProperties | undefined;
 }
@@ -95,6 +101,8 @@ export interface ShapeDef {
   text: TextZoneSpec;
   anchors?: AnchorSpec;
   defaultSize: { width: number; height: number };
+  /** Placement default; omit for the shape-family standard (160, 160). annotation-marker: (220, 220). */
+  defaultPosition?: { x: number; y: number };
   /** Tone stamped on new objects of this type (defaults to "neutral" — the W5 inert fallback). */
   defaultTone?: InteractiveCanvasTone;
   /** This shape's global-CSS rules (moved verbatim from CanvasStage's style block). */

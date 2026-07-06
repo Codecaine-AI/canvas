@@ -12,10 +12,20 @@ import type {
 import { codeBlockDef } from "./code-block/def";
 import { containerDef } from "./container/def";
 import { sectionDef } from "./section/def";
+import { sourceNodeDef } from "./source-node/def";
 import { stickyDef } from "./sticky/def";
 import { textDef } from "./text/def";
+import { annotationMarkerDef } from "./shapes/annotation-marker";
+import { arrowShapeDef } from "./shapes/arrow-shape";
+import { chatDef } from "./shapes/chat";
+import { chipIconDef } from "./shapes/chip-icon";
+import { databaseDef } from "./shapes/database";
+import { decisionDef } from "./shapes/decision";
+import { documentDef } from "./shapes/document";
 import { ellipseDef } from "./shapes/ellipse";
 import { personDef } from "./shapes/person";
+import { pillDef } from "./shapes/pill";
+import { predefinedProcessDef } from "./shapes/predefined-process";
 import { processDef } from "./shapes/process";
 
 /**
@@ -137,14 +147,20 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  * through ObjectShape's legacy branches via the `undefined` fallback).
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
- *  - `section` and `container` are dispatched on `object.type` (before
- *    style.shape is read);
+ *  - `section` is dispatched on `object.type` (the ONLY type the legacy
+ *    renderer checked before style.shape). `container` and `source-node`
+ *    deliberately are NOT type-keyed for RENDER dispatch: legacy rendering
+ *    for them is purely style.shape-driven (an explicit non-default
+ *    style.shape wins), so their objects flow through the render-shape table
+ *    — typically to the rounded-rect def. Their ObjectDefs still register in
+ *    OBJECT_DEFS to carry defaults (step 6) and behavioral flags (step 4,
+ *    which needs a type-keyed BEHAVIOR lookup, distinct from render
+ *    dispatch).
  *  - everything else is dispatched on the effective render shape, so e.g. a
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
  */
 const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {
-  container: containerDef,
   section: sectionDef,
 };
 
@@ -155,6 +171,15 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   "rounded-rect": processDef,
   ellipse: ellipseDef,
   person: personDef,
+  diamond: decisionDef,
+  marker: annotationMarkerDef,
+  document: documentDef,
+  database: databaseDef,
+  chat: chatDef,
+  "chip-icon": chipIconDef,
+  pill: pillDef,
+  "arrow-shape": arrowShapeDef,
+  "predefined-process": predefinedProcessDef,
 };
 
 /** Registered defs in stylesheet order (their `css` is appended in this order). */
@@ -167,6 +192,16 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   personDef,
   containerDef,
   textDef,
+  sourceNodeDef,
+  decisionDef,
+  annotationMarkerDef,
+  documentDef,
+  databaseDef,
+  chatDef,
+  chipIconDef,
+  pillDef,
+  arrowShapeDef,
+  predefinedProcessDef,
 ];
 
 export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undefined {
