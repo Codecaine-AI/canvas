@@ -69,10 +69,12 @@ import {
   type InteractionState,
   type ResizeHandle,
 } from "../interaction/interaction";
-import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR, SECTION_GEOMETRY } from "../render/figjam-tokens";
-import { routeConnection, type Anchor } from "../routing/routing";
+import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../render/figjam-tokens";
+import { type Anchor } from "../routing/routing";
 import { paletteTokenStyle, resolveSectionColors } from "../render/theme";
 import { Inspector } from "./features/inspector/Inspector";
+import { LabelEditingOverlay } from "./features/label-editing/LabelEditingOverlay";
+import { useLabelEditing } from "./features/label-editing/use-label-editing";
 import { TopBar } from "./features/top-bar/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
@@ -381,14 +383,17 @@ export function InteractiveCanvasEditor({
   const [state, dispatch] = useReducer(reducer, document, createInteractiveCanvasState);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
-  const [labelEditConnectionId, setLabelEditConnectionId] = useState<string | null>(null);
-  const [labelEditValue, setLabelEditValue] = useState("");
-  // Inline OBJECT label editor (4.2.1) — distinct from the connector label
-  // editor above. Opened by the interaction machine's double-click intent
-  // (overlay.editObjectLabelId) for both existing objects and freshly created
-  // ones (typing starts immediately after a canvas double-click).
-  const [objectLabelEditId, setObjectLabelEditId] = useState<string | null>(null);
-  const [objectLabelEditValue, setObjectLabelEditValue] = useState("");
+  // Inline label editing (connector labels + object labels/section titles) —
+  // state and callbacks live in editor/features/label-editing.
+  const labelEditing = useLabelEditing({ document: state.document, dispatch });
+  const {
+    labelEditConnectionId,
+    objectLabelEditId,
+    setObjectLabelEditId,
+    setObjectLabelEditValue,
+    openConnectionLabelEditor,
+    openObjectLabelEditor,
+  } = labelEditing;
   // FigJamDock modal rule (Wave 3a scope item 1): while the Shapes panel is
   // open, the dock shows no active tool (activeTool=null) — the panel owns
   // placement-arming until a shape is picked or the panel is dismissed.
@@ -678,78 +683,6 @@ export function InteractiveCanvasEditor({
       toggleSectionContentHiddenForSelection,
     ],
   );
-
-  const labelEditConnection = state.document.connections.find(
-    (connection) => connection.id === labelEditConnectionId,
-  );
-  const labelEditFromObject = labelEditConnection
-    ? state.document.objects.find((object) => object.id === labelEditConnection.from.objectId)
-    : undefined;
-  const labelEditToObject = labelEditConnection
-    ? state.document.objects.find((object) => object.id === labelEditConnection.to.objectId)
-    : undefined;
-  const labelEditPoint =
-    labelEditConnection && labelEditFromObject && labelEditToObject
-      ? routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, state.document.objects).labelPoint
-      : null;
-
-  const openConnectionLabelEditor = useCallback(
-    (connectionId: string) => {
-      const connection = state.document.connections.find((item) => item.id === connectionId);
-      setLabelEditConnectionId(connectionId);
-      setLabelEditValue(connection?.label ?? "");
-    },
-    [state.document.connections],
-  );
-
-  const commitConnectionLabel = useCallback(() => {
-    if (!labelEditConnectionId) return;
-    dispatch({
-      type: "canvas.updateConnection",
-      connectionId: labelEditConnectionId,
-      patch: { label: labelEditValue.trim() === "" ? undefined : labelEditValue },
-    });
-    setLabelEditConnectionId(null);
-    setLabelEditValue("");
-  }, [labelEditConnectionId, labelEditValue, dispatch]);
-
-  const cancelConnectionLabelEdit = useCallback(() => {
-    setLabelEditConnectionId(null);
-    setLabelEditValue("");
-  }, []);
-
-  const objectLabelEditTarget = state.document.objects.find(
-    (object) => object.id === objectLabelEditId,
-  );
-
-  const openObjectLabelEditor = useCallback(
-    (objectId: string) => {
-      const object = state.document.objects.find((item) => item.id === objectId);
-      setObjectLabelEditId(objectId);
-      setObjectLabelEditValue(object?.type === "section" ? (object.title ?? object.label) : (object?.label ?? ""));
-    },
-    [state.document.objects],
-  );
-
-  const commitObjectLabel = useCallback(() => {
-    if (!objectLabelEditId) return;
-    const target = state.document.objects.find((object) => object.id === objectLabelEditId);
-    dispatch({
-      type: "canvas.updateObject",
-      objectId: objectLabelEditId,
-      patch:
-        target?.type === "section"
-          ? { title: objectLabelEditValue.trim() || target.title || target.label, label: objectLabelEditValue.trim() || target.label }
-          : { label: objectLabelEditValue },
-    });
-    setObjectLabelEditId(null);
-    setObjectLabelEditValue("");
-  }, [objectLabelEditId, objectLabelEditValue, dispatch, state.document.objects]);
-
-  const cancelObjectLabelEdit = useCallback(() => {
-    setObjectLabelEditId(null);
-    setObjectLabelEditValue("");
-  }, []);
 
   // Interaction machine: a ref holds the current InteractionState (gestures
   // happen faster than React state updates should be trusted for), while
@@ -1240,141 +1173,7 @@ export function InteractiveCanvasEditor({
                 ? "crosshair"
                 : undefined,
         }}
-        worldOverlay={
-          <>
-          {objectLabelEditTarget?.type === "section" ? (
-            <input
-              autoFocus
-              aria-label="Section title"
-              className="interactive-canvas-section-title-editor"
-              data-canvas-section-title-editor={objectLabelEditTarget.id}
-              value={objectLabelEditValue}
-              onChange={(event) => setObjectLabelEditValue(event.target.value)}
-              onFocus={(event) => event.currentTarget.select()}
-              onBlur={commitObjectLabel}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  commitObjectLabel();
-                } else if (event.key === "Escape") {
-                  event.preventDefault();
-                  cancelObjectLabelEdit();
-                }
-              }}
-              onDoubleClick={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}
-              onPointerDown={(event) => event.stopPropagation()}
-              style={{
-                position: "absolute",
-                left: `${objectLabelEditTarget.geometry.x + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`,
-                top: `${objectLabelEditTarget.geometry.y + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`,
-                width: `${Math.max(
-                  72,
-                  (objectLabelEditValue || objectLabelEditTarget.title || objectLabelEditTarget.label).length *
-                    (SECTION_GEOMETRY.titleChip.fontSizePx * 0.62) +
-                    SECTION_GEOMETRY.titleChip.paddingXPx * 2 +
-                    SECTION_GEOMETRY.titleChip.borderWidthPx * 2,
-                )}px`,
-                height: `${SECTION_GEOMETRY.titleChip.heightPx}px`,
-                pointerEvents: "auto",
-                border: `${SECTION_GEOMETRY.titleChip.borderWidthPx}px solid var(--primary)`,
-                borderRadius: "6px",
-                padding: `0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px`,
-                fontSize: `${SECTION_GEOMETRY.titleChip.fontSizePx}px`,
-                fontWeight: SECTION_GEOMETRY.titleChip.fontWeight,
-                lineHeight: `${SECTION_GEOMETRY.titleChip.heightPx}px`,
-                background: resolveSectionColors(objectLabelEditTarget.tint).chipFill ?? "var(--background)",
-                color: SECTION_GEOMETRY.titleChip.textColor,
-                outline: "none",
-                whiteSpace: "nowrap",
-                boxSizing: "border-box",
-              }}
-            />
-          ) : objectLabelEditTarget ? (
-            <textarea
-              autoFocus
-              aria-label="Object label"
-              value={objectLabelEditValue}
-              onChange={(event) => setObjectLabelEditValue(event.target.value)}
-              onFocus={(event) => event.currentTarget.select()}
-              onBlur={commitObjectLabel}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  commitObjectLabel();
-                } else if (event.key === "Escape") {
-                  event.preventDefault();
-                  cancelObjectLabelEdit();
-                }
-              }}
-              onClick={(event) => event.stopPropagation()}
-              onPointerDown={(event) => event.stopPropagation()}
-              rows={1}
-              style={{
-                position: "absolute",
-                left: `${objectLabelEditTarget.geometry.x}px`,
-                top: `${objectLabelEditTarget.geometry.y}px`,
-                width: `${objectLabelEditTarget.geometry.width}px`,
-                height: `${objectLabelEditTarget.geometry.height}px`,
-                // Unlike the connector label input above, this overlay is
-                // rendered inside the transformed world layer WITHOUT a
-                // counter-scale transform — it scales naturally with zoom so
-                // the textarea always matches the object's on-screen size.
-                pointerEvents: "auto",
-                resize: "none",
-                border: "1.5px solid var(--primary)",
-                borderRadius: "8px",
-                padding: "8px",
-                fontSize: "13px",
-                fontWeight: 600,
-                textAlign: "center",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                outline: "none",
-              }}
-            />
-          ) : null}
-          {labelEditConnectionId && labelEditPoint ? (
-            <input
-              autoFocus
-              aria-label="Connector label"
-              value={labelEditValue}
-              onChange={(event) => setLabelEditValue(event.target.value)}
-              onBlur={commitConnectionLabel}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  commitConnectionLabel();
-                } else if (event.key === "Escape") {
-                  event.preventDefault();
-                  cancelConnectionLabelEdit();
-                }
-              }}
-              onClick={(event) => event.stopPropagation()}
-              style={{
-                position: "absolute",
-                left: `${labelEditPoint.x}px`,
-                top: `${labelEditPoint.y}px`,
-                transform: `translate(-50%, -50%) scale(${1 / viewport.zoom})`,
-                // The worldOverlay container is pointer-events: none (inherited),
-                // so mouse interaction must be re-enabled on the input itself.
-                pointerEvents: "auto",
-                minWidth: "80px",
-                maxWidth: "220px",
-                border: "1.5px solid var(--primary)",
-                borderRadius: "999px",
-                padding: "2px 8px",
-                fontSize: "11px",
-                fontWeight: 600,
-                textAlign: "center",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                outline: "none",
-              }}
-            />
-          ) : null}
-          </>
-        }
+        worldOverlay={<LabelEditingOverlay labelEditing={labelEditing} zoom={viewport.zoom} />}
       />
 
       {contextMenu && (
