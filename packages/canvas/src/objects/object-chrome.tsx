@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import type { Anchor } from "../routing/routing";
-import { resolveObjectColors, resolveObjectStrokeWidth } from "../render/theme";
+import { resolveObjectColors, resolveObjectStrokeWidth } from "../tokens/theme";
 import type { InteractiveCanvasObject } from "../model/schema";
 import type { ObjectRenderProps, RenderObjectShape } from "./object-def";
 

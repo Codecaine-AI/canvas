@@ -1,6 +1,6 @@
 "use client";
 
-import { CODE_BLOCK } from "./figjam-tokens";
+import { CODE_BLOCK } from "../tokens/figjam-tokens";
 
 /**
  * Minimal, pure "good enough to match the reference PNG" code tokenizer for

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../render/figjam-tokens";
+import { CHROME } from "../tokens/figjam-tokens";
 import { ChromeTooltip } from "./ChromeTooltip";
 import { ZoomMinusIcon, ZoomPlusIcon } from "./dock-icons";
 

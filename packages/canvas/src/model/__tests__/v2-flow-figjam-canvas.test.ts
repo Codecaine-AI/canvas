@@ -7,8 +7,8 @@ import {
   SECTION_FAMILIES,
   STICKY_COLORS,
   type SectionFamily,
-} from "../../render/figjam-tokens";
-import { resolveObjectColors, resolveObjectStrokeWidth } from "../../render/theme";
+} from "../../tokens/figjam-tokens";
+import { resolveObjectColors, resolveObjectStrokeWidth } from "../../tokens/theme";
 
 const v2FlowDocument = v2FlowCanvas as InteractiveCanvasDocument;
 

@@ -36,7 +36,7 @@
  */
 
 import type { CanvasBounds, CanvasPoint } from "../model/geometry";
-import { ARROW_SHAPE_GEOMETRY } from "../render/figjam-tokens";
+import { ARROW_SHAPE_GEOMETRY } from "../tokens/figjam-tokens";
 import type { InteractiveCanvasObject } from "../model/schema";
 
 /** World-space offset each cardinal anchor candidate starts at, outside the object's bound. Upstream `connector-manager.ts:135`. */

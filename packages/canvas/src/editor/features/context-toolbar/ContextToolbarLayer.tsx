@@ -2,8 +2,8 @@
 
 import { ContextToolbar } from "../../../chrome/ContextToolbar";
 import type { CanvasAction } from "../../../model/actions";
-import { CONNECTOR_DEFAULT_COLOR } from "../../../render/figjam-tokens";
-import { paletteTokenStyle, resolveSectionColors } from "../../../render/theme";
+import { CONNECTOR_DEFAULT_COLOR } from "../../../tokens/figjam-tokens";
+import { paletteTokenStyle, resolveSectionColors } from "../../../tokens/theme";
 import type { ContextToolbarApi } from "./use-context-toolbar";
 import type { InteractiveCanvasConnection } from "../../../model/schema";
 

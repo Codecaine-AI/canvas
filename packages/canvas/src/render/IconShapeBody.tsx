@@ -1,7 +1,7 @@
 "use client";
 
 import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
-import { ICON_APPROX_SIZE_PX } from "./figjam-tokens";
+import { ICON_APPROX_SIZE_PX } from "../tokens/figjam-tokens";
 import type { InteractiveCanvasObject } from "../model/schema";
 
 /**

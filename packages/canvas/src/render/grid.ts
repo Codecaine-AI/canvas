@@ -3,7 +3,7 @@ import {
   GRID_DOT_DIAMETER_PX,
   GRID_MAX_SCREEN_STEP_PX,
   GRID_MIN_SCREEN_STEP_PX,
-} from "./figjam-tokens";
+} from "../tokens/figjam-tokens";
 
 /** @deprecated kept for callers still importing the old name; equals GRID_BASE_STEP_PX. */
 export const BASE_GRID_STEP = GRID_BASE_STEP_PX;

@@ -1,7 +1,7 @@
 "use client";
 
-import { SECTION_GEOMETRY } from "../../../render/figjam-tokens";
-import { resolveSectionColors } from "../../../render/theme";
+import { SECTION_GEOMETRY } from "../../../tokens/figjam-tokens";
+import { resolveSectionColors } from "../../../tokens/theme";
 import type { LabelEditingApi } from "./use-label-editing";
 
 export interface LabelEditingOverlayProps {

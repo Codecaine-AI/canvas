@@ -2,7 +2,7 @@
 
 import type { CanvasPoint } from "../../model/geometry";
 import { chevronPoints } from "../../routing/connection-overlay";
-import { CHEVRON_GEOMETRY } from "../../render/figjam-tokens";
+import { CHEVRON_GEOMETRY } from "../../tokens/figjam-tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

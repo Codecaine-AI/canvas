@@ -85,52 +85,62 @@ Facts to preserve, now expressed as def properties instead of inline
 
 ## Target tree
 
+Amended 2026-07-06 (Ford + Claude), after the registry/toolbar migration
+landed: layers are named by their role in the pipeline, design tokens get
+their own foundation layer, "chrome" is dissolved into `editor/components`
+(what shows up on the page) + `ui` (shared dumb primitives), and objects/
+absorbs the icon glyphs and the shape catalog. NO compatibility barrels:
+package.json subpath exports are repointed where a consumer exists and
+deleted where none does (./chrome had no real external consumer).
+
 ```
 src/
-  model/
-    schema.ts            barrel (exports target — path frozen) over schema/
-    schema/              object-types, style, connections, annotations, document, validate
-    actions.ts           barrel (frozen) over actions/
-    actions/             reducer (thin switch), objects, geometry-ops, connections,
-                         annotations, history, defaults
-    geometry.ts          + absorbs SECTION_CAPTURE_OVERLAP_THRESHOLD (fixes
-                         interaction→render leak; keep re-export in figjam-tokens)
-  objects/
-    object-def.ts        contract + registry + capability-intersection
-    section/  sticky/  connector/  container/  text/  code-block/
-    shapes/
-      shape-def.ts  base.ts
-      rectangle.tsx  ellipse.tsx  diamond.tsx  ... (one file per shape)
-  interaction/
-    interaction.ts       barrel (frozen)
-    core.ts              state union, stepInteraction, press-pending router
-    gestures/            move, resize, marquee, place, connectors
-    hit-testing.ts  snapping.ts  clipboard.ts  edge-pan.ts  frame-coalescer.ts
-  routing/               unchanged (vendor boundary untouched)
-  render/
-    CanvasStage.tsx      thin: layer ordering, grid, event plumbing
-    ObjectShape.tsx      registry-driven, no type branches
-    connectors/          Connector, LabelChip, DragPreview
-    overlays/            SelectionBox, Marquee, guides, spacing
-    figjam-tokens.ts  theme.ts
-  editor/
-    InteractiveCanvasEditor.tsx   composition root (~200 lines)
-    features/            label-editing/  context-menu/  context-toolbar/
-                         drag-pipeline/  inspector/  top-bar/
-  chrome/                ContextToolbar becomes a dumb host; the action/flyout
-                         tables migrate into objects/ defs. Update stale README
-                         (chrome is wired into the editor since W3).
-  ui/  vendor/  fixtures/  unchanged
+  tokens/                LAYER 0 — design constants; imports nothing
+    figjam-tokens.ts       colors, text sizes, shape-geometry ratios (sampled)
+    theme.ts               tone/palette → fill/border/text resolution
+  model/                 LAYER 1 — the document
+    schema.ts → schema/    what a canvas JSON is (path kept: exports target)
+    actions.ts → actions/  reducer — the only way the document changes
+    geometry.ts
+  objects/               LAYER 2 — one def per kind of thing on the canvas
+    object-def.ts          registry + render/behavior dispatch + intersection
+    palette.ts
+    section/  sticky/  text/  container/  connector/  code-block/  source-node/
+    shapes/                one file per shape; base.tsx adapter; toolbar.tsx
+      icon/                def + IconShapeBody + glyphs together
+    catalog/               SHAPE_CATALOG + ShapeSearchPopover (registry-driven)
+  render/                LAYER 3a — document → pixels; stateless; shared by
+    CanvasStage.tsx        the editor AND the read-only viewer/embeds
+    ObjectShape.tsx        pure registry delegate
+    viewport.ts            ViewportState + world/screen transforms (from editor/)
+    connectors/  overlays/  grid.ts
+  interaction/           LAYER 3b — pointer input → actions; pure TS, no React
+    interaction.ts barrel; core.ts; gestures/; hit-testing; snapping; clipboard
+  ui/                    shared dumb primitives, importable from objects up:
+    button/input/… plus Tooltip, ColorPalettePopover, toolbar-icons
+  editor/                LAYER 4 — the app; nothing below imports it
+    InteractiveCanvasEditor.tsx   composition root
+    InteractiveCanvasViewer.tsx   read-only variant
+    components/            what shows up on the page: FigJamDock, ShapesPanel,
+                           ContextToolbar (dumb host), ZoomControls, dock-icons,
+                           icons-nucleo/, context-toolbar-position
+    features/              the state + wiring behind them: context-toolbar/,
+                           label-editing/, context-menu/, drag-pipeline/,
+                           inspector/, top-bar/
+  routing/  vendor/  fixtures/   unchanged (MPL boundary untouched)
 ```
 
-`ViewportState` moves out of `editor/` to a neutral module so interaction no
-longer imports from editor.
+Import rule (boundary-tested): tokens ← model ← objects ← render|interaction
+← editor; `ui` sits beside tokens (importable from objects up); nothing
+outside `editor/` imports `editor/`.
 
 ## Invariants (hold at every step)
 
-- Public specifiers AND their target paths stay stable: moved-from files
-  become barrels. External importers (`/schema` ×13, `/actions`, `/geometry`,
-  root editor import ×6) never notice.
+- Public specifiers with REAL consumers stay importable: `.` (root),
+  `/schema`, `/actions`, `/geometry`, `/ui/*`. Where a module moves, the
+  package.json export is REPOINTED at the new path (no barrel files);
+  consumer-less subpaths may be deleted (amended 2026-07-06 — backwards
+  compatibility explicitly waived by Ford).
 - `bun test` from the canvas repo root stays green except the 2 known W5
   failures (snapshot the pass list first).
 - MPL boundary: only `routing/` and `interaction/snapping.ts` import

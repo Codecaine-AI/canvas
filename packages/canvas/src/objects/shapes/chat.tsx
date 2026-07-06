@@ -1,6 +1,6 @@
 "use client";
 
-import { CHAT_ICON_COLORS } from "../../render/figjam-tokens";
+import { CHAT_ICON_COLORS } from "../../tokens/figjam-tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { CODE_BLOCK } from "../../render/figjam-tokens";
+import { CODE_BLOCK } from "../../tokens/figjam-tokens";
 import { tokenizeCodeBlock } from "../../render/code-tokenizer";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";

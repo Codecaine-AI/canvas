@@ -3,7 +3,7 @@ import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactiv
 import { objectById, type CanvasBounds } from "../../model/geometry";
 import { routeConnection, type RoutedConnection } from "../routing";
 import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
-import { CONNECTOR_END_GAP_PX } from "../../render/figjam-tokens";
+import { CONNECTOR_END_GAP_PX } from "../../tokens/figjam-tokens";
 
 const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
 

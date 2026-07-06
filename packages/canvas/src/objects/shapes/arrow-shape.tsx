@@ -2,7 +2,7 @@
 
 import type { CanvasPoint } from "../../model/geometry";
 import { arrowShapePoints } from "../../routing/connection-overlay";
-import { ARROW_SHAPE_GEOMETRY } from "../../render/figjam-tokens";
+import { ARROW_SHAPE_GEOMETRY } from "../../tokens/figjam-tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

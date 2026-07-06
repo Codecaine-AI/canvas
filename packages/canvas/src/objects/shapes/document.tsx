@@ -1,6 +1,6 @@
 "use client";
 
-import { DOCUMENT_GEOMETRY } from "../../render/figjam-tokens";
+import { DOCUMENT_GEOMETRY } from "../../tokens/figjam-tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

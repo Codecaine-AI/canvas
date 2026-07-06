@@ -21,7 +21,7 @@ import {
   type CanvasAction,
   type CanvasChangeSummary,
 } from "../../../model/actions";
-import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../../../render/theme";
+import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../../../tokens/theme";
 import type {
   CanvasPaletteToken,
   InteractiveCanvasConnection,

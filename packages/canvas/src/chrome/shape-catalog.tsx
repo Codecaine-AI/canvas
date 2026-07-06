@@ -39,7 +39,7 @@
  *     registry IconShapeBody renders on-canvas) via `iconGlyphPreview()` —
  *     cross-directory `chrome/` -> `render/` imports are already established
  *     precedent (ColorPalettePopover.tsx, FigJamDock.tsx, ContextToolbar.tsx,
- *     ShapeSearchPopover.tsx, ZoomControls.tsx all import render/figjam-tokens).
+ *     ShapeSearchPopover.tsx, ZoomControls.tsx all import tokens/figjam-tokens).
  */
 
 import type { CanvasBounds } from "../model/geometry";

@@ -1,7 +1,7 @@
 "use client";
 
-import { resolveSectionColors } from "../../render/theme";
-import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "../../render/figjam-tokens";
+import { resolveSectionColors } from "../../tokens/theme";
+import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "../../tokens/figjam-tokens";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { SECTION_TOOLBAR } from "./toolbar";
 

@@ -2,7 +2,7 @@
 
 import type { CanvasPoint } from "../../model/geometry";
 import { manualInputPoints } from "../../routing/connection-overlay";
-import { MANUAL_INPUT_GEOMETRY } from "../../render/figjam-tokens";
+import { MANUAL_INPUT_GEOMETRY } from "../../tokens/figjam-tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

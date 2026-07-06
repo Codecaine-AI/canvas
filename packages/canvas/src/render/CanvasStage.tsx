@@ -15,7 +15,7 @@ import {
 } from "../model/geometry";
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
-import { canvasSurfaceStyle } from "./theme";
+import { canvasSurfaceStyle } from "../tokens/theme";
 import type { ViewportState } from "../editor/viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
@@ -38,7 +38,7 @@ import {
   GRID_DOT_COLOR,
   STICKY_GEOMETRY,
   TEXT_SIZES_PX,
-} from "./figjam-tokens";
+} from "../tokens/figjam-tokens";
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,

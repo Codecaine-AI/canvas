@@ -11,7 +11,7 @@ import {
   CONNECTOR_DASH_PATTERN_PX,
   CONNECTOR_DEFAULT_COLOR,
   CONNECTOR_STROKE_WIDTH_PX,
-} from "../figjam-tokens";
+} from "../../tokens/figjam-tokens";
 
 const CONNECTION_HIT_WIDTH = 14;
 const ENDPOINT_HANDLE_RADIUS = 6;

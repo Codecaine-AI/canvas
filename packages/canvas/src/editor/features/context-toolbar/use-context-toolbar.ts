@@ -27,7 +27,7 @@ import {
   type ToolbarFlyoutProps,
 } from "../../../objects/object-def";
 import { nearestPaletteToken } from "../../../objects/palette";
-import { paletteTokenStyle } from "../../../render/theme";
+import { paletteTokenStyle } from "../../../tokens/theme";
 import type { CanvasViewportControls } from "../../use-canvas-viewport";
 import { worldToScreen, type ViewportState } from "../../viewport";
 import type {

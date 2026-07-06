@@ -7,7 +7,7 @@ import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
 import { useCanvasHotkeys } from "../use-canvas-hotkeys";
-import { SECTION_GEOMETRY } from "../../render/figjam-tokens";
+import { SECTION_GEOMETRY } from "../../tokens/figjam-tokens";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 

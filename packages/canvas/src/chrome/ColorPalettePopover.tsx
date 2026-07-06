@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CHROME, PALETTE_POPOVER_SWATCHES } from "../render/figjam-tokens";
+import { CHROME, PALETTE_POPOVER_SWATCHES } from "../tokens/figjam-tokens";
 
 /**
  * ColorPalettePopover — the dark 2x11 swatch grid with a rainbow-ring
