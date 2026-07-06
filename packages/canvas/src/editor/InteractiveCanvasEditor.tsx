@@ -11,7 +11,6 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { LockIcon, UnlockIcon } from "lucide-react";
 import {
   buildSelectionContext,
   createInteractiveCanvasState,
@@ -21,24 +20,11 @@ import {
   type CanvasTool,
 } from "../model/actions";
 import { CanvasStage } from "../render/CanvasStage";
-import {
-  ColorPalettePopover,
-  type ColorPalettePopoverProps,
-} from "../chrome/ColorPalettePopover";
-import {
-  CONTEXT_TOOLBAR_REGISTRY,
-  ContextToolbar,
-  type ContextToolbarActionId,
-  type ContextToolbarVariant,
-} from "../chrome/ContextToolbar";
-import { positionContextToolbar } from "../chrome/context-toolbar-position";
 import { FigJamDock, type ToolId } from "../chrome/FigJamDock";
-import { ShapeSearchPopover } from "../chrome/ShapeSearchPopover";
 import { ShapesPanel } from "../chrome/ShapesPanel";
-import { DashIcon, NoStrokeIcon, StrokeIcon } from "../chrome/toolbar-icons";
 import { ZoomControls } from "../chrome/ZoomControls";
 import { computeEdgePan } from "../interaction/edge-pan";
-import { boundsForGeometries, type CanvasBounds, type CanvasPoint } from "../model/geometry";
+import { type CanvasPoint } from "../model/geometry";
 import {
   cancelInteraction,
   createFrameCoalescer,
@@ -53,11 +39,11 @@ import {
   type InteractionState,
   type ResizeHandle,
 } from "../interaction/interaction";
-import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../render/figjam-tokens";
 import { type Anchor } from "../routing/routing";
-import { paletteTokenStyle, resolveSectionColors } from "../render/theme";
 import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
 import { useCanvasContextMenu } from "./features/context-menu/use-canvas-context-menu";
+import { ContextToolbarLayer } from "./features/context-toolbar/ContextToolbarLayer";
+import { useContextToolbar } from "./features/context-toolbar/use-context-toolbar";
 import { Inspector } from "./features/inspector/Inspector";
 import { LabelEditingOverlay } from "./features/label-editing/LabelEditingOverlay";
 import { useLabelEditing } from "./features/label-editing/use-label-editing";
@@ -67,12 +53,7 @@ import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
 import { panBy, worldToScreen } from "./viewport";
 import type {
-  CanvasPaletteToken,
-  CanvasSectionStrokeStyle,
-  CanvasSectionTint,
-  InteractiveCanvasConnection,
   InteractiveCanvasDocument,
-  InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../model/schema";
 
@@ -172,87 +153,6 @@ function dockToolForCanvasTool(tool: CanvasTool): ToolId | null {
 }
 
 /**
- * Hex color -> nearest CanvasPaletteToken, for bridging ColorPalettePopover's
- * raw FigJam hex swatches onto the schema's 5-value semantic palette
- * (CanvasPaletteToken). Converts to HSL and picks the token whose anchor hue
- * (theme.ts's PALETTE_TOKEN_HUE, restated here as plain hue angles since
- * that map is OKLCH-string-only and not exported in a form usable for
- * distance math) is angularly closest on the hue circle. Low-saturation
- * (near-gray) swatches fall back to "note" (yellow) only when hue is
- * otherwise undefined (achromatic) — picked arbitrarily among the 5 anchors
- * since a gray swap has no strong semantic match; documented as a known
- * approximation in the wave-3a report.
- */
-const PALETTE_TOKEN_HUE_ANGLES: Record<CanvasPaletteToken, number> = {
-  process: 255,
-  input: 145,
-  hot: 35,
-  memory: 300,
-  note: 95,
-};
-
-function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
-  const normalized = hex.replace("#", "");
-  if (normalized.length !== 6) return null;
-  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255;
-  if ([r, g, b].some((value) => Number.isNaN(value))) return null;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  const delta = max - min;
-  if (delta === 0) return { h: 0, s: 0, l };
-  const s = delta / (1 - Math.abs(2 * l - 1));
-  let h: number;
-  if (max === r) h = ((g - b) / delta) % 6;
-  else if (max === g) h = (b - r) / delta + 2;
-  else h = (r - g) / delta + 4;
-  h *= 60;
-  if (h < 0) h += 360;
-  return { h, s, l };
-}
-
-function hueDistance(a: number, b: number): number {
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
-
-function nearestPaletteToken(hex: string): CanvasPaletteToken {
-  const hsl = hexToHsl(hex);
-  if (!hsl || hsl.s < 0.08) return "note";
-  let best: CanvasPaletteToken = "note";
-  let bestDistance = Infinity;
-  for (const token of Object.keys(PALETTE_TOKEN_HUE_ANGLES) as CanvasPaletteToken[]) {
-    const distance = hueDistance(hsl.h, PALETTE_TOKEN_HUE_ANGLES[token]);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      best = token;
-    }
-  }
-  return best;
-}
-
-/** Derives the ContextToolbar variant for the current selection (Wave 3a scope item 2). */
-function contextToolbarVariantForSelection(args: {
-  selection: CanvasSelection;
-  selectedObjects: InteractiveCanvasObject[];
-  selectedConnection: InteractiveCanvasConnection | undefined;
-}): ContextToolbarVariant | null {
-  const { selection, selectedObjects, selectedConnection } = args;
-  if (selection.kind === "connection" && selectedConnection) return "connector";
-  if (selection.kind === "objects" && selectedObjects.length > 0) {
-    if (selectedObjects.length > 1) return "multi";
-    const object = selectedObjects[0];
-    if (object.type === "section") return "section";
-    if (object.type === "sticky") return "sticky";
-    if (object.type === "text") return "text";
-    return "shape";
-  }
-  return null;
-}
-
-/**
  * Resolves a raw pointer event's target into a CanvasHit by walking the DOM:
  * resize handles carry data-canvas-handle + data-canvas-object-id; connector
  * endpoint handles carry data-canvas-endpoint + data-canvas-connection-id;
@@ -341,12 +241,6 @@ export function InteractiveCanvasEditor({
   // open, the dock shows no active tool (activeTool=null) — the panel owns
   // placement-arming until a shape is picked or the panel is dismissed.
   const [shapesPanelOpen, setShapesPanelOpen] = useState(false);
-  // Which ContextToolbar flyout (if any) is currently open, tracked by action
-  // id since ContextToolbar's buttons only report `onAction(action)` without
-  // exposing their own open/closed state to the parent.
-  const [openFlyout, setOpenFlyout] = useState<ContextToolbarActionId | null>(null);
-  const contextToolbarRef = useRef<HTMLDivElement | null>(null);
-  const [contextToolbarSize, setContextToolbarSize] = useState({ width: 220, height: 29 });
   const { viewport, setViewport, isPanning, controls, screenToWorld } = useCanvasViewport({
     document: state.document,
     stageRef,
@@ -374,270 +268,26 @@ export function InteractiveCanvasEditor({
   const selectedLinks = selectedObject
     ? (state.document.links ?? []).filter((link) => link.objectId === selectedObject.id)
     : [];
-  const selectedObjectsForToolbar = useMemo(
-    () => state.document.objects.filter((object) => selectedIds.includes(object.id)),
-    [state.document.objects, selectedIds],
-  );
-  const contextToolbarVariant = contextToolbarVariantForSelection({
+  // Floating ContextToolbar (selection-derived variant/position, flyouts,
+  // style-apply actions) — state and actions live in
+  // editor/features/context-toolbar.
+  const contextToolbar = useContextToolbar({
+    document: state.document,
+    dispatch,
     selection: state.selection,
-    selectedObjects: selectedObjectsForToolbar,
+    selectedIds,
     selectedConnection,
+    selectedConnectionId,
+    viewport,
+    stageRef,
+    controls,
+    setObjectLabelEditId,
+    setObjectLabelEditValue,
   });
-  /**
-   * Screen-space rect the ContextToolbar anchors above (Wave 3a scope item 2).
-   * Computed read-only from CanvasStage's own pure helpers — worldToScreen
-   * (viewport.ts) + boundsForGeometries (geometry.ts) — rather than touching
-   * CanvasStage.tsx, per this wave's file-ownership constraints. Recomputes on
-   * every viewport change (pan/zoom) since it's derived, not stored.
-   */
-  const selectionScreenRect = useMemo(() => {
-    if (!contextToolbarVariant) return null;
-    let worldBounds: CanvasBounds | null = null;
-    if (contextToolbarVariant === "connector" && selectedConnection) {
-      const from = state.document.objects.find((o) => o.id === selectedConnection.from.objectId);
-      const to = state.document.objects.find((o) => o.id === selectedConnection.to.objectId);
-      if (from && to) worldBounds = boundsForGeometries([from.geometry, to.geometry]);
-    } else if (selectedObjectsForToolbar.length > 0) {
-      worldBounds = boundsForGeometries(selectedObjectsForToolbar.map((object) => object.geometry));
-    }
-    if (!worldBounds) return null;
-    const topLeft = worldToScreen(viewport, { x: worldBounds.x, y: worldBounds.y });
-    return {
-      x: topLeft.x,
-      y: topLeft.y,
-      width: worldBounds.width * viewport.zoom,
-      height: worldBounds.height * viewport.zoom,
-    };
-  }, [contextToolbarVariant, selectedConnection, selectedObjectsForToolbar, state.document.objects, viewport]);
-  const contextToolbarPosition = useMemo(() => {
-    if (!selectionScreenRect || !stageRef.current) return null;
-    const stageRect = stageRef.current.getBoundingClientRect();
-    return positionContextToolbar(selectionScreenRect, contextToolbarSize, {
-      width: stageRect.width,
-      height: stageRect.height,
-    });
-  }, [selectionScreenRect, contextToolbarSize]);
+  const { applyPaletteTokenToSelection } = contextToolbar;
   const selectionContext = useMemo(
     () => buildSelectionContext(state.document, state.selection),
     [state.document, state.selection],
-  );
-  /**
-   * Inspector "Color" swatches (checkpoint 5, D16) apply to every selected
-   * object, not just the primary one — canvas.updateObject only patches a
-   * single objectId, so dispatch once per id. Its style merge
-   * (`{ ...object.style, ...patch.style }`) only overwrites `paletteToken`,
-   * leaving `shape`/`tone` untouched.
-   */
-  const applyPaletteTokenToSelection = useCallback(
-    (token: CanvasPaletteToken | undefined) => {
-      const tokenStyle = token ? paletteTokenStyle(token) : undefined;
-      for (const objectId of selectedIds) {
-        const object = state.document.objects.find((item) => item.id === objectId);
-        if (object?.type === "section") {
-          dispatch({
-            type: "canvas.updateObject",
-            objectId,
-            patch: { style: { fill: tokenStyle?.fill, stroke: tokenStyle?.border } },
-          });
-          continue;
-        }
-        dispatch({
-          type: "canvas.updateObject",
-          objectId,
-          patch: { style: { paletteToken: token } },
-        });
-      }
-    },
-    [dispatch, selectedIds, state.document.objects],
-  );
-
-  const applySectionFillToSelection = useCallback(
-    (fill: string) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { style: { fill } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
-  const applySectionStrokeToSelection = useCallback(
-    (stroke: string) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { style: { stroke } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
-  // Measure the ContextToolbar's actual rendered size so positioning is exact
-  // rather than assumed — width varies per variant (different control counts).
-  useEffect(() => {
-    const element = contextToolbarRef.current;
-    if (!element || !contextToolbarVariant) return;
-    const measure = () => {
-      const rect = element.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        setContextToolbarSize({ width: rect.width, height: rect.height });
-      }
-    };
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [contextToolbarVariant]);
-
-  // Close any open ContextToolbar flyout whenever the selection changes shape
-  // (different variant, or selection cleared) so a stale flyout doesn't linger
-  // anchored to a control that's no longer rendered.
-  useEffect(() => {
-    setOpenFlyout(null);
-  }, [contextToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
-
-  const primarySelectedObject = selectedObjectsForToolbar[0];
-
-  /**
-   * Section lock toggle (Wave 3a scope item 2's "lock" action + scope item
-   * 5's context-menu Lock/Unlock entry) — `locked` is a real schema.ts field
-   * on every object (reserved primarily for sections, "no enforcement yet"),
-   * so this just flips it via the existing canvas.updateObject action.
-   */
-  const toggleLockForSelection = useCallback(() => {
-    for (const object of selectedObjectsForToolbar) {
-      dispatch({
-        type: "canvas.updateObject",
-        objectId: object.id,
-        patch: { locked: !object.locked },
-      });
-    }
-  }, [dispatch, selectedObjectsForToolbar]);
-
-  const toggleSectionContentHiddenForSelection = useCallback(() => {
-    for (const object of selectedObjectsForToolbar) {
-      if (object.type !== "section") continue;
-      dispatch({
-        type: "canvas.updateObject",
-        objectId: object.id,
-        patch: { contentHidden: !object.contentHidden },
-      });
-    }
-  }, [dispatch, selectedObjectsForToolbar]);
-
-  const applyTintToSelection = useCallback(
-    (tint: CanvasSectionTint) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({ type: "canvas.updateObject", objectId: object.id, patch: { tint } });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
-  const applySectionBorderStyleToSelection = useCallback(
-    (strokeStyle: CanvasSectionStrokeStyle) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { style: { strokeStyle } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
-  const swapSelectedShape = useCallback(
-    (objectType: InteractiveCanvasObjectType) => {
-      if (!primarySelectedObject) return;
-      dispatch({ type: "canvas.setObjectType", objectId: primarySelectedObject.id, objectType });
-      setOpenFlyout(null);
-    },
-    [dispatch, primarySelectedObject],
-  );
-
-  /**
-   * ContextToolbar onAction dispatch table (Wave 3a scope item 2). Actions
-   * with a real backing schema field dispatch immediately on click (bold-ish
-   * toggle actions have none to toggle, so those are effectively disabled —
-   * see the report's disabled-with-tooltip list); actions that need a value
-   * picker (color/tint/dash/routing/arrowhead/shape-swap/lock) instead toggle
-   * a flyout, rendered just below the toolbar in the overlay.
-   */
-  const handleContextToolbarAction = useCallback(
-    (action: ContextToolbarActionId, value?: unknown) => {
-      if (action === "section-border-style" && (value === "solid" || value === "dashed" || value === "none")) {
-        applySectionBorderStyleToSelection(value);
-        return;
-      }
-      if (action === "color" && typeof value === "string") {
-        if (contextToolbarVariant === "section") {
-          applySectionFillToSelection(value);
-        } else {
-          applyPaletteTokenToSelection(nearestPaletteToken(value));
-        }
-        return;
-      }
-      if (action === "rename" && primarySelectedObject) {
-        setObjectLabelEditId(primarySelectedObject.id);
-        setObjectLabelEditValue(
-          primarySelectedObject.type === "section"
-            ? (primarySelectedObject.title ?? primarySelectedObject.label)
-            : primarySelectedObject.label,
-        );
-        return;
-      }
-      if (action === "visibility") {
-        toggleSectionContentHiddenForSelection();
-        return;
-      }
-      const FLYOUT_ACTIONS = new Set<ContextToolbarActionId>([
-        "shape-swap",
-        "color",
-        "tint",
-        "section-border-style",
-        "dash",
-        "routing",
-        "arrowhead",
-        "lock",
-      ]);
-      if (FLYOUT_ACTIONS.has(action)) {
-        setOpenFlyout((current) => (current === action ? null : action));
-        return;
-      }
-      if (action === "expand") {
-        controls.fit();
-        return;
-      }
-      // align/font-style/size/bold/strikethrough/link/bullets/paragraph-align/
-      // list/frame/visibility/label-align/add-label: no supporting schema
-      // field exists yet (object/connection style is limited to
-      // paletteToken/tone + shape, and connections to style/arrow) — these
-      // render but are no-ops beyond ContextToolbar's own local
-      // aria-expanded toggle. Documented in the wave-3a report as
-      // disabled-with-tooltip (ContextToolbar doesn't support a disabled prop
-      // per-control today, so the tooltip still shows via ChromeTooltip's
-      // hover label; clicking is inert).
-    },
-    [
-      applyPaletteTokenToSelection,
-      applySectionFillToSelection,
-      applySectionBorderStyleToSelection,
-      controls,
-      contextToolbarVariant,
-      primarySelectedObject,
-      toggleSectionContentHiddenForSelection,
-    ],
   );
 
   // Interaction machine: a ref holds the current InteractionState (gestures
@@ -1005,249 +655,11 @@ export function InteractiveCanvasEditor({
         />
       ) : null}
 
-      {contextToolbarVariant && contextToolbarPosition && (
-        <div
-          ref={contextToolbarRef}
-          className="pointer-events-auto absolute z-40"
-          style={{ left: contextToolbarPosition.x, top: contextToolbarPosition.y }}
-        >
-          <ContextToolbar
-            variant={contextToolbarVariant}
-            onAction={handleContextToolbarAction}
-            currentColor={
-              primarySelectedObject?.type === "section"
-                ? primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint
-                : primarySelectedObject
-                  ? paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent
-                  : selectedConnection?.color ?? CONNECTOR_DEFAULT_COLOR
-            }
-            currentSectionBorderStyle={
-              primarySelectedObject?.type === "section" ? (primarySelectedObject.style?.strokeStyle ?? "solid") : undefined
-            }
-            currentSectionStroke={
-              primarySelectedObject?.type === "section"
-                ? primarySelectedObject.style?.stroke ?? resolveSectionColors(primarySelectedObject.tint).chipBorder ?? "transparent"
-                : undefined
-            }
-            activeFlyout={openFlyout}
-            sectionContentHidden={primarySelectedObject?.type === "section" ? primarySelectedObject.contentHidden : undefined}
-            sectionLocked={primarySelectedObject?.type === "section" ? primarySelectedObject.locked : undefined}
-          />
-          {openFlyout === "color" && primarySelectedObject?.type === "section" && contextToolbarVariant === "section" && (
-            <div className="absolute left-0 top-full z-50 mt-2">
-              <ColorPalettePopover
-                currentColor={primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint}
-                onPick={(color: string) => {
-                  applySectionFillToSelection(color);
-                  setOpenFlyout(null);
-                }}
-              />
-            </div>
-          )}
-          {openFlyout === "section-border-style" && primarySelectedObject?.type === "section" && contextToolbarVariant === "section" && (
-            <div className="absolute left-0 top-full z-50 mt-2">
-              <ColorPalettePopover
-                currentColor={primarySelectedObject.style?.stroke ?? resolveSectionColors(primarySelectedObject.tint).chipBorder ?? "transparent"}
-                onPick={(color: string) => {
-                  applySectionStrokeToSelection(color);
-                  setOpenFlyout(null);
-                }}
-                header={
-                  <div data-toolbar-flyout="section-border" style={{ display: "grid", gap: 12 }}>
-                    <div role="menu" aria-label="Border style" style={{ display: "flex", gap: 8 }}>
-                      {(
-                        [
-                          ["solid", "Solid", StrokeIcon],
-                          ["dashed", "Dashed", DashIcon],
-                          ["none", "None", NoStrokeIcon],
-                        ] as const
-                      ).map(([value, label, Icon]) => {
-                        const active = (primarySelectedObject.style?.strokeStyle ?? "solid") === value;
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            role="menuitem"
-                            aria-label={label}
-                            data-section-border-style={value}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              applySectionBorderStyleToSelection(value);
-                            }}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 6,
-                              height: 30,
-                              padding: "0 10px",
-                              border: "none",
-                              borderRadius: 8,
-                              background: active ? "#8C2EF2" : "rgba(255,255,255,0.08)",
-                              color: "#FFFFFF",
-                              cursor: "pointer",
-                              fontSize: 12,
-                            }}
-                            title={label}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span>{label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div style={{ height: 1, background: "rgba(255,255,255,0.14)" }} />
-                  </div>
-                }
-              />
-            </div>
-          )}
-          {openFlyout === "color" && primarySelectedObject && contextToolbarVariant !== "connector" && contextToolbarVariant !== "section" && (
-            <div className="absolute left-0 top-full z-50 mt-2">
-              <ColorPalettePopover
-                currentColor={
-                  primarySelectedObject.type === "section"
-                    ? primarySelectedObject.style?.fill ?? paletteTokenStyle("note").fill
-                    : paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent
-                }
-                onPick={(color: Parameters<NonNullable<ColorPalettePopoverProps["onPick"]>>[0]) => {
-                  applyPaletteTokenToSelection(nearestPaletteToken(color));
-                  setOpenFlyout(null);
-                }}
-              />
-            </div>
-          )}
-          {openFlyout === "color" && contextToolbarVariant === "connector" && selectedConnection && (
-            <div className="absolute left-0 top-full z-50 mt-2">
-              {/* Connector color flyout (W3b/W4): the sampled FigJam connector
-                  stroke set (figjam-tokens.ts CONNECTOR_COLORS), patched onto
-                  the selected connection as `color`. */}
-              <ColorPalettePopover
-                currentColor={selectedConnection.color ?? CONNECTOR_DEFAULT_COLOR}
-                swatches={[Object.values(CONNECTOR_COLORS)]}
-                onPick={(color: string) => {
-                  dispatch({
-                    type: "canvas.updateConnection",
-                    connectionId: selectedConnection.id,
-                    patch: { color },
-                  });
-                  setOpenFlyout(null);
-                }}
-              />
-            </div>
-          )}
-          {openFlyout === "tint" && (
-            <div className="absolute left-0 top-full z-50 mt-2 flex gap-1 rounded-full bg-[#1D1D1D] p-2 shadow-xl">
-              {(
-                [
-                  "green", "purple", "orange", "yellow", "gray",
-                  "white", "pink", "red", "blue", "teal",
-                ] as CanvasSectionTint[]
-              ).map((tint) => (
-                <button
-                  key={tint}
-                  type="button"
-                  aria-label={`Section color ${tint}`}
-                  data-section-tint={tint}
-                  className="h-5 w-5 rounded-full border border-white/20"
-                  style={{ background: `var(--canvas-section-${tint}, ${tint})` }}
-                  onClick={() => {
-                    applyTintToSelection(tint);
-                    setOpenFlyout(null);
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {openFlyout === "shape-swap" && (
-            <div className="absolute left-0 top-full z-50 mt-2">
-              <ShapeSearchPopover onPick={swapSelectedShape} />
-            </div>
-          )}
-          {openFlyout === "lock" && (
-            <div className="absolute left-0 top-full z-50 mt-2 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-              <button
-                type="button"
-                role="menuitem"
-                className="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white hover:bg-white/10"
-                onClick={() => {
-                  toggleLockForSelection();
-                  setOpenFlyout(null);
-                }}
-              >
-                {primarySelectedObject?.locked ? (
-                  <UnlockIcon className="h-4 w-4" />
-                ) : (
-                  <LockIcon className="h-4 w-4" />
-                )}
-                {primarySelectedObject?.locked ? "Unlock section" : "Lock section"}
-              </button>
-            </div>
-          )}
-          {(openFlyout === "dash" || openFlyout === "routing" || openFlyout === "arrowhead") &&
-            selectedConnection && (
-              <div className="absolute left-0 top-full z-50 mt-2 grid gap-1 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-                {openFlyout === "dash" &&
-                  (["solid", "dotted"] as const).map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="menuitem"
-                      className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-                      onClick={() => {
-                        dispatch({
-                          type: "canvas.updateConnection",
-                          connectionId: selectedConnection.id,
-                          patch: { style: value },
-                        });
-                        setOpenFlyout(null);
-                      }}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                {openFlyout === "routing" &&
-                  (["elbow", "smooth"] as const).map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="menuitem"
-                      className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-                      onClick={() => {
-                        dispatch({
-                          type: "canvas.updateConnection",
-                          connectionId: selectedConnection.id,
-                          patch: { style: value },
-                        });
-                        setOpenFlyout(null);
-                      }}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                {openFlyout === "arrowhead" &&
-                  (["none", "forward", "back", "both"] as const).map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="menuitem"
-                      className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-                      onClick={() => {
-                        dispatch({
-                          type: "canvas.updateConnection",
-                          connectionId: selectedConnection.id,
-                          patch: { arrow: value },
-                        });
-                        setOpenFlyout(null);
-                      }}
-                    >
-                      {value}
-                    </button>
-                  ))}
-              </div>
-            )}
-        </div>
-      )}
+      <ContextToolbarLayer
+        toolbar={contextToolbar}
+        selectedConnection={selectedConnection}
+        dispatch={dispatch}
+      />
 
       {shapesPanelOpen && (
         <div className="pointer-events-auto absolute bottom-4 left-4 top-20 z-30">
