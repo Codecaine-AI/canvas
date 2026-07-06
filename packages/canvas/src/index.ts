@@ -10,7 +10,7 @@ export * from "./interaction/snapping";
 export * from "./editor/InteractiveCanvasEditor";
 export * from "./editor/InteractiveCanvasViewer";
 export * from "./state/schema";
-export * from "./state/spectre-ref";
+export * from "./state/code-link";
 export * from "./tokens/theme";
 export * from "./editor/use-canvas-viewport";
 export * from "./render/viewport";

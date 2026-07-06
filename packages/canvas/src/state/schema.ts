@@ -13,7 +13,7 @@
  *  - ./schema/objects      — CanvasGeometry + the base InteractiveCanvasObject
  *  - ./schema/connections  — endpoints, connections, connector style/arrow
  *  - ./schema/annotations  — annotation targets/intents/statuses
- *  - ./schema/links        — doc/source links (SpectreRef targets)
+ *  - ./schema/links        — doc/source links (CodeLink targets)
  *  - ./schema/document     — the InteractiveCanvasDocument envelope
  *  - ./schema/validate     — validation layer (validate/assert + issue types)
  */
