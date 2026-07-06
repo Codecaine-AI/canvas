@@ -15,7 +15,7 @@ import {
   type CanvasPoint,
 } from "../model/geometry";
 import { gridBackground } from "./grid";
-import { RESIZE_HANDLES, resizeCursorFor, type InteractionOverlay, type ResizeHandle } from "../interaction/interaction";
+import type { InteractionOverlay } from "../interaction/interaction";
 import {
   arrowShapePoints,
   chevronPoints,
@@ -31,11 +31,6 @@ import {
   trianglePoints,
 } from "../routing/connection-overlay";
 import type { Anchor } from "../routing/routing";
-import type { DistributionGuideSegment, SnapGuide, SpacingHint } from "../interaction/snapping";
-import {
-  DISTRIBUTION_GUIDE_COLOR,
-  DISTRIBUTION_TICK_BAR,
-} from "../vendor/blocksuite/snap-distribution";
 import {
   canvasSurfaceStyle,
   resolveObjectColors,
@@ -43,12 +38,18 @@ import {
   resolveSectionColors,
   type CanvasToneStyle,
 } from "./theme";
-import { worldToScreen, type ViewportState } from "../editor/viewport";
+import type { ViewportState } from "../editor/viewport";
 import { tokenizeCodeBlock } from "./code-tokenizer";
 import { IconShapeBody } from "./IconShapeBody";
 import { Connector } from "./connectors/Connector";
 import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
+import { SelectionBox } from "./overlays/SelectionBox";
+import { Marquee } from "./overlays/Marquee";
+import { PlacePreview } from "./overlays/PlacePreview";
+import { SnapGuideLine } from "./overlays/SnapGuideLine";
+import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
+import { SpacingChips } from "./overlays/SpacingChips";
 import type { CanvasTool } from "../model/actions";
 import {
   ARROW_SHAPE_GEOMETRY,
@@ -82,7 +83,6 @@ import type {
   InteractiveCanvasObject,
 } from "../model/schema";
 
-const HANDLE_SIZE = 10;
 const EDGE_PORT_ANCHORS: Anchor[] = ["top", "right", "bottom", "left"];
 /** Arrowhead marker geometry, expressed in units of the connector's own stroke width (see marker `<defs>` below). */
 const ARROW_LENGTH_RATIO = CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO;
@@ -245,7 +245,9 @@ function annotationTargetLabel(target: CanvasAnnotationTarget): string {
   return "region";
 }
 
-export { annotationTargetLabel, renderOrderedObjects };
+// SelectionBox moved to overlays/ but was part of this module's public
+// surface (index.ts re-exports * from here) — keep re-exporting it.
+export { annotationTargetLabel, renderOrderedObjects, SelectionBox };
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
@@ -1066,278 +1068,6 @@ const PORT_POSITIONS: Record<Anchor, { fx: number; fy: number }> = {
   bottom: { fx: 0.5, fy: 1 },
   left: { fx: 0, fy: 0.5 },
 };
-
-/** Handle position expressed as fractional offsets (0/0.5/1) within the bounds. */
-const HANDLE_POSITIONS: Record<ResizeHandle, { fx: number; fy: number }> = {
-  nw: { fx: 0, fy: 0 },
-  n: { fx: 0.5, fy: 0 },
-  ne: { fx: 1, fy: 0 },
-  e: { fx: 1, fy: 0.5 },
-  se: { fx: 1, fy: 1 },
-  s: { fx: 0.5, fy: 1 },
-  sw: { fx: 0, fy: 1 },
-  w: { fx: 0, fy: 0.5 },
-};
-
-/**
- * Screen-space selection chrome rendered in CanvasStage's overlay slot.
- *
- * Single selection: outline + all 8 resize handles at a fixed screen size
- * (independent of zoom). Multi-selection: outline only — group scaling is
- * deferred beyond M1.
- */
-export function SelectionBox({
-  document,
-  viewport,
-  selectedObjectIds,
-  interactiveHandles = true,
-}: {
-  document: InteractiveCanvasDocument;
-  viewport: ViewportState;
-  selectedObjectIds: string[];
-  interactiveHandles?: boolean;
-}) {
-  if (selectedObjectIds.length === 0) return null;
-  const objects = document.objects.filter((object) => selectedObjectIds.includes(object.id));
-  if (objects.length === 0) return null;
-
-  const minX = Math.min(...objects.map((object) => object.geometry.x));
-  const minY = Math.min(...objects.map((object) => object.geometry.y));
-  const maxX = Math.max(...objects.map((object) => object.geometry.x + object.geometry.width));
-  const maxY = Math.max(...objects.map((object) => object.geometry.y + object.geometry.height));
-
-  const topLeft = worldToScreen(viewport, { x: minX, y: minY });
-  const bottomRight = worldToScreen(viewport, { x: maxX, y: maxY });
-  const screenBounds = {
-    left: topLeft.x,
-    top: topLeft.y,
-    width: bottomRight.x - topLeft.x,
-    height: bottomRight.y - topLeft.y,
-  };
-
-  const isSingle = objects.length === 1;
-  const objectId = objects[0]!.id;
-  // W2 — sections show corner handles only (no edge midpoints); resizing a
-  // section never moves its captured members (that's a drag-gesture-only
-  // behavior, handled entirely in interaction.ts and orthogonal to resize).
-  const isSection = isSingle && objects[0]!.type === "section";
-  const handles = isSection ? RESIZE_HANDLES.filter((handle) => handle.length === 2) : RESIZE_HANDLES;
-
-  return (
-    <div
-      className="interactive-canvas-selection-box"
-      data-canvas-selection-box="true"
-      style={{
-        position: "absolute",
-        left: `${screenBounds.left}px`,
-        top: `${screenBounds.top}px`,
-        width: `${screenBounds.width}px`,
-        height: `${screenBounds.height}px`,
-        border: "1.5px solid var(--primary)",
-        boxSizing: "border-box",
-        pointerEvents: "none",
-      }}
-    >
-      {isSingle &&
-        handles.map((handle) => {
-          const { fx, fy } = HANDLE_POSITIONS[handle];
-          return (
-            <div
-              key={handle}
-              data-canvas-handle={handle}
-              data-canvas-object-id={objectId}
-              style={{
-                position: "absolute",
-                left: `${fx * screenBounds.width}px`,
-                top: `${fy * screenBounds.height}px`,
-                width: `${HANDLE_SIZE}px`,
-                height: `${HANDLE_SIZE}px`,
-                transform: "translate(-50%, -50%)",
-                background: "var(--background)",
-                border: "1.5px solid var(--primary)",
-                borderRadius: "2px",
-                cursor: resizeCursorFor(handle),
-                pointerEvents: interactiveHandles ? "auto" : "none",
-                touchAction: "none",
-              }}
-            />
-          );
-        })}
-    </div>
-  );
-}
-
-function Marquee({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {
-  const topLeft = worldToScreen(viewport, { x: bounds.x, y: bounds.y });
-  const bottomRight = worldToScreen(viewport, {
-    x: bounds.x + bounds.width,
-    y: bounds.y + bounds.height,
-  });
-  return (
-    <div
-      data-canvas-marquee="true"
-      style={{
-        position: "absolute",
-        left: `${topLeft.x}px`,
-        top: `${topLeft.y}px`,
-        width: `${bottomRight.x - topLeft.x}px`,
-        height: `${bottomRight.y - topLeft.y}px`,
-        border: "1px solid var(--primary)",
-        background: "color-mix(in oklab, var(--primary) 12%, transparent)",
-        pointerEvents: "none",
-      }}
-    />
-  );
-}
-
-/** Ghost preview outline for an in-progress armed-tool placement (4.2.2). */
-function PlacePreview({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {
-  const topLeft = worldToScreen(viewport, { x: bounds.x, y: bounds.y });
-  const bottomRight = worldToScreen(viewport, {
-    x: bounds.x + bounds.width,
-    y: bounds.y + bounds.height,
-  });
-  return (
-    <div
-      data-canvas-place-preview="true"
-      style={{
-        position: "absolute",
-        left: `${topLeft.x}px`,
-        top: `${topLeft.y}px`,
-        width: `${bottomRight.x - topLeft.x}px`,
-        height: `${bottomRight.y - topLeft.y}px`,
-        border: "1.5px dashed var(--primary)",
-        borderRadius: "8px",
-        background: "color-mix(in oklab, var(--primary) 8%, transparent)",
-        pointerEvents: "none",
-      }}
-    />
-  );
-}
-
-/**
- * Screen-space 1px alignment guide line, projected from a world-space
- * SnapGuide (position + perpendicular span). Rendered in the untransformed
- * overlay slot so the line stays crisp at any zoom level.
- */
-function SnapGuideLine({ viewport, guide }: { viewport: ViewportState; guide: SnapGuide }) {
-  if (guide.axis === "x") {
-    const top = worldToScreen(viewport, { x: guide.position, y: guide.span.start });
-    const bottom = worldToScreen(viewport, { x: guide.position, y: guide.span.end });
-    return (
-      <div
-        data-canvas-snap-guide="x"
-        style={{
-          position: "absolute",
-          left: `${top.x}px`,
-          top: `${Math.min(top.y, bottom.y)}px`,
-          width: "1px",
-          height: `${Math.abs(bottom.y - top.y)}px`,
-          background: "var(--interactive-canvas-guide)",
-          pointerEvents: "none",
-        }}
-      />
-    );
-  }
-  const left = worldToScreen(viewport, { x: guide.span.start, y: guide.position });
-  const right = worldToScreen(viewport, { x: guide.span.end, y: guide.position });
-  return (
-    <div
-      data-canvas-snap-guide="y"
-      style={{
-        position: "absolute",
-        left: `${Math.min(left.x, right.x)}px`,
-        top: `${left.y}px`,
-        width: `${Math.abs(right.x - left.x)}px`,
-        height: "1px",
-        background: "var(--interactive-canvas-guide)",
-        pointerEvents: "none",
-      }}
-    />
-  );
-}
-
-/**
- * Equal-spacing ("distribution") guide segment from the ported AFFiNE
- * snap-overlay algorithm (W3b): a magenta line spanning one equalized gap,
- * with short perpendicular tick bars at both ends (upstream's end-tick style,
- * DISTRIBUTION_TICK_BAR view px). Segments arrive in world space on
- * InteractionOverlay.distributionGuides; rendered here as one small SVG per
- * segment so they pan/zoom with the stage.
- */
-function DistributionGuideLine({
-  viewport,
-  segment,
-}: {
-  viewport: ViewportState;
-  segment: DistributionGuideSegment;
-}) {
-  const a = worldToScreen(viewport, { x: segment.x1, y: segment.y1 });
-  const b = worldToScreen(viewport, { x: segment.x2, y: segment.y2 });
-  const horizontal = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x);
-  const half = DISTRIBUTION_TICK_BAR / 2;
-  const tickA = horizontal
-    ? `M ${a.x} ${a.y - half} L ${a.x} ${a.y + half}`
-    : `M ${a.x - half} ${a.y} L ${a.x + half} ${a.y}`;
-  const tickB = horizontal
-    ? `M ${b.x} ${b.y - half} L ${b.x} ${b.y + half}`
-    : `M ${b.x - half} ${b.y} L ${b.x + half} ${b.y}`;
-  return (
-    <svg
-      data-canvas-distribution-guide=""
-      aria-hidden="true"
-      style={{ position: "absolute", left: 0, top: 0, overflow: "visible", pointerEvents: "none" }}
-    >
-      <path
-        d={`M ${a.x} ${a.y} L ${b.x} ${b.y} ${tickA} ${tickB}`}
-        fill="none"
-        stroke={DISTRIBUTION_GUIDE_COLOR}
-        strokeWidth={2}
-      />
-    </svg>
-  );
-}
-
-/**
- * Small pill chip showing the px gap value, centered on an equal-gap segment
- * (FigJam-style spacing hint). One chip per segment in the hint.
- */
-function SpacingChips({ viewport, hint }: { viewport: ViewportState; hint: SpacingHint }) {
-  return (
-    <>
-      {hint.segments.map((segment, index) => {
-        const mid = (segment.start + segment.end) / 2;
-        const center =
-          hint.axis === "x"
-            ? worldToScreen(viewport, { x: mid, y: segment.cross })
-            : worldToScreen(viewport, { x: segment.cross, y: mid });
-        return (
-          <div
-            key={`${hint.axis}-${index}`}
-            data-canvas-spacing-chip="true"
-            style={{
-              position: "absolute",
-              left: `${center.x}px`,
-              top: `${center.y}px`,
-              transform: "translate(-50%, -50%)",
-              background: "var(--interactive-canvas-highlight)",
-              color: "var(--foreground)",
-              border: "1px solid var(--interactive-canvas-guide)",
-              borderRadius: "999px",
-              padding: "1px 6px",
-              fontSize: "10px",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-              pointerEvents: "none",
-            }}
-          >
-            {Math.round(hint.gap)}
-          </div>
-        );
-      })}
-    </>
-  );
-}
 
 /**
  * Shared world-space renderer used by both the read-only viewer (static/fit or
