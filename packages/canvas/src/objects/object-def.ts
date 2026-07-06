@@ -61,12 +61,15 @@ import { triangleDef } from "./shapes/triangle";
  * shapes share ONE behavior and get their ObjectDef generated from a
  * ShapeDef via `objects/shapes/base.tsx`.
  *
- * Pilot scope (step 4): only `render`, `css`, and the className carried by
- * the render path are CONSUMED. The behavioral flags (`handles`, `hitTest`,
- * `dragCapture`, `labelEditing`, `toolbar`, `defaults`) are DECLARED here so
- * defs are written once in their final shape, but the existing `type ===`
- * checks in interaction/editor/model code stay authoritative until a later
- * chunk wires them through the registry.
+ * Current scope: `render`, `css`, the className carried by the render path,
+ * `handles`/`hitTest`/`dragCapture` (interaction/core.ts, hit-testing.ts,
+ * gestures/move.ts, SelectionBox — cf3aec8), and `toolbar` (the
+ * context-toolbar layer's use-context-toolbar.ts — 4c0d62d) are all CONSUMED
+ * from the registry. `labelEditing` is DECLARED but not yet consumed —
+ * inline label-editing dispatch still checks `object.type === "section"`
+ * directly. `defaults` is likewise DECLARED but not yet consumed — per-type
+ * defaults still live in model/actions/defaults.ts and are wired through the
+ * registry in a later chunk (RESTRUCTURE.md step 6).
  */
 
 /** Props every object renderer receives — mirrors render/ObjectShape's public props. */
@@ -180,8 +183,9 @@ export interface ObjectDef {
   render: ComponentType<ObjectRenderProps>;
   /**
    * This kind's global-CSS rules, moved verbatim from CanvasStage's embedded
-   * style block. CanvasStage composes its style tag as: legacy block (rules
-   * not yet migrated) + the concatenated `css` of every registered def.
+   * style block. CanvasStage composes its style tag as: shared base block
+   * (rules that deliberately stay there — e.g. the sticky-body cascade
+   * exception) + the concatenated `css` of every registered def.
    */
   css: string;
   defaults: ObjectDefaults;
@@ -206,8 +210,11 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
 
 /**
  * Static def tables (no registration-order issues — populated by direct
- * import as kinds are converted; pilot converts six, the rest keep flowing
- * through ObjectShape's legacy branches via the `undefined` fallback).
+ * import). The mass conversion is complete: every object kind renders
+ * through a registered def; the `undefined` fallback in `objectDefFor` only
+ * fires for a render shape with no registered def (today solely an explicit
+ * `style.shape: "section"` on a non-section object), reproducing the old
+ * generic default chrome (see render/ObjectShape.tsx).
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
  *  - `section` is dispatched on `object.type` (the ONLY type the legacy

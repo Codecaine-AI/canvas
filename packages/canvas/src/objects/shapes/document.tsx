@@ -32,7 +32,8 @@ export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): strin
  * chrome stays fully transparent so only one outline is visible. Stroke
  * width follows the object's resolved stroke width (legacy passed
  * `shapeStrokeWidth` through for document/folder/document-stack/
- * cylinder-horizontal — see ObjectShape's ShapeSilhouette call).
+ * cylinder-horizontal — see the now-deleted render/ShapeSilhouette.tsx's
+ * call site for this shape).
  */
 export const documentShapeDef: ShapeDef = {
   type: "document",

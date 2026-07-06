@@ -3,9 +3,7 @@ import { cleanup, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
 import type { InteractionOverlay } from "../../interaction/interaction";
 import type { InteractiveCanvasDocument } from "../../model/schema";
-import {
-  DISTRIBUTION_GUIDE_COLOR,
-} from "../../vendor/blocksuite/snap-distribution";
+import { DISTRIBUTION_GUIDE_COLOR } from "../../interaction/snapping";
 
 afterEach(() => {
   cleanup();

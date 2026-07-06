@@ -5,6 +5,15 @@ import {
   type DistributionGuideSegment,
 } from "../vendor/blocksuite/snap-distribution";
 
+// Re-exported for render/overlays: the MPL vendor boundary allows only
+// routing/ and this module to import vendor/blocksuite, so the distribution
+// guide's visual constants surface here rather than being imported from
+// vendor by render code (import-boundaries test enforces this).
+export {
+  DISTRIBUTION_GUIDE_COLOR,
+  DISTRIBUTION_TICK_BAR,
+} from "../vendor/blocksuite/snap-distribution";
+
 const MAX_SNAP_CANDIDATES = 100;
 const SPACING_EPSILON = 0.5;
 const GRID_EPSILON = 0.01;

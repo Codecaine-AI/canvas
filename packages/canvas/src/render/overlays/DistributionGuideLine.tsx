@@ -1,10 +1,10 @@
 "use client";
 
-import type { DistributionGuideSegment } from "../../interaction/snapping";
 import {
   DISTRIBUTION_GUIDE_COLOR,
   DISTRIBUTION_TICK_BAR,
-} from "../../vendor/blocksuite/snap-distribution";
+  type DistributionGuideSegment,
+} from "../../interaction/snapping";
 import { worldToScreen, type ViewportState } from "../../editor/viewport";
 
 /**

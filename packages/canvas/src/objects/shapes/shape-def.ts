@@ -74,7 +74,7 @@ export interface TextZoneSpec {
  * Connector attachment points. Absent = the current behavior for every
  * shape: bbox compass points (top/right/bottom/left side midpoints).
  * Declared for shapes whose true outline should reposition anchors later;
- * unconsumed in the pilot.
+ * not consumed anywhere yet.
  */
 export interface AnchorSpec {
   points: (bounds: CanvasBounds) => ReadonlyArray<{ anchor: Anchor; point: CanvasPoint }>;

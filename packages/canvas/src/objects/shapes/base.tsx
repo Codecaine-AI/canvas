@@ -10,8 +10,8 @@ import { SHAPE_TOOLBAR } from "./toolbar";
  * Adapts any ShapeDef (tier-2 variant data) into an ObjectDef (tier-1
  * behavior contract) carrying the ONE shared shape behavior: standard shape
  * toolbar, full 8-handle set, solid hit-test, standard label editing, and
- * the generic button/label/body layout ObjectShape's legacy branch renders.
- * Per-shape files never mention toolbars or handles.
+ * the generic button/label/body layout the original pre-registry ObjectShape
+ * rendered. Per-shape files never mention toolbars or handles.
  */
 export function shapeObjectDef(shape: ShapeDef): ObjectDef {
   const className = shape.outline.className

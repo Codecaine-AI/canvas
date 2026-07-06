@@ -9,14 +9,13 @@ import type { ShapeDef } from "./shape-def";
  * Document Stack (W5) — two offset wavy-bottom document silhouettes (the
  * back page dimmed via opacity, the front page full-opacity) drawn via
  * inline SVG behind the label/body content; the button chrome stays fully
- * transparent so only one outline is visible. Moved verbatim from
- * render/ShapeSilhouette.tsx's document-stack branch. Reuses
- * `documentWavyPath` from the document def (../objects/shapes/document.tsx)
- * — after this conversion lands, render/ShapeSilhouette.tsx is
- * `documentWavyPath`'s last non-def importer and can be deleted along with
- * it. Stroke width follows the object's resolved stroke width (see
- * folder.tsx's note — the shared shape view always resolves a concrete
- * value, so no `?? 2` fallback is needed here).
+ * transparent so only one outline is visible. Moved verbatim from the
+ * now-deleted render/ShapeSilhouette.tsx's document-stack branch. Reuses
+ * `documentWavyPath` from the document def (../objects/shapes/document.tsx),
+ * which was that file's last non-def importer before it was deleted. Stroke
+ * width follows the object's resolved stroke width (see folder.tsx's note —
+ * the shared shape view always resolves a concrete value, so no `?? 2`
+ * fallback is needed here).
  */
 export const documentStackShapeDef: ShapeDef = {
   type: "document-stack",

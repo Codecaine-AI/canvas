@@ -10,10 +10,10 @@ import type { ObjectRenderProps, RenderObjectShape } from "./object-def";
  * Shared button chrome for registry-driven object renderers: the outer
  * `<button>` (positioning style, docs-targeting/data attributes, select and
  * context-menu handlers) and the quick-connect edge ports. Extracted from
- * render/ObjectShape's generic branch so per-kind defs compose it instead of
- * re-deriving it; ObjectShape's legacy branch keeps its own inline copy until
- * the mass conversion deletes it (the two MUST stay byte-identical in output
- * until then).
+ * render/ObjectShape's original generic branch so per-kind defs compose it
+ * instead of re-deriving it; ObjectShape's own generic fallback (for render
+ * shapes with no registered def) now composes this same shared code too —
+ * there is no separate inline copy left to keep in sync.
  */
 
 export function objectStyle(object: InteractiveCanvasObject): CSSProperties {
@@ -41,8 +41,8 @@ export function objectStyle(object: InteractiveCanvasObject): CSSProperties {
 
 /**
  * The generic object button: identical attribute set (and order) to the one
- * ObjectShape's legacy branch renders, so converted kinds keep byte-identical
- * DOM. `renderShape` is the effective render shape stamped on
+ * the original pre-registry ObjectShape rendered, so every kind keeps
+ * byte-identical DOM. `renderShape` is the effective render shape stamped on
  * `data-canvas-object-shape`.
  */
 export function ObjectButtonChrome({
@@ -115,7 +115,7 @@ const PORT_POSITIONS: Record<Anchor, { fx: number; fy: number }> = {
   left: { fx: 0, fy: 0.5 },
 };
 
-/** Quick-connect edge ports (editor only) — identical markup to ObjectShape's legacy branch. */
+/** Quick-connect edge ports (editor only) — identical markup to the original pre-registry ObjectShape. */
 export function EdgePorts({ object, zoom = 1 }: { object: InteractiveCanvasObject; zoom?: number }) {
   return (
     <>

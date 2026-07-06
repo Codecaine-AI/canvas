@@ -7,10 +7,11 @@ import { SHAPE_TOOLBAR } from "../shapes/toolbar";
 /**
  * Source Node renders pixel/DOM-identically to ObjectShape's plain default
  * rounded-rect path: generic button chrome, standard label/body spans, and
- * optional edge ports. Its behavioral flags are declared-only in this
- * registry step (see object-def.ts's pilot-scope note); `handles`, `hitTest`,
- * `dragCapture`, and `labelEditing` are not yet consumed by
- * interaction/editor code.
+ * optional edge ports. `handles`, `hitTest`, and `dragCapture` are consumed
+ * via the type-keyed `objectDefForType` behavior lookup (object-def.ts) at
+ * interaction's five behavior sites; `labelEditing` is still declared-only —
+ * inline label-editing dispatch does its own `object.type === "section"`
+ * check rather than reading this field.
  *
  * DOM-DISPATCH CAVEAT (read before registering): `defaultGeometryFor`,
  * `toneForType`, `objectTypeLabel`, and `shapeForType` in
@@ -25,8 +26,8 @@ import { SHAPE_TOOLBAR } from "../shapes/toolbar";
  * `DEFS_BY_TYPE` (object-def.ts) the way container/section are, ANY
  * source-node object carrying an explicit `style.shape` other than
  * "rounded-rect" (e.g. "diamond", "ellipse", ...) would be forced through
- * this plain rounded-rect view instead of the shape-specific legacy branch
- * (or another registered shape def) it renders through today — a real
+ * this plain rounded-rect view instead of the shape-specific registered
+ * def it renders through today — a real
  * behavior regression for such objects, not just a DOM/attribute nit.
  *
  * Registering this def in `DEFS_BY_RENDER_SHAPE` keyed on `"rounded-rect"`

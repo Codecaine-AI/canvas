@@ -11,8 +11,8 @@ import type { ShapeDef } from "./shape-def";
  * CHIP_ICON_COLORS so the semantic-palette system keeps working for anyone
  * who deliberately recolors one. Unlike chat, chip-icon has no compact
  * threshold: the body span renders whenever `object.body` is present,
- * regardless of height (isCompactSilhouette in the legacy branch is
- * chat-only).
+ * regardless of height (isCompactSilhouette in the old pre-registry
+ * renderer was chat-only).
  */
 export const chipIconShapeDef: ShapeDef = {
   type: "chip-icon",
