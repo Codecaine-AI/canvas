@@ -16,6 +16,7 @@ import {
   type CanvasPoint,
 } from "../../model/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../model/schema";
+import { objectDefForType } from "../../objects/object-def";
 import {
   computeSnapCorrection,
   computeSpacingHints,
@@ -48,7 +49,8 @@ export function expandMoveObjectIds(
   const expandedObjectIds = new Set(dragObjectIds);
   for (const id of dragObjectIds) {
     const object = document.objects.find((candidate) => candidate.id === id);
-    if (object?.type === "section") {
+    const dragCapture = object ? objectDefForType(object.type)?.dragCapture : undefined;
+    if (dragCapture === "geometric-overlap") {
       for (const memberId of sectionCaptureMembers(
         document,
         id,
@@ -57,7 +59,7 @@ export function expandMoveObjectIds(
         expandedObjectIds.add(memberId);
       }
     }
-    if (object?.type === "container") {
+    if (dragCapture === "descendants") {
       for (const memberId of descendantIds(document, id)) {
         expandedObjectIds.add(memberId);
       }

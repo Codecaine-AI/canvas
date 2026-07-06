@@ -8,6 +8,7 @@
  */
 import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../model/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../model/schema";
+import { objectDefForType } from "../objects/object-def";
 
 /** Width (world units) of the border band on containers that is hittable for move/select. */
 export const CONTAINER_BORDER_BAND = 16;
@@ -63,8 +64,8 @@ export function hitTestObjects(
     const inside =
       worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
     if (!inside) continue;
-    if (object.type !== "container") return object;
-    // Container: only the border band is hittable; interior is pass-through.
+    if (objectDefForType(object.type)?.hitTest !== "border-band") return object;
+    // Border-band hit-test (containers): only the band is hittable; interior is pass-through.
     const band = CONTAINER_BORDER_BAND;
     const onBorderBand =
       worldPoint.x <= x + band ||

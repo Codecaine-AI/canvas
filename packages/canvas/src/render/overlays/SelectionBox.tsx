@@ -7,6 +7,7 @@ import {
 } from "../../interaction/interaction";
 import { worldToScreen, type ViewportState } from "../../editor/viewport";
 import type { InteractiveCanvasDocument } from "../../model/schema";
+import { objectDefForType } from "../../objects/object-def";
 
 const HANDLE_SIZE = 10;
 
@@ -63,8 +64,12 @@ export function SelectionBox({
   // W2 — sections show corner handles only (no edge midpoints); resizing a
   // section never moves its captured members (that's a drag-gesture-only
   // behavior, handled entirely in interaction.ts and orthogonal to resize).
-  const isSection = isSingle && objects[0]!.type === "section";
-  const handles = isSection ? RESIZE_HANDLES.filter((handle) => handle.length === 2) : RESIZE_HANDLES;
+  // The handle set comes from the object def: "corners" keeps only the
+  // two-letter compass handles (nw/ne/se/sw); everything else ("all", and any
+  // unregistered kind) gets the full 8-handle set, exactly as before.
+  const handleMode = isSingle ? objectDefForType(objects[0]!.type)?.handles : undefined;
+  const handles =
+    handleMode === "corners" ? RESIZE_HANDLES.filter((handle) => handle.length === 2) : RESIZE_HANDLES;
 
   return (
     <div

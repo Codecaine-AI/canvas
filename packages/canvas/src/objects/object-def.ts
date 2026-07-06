@@ -265,6 +265,20 @@ export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undef
   return DEFS_BY_TYPE[object.type] ?? DEFS_BY_RENDER_SHAPE[renderShapeFor(object)];
 }
 
+const DEFS_BY_KIND = new Map(OBJECT_DEFS.map((def) => [def.kind, def]));
+
+/**
+ * Behavior lookup: the flags (`handles`/`hitTest`/`dragCapture`/`labelEditing`)
+ * belong to the object TYPE, unlike render dispatch (`objectDefFor` above),
+ * which keys on the effective `style.shape` (only `section` render-dispatches
+ * by type). Every InteractiveCanvasObjectType has a def whose `kind` is the
+ * type, so this only returns `undefined` for non-type kinds (e.g. a future
+ * connector def) or out-of-vocabulary strings.
+ */
+export function objectDefForType(type: InteractiveCanvasObjectType): ObjectDef | undefined {
+  return DEFS_BY_KIND.get(type);
+}
+
 /** Concatenated per-kind CSS of every registered def, appended to CanvasStage's style tag. */
 export const OBJECT_DEFS_CSS: string = OBJECT_DEFS.map((def) => def.css).join("");
 

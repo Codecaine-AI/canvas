@@ -9,6 +9,7 @@
  */
 import { objectTypeLabel, type CanvasAction, type CanvasSelection } from "../model/actions";
 import { createObjectId } from "../model/geometry";
+import { objectDefForType } from "../objects/object-def";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";
 import { stepFromMarquee } from "./gestures/marquee";
@@ -130,7 +131,10 @@ function stepFromIdle(
     const hit = event.hit;
     const object = ctx.document.objects.find((candidate) => candidate.id === hit.objectId);
     if (!object) return toIdle();
-    if (object.type === "section" && object.locked) return toIdle();
+    // Locked sections refuse resize (W2). Section-ness is expressed through
+    // the def's handle set — "corners" is the section-only handle behavior —
+    // while `locked` stays a plain object property.
+    if (objectDefForType(object.type)?.handles === "corners" && object.locked) return toIdle();
     const pending: ResizeGesture = {
       kind: "resize",
       startWorld: event.world,
@@ -326,7 +330,14 @@ function stepFromPressing(
     if (
       dragObjectIds.some((id) => {
         const object = ctx.document.objects.find((candidate) => candidate.id === id);
-        return object?.type === "section" && object.locked;
+        // Locked sections refuse drag (W2). Section-ness is expressed through
+        // the def's capture behavior — "geometric-overlap" is section-only —
+        // while `locked` stays a plain object property.
+        return (
+          object &&
+          objectDefForType(object.type)?.dragCapture === "geometric-overlap" &&
+          object.locked
+        );
       })
     ) {
       return toIdle();
