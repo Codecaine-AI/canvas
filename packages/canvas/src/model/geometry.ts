@@ -241,12 +241,30 @@ function overlapArea(a: CanvasBounds, b: CanvasBounds): number {
 }
 
 /**
+ * Section capture-membership threshold (W2 design decision — not directly
+ * pixel-sampled; FigJam's own overlap fraction was never captured in the
+ * screen-recording chrome catalog, see affine-mining-map.md §1's flagged
+ * caveat). A dragged section carries every object whose bounds overlap the
+ * section's bounds by at least this fraction of the OBJECT's own area,
+ * computed once at drag-start. 1.0 would require full containment (too
+ * strict — FigJam visibly captures objects that graze a section's inset
+ * padding); 0.6 was chosen as a documented, testable middle ground: an object
+ * more than half "inside" reads as a member, matching the intuitive FigJam
+ * feel of "drop it mostly inside the section and it's captured."
+ *
+ * Lives here (next to sectionCaptureMembers, its consumer) rather than in
+ * render/figjam-tokens.ts because it's model semantics, not a visual token;
+ * figjam-tokens re-exports it to keep its public surface unchanged.
+ */
+export const SECTION_CAPTURE_OVERLAP_THRESHOLD = 0.6;
+
+/**
  * FigJam section capture semantics (W2): computes which objects a section
  * "carries" when dragged, purely from geometry — NOT persisted membership
  * (no parentId/setParent involved). An object is captured when its bounds
  * overlap the section's bounds by at least `threshold` of the OBJECT's OWN
- * area (see SECTION_CAPTURE_OVERLAP_THRESHOLD in figjam-tokens.ts for the
- * rationale behind the default 0.6).
+ * area (see SECTION_CAPTURE_OVERLAP_THRESHOLD above for the rationale behind
+ * the default 0.6).
  *
  * Recursive: if a captured object is itself a section, that nested section's
  * own captured members (computed the same way, against the nested section's

@@ -9,8 +9,12 @@
  * threshold is crossed).
  */
 import type { CanvasAction } from "../../model/actions";
-import { boundsForGeometries, sectionCaptureMembers, type CanvasPoint } from "../../model/geometry";
-import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../../render/figjam-tokens";
+import {
+  SECTION_CAPTURE_OVERLAP_THRESHOLD,
+  boundsForGeometries,
+  sectionCaptureMembers,
+  type CanvasPoint,
+} from "../../model/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../model/schema";
 import {
   computeSnapCorrection,

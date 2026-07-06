@@ -116,19 +116,12 @@ export const SECTION_GEOMETRY = {
   },
 } as const;
 
-/**
- * Section capture-membership threshold (W2 design decision — not directly
- * pixel-sampled; FigJam's own overlap fraction was never captured in the
- * screen-recording chrome catalog, see affine-mining-map.md §1's flagged
- * caveat). A dragged section carries every object whose bounds overlap the
- * section's bounds by at least this fraction of the OBJECT's own area,
- * computed once at drag-start. 1.0 would require full containment (too
- * strict — FigJam visibly captures objects that graze a section's inset
- * padding); 0.6 was chosen as a documented, testable middle ground: an object
- * more than half "inside" reads as a member, matching the intuitive FigJam
- * feel of "drop it mostly inside the section and it's captured."
- */
-export const SECTION_CAPTURE_OVERLAP_THRESHOLD = 0.6;
+// Section capture-membership threshold: model semantics, not a visual token —
+// it now lives in model/geometry.ts next to sectionCaptureMembers (its
+// consumer; the full rationale for the 0.6 default moved with it).
+// Re-exported here because this module is a public exports-map entry
+// ("./figjam-tokens") and existing importers pull the constant from this path.
+export { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../model/geometry";
 
 // ---------------------------------------------------------------------------
 // Sticky notes
