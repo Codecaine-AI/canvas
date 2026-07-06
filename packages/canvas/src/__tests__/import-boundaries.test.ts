@@ -4,12 +4,27 @@ import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
 /**
- * Structural import boundaries for src/ (see RESTRUCTURE.md).
+ * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
+ * amended 2026-07-06).
  *
- * These rules were established by the src restructure and must hold as the
- * remaining migration steps land:
- *  1. interaction/ is a pure layer: it must not import from editor/ or render/.
- *  2. vendor/ (MPL-2.0 boundary) must not import first-party src code.
+ * Layering: tokens <- model <- objects <- render|interaction <- editor.
+ * ui/ sits beside tokens (shared dumb primitives, importable from objects
+ * up). Nothing outside editor/ imports editor/. vendor/ is an MPL-2.0
+ * boundary: only routing/ and interaction/snapping.ts may import
+ * vendor/blocksuite, and vendor imports nothing first-party.
+ *
+ * Known, deliberate exceptions (encoded below so drift is loud):
+ *  - interaction/types.ts may TYPE-import ViewportState from
+ *    render/viewport (never runtime code).
+ *  - tokens/figjam-tokens.ts value-re-exports
+ *    SECTION_CAPTURE_OVERLAP_THRESHOLD from model/geometry (the threshold
+ *    is model semantics; the re-export keeps figjam-tokens' public surface
+ *    unchanged). All other tokens/ -> src imports must be type-only
+ *    model/schema imports.
+ *  - objects/code-block/def.tsx still runtime-imports
+ *    render/code-tokenizer (a pure lexer whose only dependency is tokens/).
+ *    This is the one remaining objects/ -> render/ edge; it goes away if
+ *    the tokenizer is ever rehomed with the code-block slice.
  *
  * The checks are static: they scan import/export specifiers, not runtime
  * behavior, so they run in milliseconds and fail with the offending file.
@@ -37,13 +52,15 @@ function importSpecifiers(
 ): string[] {
   let content = readFileSync(filePath, "utf8");
   if (options.skipTypeOnly) {
-    // Drop whole lines that are type-only imports (e.g. `import type { X }
-    // from "..."` or `import type X from "..."`) so the rule below only
-    // sees runtime (value) imports. This does not handle inline mixed
-    // specifiers like `import { type X, Y } from "..."` — not needed here.
+    // Drop whole lines that are type-only imports/re-exports (e.g.
+    // `import type { X } from "..."` or `export type { X } from "..."`) so
+    // the rule below only sees runtime (value) imports. This does not handle
+    // multiline `import type {\n...\n} from "..."` blocks or inline mixed
+    // specifiers like `import { type X, Y } from "..."` — extend it if a
+    // legitimate edge ever needs either form.
     content = content
       .split("\n")
-      .filter((line) => !/^\s*import\s+type\b/.test(line))
+      .filter((line) => !/^\s*(import|export)\s+type\b/.test(line))
       .join("\n");
   }
   const specifiers: string[] = [];
@@ -93,25 +110,17 @@ function violationsAcrossTree(
 }
 
 describe("import boundaries", () => {
-  test("interaction/ does not import from editor/ or render/ (type-only ViewportState from render/viewport allowed)", () => {
+  test("interaction/ does not import from editor/", () => {
     expect(
       violations(join(SRC_ROOT, "interaction"), /^\.\.\/editor(\/|$)/),
     ).toEqual([]);
-    // viewport.ts (ViewportState + world/screen transforms) lives in render/;
-    // interaction/types.ts may import its TYPES but never runtime code.
+  });
+
+  test("interaction/ does not runtime-import from render/ (type-only ViewportState from render/viewport allowed)", () => {
     expect(
       violations(join(SRC_ROOT, "interaction"), /^\.\.\/render(\/|$)/, {
         skipTypeOnly: true,
       }),
-    ).toEqual([]);
-  });
-
-  test("vendor/ does not import first-party src code (MPL boundary)", () => {
-    expect(
-      violations(
-        join(SRC_ROOT, "vendor"),
-        /^(\.\.\/)+(model|interaction|routing|render|editor|chrome|ui|fixtures)(\/|$)/,
-      ),
     ).toEqual([]);
   });
 
@@ -127,11 +136,52 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("ui/ does not import objects/, render/, interaction/, or editor/ (shared dumb primitives)", () => {
+  test("objects/ does not import from render/ (one documented straggler: code-block's tokenizer)", () => {
+    expect(
+      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+render(\/|$)/),
+    ).toEqual([
+      `${join("objects", "code-block", "def.tsx")} -> ../../render/code-tokenizer`,
+    ]);
+  });
+
+  test("render/ does not import from editor/ (runtime or type)", () => {
+    expect(
+      violations(join(SRC_ROOT, "render"), /^(\.\.\/)+editor(\/|$)/),
+    ).toEqual([]);
+  });
+
+  test("ui/ does not import objects/, render/, interaction/, or editor/ (tokens/model imports are fine)", () => {
     expect(
       violations(
         join(SRC_ROOT, "ui"),
         /^(\.\.\/)+(objects|render|interaction|editor)(\/|$)/,
+      ),
+    ).toEqual([]);
+  });
+
+  test("tokens/ is layer 0: no runtime src imports except the documented model/geometry re-export", () => {
+    // Type-only model/schema imports are allowed (theme.ts needs the style
+    // unions); the ONLY runtime edge is figjam-tokens re-exporting
+    // SECTION_CAPTURE_OVERLAP_THRESHOLD from model/geometry.
+    expect(
+      violations(join(SRC_ROOT, "tokens"), /^\.\.\//, { skipTypeOnly: true }),
+    ).toEqual([`${join("tokens", "figjam-tokens.ts")} -> ../model/geometry`]);
+  });
+
+  test("nothing outside editor/ imports editor/ (root index.ts is the composition entry and is exempt)", () => {
+    expect(
+      violationsAcrossTree(
+        /(^|\/)editor\//,
+        (relPath) => relPath.split("/")[0] === "editor" || relPath === "index.ts",
+      ),
+    ).toEqual([]);
+  });
+
+  test("vendor/ does not import first-party src code (MPL boundary)", () => {
+    expect(
+      violations(
+        join(SRC_ROOT, "vendor"),
+        /^(\.\.\/)+(tokens|model|objects|interaction|routing|render|editor|ui|fixtures)(\/|$)/,
       ),
     ).toEqual([]);
   });
