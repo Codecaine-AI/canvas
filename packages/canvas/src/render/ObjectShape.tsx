@@ -32,9 +32,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
 }
 
-type RenderObjectShape = NonNullable<InteractiveCanvasObject["style"]>["shape"] | "label";
+type LegacyObjectShapeVariant = NonNullable<NonNullable<InteractiveCanvasObject["style"]>["shape"]>;
 
-function classNameForObjectShape(shape: RenderObjectShape): string {
+function classNameForObjectShape(shape: LegacyObjectShapeVariant): string {
   const base = "interactive-canvas-object";
   switch (shape) {
     case "diamond":
@@ -66,19 +66,17 @@ function classNameForObjectShape(shape: RenderObjectShape): string {
     case "page-corner":
     case "icon":
       return `${base} interactive-canvas-object-${shape}`;
-    case "label":
-      return `${base} interactive-canvas-object-text-shape`;
     default:
       return base;
   }
 }
 
 export function ObjectShape(props: ObjectRenderProps) {
-  // Two-tier registry dispatch (RESTRUCTURE.md step 4): kinds converted to
-  // ObjectDefs (pilot: section, sticky/"note", code-block, process/
-  // "rounded-rect", ellipse, person) render through their def. Everything
-  // else falls through to the legacy branches below until the mass
-  // conversion completes.
+  // Two-tier registry dispatch (RESTRUCTURE.md step 4): converted kinds render
+  // through ObjectDefs (specials by type: section/container; specials/shapes
+  // by render shape: text/"label", sticky/"note", code-block, process/
+  // "rounded-rect", ellipse, person). Everything else falls through to the
+  // legacy branches below until the mass conversion completes.
   const def = objectDefFor(props.object);
   if (def) {
     const DefRender = def.render;
@@ -101,11 +99,7 @@ function LegacyObjectShape({
   onObjectSelect,
   onObjectContextMenu,
 }: ObjectRenderProps) {
-  // W2 — standalone text objects render as a bold, borderless FigJam label
-  // rather than the generic rounded-rect chrome (no explicit style.shape
-  // value existed for "text" before this wave; it silently fell through to
-  // rounded-rect, which is what the W2 brief asked to restyle).
-  const shape = object.style?.shape ?? (object.type === "text" ? "label" : "rounded-rect");
+  const shape = object.style?.shape ?? "rounded-rect";
   const className = classNameForObjectShape(shape);
   const colors = resolveObjectColors(object.style);
   const hasExplicitColor = Boolean(

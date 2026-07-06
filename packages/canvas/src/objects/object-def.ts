@@ -10,8 +10,10 @@ import type {
   InteractiveCanvasTone,
 } from "../model/schema";
 import { codeBlockDef } from "./code-block/def";
+import { containerDef } from "./container/def";
 import { sectionDef } from "./section/def";
 import { stickyDef } from "./sticky/def";
+import { textDef } from "./text/def";
 import { ellipseDef } from "./shapes/ellipse";
 import { personDef } from "./shapes/person";
 import { processDef } from "./shapes/process";
@@ -92,8 +94,8 @@ export interface ToolbarSpec {
 export interface ObjectDefaults {
   geometry: CanvasGeometry;
   tone: InteractiveCanvasTone;
-  /** `style.shape` value canvas.addObject should stamp on new objects of this kind. */
-  shape?: NonNullable<CanvasObjectStyle["shape"]>;
+  /** Effective render shape; usually also the `style.shape` value step 6 will stamp. */
+  shape?: RenderObjectShape;
   /** Human-readable type label (context menu, inspector, a11y). */
   label: string;
 }
@@ -135,16 +137,19 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  * through ObjectShape's legacy branches via the `undefined` fallback).
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
- *  - `section` is dispatched on `object.type` (before style.shape is read);
+ *  - `section` and `container` are dispatched on `object.type` (before
+ *    style.shape is read);
  *  - everything else is dispatched on the effective render shape, so e.g. a
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
  */
 const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {
+  container: containerDef,
   section: sectionDef,
 };
 
 const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
+  label: textDef,
   note: stickyDef,
   "code-block": codeBlockDef,
   "rounded-rect": processDef,
@@ -160,6 +165,8 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   processDef,
   ellipseDef,
   personDef,
+  containerDef,
+  textDef,
 ];
 
 export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undefined {

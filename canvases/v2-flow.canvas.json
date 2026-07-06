@@ -55,8 +55,8 @@
       "body": "Base Question Text:\n• Stakeholder inputted text of the question\n• Can be adapted based on conversation history\n\nResearch Objective\n• Defines what we want to understand about the interviewee from this question.\n• In relation to the overall objective",
       "parentId": null,
       "geometry": {
-        "x": 848.8733368634594,
-        "y": 1381.9691316031153,
+        "x": 854.6373227874894,
+        "y": 1381.965159239767,
         "width": 414,
         "height": 490.5
       },

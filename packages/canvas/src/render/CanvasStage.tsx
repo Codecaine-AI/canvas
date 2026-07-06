@@ -472,23 +472,6 @@ export function CanvasStage({
           font-weight: 700;
           color: #000000;
         }
-        /* W2 — standalone text/"label" objects: bold black FigJam label, no box. */
-        .interactive-canvas-object-text-shape {
-          border: none;
-          background: transparent !important;
-          box-shadow: none;
-          padding: 4px;
-        }
-        .interactive-canvas-object-text-shape .interactive-canvas-object-label {
-          font-weight: 700;
-          font-size: ${TEXT_SIZES_PX.boldLabel}px;
-          color: #000000;
-        }
-        .interactive-canvas-object-text-shape:hover,
-        .interactive-canvas-object-text-shape[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 3px;
-        }
         /* W2 — pill: true stadium shape, radius = height/2 (computed inline via CSS calc). */
         .interactive-canvas-object-pill {
           align-items: center;
