@@ -7,7 +7,6 @@ import {
   DOCUMENT_GEOMETRY,
   DOCUMENT_STACK_GEOMETRY,
   FOLDER_GEOMETRY,
-  PERSON_ICON_COLORS,
 } from "./figjam-tokens";
 
 function documentWavyPath(x = 0, y = 0, width = 100, height = 100): string {
@@ -29,19 +28,22 @@ function documentWavyPath(x = 0, y = 0, width = 100, height = 100): string {
 
 /**
  * Inline SVG background layer for silhouettes CSS clip-path can't express
- * (person's head+shoulders, database's cylinder, chat's tail, chip-icon's
- * CPU pins). Rendered absolutely-positioned behind the label/body content.
+ * (database's cylinder, chat's tail, chip-icon's CPU pins). Rendered
+ * absolutely-positioned behind the label/body content.
  * viewBox tracks the object's own aspect ratio (0 0 100 100 scaled non-
  * uniformly via preserveAspectRatio="none") so the silhouette always fills
  * its box regardless of the object's actual width/height.
  *
- * W2 restyle: chat/person/chip-icon are FILLED, SATURATED, borderless icon
+ * W2 restyle: chat/chip-icon are FILLED, SATURATED, borderless icon
  * glyphs per the V2 Flow reference (figjam-tokens.ts CHAT_ICON_COLORS /
- * PERSON_ICON_COLORS / CHIP_ICON_COLORS) — an explicit paletteToken/tone on
+ * CHIP_ICON_COLORS) — an explicit paletteToken/tone on
  * the object still overrides these defaults (falls back to `colors`, the
  * resolveObjectColors result) so the semantic-palette system keeps working
  * for anyone who deliberately recolors one of these. `database` keeps the
  * older tone-driven pastel-pair styling (not named in the W2 restyle scope).
+ *
+ * (`person`, the third W2-restyled silhouette, moved into its registry def —
+ * see objects/shapes/person.tsx.)
  */
 export function ShapeSilhouette({
   shape,
@@ -49,7 +51,7 @@ export function ShapeSilhouette({
   hasExplicitColor,
   strokeWidth,
 }: {
-  shape: "person" | "database" | "chat" | "chip-icon" | "document" | "folder" | "document-stack" | "cylinder-horizontal";
+  shape: "database" | "chat" | "chip-icon" | "document" | "folder" | "document-stack" | "cylinder-horizontal";
   colors: CanvasToneStyle;
   /** True when the object has an explicit paletteToken/tone — overrides the shape's default fixed fill. */
   hasExplicitColor?: boolean;
@@ -65,29 +67,6 @@ export function ShapeSilhouette({
     pointerEvents: "none" as const,
   };
   const silhouetteStrokeWidth = strokeWidth ?? 2;
-
-  if (shape === "person") {
-    const fill = hasExplicitColor ? colors.fill : PERSON_ICON_COLORS.fill;
-    const stroke = hasExplicitColor ? colors.border : PERSON_ICON_COLORS.stroke;
-    return (
-      <svg
-        style={common}
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        data-canvas-shape-silhouette="person"
-      >
-        {/* Rounded-shoulders body first (so the head overlaps its top edge). */}
-        <path
-          d="M 50 52 C 20 52 10 68 8 100 L 92 100 C 90 68 80 52 50 52 Z"
-          fill={fill}
-          stroke={stroke}
-          strokeWidth={2}
-        />
-        <circle cx="50" cy="30" r="22" fill={fill} stroke={stroke} strokeWidth={2} />
-      </svg>
-    );
-  }
 
   if (shape === "database") {
     return (

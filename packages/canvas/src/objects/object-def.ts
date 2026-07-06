@@ -9,6 +9,12 @@ import type {
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
 } from "../model/schema";
+import { codeBlockDef } from "./code-block/def";
+import { sectionDef } from "./section/def";
+import { stickyDef } from "./sticky/def";
+import { ellipseDef } from "./shapes/ellipse";
+import { personDef } from "./shapes/person";
+import { processDef } from "./shapes/process";
 
 /**
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
@@ -134,12 +140,27 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
  */
-const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {};
+const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {
+  section: sectionDef,
+};
 
-const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {};
+const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
+  note: stickyDef,
+  "code-block": codeBlockDef,
+  "rounded-rect": processDef,
+  ellipse: ellipseDef,
+  person: personDef,
+};
 
 /** Registered defs in stylesheet order (their `css` is appended in this order). */
-export const OBJECT_DEFS: readonly ObjectDef[] = [];
+export const OBJECT_DEFS: readonly ObjectDef[] = [
+  sectionDef,
+  stickyDef,
+  codeBlockDef,
+  processDef,
+  ellipseDef,
+  personDef,
+];
 
 export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undefined {
   return DEFS_BY_TYPE[object.type] ?? DEFS_BY_RENDER_SHAPE[renderShapeFor(object)];

@@ -33,7 +33,6 @@ import {
   CANVAS_BG,
   CANVAS_FONT_FAMILY,
   CHROME,
-  CODE_BLOCK,
   CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO,
   CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
   DOCUMENT_STACK_GEOMETRY,
@@ -42,11 +41,10 @@ import {
   MANUAL_INPUT_GEOMETRY,
   OFF_PAGE_CONNECTOR_GEOMETRY,
   PREDEFINED_PROCESS_GEOMETRY,
-  SECTION_GEOMETRY,
-  STICKY_COLORS,
   STICKY_GEOMETRY,
   TEXT_SIZES_PX,
 } from "./figjam-tokens";
+import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
   InteractiveCanvasDocument,
@@ -331,22 +329,12 @@ export function CanvasStage({
           clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
           padding: 18px 28px;
         }
-        /*
-         * W2 — sticky is the ONLY object type with a shadow (per spec, every
-         * other shape is flat/shadowless). Square corners (STICKY_GEOMETRY.
-         * cornerRadiusPx = 0), the measured down-biased shadow, and
-         * body/author typography all live here.
-         */
-        .interactive-canvas-object-note {
-          justify-content: flex-start;
-          border-radius: ${STICKY_GEOMETRY.cornerRadiusPx}px;
-          box-shadow: ${STICKY_GEOMETRY.shadow};
-        }
-        .interactive-canvas-object-note[data-changed="true"] {
-          box-shadow:
-            0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent),
-            ${STICKY_GEOMETRY.shadow};
-        }
+        /* Sticky rules live on the sticky def (objects/sticky/def.tsx) — except
+           this one: the sticky body span carries BOTH .interactive-canvas-object-body
+           and .interactive-canvas-sticky-body (same specificity), and this rule's
+           non-!important declarations must keep LOSING to .interactive-canvas-object-body
+           below by source order. It cannot move into the appended def CSS without
+           flipping the color/font-size/line-height winners. */
         .interactive-canvas-sticky-body {
           display: flex !important;
           flex-direction: column;
@@ -354,22 +342,6 @@ export function CanvasStage({
           color: ${STICKY_GEOMETRY.bodyTextColor};
           font-size: ${STICKY_GEOMETRY.bodyFontSizePx}px;
           line-height: ${STICKY_GEOMETRY.bodyLineHeightPx}px;
-        }
-        .interactive-canvas-sticky-line[data-bullet="true"] {
-          position: relative;
-          padding-left: 1em;
-        }
-        .interactive-canvas-sticky-line[data-bullet="true"]::before {
-          content: "•";
-          position: absolute;
-          left: 0;
-        }
-        .interactive-canvas-sticky-author {
-          position: absolute;
-          left: ${STICKY_GEOMETRY.author.insetLeftPx}px;
-          bottom: ${STICKY_GEOMETRY.author.baselineFromBottomPx - STICKY_GEOMETRY.author.fontSizePx}px;
-          font-size: ${STICKY_GEOMETRY.author.fontSizePx}px;
-          color: ${STICKY_GEOMETRY.author.color};
         }
         .interactive-canvas-object-marker {
           align-items: center;
@@ -385,7 +357,6 @@ export function CanvasStage({
         .interactive-canvas-object-folder,
         .interactive-canvas-object-document-stack,
         .interactive-canvas-object-cylinder-horizontal,
-        .interactive-canvas-object-ellipse,
         .interactive-canvas-object-triangle,
         .interactive-canvas-object-parallelogram,
         .interactive-canvas-object-pentagon,
@@ -456,7 +427,6 @@ export function CanvasStage({
           top: 15%;
           height: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
         }
-        .interactive-canvas-object-person,
         .interactive-canvas-object-database,
         .interactive-canvas-object-chat,
         .interactive-canvas-object-chip-icon {
@@ -469,7 +439,6 @@ export function CanvasStage({
           box-shadow: none;
           padding: 8px;
         }
-        .interactive-canvas-object-person,
         .interactive-canvas-object-chip-icon {
           align-items: center;
           justify-content: flex-end;
@@ -488,8 +457,6 @@ export function CanvasStage({
           text-align: center;
           padding-bottom: 10%;
         }
-        .interactive-canvas-object-person:hover,
-        .interactive-canvas-object-person[data-selected="true"],
         .interactive-canvas-object-database:hover,
         .interactive-canvas-object-database[data-selected="true"],
         .interactive-canvas-object-chat:hover,
@@ -563,75 +530,6 @@ export function CanvasStage({
           background: currentColor;
           opacity: 0.6;
         }
-        /* W2 — code-block: Dracula theme, mono font, right-aligned line-number gutter. */
-        .interactive-canvas-object-code-block {
-          align-items: stretch;
-          justify-content: flex-start;
-          background: ${CODE_BLOCK.bg} !important;
-          border: none;
-          border-radius: ${CODE_BLOCK.cornerRadiusPx}px;
-          padding: ${CODE_BLOCK.paddingTopPx}px 16px 16px 0;
-          box-shadow: none;
-        }
-        .interactive-canvas-code-block-body {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          overflow: hidden;
-          font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-          font-size: 13px;
-          line-height: 1.5;
-          color: ${CODE_BLOCK.syntax.fg};
-        }
-        .interactive-canvas-code-block-line {
-          display: flex;
-          gap: 12px;
-          white-space: pre;
-        }
-        .interactive-canvas-code-block-line-number {
-          flex: 0 0 auto;
-          width: 24px;
-          text-align: right;
-          color: ${CODE_BLOCK.gutter.lineNumberColor};
-          user-select: none;
-        }
-        .interactive-canvas-code-block-line-code {
-          flex: 1 1 auto;
-          min-width: 0;
-        }
-        /* W2 — section: tint fill, subtle border (= chip fill), no shadow, no
-           button-style chrome; the floating title chip is a separate
-           absolutely-positioned child. */
-        .interactive-canvas-object-section {
-          border-style: solid;
-          border-width: ${SECTION_GEOMETRY.borderWidthPx}px;
-          border-radius: ${SECTION_GEOMETRY.cornerRadiusPx}px;
-          padding: 0;
-          box-shadow: none;
-          align-items: stretch;
-          justify-content: flex-start;
-        }
-        .interactive-canvas-object-section:hover,
-        .interactive-canvas-object-section[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 2px;
-        }
-        .interactive-canvas-section-title-chip {
-          position: absolute;
-          left: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
-          top: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
-          height: ${SECTION_GEOMETRY.titleChip.heightPx}px;
-          display: flex;
-          align-items: center;
-          border-style: solid;
-          border-width: ${SECTION_GEOMETRY.titleChip.borderWidthPx}px;
-          border-radius: 6px;
-          padding: 0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px;
-          font-size: ${SECTION_GEOMETRY.titleChip.fontSizePx}px;
-          font-weight: ${SECTION_GEOMETRY.titleChip.fontWeight};
-          color: ${SECTION_GEOMETRY.titleChip.textColor};
-          white-space: nowrap;
-        }
         .interactive-canvas-object-label {
           position: relative;
           z-index: 1;
@@ -682,7 +580,14 @@ export function CanvasStage({
           opacity: 0;
           pointer-events: none;
         }
-      `}</style>
+      ${
+        /* Two-tier registry (RESTRUCTURE.md step 4): per-kind CSS lives on the
+           registered ObjectDefs and is appended after the legacy block above.
+           Moved rules only ever ADD specificity over the base rules they
+           override (same relative order: base first, per-kind after), so
+           relocating them to the tail changes no cascade outcome. */
+        OBJECT_DEFS_CSS
+      }`}</style>
       <div
         className="interactive-canvas-world-layer"
         style={{

@@ -1,41 +1,29 @@
 "use client";
 
-import type { MouseEvent as ReactMouseEvent } from "react";
-import type { CanvasBounds } from "../model/geometry";
-import { resolveSectionColors } from "./theme";
-import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "./figjam-tokens";
-import type { InteractiveCanvasObject } from "../model/schema";
+import { resolveSectionColors } from "../../render/theme";
+import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "../../render/figjam-tokens";
+import type { ObjectDef, ObjectRenderProps } from "../object-def";
 
 /**
- * FigJam section render (W2) — a large tinted backdrop with a floating
- * title chip in the top-left corner, per SECTION_GEOMETRY. Deliberately NOT
- * built on the generic button/label/body layout the other shapes share:
- * sections have no centered label, no shadow, and their "border" is
+ * FigJam section (W2) — a large tinted backdrop with a floating title chip
+ * in the top-left corner, per SECTION_GEOMETRY. Deliberately NOT built on
+ * the generic button/label/body chrome the shape family shares: sections
+ * have no centered label, no shadow, no edge ports, and their "border" is
  * literally the title chip's fill color (per spec, border = chip fill).
+ *
+ * `hideLabel` maps to hiding the title CHIP — the chip IS the section's
+ * visible text, edited in place via the title-chip label editor.
  */
-export function SectionShape({
+function SectionObjectView({
   object,
   selected,
   dropTarget,
   bounds,
   editable,
-  hideTitle,
+  hideLabel,
   onObjectSelect,
   onObjectContextMenu,
-}: {
-  object: InteractiveCanvasObject;
-  selected: boolean;
-  dropTarget?: boolean;
-  bounds: CanvasBounds;
-  editable?: boolean;
-  hideTitle?: boolean;
-  onObjectSelect?: (objectId: string) => void;
-  onObjectContextMenu?: (
-    event: ReactMouseEvent<HTMLElement>,
-    object: InteractiveCanvasObject,
-    bounds: CanvasBounds,
-  ) => void;
-}) {
+}: ObjectRenderProps) {
   const family = resolveSectionColors(object.tint);
   const borderColor = object.style?.stroke ?? family.chipBorder ?? "transparent";
   const borderStyle = object.style?.strokeStyle ?? "solid";
@@ -110,7 +98,7 @@ export function SectionShape({
           />
         </svg>
       ) : null}
-      {!hideTitle && (
+      {!hideLabel && (
         <span
           className="interactive-canvas-section-title-chip"
           data-canvas-section-title-chip={object.id}
@@ -125,3 +113,58 @@ export function SectionShape({
     </button>
   );
 }
+
+export const sectionDef: ObjectDef = {
+  kind: "section",
+  render: SectionObjectView,
+  css: `
+        /* W2 — section: tint fill, subtle border (= chip fill), no shadow, no
+           button-style chrome; the floating title chip is a separate
+           absolutely-positioned child. */
+        .interactive-canvas-object-section {
+          border-style: solid;
+          border-width: ${SECTION_GEOMETRY.borderWidthPx}px;
+          border-radius: ${SECTION_GEOMETRY.cornerRadiusPx}px;
+          padding: 0;
+          box-shadow: none;
+          align-items: stretch;
+          justify-content: flex-start;
+        }
+        .interactive-canvas-object-section:hover,
+        .interactive-canvas-object-section[data-selected="true"] {
+          outline: 2px solid var(--primary);
+          outline-offset: 2px;
+        }
+        .interactive-canvas-section-title-chip {
+          position: absolute;
+          left: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
+          top: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
+          height: ${SECTION_GEOMETRY.titleChip.heightPx}px;
+          display: flex;
+          align-items: center;
+          border-style: solid;
+          border-width: ${SECTION_GEOMETRY.titleChip.borderWidthPx}px;
+          border-radius: 6px;
+          padding: 0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px;
+          font-size: ${SECTION_GEOMETRY.titleChip.fontSizePx}px;
+          font-weight: ${SECTION_GEOMETRY.titleChip.fontWeight};
+          color: ${SECTION_GEOMETRY.titleChip.textColor};
+          white-space: nowrap;
+        }
+`,
+  defaults: {
+    // W2 — sections default large (they're meant to wrap other objects, so a
+    // container-like footprint reads better than a shape-sized default).
+    geometry: { x: 80, y: 80, width: 480, height: 360 },
+    tone: "neutral",
+    shape: "section",
+    label: "Section",
+  },
+  // Sections get corner-only handles; locked sections refuse resize/drag.
+  handles: "corners",
+  hitTest: "solid",
+  // Section membership is geometric and ephemeral (sectionCaptureMembers,
+  // ≥60% overlap at drag start, recursive) — never persisted.
+  dragCapture: "geometric-overlap",
+  labelEditing: { target: "section-title" },
+};

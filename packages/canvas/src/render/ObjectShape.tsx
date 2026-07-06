@@ -1,7 +1,7 @@
 "use client";
 
-import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
-import type { CanvasBounds, CanvasPoint } from "../model/geometry";
+import type { CSSProperties } from "react";
+import type { CanvasPoint } from "../model/geometry";
 import {
   arrowShapePoints,
   chevronPoints,
@@ -16,43 +16,17 @@ import {
   trapezoidPoints,
   trianglePoints,
 } from "../routing/connection-overlay";
-import type { Anchor } from "../routing/routing";
 import { resolveObjectColors, resolveObjectStrokeWidth } from "./theme";
-import { tokenizeCodeBlock } from "./code-tokenizer";
 import { IconShapeBody } from "./IconShapeBody";
 import { ShapeSilhouette } from "./ShapeSilhouette";
-import { SectionShape } from "./SectionShape";
 import {
   ARROW_SHAPE_GEOMETRY,
   CHEVRON_GEOMETRY,
   PREDEFINED_PROCESS_GEOMETRY,
 } from "./figjam-tokens";
+import { objectDefFor, type ObjectRenderProps } from "../objects/object-def";
+import { EdgePorts, objectStyle } from "../objects/object-chrome";
 import type { InteractiveCanvasObject } from "../model/schema";
-
-const EDGE_PORT_ANCHORS: Anchor[] = ["top", "right", "bottom", "left"];
-
-function objectStyle(object: InteractiveCanvasObject): CSSProperties {
-  const colors = resolveObjectColors(object.style);
-  const style: CSSProperties = {
-    left: `${object.geometry.x}px`,
-    top: `${object.geometry.y}px`,
-    width: `${object.geometry.width}px`,
-    height: `${object.geometry.height}px`,
-    background: colors.fill,
-    borderColor: colors.border,
-    color: colors.text,
-    // W4 z-layering (see the connector <svg> comment in CanvasStage): non-
-    // section shapes paint above the connector layer (z 1); sections render
-    // via SectionShape (explicit z 0) below it.
-    zIndex: 2,
-  };
-  // W4 — explicit stroke gets FigJam's universal 4px chrome (or the object's
-  // own strokeWidth); tone/token-only objects keep the legacy 2px CSS border.
-  if (object.style?.stroke || object.style?.strokeWidth) {
-    style.borderWidth = `${resolveObjectStrokeWidth(object.style)}px`;
-  }
-  return style;
-}
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
@@ -65,17 +39,13 @@ function classNameForObjectShape(shape: RenderObjectShape): string {
   switch (shape) {
     case "diamond":
     case "marker":
-    case "note":
     case "document":
-    case "person":
     case "database":
     case "chat":
     case "chip-icon":
     case "pill":
     case "arrow-shape":
     case "predefined-process":
-    case "code-block":
-    case "ellipse":
     case "triangle":
     case "parallelogram":
     case "pentagon":
@@ -103,7 +73,21 @@ function classNameForObjectShape(shape: RenderObjectShape): string {
   }
 }
 
-export function ObjectShape({
+export function ObjectShape(props: ObjectRenderProps) {
+  // Two-tier registry dispatch (RESTRUCTURE.md step 4): kinds converted to
+  // ObjectDefs (pilot: section, sticky/"note", code-block, process/
+  // "rounded-rect", ellipse, person) render through their def. Everything
+  // else falls through to the legacy branches below until the mass
+  // conversion completes.
+  const def = objectDefFor(props.object);
+  if (def) {
+    const DefRender = def.render;
+    return <DefRender {...props} />;
+  }
+  return <LegacyObjectShape {...props} />;
+}
+
+function LegacyObjectShape({
   object,
   selected,
   changed,
@@ -116,42 +100,7 @@ export function ObjectShape({
   hideLabel,
   onObjectSelect,
   onObjectContextMenu,
-}: {
-  object: InteractiveCanvasObject;
-  selected: boolean;
-  changed: boolean;
-  dropTarget?: boolean;
-  compact?: boolean;
-  bounds: CanvasBounds;
-  /** Shows the grab-cursor affordance; defaults to true when any select/pointer handler is wired. */
-  editable?: boolean;
-  /** Renders quick-connect edge ports — only true in the interactive editor. */
-  showPorts?: boolean;
-  /** Current viewport zoom — used to counter-scale edge ports to a constant screen size. */
-  zoom?: number;
-  /** True while this object's label is being edited inline (4.2.1) — hides the static label span. */
-  hideLabel?: boolean;
-  onObjectSelect?: (objectId: string) => void;
-  onObjectContextMenu?: (
-    event: ReactMouseEvent<HTMLElement>,
-    object: InteractiveCanvasObject,
-    bounds: CanvasBounds,
-  ) => void;
-}) {
-  if (object.type === "section") {
-    return (
-      <SectionShape
-        object={object}
-        selected={selected}
-        dropTarget={dropTarget}
-        bounds={bounds}
-        editable={editable}
-        hideTitle={hideLabel}
-        onObjectSelect={onObjectSelect}
-        onObjectContextMenu={onObjectContextMenu}
-      />
-    );
-  }
+}: ObjectRenderProps) {
   // W2 — standalone text objects render as a bold, borderless FigJam label
   // rather than the generic rounded-rect chrome (no explicit style.shape
   // value existed for "text" before this wave; it silently fell through to
@@ -163,13 +112,13 @@ export function ObjectShape({
     object.style?.paletteToken || object.style?.tone || object.style?.fill || object.style?.stroke,
   );
   const shapeStrokeWidth = resolveObjectStrokeWidth(object.style);
-  // person/chat/chip-icon lean on the SVG silhouette for the shape itself, so
-  // body copy (and, below a compact height, even the label) is dropped to
-  // keep the silhouette legible rather than overrun with text. Their label
+  // chat/chip-icon lean on the SVG silhouette for the shape itself, so body
+  // copy (and, below a compact height, even the label) is dropped to keep
+  // the silhouette legible rather than overrun with text. Their label
   // renders BELOW the icon (bold black), not overlaid on it (W2 restyle).
-  const isCompactSilhouette = (shape === "person" || shape === "chat") && object.geometry.height < 100;
+  // (person, the third member of this family, now renders via its def.)
+  const isCompactSilhouette = shape === "chat" && object.geometry.height < 100;
   const svgShape =
-    shape === "person" ||
     shape === "database" ||
     shape === "chat" ||
     shape === "chip-icon" ||
@@ -179,7 +128,7 @@ export function ObjectShape({
     shape === "cylinder-horizontal"
       ? shape
       : null;
-  const labelBelowIcon = shape === "person" || shape === "chat" || shape === "chip-icon";
+  const labelBelowIcon = shape === "chat" || shape === "chip-icon";
   // W5/Wave C — the `icon` type (Advanced-tier glyph family) renders its own
   // self-contained glyph+label body via IconShapeBody (bbox outline tier, no
   // silhouette/polygon overlay) rather than composing through the
@@ -224,7 +173,9 @@ export function ObjectShape({
                         : shape === "hexagon"
                           ? pointsAttribute(hexagonPoints(localShapeBounds))
                           : null;
-  const ellipseSilhouette = shape === "ellipse" || shape === "or-junction" || shape === "summing-junction";
+  // (plain `ellipse` now renders via its def; the junction variants keep the
+  // shared ellipse silhouette below for their inscribed cross/X strokes.)
+  const ellipseSilhouette = shape === "or-junction" || shape === "summing-junction";
   const labelStyle: CSSProperties | undefined =
     shape === "arrow-shape"
       ? {
@@ -245,14 +196,6 @@ export function ObjectShape({
   // W2 — predefined-process: rect with two inner vertical bars inset from
   // each edge (PREDEFINED_PROCESS_GEOMETRY.barInsetRatio of total width).
   const barInsetPct = PREDEFINED_PROCESS_GEOMETRY.barInsetRatio * 100;
-
-  // W2 — code-block: tokenized per-line rendering with an optional
-  // right-aligned line-number gutter.
-  const codeLines = shape === "code-block" ? tokenizeCodeBlock(object.body ?? "", object.language) : null;
-
-  // W2 — sticky upgrade: author chip + "- " bullet rendering in the body text.
-  const isSticky = shape === "note";
-  const bodyLines = isSticky ? (object.body ?? "").split("\n") : null;
 
   return (
     <button
@@ -394,62 +337,15 @@ export function ObjectShape({
           />
         </>
       )}
-      {shape === "code-block" && codeLines && (
-        <div className="interactive-canvas-code-block-body">
-          {codeLines.map((line, lineIndex) => (
-            // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
-            <div key={lineIndex} className="interactive-canvas-code-block-line">
-              <span className="interactive-canvas-code-block-line-number">{lineIndex + 1}</span>
-              <span className="interactive-canvas-code-block-line-code">
-                {line.map((token, tokenIndex) => (
-                  // eslint-disable-next-line react/no-array-index-key -- tokens are position-stable within a single render
-                  <span key={tokenIndex} style={{ color: token.color }}>
-                    {token.text}
-                  </span>
-                ))}
-                {line.length === 0 && " "}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {/* W4 — code-blocks render body-only (FigJam code blocks carry no label chrome). */}
-      {!hideLabel &&
-        !(isCompactSilhouette && shape === "person") &&
-        !labelBelowIcon &&
-        shape !== "code-block" &&
-        !isIconShape &&
-        !hidesVisibleText && (
+      {!hideLabel && !labelBelowIcon && !isIconShape && !hidesVisibleText && (
         <span className="interactive-canvas-object-label" style={labelStyle}>
           {object.label}
         </span>
       )}
-      {isSticky && bodyLines && (
-        <span className="interactive-canvas-object-body interactive-canvas-sticky-body">
-          {bodyLines.map((line, index) => {
-            const isBullet = line.startsWith("- ");
-            return (
-              // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
-              <span key={index} className="interactive-canvas-sticky-line" data-bullet={isBullet ? "true" : undefined}>
-                {isBullet ? line.slice(2) : line}
-              </span>
-            );
-          })}
-        </span>
-      )}
-      {object.body &&
-        !compact &&
-        !isCompactSilhouette &&
-        shape !== "code-block" &&
-        !isIconShape &&
-        !isSticky &&
-        !hidesVisibleText && (
+      {object.body && !compact && !isCompactSilhouette && !isIconShape && !hidesVisibleText && (
         <span className="interactive-canvas-object-body">{object.body}</span>
       )}
-      {isSticky && object.author && (
-        <span className="interactive-canvas-sticky-author">{object.author}</span>
-      )}
-      {labelBelowIcon && !hideLabel && !(isCompactSilhouette && shape === "person") && (
+      {labelBelowIcon && !hideLabel && (
         <span className="interactive-canvas-object-label interactive-canvas-label-below-icon">
           {object.label}
         </span>
@@ -468,35 +364,7 @@ export function ObjectShape({
           hideLabel={hideLabel}
         />
       )}
-      {showPorts &&
-        EDGE_PORT_ANCHORS.map((anchor) => {
-          const { fx, fy } = PORT_POSITIONS[anchor];
-          return (
-            <span
-              key={anchor}
-              className="interactive-canvas-edge-port"
-              data-canvas-port={anchor}
-              data-canvas-object-id={object.id}
-              style={{
-                position: "absolute",
-                left: `${fx * 100}%`,
-                top: `${fy * 100}%`,
-                // Counter-scale against the world layer's zoom transform so the
-                // port dot stays a constant screen size regardless of zoom.
-                transform: `translate(-50%, -50%) scale(${1 / zoom})`,
-              }}
-              onClick={(event) => event.stopPropagation()}
-            />
-          );
-        })}
+      {showPorts && <EdgePorts object={object} zoom={zoom} />}
     </button>
   );
 }
-
-/** Edge-port fractional offsets within an object's box, matching HANDLE_POSITIONS' side midpoints. */
-const PORT_POSITIONS: Record<Anchor, { fx: number; fy: number }> = {
-  top: { fx: 0.5, fy: 0 },
-  right: { fx: 1, fy: 0.5 },
-  bottom: { fx: 0.5, fy: 1 },
-  left: { fx: 0, fy: 0.5 },
-};
