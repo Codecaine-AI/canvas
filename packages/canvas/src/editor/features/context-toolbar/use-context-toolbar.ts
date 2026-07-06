@@ -11,11 +11,11 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import type { ContextToolbarActionId } from "../../components/ContextToolbar";
+import type { ContextToolbarActionId } from "./ContextToolbar";
 import {
   positionContextToolbar,
   type PositionContextToolbarResult,
-} from "../../components/context-toolbar-position";
+} from "./position";
 import type { CanvasAction, CanvasSelection } from "../../../model/actions";
 import { boundsForGeometries, type CanvasBounds } from "../../../model/geometry";
 import {

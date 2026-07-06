@@ -14,7 +14,7 @@ import { useEffect, useId, useSyncExternalStore } from "react";
  *
  * Standalone (W2-chrome): no floating-ui anchoring here — callers position
  * this relative to their own trigger via a wrapping `position: relative`
- * element (see FigJamDock.tsx for the pattern). W3 may swap this for a
+ * element (see CanvasDock.tsx for the pattern). W3 may swap this for a
  * floating-ui-anchored version if absolute-positioned tooltips clip against
  * dock edges in the real editor; the prop contract below is designed to
  * survive that swap unchanged.

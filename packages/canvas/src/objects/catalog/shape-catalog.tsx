@@ -12,7 +12,7 @@
  * docs/10-system-design/20-figjam-parity/doc.json — exactly 3 sections
  * (Basic / Flowchart / Advanced), no Recents/Connections/"Other libraries"
  * (those were placeholders from before the real W5 shape vocabulary landed;
- * connectors are a dock-only tool — see FigJamDock.tsx's `"connector"`
+ * connectors are a dock-only tool — see CanvasDock.tsx's `"connector"`
  * ToolId — not a Shapes-panel concept). `objectType` now maps to the REAL
  * `InteractiveCanvasObjectType` from ../model/schema (all 19 W5 native types
  * + "icon" are live), so every entry in this catalog is enabled — there is

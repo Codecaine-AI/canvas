@@ -1,6 +1,6 @@
 "use client";
 
-import { ContextToolbar } from "../../components/ContextToolbar";
+import { ContextToolbar } from "./ContextToolbar";
 import type { CanvasAction } from "../../../model/actions";
 import { CONNECTOR_DEFAULT_COLOR } from "../../../tokens/figjam-tokens";
 import { paletteTokenStyle, resolveSectionColors } from "../../../tokens/theme";

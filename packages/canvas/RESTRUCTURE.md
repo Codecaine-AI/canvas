@@ -123,12 +123,13 @@ src/
   editor/                LAYER 4 — the app; nothing below imports it
     InteractiveCanvasEditor.tsx   composition root
     InteractiveCanvasViewer.tsx   read-only variant
-    components/            what shows up on the page: FigJamDock, ShapesPanel,
-                           ContextToolbar (dumb host), ZoomControls,
-                           context-toolbar-position
-    features/              the state + wiring behind them: context-toolbar/,
-                           label-editing/, context-menu/, drag-pipeline/,
-                           inspector/, top-bar/
+    components/            what shows up on the page: CanvasDock, ShapesPanel,
+                           ZoomControls
+    features/              the state + wiring behind them: context-toolbar/
+                           (the WHOLE selection-toolbar feature: pill view,
+                           position math, state hook, flyout host — amended
+                           2026-07-06), label-editing/, context-menu/,
+                           drag-pipeline/, inspector/, top-bar/
   routing/  vendor/  fixtures/   unchanged (MPL boundary untouched)
 ```
 

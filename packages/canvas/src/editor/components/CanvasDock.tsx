@@ -14,7 +14,7 @@ import {
 } from "../../ui/icons/dock-icons";
 
 /**
- * FigJamDock — the white rounded bottom dock.
+ * CanvasDock — the white rounded bottom dock.
  *
  * Geometry/behavior source: board-design-reference/analysis/figjam-bottom-dock-spec.md
  *   - Content-fit width, 48px logical height, 13px radius.
@@ -43,7 +43,7 @@ export type ToolId =
   | "section"
   | "sticky";
 
-export type FigJamDockProps = {
+export type CanvasDockProps = {
   /** Currently active tool, or null when no dock button should show the violet active state (modal rule). */
   activeTool?: ToolId | null;
   onSelectTool?: (tool: ToolId) => void;
@@ -196,13 +196,13 @@ function DockDivider() {
   );
 }
 
-function FigJamDockComponent({
+function CanvasDockComponent({
   activeTool = null,
   onSelectTool,
   onOpenShapes,
   disabled = false,
   className,
-}: FigJamDockProps) {
+}: CanvasDockProps) {
   return (
     <div
       role="toolbar"
@@ -249,7 +249,7 @@ function FigJamDockComponent({
   );
 }
 
-export const FigJamDock = memo(FigJamDockComponent);
+export const CanvasDock = memo(CanvasDockComponent);
 
 export const FIGJAM_DOCK_WIDTH_PX = DOCK_WIDTH_PX;
 export const FIGJAM_DOCK_HEIGHT_PX = DOCK_HEIGHT_PX;

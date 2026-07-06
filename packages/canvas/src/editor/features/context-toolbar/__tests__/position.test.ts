@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { positionContextToolbar } from "../context-toolbar-position";
+import { positionContextToolbar } from "../position";
 
 const VIEWPORT = { width: 1200, height: 800 };
 const TOOLBAR = { width: 300, height: 30 };

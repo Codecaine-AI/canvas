@@ -17,7 +17,7 @@ import type { InteractiveCanvasObjectType } from "../../model/schema";
  * footer: those were placeholder scaffolding from before the real W5 shape
  * vocabulary landed, and FigJam's own picker has no such concepts (connectors
  * are the dock's separate "connector" tool, not a Shapes-panel entry — see
- * FigJamDock.tsx's ToolId union).
+ * CanvasDock.tsx's ToolId union).
  *
  * Ground truth (fj-053-072): x~8-197 (width ~197-198px), full viewport
  * height, white bg, "Shapes" header + close (x), "Search shapes" input with

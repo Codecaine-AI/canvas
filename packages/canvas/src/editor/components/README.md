@@ -1,14 +1,16 @@
-# Editor components (FigJam-parity page chrome)
+# Editor components (FigJam-parity page furniture)
 
 Built per `board-design-reference/analysis/figjam-bottom-dock-spec.md`,
 `figjam-chrome-catalog.md`, `figjam-style-tokens.json`/`figjam-style-spec.md`.
-This directory holds what shows up on the page around the canvas — dock,
-panels, `ContextToolbar`, zoom pill, and their icons. It started as a
-standalone component library (W2-chrome, the old `src/chrome/`); since W3 it
-**is** wired in: `editor/InteractiveCanvasEditor.tsx` and `editor/features/*`
-compose these components directly (`FigJamDock`, `ShapesPanel`,
-`ZoomControls` from the editor root; `ContextToolbar` from
-`editor/features/context-toolbar/ContextToolbarLayer.tsx`).
+This directory holds what shows up on the page around the canvas — the
+bottom dock, the shapes panel, and the zoom pill. It started as a standalone
+component library (W2-chrome, the old `src/chrome/`); since W3 it **is**
+wired in: `editor/InteractiveCanvasEditor.tsx` composes these components
+directly.
+
+The floating selection toolbar is NOT here: the whole feature — pill view
+(`ContextToolbar.tsx`), positioning math (`position.ts`), state hook, and
+flyout host — lives together in `editor/features/context-toolbar/`.
 
 Per RESTRUCTURE.md's amended target tree, the old `chrome/` directory was
 dissolved into two homes:
@@ -26,9 +28,7 @@ The shape catalog (`shape-catalog.tsx`) and `ShapeSearchPopover` moved to
 
 | File | Component | Purpose |
 |---|---|---|
-| `FigJamDock.tsx` | `FigJamDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
-| `context-toolbar-position.ts` | `positionContextToolbar` | Pure clamp-to-viewport positioning function. |
-| `ContextToolbar.tsx` | `ContextToolbar`, `CONTEXT_TOOLBAR_REGISTRY` | Dark floating pill; dumb host over registry-resolved control specs (see below). |
+| `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
 | `ShapesPanel.tsx` | `ShapesPanel` | Full-height left-docked white Shapes sidebar (Panel B). |
 | `ZoomControls.tsx` | `ZoomControls` | Bottom-right zoom pill. |
 
@@ -41,7 +41,8 @@ glyphs), and `nucleo/` (reference SVG sources for the dock/toolbar glyphs).
 
 ## ContextToolbar is a dumb host
 
-Since the RESTRUCTURE.md step-5 toolbar migration, `ContextToolbar` no longer
+Since the RESTRUCTURE.md step-5 toolbar migration, `ContextToolbar`
+(`editor/features/context-toolbar/ContextToolbar.tsx`) no longer
 owns *what* controls appear for a given selection. Per-kind control lists and
 their flyout components live on the object defs in `src/objects/` as each
 def's `toolbar: ToolbarSpec` (see `objects/object-def.ts`):

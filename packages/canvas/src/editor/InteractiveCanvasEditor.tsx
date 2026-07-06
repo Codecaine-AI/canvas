@@ -18,7 +18,7 @@ import {
   type CanvasTool,
 } from "../model/actions";
 import { CanvasStage } from "../render/CanvasStage";
-import { FigJamDock, type ToolId } from "./components/FigJamDock";
+import { CanvasDock, type ToolId } from "./components/CanvasDock";
 import { ShapesPanel } from "./components/ShapesPanel";
 import { ZoomControls } from "./components/ZoomControls";
 import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
@@ -59,10 +59,10 @@ function selectedObjectIds(selection: CanvasSelection): string[] {
 }
 
 /**
- * Wave 3a — FigJamDock ↔ CanvasTool mapping.
+ * Wave 3a — CanvasDock ↔ CanvasTool mapping.
  *
  * The dock speaks a small fixed vocabulary of chrome-level tool ids
- * (ToolId, from editor/components/FigJamDock.tsx) while the reducer speaks the much
+ * (ToolId, from editor/components/CanvasDock.tsx) while the reducer speaks the much
  * larger CanvasTool vocabulary (one entry per placeable object type, plus
  * select/hand/annotation). Most dock ids map 1:1 to an editor tool; "shapes"
  * is special-cased (it opens ShapesPanel instead of arming a single type —
@@ -123,7 +123,7 @@ export function InteractiveCanvasEditor({
     openConnectionLabelEditor,
     openObjectLabelEditor,
   } = labelEditing;
-  // FigJamDock modal rule (Wave 3a scope item 1): while the Shapes panel is
+  // CanvasDock modal rule (Wave 3a scope item 1): while the Shapes panel is
   // open, the dock shows no active tool (activeTool=null) — the panel owns
   // placement-arming until a shape is picked or the panel is dismissed.
   const [shapesPanelOpen, setShapesPanelOpen] = useState(false);
@@ -335,7 +335,7 @@ export function InteractiveCanvasEditor({
       )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center px-4">
-        <FigJamDock
+        <CanvasDock
           className="pointer-events-auto"
           activeTool={shapesPanelOpen ? null : dockToolForCanvasTool(state.tool)}
           onSelectTool={handleDockSelectTool}

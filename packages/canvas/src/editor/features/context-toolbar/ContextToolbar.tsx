@@ -3,9 +3,9 @@
 import { memo, useState } from "react";
 // Type-only import: chrome must never import objects/ at runtime — the
 // dependency points the other way (object defs import chrome components).
-import type { ToolbarControlSpec } from "../../objects/object-def";
-import { CHROME } from "../../tokens/figjam-tokens";
-import { Tooltip } from "../../ui/Tooltip";
+import type { ToolbarControlSpec } from "../../../objects/object-def";
+import { CHROME } from "../../../tokens/figjam-tokens";
+import { Tooltip } from "../../../ui/Tooltip";
 import {
   AlignIcon,
   ArrowheadIcon,
@@ -29,7 +29,7 @@ import {
   StrikethroughIcon,
   StrokeIcon,
   TextLabelIcon,
-} from "../../ui/icons/toolbar-icons";
+} from "../../../ui/icons/toolbar-icons";
 
 /**
  * ContextToolbar — the dark floating pill shown above a selection.
