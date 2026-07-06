@@ -1,0 +1,1137 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-99-appendix",
+  "title": "Canvas Engine — Appendix: Provenance and Testing",
+  "root": "b-appendix-root",
+  "blocks": {
+    "b-appendix-root": {
+      "id": "b-appendix-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "Vendor provenance (MPL-2.0), UI-primitive and SpectreRef vendoring, extraction history, board-design-reference provenance, and the package-wide testing approach.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "MPL-2.0",
+          "vendor boundary",
+          "extraction history",
+          "board-design-reference",
+          "colocated tests"
+        ]
+      },
+      "children": [
+        "b-appendix-heading-1",
+        "b-appendix-intro-2",
+        "b-appendix-heading-vendor-3",
+        "b-appendix-vendor-p1-4",
+        "b-appendix-vendor-p2-5",
+        "b-appendix-vendor-filetree-6",
+        "b-appendix-vendor-constraint-7",
+        "b-appendix-heading-uiprim-8",
+        "b-appendix-uiprim-p1-9",
+        "b-appendix-heading-extraction-10",
+        "b-appendix-extraction-p1-11",
+        "b-appendix-heading-bdr-12",
+        "b-appendix-bdr-p1-13",
+        "b-appendix-bdr-assumption-14",
+        "b-appendix-heading-testing-15",
+        "b-appendix-testing-p1-16",
+        "b-appendix-testing-block-17",
+        "b-appendix-closing-18"
+      ]
+    },
+    "b-appendix-heading-1": {
+      "id": "b-appendix-heading-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Appendix: Provenance and Testing"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-intro-2": {
+      "id": "b-appendix-intro-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This is the last doc in the "
+        },
+        {
+          "insert": "canvas-00-overview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "00-overview",
+              "label": "canvas-00-overview"
+            }
+          }
+        },
+        {
+          "insert": " through "
+        },
+        {
+          "insert": "canvas-99-appendix",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set. It covers cross-cutting concerns that don't belong to any one layer: where vendored code came from and why it's legally isolated, where the package's UI primitives and reference types came from, when and how the engine was extracted into its own repo, where the FigJam pixel-parity constants used throughout "
+        },
+        {
+          "insert": "render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "chrome/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " actually come from, and how the package is tested end to end."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-heading-vendor-3": {
+      "id": "b-appendix-heading-vendor-3",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Vendor provenance: BlockSuite (MPL-2.0)"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-vendor-p1-4": {
+      "id": "b-appendix-vendor-p1-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The A* orthogonal routing algorithm at the heart of the routing layer (see "
+        },
+        {
+          "insert": "canvas-30-routing",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-routing",
+              "label": "canvas-30-routing"
+            }
+          }
+        },
+        {
+          "insert": ") was adapted from "
+        },
+        {
+          "insert": "BlockSuite",
+          "attributes": {
+            "link": "https://github.com/toeverything/blocksuite"
+          }
+        },
+        {
+          "insert": ", an open-source project licensed under the Mozilla Public License 2.0 (MPL-2.0). MPL-2.0 is "
+        },
+        {
+          "insert": "file-level"
+        },
+        {
+          "insert": " copyleft, not project-level: only the specific files that carry BlockSuite-derived code inherit its license obligations, not the rest of the codebase they sit alongside. To keep that boundary exact and auditable, every vendored or ported file lives under a single directory, "
+        },
+        {
+          "insert": "packages/canvas/src/vendor/blocksuite/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite"
+            }
+          }
+        },
+        {
+          "insert": ", and each file there carries a header citing its upstream BlockSuite source path and the MPL-2.0 license, recorded in detail in "
+        },
+        {
+          "insert": "packages/canvas/src/vendor/blocksuite/NOTICE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-vendor-p2-5": {
+      "id": "b-appendix-vendor-p2-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The provenance ranges from verbatim copies to labeled algorithm-only ports. "
+        },
+        {
+          "insert": "priority-queue.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is algorithmically verbatim; "
+        },
+        {
+          "insert": "graph.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "a-star.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are verbatim with import specifiers rewritten to point at local files; "
+        },
+        {
+          "insert": "path-generator.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "snap-distribution.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are explicitly-labeled extractions that pull only the pure, framework-free algorithm logic out of larger BlockSuite modules (dropping Lit, signals, and canvas-paint/overlay code); and "
+        },
+        {
+          "insert": "gfx-types.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a dependency-free reimplementation of the handful of "
+        },
+        {
+          "insert": "@blocksuite/global",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " math primitives the other files need. A sixth file, "
+        },
+        {
+          "insert": "connection-overlay.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts"
+            }
+          }
+        },
+        {
+          "insert": ", is also a BlockSuite-derived algorithm-only port (the connector anchor-snap and rendering decision cascade) but lives outside "
+        },
+        {
+          "insert": "vendor/blocksuite/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "src/interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " per the NOTICE's own file list — its provenance is still tracked there even though it sits outside the vendor directory proper. The vendored files enumerated under "
+        },
+        {
+          "insert": "src/vendor/blocksuite/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " itself are: "
+        },
+        {
+          "insert": "a-star.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/a-star.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "gfx-types.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/gfx-types.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "graph.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/graph.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "path-generator.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "priority-queue.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/priority-queue.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "snap-distribution.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/snap-distribution.ts"
+            }
+          }
+        },
+        {
+          "insert": ", plus the "
+        },
+        {
+          "insert": "NOTICE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
+            }
+          }
+        },
+        {
+          "insert": " record itself."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-vendor-filetree-6": {
+      "id": "b-appendix-vendor-filetree-6",
+      "flavour": "file-tree",
+      "props": {
+        "title": "src/vendor/blocksuite/ — the exact MPL-2.0 boundary",
+        "entries": [
+          {
+            "path": "NOTICE",
+            "note": "provenance record: upstream path, license, and modification status per file"
+          },
+          {
+            "path": "a-star.ts",
+            "note": "verbatim; import specifiers rewritten to local graph.ts/priority-queue.ts/gfx-types.ts"
+          },
+          {
+            "path": "graph.ts",
+            "note": "verbatim; import specifiers rewritten to local gfx-types.ts"
+          },
+          {
+            "path": "priority-queue.ts",
+            "note": "verbatim, MPL-2.0 header added"
+          },
+          {
+            "path": "path-generator.ts",
+            "note": "labeled port: pure orthogonal path-generation logic extracted from BlockSuite's connector-manager.ts"
+          },
+          {
+            "path": "snap-distribution.ts",
+            "note": "labeled port: distribution-snap search extracted from BlockSuite's snap-overlay.ts, one documented axis-bug fix"
+          },
+          {
+            "path": "gfx-types.ts",
+            "note": "no direct upstream file; dependency-free reimplementation of @blocksuite/global math primitives"
+          }
+        ]
+      },
+      "children": []
+    },
+    "b-appendix-vendor-constraint-7": {
+      "id": "b-appendix-vendor-constraint-7",
+      "flavour": "constraint",
+      "props": {
+        "severity": "hard",
+        "title": "MPL-2.0 file-level boundary"
+      },
+      "text": [
+        {
+          "insert": "Do not move BlockSuite-derived logic out of "
+        },
+        {
+          "insert": "src/vendor/blocksuite/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite"
+            }
+          }
+        },
+        {
+          "insert": " into non-vendor files without legal review, and do not add non-BlockSuite-derived code into "
+        },
+        {
+          "insert": "vendor/blocksuite/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The directory boundary is the license boundary — keep it exact. If a vendored file is ever modified, update "
+        },
+        {
+          "insert": "NOTICE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
+            }
+          }
+        },
+        {
+          "insert": " and the file's own header accordingly, per the record's own instructions."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-heading-uiprim-8": {
+      "id": "b-appendix-heading-uiprim-8",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "UI primitives and SpectreRef vendoring"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-uiprim-p1-9": {
+      "id": "b-appendix-uiprim-p1-9",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Separately from the MPL-2.0 vendor boundary, a handful of Spectre's shadcn-style UI primitives — "
+        },
+        {
+          "insert": "Button",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Input",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Textarea",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Badge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the "
+        },
+        {
+          "insert": "cn()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " class-name helper — were duplicated (not re-exported) into "
+        },
+        {
+          "insert": "packages/canvas/src/ui/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui"
+            }
+          }
+        },
+        {
+          "insert": " so the package has zero dependency on a host app's component library. None of this carries MPL-2.0 obligations — it's ordinary Spectre/Codecaine code, just copied for self-containment rather than imported. Alongside it, a type-only copy of Spectre's "
+        },
+        {
+          "insert": "SpectreRef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type (the doc/canvas shared reference-link shape) was copied into "
+        },
+        {
+          "insert": "packages/canvas/src/model/spectre-ref.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/spectre-ref.ts"
+            }
+          }
+        },
+        {
+          "insert": " rather than depending on Spectre's "
+        },
+        {
+          "insert": "docs-model",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " package — only the type is needed here, so the runtime validator was intentionally left behind. As part of the same self-containment move, "
+        },
+        {
+          "insert": "lucide-react",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " was promoted from a transitive dependency (pulled in via the host app) to a direct dependency of "
+        },
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-heading-extraction-10": {
+      "id": "b-appendix-heading-extraction-10",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Extraction history"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-extraction-p1-11": {
+      "id": "b-appendix-extraction-p1-11",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and its "
+        },
+        {
+          "insert": "board-design-reference/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " design corpus were extracted from the Spectre monorepo at commit "
+        },
+        {
+          "insert": "321ce699e695464bc6f44310744e870e495185be",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (\"figjam-w5: connection waypoints follow moved objects (rigid translate / asymmetric re-route)\"), on 2026-07-05. The engine, chrome components, fixtures, and test suite moved from "
+        },
+        {
+          "insert": "apps/frontend/src/lib/interactive-canvas/**",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "packages/canvas/src/**",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", with two app-coupled exceptions ("
+        },
+        {
+          "insert": "CanvasSidecarEmbed.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "InteractiveCanvasLibrary.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", plus their dedicated test files) staying behind in Spectre since they depend on Spectre's own API client and docs app routing. Full detail — including the split provenance of "
+        },
+        {
+          "insert": "slash-menu-model.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (also vendored from BlockSuite, but staying in Spectre because it backs the docs editor's slash menu rather than the canvas engine) — lives in "
+        },
+        {
+          "insert": "packages/canvas/PROVENANCE.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "PROVENANCE.md"
+            }
+          }
+        },
+        {
+          "insert": ", which also records the repo layout at extraction time."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-heading-bdr-12": {
+      "id": "b-appendix-heading-bdr-12",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "board-design-reference provenance"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-bdr-p1-13": {
+      "id": "b-appendix-bdr-p1-13",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "packages/canvas/board-design-reference/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference"
+            }
+          }
+        },
+        {
+          "insert": " is the ground-truth source for every FigJam pixel-parity constant used across the engine. It holds FigJam and AFFiNE reference screen recordings ("
+        },
+        {
+          "insert": "Figjam.mp4",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Affine.mp4",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") plus an "
+        },
+        {
+          "insert": "analysis/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference/analysis"
+            }
+          }
+        },
+        {
+          "insert": " directory of pixel-sampled style analysis distilled from those recordings: "
+        },
+        {
+          "insert": "figjam-style-tokens.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the raw sampled values — colors, radii, stroke widths, spacing), "
+        },
+        {
+          "insert": "figjam-style-spec.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the written style spec derived from those tokens), "
+        },
+        {
+          "insert": "figjam-bottom-dock-spec.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the bottom-dock layout/behavior spec), and "
+        },
+        {
+          "insert": "figjam-chrome-catalog.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (an inventory of every chrome surface observed). Every FigJam-derived constant in "
+        },
+        {
+          "insert": "render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (notably "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ") and in "
+        },
+        {
+          "insert": "chrome/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome"
+            }
+          }
+        },
+        {
+          "insert": " traces back to this corpus — it is the single source of truth for pixel-parity decisions, not any individual engineer's judgment call."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-bdr-assumption-14": {
+      "id": "b-appendix-bdr-assumption-14",
+      "flavour": "assumption",
+      "props": {
+        "title": "Some constants are flagged extrapolations",
+        "confidence": "medium"
+      },
+      "text": [
+        {
+          "insert": "Not every pixel value in the analysis corpus is a direct measurement off the reference recordings. Some are documented extrapolations for states the source recordings didn't capture — for example, the "
+        },
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " \"multi\" selection variant discussed in "
+        },
+        {
+          "insert": "canvas-60-chrome",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "60-chrome",
+              "label": "canvas-60-chrome"
+            }
+          }
+        },
+        {
+          "insert": ", where the recordings never showed a multi-object selection long enough to sample cleanly. Treat any such extrapolated constant as a best guess, not ground truth, and reconfirm it against live FigJam before relying on it for a pixel-exact decision."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-heading-testing-15": {
+      "id": "b-appendix-heading-testing-15",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Testing approach"
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-testing-p1-16": {
+      "id": "b-appendix-testing-p1-16",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Tests are colocated per layer rather than collected in one top-level suite. Each layer directory — "
+        },
+        {
+          "insert": "model/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "routing/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "fixtures/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "chrome/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — owns its own "
+        },
+        {
+          "insert": "__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " subdirectory, dissolving what used to be a single top-level "
+        },
+        {
+          "insert": "src/__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directory. Run the full package suite with "
+        },
+        {
+          "insert": "bun test packages/canvas/src",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the repo root, or scope to a single layer's "
+        },
+        {
+          "insert": "__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directory when iterating on one part of the engine."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-testing-block-17": {
+      "id": "b-appendix-testing-block-17",
+      "flavour": "testing",
+      "props": {
+        "title": "Unit tests for logic, DOM/geometry assertions for rendering — never screenshots"
+      },
+      "text": [
+        {
+          "insert": "Pure logic layers — "
+        },
+        {
+          "insert": "model/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "routing/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — get plain unit tests: given inputs, assert outputs, no rendering involved. The "
+        },
+        {
+          "insert": "render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " layers instead get jsdom-based DOM and geometry assertion tests — checking computed styles, element positions, class names, and attribute values against expectations derived from "
+        },
+        {
+          "insert": "board-design-reference/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — rather than visual screenshot/snapshot-image tests. This \"no screenshots\" philosophy was established for the chrome components (see "
+        },
+        {
+          "insert": "canvas-60-chrome",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "60-chrome",
+              "label": "canvas-60-chrome"
+            }
+          }
+        },
+        {
+          "insert": ") and carried through the rest of the package: assertions are made on concrete, diffable values (a computed pixel width, a hex color, a DOM attribute) rather than on rendered pixels, so failures are legible and don't require a human to eyeball an image diff."
+        }
+      ],
+      "children": []
+    },
+    "b-appendix-closing-18": {
+      "id": "b-appendix-closing-18",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This closes the "
+        },
+        {
+          "insert": "canvas-00-overview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "00-overview",
+              "label": "canvas-00-overview"
+            }
+          }
+        },
+        {
+          "insert": " through "
+        },
+        {
+          "insert": "canvas-99-appendix",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " doc set for the "
+        },
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " engine — start back at the overview for the map of how model, interaction, routing, render, editor, chrome, and studio/fixtures fit together."
+        }
+      ],
+      "children": []
+    }
+  }
+}

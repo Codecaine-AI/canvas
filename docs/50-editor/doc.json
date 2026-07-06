@@ -1,0 +1,1734 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-50-editor",
+  "title": "Canvas Engine — Editor Layer",
+  "root": "b-editor-root",
+  "blocks": {
+    "b-editor-root": {
+      "id": "b-editor-root",
+      "flavour": "paragraph",
+      "props": {
+        "format": "mdx",
+        "type": "overview",
+        "covers": "The editor layer of the interactive canvas engine: the full editing entrypoint vs the read-only viewer, the pan/zoom viewport model, and the scoped hotkey vocabulary.",
+        "concepts": [
+          "viewport",
+          "hotkeys",
+          "InteractiveCanvasEditor",
+          "InteractiveCanvasViewer",
+          "view-crop"
+        ]
+      },
+      "children": [
+        "b-editor-intro-1",
+        "b-editor-heading-editor-vs-viewer-2",
+        "b-editor-editor-desc-3",
+        "b-editor-editor-composition-4",
+        "b-editor-viewer-desc-5",
+        "b-editor-viewer-relationship-6",
+        "b-editor-heading-viewport-7",
+        "b-editor-viewport-ts-desc-8",
+        "b-editor-viewport-formula-9",
+        "b-editor-use-canvas-viewport-desc-10",
+        "b-editor-use-canvas-viewport-wheel-11",
+        "b-editor-use-canvas-viewport-pan-12",
+        "b-editor-heading-hotkeys-13",
+        "b-editor-hotkeys-intro-14",
+        "b-editor-hotkey-v-15",
+        "b-editor-hotkey-h-16",
+        "b-editor-hotkey-c-17",
+        "b-editor-hotkey-p-18",
+        "b-editor-hotkey-d-19",
+        "b-editor-hotkey-t-20",
+        "b-editor-hotkey-s-21",
+        "b-editor-hotkey-o-22",
+        "b-editor-hotkey-u-23",
+        "b-editor-hotkey-b-24",
+        "b-editor-hotkey-m-25",
+        "b-editor-hotkey-delete-26",
+        "b-editor-hotkey-cmd-d-27",
+        "b-editor-hotkey-cmd-c-28",
+        "b-editor-hotkey-cmd-v-29",
+        "b-editor-hotkey-arrows-30",
+        "b-editor-hotkey-cmd-z-31",
+        "b-editor-hotkey-shift-cmd-z-32",
+        "b-editor-hotkey-escape-33",
+        "b-editor-hotkey-cmd-0-34",
+        "b-editor-hotkey-cmd-plus-35",
+        "b-editor-hotkey-cmd-minus-36",
+        "b-editor-scoping-note-37",
+        "b-editor-testing-note-38",
+        "b-editor-closing-39"
+      ]
+    },
+    "b-editor-intro-1": {
+      "id": "b-editor-intro-1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The editor layer is where the interactive canvas engine becomes an actual interactive editor: it composes the pure render layer, the interaction state machine, viewport/camera control, and keyboard shortcuts into a single component tree, and dispatches every user gesture as a typed "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "CanvasAction"
+            }
+          }
+        },
+        {
+          "insert": " through the model's reducer. This doc covers the four files that make up that layer — the editor entrypoint, the read-only viewer, the viewport math, and the hotkey binding table."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-editor-vs-viewer-2": {
+      "id": "b-editor-heading-editor-vs-viewer-2",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "InteractiveCanvasEditor vs InteractiveCanvasViewer"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-editor-desc-3": {
+      "id": "b-editor-editor-desc-3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "bold": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/InteractiveCanvasEditor.tsx",
+              "symbol": "InteractiveCanvasEditor"
+            }
+          }
+        },
+        {
+          "insert": " (~2000 lines) is the full interactive editing entrypoint. Its props are minimal — "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "onSave",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "onCancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and an optional "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — but internally it owns the entire editing session: it holds document state via "
+        },
+        {
+          "insert": "useReducer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": ", drives the pointer-driven "
+        },
+        {
+          "insert": "InteractionState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/interaction.ts",
+              "symbol": "InteractionState"
+            }
+          }
+        },
+        {
+          "insert": " machine (press/move/resize/marquee/connector-drag/etc.) via "
+        },
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and wires up edge-pan-while-dragging, clipboard copy/paste, and every chrome affordance around the stage."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-editor-composition-4": {
+      "id": "b-editor-editor-composition-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Structurally it composes: the render layer ("
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": ") for pixels, the viewport hook ("
+        },
+        {
+          "insert": "useCanvasViewport",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-viewport.ts",
+              "symbol": "useCanvasViewport"
+            }
+          }
+        },
+        {
+          "insert": ") for pan/zoom, the hotkey hook ("
+        },
+        {
+          "insert": "useCanvasHotkeys",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "symbol": "useCanvasHotkeys"
+            }
+          }
+        },
+        {
+          "insert": ") for keyboard, and the FigJam-parity chrome components — "
+        },
+        {
+          "insert": "FigJamDock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
+              "symbol": "FigJamDock"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "ContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ShapesPanel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "symbol": "ShapesPanel"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ColorPalettePopover",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "symbol": "ColorPalettePopover"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "ZoomControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "symbol": "ZoomControls"
+            }
+          }
+        },
+        {
+          "insert": " — around that stage. A small "
+        },
+        {
+          "insert": "TOOL_KEY_MAP",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-style mapping translates the dock's fixed "
+        },
+        {
+          "insert": "ToolId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " vocabulary onto the reducer's larger "
+        },
+        {
+          "insert": "CanvasTool",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "CanvasTool"
+            }
+          }
+        },
+        {
+          "insert": " vocabulary (one entry per placeable object type, plus select/hand/annotation)."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-viewer-desc-5": {
+      "id": "b-editor-viewer-desc-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "bold": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/InteractiveCanvasViewer.tsx",
+              "symbol": "InteractiveCanvasViewer"
+            }
+          }
+        },
+        {
+          "insert": " is the read-only counterpart, and much smaller (under 200 lines). It takes a "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", optional "
+        },
+        {
+          "insert": "selectedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "changedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (for highlight state), a "
+        },
+        {
+          "insert": "compact",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " flag, and an optional "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a container object id to crop the viewport to, per "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/viewport.ts",
+              "symbol": "containerViewBounds"
+            }
+          }
+        },
+        {
+          "insert": "). There is no reducer, no interaction state machine, no hotkey hook, and no chrome — it renders "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directly inside a measured, fixed-aspect shell, computing a one-shot "
+        },
+        {
+          "insert": "ViewportState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via "
+        },
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than owning a live pannable/zoomable camera. It still surfaces click callbacks ("
+        },
+        {
+          "insert": "onObjectSelect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "onCanvasSelect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", context-menu hooks) and a small header bar with object/connector/annotation counts and a warning badge when a requested "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " id can't be found — but it is fundamentally a display component, not an editing surface."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-viewer-relationship-6": {
+      "id": "b-editor-viewer-relationship-6",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This is the component a "
+        },
+        {
+          "insert": "canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " doc-flavour block renders through: a doc's "
+        },
+        {
+          "insert": "canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block props ("
+        },
+        {
+          "insert": "src",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") map directly onto "
+        },
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " props — an embedded canvas inside a doc is read-only by construction, which is why the viewer has no hotkeys or reducer to begin with rather than merely having them disabled."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-viewport-7": {
+      "id": "b-editor-heading-viewport-7",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Viewport model"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-viewport-ts-desc-8": {
+      "id": "b-editor-viewport-ts-desc-8",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "viewport.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/viewport.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the pure viewport/camera model — no React, no side effects, just coordinate math over a "
+        },
+        {
+          "insert": "ViewportState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/viewport.ts",
+              "symbol": "ViewportState"
+            }
+          }
+        },
+        {
+          "insert": " of "
+        },
+        {
+          "insert": "{ x, y, zoom }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", where "
+        },
+        {
+          "insert": "(x, y)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the world point shown at screen origin "
+        },
+        {
+          "insert": "(0, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It exports "
+        },
+        {
+          "insert": "worldToScreen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "screenToWorld",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " conversions, "
+        },
+        {
+          "insert": "clampZoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (bounds "
+        },
+        {
+          "insert": "MIN_ZOOM = 0.1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "MAX_ZOOM = 4",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "zoomAtPoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (zoom while keeping a given screen point fixed in world space), "
+        },
+        {
+          "insert": "panBy",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (screen-delta pan), and "
+        },
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (compute the viewport that centers and scales a set of bounds — or the whole document — into a given screen size, with padding). "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rounds this out: given a container object id, it walks "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " chains to find every descendant and returns the padded bounds of just that subtree — this is the D4 \"view-crop\" feature "
+        },
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop relies on."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-viewport-formula-9": {
+      "id": "b-editor-viewport-formula-9",
+      "flavour": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "screenPoint = (worldPoint - { x, y }) * zoom\nworldPoint = screenPoint / zoom + { x, y }"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-use-canvas-viewport-desc-10": {
+      "id": "b-editor-use-canvas-viewport-desc-10",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "use-canvas-viewport.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-viewport.ts",
+              "symbol": "useCanvasViewport"
+            }
+          }
+        },
+        {
+          "insert": " is the React hook wrapping that pure model with real pointer/wheel event handling. It owns "
+        },
+        {
+          "insert": "ViewportState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via "
+        },
+        {
+          "insert": "useState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", fits to document content once on mount (as soon as the stage element is measurable), and exposes "
+        },
+        {
+          "insert": "controls",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "fit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "zoomIn",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "zoomOut",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "zoomTo100",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") plus a "
+        },
+        {
+          "insert": "screenToWorld",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " helper, all bound to the current stage size via a ref rather than re-subscribing listeners on every render (mirrors term-draw's pointer-adapter pattern, per the file's own comment)."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-use-canvas-viewport-wheel-11": {
+      "id": "b-editor-use-canvas-viewport-wheel-11",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Wheel handling distinguishes plain scroll (pan) from ctrl/meta-modified scroll (zoom toward the cursor — trackpad pinch also arrives as a "
+        },
+        {
+          "insert": "ctrlKey",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wheel event in browsers). Rapid wheel events are coalesced via "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/interaction.ts",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " into at most one viewport commit per animation frame: each event accumulates into a pending pan-delta/zoom-factor frame, and the coalescer applies the accumulated frame using the latest cursor point, so the point under the cursor stays exactly fixed even when several wheel deltas were merged."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-use-canvas-viewport-pan-12": {
+      "id": "b-editor-use-canvas-viewport-pan-12",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Panning is also available via space-held-drag or middle-mouse-drag (tracked with raw "
+        },
+        {
+          "insert": "keydown",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "keyup",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " listeners for space state, and pointer capture for the drag itself), or via plain left-drag when the hook is constructed with "
+        },
+        {
+          "insert": "panOnPlainDrag: true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the editor's \"hand\" tool). This hook — not "
+        },
+        {
+          "insert": "useCanvasHotkeys",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — is the sole owner of space-drag panning."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-hotkeys-13": {
+      "id": "b-editor-heading-hotkeys-13",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Hotkeys"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkeys-intro-14": {
+      "id": "b-editor-hotkeys-intro-14",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "use-canvas-hotkeys.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "symbol": "useCanvasHotkeys"
+            }
+          }
+        },
+        {
+          "insert": " mounts a single window-level "
+        },
+        {
+          "insert": "keydown",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " listener for the editor's whole hotkey vocabulary, kept in sync with any UI hint text (toolbar button titles) per the file's own header comment. The full binding table, reproduced from that header:"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-v-15": {
+      "id": "b-editor-hotkey-v-15",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "V",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — select tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-h-16": {
+      "id": "b-editor-hotkey-h-16",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "H",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — hand tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-c-17": {
+      "id": "b-editor-hotkey-c-17",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — container tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-p-18": {
+      "id": "b-editor-hotkey-p-18",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "P",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — process tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-d-19": {
+      "id": "b-editor-hotkey-d-19",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "D",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — decision tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-t-20": {
+      "id": "b-editor-hotkey-t-20",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "T",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — text tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-s-21": {
+      "id": "b-editor-hotkey-s-21",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "S",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — sticky tool"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-o-22": {
+      "id": "b-editor-hotkey-o-22",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "O",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — document tool (checkpoint 5 — D16 expanded vocabulary)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-u-23": {
+      "id": "b-editor-hotkey-u-23",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "U",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — person tool (checkpoint 5 — D16 expanded vocabulary)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-b-24": {
+      "id": "b-editor-hotkey-b-24",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "B",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — database tool (checkpoint 5 — D16 expanded vocabulary)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-m-25": {
+      "id": "b-editor-hotkey-m-25",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "M",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — chat tool (checkpoint 5 — D16 expanded vocabulary)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-delete-26": {
+      "id": "b-editor-hotkey-delete-26",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Delete / Backspace",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "canvas.deleteSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (objects AND selected connections)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-d-27": {
+      "id": "b-editor-hotkey-cmd-d-27",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-D",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "canvas.duplicateSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (preventDefault beats the browser's bookmark-page shortcut)"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-c-28": {
+      "id": "b-editor-hotkey-cmd-c-28",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — copy selection to the in-memory clipboard"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-v-29": {
+      "id": "b-editor-hotkey-cmd-v-29",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-V",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — paste the in-memory clipboard via "
+        },
+        {
+          "insert": "canvas.addObjects",
+          "attributes": {
+            "code": true
+          }
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-arrows-30": {
+      "id": "b-editor-hotkey-arrows-30",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Arrow keys",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "canvas.moveSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " by 1 world unit (snap: false); Shift+Arrow moves by "
+        },
+        {
+          "insert": "CANVAS_GRID_SIZE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (16) instead"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-z-31": {
+      "id": "b-editor-hotkey-cmd-z-31",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-Z",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "canvas.undo",
+          "attributes": {
+            "code": true
+          }
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-shift-cmd-z-32": {
+      "id": "b-editor-hotkey-shift-cmd-z-32",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Shift-Cmd/Ctrl-Z",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "canvas.redo",
+          "attributes": {
+            "code": true
+          }
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-escape-33": {
+      "id": "b-editor-hotkey-escape-33",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Escape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — cancel the active interaction gesture, else close an open context menu, else clear selection"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-0-34": {
+      "id": "b-editor-hotkey-cmd-0-34",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-0",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — viewport controls.fit"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-plus-35": {
+      "id": "b-editor-hotkey-cmd-plus-35",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl-=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — viewport controls.zoomIn"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-hotkey-cmd-minus-36": {
+      "id": "b-editor-hotkey-cmd-minus-36",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cmd/Ctrl--",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — viewport controls.zoomOut"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-scoping-note-37": {
+      "id": "b-editor-scoping-note-37",
+      "flavour": "implementation",
+      "props": {
+        "title": "Hotkey scoping: no-op while typing"
+      },
+      "text": [
+        {
+          "insert": "All bindings in "
+        },
+        {
+          "insert": "useCanvasHotkeys",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "symbol": "useCanvasHotkeys"
+            }
+          }
+        },
+        {
+          "insert": " no-op when "
+        },
+        {
+          "insert": "document.activeElement",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is an input, textarea, select, or contentEditable element ("
+        },
+        {
+          "insert": "isEditableTarget",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), or when the caller's "
+        },
+        {
+          "insert": "isTypingContextActive()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " callback reports true — the editor wires this to whether an inline label or connector-label editor currently has focus. Both checks exist because the inline editors own the keyboard while focused, but focus can lag a render, so the callback is a defensive second guard. Space is deliberately NOT bound in this hook at all — "
+        },
+        {
+          "insert": "useCanvasViewport",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/use-canvas-viewport.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns space-drag panning separately, with its own space-held tracking. Anyone adding a new binding to "
+        },
+        {
+          "insert": "TOOL_KEY_MAP",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or the keydown handler gets this scoping for free by construction (the guard runs first, before any key is dispatched) — but a new hotkey that needs to fire even while typing (there currently are none) would need its own explicit carve-out, not a change to the shared guard."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-testing-note-38": {
+      "id": "b-editor-testing-note-38",
+      "flavour": "testing",
+      "props": {
+        "title": "Editor test suite"
+      },
+      "text": [
+        {
+          "insert": "Editor-layer tests live under "
+        },
+        {
+          "insert": "packages/canvas/src/editor/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/__tests__"
+            }
+          }
+        },
+        {
+          "insert": " and split cleanly along the four files this doc covers: "
+        },
+        {
+          "insert": "hotkeys.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/__tests__/hotkeys.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " exercises the "
+        },
+        {
+          "insert": "useCanvasHotkeys",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " binding table (tool keys, delete/duplicate/copy/paste, arrow nudge with and without Shift, undo/redo, Escape's cancel-gesture/close-menu/clear-selection fallthrough, and the editable-target/typing-context no-op guard); "
+        },
+        {
+          "insert": "viewport.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/__tests__/viewport.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " covers the pure coordinate math in "
+        },
+        {
+          "insert": "viewport.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (world/screen conversion round-trips, "
+        },
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sizing, "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " descendant walking); "
+        },
+        {
+          "insert": "use-canvas-viewport.zoom.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/__tests__/use-canvas-viewport.zoom.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " focuses specifically on the hook's zoom behavior — wheel-with-modifier zoom-toward-cursor, zoom clamping, and the rAF wheel-event coalescing; and "
+        },
+        {
+          "insert": "viewer-view-crop.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/__tests__/viewer-view-crop.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " covers "
+        },
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s D4 view-cropping behavior — fitting the viewport to a named container's bounds via the "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop, and surfacing the \"view not found\" warning badge when the requested container id doesn't resolve."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-closing-39": {
+      "id": "b-editor-closing-39",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For the dock, toolbars, palettes, and other chrome components wired into "
+        },
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " above this layer, see "
+        },
+        {
+          "insert": "canvas-60-chrome",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "60-chrome"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+ * Tailwind v4 auto-detection does not reliably scan the engine package's
+ * sources from here, so name them explicitly — the editor chrome's
+ * positioning/sizing classes live in ../../canvas/src and vanish from the
+ * build without this.
+ */
+@source "../../canvas/src";
+
+/*
  * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved
  * "spectre-light" design tokens (apps/frontend/src/theme/themes/spectre-light.json,
  * resolved via apps/frontend/src/theme/css-vars.ts at extraction time). Spectre

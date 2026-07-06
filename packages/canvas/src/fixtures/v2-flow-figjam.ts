@@ -1,6 +1,6 @@
 "use client";
 
-import type { InteractiveCanvasDocument } from "../schema";
+import type { InteractiveCanvasDocument } from "../model/schema";
 
 /**
  * V2 Flow — FigJam visual-parity fixture (Wave 4 acceptance gate).

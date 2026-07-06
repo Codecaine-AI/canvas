@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CHROME } from "../figjam-tokens";
+import { CHROME } from "../render/figjam-tokens";
 import { isShapeEntryEnabled, SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
 import { ChromeTooltip } from "./ChromeTooltip";
 

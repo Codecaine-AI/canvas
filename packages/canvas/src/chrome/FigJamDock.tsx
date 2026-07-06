@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CHROME } from "../figjam-tokens";
+import { CHROME } from "../render/figjam-tokens";
 import { ChromeTooltip } from "./ChromeTooltip";
 import {
   ArrowIcon,

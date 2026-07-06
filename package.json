@@ -5,7 +5,7 @@
   "type": "module",
   "workspaces": ["packages/*"],
   "scripts": {
-    "docs": "bun packages/docs-framework/packages/docs-cli/src/index.ts",
+    "docs": "bun tools/docs-framework/packages/docs-cli/src/index.ts",
     "test": "bun test packages/canvas/src",
     "typecheck": "bun run typecheck:canvas && bun run typecheck:studio",
     "typecheck:canvas": "bunx --bun tsc -p packages/canvas/tsconfig.json --noEmit",

@@ -1,6 +1,6 @@
 "use client";
 
-import type { InteractiveCanvasDocument } from "../schema";
+import type { InteractiveCanvasDocument } from "../model/schema";
 
 export const v2FlowInteractiveCanvas: InteractiveCanvasDocument = {
   schemaVersion: 1,

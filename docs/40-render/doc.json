@@ -1,0 +1,1229 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-40-render",
+  "title": "Canvas Engine — Render Layer",
+  "root": "b-render-root",
+  "blocks": {
+    "b-render-root": {
+      "id": "b-render-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, the theme/FigJam token system, and the code-block tokenizer.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "CanvasStage",
+          "adaptive grid",
+          "screen-pixel band",
+          "FigJam tokens",
+          "code tokenizer"
+        ]
+      },
+      "children": [
+        "b-render-title-1",
+        "b-render-intro-2",
+        "b-render-heading-canvasstage-3",
+        "b-render-canvasstage-body-4",
+        "b-render-canvasstage-helpers-5",
+        "b-render-canvasstage-imports-6",
+        "b-render-heading-grid-7",
+        "b-render-grid-mechanism-8",
+        "b-render-grid-band-9",
+        "b-render-grid-decision-10",
+        "b-render-heading-theme-11",
+        "b-render-theme-body-12",
+        "b-render-figjam-tokens-body-13",
+        "b-render-figjam-tokens-provenance-14",
+        "b-render-heading-tokenizer-15",
+        "b-render-tokenizer-body-16",
+        "b-render-testing-17",
+        "b-render-closing-18"
+      ]
+    },
+    "b-render-title-1": {
+      "id": "b-render-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Render Layer"
+        }
+      ],
+      "children": []
+    },
+    "b-render-intro-2": {
+      "id": "b-render-intro-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The render layer is the presentation side of the canvas engine: given an "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasDocument"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " and a viewport, it draws objects, connections, sections, and annotations to the screen as a world-space DOM/SVG tree. It owns no editing state of its own — it is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
+        }
+      ],
+      "children": []
+    },
+    "b-render-heading-canvasstage-3": {
+      "id": "b-render-heading-canvasstage-3",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "CanvasStage"
+        }
+      ],
+      "children": []
+    },
+    "b-render-canvasstage-body-4": {
+      "id": "b-render-canvasstage-body-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " is the top-level exported component (a large, ~1800-line file). It takes the document, the viewport (pan/zoom), selection and interaction state, and a couple of slot props ("
+        },
+        {
+          "insert": "overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for screen-space UI, "
+        },
+        {
+          "insert": "worldOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for things like the inline connector-label editor input the editor injects) and renders the whole scene. It applies the camera transform — translate by "
+        },
+        {
+          "insert": "-viewport.x * zoom, -viewport.y * zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " then scale by "
+        },
+        {
+          "insert": "zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — to a single world layer, and projects world coordinates to screen coordinates via "
+        },
+        {
+          "insert": "worldToScreen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for every screen-space overlay (marquee, snap guides, distribution guides, selection handles)."
+        }
+      ],
+      "children": []
+    },
+    "b-render-canvasstage-helpers-5": {
+      "id": "b-render-canvasstage-helpers-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Structurally it is one large render tree assembled from many small, single-purpose sub-renderers rather than one deeply nested component. Notable pieces: "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " (also exported) renders any non-section object — shape, sticky note, section, text, pill, diamond, marker, document, person/database/chat/chip-icon silhouettes, arrow-shape, predefined-process, and code-block — and delegates to "
+        },
+        {
+          "insert": "SectionShape",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SectionShape"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " for sections; "
+        },
+        {
+          "insert": "Connector",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "Connector"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " draws one routed connector (hit path, visible path, arrowhead markers, dashed styles, bend-affordance stubs, endpoint handles), paired with "
+        },
+        {
+          "insert": "ConnectionLabelChip",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ConnectionLabelChip"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ConnectorDragPreview"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "SelectionBox",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SelectionBox"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " (also exported) draws the screen-space selection outline and resize handles; "
+        },
+        {
+          "insert": "Marquee",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "Marquee"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "PlacePreview",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "PlacePreview"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SnapGuideLine",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SnapGuideLine"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DistributionGuideLine",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "DistributionGuideLine"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "SpacingChips",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SpacingChips"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " render selection-rectangle, tool-placement ghost, and alignment/distribution guide overlays. "
+        },
+        {
+          "insert": "renderOrderedObjects",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "renderOrderedObjects"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " computes FigJam-correct z-layering (sections paint below shapes; nested sections paint above their parent section) before the scene is drawn."
+        }
+      ],
+      "children": []
+    },
+    "b-render-canvasstage-imports-6": {
+      "id": "b-render-canvasstage-imports-6",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasStage composes the other three render-layer modules directly: it calls "
+        },
+        {
+          "insert": "gridBackground",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/grid.ts",
+              "symbol": "gridBackground"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " once per render to compute the dot-grid CSS background for the stage's root div; it pulls "
+        },
+        {
+          "insert": "resolveObjectColors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveObjectColors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveObjectStrokeWidth",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveObjectStrokeWidth"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "resolveSectionColors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveSectionColors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " from "
+        },
+        {
+          "insert": "theme.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to resolve fill/border/stroke-width per object and section; it pulls a long list of geometry and color constants from "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (including "
+        },
+        {
+          "insert": "CANVAS_BG",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CANVAS_BG"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", set as the root stage div's "
+        },
+        {
+          "insert": "backgroundColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so the board stays a fixed light surface under either app theme); and it calls "
+        },
+        {
+          "insert": "tokenizeCodeBlock",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts",
+              "symbol": "tokenizeCodeBlock"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " for objects with "
+        },
+        {
+          "insert": "shape === \"code-block\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to split each line into syntax-highlighted spans."
+        }
+      ],
+      "children": []
+    },
+    "b-render-heading-grid-7": {
+      "id": "b-render-heading-grid-7",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Adaptive grid"
+        }
+      ],
+      "children": []
+    },
+    "b-render-grid-mechanism-8": {
+      "id": "b-render-grid-mechanism-8",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "gridBackground",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/grid.ts",
+              "symbol": "gridBackground"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " (in "
+        },
+        {
+          "insert": "grid.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") computes the CSS "
+        },
+        {
+          "insert": "backgroundSize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "backgroundPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/dot-radius for a zoom-aware dot grid pinned to world coordinates. The mechanism: starting from a world-space base step ("
+        },
+        {
+          "insert": "GRID_BASE_STEP_PX",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "GRID_BASE_STEP_PX"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " = 8 logical px), the function computes the on-screen step as "
+        },
+        {
+          "insert": "effectiveStep * scale",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". If that on-screen size is below the minimum band, it repeatedly doubles "
+        },
+        {
+          "insert": "effectiveStep",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a "
+        },
+        {
+          "insert": "while",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " loop) until the on-screen step is back at or above the minimum; if it's above the maximum band, it repeatedly halves "
+        },
+        {
+          "insert": "effectiveStep",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " until it falls back at or below the maximum. Because the step only ever changes by powers of two, the grid's on-screen density shifts in discrete tiers as zoom changes, while background size and pan position still move continuously within each tier — panning and continuous zoom inside one tier never causes a visible grid \"pop,\" only crossing a tier boundary does. Dot radius is handled separately: it scales continuously with zoom (not tiered) and is clamped between "
+        },
+        {
+          "insert": "MIN_DOT_RADIUS_PX",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/grid.ts",
+              "symbol": "MIN_DOT_RADIUS_PX"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "MAX_DOT_RADIUS_PX",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/grid.ts",
+              "symbol": "MAX_DOT_RADIUS_PX"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " so dots stay visible when zoomed far out and stop growing past a fixed size when zoomed far in — FigJam's dots read as a constant fine size on screen regardless of the current density tier."
+        }
+      ],
+      "children": []
+    },
+    "b-render-grid-band-9": {
+      "id": "b-render-grid-band-9",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The screen-space band the effective step must stay inside is "
+        },
+        {
+          "insert": "[GRID_MIN_SCREEN_STEP_PX, GRID_MAX_SCREEN_STEP_PX]",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "GRID_MIN_SCREEN_STEP_PX"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ", currently ~[6.5, 13] px ("
+        },
+        {
+          "insert": "grid.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " re-exports these as "
+        },
+        {
+          "insert": "MIN_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "MAX_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). This band and the base step of 8 logical px were chosen to reproduce two pixel-sampled ground-truth observations from the FigJam reference captures: at zoom 0.305, the base step lands on tier n=2 (8 × 4 = 32 world px), giving 32 × 0.305 ≈ 9.8px on screen, matching the measured 9.8px; at zoom 0.21, the same tier gives 32 × 0.21 ≈ 6.7px, matching the measured 6.9px. Both observations resolve to the same underlying logical spacing (32px), which is what validated choosing 8 as the base step and powers-of-two as the step law rather than some other base."
+        }
+      ],
+      "children": []
+    },
+    "b-render-grid-decision-10": {
+      "id": "b-render-grid-decision-10",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Keep the grid legible via a screen-pixel step band, not a fixed world step"
+      },
+      "text": [
+        {
+          "insert": "A fixed world-space grid step would either become imperceptibly dense (many sub-pixel dots merging into noise) when zoomed far out, or absurdly sparse (a single dot every few screen-feet) when zoomed far in. Instead, the grid's world-space step doubles or halves as needed to keep the on-screen step within a legible band (currently ~6.5–13px, "
+        },
+        {
+          "insert": "GRID_MIN_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "GRID_MAX_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), so the dot grid stays visually useful across the entire zoom range instead of only near 100%."
+        }
+      ],
+      "children": []
+    },
+    "b-render-heading-theme-11": {
+      "id": "b-render-heading-theme-11",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Theme and FigJam tokens"
+        }
+      ],
+      "children": []
+    },
+    "b-render-theme-body-12": {
+      "id": "b-render-theme-body-12",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "theme.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " resolves an object or section's rendered colors from the document's semantic style fields rather than fixed hexes. "
+        },
+        {
+          "insert": "canvasToneStyle",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "canvasToneStyle"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " maps each "
+        },
+        {
+          "insert": "InteractiveCanvasTone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (neutral, input, process, decision, memory, agent, warning, annotation) to fill/border/accent colors built by "
+        },
+        {
+          "insert": "color-mix()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " blends of the host app's own CSS theme variables ("
+        },
+        {
+          "insert": "--primary",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "--border",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", etc.), so tones stay legible in both light and dark host themes. "
+        },
+        {
+          "insert": "paletteTokenStyle",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "paletteTokenStyle"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " does the same for the five fixed \"color-as-meaning\" palette tokens (process/input/hot/memory/note), anchored to fixed OKLCH hues rather than theme aliases. "
+        },
+        {
+          "insert": "resolveObjectColors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveObjectColors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " is the entry point CanvasStage actually calls: it applies the precedence explicit "
+        },
+        {
+          "insert": "fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wins, then sticky-note objects resolve a palette token to an exact "
+        },
+        {
+          "insert": "STICKY_COLORS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hex (bypassing the desaturated theme mix, since FigJam stickies are saturated), then "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wins over "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", falling back to the neutral tone if nothing is set. "
+        },
+        {
+          "insert": "resolveSectionColors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveSectionColors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " does the equivalent lookup for a section's tint family."
+        }
+      ],
+      "children": []
+    },
+    "b-render-figjam-tokens-body-13": {
+      "id": "b-render-figjam-tokens-body-13",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the single place FigJam pixel-parity constants live: the board background ("
+        },
+        {
+          "insert": "CANVAS_BG",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CANVAS_BG"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " = "
+        },
+        {
+          "insert": "\"#F5F5F5\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", fixed regardless of host app theme — see the render-layer decision recorded in the overview doc), grid constants ("
+        },
+        {
+          "insert": "GRID_BASE_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "GRID_MIN_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "GRID_MAX_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", dot diameter/color), section tint families and geometry, sticky-note colors and geometry, shape stroke width and per-shape corner radii, the saturated/pastel color palettes, connector stroke width, colors, dash pattern, elbow corner radius, arrowhead ratios, and endpoint gap, arrow-shape and predefined-process geometry, icon stroke width/colors, the code-block (Dracula-theme) palette, canvas content font and text-size hierarchy, and chrome colors (toolbar backgrounds, selection blue, the color-popover rainbow ring gradient)."
+        }
+      ],
+      "children": []
+    },
+    "b-render-figjam-tokens-provenance-14": {
+      "id": "b-render-figjam-tokens-provenance-14",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "These constants are explicitly a hand-written, typed mirror of "
+        },
+        {
+          "insert": "board-design-reference/analysis/figjam-style-tokens.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference/analysis/figjam-style-tokens.json"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " — pixel-sampled measurements taken from real FigJam exports — not a runtime codegen output; the file's own header comment says to keep the two in sync by hand whenever the JSON is re-sampled. The file's inline comments distinguish measured ground truth (values traced directly to a sampled observation, e.g. the grid band derivation, the connector dash pattern, sticky colors) from flagged extrapolations the file calls out explicitly — for example the palette-popover swatch order (no dedicated popover array was ever sampled, so it's derived by concatenating existing pastel/saturated swatches), the section capture-overlap threshold (a design decision, not a pixel measurement), the teal section family's chip/border colors (never observed, tint-only), and the code-block comment color (a standard Dracula placeholder, not sampled). Every value in the file is in logical px, already normalized against the source export's 2x scale factor."
+        }
+      ],
+      "children": []
+    },
+    "b-render-heading-tokenizer-15": {
+      "id": "b-render-heading-tokenizer-15",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Code tokenizer"
+        }
+      ],
+      "children": []
+    },
+    "b-render-tokenizer-body-16": {
+      "id": "b-render-tokenizer-body-16",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "code-tokenizer.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a small, deliberately non-general syntax highlighter used only to render the in-canvas "
+        },
+        {
+          "insert": "code-block",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object shape (not related to the docs system's own "
+        },
+        {
+          "insert": "code",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block flavour). Its own header comment is explicit that it is \"intentionally NOT a real syntax-highlighting engine\" — no grammar, no AST, no language server — just regex rules tuned for the two languages the FigJam reference boards actually show. "
+        },
+        {
+          "insert": "tokenizeCodeLine",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts",
+              "symbol": "tokenizeCodeLine"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " dispatches on a language tag: for "
+        },
+        {
+          "insert": "\"python\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " it recognizes comments, strings, a fixed keyword set, and capitalized identifiers (rendered as \"type\" color, mimicking class/type-name highlighting); for "
+        },
+        {
+          "insert": "\"json\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " it splits quoted-string spans from plain spans, coloring a quoted string followed by a colon as a key (\"type\" color) versus a value (\"string\" color), and recognizing "
+        },
+        {
+          "insert": "true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "null",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as keywords. Any other language falls back to untokenized plain text in the base foreground color. "
+        },
+        {
+          "insert": "tokenizeCodeBlock",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts",
+              "symbol": "tokenizeCodeBlock"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": " (the function CanvasStage calls) splits a full code-block body on newlines and tokenizes each line independently. The tokenizer's core invariant — enforced by its test suite — is that concatenating a line's output tokens reproduces the original line exactly; it must never drop or reorder characters."
+        }
+      ],
+      "children": []
+    },
+    "b-render-testing-17": {
+      "id": "b-render-testing-17",
+      "flavour": "testing",
+      "props": {
+        "title": "Render-layer test suite"
+      },
+      "text": [
+        {
+          "insert": "Render-layer tests live under "
+        },
+        {
+          "insert": "packages/canvas/src/render/__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and split cleanly by concern. "
+        },
+        {
+          "insert": "grid.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a pure math suite against "
+        },
+        {
+          "insert": "gridBackground",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": it checks the step stays at the base at scale 1, that zooming out past the min threshold doubles the effective step, that zooming in past the max threshold halves it, that the on-screen step and dot radius stay within their respective bands across a wide sweep of zoom levels (0.05x to 8x), and that "
+        },
+        {
+          "insert": "backgroundPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " tracks translate proportionally to scale. "
+        },
+        {
+          "insert": "code-tokenizer.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " covers "
+        },
+        {
+          "insert": "tokenizeCodeLine",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "tokenizeCodeBlock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " token-boundary and reconstruction correctness. "
+        },
+        {
+          "insert": "w2-render-smoke.test.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a broad rendering smoke test that mounts a full fixture document through the viewer and asserts it renders without throwing. "
+        },
+        {
+          "insert": "canvas-stage.w3b-overlays.test.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " targets CanvasStage's interaction overlays directly: hover ports and snapped-anchor highlighting during connector drags, hollow selection-blue endpoint circles on selected connectors, distribution guides, the bend-affordance stub, and per-connection color rendering. "
+        },
+        {
+          "insert": "connector-rendering.test.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "connection-color.test.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " round out connector coverage — routed connector paths/labels, and the additive per-connection "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field round-tripping through schema validation, state actions, and the rendered stroke/arrowhead color."
+        }
+      ],
+      "children": []
+    },
+    "b-render-closing-18": {
+      "id": "b-render-closing-18",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasStage is a pure renderer over props — it is wired into live interaction state, pointer handling, and the surrounding editor chrome in "
+        },
+        {
+          "insert": "Canvas Engine — Editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "50-editor",
+              "label": "Canvas Engine — Editor"
+            }
+          }
+        },
+        {
+          "insert": ", which covers how the editor's React components mount and drive it."
+        }
+      ],
+      "children": []
+    }
+  }
+}

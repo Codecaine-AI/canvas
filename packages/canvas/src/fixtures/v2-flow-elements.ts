@@ -1,6 +1,6 @@
 "use client";
 
-import type { InteractiveCanvasDocument } from "../schema";
+import type { InteractiveCanvasDocument } from "../model/schema";
 
 /**
  * W2 reference fixture — exercises every new FigJam-section /
