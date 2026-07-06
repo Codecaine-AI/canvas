@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-code-block",
+  "title": "Code Block — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 718,
+    "height": 598
+  },
+  "objects": [
+    {
+      "id": "subject-code-block",
+      "type": "code-block",
+      "label": "Code Block",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 320,
+        "height": 200
+      },
+      "language": "python",
+      "body": "class Agent:\n    def run(self):\n        return self.step()"
+    },
+    {
+      "id": "marker-code-block-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 288,
+        "y": 57,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-code-block-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 555,
+        "y": 246,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-code-block-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 288,
+        "y": 435,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-code-block-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 246,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-code-block",
+      "type": "text",
+      "label": "body renders as tokenized, line-numbered code (no label chrome shown)",
+      "geometry": {
+        "x": 120,
+        "y": 503,
+        "width": 400,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-code-block-top",
+      "from": {
+        "objectId": "marker-code-block-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-code-block",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-code-block-right",
+      "from": {
+        "objectId": "marker-code-block-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-code-block",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-code-block-bottom",
+      "from": {
+        "objectId": "marker-code-block-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-code-block",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-code-block-left",
+      "from": {
+        "objectId": "marker-code-block-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-code-block",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

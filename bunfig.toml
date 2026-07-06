@@ -1,2 +1,5 @@
 [test]
 preload = ["./happydom.ts"]
+# Restrict discovery to this repo's own packages — tools/docs-framework is a
+# submodule carrying vendored package snapshots whose tests are not ours to run.
+root = "packages"

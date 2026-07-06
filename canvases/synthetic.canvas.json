@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "id": "synthetic",
+  "title": "Synthetic Interview Flow",
+  "mode": "diagram",
+  "size": {
+    "width": 1240,
+    "height": 760
+  },
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "interview-flow",
+      "type": "container",
+      "label": "Interview Flow",
+      "body": "Validation container for the first interactive canvas slice.",
+      "geometry": {
+        "x": 72,
+        "y": 64,
+        "width": 1008,
+        "height": 584
+      },
+      "style": {
+        "tone": "neutral",
+        "shape": "rounded-rect"
+      },
+      "layout": {
+        "mode": "free",
+        "padding": 32,
+        "gap": 32
+      }
+    },
+    {
+      "id": "input-context",
+      "type": "container",
+      "label": "Input Context",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 112,
+        "y": 136,
+        "width": 240,
+        "height": 376
+      },
+      "style": {
+        "tone": "input",
+        "shape": "rounded-rect"
+      },
+      "layout": {
+        "mode": "column",
+        "padding": 24,
+        "gap": 18
+      }
+    },
+    {
+      "id": "user-brief",
+      "type": "process",
+      "label": "User brief",
+      "parentId": "input-context",
+      "geometry": {
+        "x": 144,
+        "y": 208,
+        "width": 176,
+        "height": 72
+      },
+      "style": {
+        "tone": "input",
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "current-docs",
+      "type": "source-node",
+      "label": "Current docs",
+      "body": "Existing MDX docs context.",
+      "parentId": "input-context",
+      "geometry": {
+        "x": 144,
+        "y": 320,
+        "width": 176,
+        "height": 72
+      },
+      "style": {
+        "tone": "agent",
+        "shape": "rounded-rect"
+      },
+      "source": {
+        "path": "docs/10-system-design/40-docs-mdx-lab.mdx"
+      }
+    },
+    {
+      "id": "agent-summarizes",
+      "type": "process",
+      "label": "Agent summarizes",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 440,
+        "y": 176,
+        "width": 192,
+        "height": 88
+      },
+      "style": {
+        "tone": "process",
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "needs-clarification",
+      "type": "decision",
+      "label": "Need clarification?",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 704,
+        "y": 168,
+        "width": 176,
+        "height": 112
+      },
+      "style": {
+        "tone": "decision",
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "write-spec",
+      "type": "process",
+      "label": "Write spec",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 928,
+        "y": 176,
+        "width": 160,
+        "height": 88
+      },
+      "style": {
+        "tone": "process",
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ask-follow-up",
+      "type": "sticky",
+      "label": "Ask follow-up",
+      "body": "Keep the question close to the unresolved decision branch.",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 680,
+        "y": 376,
+        "width": 216,
+        "height": 128
+      },
+      "style": {
+        "tone": "warning",
+        "shape": "note"
+      }
+    },
+    {
+      "id": "annotation-review",
+      "type": "annotation-marker",
+      "label": "Review",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 616,
+        "y": 144,
+        "width": 40,
+        "height": 40
+      },
+      "style": {
+        "tone": "annotation",
+        "shape": "marker"
+      }
+    },
+    {
+      "id": "spec-document",
+      "type": "document",
+      "label": "Spec document",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 896,
+        "y": 480,
+        "width": 160,
+        "height": 120
+      },
+      "style": {
+        "shape": "document",
+        "paletteToken": "memory"
+      }
+    },
+    {
+      "id": "stakeholder",
+      "type": "person",
+      "label": "Stakeholder",
+      "parentId": "input-context",
+      "geometry": {
+        "x": 144,
+        "y": 408,
+        "width": 120,
+        "height": 88
+      },
+      "style": {
+        "shape": "person",
+        "paletteToken": "input"
+      }
+    },
+    {
+      "id": "memory-store",
+      "type": "database",
+      "label": "Memory store",
+      "geometry": {
+        "x": 72,
+        "y": 664,
+        "width": 140,
+        "height": 120
+      },
+      "style": {
+        "shape": "database",
+        "paletteToken": "memory"
+      }
+    },
+    {
+      "id": "clarify-chat",
+      "type": "chat",
+      "label": "Clarify chat",
+      "parentId": "interview-flow",
+      "geometry": {
+        "x": 704,
+        "y": 320,
+        "width": 176,
+        "height": 110
+      },
+      "style": {
+        "shape": "chat",
+        "paletteToken": "process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "brief-to-summary",
+      "from": {
+        "objectId": "user-brief",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "agent-summarizes",
+        "anchor": "left"
+      },
+      "label": "prompt",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "docs-to-summary",
+      "from": {
+        "objectId": "current-docs",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "agent-summarizes",
+        "anchor": "left"
+      },
+      "label": "context",
+      "style": "dotted",
+      "arrow": "forward"
+    },
+    {
+      "id": "summary-to-decision",
+      "from": {
+        "objectId": "agent-summarizes",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "needs-clarification",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "decision-to-spec",
+      "from": {
+        "objectId": "needs-clarification",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "write-spec",
+        "anchor": "left"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "decision-to-follow-up",
+      "from": {
+        "objectId": "needs-clarification",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ask-follow-up",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "dotted",
+      "arrow": "forward"
+    }
+  ],
+  "links": [
+    {
+      "id": "docs-link-current-docs",
+      "objectId": "current-docs",
+      "target": {
+        "kind": "doc",
+        "path": "docs/10-system-design/40-docs-mdx-lab.mdx",
+        "label": "Docs MDX lab"
+      },
+      "status": "unresolved"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "annotation-summary-review",
+      "target": {
+        "kind": "object",
+        "objectId": "agent-summarizes"
+      },
+      "intent": "agent-request",
+      "body": "Tighten this step after the first full editor pass.",
+      "status": "open",
+      "createdBy": "human"
+    }
+  ]
+}

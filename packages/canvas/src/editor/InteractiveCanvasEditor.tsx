@@ -7,14 +7,11 @@ import {
   useReducer,
   useRef,
   useState,
+  type ReactNode,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
-  AlignCenterHorizontalIcon,
-  AlignCenterVerticalIcon,
-  AlignHorizontalDistributeCenterIcon,
-  AlignVerticalDistributeCenterIcon,
   ArrowDownIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -30,7 +27,6 @@ import {
   MessageSquareIcon,
   PlusIcon,
   RotateCcwIcon,
-  SaveIcon,
   StickyNoteIcon,
   Trash2Icon,
   TypeIcon,
@@ -66,6 +62,7 @@ import { positionContextToolbar } from "../chrome/context-toolbar-position";
 import { FigJamDock, type ToolId } from "../chrome/FigJamDock";
 import { ShapeSearchPopover } from "../chrome/ShapeSearchPopover";
 import { ShapesPanel } from "../chrome/ShapesPanel";
+import { DashIcon, NoStrokeIcon, StrokeIcon } from "../chrome/toolbar-icons";
 import { ZoomControls } from "../chrome/ZoomControls";
 import { computeEdgePan } from "../interaction/edge-pan";
 import { boundsForGeometries, type CanvasBounds, type CanvasPoint } from "../model/geometry";
@@ -83,15 +80,16 @@ import {
   type InteractionState,
   type ResizeHandle,
 } from "../interaction/interaction";
-import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../render/figjam-tokens";
+import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR, SECTION_GEOMETRY } from "../render/figjam-tokens";
 import { routeConnection, type Anchor } from "../routing/routing";
-import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../render/theme";
+import { CANVAS_PALETTE_TOKENS, paletteTokenStyle, resolveSectionColors } from "../render/theme";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
 import { panBy, worldToScreen } from "./viewport";
 import type {
   CanvasGeometry,
   CanvasPaletteToken,
+  CanvasSectionStrokeStyle,
   CanvasSectionTint,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
@@ -101,9 +99,15 @@ import type {
 
 export interface InteractiveCanvasEditorProps {
   document: InteractiveCanvasDocument;
-  onSave: (document: InteractiveCanvasDocument) => void | Promise<void>;
-  onCancel: () => void;
+  onSave?: (document: InteractiveCanvasDocument) => void | Promise<void>;
+  onCancel?: () => void;
+  onDocumentChange?: (document: InteractiveCanvasDocument) => void;
   title?: string;
+  titleContent?: ReactNode;
+  editableTitle?: boolean;
+  showInspector?: boolean;
+  topBarLeading?: ReactNode;
+  topBarActions?: ReactNode;
 }
 
 function reducer(state: ReturnType<typeof createInteractiveCanvasState>, action: CanvasAction) {
@@ -156,42 +160,29 @@ type DragPointerSnapshot = {
  * larger CanvasTool vocabulary (one entry per placeable object type, plus
  * select/hand/annotation). Most dock ids map 1:1 to an editor tool; "shapes"
  * is special-cased (it opens ShapesPanel instead of arming a single type —
- * see `shapesPanelOpen` state below) and a few dock ids have no backing
- * editor capability yet and are rendered disabled with a "coming soon"
- * tooltip (pen/highlighter/table/stamp/widgets).
+ * see `shapesPanelOpen` state below).
  */
 const DOCK_TOOL_TO_CANVAS_TOOL: Partial<Record<ToolId, CanvasTool>> = {
   select: "select",
   hand: "hand",
   text: "text",
+  section: "section",
   sticky: "sticky",
   connector: "select", // quick-connect is driven by hovering a port while in "select", not a distinct tool.
-  // FigJam's comment tool drops a pin annotation on the canvas — closest
-  // existing capability is the "annotation-marker" object tool.
-  comment: "annotation-marker",
 };
-
-/** Dock ids with no backing editor capability yet — rendered disabled with a tooltip. */
-const DOCK_TOOLS_COMING_SOON = new Set<ToolId>([
-  "pen",
-  "highlighter",
-  "table",
-  "stamp",
-  "widgets",
-]);
 
 /** Inverse of DOCK_TOOL_TO_CANVAS_TOOL, for reflecting reducer tool state back onto the dock's activeTool. */
 const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
   select: "select",
   hand: "hand",
   text: "text",
+  section: "section",
   sticky: "sticky",
-  "annotation-marker": "comment",
 };
 
 /**
  * Every other CanvasTool value (container/process/decision/source-node/
- * document/person/database/chat/section/pill/arrow-shape/predefined-process/
+ * document/person/database/chat/pill/arrow-shape/predefined-process/
  * code-block/chip-icon/annotation) is armed exclusively via the Shapes panel
  * or the shape-search swap popover now — the dock's "shapes" button opens
  * that surface (see ShapesPanel wiring below) rather than exposing 16
@@ -388,12 +379,17 @@ export function InteractiveCanvasEditor({
   document,
   onSave,
   onCancel,
+  onDocumentChange,
   title,
+  titleContent,
+  editableTitle = false,
+  showInspector = false,
+  topBarLeading,
+  topBarActions,
 }: InteractiveCanvasEditorProps) {
   const [state, dispatch] = useReducer(reducer, document, createInteractiveCanvasState);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [annotationBody, setAnnotationBody] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
   const [labelEditConnectionId, setLabelEditConnectionId] = useState<string | null>(null);
   const [labelEditValue, setLabelEditValue] = useState("");
@@ -403,6 +399,8 @@ export function InteractiveCanvasEditor({
   // ones (typing starts immediately after a canvas double-click).
   const [objectLabelEditId, setObjectLabelEditId] = useState<string | null>(null);
   const [objectLabelEditValue, setObjectLabelEditValue] = useState("");
+  const [boardTitleEditing, setBoardTitleEditing] = useState(false);
+  const [boardTitleEditValue, setBoardTitleEditValue] = useState("");
   // FigJamDock modal rule (Wave 3a scope item 1): while the Shapes panel is
   // open, the dock shows no active tool (activeTool=null) — the panel owns
   // placement-arming until a shape is picked or the panel is dismissed.
@@ -483,7 +481,17 @@ export function InteractiveCanvasEditor({
    */
   const applyPaletteTokenToSelection = useCallback(
     (token: CanvasPaletteToken | undefined) => {
+      const tokenStyle = token ? paletteTokenStyle(token) : undefined;
       for (const objectId of selectedIds) {
+        const object = state.document.objects.find((item) => item.id === objectId);
+        if (object?.type === "section") {
+          dispatch({
+            type: "canvas.updateObject",
+            objectId,
+            patch: { style: { fill: tokenStyle?.fill, stroke: tokenStyle?.border } },
+          });
+          continue;
+        }
         dispatch({
           type: "canvas.updateObject",
           objectId,
@@ -491,7 +499,35 @@ export function InteractiveCanvasEditor({
         });
       }
     },
-    [dispatch, selectedIds],
+    [dispatch, selectedIds, state.document.objects],
+  );
+
+  const applySectionFillToSelection = useCallback(
+    (fill: string) => {
+      for (const object of selectedObjectsForToolbar) {
+        if (object.type !== "section") continue;
+        dispatch({
+          type: "canvas.updateObject",
+          objectId: object.id,
+          patch: { style: { fill } },
+        });
+      }
+    },
+    [dispatch, selectedObjectsForToolbar],
+  );
+
+  const applySectionStrokeToSelection = useCallback(
+    (stroke: string) => {
+      for (const object of selectedObjectsForToolbar) {
+        if (object.type !== "section") continue;
+        dispatch({
+          type: "canvas.updateObject",
+          objectId: object.id,
+          patch: { style: { stroke } },
+        });
+      }
+    },
+    [dispatch, selectedObjectsForToolbar],
   );
 
   // Measure the ContextToolbar's actual rendered size so positioning is exact
@@ -537,11 +573,36 @@ export function InteractiveCanvasEditor({
     }
   }, [dispatch, selectedObjectsForToolbar]);
 
+  const toggleSectionContentHiddenForSelection = useCallback(() => {
+    for (const object of selectedObjectsForToolbar) {
+      if (object.type !== "section") continue;
+      dispatch({
+        type: "canvas.updateObject",
+        objectId: object.id,
+        patch: { contentHidden: !object.contentHidden },
+      });
+    }
+  }, [dispatch, selectedObjectsForToolbar]);
+
   const applyTintToSelection = useCallback(
     (tint: CanvasSectionTint) => {
       for (const object of selectedObjectsForToolbar) {
         if (object.type !== "section") continue;
         dispatch({ type: "canvas.updateObject", objectId: object.id, patch: { tint } });
+      }
+    },
+    [dispatch, selectedObjectsForToolbar],
+  );
+
+  const applySectionBorderStyleToSelection = useCallback(
+    (strokeStyle: CanvasSectionStrokeStyle) => {
+      for (const object of selectedObjectsForToolbar) {
+        if (object.type !== "section") continue;
+        dispatch({
+          type: "canvas.updateObject",
+          objectId: object.id,
+          patch: { style: { strokeStyle } },
+        });
       }
     },
     [dispatch, selectedObjectsForToolbar],
@@ -565,11 +626,37 @@ export function InteractiveCanvasEditor({
    * a flyout, rendered just below the toolbar in the overlay.
    */
   const handleContextToolbarAction = useCallback(
-    (action: ContextToolbarActionId) => {
+    (action: ContextToolbarActionId, value?: unknown) => {
+      if (action === "section-border-style" && (value === "solid" || value === "dashed" || value === "none")) {
+        applySectionBorderStyleToSelection(value);
+        return;
+      }
+      if (action === "color" && typeof value === "string") {
+        if (contextToolbarVariant === "section") {
+          applySectionFillToSelection(value);
+        } else {
+          applyPaletteTokenToSelection(nearestPaletteToken(value));
+        }
+        return;
+      }
+      if (action === "rename" && primarySelectedObject) {
+        setObjectLabelEditId(primarySelectedObject.id);
+        setObjectLabelEditValue(
+          primarySelectedObject.type === "section"
+            ? (primarySelectedObject.title ?? primarySelectedObject.label)
+            : primarySelectedObject.label,
+        );
+        return;
+      }
+      if (action === "visibility") {
+        toggleSectionContentHiddenForSelection();
+        return;
+      }
       const FLYOUT_ACTIONS = new Set<ContextToolbarActionId>([
         "shape-swap",
         "color",
         "tint",
+        "section-border-style",
         "dash",
         "routing",
         "arrowhead",
@@ -593,7 +680,15 @@ export function InteractiveCanvasEditor({
       // per-control today, so the tooltip still shows via ChromeTooltip's
       // hover label; clicking is inert).
     },
-    [controls],
+    [
+      applyPaletteTokenToSelection,
+      applySectionFillToSelection,
+      applySectionBorderStyleToSelection,
+      controls,
+      contextToolbarVariant,
+      primarySelectedObject,
+      toggleSectionContentHiddenForSelection,
+    ],
   );
 
   const labelEditConnection = state.document.connections.find(
@@ -643,35 +738,30 @@ export function InteractiveCanvasEditor({
     (objectId: string) => {
       const object = state.document.objects.find((item) => item.id === objectId);
       setObjectLabelEditId(objectId);
-      setObjectLabelEditValue(object?.label ?? "");
+      setObjectLabelEditValue(object?.type === "section" ? (object.title ?? object.label) : (object?.label ?? ""));
     },
     [state.document.objects],
   );
 
   const commitObjectLabel = useCallback(() => {
     if (!objectLabelEditId) return;
+    const target = state.document.objects.find((object) => object.id === objectLabelEditId);
     dispatch({
       type: "canvas.updateObject",
       objectId: objectLabelEditId,
-      patch: { label: objectLabelEditValue },
+      patch:
+        target?.type === "section"
+          ? { title: objectLabelEditValue.trim() || target.title || target.label, label: objectLabelEditValue.trim() || target.label }
+          : { label: objectLabelEditValue },
     });
     setObjectLabelEditId(null);
     setObjectLabelEditValue("");
-  }, [objectLabelEditId, objectLabelEditValue, dispatch]);
+  }, [objectLabelEditId, objectLabelEditValue, dispatch, state.document.objects]);
 
   const cancelObjectLabelEdit = useCallback(() => {
     setObjectLabelEditId(null);
     setObjectLabelEditValue("");
   }, []);
-
-  const save = async () => {
-    setIsSaving(true);
-    try {
-      await onSave(state.document);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   // Interaction machine: a ref holds the current InteractionState (gestures
   // happen faster than React state updates should be trusted for), while
@@ -682,6 +772,37 @@ export function InteractiveCanvasEditor({
   stateRef.current = state;
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
+  const didReportInitialDocumentRef = useRef(false);
+
+  useEffect(() => {
+    if (!didReportInitialDocumentRef.current) {
+      didReportInitialDocumentRef.current = true;
+      return;
+    }
+    onDocumentChange?.(state.document);
+  }, [onDocumentChange, state.document]);
+
+  const boardTitle = title ?? state.document.title ?? state.document.id;
+  const beginBoardTitleEdit = useCallback(() => {
+    if (!editableTitle) return;
+    setBoardTitleEditValue(boardTitle);
+    setBoardTitleEditing(true);
+  }, [boardTitle, editableTitle]);
+  const cancelBoardTitleEdit = useCallback(() => {
+    setBoardTitleEditValue("");
+    setBoardTitleEditing(false);
+  }, []);
+  const commitBoardTitleEdit = useCallback(() => {
+    const nextTitle = boardTitleEditValue.trim();
+    setBoardTitleEditing(false);
+    if (!nextTitle) {
+      setBoardTitleEditValue("");
+      return;
+    }
+    dispatch({ type: "canvas.updateDocumentTitle", title: nextTitle });
+    setBoardTitleEditValue("");
+  }, [boardTitleEditValue, dispatch]);
+
   // Tracks the pointerId + stage element of an in-progress gesture so window-level
   // move/up listeners (attached only while a gesture is active) can keep receiving
   // events even when the pointer leaves the stage's bounding box during a fast drag.
@@ -830,11 +951,27 @@ export function InteractiveCanvasEditor({
 
   const handleStageDoubleClick = useCallback(
     (event: ReactMouseEvent<HTMLElement>) => {
+      if (stateRef.current.tool === "hand") return;
       const stage = stageFromEventTarget(event.currentTarget);
       if (!stage) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const sectionChip = target?.closest("[data-canvas-section-title-chip]");
+      if (sectionChip instanceof HTMLElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        const objectId = sectionChip.getAttribute("data-canvas-section-title-chip");
+        if (objectId) openObjectLabelEditor(objectId);
+        return;
+      }
+      const sectionObject = target?.closest('[data-canvas-object-type="section"]');
+      if (sectionObject) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       runInteraction(buildPointerEvent("double", event.nativeEvent, stage));
     },
-    [buildPointerEvent, runInteraction],
+    [buildPointerEvent, openObjectLabelEditor, runInteraction],
   );
 
   const onWindowPointerMove = useCallback(
@@ -885,6 +1022,7 @@ export function InteractiveCanvasEditor({
   const handleStagePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (event.button !== 0) return;
+      if (stateRef.current.tool === "hand") return;
       const stage = event.currentTarget;
       setContextMenu(null);
       activeGestureRef.current = { pointerId: event.pointerId, stage };
@@ -1093,6 +1231,28 @@ export function InteractiveCanvasEditor({
     setContextMenu(null);
   };
 
+  const handleShapePick = useCallback(
+    (shapeType: InteractiveCanvasObjectType) => {
+      dispatch({ type: "canvas.setTool", tool: shapeType });
+      setShapesPanelOpen(false);
+    },
+    [dispatch],
+  );
+
+  const closeShapesPanel = useCallback(() => setShapesPanelOpen(false), []);
+
+  const handleDockSelectTool = useCallback(
+    (tool: ToolId) => {
+      if (tool === "shapes") return;
+      setShapesPanelOpen(false);
+      const canvasTool = DOCK_TOOL_TO_CANVAS_TOOL[tool];
+      if (canvasTool) dispatch({ type: "canvas.setTool", tool: canvasTool });
+    },
+    [dispatch],
+  );
+
+  const openShapesPanel = useCallback(() => setShapesPanelOpen(true), []);
+
   const contextObject =
     contextMenu?.kind === "object"
       ? state.document.objects.find((object) => object.id === contextMenu.objectId)
@@ -1114,6 +1274,7 @@ export function InteractiveCanvasEditor({
         onStageDoubleClick={handleStageDoubleClick}
         interactionOverlay={interactionOverlay}
         editingLabelObjectId={objectLabelEditId}
+        activeTool={state.tool}
         className="h-full"
         style={{
           cursor: isPanning
@@ -1126,7 +1287,55 @@ export function InteractiveCanvasEditor({
         }}
         worldOverlay={
           <>
-          {objectLabelEditTarget && (
+          {objectLabelEditTarget?.type === "section" ? (
+            <input
+              autoFocus
+              aria-label="Section title"
+              className="interactive-canvas-section-title-editor"
+              data-canvas-section-title-editor={objectLabelEditTarget.id}
+              value={objectLabelEditValue}
+              onChange={(event) => setObjectLabelEditValue(event.target.value)}
+              onFocus={(event) => event.currentTarget.select()}
+              onBlur={commitObjectLabel}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitObjectLabel();
+                } else if (event.key === "Escape") {
+                  event.preventDefault();
+                  cancelObjectLabelEdit();
+                }
+              }}
+              onDoubleClick={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+              style={{
+                position: "absolute",
+                left: `${objectLabelEditTarget.geometry.x + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`,
+                top: `${objectLabelEditTarget.geometry.y + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`,
+                width: `${Math.max(
+                  72,
+                  (objectLabelEditValue || objectLabelEditTarget.title || objectLabelEditTarget.label).length *
+                    (SECTION_GEOMETRY.titleChip.fontSizePx * 0.62) +
+                    SECTION_GEOMETRY.titleChip.paddingXPx * 2 +
+                    SECTION_GEOMETRY.titleChip.borderWidthPx * 2,
+                )}px`,
+                height: `${SECTION_GEOMETRY.titleChip.heightPx}px`,
+                pointerEvents: "auto",
+                border: `${SECTION_GEOMETRY.titleChip.borderWidthPx}px solid var(--primary)`,
+                borderRadius: "6px",
+                padding: `0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px`,
+                fontSize: `${SECTION_GEOMETRY.titleChip.fontSizePx}px`,
+                fontWeight: SECTION_GEOMETRY.titleChip.fontWeight,
+                lineHeight: `${SECTION_GEOMETRY.titleChip.heightPx}px`,
+                background: resolveSectionColors(objectLabelEditTarget.tint).chipFill ?? "var(--background)",
+                color: SECTION_GEOMETRY.titleChip.textColor,
+                outline: "none",
+                whiteSpace: "nowrap",
+                boxSizing: "border-box",
+              }}
+            />
+          ) : objectLabelEditTarget ? (
             <textarea
               autoFocus
               aria-label="Object label"
@@ -1169,7 +1378,7 @@ export function InteractiveCanvasEditor({
                 outline: "none",
               }}
             />
-          )}
+          ) : null}
           {labelEditConnectionId && labelEditPoint ? (
             <input
               autoFocus
@@ -1359,18 +1568,40 @@ export function InteractiveCanvasEditor({
       )}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-wrap items-start justify-between gap-3 p-3">
-        <div className="pointer-events-auto flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-md border border-border/70 bg-background/95 px-3 py-2 shadow-lg backdrop-blur">
+        <div className="pointer-events-auto flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-md border border-border/70 bg-background/95 px-3 py-2 shadow-lg backdrop-blur">
+          {topBarLeading}
           <div className="min-w-0">
-            <div className="truncate font-display text-sm font-semibold">
-              {title ?? state.document.title ?? "Interactive Canvas"}
-            </div>
-            <div className="truncate font-mono text-[11px] text-muted-foreground">
-              {state.document.id}
-            </div>
-          </div>
-          <div className="hidden items-center gap-2 border-l border-border/60 pl-3 text-[11px] text-muted-foreground sm:flex">
-            <span>{state.document.objects.length} objects</span>
-            <span>{state.document.connections.length} connectors</span>
+            {titleContent ?? (
+              boardTitleEditing ? (
+                <Input
+                  autoFocus
+                  className="h-7 w-56 max-w-[45vw] px-2 py-1 font-display text-sm font-semibold"
+                  value={boardTitleEditValue}
+                  aria-label="Board name"
+                  onChange={(event) => setBoardTitleEditValue(event.target.value)}
+                  onBlur={commitBoardTitleEdit}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      commitBoardTitleEdit();
+                    } else if (event.key === "Escape") {
+                      event.preventDefault();
+                      cancelBoardTitleEdit();
+                    }
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="block h-7 max-w-[45vw] truncate rounded px-2 text-left font-display text-sm font-semibold hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={beginBoardTitleEdit}
+                  disabled={!editableTitle}
+                  title={boardTitle}
+                >
+                  {boardTitle}
+                </button>
+              )
+            )}
           </div>
         </div>
 
@@ -1397,19 +1628,28 @@ export function InteractiveCanvasEditor({
           >
             <RotateCcwIcon className="h-4 w-4" />
           </Button>
-          <span className="mx-1 h-6 border-l border-border/60" />
-          <Button type="button" size="sm" variant="outline" onClick={onCancel}>
-            <XIcon className="h-4 w-4" />
-            Cancel
-          </Button>
-          <Button type="button" size="sm" onClick={save} disabled={isSaving}>
-            <SaveIcon className="h-4 w-4" />
-            Save
-          </Button>
+          {onCancel || onSave ? <span className="mx-1 h-6 border-l border-border/60" /> : null}
+          {onCancel ? (
+            <Button type="button" size="sm" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          ) : null}
+          {onSave ? (
+            <Button type="button" size="sm" onClick={() => void onSave(state.document)}>
+              Save
+            </Button>
+          ) : null}
+          {topBarActions ? (
+            <>
+              <span className="mx-1 h-6 border-l border-border/60" />
+              {topBarActions}
+            </>
+          ) : null}
         </div>
       </div>
 
-      <aside className="absolute bottom-24 right-4 top-20 z-20 w-[320px] max-w-[calc(100vw-2rem)] overflow-auto rounded-md border border-border/70 bg-background/95 p-3 shadow-xl backdrop-blur">
+      {showInspector ? (
+        <aside className="absolute bottom-24 right-4 top-20 z-20 w-[320px] max-w-[calc(100vw-2rem)] overflow-auto rounded-md border border-border/70 bg-background/95 p-3 shadow-xl backdrop-blur">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Inspector
@@ -1715,7 +1955,8 @@ export function InteractiveCanvasEditor({
           <div>{selectionContext.connections.length} nearby connectors</div>
           <div>{selectionContext.annotations.length} annotations</div>
         </div>
-      </aside>
+        </aside>
+      ) : null}
 
       {contextToolbarVariant && contextToolbarPosition && (
         <div
@@ -1723,11 +1964,105 @@ export function InteractiveCanvasEditor({
           className="pointer-events-auto absolute z-40"
           style={{ left: contextToolbarPosition.x, top: contextToolbarPosition.y }}
         >
-          <ContextToolbar variant={contextToolbarVariant} onAction={handleContextToolbarAction} />
-          {openFlyout === "color" && primarySelectedObject && contextToolbarVariant !== "connector" && (
+          <ContextToolbar
+            variant={contextToolbarVariant}
+            onAction={handleContextToolbarAction}
+            currentColor={
+              primarySelectedObject?.type === "section"
+                ? primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint
+                : primarySelectedObject
+                  ? paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent
+                  : selectedConnection?.color ?? CONNECTOR_DEFAULT_COLOR
+            }
+            currentSectionBorderStyle={
+              primarySelectedObject?.type === "section" ? (primarySelectedObject.style?.strokeStyle ?? "solid") : undefined
+            }
+            currentSectionStroke={
+              primarySelectedObject?.type === "section"
+                ? primarySelectedObject.style?.stroke ?? resolveSectionColors(primarySelectedObject.tint).chipBorder ?? "transparent"
+                : undefined
+            }
+            activeFlyout={openFlyout}
+            sectionContentHidden={primarySelectedObject?.type === "section" ? primarySelectedObject.contentHidden : undefined}
+            sectionLocked={primarySelectedObject?.type === "section" ? primarySelectedObject.locked : undefined}
+          />
+          {openFlyout === "color" && primarySelectedObject?.type === "section" && contextToolbarVariant === "section" && (
             <div className="absolute left-0 top-full z-50 mt-2">
               <ColorPalettePopover
-                currentColor={paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent}
+                currentColor={primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint}
+                onPick={(color: string) => {
+                  applySectionFillToSelection(color);
+                  setOpenFlyout(null);
+                }}
+              />
+            </div>
+          )}
+          {openFlyout === "section-border-style" && primarySelectedObject?.type === "section" && contextToolbarVariant === "section" && (
+            <div className="absolute left-0 top-full z-50 mt-2">
+              <ColorPalettePopover
+                currentColor={primarySelectedObject.style?.stroke ?? resolveSectionColors(primarySelectedObject.tint).chipBorder ?? "transparent"}
+                onPick={(color: string) => {
+                  applySectionStrokeToSelection(color);
+                  setOpenFlyout(null);
+                }}
+                header={
+                  <div data-toolbar-flyout="section-border" style={{ display: "grid", gap: 12 }}>
+                    <div role="menu" aria-label="Border style" style={{ display: "flex", gap: 8 }}>
+                      {(
+                        [
+                          ["solid", "Solid", StrokeIcon],
+                          ["dashed", "Dashed", DashIcon],
+                          ["none", "None", NoStrokeIcon],
+                        ] as const
+                      ).map(([value, label, Icon]) => {
+                        const active = (primarySelectedObject.style?.strokeStyle ?? "solid") === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            role="menuitem"
+                            aria-label={label}
+                            data-section-border-style={value}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              applySectionBorderStyleToSelection(value);
+                            }}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 6,
+                              height: 30,
+                              padding: "0 10px",
+                              border: "none",
+                              borderRadius: 8,
+                              background: active ? "#8C2EF2" : "rgba(255,255,255,0.08)",
+                              color: "#FFFFFF",
+                              cursor: "pointer",
+                              fontSize: 12,
+                            }}
+                            title={label}
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span>{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{ height: 1, background: "rgba(255,255,255,0.14)" }} />
+                  </div>
+                }
+              />
+            </div>
+          )}
+          {openFlyout === "color" && primarySelectedObject && contextToolbarVariant !== "connector" && contextToolbarVariant !== "section" && (
+            <div className="absolute left-0 top-full z-50 mt-2">
+              <ColorPalettePopover
+                currentColor={
+                  primarySelectedObject.type === "section"
+                    ? primarySelectedObject.style?.fill ?? paletteTokenStyle("note").fill
+                    : paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent
+                }
                 onPick={(color: Parameters<NonNullable<ColorPalettePopoverProps["onPick"]>>[0]) => {
                   applyPaletteTokenToSelection(nearestPaletteToken(color));
                   setOpenFlyout(null);
@@ -1871,11 +2206,8 @@ export function InteractiveCanvasEditor({
         <div className="pointer-events-auto absolute bottom-4 left-4 top-20 z-30">
           <ShapesPanel
             className="h-full"
-            onPick={(shapeType) => {
-              dispatch({ type: "canvas.setTool", tool: shapeType });
-              setShapesPanelOpen(false);
-            }}
-            onClose={() => setShapesPanelOpen(false)}
+            onPick={handleShapePick}
+            onClose={closeShapesPanel}
           />
         </div>
       )}
@@ -1884,96 +2216,12 @@ export function InteractiveCanvasEditor({
         <FigJamDock
           className="pointer-events-auto"
           activeTool={shapesPanelOpen ? null : dockToolForCanvasTool(state.tool)}
-          onSelectTool={(tool) => {
-            if (DOCK_TOOLS_COMING_SOON.has(tool)) return;
-            // "shapes" fires both onOpenShapes and onSelectTool("shapes") on
-            // the same click (see FigJamDock) — don't let this handler close
-            // the panel that onOpenShapes just opened.
-            if (tool === "shapes") return;
-            setShapesPanelOpen(false);
-            const canvasTool = DOCK_TOOL_TO_CANVAS_TOOL[tool];
-            if (canvasTool) dispatch({ type: "canvas.setTool", tool: canvasTool });
-          }}
-          onOpenShapes={() => setShapesPanelOpen(true)}
+          onSelectTool={handleDockSelectTool}
+          onOpenShapes={openShapesPanel}
         />
       </div>
 
       <div className="pointer-events-none absolute bottom-4 right-4 z-30 flex items-center justify-end gap-2">
-        {/*
-          FigJamDock/ZoomControls (the chrome catalog's ground truth) have no
-          slot for align/distribute/fit-to-content/bulk-delete — real
-          capabilities the old toolbar exposed. Rather than dropping them,
-          they get a small secondary pill alongside the dock's zoom controls
-          so nothing regresses.
-        */}
-        <div className="pointer-events-auto flex items-center gap-1 rounded-md border border-border/70 bg-background/95 p-1 shadow-lg backdrop-blur">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Align center"
-            title="Align center"
-            onClick={() => dispatch({ type: "canvas.alignSelection", axis: "center-x" })}
-            disabled={selectedIds.length < 2}
-          >
-            <AlignCenterHorizontalIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Align middle"
-            title="Align middle"
-            onClick={() => dispatch({ type: "canvas.alignSelection", axis: "center-y" })}
-            disabled={selectedIds.length < 2}
-          >
-            <AlignCenterVerticalIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Distribute horizontally"
-            title="Distribute horizontally"
-            onClick={() => dispatch({ type: "canvas.distributeSelection", axis: "horizontal" })}
-            disabled={selectedIds.length < 3}
-          >
-            <AlignHorizontalDistributeCenterIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Distribute vertically"
-            title="Distribute vertically"
-            onClick={() => dispatch({ type: "canvas.distributeSelection", axis: "vertical" })}
-            disabled={selectedIds.length < 3}
-          >
-            <AlignVerticalDistributeCenterIcon className="h-4 w-4" />
-          </Button>
-          <span className="mx-1 h-6 border-l border-border/60" />
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Fit to content"
-            title="Fit to content"
-            onClick={controls.fit}
-          >
-            <CheckIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Delete"
-            title="Delete"
-            onClick={() => dispatch({ type: "canvas.deleteSelection" })}
-            disabled={selectedIds.length === 0}
-          >
-            <Trash2Icon className="h-4 w-4" />
-          </Button>
-        </div>
         <ZoomControls
           className="pointer-events-auto"
           zoomPercent={viewport.zoom}

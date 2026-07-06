@@ -46,6 +46,17 @@ describe("gridBackground", () => {
     }
   });
 
+  it("keeps high-zoom grid dots nonempty and smaller than the pitch", () => {
+    for (const scale of [4, 8]) {
+      const result = gridBackground(scale, { x: 0, y: 0 });
+      const sizePx = parseFloat(result.backgroundSize);
+      expect(sizePx).toBeGreaterThanOrEqual(MIN_SCREEN_STEP_PX - 1e-6);
+      expect(sizePx).toBeLessThanOrEqual(MAX_SCREEN_STEP_PX + 1e-6);
+      expect(result.dotRadius).toBeGreaterThan(0);
+      expect(result.dotRadius * 2).toBeLessThan(sizePx);
+    }
+  });
+
   it("tracks translate in backgroundPosition proportional to scale", () => {
     const scale = 2;
     const result = gridBackground(scale, { x: 10, y: -5 });

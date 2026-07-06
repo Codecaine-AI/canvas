@@ -155,6 +155,86 @@ describe("interaction: selectionBounds", () => {
 });
 
 describe("interaction: click selection (sub-threshold press+release)", () => {
+  it("keeps hand mode as pure pan for synthetic object clicks and drags", () => {
+    const document = makeDocument([
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+      makeObject({ id: "b", geometry: { x: 150, y: 0, width: 100, height: 100 } }),
+    ]);
+    const ctx = makeContext(document, {
+      tool: "hand",
+      selection: { kind: "objects", objectIds: ["b"] },
+    });
+
+    let result = stepInteraction(
+      IDLE_INTERACTION_STATE,
+      down({ x: 50, y: 50 }, { kind: "object", objectId: "a" }),
+      ctx,
+    );
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([]);
+
+    result = stepInteraction(result.state, up({ x: 50, y: 50 }, { kind: "object", objectId: "a" }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([]);
+
+    result = stepInteraction(
+      IDLE_INTERACTION_STATE,
+      down({ x: 50, y: 50 }, { kind: "object", objectId: "a" }),
+      ctx,
+    );
+    result = stepInteraction(result.state, move({ x: 90, y: 90 }, { kind: "object", objectId: "a" }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(updateGeometriesActions(result.dispatch)).toEqual([]);
+  });
+
+  it("ignores synthetic hand-mode handles, connector endpoints, ports, and double-clicks", () => {
+    const document = makeDocument(
+      [
+        makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+        makeObject({ id: "b", geometry: { x: 200, y: 0, width: 100, height: 100 } }),
+      ],
+      [
+        makeConnection({
+          id: "c1",
+          from: { objectId: "a", anchor: "right" },
+          to: { objectId: "b", anchor: "left" },
+        }),
+      ],
+    );
+    const ctx = makeContext(document, {
+      tool: "hand",
+      selection: { kind: "objects", objectIds: ["a"] },
+    });
+    const hits: CanvasPointerEvent["hit"][] = [
+      { kind: "handle", objectId: "a", handle: "se" },
+      { kind: "endpoint", connectionId: "c1", end: "from" },
+      { kind: "port", objectId: "a", anchor: "right" },
+      { kind: "connection", connectionId: "c1" },
+      { kind: "canvas" },
+    ];
+
+    for (const hit of hits) {
+      const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
+      expect(result.state.kind).toBe("idle");
+      expect(result.dispatch).toEqual([]);
+      expect(result.overlay).toEqual({});
+    }
+
+    const doubleResult = stepInteraction(
+      IDLE_INTERACTION_STATE,
+      pointerEvent({
+        type: "double",
+        world: { x: 10, y: 10 },
+        screen: { x: 10, y: 10 },
+        hit: { kind: "object", objectId: "a" },
+      }),
+      ctx,
+    );
+    expect(doubleResult.state.kind).toBe("idle");
+    expect(doubleResult.dispatch).toEqual([]);
+    expect(doubleResult.overlay).toEqual({});
+  });
+
   it("selects an object on a sub-threshold press+release (no drag)", () => {
     const document = makeDocument([makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } })]);
     const ctx = makeContext(document);
@@ -260,6 +340,42 @@ describe("interaction: drag/move gesture", () => {
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
   });
 
+  it("moves a dragged container and its descendants exactly once", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "container",
+        type: "container",
+        geometry: { x: 80, y: 80, width: 320, height: 220 },
+      }),
+      makeObject({
+        id: "child",
+        parentId: "container",
+        geometry: { x: 120, y: 120, width: 80, height: 40 },
+      }),
+      makeObject({
+        id: "grandchild",
+        parentId: "child",
+        geometry: { x: 140, y: 180, width: 60, height: 30 },
+      }),
+      makeObject({ id: "outside", geometry: { x: 500, y: 500, width: 80, height: 40 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "container" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 90, y: 90 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 130, y: 110 }, hit), ctx);
+
+    expect(result.state.kind).toBe("move");
+    const geometryActions = updateGeometriesActions(result.dispatch);
+    expect(geometryActions).toHaveLength(1);
+    expect(geometryActions[0]!.geometries).toEqual({
+      container: { x: 120, y: 100, width: 320, height: 220 },
+      child: { x: 160, y: 140, width: 80, height: 40 },
+      grandchild: { x: 180, y: 200, width: 60, height: 30 },
+    });
+    expect(geometryActions[0]!.geometries.outside).toBeUndefined();
+  });
+
   it("does not start a move gesture until the 3px world threshold is crossed", () => {
     const document = makeDocument([makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } })]);
     const ctx = makeContext(document);
@@ -269,6 +385,27 @@ describe("interaction: drag/move gesture", () => {
     // 2px movement: below threshold, stays "pressing", no geometry dispatch.
     result = stepInteraction(result.state, move({ x: 11, y: 11 }, hit), ctx);
     expect(result.state.kind).toBe("pressing");
+    expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+  });
+
+  it("does not move a locked section", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "section-a",
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: true,
+        geometry: { x: 0, y: 0, width: 200, height: 120 },
+      }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["section-a"] } });
+    const hit = { kind: "object" as const, objectId: "section-a" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 40, y: 40 }, hit), ctx);
+
+    expect(result.state.kind).toBe("idle");
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
   });
 
@@ -486,6 +623,26 @@ describe("interaction: resize gesture via stepInteraction", () => {
     const geometryActions = updateGeometriesActions(cancelResult.dispatch);
     expect(geometryActions[0]!.recordHistory).toBe(false);
     expect(geometryActions[0]!.geometries.a).toEqual({ x: 100, y: 100, width: 200, height: 150 });
+  });
+
+  it("does not resize a locked section", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "section-a",
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: true,
+        geometry: { x: 100, y: 100, width: 200, height: 150 },
+      }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["section-a"] } });
+    const handleHit = { kind: "handle" as const, objectId: "section-a", handle: "se" as ResizeHandle };
+
+    const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 250 }, handleHit), ctx);
+
+    expect(result.state.kind).toBe("idle");
+    expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
   });
 });
 

@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "id": "v2-flow-elements",
+  "title": "V2 Flow — element vocabulary reference",
+  "mode": "diagram",
+  "size": {
+    "width": 1600,
+    "height": 900
+  },
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "objects": [
+    {
+      "id": "outer-section",
+      "type": "section",
+      "label": "Outer section",
+      "title": "Memory pipeline",
+      "tint": "gray",
+      "geometry": {
+        "x": 40,
+        "y": 40,
+        "width": 700,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inner-section",
+      "type": "section",
+      "label": "Inner section",
+      "title": "New memory",
+      "tint": "blue",
+      "parentId": "outer-section",
+      "geometry": {
+        "x": 80,
+        "y": 100,
+        "width": 300,
+        "height": 260
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "captured-pill",
+      "type": "pill",
+      "label": "Base Question Text",
+      "parentId": "outer-section",
+      "geometry": {
+        "x": 420,
+        "y": 120,
+        "width": 200,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill",
+        "paletteToken": "input"
+      }
+    },
+    {
+      "id": "captured-code-block",
+      "type": "code-block",
+      "label": "Agent definition",
+      "body": "class Agent(BaseModel):\n    name: str\n    # created per session\n    def run(self):\n        return None",
+      "language": "python",
+      "parentId": "inner-section",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 260,
+        "height": 180
+      },
+      "style": {
+        "shape": "code-block"
+      }
+    },
+    {
+      "id": "partial-overlap-note",
+      "type": "sticky",
+      "label": "Partial overlap sticky",
+      "body": "Only a corner of this note overlaps outer-section — must not be captured on drag.\n- bullet one\n- bullet two",
+      "author": "Ford",
+      "geometry": {
+        "x": 690,
+        "y": 480,
+        "width": 220,
+        "height": 180
+      },
+      "style": {
+        "tone": "warning",
+        "shape": "note"
+      }
+    },
+    {
+      "id": "outside-arrow",
+      "type": "arrow-shape",
+      "label": "Then",
+      "direction": "right",
+      "geometry": {
+        "x": 900,
+        "y": 60,
+        "width": 361,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape",
+        "paletteToken": "process"
+      }
+    },
+    {
+      "id": "outside-arrow-left",
+      "type": "arrow-shape",
+      "label": "Back",
+      "direction": "left",
+      "geometry": {
+        "x": 900,
+        "y": 200,
+        "width": 361,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape",
+        "paletteToken": "hot"
+      }
+    },
+    {
+      "id": "predefined-process-node",
+      "type": "predefined-process",
+      "label": "New Memory",
+      "geometry": {
+        "x": 900,
+        "y": 340,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process",
+        "paletteToken": "memory"
+      }
+    },
+    {
+      "id": "chip-icon-node",
+      "type": "chip-icon",
+      "label": "Model",
+      "geometry": {
+        "x": 1160,
+        "y": 60,
+        "width": 120,
+        "height": 140
+      },
+      "style": {
+        "shape": "chip-icon"
+      }
+    },
+    {
+      "id": "restyled-person",
+      "type": "person",
+      "label": "Interviewee",
+      "geometry": {
+        "x": 1160,
+        "y": 240,
+        "width": 128,
+        "height": 144
+      },
+      "style": {
+        "shape": "person",
+        "paletteToken": "input"
+      }
+    },
+    {
+      "id": "restyled-chat",
+      "type": "chat",
+      "label": "Live Q&A",
+      "body": "Realtime exchange between interviewer and interviewee.",
+      "geometry": {
+        "x": 1330,
+        "y": 240,
+        "width": 180,
+        "height": 130
+      },
+      "style": {
+        "shape": "chat",
+        "paletteToken": "process"
+      }
+    },
+    {
+      "id": "compact-person",
+      "type": "person",
+      "label": "Compact person",
+      "geometry": {
+        "x": 1160,
+        "y": 420,
+        "width": 96,
+        "height": 72
+      },
+      "style": {
+        "shape": "person",
+        "paletteToken": "input"
+      }
+    },
+    {
+      "id": "standalone-label",
+      "type": "text",
+      "label": "Section header label",
+      "geometry": {
+        "x": 900,
+        "y": 520,
+        "width": 260,
+        "height": 40
+      }
+    },
+    {
+      "id": "json-code-block",
+      "type": "code-block",
+      "label": "Config",
+      "body": "{\n  \"name\": \"spectre\",\n  \"active\": true,\n  \"deleted\": null\n}",
+      "language": "json",
+      "geometry": {
+        "x": 1160,
+        "y": 560,
+        "width": 300,
+        "height": 200
+      },
+      "style": {
+        "shape": "code-block"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "arrow-to-process",
+      "from": {
+        "objectId": "outside-arrow",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "predefined-process-node",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "response"
+    }
+  ]
+}

@@ -23,7 +23,30 @@ export type InteractiveCanvasObjectType =
   | "arrow-shape"
   | "predefined-process"
   | "code-block"
-  | "chip-icon";
+  | "chip-icon"
+  // W5 — FigJam parity shape set (Wave A): 19 native Basic/Flowchart primitives
+  // plus the icon-glyph family, per docs/10-system-design/20-figjam-parity's
+  // "Missing shape specs" and the Wave A implementation brief.
+  | "ellipse"
+  | "triangle"
+  | "parallelogram"
+  | "pentagon"
+  | "octagon"
+  | "star"
+  | "plus"
+  | "chevron"
+  | "folder"
+  | "document-stack"
+  | "off-page-connector"
+  | "trapezoid"
+  | "manual-input"
+  | "hexagon"
+  | "internal-storage"
+  | "or-junction"
+  | "summing-junction"
+  | "cylinder-horizontal"
+  | "page-corner"
+  | "icon";
 
 export type InteractiveCanvasTone =
   | "neutral"
@@ -64,12 +87,60 @@ export type CanvasSectionTint =
   | "blue"
   | "teal";
 
-/** Chevron/arrow-shape pointing direction (W2). */
-export type CanvasArrowShapeDirection = "left" | "right";
+/**
+ * Directional field shared by every direction-aware shape (W5). Individual
+ * types only accept a subset of these 4 values — see `direction` on
+ * `InteractiveCanvasObject` and the per-type soft-default validation in
+ * `validateInteractiveCanvasDocument` (arrow-shape/parallelogram/chevron:
+ * "left" | "right", default "right"; triangle: "up" | "down", default "up").
+ */
+export type CanvasShapeDirection = "left" | "right" | "up" | "down";
+
+/**
+ * Chevron/arrow-shape pointing direction (W2). Kept as a back-compat alias of
+ * the generalized `CanvasShapeDirection` (W5) for any external reference to
+ * this name; arrow-shape's own accepted values are still just left|right.
+ */
+export type CanvasArrowShapeDirection = CanvasShapeDirection;
+
+/**
+ * Icon glyph selector for `type: "icon"` (W5) — the Advanced-tier FigJam
+ * component family, 26 stroke-outline glyphs rendered in a 24x24 viewBox
+ * with the label below (chip-icon precedent). Exact ids per the Wave A
+ * implementation brief; Wave B2 owns the actual glyph-path registry.
+ */
+export type CanvasIconGlyph =
+  | "activity"
+  | "archive"
+  | "key"
+  | "chat"
+  | "cloud"
+  | "cpu"
+  | "database"
+  | "display"
+  | "mail"
+  | "file"
+  | "code"
+  | "bolt"
+  | "pin"
+  | "phone"
+  | "package"
+  | "coin"
+  | "shield"
+  | "send"
+  | "server"
+  | "cube"
+  | "gear"
+  | "drive"
+  | "terminal"
+  | "person"
+  | "wallet"
+  | "globe";
 
 export type CanvasLinkStatus = "resolved" | "stale" | "missing" | "unresolved";
 
 export type CanvasConnectionStyle = "solid" | "dotted" | "elbow" | "smooth";
+export type CanvasSectionStrokeStyle = "solid" | "dashed" | "none";
 
 export type CanvasArrowDirection = "none" | "forward" | "back" | "both";
 
@@ -107,7 +178,28 @@ export type CanvasObjectStyle = {
     | "arrow-shape"
     | "predefined-process"
     | "code-block"
-    | "chip-icon";
+    | "chip-icon"
+    // W5 — FigJam parity shape set (Wave A), one same-named variant per new type:
+    | "ellipse"
+    | "triangle"
+    | "parallelogram"
+    | "pentagon"
+    | "octagon"
+    | "star"
+    | "plus"
+    | "chevron"
+    | "folder"
+    | "document-stack"
+    | "off-page-connector"
+    | "trapezoid"
+    | "manual-input"
+    | "hexagon"
+    | "internal-storage"
+    | "or-junction"
+    | "summing-junction"
+    | "cylinder-horizontal"
+    | "page-corner"
+    | "icon";
   /** Semantic palette token (D16) — takes precedence over `tone` when set. */
   paletteToken?: CanvasPaletteToken;
   /**
@@ -123,6 +215,8 @@ export type CanvasObjectStyle = {
    * defaults to the FigJam universal shape stroke (SHAPE_STROKE_WIDTH_PX = 4).
    */
   strokeWidth?: number;
+  /** Section border style. Sections default to solid when omitted. */
+  strokeStyle?: CanvasSectionStrokeStyle;
 };
 
 export type InteractiveCanvasObject = {
@@ -154,12 +248,25 @@ export type InteractiveCanvasObject = {
   title?: string;
   tint?: CanvasSectionTint;
   locked?: boolean;
-  /** `type: "arrow-shape"` only (W2) — which way the chevron points. */
-  direction?: CanvasArrowShapeDirection;
+  contentHidden?: boolean;
+  /**
+   * Pointing/skew direction for direction-aware shapes (W2, generalized W5):
+   * `arrow-shape` | `chevron` | `parallelogram` accept "left" | "right"
+   * (soft-default "right" when omitted/invalid); `triangle` accepts
+   * "up" | "down" (soft-default "up"). Absent/ignored for every other type.
+   */
+  direction?: CanvasShapeDirection;
   /** `type: "code-block"` only (W2) — selects the minimal tokenizer in code-tokenizer.ts. */
   language?: string;
   /** `type: "sticky"` only (W2) — rendered bottom-left at 12px/40% black. */
   author?: string;
+  /**
+   * `type: "icon"` only (W5) — REQUIRED glyph selector, one of the 26
+   * Advanced-tier ids in `CanvasIconGlyph`. Missing/unknown is a hard
+   * validation error (mirrors the `section` title/tint precedent above),
+   * since an icon object with no glyph can't be rendered at all.
+   */
+  icon?: CanvasIconGlyph;
 };
 
 export type CanvasConnectionEndpoint = {
@@ -288,7 +395,28 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "arrow-shape" ||
     value === "predefined-process" ||
     value === "code-block" ||
-    value === "chip-icon"
+    value === "chip-icon" ||
+    // W5 — FigJam parity shape set (Wave A):
+    value === "ellipse" ||
+    value === "triangle" ||
+    value === "parallelogram" ||
+    value === "pentagon" ||
+    value === "octagon" ||
+    value === "star" ||
+    value === "plus" ||
+    value === "chevron" ||
+    value === "folder" ||
+    value === "document-stack" ||
+    value === "off-page-connector" ||
+    value === "trapezoid" ||
+    value === "manual-input" ||
+    value === "hexagon" ||
+    value === "internal-storage" ||
+    value === "or-junction" ||
+    value === "summing-junction" ||
+    value === "cylinder-horizontal" ||
+    value === "page-corner" ||
+    value === "icon"
   );
 }
 
@@ -307,8 +435,48 @@ function isSectionTint(value: unknown): value is CanvasSectionTint {
   );
 }
 
-function isArrowShapeDirection(value: unknown): value is CanvasArrowShapeDirection {
+/**
+ * `direction: "left" | "right"` acceptance (W2, reused W5) for the 3 shapes
+ * that point/skew horizontally: arrow-shape, chevron, parallelogram.
+ */
+function isArrowShapeDirection(value: unknown): value is "left" | "right" {
   return value === "left" || value === "right";
+}
+
+/** `direction: "up" | "down"` acceptance for `triangle` (W5). */
+function isTriangleDirection(value: unknown): value is "up" | "down" {
+  return value === "up" || value === "down";
+}
+
+function isCanvasIconGlyph(value: unknown): value is CanvasIconGlyph {
+  return (
+    value === "activity" ||
+    value === "archive" ||
+    value === "key" ||
+    value === "chat" ||
+    value === "cloud" ||
+    value === "cpu" ||
+    value === "database" ||
+    value === "display" ||
+    value === "mail" ||
+    value === "file" ||
+    value === "code" ||
+    value === "bolt" ||
+    value === "pin" ||
+    value === "phone" ||
+    value === "package" ||
+    value === "coin" ||
+    value === "shield" ||
+    value === "send" ||
+    value === "server" ||
+    value === "cube" ||
+    value === "gear" ||
+    value === "drive" ||
+    value === "terminal" ||
+    value === "person" ||
+    value === "wallet" ||
+    value === "globe"
+  );
 }
 
 function isPaletteToken(value: unknown): value is CanvasPaletteToken {
@@ -323,6 +491,10 @@ function isPaletteToken(value: unknown): value is CanvasPaletteToken {
 
 function isConnectionStyle(value: unknown): value is CanvasConnectionStyle {
   return value === "solid" || value === "dotted" || value === "elbow" || value === "smooth";
+}
+
+function isSectionStrokeStyle(value: unknown): value is CanvasSectionStrokeStyle {
+  return value === "solid" || value === "dashed" || value === "none";
 }
 
 function isArrow(value: unknown): value is CanvasArrowDirection {
@@ -503,6 +675,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     let fill: string | undefined;
     let stroke: string | undefined;
     let strokeWidth: number | undefined;
+    let strokeStyle: CanvasSectionStrokeStyle | undefined;
     if (isRecord(rawObject.style)) {
       if (rawObject.style.fill !== undefined) {
         if (typeof rawObject.style.fill === "string" && rawObject.style.fill.trim().length > 0) {
@@ -534,6 +707,16 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
           });
         }
       }
+      if (rawObject.style.strokeStyle !== undefined) {
+        if (isSectionStrokeStyle(rawObject.style.strokeStyle)) {
+          strokeStyle = rawObject.style.strokeStyle;
+        } else {
+          warnings.push({
+            path: `${path}.style.strokeStyle`,
+            message: "style.strokeStyle must be solid, dashed, or none; it was dropped.",
+          });
+        }
+      }
     }
 
     // W2 — section requires title + a known tint family; both are hard
@@ -556,10 +739,31 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
 
     // W2 — arrow-shape direction defaults to "right" when omitted/invalid
     // (non-fatal: a chevron pointing right is a reasonable default, not worth
-    // rejecting the whole document over).
-    let direction: CanvasArrowShapeDirection | undefined;
-    if (rawObject.type === "arrow-shape") {
+    // rejecting the whole document over). W5 generalizes the same soft-default
+    // pattern to parallelogram/chevron (left|right, default "right") and
+    // triangle (up|down, default "up") — each type only accepts its own
+    // 2-value subset of CanvasShapeDirection.
+    let direction: CanvasShapeDirection | undefined;
+    if (
+      rawObject.type === "arrow-shape" ||
+      rawObject.type === "parallelogram" ||
+      rawObject.type === "chevron"
+    ) {
       direction = isArrowShapeDirection(rawObject.direction) ? rawObject.direction : "right";
+    } else if (rawObject.type === "triangle") {
+      direction = isTriangleDirection(rawObject.direction) ? rawObject.direction : "up";
+    }
+
+    // W5 — icon requires a known glyph id; hard validation error (not a
+    // warning) since an icon object with no resolvable glyph can't be
+    // rendered at all (mirrors the section title/tint precedent above).
+    let icon: CanvasIconGlyph | undefined;
+    if (rawObject.type === "icon") {
+      if (!isCanvasIconGlyph(rawObject.icon)) {
+        issues.push({ path: `${path}.icon`, message: "Icon requires a known glyph id." });
+        continue;
+      }
+      icon = rawObject.icon;
     }
 
     objects.push({
@@ -583,6 +787,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
             fill,
             stroke,
             strokeWidth,
+            strokeStyle,
           }
         : undefined,
       layout: isRecord(rawObject.layout)
@@ -611,9 +816,11 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       title,
       tint,
       locked: typeof rawObject.locked === "boolean" ? rawObject.locked : undefined,
+      contentHidden: typeof rawObject.contentHidden === "boolean" ? rawObject.contentHidden : undefined,
       direction,
       language: typeof rawObject.language === "string" ? rawObject.language : undefined,
       author: typeof rawObject.author === "string" ? rawObject.author : undefined,
+      icon,
     });
   }
 
@@ -623,6 +830,22 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         path: `$.objects.${object.id}.parentId`,
         message: `Unknown parent object: ${object.parentId}`,
       });
+    }
+  }
+  const objectById = new Map(objects.map((object) => [object.id, object]));
+  for (const object of objects) {
+    const visited = new Set<string>([object.id]);
+    let parentId = object.parentId ?? null;
+    while (parentId) {
+      if (visited.has(parentId)) {
+        issues.push({
+          path: `$.objects.${object.id}.parentId`,
+          message: "Parent cycle detected.",
+        });
+        break;
+      }
+      visited.add(parentId);
+      parentId = objectById.get(parentId)?.parentId ?? null;
     }
   }
 

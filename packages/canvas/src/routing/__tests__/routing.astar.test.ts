@@ -1,9 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { v2FlowInteractiveCanvas } from "../../fixtures/v2-flow-canvas";
+import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactive.canvas.json";
 import { objectById, type CanvasBounds } from "../../model/geometry";
 import { routeConnection, type RoutedConnection } from "../routing";
 import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
 import { CONNECTOR_END_GAP_PX } from "../../render/figjam-tokens";
+
+const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
 
 /** Parses an SVG path's `M`/`L`/`Q` numeric coordinates into a flat point list (Q control points included, harmless for bounds checks since they lie near the corner). */
 function pathPoints(path: string): { x: number; y: number }[] {
@@ -86,7 +88,7 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     // at the segment midpoint" contract), literal direct lines/curves between
     // their two anchor points and may legitimately pass near or through
     // unrelated shapes sitting on that line — that's not a routing bug.
-    const results = routeAll(v2FlowInteractiveCanvas).filter(
+    const results = routeAll(v2FlowSampleDocument).filter(
       ({ connection }) => connection.style === "elbow" && !connection.waypoints,
     );
     expect(results.length).toBeGreaterThan(0);
@@ -98,10 +100,10 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
       // necessarily passes through that object's parent containers' bounds,
       // which is containment, not an obstacle crossing.
       const excluded = new Set<string>([
-        ...collectSelfAndAncestors(v2FlowInteractiveCanvas, fromObject.id),
-        ...collectSelfAndAncestors(v2FlowInteractiveCanvas, toObject.id),
+        ...collectSelfAndAncestors(v2FlowSampleDocument, fromObject.id),
+        ...collectSelfAndAncestors(v2FlowSampleDocument, toObject.id),
       ]);
-      const nonOwnerObjects = v2FlowInteractiveCanvas.objects.filter((object) => !excluded.has(object.id));
+      const nonOwnerObjects = v2FlowSampleDocument.objects.filter((object) => !excluded.has(object.id));
 
       for (let i = 1; i < points.length; i += 1) {
         const a = points[i - 1]!;
@@ -115,20 +117,20 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
   });
 
   it("is deterministic — routing the same connection twice yields the same path", () => {
-    const connection = v2FlowInteractiveCanvas.connections.find((c) => c.id === "transition-to-question")!;
-    const fromObject = objectById(v2FlowInteractiveCanvas, connection.from.objectId)!;
-    const toObject = objectById(v2FlowInteractiveCanvas, connection.to.objectId)!;
+    const connection = v2FlowSampleDocument.connections.find((c) => c.id === "transition-to-question")!;
+    const fromObject = objectById(v2FlowSampleDocument, connection.from.objectId)!;
+    const toObject = objectById(v2FlowSampleDocument, connection.to.objectId)!;
 
-    const first = routeConnection(fromObject, toObject, connection, v2FlowInteractiveCanvas.objects);
-    const second = routeConnection(fromObject, toObject, connection, v2FlowInteractiveCanvas.objects);
+    const first = routeConnection(fromObject, toObject, connection, v2FlowSampleDocument.objects);
+    const second = routeConnection(fromObject, toObject, connection, v2FlowSampleDocument.objects);
 
     expect(second).toEqual(first);
   });
 
   it("keeps the 3-arg form working — omitting obstacles behaves exactly like passing none", () => {
-    const connection = v2FlowInteractiveCanvas.connections.find((c) => c.id === "transition-to-question")!;
-    const fromObject = objectById(v2FlowInteractiveCanvas, connection.from.objectId)!;
-    const toObject = objectById(v2FlowInteractiveCanvas, connection.to.objectId)!;
+    const connection = v2FlowSampleDocument.connections.find((c) => c.id === "transition-to-question")!;
+    const fromObject = objectById(v2FlowSampleDocument, connection.from.objectId)!;
+    const toObject = objectById(v2FlowSampleDocument, connection.to.objectId)!;
 
     const threeArg = routeConnection(fromObject, toObject, connection);
     const emptyObstacles = routeConnection(fromObject, toObject, connection, []);

@@ -8,7 +8,7 @@ asymmetric re-route)"), on 2026-07-05.
 ## What moved
 
 - `apps/frontend/src/lib/interactive-canvas/**` (the engine, chrome
-  components, fixtures, and test suite) → `packages/canvas/src/**`, with two
+  components, sample canvas data, and test suite) → `packages/canvas/src/**`, with two
   exceptions that stayed in Spectre because they are app-coupled
   (`CanvasSidecarEmbed.tsx` imports Spectre's `@/lib/projects-api`;
   `InteractiveCanvasLibrary.tsx` + its `/canvas` route are the Spectre docs
@@ -53,7 +53,7 @@ MPL-2.0 is a file-level copyleft license — see
 `packages/canvas/packages/canvas/src/vendor/blocksuite/NOTICE` for the exact
 provenance and modification status of each vendored file, and keep that
 NOTICE in sync if those files are ever modified. The rest of this package
-(the engine, chrome components, fixtures, and vendored UI primitives) is
+(the engine, chrome components, sample canvas data, and vendored UI primitives) is
 original Spectre/Codecaine code with no further licensing constraints beyond
 whatever license this repository declares at large.
 

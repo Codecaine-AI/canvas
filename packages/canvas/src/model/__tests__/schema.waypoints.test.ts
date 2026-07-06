@@ -1,7 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
+import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactive.canvas.json";
 import { validateInteractiveCanvasDocument } from "../schema";
-import { v2FlowInteractiveCanvas } from "../../fixtures/v2-flow-canvas";
-import { syntheticInteractiveCanvas } from "../../fixtures/synthetic-canvas";
+import type { InteractiveCanvasDocument } from "../schema";
+
+const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
+const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
 
 function baseDocument(overrides: {
   fromExtra?: Record<string, unknown>;
@@ -121,8 +125,8 @@ describe("schema — D33 thread B additions (position, waypoints)", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("still validates the v2-flow fixture unchanged (no position/waypoints present)", () => {
-    const result = validateInteractiveCanvasDocument(v2FlowInteractiveCanvas);
+  it("still validates the v2-flow canvas JSON unchanged (no position/waypoints present)", () => {
+    const result = validateInteractiveCanvasDocument(v2FlowSampleDocument);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     for (const connection of result.document.connections) {
@@ -132,8 +136,8 @@ describe("schema — D33 thread B additions (position, waypoints)", () => {
     }
   });
 
-  it("still validates the synthetic fixture unchanged", () => {
-    const result = validateInteractiveCanvasDocument(syntheticInteractiveCanvas);
+  it("still validates the synthetic canvas JSON unchanged", () => {
+    const result = validateInteractiveCanvasDocument(syntheticCanvasDocument);
     expect(result.ok).toBe(true);
   });
 });

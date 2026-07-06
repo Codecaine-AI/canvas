@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { syntheticInteractiveCanvas } from "../../fixtures/synthetic-canvas";
+import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
 import type { CanvasBounds, CanvasPoint } from "../../model/geometry";
+import type { InteractiveCanvasDocument } from "../../model/schema";
 import {
   clampZoom,
   containerViewBounds,
@@ -15,6 +16,7 @@ import {
   type ViewportState,
 } from "../viewport";
 
+const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 const EPSILON = 1e-6;
 
 function expectClose(actual: number, expected: number): void {
@@ -27,8 +29,8 @@ function expectPointClose(actual: CanvasPoint, expected: CanvasPoint): void {
 }
 
 function objectGeometry(id: string): CanvasBounds {
-  const object = syntheticInteractiveCanvas.objects.find((candidate) => candidate.id === id);
-  if (!object) throw new Error(`Missing fixture object: ${id}`);
+  const object = syntheticCanvasDocument.objects.find((candidate) => candidate.id === id);
+  if (!object) throw new Error(`Missing canvas JSON object: ${id}`);
   return object.geometry;
 }
 
@@ -123,7 +125,7 @@ describe("viewport", () => {
 
   describe("fitDocument", () => {
     it("returns a finite viewport for the synthetic canvas", () => {
-      const viewport = fitDocument(syntheticInteractiveCanvas, { width: 1600, height: 900 });
+      const viewport = fitDocument(syntheticCanvasDocument, { width: 1600, height: 900 });
 
       expect(Number.isFinite(viewport.x)).toBe(true);
       expect(Number.isFinite(viewport.y)).toBe(true);
@@ -135,7 +137,7 @@ describe("viewport", () => {
 
   describe("containerViewBounds", () => {
     it("includes transitive descendants for a top-level container", () => {
-      const bounds = containerViewBounds(syntheticInteractiveCanvas, "interview-flow");
+      const bounds = containerViewBounds(syntheticCanvasDocument, "interview-flow");
       const interviewFlow = objectGeometry("interview-flow");
       const userBrief = objectGeometry("user-brief");
 
@@ -149,7 +151,7 @@ describe("viewport", () => {
     });
 
     it("includes children for a nested container", () => {
-      const bounds = containerViewBounds(syntheticInteractiveCanvas, "input-context");
+      const bounds = containerViewBounds(syntheticCanvasDocument, "input-context");
       const userBrief = objectGeometry("user-brief");
       const currentDocs = objectGeometry("current-docs");
 
@@ -162,8 +164,8 @@ describe("viewport", () => {
     });
 
     it("returns null for non-container and unknown ids", () => {
-      expect(containerViewBounds(syntheticInteractiveCanvas, "agent-summarizes")).toBeNull();
-      expect(containerViewBounds(syntheticInteractiveCanvas, "does-not-exist")).toBeNull();
+      expect(containerViewBounds(syntheticCanvasDocument, "agent-summarizes")).toBeNull();
+      expect(containerViewBounds(syntheticCanvasDocument, "does-not-exist")).toBeNull();
     });
   });
 });

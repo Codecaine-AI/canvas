@@ -108,6 +108,46 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     expect(ports.length).toBe(4);
   });
 
+  it("makes object affordance layers inert in hand mode and restores them in select mode", () => {
+    const hand = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedObjectIds={["process-a"]}
+        selectedConnectionId="connection-a"
+        activeTool="hand"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+    const handStage = hand.container.querySelector('[data-canvas-stage="true"]') as HTMLElement | null;
+    const objectLayer = hand.container.querySelector('[data-canvas-object-layer="true"]') as HTMLElement | null;
+    const selectedHandle = hand.container.querySelector('[data-canvas-handle="se"]') as HTMLElement | null;
+    expect(handStage?.style.cursor).toBe("grab");
+    expect(objectLayer?.style.pointerEvents).toBe("none");
+    expect(hand.container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]').length).toBe(0);
+    expect(hand.container.querySelector('[data-canvas-selection-box="true"]')).toBeTruthy();
+    expect(selectedHandle?.style.pointerEvents).toBe("none");
+    hand.unmount();
+
+    const select = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedObjectIds={["process-a"]}
+        activeTool="select"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+    const selectStage = select.container.querySelector('[data-canvas-stage="true"]') as HTMLElement | null;
+    const restoredObjectLayer = select.container.querySelector('[data-canvas-object-layer="true"]') as HTMLElement | null;
+    const restoredHandle = select.container.querySelector('[data-canvas-handle="se"]') as HTMLElement | null;
+    expect(selectStage?.style.cursor).toContain('url("data:image/svg+xml');
+    expect(selectStage?.style.cursor).toContain(", default");
+    expect(restoredObjectLayer?.style.pointerEvents).toBe("");
+    expect(select.container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]').length).toBe(4);
+    expect(restoredHandle?.style.pointerEvents).toBe("auto");
+  });
+
   it("omits edge ports in read-only (non-editable) mode", () => {
     const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
     const ports = container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]');

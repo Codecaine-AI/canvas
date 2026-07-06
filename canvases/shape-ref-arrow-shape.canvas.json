@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-arrow-shape",
+  "title": "Next step — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 759,
+    "height": 475
+  },
+  "objects": [
+    {
+      "id": "subject-arrow-shape",
+      "type": "arrow-shape",
+      "label": "Next step",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 361,
+        "height": 100
+      },
+      "direction": "right",
+      "style": {
+        "shape": "arrow-shape"
+      }
+    },
+    {
+      "id": "marker-arrow-shape-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 308.5,
+        "y": 80.5,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-arrow-shape-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 596,
+        "y": 196,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-arrow-shape-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 308.5,
+        "y": 311.5,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-arrow-shape-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 196,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-arrow-shape",
+      "type": "text",
+      "label": "label renders centered within the chevron BODY only (head carries no text)",
+      "geometry": {
+        "x": 120,
+        "y": 403,
+        "width": 441,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-arrow-shape-top",
+      "from": {
+        "objectId": "marker-arrow-shape-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-arrow-shape",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0.235
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-arrow-shape-right",
+      "from": {
+        "objectId": "marker-arrow-shape-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-arrow-shape",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-arrow-shape-bottom",
+      "from": {
+        "objectId": "marker-arrow-shape-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-arrow-shape",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          0.765
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-arrow-shape-left",
+      "from": {
+        "objectId": "marker-arrow-shape-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-arrow-shape",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

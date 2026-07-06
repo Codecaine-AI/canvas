@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   ANCHOR_SNAP_VIEW_PX,
+  chevronPoints,
   getConnectionAnchors,
   nearestOutlinePoint,
   outlinePolygon,
@@ -61,6 +62,20 @@ function chipIconObject(overrides: Partial<InteractiveCanvasObject> = {}): Inter
   };
 }
 
+/** Generic 100x100-bounds object factory for the W5 FigJam parity shape set (Wave A). */
+function shapeObject(
+  type: InteractiveCanvasObject["type"],
+  overrides: Partial<InteractiveCanvasObject> = {},
+): InteractiveCanvasObject {
+  return {
+    id: `${type}-1`,
+    type,
+    label: type,
+    geometry: { x: 0, y: 0, width: 100, height: 100 },
+    ...overrides,
+  };
+}
+
 describe("outlinePolygon", () => {
   it("returns the axis-aligned bounds rect for a plain rect-shaped object", () => {
     const object = rectObject();
@@ -110,6 +125,185 @@ describe("outlinePolygon", () => {
       { x: 60, y: 60 },
       { x: 0, y: 60 },
     ]);
+  });
+});
+
+describe("outlinePolygon: W5 FigJam parity shape set (Wave A)", () => {
+  it("returns a dense 32-point ellipse polygon inscribed in the bounds", () => {
+    const object = shapeObject("ellipse");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(32);
+    // Rightmost point (angle 0) sits on the true ellipse outline at (100, 50).
+    expect(polygon[0]).toEqual({ x: 100, y: 50 });
+  });
+
+  it("returns a 3-point up-pointing triangle with the apex at top-center", () => {
+    const object = shapeObject("triangle");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(3);
+    expect(polygon).toContainEqual({ x: 50, y: 0 });
+  });
+
+  it("returns a 3-point down-pointing triangle when direction is 'down'", () => {
+    const object = shapeObject("triangle", { direction: "down" });
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(3);
+    // Apex is now at the bottom-center.
+    expect(polygon).toContainEqual({ x: 50, y: 100 });
+  });
+
+  it("returns a 4-point parallelogram skewed per PARALLELOGRAM_SKEW_RATIO (18%)", () => {
+    const object = shapeObject("parallelogram");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(4);
+    // direction "right" (default): top edge shifted right by 18% of width.
+    expect(polygon).toContainEqual({ x: 18, y: 0 });
+    expect(polygon).toContainEqual({ x: 82, y: 100 });
+  });
+
+  it("returns a 5-point pentagon, point-up", () => {
+    const object = shapeObject("pentagon");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(5);
+    expect(polygon[0]).toEqual({ x: 50, y: 0 });
+  });
+
+  it("returns an 8-point octagon, flat-top", () => {
+    const object = shapeObject("octagon");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(8);
+  });
+
+  it("returns a 10-point star, point-up, with alternating outer/inner radii", () => {
+    const object = shapeObject("star");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(10);
+    expect(polygon[0]).toEqual({ x: 50, y: 0 });
+  });
+
+  it("returns a 12-point plus/cross polygon", () => {
+    const object = shapeObject("plus");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(12);
+    // Top of the vertical bar is centered and inset by half the bar thickness.
+    const top = polygon.filter((p) => p.y === 0);
+    expect(top.length).toBe(2);
+    expect(top.map((p) => p.x).sort((a, b) => a - b)[0]).toBeCloseTo(100 / 3, 5);
+    expect(top.map((p) => p.x).sort((a, b) => a - b)[1]).toBeCloseTo(200 / 3, 5);
+  });
+
+  it("returns a 6-point fat chevron (distinct from arrow-shape's 7-point sliver)", () => {
+    const object = shapeObject("chevron");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(6);
+    // The pointed head of a right-pointing chevron reaches the right edge at mid-height.
+    expect(polygon).toContainEqual({ x: 100, y: 50 });
+  });
+
+  it("chevronPoints mirrors left vs right direction", () => {
+    const bounds = { x: 0, y: 0, width: 100, height: 100 };
+    const right = chevronPoints(bounds, "right");
+    const left = chevronPoints(bounds, "left");
+    expect(right).toContainEqual({ x: 100, y: 50 });
+    expect(left).toContainEqual({ x: 0, y: 50 });
+  });
+
+  it("returns a 5-point off-page-connector (downward pentagon)", () => {
+    const object = shapeObject("off-page-connector");
+    const polygon = outlinePolygon(object);
+    expect(polygon).toEqual([
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 60 },
+      { x: 50, y: 100 },
+      { x: 0, y: 60 },
+    ]);
+  });
+
+  it("returns a 4-point trapezoid inset 20% on each top corner", () => {
+    const object = shapeObject("trapezoid");
+    const polygon = outlinePolygon(object);
+    expect(polygon).toEqual([
+      { x: 20, y: 0 },
+      { x: 80, y: 0 },
+      { x: 100, y: 100 },
+      { x: 0, y: 100 },
+    ]);
+  });
+
+  it("returns a 4-point manual-input shape with a slanted top edge", () => {
+    const object = shapeObject("manual-input");
+    const polygon = outlinePolygon(object);
+    expect(polygon).toEqual([
+      { x: 0, y: 25 },
+      { x: 100, y: 0 },
+      { x: 100, y: 100 },
+      { x: 0, y: 100 },
+    ]);
+  });
+
+  it("returns a 6-point flat-top hexagon", () => {
+    const object = shapeObject("hexagon");
+    const polygon = outlinePolygon(object);
+    expect(polygon.length).toBe(6);
+    const rightPoint = polygon.find((p) => Math.abs(p.x - 100) < 1e-6);
+    const leftPoint = polygon.find((p) => Math.abs(p.x - 0) < 1e-6);
+    expect(rightPoint?.y).toBeCloseTo(50, 5);
+    expect(leftPoint?.y).toBeCloseTo(50, 5);
+  });
+
+  it("returns a dense circular polygon for or-junction and summing-junction (shared 'junction' outline)", () => {
+    const orJunction = outlinePolygon(shapeObject("or-junction"));
+    const summingJunction = outlinePolygon(shapeObject("summing-junction"));
+    expect(orJunction.length).toBe(32);
+    expect(summingJunction.length).toBe(32);
+    expect(orJunction).toEqual(summingJunction);
+  });
+
+  it("falls back to the bounding-rect outline for bbox-fallback W5 types (folder, document-stack, cylinder-horizontal, page-corner, icon, internal-storage)", () => {
+    for (const type of [
+      "folder",
+      "document-stack",
+      "cylinder-horizontal",
+      "page-corner",
+      "icon",
+      "internal-storage",
+    ] as const) {
+      const polygon = outlinePolygon(shapeObject(type));
+      expect(polygon).toEqual([
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+        { x: 100, y: 100 },
+        { x: 0, y: 100 },
+      ]);
+    }
+  });
+});
+
+describe("getConnectionAnchors: W5 FigJam parity shape set (Wave A)", () => {
+  it("produces a top anchor exactly at the apex for an up-pointing triangle (x = 0.5 fraction of width)", () => {
+    const object = shapeObject("triangle");
+    const anchors = getConnectionAnchors(object);
+    const top = anchors.find((a) => a.coord[1] === 0);
+    expect(top).toBeDefined();
+    expect(top?.point).toEqual({ x: 50, y: 0 });
+    expect(top?.coord).toEqual([0.5, 0]);
+  });
+
+  it("produces a bottom anchor exactly at the apex for a down-pointing triangle", () => {
+    const object = shapeObject("triangle", { direction: "down" });
+    const anchors = getConnectionAnchors(object);
+    const bottom = anchors.find((a) => a.coord[1] === 1);
+    expect(bottom).toBeDefined();
+    expect(bottom?.point).toEqual({ x: 50, y: 100 });
+  });
+
+  it("produces anchors on the true ellipse outline (cardinal points touch the bbox edge midpoints, same as a circle inscribed in a square)", () => {
+    const object = shapeObject("ellipse");
+    const anchors = getConnectionAnchors(object);
+    const points = anchors.map((a) => a.point);
+    expect(points.some((p) => Math.abs(p.x - 50) < 1e-6 && Math.abs(p.y - 0) < 1e-6)).toBe(true);
+    expect(points.some((p) => Math.abs(p.x - 100) < 1e-6 && Math.abs(p.y - 50) < 1e-6)).toBe(true);
   });
 });
 

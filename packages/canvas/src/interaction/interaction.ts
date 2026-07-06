@@ -298,6 +298,7 @@ function descendantIds(document: InteractiveCanvasDocument, containerId: string)
   const stack = [...(children.get(containerId) ?? [])];
   while (stack.length > 0) {
     const id = stack.pop()!;
+    if (id === containerId) continue;
     if (result.has(id)) continue;
     result.add(id);
     stack.push(...(children.get(id) ?? []));
@@ -571,6 +572,8 @@ function stepFromIdle(
 ): InteractionResult {
   if (event.type === "cancel") return toIdle();
 
+  if (ctx.tool === "hand") return toIdle();
+
   if (event.type === "double") {
     // Double-click on an existing object: start editing its label inline (the
     // id is already known). Double-click on empty canvas: create a new text
@@ -614,6 +617,7 @@ function stepFromIdle(
     const hit = event.hit;
     const object = ctx.document.objects.find((candidate) => candidate.id === hit.objectId);
     if (!object) return toIdle();
+    if (object.type === "section" && object.locked) return toIdle();
     const pending: ResizeGesture = {
       kind: "resize",
       startWorld: event.world,
@@ -746,7 +750,7 @@ function stepFromIdle(
   }
 
   // Canvas (empty space) pointer-down.
-  if (ctx.tool === "select" || ctx.tool === "hand") {
+  if (ctx.tool === "select") {
     const pending: PressPending = {
       kind: "pressing",
       startWorld: event.world,
@@ -806,6 +810,14 @@ function stepFromPressing(
       !state.shiftKey && alreadySelected && selectedObjectIds(ctx.selection).length > 1
         ? selectedObjectIds(ctx.selection)
         : [state.hit.objectId];
+    if (
+      dragObjectIds.some((id) => {
+        const object = ctx.document.objects.find((candidate) => candidate.id === id);
+        return object?.type === "section" && object.locked;
+      })
+    ) {
+      return toIdle();
+    }
     // FigJam section capture (W2): dragging a section also carries every
     // object positionally "inside" it (recursively, including nested
     // sections' own members) — computed once, right here, at drag-start, and
@@ -815,13 +827,19 @@ function stepFromPressing(
     const expandedObjectIds = new Set(dragObjectIds);
     for (const id of dragObjectIds) {
       const object = ctx.document.objects.find((candidate) => candidate.id === id);
-      if (object?.type !== "section") continue;
-      for (const memberId of sectionCaptureMembers(
-        ctx.document,
-        id,
-        SECTION_CAPTURE_OVERLAP_THRESHOLD,
-      )) {
-        expandedObjectIds.add(memberId);
+      if (object?.type === "section") {
+        for (const memberId of sectionCaptureMembers(
+          ctx.document,
+          id,
+          SECTION_CAPTURE_OVERLAP_THRESHOLD,
+        )) {
+          expandedObjectIds.add(memberId);
+        }
+      }
+      if (object?.type === "container") {
+        for (const memberId of descendantIds(ctx.document, id)) {
+          expandedObjectIds.add(memberId);
+        }
       }
     }
     const finalObjectIds = Array.from(expandedObjectIds);

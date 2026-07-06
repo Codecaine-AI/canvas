@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useId, useSyncExternalStore } from "react";
+
 /**
  * ChromeTooltip — shared dark hover-label used by all FigJam chrome
  * components (dock buttons, context-toolbar controls, etc.).
@@ -30,13 +32,45 @@ export type ChromeTooltipProps = {
 
 const TOOLTIP_BG = "#1D1D1D";
 const TOOLTIP_TEXT = "#FFFFFF";
+const TOOLTIP_EVENT = "chrome-tooltip-change";
+
+let activeTooltipId: string | null = null;
+
+function setActiveTooltip(id: string | null) {
+  activeTooltipId = id;
+  window.dispatchEvent(new Event(TOOLTIP_EVENT));
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener(TOOLTIP_EVENT, callback);
+  return () => window.removeEventListener(TOOLTIP_EVENT, callback);
+}
 
 export function ChromeTooltip({ label, visible, placement = "top", id }: ChromeTooltipProps) {
-  if (!visible) return null;
+  const fallbackId = useId();
+  const tooltipId = id ?? fallbackId;
+  const currentTooltipId = useSyncExternalStore(
+    subscribe,
+    () => activeTooltipId,
+    () => null,
+  );
+
+  useEffect(() => {
+    if (!visible) {
+      if (activeTooltipId === tooltipId) setActiveTooltip(null);
+      return;
+    }
+    setActiveTooltip(tooltipId);
+    return () => {
+      if (activeTooltipId === tooltipId) setActiveTooltip(null);
+    };
+  }, [tooltipId, visible]);
+
+  if (!visible || currentTooltipId !== tooltipId) return null;
 
   return (
     <span
-      id={id}
+      id={tooltipId}
       role="tooltip"
       data-chrome-tooltip=""
       data-placement={placement}
@@ -44,9 +78,12 @@ export function ChromeTooltip({ label, visible, placement = "top", id }: ChromeT
         position: "absolute",
         left: "50%",
         transform: "translateX(-50%)",
+        width: "max-content",
+        maxWidth: "none",
         top: placement === "top" ? "auto" : "calc(100% + 8px)",
         bottom: placement === "top" ? "calc(100% + 8px)" : "auto",
         whiteSpace: "nowrap",
+        overflow: "visible",
         background: TOOLTIP_BG,
         color: TOOLTIP_TEXT,
         fontSize: 12,

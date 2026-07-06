@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-text",
+  "title": "Free text — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 582,
+    "height": 494
+  },
+  "objects": [
+    {
+      "id": "subject-text",
+      "type": "text",
+      "label": "Free text",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "marker-text-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 220,
+        "y": 57,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-text-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 419,
+        "y": 194,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-text-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 220,
+        "y": 331,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-text-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 194,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-text",
+      "type": "text",
+      "label": "label renders as a bold, borderless FigJam text label",
+      "geometry": {
+        "x": 120,
+        "y": 399,
+        "width": 264,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-text-top",
+      "from": {
+        "objectId": "marker-text-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-text",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-text-right",
+      "from": {
+        "objectId": "marker-text-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-text",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-text-bottom",
+      "from": {
+        "objectId": "marker-text-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-text",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-text-left",
+      "from": {
+        "objectId": "marker-text-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-text",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

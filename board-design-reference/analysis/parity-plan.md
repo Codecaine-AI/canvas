@@ -42,7 +42,7 @@ tests (no editor edits → no conflicts).
 ConnectionOverlay port; snap-overlay port; right-click menu contents; preview-trap fix;
 text-edit caret/font-preset/sizes/bullets.
 
-**W4-acceptance**: recreate V2 Flow as a board fixture; side-by-side vs the PNG; iterate
+**W4-acceptance**: recreate V2 Flow as a board sample; side-by-side vs the PNG; iterate
 until indistinguishable; feel pass (build a section of it by hand); full suites green.
 
 Open items needing live-FigJam ground truth (implement from known behavior, flag for user

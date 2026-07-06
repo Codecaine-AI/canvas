@@ -7,10 +7,30 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import { documentBounds, objectById, type CanvasBounds, type CanvasPoint } from "../model/geometry";
+import {
+  documentBounds,
+  objectById,
+  sectionCaptureMembers,
+  type CanvasBounds,
+  type CanvasPoint,
+} from "../model/geometry";
 import { gridBackground } from "./grid";
 import { RESIZE_HANDLES, resizeCursorFor, type InteractionOverlay, type ResizeHandle } from "../interaction/interaction";
-import { arrowShapePoints, getConnectionAnchors } from "../routing/connection-overlay";
+import {
+  arrowShapePoints,
+  chevronPoints,
+  getConnectionAnchors,
+  hexagonPoints,
+  manualInputPoints,
+  octagonPoints,
+  offPageConnectorPoints,
+  parallelogramPoints,
+  pentagonPoints,
+  plusPoints,
+  starPoints,
+  trapezoidPoints,
+  trianglePoints,
+} from "../routing/connection-overlay";
 import { pointForAnchor, routeConnection, type Anchor } from "../routing/routing";
 import type { DistributionGuideSegment, SnapGuide, SpacingHint } from "../interaction/snapping";
 import {
@@ -26,11 +46,14 @@ import {
 } from "./theme";
 import { worldToScreen, type ViewportState } from "../editor/viewport";
 import { tokenizeCodeBlock } from "./code-tokenizer";
+import { IconShapeBody } from "./IconShapeBody";
+import type { CanvasTool } from "../model/actions";
 import {
   ARROW_SHAPE_GEOMETRY,
   CANVAS_BG,
   CANVAS_FONT_FAMILY,
   CHAT_ICON_COLORS,
+  CHEVRON_GEOMETRY,
   CHROME,
   CHIP_ICON_COLORS,
   CODE_BLOCK,
@@ -38,8 +61,14 @@ import {
   CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
   CONNECTOR_DASH_PATTERN_PX,
   CONNECTOR_DEFAULT_COLOR,
+  DOCUMENT_GEOMETRY,
+  DOCUMENT_STACK_GEOMETRY,
+  FOLDER_GEOMETRY,
+  SECTION_CAPTURE_OVERLAP_THRESHOLD,
   CONNECTOR_STROKE_WIDTH_PX,
   GRID_DOT_COLOR,
+  MANUAL_INPUT_GEOMETRY,
+  OFF_PAGE_CONNECTOR_GEOMETRY,
   PERSON_ICON_COLORS,
   PREDEFINED_PROCESS_GEOMETRY,
   SECTION_GEOMETRY,
@@ -112,6 +141,8 @@ export interface CanvasStageProps {
    * canvas; callers scale-compensate manually if they want constant screen size.
    */
   worldOverlay?: ReactNode;
+  /** Current editor tool, used to make canvas content inert while panning with the hand tool. */
+  activeTool?: CanvasTool;
   className?: string;
   style?: CSSProperties;
   /** Ref to the root stage element (`[data-canvas-stage="true"]`), e.g. for useCanvasViewport. */
@@ -197,6 +228,20 @@ function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCa
     }
     return (indexOf.get(a.id) ?? 0) - (indexOf.get(b.id) ?? 0);
   });
+}
+
+function visibleObjectsForSections(
+  objects: InteractiveCanvasObject[],
+  document: InteractiveCanvasDocument,
+): InteractiveCanvasObject[] {
+  const hidden = new Set<string>();
+  for (const section of objects) {
+    if (section.type !== "section" || !section.contentHidden) continue;
+    for (const memberId of sectionCaptureMembers(document, section.id, SECTION_CAPTURE_OVERLAP_THRESHOLD)) {
+      hidden.add(memberId);
+    }
+  }
+  return hidden.size === 0 ? objects : objects.filter((object) => object.type === "section" || !hidden.has(object.id));
 }
 
 function annotationTargetLabel(target: CanvasAnnotationTarget): string {
@@ -492,6 +537,27 @@ function ConnectorDragPreview({
   );
 }
 
+function pointsAttribute(points: CanvasPoint[]): string {
+  return points.map((point) => `${point.x},${point.y}`).join(" ");
+}
+
+function documentWavyPath(x = 0, y = 0, width = 100, height = 100): string {
+  const top = y;
+  const left = x;
+  const right = x + width;
+  const waveShoulderY = y + height * DOCUMENT_GEOMETRY.waveShoulderYRatio;
+  const waveCrestY = y + height * DOCUMENT_GEOMETRY.waveCrestYRatio;
+  return [
+    `M ${left} ${top}`,
+    `L ${right} ${top}`,
+    `L ${right} ${waveShoulderY}`,
+    `C ${x + width * 0.83} ${waveShoulderY} ${x + width * 0.83} ${waveCrestY} ${x + width * 0.66} ${waveCrestY}`,
+    `C ${x + width * 0.5} ${waveCrestY} ${x + width * 0.5} ${waveShoulderY} ${x + width * 0.33} ${waveShoulderY}`,
+    `C ${x + width * 0.16} ${waveShoulderY} ${x + width * 0.16} ${waveCrestY} ${left} ${waveCrestY}`,
+    "Z",
+  ].join(" ");
+}
+
 /**
  * Inline SVG background layer for silhouettes CSS clip-path can't express
  * (person's head+shoulders, database's cylinder, chat's tail, chip-icon's
@@ -512,11 +578,13 @@ function ShapeSilhouette({
   shape,
   colors,
   hasExplicitColor,
+  strokeWidth,
 }: {
-  shape: "person" | "database" | "chat" | "chip-icon";
+  shape: "person" | "database" | "chat" | "chip-icon" | "document" | "folder" | "document-stack" | "cylinder-horizontal";
   colors: CanvasToneStyle;
   /** True when the object has an explicit paletteToken/tone — overrides the shape's default fixed fill. */
   hasExplicitColor?: boolean;
+  strokeWidth?: number;
 }) {
   const common = {
     position: "absolute" as const,
@@ -524,8 +592,10 @@ function ShapeSilhouette({
     top: 0,
     width: "100%",
     height: "100%",
+    overflow: "visible",
     pointerEvents: "none" as const,
   };
+  const silhouetteStrokeWidth = strokeWidth ?? 2;
 
   if (shape === "person") {
     const fill = hasExplicitColor ? colors.fill : PERSON_ICON_COLORS.fill;
@@ -566,6 +636,111 @@ function ShapeSilhouette({
           strokeWidth={2}
         />
         <ellipse cx="50" cy="22" rx="46" ry="12" fill={colors.fill} stroke={colors.border} strokeWidth={2} />
+      </svg>
+    );
+  }
+
+  if (shape === "document") {
+    return (
+      <svg
+        style={common}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        data-canvas-shape-silhouette="document"
+      >
+        <path
+          d={documentWavyPath()}
+          fill={colors.fill}
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (shape === "folder") {
+    const tabWidth = FOLDER_GEOMETRY.tabWidthRatio * 100;
+    const tabTop = 8;
+    const tabBottom = 24;
+    return (
+      <svg
+        style={common}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        data-canvas-shape-silhouette="folder"
+      >
+        <path
+          d={`M 0 ${tabTop} H ${tabWidth} V ${tabBottom} H 100 V 100 H 0 Z`}
+          fill={colors.fill}
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (shape === "document-stack") {
+    const offset = DOCUMENT_STACK_GEOMETRY.offsetPx;
+    const pageSize = 100 - offset;
+    return (
+      <svg
+        style={common}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        data-canvas-shape-silhouette="document-stack"
+      >
+        <path
+          d={documentWavyPath(0, 0, pageSize, pageSize)}
+          fill={colors.fill}
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+          strokeLinejoin="round"
+          opacity={0.82}
+        />
+        <path
+          d={documentWavyPath(offset, offset, pageSize, pageSize)}
+          fill={colors.fill}
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (shape === "cylinder-horizontal") {
+    return (
+      <svg
+        style={common}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        data-canvas-shape-silhouette="cylinder-horizontal"
+      >
+        <path
+          d="M 18 5 H 82 C 92 5 98 25 98 50 C 98 75 92 95 82 95 H 18 C 8 95 2 75 2 50 C 2 25 8 5 18 5 Z"
+          fill={colors.fill}
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 18 5 C 28 5 34 25 34 50 C 34 75 28 95 18 95"
+          fill="none"
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+        />
+        <path
+          d="M 82 5 C 72 5 66 25 66 50 C 66 75 72 95 82 95"
+          fill="none"
+          stroke={colors.border}
+          strokeWidth={silhouetteStrokeWidth}
+        />
       </svg>
     );
   }
@@ -632,6 +807,7 @@ function SectionShape({
   dropTarget,
   bounds,
   editable,
+  hideTitle,
   onObjectSelect,
   onObjectContextMenu,
 }: {
@@ -640,6 +816,7 @@ function SectionShape({
   dropTarget?: boolean;
   bounds: CanvasBounds;
   editable?: boolean;
+  hideTitle?: boolean;
   onObjectSelect?: (objectId: string) => void;
   onObjectContextMenu?: (
     event: ReactMouseEvent<HTMLElement>,
@@ -648,7 +825,13 @@ function SectionShape({
   ) => void;
 }) {
   const family = resolveSectionColors(object.tint);
-  const borderColor = family.chipBorder ?? "transparent";
+  const borderColor = object.style?.stroke ?? family.chipBorder ?? "transparent";
+  const borderStyle = object.style?.strokeStyle ?? "solid";
+  const borderWidth =
+    borderStyle === "none" || borderStyle === "dashed"
+      ? 0
+      : (object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx);
+  const renderedStrokeWidth = object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx;
   const title = object.title ?? object.label;
   return (
     <button
@@ -669,8 +852,11 @@ function SectionShape({
         top: `${object.geometry.y}px`,
         width: `${object.geometry.width}px`,
         height: `${object.geometry.height}px`,
-        background: family.tint,
+        background: object.style?.fill ?? family.tint,
         borderColor,
+        borderStyle,
+        borderWidth,
+        borderRadius: SECTION_GEOMETRY.cornerRadiusPx,
         // W4 z-layering: section backdrops stay below the connector layer (z 1).
         zIndex: 0,
       }}
@@ -685,17 +871,92 @@ function SectionShape({
         onObjectContextMenu(event, object, bounds);
       }}
     >
-      <span
-        className="interactive-canvas-section-title-chip"
-        style={{
-          background: family.chipFill ?? "transparent",
-          borderColor: family.chipBorder ?? "transparent",
-        }}
-      >
-        {title}
-      </span>
+      {borderStyle === "dashed" ? (
+        <svg
+          aria-hidden="true"
+          data-section-border-dash=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            overflow: "visible",
+            pointerEvents: "none",
+          }}
+        >
+          <rect
+            x={renderedStrokeWidth / 2}
+            y={renderedStrokeWidth / 2}
+            width={`calc(100% - ${renderedStrokeWidth}px)`}
+            height={`calc(100% - ${renderedStrokeWidth}px)`}
+            rx={SECTION_GEOMETRY.cornerRadiusPx}
+            ry={SECTION_GEOMETRY.cornerRadiusPx}
+            fill="none"
+            stroke={borderColor}
+            strokeWidth={renderedStrokeWidth}
+            strokeDasharray={CONNECTOR_DASH_PATTERN_PX.join(" ")}
+          />
+        </svg>
+      ) : null}
+      {!hideTitle && (
+        <span
+          className="interactive-canvas-section-title-chip"
+          data-canvas-section-title-chip={object.id}
+          style={{
+            background: family.chipFill ?? "transparent",
+            borderColor: family.chipBorder ?? "transparent",
+          }}
+        >
+          {title}
+        </span>
+      )}
     </button>
   );
+}
+
+type RenderObjectShape = NonNullable<InteractiveCanvasObject["style"]>["shape"] | "label";
+
+function classNameForObjectShape(shape: RenderObjectShape): string {
+  const base = "interactive-canvas-object";
+  switch (shape) {
+    case "diamond":
+    case "marker":
+    case "note":
+    case "document":
+    case "person":
+    case "database":
+    case "chat":
+    case "chip-icon":
+    case "pill":
+    case "arrow-shape":
+    case "predefined-process":
+    case "code-block":
+    case "ellipse":
+    case "triangle":
+    case "parallelogram":
+    case "pentagon":
+    case "octagon":
+    case "star":
+    case "plus":
+    case "chevron":
+    case "folder":
+    case "document-stack":
+    case "off-page-connector":
+    case "trapezoid":
+    case "manual-input":
+    case "hexagon":
+    case "internal-storage":
+    case "or-junction":
+    case "summing-junction":
+    case "cylinder-horizontal":
+    case "page-corner":
+    case "icon":
+      return `${base} interactive-canvas-object-${shape}`;
+    case "label":
+      return `${base} interactive-canvas-object-text-shape`;
+    default:
+      return base;
+  }
 }
 
 export function ObjectShape({
@@ -741,6 +1002,7 @@ export function ObjectShape({
         dropTarget={dropTarget}
         bounds={bounds}
         editable={editable}
+        hideTitle={hideLabel}
         onObjectSelect={onObjectSelect}
         onObjectContextMenu={onObjectContextMenu}
       />
@@ -751,48 +1013,37 @@ export function ObjectShape({
   // value existed for "text" before this wave; it silently fell through to
   // rounded-rect, which is what the W2 brief asked to restyle).
   const shape = object.style?.shape ?? (object.type === "text" ? "label" : "rounded-rect");
-  const className =
-    shape === "diamond"
-      ? "interactive-canvas-object interactive-canvas-object-diamond"
-      : shape === "marker"
-        ? "interactive-canvas-object interactive-canvas-object-marker"
-        : shape === "note"
-          ? "interactive-canvas-object interactive-canvas-object-note"
-          : shape === "document"
-            ? "interactive-canvas-object interactive-canvas-object-document"
-            : shape === "person"
-              ? "interactive-canvas-object interactive-canvas-object-person"
-              : shape === "database"
-                ? "interactive-canvas-object interactive-canvas-object-database"
-                : shape === "chat"
-                  ? "interactive-canvas-object interactive-canvas-object-chat"
-                  : shape === "chip-icon"
-                    ? "interactive-canvas-object interactive-canvas-object-chip-icon"
-                    : shape === "label"
-                      ? "interactive-canvas-object interactive-canvas-object-text-shape"
-                      : shape === "pill"
-                        ? "interactive-canvas-object interactive-canvas-object-pill"
-                        : shape === "arrow-shape"
-                          ? "interactive-canvas-object interactive-canvas-object-arrow-shape"
-                          : shape === "predefined-process"
-                            ? "interactive-canvas-object interactive-canvas-object-predefined-process"
-                            : shape === "code-block"
-                              ? "interactive-canvas-object interactive-canvas-object-code-block"
-                              : "interactive-canvas-object";
+  const className = classNameForObjectShape(shape);
   const colors = resolveObjectColors(object.style);
   const hasExplicitColor = Boolean(
     object.style?.paletteToken || object.style?.tone || object.style?.fill || object.style?.stroke,
   );
+  const shapeStrokeWidth = resolveObjectStrokeWidth(object.style);
   // person/chat/chip-icon lean on the SVG silhouette for the shape itself, so
   // body copy (and, below a compact height, even the label) is dropped to
   // keep the silhouette legible rather than overrun with text. Their label
   // renders BELOW the icon (bold black), not overlaid on it (W2 restyle).
   const isCompactSilhouette = (shape === "person" || shape === "chat") && object.geometry.height < 100;
   const svgShape =
-    shape === "person" || shape === "database" || shape === "chat" || shape === "chip-icon"
+    shape === "person" ||
+    shape === "database" ||
+    shape === "chat" ||
+    shape === "chip-icon" ||
+    shape === "document" ||
+    shape === "folder" ||
+    shape === "document-stack" ||
+    shape === "cylinder-horizontal"
       ? shape
       : null;
   const labelBelowIcon = shape === "person" || shape === "chat" || shape === "chip-icon";
+  // W5/Wave C — the `icon` type (Advanced-tier glyph family) renders its own
+  // self-contained glyph+label body via IconShapeBody (bbox outline tier, no
+  // silhouette/polygon overlay) rather than composing through the
+  // svgShape/labelBelowIcon paths above, since IconShapeBody already bundles
+  // the label-below-glyph layout internally (see render/IconShapeBody.tsx).
+  const isIconShape = shape === "icon";
+  const hidesVisibleText = shape === "plus" || shape === "or-junction" || shape === "summing-junction";
+  const localShapeBounds = { x: 0, y: 0, width: object.geometry.width, height: object.geometry.height };
 
   // W2/W4 — arrow-shape (fat chevron): a single SVG polygon tracing the full
   // 7-point silhouette (body + head + notch) — the same outline connector
@@ -801,13 +1052,51 @@ export function ObjectShape({
   const arrowDirection: "left" | "right" = object.direction === "left" ? "left" : "right";
   const arrowSilhouettePoints =
     shape === "arrow-shape"
-      ? arrowShapePoints(
-          { x: 0, y: 0, width: object.geometry.width, height: object.geometry.height },
-          arrowDirection,
-        )
-          .map((point) => `${point.x},${point.y}`)
-          .join(" ")
+      ? pointsAttribute(arrowShapePoints(localShapeBounds, arrowDirection))
       : null;
+  const horizontalDirection: "left" | "right" = object.direction === "left" ? "left" : "right";
+  const triangleDirection: "up" | "down" = object.direction === "down" ? "down" : "up";
+  const trueOutlinePolygonPoints =
+    shape === "triangle"
+      ? pointsAttribute(trianglePoints(localShapeBounds, triangleDirection))
+      : shape === "parallelogram"
+        ? pointsAttribute(parallelogramPoints(localShapeBounds, horizontalDirection))
+        : shape === "pentagon"
+          ? pointsAttribute(pentagonPoints(localShapeBounds))
+          : shape === "octagon"
+            ? pointsAttribute(octagonPoints(localShapeBounds))
+            : shape === "star"
+              ? pointsAttribute(starPoints(localShapeBounds))
+              : shape === "plus"
+                ? pointsAttribute(plusPoints(localShapeBounds))
+                : shape === "chevron"
+                  ? pointsAttribute(chevronPoints(localShapeBounds, horizontalDirection))
+                  : shape === "off-page-connector"
+                    ? pointsAttribute(offPageConnectorPoints(localShapeBounds))
+                    : shape === "trapezoid"
+                      ? pointsAttribute(trapezoidPoints(localShapeBounds))
+                      : shape === "manual-input"
+                        ? pointsAttribute(manualInputPoints(localShapeBounds))
+                        : shape === "hexagon"
+                          ? pointsAttribute(hexagonPoints(localShapeBounds))
+                          : null;
+  const ellipseSilhouette = shape === "ellipse" || shape === "or-junction" || shape === "summing-junction";
+  const labelStyle: CSSProperties | undefined =
+    shape === "arrow-shape"
+      ? {
+          // Center the label within the chevron BODY (the head side carries no
+          // text in FigJam), not the full bounding box.
+          [arrowDirection === "left" ? "marginLeft" : "marginRight"]: `${
+            ARROW_SHAPE_GEOMETRY.headWidthRatio * 100
+          }%`,
+        }
+      : shape === "chevron"
+        ? {
+            [horizontalDirection === "left" ? "marginLeft" : "marginRight"]: `${
+              CHEVRON_GEOMETRY.notchWidthRatio * 100
+            }%`,
+          }
+        : undefined;
 
   // W2 — predefined-process: rect with two inner vertical bars inset from
   // each edge (PREDEFINED_PROCESS_GEOMETRY.barInsetRatio of total width).
@@ -836,6 +1125,7 @@ export function ObjectShape({
       data-changed={changed ? "true" : undefined}
       data-drop-target={dropTarget ? "true" : undefined}
       data-editable={(editable ?? Boolean(onObjectSelect)) ? "true" : undefined}
+      aria-label={object.label}
       style={objectStyle(object)}
       onClick={(event) => {
         event.stopPropagation();
@@ -848,7 +1138,59 @@ export function ObjectShape({
         onObjectContextMenu(event, object, bounds);
       }}
     >
-      {svgShape && <ShapeSilhouette shape={svgShape} colors={colors} hasExplicitColor={hasExplicitColor} />}
+      {svgShape && (
+        <ShapeSilhouette
+          shape={svgShape}
+          colors={colors}
+          hasExplicitColor={hasExplicitColor}
+          strokeWidth={
+            shape === "document" ||
+            shape === "folder" ||
+            shape === "document-stack" ||
+            shape === "cylinder-horizontal"
+              ? shapeStrokeWidth
+              : undefined
+          }
+        />
+      )}
+      {ellipseSilhouette && (
+        <svg
+          aria-hidden="true"
+          className="interactive-canvas-true-outline-silhouette"
+          data-canvas-shape-silhouette={shape}
+          viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}
+          preserveAspectRatio="none"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
+        >
+          <ellipse
+            cx="50%"
+            cy="50%"
+            rx="50%"
+            ry="50%"
+            fill={colors.fill}
+            stroke={colors.border}
+            strokeWidth={shapeStrokeWidth}
+          />
+        </svg>
+      )}
+      {trueOutlinePolygonPoints && (
+        <svg
+          aria-hidden="true"
+          className="interactive-canvas-true-outline-silhouette"
+          data-canvas-shape-silhouette={shape}
+          viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}
+          preserveAspectRatio="none"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
+        >
+          <polygon
+            points={trueOutlinePolygonPoints}
+            fill={colors.fill}
+            stroke={colors.border}
+            strokeWidth={shapeStrokeWidth}
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
       {shape === "arrow-shape" && arrowSilhouettePoints && (
         <svg
           aria-hidden="true"
@@ -862,7 +1204,7 @@ export function ObjectShape({
             points={arrowSilhouettePoints}
             fill={colors.fill}
             stroke={colors.border}
-            strokeWidth={resolveObjectStrokeWidth(object.style)}
+            strokeWidth={shapeStrokeWidth}
             strokeLinejoin="round"
           />
         </svg>
@@ -878,6 +1220,18 @@ export function ObjectShape({
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
             style={{ right: `${barInsetPct}%`, left: "auto" }}
+          />
+        </>
+      )}
+      {shape === "internal-storage" && (
+        <>
+          <span
+            aria-hidden="true"
+            className="interactive-canvas-internal-storage-rule interactive-canvas-internal-storage-rule-vertical"
+          />
+          <span
+            aria-hidden="true"
+            className="interactive-canvas-internal-storage-rule interactive-canvas-internal-storage-rule-horizontal"
           />
         </>
       )}
@@ -901,21 +1255,13 @@ export function ObjectShape({
         </div>
       )}
       {/* W4 — code-blocks render body-only (FigJam code blocks carry no label chrome). */}
-      {!hideLabel && !(isCompactSilhouette && shape === "person") && !labelBelowIcon && shape !== "code-block" && (
-        <span
-          className="interactive-canvas-object-label"
-          style={
-            shape === "arrow-shape"
-              ? {
-                  // Center the label within the chevron BODY (the head side
-                  // carries no text in FigJam), not the full bounding box.
-                  [arrowDirection === "left" ? "marginLeft" : "marginRight"]: `${
-                    ARROW_SHAPE_GEOMETRY.headWidthRatio * 100
-                  }%`,
-                }
-              : undefined
-          }
-        >
+      {!hideLabel &&
+        !(isCompactSilhouette && shape === "person") &&
+        !labelBelowIcon &&
+        shape !== "code-block" &&
+        !isIconShape &&
+        !hidesVisibleText && (
+        <span className="interactive-canvas-object-label" style={labelStyle}>
           {object.label}
         </span>
       )}
@@ -932,7 +1278,13 @@ export function ObjectShape({
           })}
         </span>
       )}
-      {object.body && !compact && !isCompactSilhouette && shape !== "code-block" && !isSticky && (
+      {object.body &&
+        !compact &&
+        !isCompactSilhouette &&
+        shape !== "code-block" &&
+        !isIconShape &&
+        !isSticky &&
+        !hidesVisibleText && (
         <span className="interactive-canvas-object-body">{object.body}</span>
       )}
       {isSticky && object.author && (
@@ -942,6 +1294,20 @@ export function ObjectShape({
         <span className="interactive-canvas-object-label interactive-canvas-label-below-icon">
           {object.label}
         </span>
+      )}
+      {/* W5/Wave C — `icon` shape: glyph + label-below-glyph, entirely composed
+          by IconShapeBody (mirrors chip-icon/person's label-below-icon layout
+          but as a single self-contained body rather than a silhouette +
+          separate label span). Colors: an explicit fill/stroke on the object
+          wins (same `hasExplicitColor` precedent as chip-icon/person/chat);
+          otherwise the glyph uses a neutral dark stroke with no fill, per the
+          brief's "bbox" outline tier (no chip background behind the glyph). */}
+      {isIconShape && (
+        <IconShapeBody
+          object={object}
+          colors={hasExplicitColor ? { stroke: colors.border, fill: colors.fill } : undefined}
+          hideLabel={hideLabel}
+        />
       )}
       {showPorts &&
         EDGE_PORT_ANCHORS.map((anchor) => {
@@ -999,10 +1365,12 @@ export function SelectionBox({
   document,
   viewport,
   selectedObjectIds,
+  interactiveHandles = true,
 }: {
   document: InteractiveCanvasDocument;
   viewport: ViewportState;
   selectedObjectIds: string[];
+  interactiveHandles?: boolean;
 }) {
   if (selectedObjectIds.length === 0) return null;
   const objects = document.objects.filter((object) => selectedObjectIds.includes(object.id));
@@ -1064,7 +1432,7 @@ export function SelectionBox({
                 border: "1.5px solid var(--primary)",
                 borderRadius: "2px",
                 cursor: resizeCursorFor(handle),
-                pointerEvents: "auto",
+                pointerEvents: interactiveHandles ? "auto" : "none",
                 touchAction: "none",
               }}
             />
@@ -1282,6 +1650,7 @@ export function CanvasStage({
   editingLabelObjectId = null,
   overlay,
   worldOverlay,
+  activeTool,
   className,
   style,
   stageRef,
@@ -1301,12 +1670,17 @@ export function CanvasStage({
   const grid = gridBackground(zoom, { x: viewport.x, y: viewport.y });
 
   const dropTargetId = interactionOverlay?.dropTargetId;
+  const handToolActive = activeTool === "hand";
+  const selectToolActive = activeTool === "select";
+  const stageCursor = style?.cursor ?? (handToolActive ? "grab" : selectToolActive ? CHROME.selectCursor : undefined);
 
   return (
     <div
       ref={stageRef}
       className={`interactive-canvas-stage${className ? ` ${className}` : ""}`}
       data-canvas-stage="true"
+      data-canvas-hand-tool={handToolActive ? "true" : undefined}
+      data-canvas-select-tool={selectToolActive ? "true" : undefined}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -1317,12 +1691,13 @@ export function CanvasStage({
         // board is light-only, it never dark-themes the canvas surface
         // itself (only chrome around it changes). Flagged in figjam-tokens.ts
         // as a call worth user feedback once seen live.
-        backgroundImage: `radial-gradient(circle, ${GRID_DOT_COLOR} 0 ${grid.dotRadius}px, transparent ${grid.dotRadius + 0.75}px)`,
+        backgroundImage: `radial-gradient(circle, ${GRID_DOT_COLOR} ${grid.dotRadius}px, transparent ${grid.dotRadius}px)`,
         backgroundPosition: grid.backgroundPosition,
         backgroundSize: grid.backgroundSize,
         backgroundColor: CANVAS_BG,
         fontFamily: CANVAS_FONT_FAMILY,
         ...style,
+        cursor: stageCursor,
       }}
       onPointerDown={onStagePointerEvent}
       onDoubleClick={onStageDoubleClick}
@@ -1355,11 +1730,11 @@ export function CanvasStage({
           outline-offset: 3px;
         }
         .interactive-canvas-object[data-editable="true"] {
-          cursor: grab;
+          cursor: inherit;
           touch-action: none;
         }
-        .interactive-canvas-object[data-editable="true"]:active {
-          cursor: grabbing;
+        .interactive-canvas-stage[data-canvas-select-tool="true"] .interactive-canvas-object[data-editable="true"] {
+          cursor: ${CHROME.selectCursor};
         }
         .interactive-canvas-object[data-changed="true"] {
           box-shadow: 0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent);
@@ -1421,9 +1796,84 @@ export function CanvasStage({
           border-radius: 999px;
           padding: 0;
         }
-        .interactive-canvas-object-document {
+        .interactive-canvas-object-page-corner {
           clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%);
           border-radius: 2px 8px 8px 8px;
+        }
+        .interactive-canvas-object-document,
+        .interactive-canvas-object-folder,
+        .interactive-canvas-object-document-stack,
+        .interactive-canvas-object-cylinder-horizontal,
+        .interactive-canvas-object-ellipse,
+        .interactive-canvas-object-triangle,
+        .interactive-canvas-object-parallelogram,
+        .interactive-canvas-object-pentagon,
+        .interactive-canvas-object-octagon,
+        .interactive-canvas-object-star,
+        .interactive-canvas-object-plus,
+        .interactive-canvas-object-chevron,
+        .interactive-canvas-object-off-page-connector,
+        .interactive-canvas-object-trapezoid,
+        .interactive-canvas-object-manual-input,
+        .interactive-canvas-object-hexagon,
+        .interactive-canvas-object-or-junction,
+        .interactive-canvas-object-summing-junction {
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          border: none;
+          border-radius: 0;
+          background: transparent !important;
+          box-shadow: none;
+          overflow: visible;
+        }
+        .interactive-canvas-true-outline-silhouette {
+          z-index: 0;
+        }
+        .interactive-canvas-object-folder {
+          padding-top: 26%;
+        }
+        .interactive-canvas-object-document-stack {
+          padding-top: calc(12px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
+          padding-left: calc(14px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
+        }
+        .interactive-canvas-object-triangle {
+          justify-content: flex-end;
+          padding: 18% 18% 10%;
+        }
+        .interactive-canvas-object-off-page-connector {
+          padding-bottom: ${(1 - OFF_PAGE_CONNECTOR_GEOMETRY.shoulderRatio) * 70}%;
+        }
+        .interactive-canvas-object-manual-input {
+          padding-top: ${MANUAL_INPUT_GEOMETRY.dropRatio * 80}%;
+        }
+        .interactive-canvas-object-star .interactive-canvas-object-label {
+          font-size: 12px;
+        }
+        .interactive-canvas-object-internal-storage {
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 18% 12% 12% 22%;
+        }
+        .interactive-canvas-internal-storage-rule {
+          position: absolute;
+          background: currentColor;
+          opacity: 0.6;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .interactive-canvas-internal-storage-rule-vertical {
+          top: 0;
+          bottom: 0;
+          left: 15%;
+          width: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
+        }
+        .interactive-canvas-internal-storage-rule-horizontal {
+          left: 0;
+          right: 0;
+          top: 15%;
+          height: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
         }
         .interactive-canvas-object-person,
         .interactive-canvas-object-database,
@@ -1641,6 +2091,16 @@ export function CanvasStage({
           opacity: 1;
           pointer-events: auto;
         }
+        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object {
+          cursor: inherit;
+        }
+        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object:hover:not([data-selected="true"]) {
+          outline: none;
+        }
+        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object:hover .interactive-canvas-edge-port {
+          opacity: 0;
+          pointer-events: none;
+        }
       `}</style>
       <div
         className="interactive-canvas-world-layer"
@@ -1660,7 +2120,14 @@ export function CanvasStage({
         */}
         <svg
           className="interactive-canvas-layer pointer-events-none"
-          style={{ position: "absolute", left: 0, top: 0, overflow: "visible", zIndex: 1 }}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            overflow: "visible",
+            zIndex: 1,
+            pointerEvents: handToolActive ? "none" : undefined,
+          }}
           aria-hidden="true"
         >
           <defs>
@@ -1726,7 +2193,8 @@ export function CanvasStage({
         </svg>
         <div
           className="interactive-canvas-layer"
-          style={{ position: "absolute", left: 0, top: 0 }}
+          data-canvas-object-layer="true"
+          style={{ position: "absolute", left: 0, top: 0, pointerEvents: handToolActive ? "none" : undefined }}
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               onCanvasSelect?.();
@@ -1739,7 +2207,7 @@ export function CanvasStage({
             onCanvasContextMenu(event, bounds);
           }}
         >
-          {renderOrderedObjects(document.objects).map((object) => (
+          {renderOrderedObjects(visibleObjectsForSections(document.objects, document)).map((object) => (
             <ObjectShape
               key={object.id}
               object={object}
@@ -1749,7 +2217,7 @@ export function CanvasStage({
               compact={compact}
               bounds={bounds}
               editable={Boolean(onObjectSelect || onStagePointerEvent)}
-              showPorts={Boolean(onStagePointerEvent)}
+              showPorts={Boolean(onStagePointerEvent) && !handToolActive}
               zoom={zoom}
               hideLabel={editingLabelObjectId === object.id}
               onObjectSelect={onObjectSelect}
@@ -1759,6 +2227,7 @@ export function CanvasStage({
         </div>
         <div
           className="interactive-canvas-layer"
+          data-canvas-world-overlay-layer="true"
           style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 3 }}
         >
           {document.connections.map((connection) => {
@@ -1776,7 +2245,7 @@ export function CanvasStage({
               />
             );
           })}
-          {worldOverlay}
+          {!handToolActive && worldOverlay}
         </div>
       </div>
       <div
@@ -1787,7 +2256,12 @@ export function CanvasStage({
           pointerEvents: "none",
         }}
       >
-        <SelectionBox document={document} viewport={viewport} selectedObjectIds={selectedObjectIds} />
+        <SelectionBox
+          document={document}
+          viewport={viewport}
+          selectedObjectIds={selectedObjectIds}
+          interactiveHandles={!handToolActive}
+        />
         {interactionOverlay?.marquee && (
           <Marquee viewport={viewport} bounds={interactionOverlay.marquee} />
         )}

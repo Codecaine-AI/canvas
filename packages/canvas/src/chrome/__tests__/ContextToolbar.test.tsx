@@ -37,12 +37,12 @@ describe("ContextToolbar variant registry", () => {
     ]);
   });
 
-  it("section variant renders exactly the 6 measured controls with a divider after the layers control", () => {
+  it("section variant renders the FigJam v2 controls in order with one divider", () => {
     const { container } = render(<ContextToolbar variant="section" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["tint", "list", "frame", "visibility", "lock", "expand"]);
+    expect(actions).toEqual(["color", "section-border-style", "rename", "visibility", "lock"]);
     expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
@@ -98,5 +98,29 @@ describe("ContextToolbar interaction", () => {
     const dashButton = container.querySelector('[data-toolbar-action="dash"]') as HTMLElement;
     fireEvent.mouseEnter(dashButton);
     expect(queryByRole("tooltip")?.textContent).toBe("Line style");
+  });
+
+  it("section style controls are editor-owned flyouts", () => {
+    const onAction = mock((_action: string, _value?: unknown) => {});
+    const { container } = render(
+      <ContextToolbar
+        variant="section"
+        onAction={onAction}
+        currentColor="#C2E5FF"
+        currentSectionBorderStyle="solid"
+      />,
+    );
+    const fill = container.querySelector('[data-toolbar-action="color"]')!;
+    const border = container.querySelector('[data-toolbar-action="section-border-style"]')!;
+
+    fireEvent.click(fill);
+    expect(onAction.mock.calls.at(-1)).toEqual(["color"]);
+    expect(fill.getAttribute("aria-expanded")).toBe("true");
+    expect(container.querySelector("[data-color-palette-popover]")).toBeNull();
+
+    fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
+    expect(onAction.mock.calls.at(-1)).toEqual(["section-border-style"]);
+    expect(border.getAttribute("aria-expanded")).toBe("true");
+    expect(container.querySelector("[data-color-palette-popover]")).toBeNull();
   });
 });

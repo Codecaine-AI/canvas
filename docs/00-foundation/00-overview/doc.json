@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-00-foundation-00-overview",
+  "title": "Foundation — Why This Canvas Exists",
+  "root": "b-foundation-root",
+  "blocks": {
+    "b-foundation-root": {
+      "id": "b-foundation-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "This canvas exists to give software diagramming FigJam's designer-grade aesthetics without FigJam's feature sprawl, built from the ground up so an agent can read and write the document model directly.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "FigJam aesthetics",
+          "software diagramming",
+          "agent-native",
+          "single mutation authority",
+          "light board"
+        ]
+      },
+      "children": [
+        "b-foundation-title-1",
+        "b-foundation-intro-2",
+        "b-foundation-figjam-half-3",
+        "b-foundation-engineer-half-4",
+        "b-foundation-wedge-5",
+        "b-foundation-scope-heading-6",
+        "b-foundation-scope-intro-7",
+        "b-foundation-scope-not-whiteboard-8",
+        "b-foundation-scope-not-sprawl-9",
+        "b-foundation-scope-is-10",
+        "b-foundation-commitments-heading-11",
+        "b-foundation-decision-lightboard-12",
+        "b-foundation-decision-parity-13",
+        "b-foundation-decision-mutation-14",
+        "b-foundation-decision-agent-model-15",
+        "b-foundation-nextsteps-heading-16",
+        "b-foundation-nextsteps-body-17"
+      ]
+    },
+    "b-foundation-title-1": {
+      "id": "b-foundation-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Foundation — Why This Canvas Exists"
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-intro-2": {
+      "id": "b-foundation-intro-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "FigJam is my favorite design/whiteboarding tool for diagrams. It's aesthetic and clean in a way that makes things very clear to understand — it's obviously made by designers. But it doesn't integrate well with AI tooling, and it carries a lot of features that are unnecessary for software diagrams specifically. Meanwhile every tool built specifically for software diagramming is obviously made by software engineers and not designers — they all feel clunky and shitty. This canvas is the way in between: designer-grade FigJam aesthetics, scoped down to software diagramming, built agent-native so AI tooling can read and write the document model directly."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-figjam-half-3": {
+      "id": "b-foundation-figjam-half-3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Take the FigJam half seriously: the reason FigJam feels good isn't an accident, it's craft — pastel fills, deliberate stroke weights, a soft grid, type that's actually been tuned. That's the bar this engine holds itself to. The FigJam visual language (colors, geometry, shadows, type sizes) is sampled and mirrored, not reinvented, because reinventing it is how you end up with the clunky-engineer look this project is explicitly trying to avoid."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-engineer-half-4": {
+      "id": "b-foundation-engineer-half-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Take the engineer-tools half seriously too: general whiteboards are not built for agent integration, and dedicated software-diagramming tools are usually a document model bolted onto a GUI as an afterthought, never designed to be read or written programmatically. Neither gives you a clean surface for an AI agent to generate, inspect, or edit a diagram. This engine is designed the other way around — the document model comes first, the rendering is a projection of it, and the model is exactly as legible to an agent as it is to the reducer that drives the UI."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-wedge-5": {
+      "id": "b-foundation-wedge-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The wedge this project occupies: FigJam's aesthetics, a scope limited to software diagramming (not general whiteboarding), and a document model an agent can read and write directly — not a human-only GUI on top of an ad hoc data structure a script has to fight."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-scope-heading-6": {
+      "id": "b-foundation-scope-heading-6",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "What this is / what this is not"
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-scope-intro-7": {
+      "id": "b-foundation-scope-intro-7",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Scope is a feature here, not a limitation. Every feature FigJam has that doesn't serve software diagramming is a feature this engine deliberately doesn't have."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-scope-not-whiteboard-8": {
+      "id": "b-foundation-scope-not-whiteboard-8",
+      "flavour": "constraint",
+      "props": {
+        "severity": "hard",
+        "title": "Not a general-purpose whiteboard"
+      },
+      "text": [
+        {
+          "insert": "This is not a Miro/FigJam competitor for brainstorming, retros, voting, or freeform ideation. No sticky-note voting, no timers, no cursor-chat games, no generic canvas-for-anything ambition. Every feature earns its place by serving software diagramming — architecture diagrams, flows, system maps — or it doesn't ship."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-scope-not-sprawl-9": {
+      "id": "b-foundation-scope-not-sprawl-9",
+      "flavour": "constraint",
+      "props": {
+        "severity": "hard",
+        "title": "No FigJam feature sprawl"
+      },
+      "text": [
+        {
+          "insert": "FigJam's visual language is the target, not its full feature surface. Templates, stamps, widgets, voting, video chat, and the rest of FigJam's collaboration-suite feature list are explicitly out of scope. Borrowing the aesthetic does not mean cloning the product."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-scope-is-10": {
+      "id": "b-foundation-scope-is-10",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "What it is: a software-diagramming canvas — shapes, connectors, sections, stickies, code blocks — rendered with FigJam-grade polish, backed by a document model that is a first-class, agent-writable artifact rather than an internal implementation detail."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-commitments-heading-11": {
+      "id": "b-foundation-commitments-heading-11",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The real commitments"
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-decision-lightboard-12": {
+      "id": "b-foundation-decision-lightboard-12",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "The board is light-surface only — no dark mode for the canvas itself"
+      },
+      "text": [
+        {
+          "insert": "The board always renders on a fixed light background — "
+        },
+        {
+          "insert": "CANVAS_BG = \"#F5F5F5\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CANVAS_BG"
+            }
+          }
+        },
+        {
+          "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app chrome is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app chrome around the board is allowed to follow the host theme. See the sourcing comment directly above the constant in "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "theme.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which maps canvas object tones through the host's CSS variables for chrome but never dark-shifts the board background itself."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-decision-parity-13": {
+      "id": "b-foundation-decision-parity-13",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "FigJam visual parity is ground truth"
+      },
+      "text": [
+        {
+          "insert": "Rendering decisions — fills, stroke widths, corner radii, shadows, type sizes, dash patterns, arrowhead geometry — are not design opinions to be re-litigated per component; they're settled by matching FigJam's sampled tokens in "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which is a hand-written typed mirror of "
+        },
+        {
+          "insert": "figjam-style-tokens.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (pixel-sampled from real FigJam exports, see "
+        },
+        {
+          "insert": "board-design-reference/analysis/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). When a rendering question comes up — what radius should this shape have, what's the stroke color — the answer is \"what does FigJam do,\" checked against the sampled tokens, not \"what looks nice to me right now.\" New visual work should extend that module rather than hardcoding fresh values elsewhere."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-decision-mutation-14": {
+      "id": "b-foundation-decision-mutation-14",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Typed-action single mutation authority"
+      },
+      "text": [
+        {
+          "insert": "Every mutation to the document — a human dragging a shape, a keyboard shortcut, a chrome UI button, or an agent editing the board programmatically — is expressed as a "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and flows through the one "
+        },
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": " reducer. There is no second write path. This is what actually makes the \"agent-native\" claim true rather than aspirational: an agent doesn't get a degraded, side-channel API — it dispatches the exact same typed actions a human's pointer interactions dispatch, through the exact same reducer, and gets the exact same guarantees (consistent undo/redo history, consistent connector-waypoint reconciliation) a human edit gets. One authority, one history, no drift between \"what a person did\" and \"what an agent did.\""
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-decision-agent-model-15": {
+      "id": "b-foundation-decision-agent-model-15",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "The document model is agent-editable, not just human-editable"
+      },
+      "text": [
+        {
+          "insert": "The persisted board is plain, validated JSON — "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", checked by "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " — with no hidden runtime-only state, no opaque binary blobs, and no proprietary format standing between the diagram and something that reads or writes it programmatically. An agent can generate a document from scratch, parse an existing one, or patch a piece of one, using nothing but the schema and the validator, exactly the same as the human-facing editor does. This is the other half of what \"agent-native\" means: it isn't only that actions can be dispatched programmatically (the mutation authority above), it's that the artifact those actions produce is legible on its own, at rest, to anything that wants to read or write it directly."
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-nextsteps-heading-16": {
+      "id": "b-foundation-nextsteps-heading-16",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Where to go next"
+        }
+      ],
+      "children": []
+    },
+    "b-foundation-nextsteps-body-17": {
+      "id": "b-foundation-nextsteps-body-17",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For the architecture that implements these commitments, see "
+        },
+        {
+          "insert": "10-system-design/00-overview",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/00-overview",
+              "label": "10-system-design/00-overview"
+            }
+          }
+        },
+        {
+          "insert": ". For the shape API's structure, see "
+        },
+        {
+          "insert": "10-system-design/10-shape-api",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "10-system-design/10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": ". For the FigJam parity map, see "
+        },
+        {
+          "insert": "10-system-design/20-figjam-parity",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-figjam-parity",
+              "label": "10-system-design/20-figjam-parity"
+            }
+          }
+        },
+        {
+          "insert": ". For the model layer itself — schema, actions, reducer, geometry — see "
+        },
+        {
+          "insert": "20-implementation/10-model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/10-model",
+              "label": "20-implementation/10-model"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

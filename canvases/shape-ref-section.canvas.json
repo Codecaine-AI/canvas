@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-section",
+  "title": "Section — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 878,
+    "height": 758
+  },
+  "objects": [
+    {
+      "id": "subject-section",
+      "type": "section",
+      "label": "Section",
+      "geometry": {
+        "x": 80,
+        "y": 80,
+        "width": 480,
+        "height": 360
+      },
+      "title": "Section",
+      "tint": "blue",
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "marker-section-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 288,
+        "y": -23,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-section-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 635,
+        "y": 246,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-section-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 288,
+        "y": 515,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-section-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": -59,
+        "y": 246,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-section",
+      "type": "text",
+      "label": "title renders in a floating top-left chip; label is not separately shown",
+      "geometry": {
+        "x": 40,
+        "y": 583,
+        "width": 560,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-section-top",
+      "from": {
+        "objectId": "marker-section-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-section",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-section-right",
+      "from": {
+        "objectId": "marker-section-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-section",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-section-bottom",
+      "from": {
+        "objectId": "marker-section-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-section",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-section-left",
+      "from": {
+        "objectId": "marker-section-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-section",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

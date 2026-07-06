@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
+import { CHROME } from "../render/figjam-tokens";
 import { ChromeTooltip } from "./ChromeTooltip";
 import { ZoomMinusIcon, ZoomPlusIcon } from "./dock-icons";
 
@@ -27,8 +28,9 @@ export type ZoomControlsProps = {
 };
 
 const PILL_HEIGHT_PX = 32;
-const GLYPH_CHARCOAL = "rgb(51, 51, 51)";
-const HOVER_BG = "rgb(235, 235, 235)";
+const PILL_RADIUS_PX = CHROME.dockRadiusPx;
+const GLYPH_CHARCOAL = CHROME.dockGlyphColor;
+const HOVER_BG = CHROME.dockHoverBg;
 
 function ZoomButton({
   label,
@@ -42,15 +44,23 @@ function ZoomButton({
   children: React.ReactNode;
 }) {
   const [hovered, setHovered] = useState(false);
+  const clearHover = () => setHovered(false);
   return (
     <div style={{ position: "relative", display: "inline-flex" }}>
       <button
         type="button"
         aria-label={label}
         disabled={disabled}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={clearHover}
+        onPointerCancel={clearHover}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onClick={onClick}
+        onMouseLeave={clearHover}
+        onBlur={clearHover}
+        onClick={() => {
+          clearHover();
+          onClick?.();
+        }}
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -73,7 +83,7 @@ function ZoomButton({
   );
 }
 
-export function ZoomControls({
+function ZoomControlsComponent({
   zoomPercent,
   onZoomIn,
   onZoomOut,
@@ -92,9 +102,9 @@ export function ZoomControls({
         alignItems: "center",
         gap: 2,
         height: PILL_HEIGHT_PX,
-        borderRadius: PILL_HEIGHT_PX / 2,
-        background: "#FDFDFD",
-        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08)",
+        borderRadius: PILL_RADIUS_PX,
+        background: CHROME.bottomToolbarBg,
+        boxShadow: CHROME.dockShadow,
         padding: "0 6px",
         boxSizing: "border-box",
       }}
@@ -131,4 +141,7 @@ export function ZoomControls({
   );
 }
 
+export const ZoomControls = memo(ZoomControlsComponent);
+
 export const ZOOM_CONTROLS_HEIGHT_PX = PILL_HEIGHT_PX;
+export const ZOOM_CONTROLS_RADIUS_PX = PILL_RADIUS_PX;

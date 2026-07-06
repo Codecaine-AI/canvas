@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
+import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements.canvas.json";
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
-import { v2FlowElementsCanvas } from "../../fixtures/v2-flow-elements";
+import type { InteractiveCanvasDocument } from "../../model/schema";
+
+const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDocument;
 
 afterEach(() => {
   cleanup();
@@ -42,9 +45,9 @@ const SCREEN = { width: 1600, height: 900 };
 describe("W2 render smoke: every new object type renders without throwing", () => {
   it("renders one of each new W2 shape/section type", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
-      for (const object of v2FlowElementsCanvas.objects) {
+      for (const object of v2FlowElementsDocument.objects) {
         const node = container.querySelector(`[data-canvas-object-id="${object.id}"]`);
         expect(node).toBeTruthy();
       }
@@ -53,7 +56,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders sections with a title chip showing their `title` (not `label`)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const outer = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
       expect(outer).toBeTruthy();
@@ -65,9 +68,65 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
+  it("renders explicit section fill and dashed border style", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const document = {
+        ...v2FlowElementsDocument,
+        objects: v2FlowElementsDocument.objects.map((object) =>
+          object.id === "outer-section"
+            ? {
+                ...object,
+                style: { ...object.style, fill: "#C2E5FF", stroke: "#3DADFF", strokeStyle: "dashed" as const },
+              }
+            : object,
+        ),
+      };
+      const { container } = render(<InteractiveCanvasViewer document={document} />);
+      const section = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
+
+      expect(section?.style.background).toBe("#C2E5FF");
+      expect(section?.style.borderColor).toBe("#3DADFF");
+      expect(section?.style.borderStyle).toBe("dashed");
+      expect(section?.querySelector("[data-section-border-dash] rect")?.getAttribute("stroke-dasharray")).toBe("19 7");
+    });
+  });
+
+  it("renders section strokeStyle none without a border", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const document = {
+        ...v2FlowElementsDocument,
+        objects: v2FlowElementsDocument.objects.map((object) =>
+          object.id === "outer-section"
+            ? { ...object, style: { ...object.style, strokeStyle: "none" as const } }
+            : object,
+        ),
+      };
+      const { container } = render(<InteractiveCanvasViewer document={document} />);
+      const section = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
+
+      expect(section?.style.borderStyle).toBe("none");
+      expect(section?.style.borderWidth).toBe("0px");
+    });
+  });
+
+  it("hides captured member objects while section contentHidden is true", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const document = {
+        ...v2FlowElementsDocument,
+        objects: v2FlowElementsDocument.objects.map((object) =>
+          object.id === "outer-section" ? { ...object, contentHidden: true } : object,
+        ),
+      };
+      const { container } = render(<InteractiveCanvasViewer document={document} />);
+
+      expect(container.querySelector('[data-canvas-object-id="outer-section"]')).toBeTruthy();
+      expect(container.querySelector('[data-canvas-object-id="captured-pill"]')).toBeFalsy();
+    });
+  });
+
   it("renders sections below non-section objects in DOM order", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const allObjectNodes = Array.from(container.querySelectorAll("[data-canvas-object-id]"));
       const sectionIndex = allObjectNodes.findIndex(
@@ -84,7 +143,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders the chip-icon silhouette", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
       const chipSvg = container.querySelector('[data-canvas-shape-silhouette="chip-icon"]');
       expect(chipSvg).toBeTruthy();
     });
@@ -92,7 +151,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders the restyled person/chat labels BELOW the icon, not overlaid", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const person = container.querySelector('[data-canvas-object-id="restyled-person"]');
       expect(person?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe("Interviewee");
@@ -104,7 +163,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("hides the compact person's label under 100px height", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
       const compactPerson = container.querySelector('[data-canvas-object-id="compact-person"]');
       expect(compactPerson?.querySelector(".interactive-canvas-label-below-icon")).toBeNull();
     });
@@ -112,7 +171,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders sticky author text and bullet lines", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const sticky = container.querySelector('[data-canvas-object-id="partial-overlap-note"]') as HTMLElement | null;
       expect(sticky).toBeTruthy();
@@ -129,7 +188,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders the code-block with a line-number gutter and tokenized spans", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const codeBlock = container.querySelector('[data-canvas-object-id="captured-code-block"]') as HTMLElement | null;
       expect(codeBlock).toBeTruthy();
@@ -144,7 +203,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders arrow-shape objects pointing in their configured direction", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
       const rightArrow = container.querySelector('[data-canvas-object-id="outside-arrow"] .interactive-canvas-arrow-shape-silhouette') as SVGElement | null;
       const leftArrow = container.querySelector('[data-canvas-object-id="outside-arrow-left"] .interactive-canvas-arrow-shape-silhouette') as SVGElement | null;
@@ -160,7 +219,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
   it("renders predefined-process's two inner bars", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsCanvas} />);
+      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
       const node = container.querySelector('[data-canvas-object-id="predefined-process-node"]');
       const bars = node?.querySelectorAll(".interactive-canvas-predefined-process-bar");
       expect(bars?.length).toBe(2);
@@ -170,7 +229,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
   it("gives a selected section corner-only resize handles (no edge midpoints)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
-        <InteractiveCanvasViewer document={v2FlowElementsCanvas} selectedObjectIds={["outer-section"]} />,
+        <InteractiveCanvasViewer document={v2FlowElementsDocument} selectedObjectIds={["outer-section"]} />,
       );
       const handles = Array.from(container.querySelectorAll("[data-canvas-handle]"));
       expect(handles.length).toBeGreaterThan(0);
@@ -186,7 +245,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
   it("gives a selected non-section object the full 8-handle set, including edge midpoints", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
-        <InteractiveCanvasViewer document={v2FlowElementsCanvas} selectedObjectIds={["captured-pill"]} />,
+        <InteractiveCanvasViewer document={v2FlowElementsDocument} selectedObjectIds={["captured-pill"]} />,
       );
       const handles = Array.from(container.querySelectorAll("[data-canvas-handle]"));
       const handleNames = handles.map((node) => node.getAttribute("data-canvas-handle"));

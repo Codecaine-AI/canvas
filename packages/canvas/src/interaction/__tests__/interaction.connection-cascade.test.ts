@@ -158,7 +158,8 @@ describe("connector-create: cascade snapping (W3b)", () => {
   it("anchor snap on a true-outline shape (arrow-shape): stores the exact outline position, not the bbox midpoint", () => {
     // Arrow-shape 200x100 at (300, 0), direction right: the top-anchor ray
     // from the center crosses the chevron BODY top edge at y = bodyInset
-    // (23.5 with ARROW_SHAPE_GEOMETRY.bodyHeightRatio = 0.53), not y = 0.
+    // (20 with ARROW_SHAPE_GEOMETRY.bodyHeightRatio = 0.60 — Wave B1's
+    // blockier arrow; bodyInset = (1 - 0.60) / 2 * height), not y = 0.
     const documentWithArrow = makeDocument([
       makeObject({ id: "a" }),
       makeObject({
@@ -179,7 +180,7 @@ describe("connector-create: cascade snapping (W3b)", () => {
     expect(action.toAnchor).toBe("top");
     // The exact outline attach point is preserved: [0.5, bodyInset/height].
     expect(action.toPosition?.[0]).toBeCloseTo(0.5, 5);
-    expect(action.toPosition?.[1]).toBeCloseTo(0.235, 3);
+    expect(action.toPosition?.[1]).toBeCloseTo(0.2, 3);
   });
 });
 

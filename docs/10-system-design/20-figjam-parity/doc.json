@@ -1,0 +1,3594 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-figjam-parity",
+  "title": "FigJam Shape Parity Map",
+  "root": "b-figjam-parity-root",
+  "blocks": {
+    "b-figjam-parity-figjam-shape-parity-map-1": {
+      "id": "b-figjam-parity-figjam-shape-parity-map-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "FigJam Shape Parity Map"
+        }
+      ]
+    },
+    "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2": {
+      "id": "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "This doc measures our canvas engine's shape vocabulary against FigJam's default shape picker — the same picker used as ground truth throughout this docs tree (see the "
+        },
+        {
+          "insert": "foundation manifesto's",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "00-foundation/00-overview"
+            }
+          }
+        },
+        {
+          "insert": " \"FigJam visual parity is ground truth\" decision). The picker has three tiers, and they map onto our schema very differently:"
+        }
+      ]
+    },
+    "b-figjam-parity-native-code-ref-shapetype-packages-canv-3": {
+      "id": "b-figjam-parity-native-code-ref-shapetype-packages-canv-3",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Native "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " values — Basic (14) + Flowchart (16) = 30 enum entries in Figma's "
+        },
+        {
+          "insert": "ShapeWithTextNode.shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", each a first-class shape a user can place directly. This is the tier our 17 "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " values and 14 "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasObjectStyle"
+            }
+          }
+        },
+        {
+          "insert": " variants are compared against below."
+        }
+      ]
+    },
+    "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4": {
+      "id": "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Connectors (3) — line/arrow/elbow-arrow presets on Figma's "
+        },
+        {
+          "insert": "ConnectorNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not shapes at all. Compared against our "
+        },
+        {
+          "insert": "CanvasConnectionStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasConnectionStyle"
+            }
+          }
+        },
+        {
+          "insert": " (solid/dotted/elbow/smooth) and "
+        },
+        {
+          "insert": "CanvasArrowDirection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowDirection"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-advanced-26-these-are-components-5": {
+      "id": "b-figjam-parity-advanced-26-these-are-components-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Advanced (26) — these are "
+        },
+        {
+          "insert": "components",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": ", not "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values (they don't appear anywhere in the plugin typings' shape enum). Treated here as a separate icon tier, compared against our icon-shaped object types ("
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-figjam-parity-every-row-below-gets-one-of-three-verdic-6": {
+      "id": "b-figjam-parity-every-row-below-gets-one-of-three-verdic-6",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every row below gets one of three verdicts, judged strictly against actual rendering code (in "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), not against type names that merely sound similar:"
+        }
+      ]
+    },
+    "b-figjam-parity-bold-have-geometry-and-role-match-m-7": {
+      "id": "b-figjam-parity-bold-have-geometry-and-role-match-m-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "HAVE",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — geometry and role match; minor styling deltas (fixed radius, palette) are noted but don't demote the verdict."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-have-but-wrong-we-render-someth-8": {
+      "id": "b-figjam-parity-bold-have-but-wrong-we-render-someth-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "HAVE-BUT-WRONG",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — we render something for this slot, but its silhouette, geometry, or behavior diverges enough that it isn't a faithful stand-in."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-missing-no-reasonable-mapping-e-9": {
+      "id": "b-figjam-parity-bold-missing-no-reasonable-mapping-e-9",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "MISSING",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — no reasonable mapping exists today."
+        }
+      ]
+    },
+    "b-figjam-parity-see-doc-ref-shape-api-structure-10-syst-10": {
+      "id": "b-figjam-parity-see-doc-ref-shape-api-structure-10-syst-10",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "See "
+        },
+        {
+          "insert": "Shape API Structure",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": " for the four-facet contract (geometry, style, text slot, connection anchors) every shape satisfies, and "
+        },
+        {
+          "insert": "Shape Reference",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/80-shape-reference"
+            }
+          }
+        },
+        {
+          "insert": " for exhaustive per-type rendering detail. This doc is the gap analysis that sits between them."
+        }
+      ]
+    },
+    "b-figjam-parity-gap-table-11": {
+      "id": "b-figjam-parity-gap-table-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Gap table"
+        }
+      ]
+    },
+    "b-figjam-parity-reconciling-the-shared-brief-s-59-item-p-12": {
+      "id": "b-figjam-parity-reconciling-the-shared-brief-s-59-item-p-12",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Reconciling the shared brief's 59-item picker transcription against the plugin typings' verbatim "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enum: Basic's 14 + Flowchart's 16 map one-to-one onto all 30 "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values with none left over. The 3 Connectors are "
+        },
+        {
+          "insert": "ConnectorNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line-type presets, not shapes. The 26 Advanced items are components — they don't appear in the "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " union at all, and are handled in their own subsection and strategy note below."
+        }
+      ]
+    },
+    "b-figjam-parity-basic-13": {
+      "id": "b-figjam-parity-basic-13",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Basic"
+        }
+      ]
+    },
+    "b-figjam-parity-basic-table-14": {
+      "id": "b-figjam-parity-basic-table-14",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "FigJam name               shapeType          verdict         our mapping                     notes\n------------------------  -----------------  --------------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE            rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            MISSING         -                               no ellipse/circle primitive anywhere in schema or renderer\nDiamond                   DIAMOND            HAVE            decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        MISSING         -                               no triangle primitive\nTriangle (down)           TRIANGLE_DOWN      MISSING         -                               no triangle primitive\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE            container/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           MISSING         -                               no pentagon primitive\nOctagon                   OCTAGON            MISSING         -                               no octagon primitive\nPlus/cross                PLUS               MISSING         -                               no plus/cross primitive\nBlock arrow (left)        ARROW_LEFT         HAVE-BUT-WRONG  arrow-shape (direction:left)    ours is a thin 7-point chevron sliver (headWidthRatio 0.38, bodyHeightRatio 0.53), not FigJam's blockier full-height arrow body\nBlock arrow (right)       ARROW_RIGHT        HAVE-BUT-WRONG  arrow-shape (direction:right)   same chevron-vs-block-arrow silhouette gap as ARROW_LEFT\nFat chevron arrow         CHEVRON            MISSING         -                               distinct from ARROW_LEFT/RIGHT in Figma's own enum; we only have the arrow-shape chevron, not a separate fat-chevron primitive\nStar                      STAR               MISSING         -                               no star primitive\nSpeech bubble             SPEECH_BUBBLE      HAVE            chat                            true SVG path with bottom-left triangular tail; close silhouette match, tail position/angle is a fixed style choice not user-configurable"
+        }
+      ]
+    },
+    "b-figjam-parity-block-arrow-left-arrow-left-our-co-15": {
+      "id": "b-figjam-parity-block-arrow-left-arrow-left-our-co-15",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Block arrow (left) / ARROW_LEFT: Our "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " (direction: left) renders a thin 7-point chevron sliver ("
+        },
+        {
+          "insert": "headWidthRatio",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " 0.38, "
+        },
+        {
+          "insert": "bodyHeightRatio",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " 0.53 in figjam-tokens.ts's "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": ") — FigJam's block arrow is a blockier, full-height arrow body. Same silhouette gap as the right-pointing variant."
+        }
+      ]
+    },
+    "b-figjam-parity-block-arrow-right-arrow-right-same-16": {
+      "id": "b-figjam-parity-block-arrow-right-arrow-right-same-16",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Block arrow (right) / ARROW_RIGHT: Same chevron-vs-block-arrow silhouette gap as the left-pointing variant — both are the same "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type with "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " flipped, not two independently-tuned shapes."
+        }
+      ]
+    },
+    "b-figjam-parity-speech-bubble-is-have-not-have-but-wron-17": {
+      "id": "b-figjam-parity-speech-bubble-is-have-not-have-but-wron-17",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Speech bubble is HAVE, not HAVE-BUT-WRONG, but still worth noting: "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " is a genuine SVG speech-bubble path with a fixed bottom-left triangular tail (see the Advanced-tier discussion below for why reusing this same shape there is a tier mismatch)."
+        }
+      ]
+    },
+    "b-figjam-parity-flowchart-18": {
+      "id": "b-figjam-parity-flowchart-18",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Flowchart"
+        }
+      ]
+    },
+    "b-figjam-parity-flowchart-table-19": {
+      "id": "b-figjam-parity-flowchart-table-19",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "FigJam name                         shapeType            verdict         our mapping         notes\n----------------------------------  -------------------  --------------  ------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nParallelogram (skew right)          PARALLELOGRAM_RIGHT  MISSING         -                   no parallelogram primitive\nParallelogram (skew left)           PARALLELOGRAM_LEFT   MISSING         -                   no parallelogram primitive\nCylinder vertical (database/drum)   ENG_DATABASE         HAVE            database            true geometric cylinder: closed barrel path + ellipse lid, matches FigJam's silhouette closely\nCylinder horizontal                 ENG_QUEUE            MISSING         -                   our database shape is vertical-only; no rotated/horizontal variant, and schema has no rotation field to derive one from\nPage with folded corner             ENG_FILE             HAVE-BUT-WRONG  document            our \"document\" IS this shape (dog-ear clip-path notch top-right), but it's mapped to the wrong FigJam concept — see DOCUMENT_SINGLE below\nFolder (tabbed)                     ENG_FOLDER           MISSING         -                   no folder primitive\nDocument (wavy bottom edge)         DOCUMENT_SINGLE      HAVE-BUT-WRONG  document            our \"document\" type renders a straight-edged dog-ear/folded-corner notch (clip-path polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)), NOT a wavy flowchart-document bottom edge; visually it is ENG_FILE's silhouette, not DOCUMENT_SINGLE's\nMultiple documents (stacked)        DOCUMENT_MULTIPLE    MISSING         -                   no stacked/multi-document primitive; would require a genuine new shape (offset duplicate outline behind the primary)\nPredefined process                  PREDEFINED_PROCESS   HAVE            predefined-process  rounded-rect + two inset vertical bars near left/right edges, matches the FigJam symbol\nOff-page connector (pentagon down)  SHIELD               MISSING         -                   no shield or off-page-connector primitive; shapeType name and picker visual don't obviously correspond (see doc note below)\nTrapezoid (manual operation)        TRAPEZOID            MISSING         -                   no trapezoid primitive\nManual input (slanted top edge)     MANUAL_INPUT         MISSING         -                   no manual-input primitive\nHexagon (preparation)               HEXAGON              MISSING         -                   no hexagon primitive\nInternal storage                    INTERNAL_STORAGE     MISSING         -                   no internal-storage primitive (rect + top row + left column rule lines)\nOr-junction (circle with +)         OR                   MISSING         -                   no or-junction primitive; unrelated to our unrelated \"plus\" gap above (different context: circle+cross vs standalone cross)\nSumming junction (circle with X)    SUMMING_JUNCTION     MISSING         -                   no summing-junction primitive"
+        }
+      ]
+    },
+    "b-figjam-parity-page-with-folded-corner-eng-file-our-20": {
+      "id": "b-figjam-parity-page-with-folded-corner-eng-file-our-20",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Page with folded corner / ENG_FILE: Our "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " type's actual silhouette — a straight-edged dog-ear notch cut from the top-right corner via CSS "
+        },
+        {
+          "insert": "clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — is exactly ENG_FILE's \"page with folded corner\" symbol, not a flowchart document. It's mapped to the wrong FigJam concept: see the next row."
+        }
+      ]
+    },
+    "b-figjam-parity-document-wavy-bottom-edge-document-s-21": {
+      "id": "b-figjam-parity-document-wavy-bottom-edge-document-s-21",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Document (wavy bottom edge) / DOCUMENT_SINGLE: The FigJam flowchart document symbol has a wavy/curved bottom edge; our "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type has no curve anywhere in its geometry — it's a straight-sided dog-ear shape. We have a real shape here, it's just a different flowchart symbol (ENG_FILE) wearing the "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type name. A true wavy-bottom document is a genuinely missing shape — see Missing shape specs."
+        }
+      ]
+    },
+    "b-figjam-parity-cylinder-horizontal-eng-queue-our-co-22": {
+      "id": "b-figjam-parity-cylinder-horizontal-eng-queue-our-co-22",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Cylinder horizontal / ENG_QUEUE: Our "
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " cylinder is vertical-only; there's no rotated or horizontal variant, and the schema has no rotation field to derive one from generically (see Where our model diverges, below)."
+        }
+      ]
+    },
+    "b-figjam-parity-off-page-connector-shield-figma-s-own-23": {
+      "id": "b-figjam-parity-off-page-connector-shield-figma-s-own-23",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Off-page connector / SHIELD: Figma's own naming is worth flagging: the Flowchart picker's \"off-page connector\" (pointing-down pentagon) shows up in the typings as the "
+        },
+        {
+          "insert": "SHIELD",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " shapeType — an odd tooltip/enum-name pairing worth double-checking against a live FigJam instance before implementing, since it doesn't obviously correspond to a shield glyph the way the Advanced tier's own \"Shield\" icon does."
+        }
+      ]
+    },
+    "b-figjam-parity-connectors-24": {
+      "id": "b-figjam-parity-connectors-24",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Connectors"
+        }
+      ]
+    },
+    "b-figjam-parity-connectors-table-25": {
+      "id": "b-figjam-parity-connectors-table-25",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "FigJam name               line type            verdict         our mapping                            notes\n------------------------  -------------------  --------------  -------------------------------------  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nStraight line (no arrow)  line, no arrowheads  HAVE            connection style:solid, arrow:none     true straight routing, zero arrowhead markers\nStraight arrow            line, one arrowhead  HAVE-BUT-WRONG  connection style:solid, arrow:forward  routes straight but arrowhead is FigJam's ONLY arrowhead option too (solid filled triangle) — actually a full HAVE on shape; flagged only because Figma exposes 12 ConnectorStrokeCap variants (ARROW_LINES, TRIANGLE_FILLED, DIAMOND_FILLED, etc.) we don't expose per-connection, so \"arrow\" here always means the one style we have\nElbow arrow               ELBOWED connector    HAVE            connection style:elbow                 genuine right-angle routing algorithm (CONNECTOR_ELBOW_CORNER_RADIUS_PX 21.5 rounded corners), not a CSS trick"
+        }
+      ]
+    },
+    "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26": {
+      "id": "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Straight arrow: The routing and arrow placement are fully correct — the only gap is stroke-cap variety: Figma exposes 12 "
+        },
+        {
+          "insert": "ConnectorStrokeCap",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values ("
+        },
+        {
+          "insert": "ARROW_LINES",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "TRIANGLE_FILLED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DIAMOND_FILLED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", etc.) per endpoint, while we have exactly one arrowhead marker (a solid filled triangle, "
+        },
+        {
+          "insert": "context-stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-colored) with no per-connection choice of cap style."
+        }
+      ]
+    },
+    "b-figjam-parity-advanced-27": {
+      "id": "b-figjam-parity-advanced-27",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Advanced"
+        }
+      ]
+    },
+    "b-figjam-parity-advanced-table-28": {
+      "id": "b-figjam-parity-advanced-table-28",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "FigJam name                          verdict         our mapping  notes\n-----------------------------------  --------------  -----------  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  MISSING         -            no matching icon\nArchive box                          MISSING         -            no matching icon\nKey                                  MISSING         -            no matching icon\nChat bubble (outline)                HAVE-BUT-WRONG  chat         our chat is a full native shapeType-tier shape (SPEECH_BUBBLE parity target), not a small component icon; using it to stand in for this Advanced tile means it's oversized/over-featured relative to sibling icons, and it's identical to the Basic-tier speech bubble, not a distinct chip glyph\nCloud                                MISSING         -            no matching icon\nCPU/chip                             HAVE            chip-icon    dedicated rounded-square + pin-lines SVG silhouette, direct match\nDatabase (stacked discs)             HAVE-BUT-WRONG  database     our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch as chat: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape\nDisplay/monitor                      MISSING         -            no matching icon\nEnvelope/mail                        MISSING         -            no matching icon\nFile/document                        HAVE-BUT-WRONG  document     same tier mismatch as chat/database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip\nCode (angle brackets)                HAVE-BUT-WRONG  code-block   our code-block is a full syntax-highlighted editor surface (Dracula theme, tokenizer, line numbers), not a small angle-bracket icon chip — same tier mismatch pattern\nLightning bolt                       MISSING         -            no matching icon\nLocation pin                         MISSING         -            no matching icon\nMobile phone                         MISSING         -            no matching icon\nPackage (3D box, tape)               MISSING         -            no matching icon\nDollar coin                          MISSING         -            no matching icon\nShield                               MISSING         -            no matching icon (distinct from the Flowchart SHIELD shapeType entry — Advanced's shield is a component icon, Flowchart's SHIELD is a full shapeType; conceptually adjacent, not the same picker entry)\nPaper plane/send                     MISSING         -            no matching icon\nServer stack (2 rows)                MISSING         -            no matching icon\nCube (3D)                            MISSING         -            no matching icon\nGear                                 MISSING         -            no matching icon\nHard drive/disk enclosure            MISSING         -            no matching icon\nTerminal window                      MISSING         -            no matching icon\nPerson/user                          HAVE-BUT-WRONG  person       our person is a full shapeType-tier silhouette (rounded-shoulders body + head circle), same over-scaled tier mismatch as chat/database/document\nWallet/card holder                   MISSING         -            no matching icon\nGlobe                                MISSING         -            no matching icon"
+        }
+      ]
+    },
+    "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29": {
+      "id": "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Chat bubble",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": our chat is a full native shapeType-tier shape (SPEECH_BUBBLE parity target), not a small component icon; using it to stand in for this Advanced tile means it's oversized/over-featured relative to sibling icons, and it's identical to the Basic-tier speech bubble, not a distinct chip glyph."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-database-our-database-is-a-true-30": {
+      "id": "b-figjam-parity-bold-database-our-database-is-a-true-30",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Database",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch as chat: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-file-document-same-tier-mismatch-31": {
+      "id": "b-figjam-parity-bold-file-document-same-tier-mismatch-31",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "File/document",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": same tier mismatch as chat/database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32": {
+      "id": "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Code",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": our code-block is a full syntax-highlighted editor surface (Dracula theme, tokenizer, line numbers), not a small angle-bracket icon chip — same tier mismatch pattern."
+        }
+      ]
+    },
+    "b-figjam-parity-bold-person-user-our-person-is-a-full-33": {
+      "id": "b-figjam-parity-bold-person-user-our-person-is-a-full-33",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Person/user",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": our person is a full shapeType-tier silhouette (rounded-shoulders body + head circle), same over-scaled tier mismatch as chat/database/document."
+        }
+      ]
+    },
+    "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34": {
+      "id": "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The 26 Advanced items are FigJam "
+        },
+        {
+          "insert": "components",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ", not shapeType primitives — placing one drops a small pre-styled icon-in-a-chip onto the board, not a resizable geometric shape. Genuine parity with this tier therefore doesn't mean building 26 bespoke [CODE-REF:InteractiveCanvasObjectType|packages/canvas/src/model/schema.ts|InteractiveCanvasObjectType] values; it means one icon-shape ",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": "family* — a single object type (or a "
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": "-style "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " variant) parameterized by an icon-glyph selector, the same way "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " is parameterized by "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": ". We already cover roughly five of the 26 conceptually (chip/CPU, database, chat, document, person) but every one of those five is implemented as a full native shapeType-tier shape reused out of its proper tier, rather than as a member of a small-icon family — so today's coverage is a set of tier-mismatched reuses, not a real head start on the family itself. "
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " (schema.ts) is the closest structural precedent: it's already a fixed-glyph icon-in-a-chip, just hardcoded to a single CPU glyph with no selector — extending it with an icon-name field is the natural path to real Advanced-tier parity."
+        }
+      ]
+    },
+    "b-figjam-parity-missing-shape-specs-35": {
+      "id": "b-figjam-parity-missing-shape-specs-35",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Missing shape specs"
+        }
+      ]
+    },
+    "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36": {
+      "id": "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Each spec below follows the shape-API's four-facet contract (geometry/outline, text slot, connection anchors, style surface) plus per-type fields and a suggested implementation path — either a new "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", or a new "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasObjectStyle"
+            }
+          }
+        },
+        {
+          "insert": " variant on an existing type, matching how "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " already uses a "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": " field rather than two separate left/right types. Trivially-similar shapes (a triangle that just points the other way, a parallelogram skewed the other way) are grouped into one spec with a direction-style field, for the same reason."
+        }
+      ]
+    },
+    "b-figjam-parity-ellipse-37": {
+      "id": "b-figjam-parity-ellipse-37",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Ellipse"
+        }
+      ]
+    },
+    "b-figjam-parity-ellipse-geometry-38": {
+      "id": "b-figjam-parity-ellipse-geometry-38",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Ellipse geometry"
+      },
+      "text": [
+        {
+          "insert": "A true ellipse inscribed in the object's bounding box — center "
+        },
+        {
+          "insert": "(width/2, height/2)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", radii "
+        },
+        {
+          "insert": "(width/2, height/2)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Rendered as an SVG "
+        },
+        {
+          "insert": "<ellipse>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not a CSS "
+        },
+        {
+          "insert": "border-radius: 50%",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " trick (border-radius alone can't give true elliptical connection-anchor projection when the object isn't a perfect square)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-160x120-wide-oval-same-de-39": {
+      "id": "b-figjam-parity-default-size-160x120-wide-oval-same-de-39",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 160x120 (wide oval, same default sizing convention as other basic shapes). Text slot centered like other shapes. Connection anchors: needs to join the true-outline tier ("
+        },
+        {
+          "insert": "outlineShapeFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "outlineShapeFor"
+            }
+          }
+        },
+        {
+          "insert": " in connection-overlay.ts) alongside rect/pill/diamond/arrow-shape — an ellipse's outline-intersection is closed-form (parametric ellipse/line intersection), so it's a natural 5th member, not a bbox-fallback shape. Style surface: fill/stroke/strokeStyle like any basic shape, no special fields. Suggested name: new "
+        },
+        {
+          "insert": "style.shape: \"ellipse\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " variant reachable from a new "
+        },
+        {
+          "insert": "type: \"ellipse\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (or from "
+        },
+        {
+          "insert": "container",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — recommend a dedicated "
+        },
+        {
+          "insert": "ellipse",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type for discoverability, matching how "
+        },
+        {
+          "insert": "decision",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "pill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " each get their own type rather than being style-only variants of "
+        },
+        {
+          "insert": "container",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-figjam-parity-triangle-40": {
+      "id": "b-figjam-parity-triangle-40",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Triangle"
+        }
+      ]
+    },
+    "b-figjam-parity-triangle-geometry-41": {
+      "id": "b-figjam-parity-triangle-geometry-41",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Triangle geometry"
+      },
+      "text": [
+        {
+          "insert": "An isosceles triangle inscribed in the bounding box. "
+        },
+        {
+          "insert": "direction: \"up\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — apex at "
+        },
+        {
+          "insert": "(width/2, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", base corners at "
+        },
+        {
+          "insert": "(0, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "(width, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "direction: \"down\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the same points vertically mirrored (apex at "
+        },
+        {
+          "insert": "(width/2, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", base corners at "
+        },
+        {
+          "insert": "(0, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "(width, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Rendered as an SVG "
+        },
+        {
+          "insert": "<polygon>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with 3 points, the same rendering strategy as the existing "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " chevron."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-140x120-text-slot-centered-42": {
+      "id": "b-figjam-parity-default-size-140x120-text-slot-centered-42",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 140x120. Text slot centered in the lower two-thirds (apex area is too narrow for text). Connection anchors: true-outline triangle intersection joins the polygon tier; the 3-point polygon math is simpler than the diamond's 4-point case already implemented. Style surface: fill/stroke/strokeStyle, standard. Per-type field: "
+        },
+        {
+          "insert": "direction: \"up\" | \"down\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", mirroring "
+        },
+        {
+          "insert": "CanvasArrowShapeDirection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": "'s left/right pattern exactly. Suggested name: new "
+        },
+        {
+          "insert": "type: \"triangle\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "style.shape: \"triangle\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and a "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field on the object (not on style, matching how arrow-shape's direction currently lives — check exact placement against schema.ts's "
+        },
+        {
+          "insert": "CanvasArrowShapeDirection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": " usage and mirror it)."
+        }
+      ]
+    },
+    "b-figjam-parity-parallelogram-43": {
+      "id": "b-figjam-parity-parallelogram-43",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Parallelogram"
+        }
+      ]
+    },
+    "b-figjam-parity-parallelogram-geometry-44": {
+      "id": "b-figjam-parity-parallelogram-geometry-44",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Parallelogram geometry"
+      },
+      "text": [
+        {
+          "insert": "A 4-point skewed quadrilateral. "
+        },
+        {
+          "insert": "direction: \"right\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (skew-right): top edge shifted right relative to bottom — points "
+        },
+        {
+          "insert": "(skewPx, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width - skewPx, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(0, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "direction: \"left\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": horizontally mirrored. "
+        },
+        {
+          "insert": "skewPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " a fixed fraction of width (e.g. 15-20%, matching FigJam's visual skew angle — needs a pixel-reference check against a live sample, flag as approximate)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-160x100-text-slot-centered-45": {
+      "id": "b-figjam-parity-default-size-160x100-text-slot-centered-45",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 160x100. Text slot centered (parallelogram's middle band is roughly rectangular so text fits reasonably without special-casing). Connection anchors: 4-point polygon, same tier as diamond. Style surface: standard fill/stroke/strokeStyle. Per-type field: "
+        },
+        {
+          "insert": "direction: \"left\" | \"right\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Suggested name: new "
+        },
+        {
+          "insert": "type: \"parallelogram\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"parallelogram\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field mirroring arrow-shape's pattern."
+        }
+      ]
+    },
+    "b-figjam-parity-pentagon-and-octagon-46": {
+      "id": "b-figjam-parity-pentagon-and-octagon-46",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Pentagon and octagon"
+        }
+      ]
+    },
+    "b-figjam-parity-regular-polygon-geometry-47": {
+      "id": "b-figjam-parity-regular-polygon-geometry-47",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Regular polygon geometry"
+      },
+      "text": [
+        {
+          "insert": "Pentagon: 5-point regular polygon (one point up), computed as "
+        },
+        {
+          "insert": "{x: cx + r*sin(2*pi*i/5), y: cy - r*cos(2*pi*i/5)}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for i in 0..4, radii scaled independently on x/y to fill the bounding box (non-uniform scale, same "
+        },
+        {
+          "insert": "preserveAspectRatio=\"none\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " trick already used for "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Octagon: 8-point regular polygon, flat-top orientation (matching FigJam's tile), same parametric construction with i in 0..7."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-140x140-square-ish-matchi-48": {
+      "id": "b-figjam-parity-default-size-140x140-square-ish-matchi-48",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 140x140 (square-ish, matching regular-polygon aspect). Text slot centered. Connection anchors: both are natural additions to the true-outline polygon tier (parametric point lists, same treatment as diamond/arrow-shape). Style surface: standard. Suggested names: two new types, "
+        },
+        {
+          "insert": "type: \"pentagon\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "type: \"octagon\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (not worth grouping into one field — they're a different point count and a shared \"regular-polygon with N sides\" field would be over-engineering for exactly two consumers)."
+        }
+      ]
+    },
+    "b-figjam-parity-star-49": {
+      "id": "b-figjam-parity-star-49",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Star"
+        }
+      ]
+    },
+    "b-figjam-parity-star-geometry-50": {
+      "id": "b-figjam-parity-star-geometry-50",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Star geometry"
+      },
+      "text": [
+        {
+          "insert": "A 5-point star polygon: 10 alternating outer/inner vertices around the bounding box center, outer radius touching the box edge, inner radius a fixed fraction (~0.4x outer, matching FigJam's visual proportions — flag as approximate pending a pixel-reference check)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-140x140-text-slot-centered-51": {
+      "id": "b-figjam-parity-default-size-140x140-text-slot-centered-51",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 140x140. Text slot centered (small — a star's usable text area is its middle third). Connection anchors: 10-point polygon joins the true-outline tier the same way diamond/triangle do. Style surface: standard. Suggested name: new "
+        },
+        {
+          "insert": "type: \"star\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"star\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-plus-cross-52": {
+      "id": "b-figjam-parity-plus-cross-52",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Plus / cross"
+        }
+      ]
+    },
+    "b-figjam-parity-plus-geometry-53": {
+      "id": "b-figjam-parity-plus-geometry-53",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Plus geometry"
+      },
+      "text": [
+        {
+          "insert": "A 12-point cross/plus polygon: a horizontal bar and vertical bar of equal thickness crossing at the object's center, thickness a fixed fraction of the smaller bounding-box dimension (~1/3, matching FigJam's proportions)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-120x120-square-a-plus-re-54": {
+      "id": "b-figjam-parity-default-size-120x120-square-a-plus-re-54",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 120x120 (square — a plus reads oddly at non-square aspects). Text slot: none recommended — a plus's center intersection is too small for a meaningful text slot at typical sizes; treat as a decorative/marker shape like "
+        },
+        {
+          "insert": "annotation-marker",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not a label-bearing one. Connection anchors: 12-point polygon, true-outline tier. Style surface: standard fill/stroke. Suggested name: new "
+        },
+        {
+          "insert": "type: \"plus\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"plus\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-block-arrow-and-fat-chevron-55": {
+      "id": "b-figjam-parity-block-arrow-and-fat-chevron-55",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Block arrow and fat chevron"
+        }
+      ]
+    },
+    "b-figjam-parity-our-existing-code-ref-arrow-shape-packa-56": {
+      "id": "b-figjam-parity-our-existing-code-ref-arrow-shape-packa-56",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Our existing "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "'s 7-point chevron, geometry in "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": ") is a thin sliver chevron, not FigJam's blockier full-body block arrow. Closing the ARROW_LEFT/ARROW_RIGHT gap likely means widening "
+        },
+        {
+          "insert": "bodyHeightRatio",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "headWidthRatio",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " toward FigJam's proportions rather than adding a new type. FigJam's separate "
+        },
+        {
+          "insert": "CHEVRON",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (\"fat chevron arrow\") entry is a distinct, even blockier silhouette from ARROW_LEFT/RIGHT in Figma's own enum — worth a second look at whether it's actually a wider "
+        },
+        {
+          "insert": "bodyHeightRatio",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " variant of the same "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " polygon (a third "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-adjacent field, e.g. "
+        },
+        {
+          "insert": "weight: \"sliver\" | \"block\" | \"fat\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") or genuinely a separate 3-point/different-vertex-count polygon; recommend a pixel-comparison against live FigJam exports before deciding, rather than guessing the vertex count here."
+        }
+      ]
+    },
+    "b-figjam-parity-folder-57": {
+      "id": "b-figjam-parity-folder-57",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Folder"
+        }
+      ]
+    },
+    "b-figjam-parity-folder-geometry-58": {
+      "id": "b-figjam-parity-folder-geometry-58",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Folder geometry"
+      },
+      "text": [
+        {
+          "insert": "A manila-folder silhouette: a rectangle with a small tab notch on the top edge (typically top-left, ~35-40% of the width), rendered as a single closed SVG "
+        },
+        {
+          "insert": "<path>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the same construction strategy as the existing "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " speech-bubble tail (one path, not a rect + separate tab overlay)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-140x110-text-slot-centered-59": {
+      "id": "b-figjam-parity-default-size-140x110-text-slot-centered-59",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 140x110. Text slot centered in the main body, below the tab. Connection anchors: bbox fallback is acceptable here (matching how "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/etc. already fall back to bbox despite having non-rectangular SVG silhouettes) — the tab notch is a small enough perturbation that a true-outline projection isn't worth the complexity. Style surface: standard fill/stroke. Suggested name: new "
+        },
+        {
+          "insert": "type: \"folder\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"folder\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-wavy-bottom-document-60": {
+      "id": "b-figjam-parity-wavy-bottom-document-60",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Wavy-bottom document"
+        }
+      ]
+    },
+    "b-figjam-parity-wavy-document-geometry-61": {
+      "id": "b-figjam-parity-wavy-document-geometry-61",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Wavy document geometry"
+      },
+      "text": [
+        {
+          "insert": "A rectangle with a sinusoidal/wave-curved bottom edge — 2-3 wave crests via SVG cubic Bézier "
+        },
+        {
+          "insert": "C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " commands, top and side edges straight, rendered as a single closed "
+        },
+        {
+          "insert": "<path>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". This is the flowchart symbol our current "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type is meant to represent but doesn't (see the Flowchart gap table — our "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " actually renders ENG_FILE's dog-ear notch instead)."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-150x110-text-slot-centered-62": {
+      "id": "b-figjam-parity-default-size-150x110-text-slot-centered-62",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 150x110. Text slot centered in the upper two-thirds (above the wave). Connection anchors: bbox fallback, matching the existing precedent for non-rectangular icon-silhouette shapes ("
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and our current "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", all use bbox fallback despite true SVG paths). Style surface: standard. Suggested name: rename/re-tag is out of scope for a MISSING spec (that's a fix to the existing "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type, tracked as a HAVE-BUT-WRONG spec-delta in the Flowchart section, not a new type) — but if a genuinely separate \"page with folded corner, ENG_FILE\" shape is ALSO wanted going forward (since "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " would be freed up to become the true wavy-bottom shape), that's "
+        },
+        {
+          "insert": "type: \"page-corner\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "style.shape: \"page-corner\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", reusing the exact clip-path geometry we already have today, just under a correctly-scoped name."
+        }
+      ]
+    },
+    "b-figjam-parity-multiple-documents-stacked-63": {
+      "id": "b-figjam-parity-multiple-documents-stacked-63",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Multiple documents (stacked)"
+        }
+      ]
+    },
+    "b-figjam-parity-stacked-documents-geometry-64": {
+      "id": "b-figjam-parity-stacked-documents-geometry-64",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Stacked documents geometry"
+      },
+      "text": [
+        {
+          "insert": "Two or three copies of the (wavy-bottom, per Spec 9) document silhouette, offset diagonally by a small fixed pixel amount (e.g. 6px x, 6px y per layer) so the back copies peek out from behind the front one — same layering idea as a physical stack of papers. Rendered as multiple stacked "
+        },
+        {
+          "insert": "<path>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " elements sharing the same wave-bottom geometry, back-to-front."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-160x120-slightly-larger-th-65": {
+      "id": "b-figjam-parity-default-size-160x120-slightly-larger-th-65",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 160x120 (slightly larger than the single-document default to accommodate the offset peek). Text slot: only the front-most copy carries the text slot. Connection anchors: bbox fallback of the outermost (unioned) silhouette. Style surface: standard, but the back copies should probably use a slightly muted/tinted fill so the stack reads clearly (a small rendering nuance, not a schema field). Suggested name: new "
+        },
+        {
+          "insert": "type: \"document-stack\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"document-stack\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", depends on Spec 9 landing first (or duplicates its own local wave geometry independently if sequencing requires)."
+        }
+      ]
+    },
+    "b-figjam-parity-off-page-connector-66": {
+      "id": "b-figjam-parity-off-page-connector-66",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Off-page connector"
+        }
+      ]
+    },
+    "b-figjam-parity-off-page-connector-geometry-67": {
+      "id": "b-figjam-parity-off-page-connector-geometry-67",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Off-page connector geometry"
+      },
+      "text": [
+        {
+          "insert": "A downward-pointing pentagon: a rectangle whose bottom edge is replaced by two angled edges meeting at a point below center — 5 vertices: "
+        },
+        {
+          "insert": "(0,0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width,0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width, height*0.6)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width/2, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(0, height*0.6)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Rendered as an SVG "
+        },
+        {
+          "insert": "<polygon>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-120x100-text-slot-centered-68": {
+      "id": "b-figjam-parity-default-size-120x100-text-slot-centered-68",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 120x100. Text slot centered in the upper rectangular band. Connection anchors: 5-point polygon, true-outline tier (same treatment as the Pentagon spec above, just non-regular — this pentagon is NOT the same shape as the Basic tier's regular Pentagon, despite both being 5-sided; keep them as two separate specs/types). Style surface: standard. Suggested name: new "
+        },
+        {
+          "insert": "type: \"off-page-connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"off-page-connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (note: Figma's own "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enum name for this is literally "
+        },
+        {
+          "insert": "SHIELD",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a naming curiosity flagged in the gap table; don't name our type "
+        },
+        {
+          "insert": "shield",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " since that invites confusion with the Advanced tier's actual shield icon)."
+        }
+      ]
+    },
+    "b-figjam-parity-trapezoid-69": {
+      "id": "b-figjam-parity-trapezoid-69",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Trapezoid"
+        }
+      ]
+    },
+    "b-figjam-parity-trapezoid-geometry-70": {
+      "id": "b-figjam-parity-trapezoid-geometry-70",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Trapezoid geometry"
+      },
+      "text": [
+        {
+          "insert": "A 4-point trapezoid: wider bottom edge, narrower top edge, symmetric about the vertical center line. Points: "
+        },
+        {
+          "insert": "(width*0.2, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width*0.8, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(0, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a ~20% inset on the top edge only."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-150x100-text-slot-centered-71": {
+      "id": "b-figjam-parity-default-size-150x100-text-slot-centered-71",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 150x100. Text slot centered. Connection anchors: 4-point polygon, true-outline tier alongside diamond. Style surface: standard. Suggested name: new "
+        },
+        {
+          "insert": "type: \"trapezoid\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"trapezoid\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-manual-input-72": {
+      "id": "b-figjam-parity-manual-input-72",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Manual input"
+        }
+      ]
+    },
+    "b-figjam-parity-manual-input-geometry-73": {
+      "id": "b-figjam-parity-manual-input-geometry-73",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Manual input geometry"
+      },
+      "text": [
+        {
+          "insert": "A rectangle with a slanted top-left-to-top-right edge (top-left corner higher than top-right, or vice versa — FigJam's convention slants up from left to right). 4 points: "
+        },
+        {
+          "insert": "(0, height*0.25)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(width, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "(0, height)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-150x100-text-slot-centered-74": {
+      "id": "b-figjam-parity-default-size-150x100-text-slot-centered-74",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 150x100. Text slot centered in the lower rectangular band. Connection anchors: 4-point polygon, true-outline tier. Style surface: standard. Suggested name: new "
+        },
+        {
+          "insert": "type: \"manual-input\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"manual-input\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-hexagon-75": {
+      "id": "b-figjam-parity-hexagon-75",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Hexagon"
+        }
+      ]
+    },
+    "b-figjam-parity-hexagon-geometry-76": {
+      "id": "b-figjam-parity-hexagon-geometry-76",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Hexagon geometry"
+      },
+      "text": [
+        {
+          "insert": "A 6-point regular hexagon, flat-top orientation (matching the flowchart \"preparation\" symbol convention), inscribed in the bounding box with independent x/y radius scaling to fill non-square aspect ratios."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-150x100-flowchart-hexagons-77": {
+      "id": "b-figjam-parity-default-size-150x100-flowchart-hexagons-77",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 150x100 (flowchart hexagons are typically wider than tall, unlike the Basic-tier's would-be square hexagon if Figma had one — it doesn't; this is Flowchart-only). Text slot centered. Connection anchors: 6-point polygon, true-outline tier. Style surface: standard. Suggested name: new "
+        },
+        {
+          "insert": "type: \"hexagon\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"hexagon\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-figjam-parity-internal-storage-78": {
+      "id": "b-figjam-parity-internal-storage-78",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Internal storage"
+        }
+      ]
+    },
+    "b-figjam-parity-internal-storage-geometry-79": {
+      "id": "b-figjam-parity-internal-storage-geometry-79",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Internal storage geometry"
+      },
+      "text": [
+        {
+          "insert": "A rectangle with two additional straight rule lines drawn inside near the top edge and near the left edge (like a spreadsheet's frozen header row + column), each inset a fixed pixel amount (e.g. 12px) from its respective edge. Rendered as a rect plus two "
+        },
+        {
+          "insert": "<line>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " elements — the same compositional strategy already used for "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s two vertical bars."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-140x100-text-slot-centered-80": {
+      "id": "b-figjam-parity-default-size-140x100-text-slot-centered-80",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 140x100. Text slot centered in the remaining lower-right two-thirds. Connection anchors: rectangular outline, so this can join the existing "
+        },
+        {
+          "insert": "rect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-tier true-outline projection directly (no new polygon math needed — it's a plain rect with interior decoration, same as "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Style surface: standard, plus the two rule lines inherit the border color. Suggested name: new "
+        },
+        {
+          "insert": "type: \"internal-storage\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"internal-storage\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (structurally the closest existing precedent is "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — same \"rect + inset rule marks\" pattern, different mark placement)."
+        }
+      ]
+    },
+    "b-figjam-parity-or-junction-and-summing-junction-81": {
+      "id": "b-figjam-parity-or-junction-and-summing-junction-81",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Or-junction and summing junction"
+        }
+      ]
+    },
+    "b-figjam-parity-junction-geometry-82": {
+      "id": "b-figjam-parity-junction-geometry-82",
+      "flavour": "requirement",
+      "children": [],
+      "props": {
+        "title": "Junction geometry"
+      },
+      "text": [
+        {
+          "insert": "A circle (true ellipse/circle outline, per the Ellipse spec above) with a centered 2-glyph overlay: "
+        },
+        {
+          "insert": "variant: \"or\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " draws a plus/cross through the center; "
+        },
+        {
+          "insert": "variant: \"summing\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " draws an X through the center. Both overlays are simple 2-line SVG "
+        },
+        {
+          "insert": "<line>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pairs on top of the circle, sized to ~60% of the circle's diameter."
+        }
+      ]
+    },
+    "b-figjam-parity-default-size-90x90-small-these-are-ju-83": {
+      "id": "b-figjam-parity-default-size-90x90-small-these-are-ju-83",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Default size 90x90 (small — these are junction glyphs, always roughly circular and compact, matching FigJam's own scale for this symbol pair). Text slot: none — these are pure junction glyphs, no label area, similar to "
+        },
+        {
+          "insert": "annotation-marker",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Connection anchors: circular true-outline (depends on the Ellipse spec's outline math landing first, since a circle is just a 1:1-aspect ellipse). Style surface: fill/stroke only, no strokeStyle variation needed (junction glyphs are always solid). Per-type field: "
+        },
+        {
+          "insert": "variant: \"or\" | \"summing\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", same enum-field pattern as "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " elsewhere. Suggested name: new "
+        },
+        {
+          "insert": "type: \"junction\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape: \"junction\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "variant",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field."
+        }
+      ]
+    },
+    "b-figjam-parity-where-our-model-diverges-from-figma-s-84": {
+      "id": "b-figjam-parity-where-our-model-diverges-from-figma-s-84",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Where our model diverges from Figma's"
+        }
+      ]
+    },
+    "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85": {
+      "id": "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Beyond the shape-by-shape gaps above, a few structural differences run through the whole model — these aren't fixable by adding one more shape type, they're differences in philosophy or scope between the two engines."
+        }
+      ]
+    },
+    "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86": {
+      "id": "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Closed enum vs. typed union — same philosophy, different vocabulary size"
+      },
+      "text": [
+        {
+          "insert": "Figma's "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a closed string-literal union on "
+        },
+        {
+          "insert": "ShapeWithTextNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and our "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " is exactly the same kind of closed union — neither engine has an open/extensible shape-registration mechanism at the schema level (Figma's plugin API confirms this: there's no way for a plugin to register a new "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value, only the Widgets API sits outside the closed enum entirely, and that's a fully separate extension surface, not a shape). The two engines agree on the "
+        },
+        {
+          "insert": "shape",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " of the problem; they just currently agree on a much smaller shared vocabulary (17 of our types cover a subset of Figma's 30, per the gap tables above)."
+        }
+      ]
+    },
+    "b-figjam-parity-no-rotation-anywhere-87": {
+      "id": "b-figjam-parity-no-rotation-anywhere-87",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "No rotation, anywhere"
+      },
+      "text": [
+        {
+          "insert": "CanvasGeometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasGeometry"
+            }
+          }
+        },
+        {
+          "insert": " (schema.ts) has only "
+        },
+        {
+          "insert": "x, y, width, height",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — no rotation/angle field exists anywhere in the schema, renderer, or interaction code (confirmed by an exhaustive grep of the whole "
+        },
+        {
+          "insert": "src/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " tree; the only "
+        },
+        {
+          "insert": "rotate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hits are unrelated toolbar-icon and CSS-chevron animations in the chrome layer, not object rendering). This is a deliberate, documented gap: "
+        },
+        {
+          "insert": "connection-overlay.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s own header comment states plainly that anchors are computed \"directly against each object's axis-aligned bounds/outline\" with \"no rotation (this repo's schema has no per-object rotation field, unlike BlockSuite's "
+        },
+        {
+          "insert": "ele.rotate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")\". Figma's "
+        },
+        {
+          "insert": "ShapeWithTextNode.rotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (and rotation generally across all node types) has no counterpart here at all — every shape spec above assumes an unrotated, axis-aligned object."
+        }
+      ]
+    },
+    "b-figjam-parity-connection-endpoints-vs-magnets-88": {
+      "id": "b-figjam-parity-connection-endpoints-vs-magnets-88",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Connection endpoints vs. magnets"
+      },
+      "text": [
+        {
+          "insert": "Our "
+        },
+        {
+          "insert": "CanvasConnectionEndpoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasConnectionEndpoint"
+            }
+          }
+        },
+        {
+          "insert": " resolves to an anchor (one of 4 cardinal directions) plus an optional relative position, computed via a fixed anchor-offset/snap-radius cascade ("
+        },
+        {
+          "insert": "ANCHOR_OFFSET_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "ANCHOR_OFFSET_PX"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ANCHOR_SNAP_VIEW_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "OUTLINE_SNAP_WORLD_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "OUTLINE_SNAP_WORLD_PX"
+            }
+          }
+        },
+        {
+          "insert": " in connection-overlay.ts). Figma's connector endpoints instead expose a "
+        },
+        {
+          "insert": "magnet",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field ("
+        },
+        {
+          "insert": "NONE | AUTO | TOP | BOTTOM | LEFT | RIGHT | CENTER",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", per the research report) — conceptually similar (both are ways of saying \"attach here, and re-derive the exact point as the shape moves\") but Figma's "
+        },
+        {
+          "insert": "AUTO",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " magnet reads as more dynamic (letting Figma's own layout engine pick the best of several candidate points at render time) versus our fixed cascade which resolves to one concrete point per connection at edit time. Only 4 of our object shapes ("
+        },
+        {
+          "insert": "rect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "pill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "diamond",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") get true non-bbox outline anchors — every other shape, including visually non-rectangular ones like "
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", falls back to its axis-aligned bounding-box outline for anchor projection."
+        }
+      ]
+    },
+    "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89": {
+      "id": "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "One arrowhead vs. twelve stroke caps"
+      },
+      "text": [
+        {
+          "insert": "We have exactly one arrowhead marker — a solid filled triangle, colored via SVG's "
+        },
+        {
+          "insert": "context-stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fill inheritance — with no per-connection choice. Figma's "
+        },
+        {
+          "insert": "ConnectorStrokeCap",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exposes 12 values ("
+        },
+        {
+          "insert": "NONE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ROUND",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SQUARE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ARROW_LINES",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ARROW_EQUILATERAL",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "TRIANGLE_FILLED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DIAMOND_FILLED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "CIRCLE_FILLED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and others per the research report), settable independently per connector endpoint (start cap vs. end cap can differ). Our "
+        },
+        {
+          "insert": "dotted",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " connection style is also worth noting here as a routing-level simplification: it's the same straight-line path as "
+        },
+        {
+          "insert": "solid",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a dash array applied ("
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": "), not a distinct routing algorithm — whereas "
+        },
+        {
+          "insert": "elbow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "smooth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " genuinely are distinct path-computation algorithms, not just stroke styling."
+        }
+      ]
+    },
+    "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90": {
+      "id": "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Corner radius: baked into the shape vs. a live Figma property"
+      },
+      "text": [
+        {
+          "insert": "Every corner radius in our renderer is a hardcoded constant sourced from figjam-tokens.ts ("
+        },
+        {
+          "insert": "STICKY_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "STICKY_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "."
+        },
+        {
+          "insert": "cornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = 0, "
+        },
+        {
+          "insert": "SECTION_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "SECTION_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "."
+        },
+        {
+          "insert": "cornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = 8.5, "
+        },
+        {
+          "insert": "PREDEFINED_PROCESS_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "PREDEFINED_PROCESS_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "."
+        },
+        {
+          "insert": "cornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = 5, "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "."
+        },
+        {
+          "insert": "bodyCornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = 10, plain rounded-rect's 8px inlined directly in CanvasStage.tsx) or a CSS literal (pill/marker's 999px trick, diamond's clip-path has no radius concept at all). "
+        },
+        {
+          "insert": "CanvasObjectStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasObjectStyle"
+            }
+          }
+        },
+        {
+          "insert": " has no "
+        },
+        {
+          "insert": "cornerRadius",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field — there is no per-object override. Figma's "
+        },
+        {
+          "insert": "ShapeWithTextNode.cornerRadius",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is instead a real (if read-only-via-some-APIs) per-node property that varies per instance, not a per-shape-type constant. Any future corner-radius customization here would need a new "
+        },
+        {
+          "insert": "style.cornerRadius",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field threaded through every shape branch in "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": ", not just a token change."
+        }
+      ]
+    },
+    "b-figjam-parity-root": {
+      "id": "b-figjam-parity-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "Gap analysis mapping FigJam's default shape picker (30 shapeType values + 3 connector presets + 26 Advanced component icons) against this engine's 17 object types, with full specs for every missing shape.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "InteractiveCanvasObjectType",
+          "shapeType",
+          "ConnectorNode",
+          "outlinePolygon",
+          "CanvasConnectionStyle"
+        ]
+      },
+      "children": [
+        "b-figjam-parity-figjam-shape-parity-map-1",
+        "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2",
+        "b-figjam-parity-native-code-ref-shapetype-packages-canv-3",
+        "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4",
+        "b-figjam-parity-advanced-26-these-are-components-5",
+        "b-figjam-parity-every-row-below-gets-one-of-three-verdic-6",
+        "b-figjam-parity-bold-have-geometry-and-role-match-m-7",
+        "b-figjam-parity-bold-have-but-wrong-we-render-someth-8",
+        "b-figjam-parity-bold-missing-no-reasonable-mapping-e-9",
+        "b-figjam-parity-see-doc-ref-shape-api-structure-10-syst-10",
+        "b-figjam-parity-gap-table-11",
+        "b-figjam-parity-reconciling-the-shared-brief-s-59-item-p-12",
+        "b-figjam-parity-basic-13",
+        "b-figjam-parity-basic-table-14",
+        "b-figjam-parity-block-arrow-left-arrow-left-our-co-15",
+        "b-figjam-parity-block-arrow-right-arrow-right-same-16",
+        "b-figjam-parity-speech-bubble-is-have-not-have-but-wron-17",
+        "b-figjam-parity-flowchart-18",
+        "b-figjam-parity-flowchart-table-19",
+        "b-figjam-parity-page-with-folded-corner-eng-file-our-20",
+        "b-figjam-parity-document-wavy-bottom-edge-document-s-21",
+        "b-figjam-parity-cylinder-horizontal-eng-queue-our-co-22",
+        "b-figjam-parity-off-page-connector-shield-figma-s-own-23",
+        "b-figjam-parity-connectors-24",
+        "b-figjam-parity-connectors-table-25",
+        "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26",
+        "b-figjam-parity-advanced-27",
+        "b-figjam-parity-advanced-table-28",
+        "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29",
+        "b-figjam-parity-bold-database-our-database-is-a-true-30",
+        "b-figjam-parity-bold-file-document-same-tier-mismatch-31",
+        "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32",
+        "b-figjam-parity-bold-person-user-our-person-is-a-full-33",
+        "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
+        "b-figjam-parity-missing-shape-specs-35",
+        "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",
+        "b-figjam-parity-ellipse-37",
+        "b-figjam-parity-ellipse-geometry-38",
+        "b-figjam-parity-default-size-160x120-wide-oval-same-de-39",
+        "b-figjam-parity-triangle-40",
+        "b-figjam-parity-triangle-geometry-41",
+        "b-figjam-parity-default-size-140x120-text-slot-centered-42",
+        "b-figjam-parity-parallelogram-43",
+        "b-figjam-parity-parallelogram-geometry-44",
+        "b-figjam-parity-default-size-160x100-text-slot-centered-45",
+        "b-figjam-parity-pentagon-and-octagon-46",
+        "b-figjam-parity-regular-polygon-geometry-47",
+        "b-figjam-parity-default-size-140x140-square-ish-matchi-48",
+        "b-figjam-parity-star-49",
+        "b-figjam-parity-star-geometry-50",
+        "b-figjam-parity-default-size-140x140-text-slot-centered-51",
+        "b-figjam-parity-plus-cross-52",
+        "b-figjam-parity-plus-geometry-53",
+        "b-figjam-parity-default-size-120x120-square-a-plus-re-54",
+        "b-figjam-parity-block-arrow-and-fat-chevron-55",
+        "b-figjam-parity-our-existing-code-ref-arrow-shape-packa-56",
+        "b-figjam-parity-folder-57",
+        "b-figjam-parity-folder-geometry-58",
+        "b-figjam-parity-default-size-140x110-text-slot-centered-59",
+        "b-figjam-parity-wavy-bottom-document-60",
+        "b-figjam-parity-wavy-document-geometry-61",
+        "b-figjam-parity-default-size-150x110-text-slot-centered-62",
+        "b-figjam-parity-multiple-documents-stacked-63",
+        "b-figjam-parity-stacked-documents-geometry-64",
+        "b-figjam-parity-default-size-160x120-slightly-larger-th-65",
+        "b-figjam-parity-off-page-connector-66",
+        "b-figjam-parity-off-page-connector-geometry-67",
+        "b-figjam-parity-default-size-120x100-text-slot-centered-68",
+        "b-figjam-parity-trapezoid-69",
+        "b-figjam-parity-trapezoid-geometry-70",
+        "b-figjam-parity-default-size-150x100-text-slot-centered-71",
+        "b-figjam-parity-manual-input-72",
+        "b-figjam-parity-manual-input-geometry-73",
+        "b-figjam-parity-default-size-150x100-text-slot-centered-74",
+        "b-figjam-parity-hexagon-75",
+        "b-figjam-parity-hexagon-geometry-76",
+        "b-figjam-parity-default-size-150x100-flowchart-hexagons-77",
+        "b-figjam-parity-internal-storage-78",
+        "b-figjam-parity-internal-storage-geometry-79",
+        "b-figjam-parity-default-size-140x100-text-slot-centered-80",
+        "b-figjam-parity-or-junction-and-summing-junction-81",
+        "b-figjam-parity-junction-geometry-82",
+        "b-figjam-parity-default-size-90x90-small-these-are-ju-83",
+        "b-figjam-parity-where-our-model-diverges-from-figma-s-84",
+        "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",
+        "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86",
+        "b-figjam-parity-no-rotation-anywhere-87",
+        "b-figjam-parity-connection-endpoints-vs-magnets-88",
+        "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89",
+        "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90"
+      ]
+    }
+  }
+}

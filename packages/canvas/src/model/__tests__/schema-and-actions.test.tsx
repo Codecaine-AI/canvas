@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
+import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactive.canvas.json";
 import {
   buildPastePayload,
   CANVAS_PALETTE_TOKENS,
@@ -13,16 +15,23 @@ import {
   reduceInteractiveCanvasState,
   resolveCanvasLinkStatuses,
   resolveObjectColors,
-  syntheticInteractiveCanvas,
-  v2FlowInteractiveCanvas,
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
   type InteractiveCanvasObjectType,
 } from "../../index";
 
+const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
+const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
+
 afterEach(() => {
   cleanup();
 });
+
+async function waitForAnimationFrame() {
+  await act(async () => {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  });
+}
 
 function makeSetParentDocument(): InteractiveCanvasDocument {
   return {
@@ -183,8 +192,8 @@ function boundsCenter(document: InteractiveCanvasDocument, ids: string[]): { x: 
 }
 
 describe("interactive canvas schema and actions", () => {
-  it("validates the synthetic canvas fixture", () => {
-    const validation = validateInteractiveCanvasDocument(syntheticInteractiveCanvas);
+  it("validates the synthetic canvas JSON", () => {
+    const validation = validateInteractiveCanvasDocument(syntheticCanvasDocument);
 
     expect(validation.ok).toBe(true);
     if (validation.ok) {
@@ -194,8 +203,8 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("validates the V2 Flow-style fixture after the synthetic baseline", () => {
-    const validation = validateInteractiveCanvasDocument(v2FlowInteractiveCanvas);
+  it("validates the V2 Flow-style canvas JSON after the synthetic baseline", () => {
+    const validation = validateInteractiveCanvasDocument(v2FlowSampleDocument);
 
     expect(validation.ok).toBe(true);
     if (validation.ok) {
@@ -205,15 +214,15 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("validates the docs sidecar JSON files for synthetic and V2 Flow canvases", async () => {
-    const docsRoot = join(process.cwd(), "../../docs/10-system-design/50-interactive-canvas");
-    const sidecars = [
-      "assets/canvases/synthetic.canvas.json",
-      "v2-flow/assets/canvases/v2-flow.canvas.json",
-    ];
+  it("validates every canvas JSON file in this repo's canvases/ store", async () => {
+    // Repo-local store only (canvases/*.canvas.json at the repo root) — this
+    // repo's tests must not reach into a host monorepo's files.
+    const storeDir = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases");
+    const entries = (await readdir(storeDir)).filter((name) => name.endsWith(".canvas.json"));
+    expect(entries.length).toBeGreaterThan(0);
 
-    for (const sidecar of sidecars) {
-      const raw = await readFile(join(docsRoot, sidecar), "utf8");
+    for (const entry of entries) {
+      const raw = await readFile(join(storeDir, entry), "utf8");
       const validation = validateInteractiveCanvasDocument(JSON.parse(raw));
       expect(validation.ok).toBe(true);
     }
@@ -221,10 +230,10 @@ describe("interactive canvas schema and actions", () => {
 
   it("rejects duplicate IDs and unknown endpoints", () => {
     const validation = validateInteractiveCanvasDocument({
-      ...syntheticInteractiveCanvas,
+      ...syntheticCanvasDocument,
       objects: [
-        syntheticInteractiveCanvas.objects[0],
-        { ...syntheticInteractiveCanvas.objects[0] },
+        syntheticCanvasDocument.objects[0],
+        { ...syntheticCanvasDocument.objects[0] },
       ],
       connections: [
         {
@@ -239,6 +248,34 @@ describe("interactive canvas schema and actions", () => {
     if (!validation.ok) {
       expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("Duplicate");
       expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("Unknown");
+    }
+  });
+
+  it("rejects parentId cycles", () => {
+    const validation = validateInteractiveCanvasDocument({
+      ...syntheticCanvasDocument,
+      objects: [
+        {
+          id: "container-a",
+          type: "container",
+          label: "Container A",
+          parentId: "container-b",
+          geometry: { x: 0, y: 0, width: 200, height: 160 },
+        },
+        {
+          id: "container-b",
+          type: "container",
+          label: "Container B",
+          parentId: "container-a",
+          geometry: { x: 20, y: 20, width: 120, height: 80 },
+        },
+      ],
+      connections: [],
+    });
+
+    expect(validation.ok).toBe(false);
+    if (!validation.ok) {
+      expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("Parent cycle");
     }
   });
 
@@ -325,7 +362,7 @@ describe("interactive canvas schema and actions", () => {
     // canvas.addObject runs the default geometry through snapGeometry (16px
     // grid), so expected sizes here are the *snapped* values, matching how
     // e.g. the pre-existing container default (360) already snaps to 368.
-    const base = createInteractiveCanvasState(syntheticInteractiveCanvas);
+    const base = createInteractiveCanvasState(syntheticCanvasDocument);
     const cases: Array<{
       objectType: InteractiveCanvasObjectType;
       expectedShape: string;
@@ -354,9 +391,9 @@ describe("interactive canvas schema and actions", () => {
   it("resolves source and doc link statuses through a typed document update", () => {
     const document = resolveCanvasLinkStatuses(
       {
-        ...syntheticInteractiveCanvas,
+        ...syntheticCanvasDocument,
         links: [
-          ...(syntheticInteractiveCanvas.links ?? []),
+          ...(syntheticCanvasDocument.links ?? []),
           {
             id: "stale-source-link",
             objectId: "agent-summarizes",
@@ -395,7 +432,7 @@ describe("interactive canvas schema and actions", () => {
     expect(statuses.get("missing-doc-link")).toBe("missing");
 
     let state = createInteractiveCanvasState({
-      ...syntheticInteractiveCanvas,
+      ...syntheticCanvasDocument,
       links: document.links,
     });
     state = reduceInteractiveCanvasState(state, {
@@ -429,7 +466,7 @@ describe("interactive canvas schema and actions", () => {
       const saved: InteractiveCanvasDocument[] = [];
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={(document) => {
             saved.push(document);
           }}
@@ -439,7 +476,7 @@ describe("interactive canvas schema and actions", () => {
 
       expect(document.querySelector("[data-canvas-stage='true']")).toBeTruthy();
       expect(screen.getByRole("button", { name: "Select" })).toBeTruthy();
-      expect(screen.getByRole("button", { name: "Hand tool" })).toBeTruthy();
+      expect(screen.getByRole("button", { name: "Hand" })).toBeTruthy();
       expect(screen.queryByText("Tools")).toBeNull();
 
       const canvasLayer = Array.from(
@@ -464,7 +501,7 @@ describe("interactive canvas schema and actions", () => {
       fireEvent.keyDown(window, { key: "Escape" });
       expect(screen.queryByRole("menu", { name: "Canvas context menu" })).toBeNull();
 
-      const originalGeometry = syntheticInteractiveCanvas.objects.find(
+      const originalGeometry = syntheticCanvasDocument.objects.find(
         (candidate) => candidate.id === "agent-summarizes",
       )?.geometry;
       expect(originalGeometry).toBeTruthy();
@@ -514,6 +551,94 @@ describe("interactive canvas schema and actions", () => {
     } finally {
       HTMLElement.prototype.getBoundingClientRect = originalRect;
     }
+  });
+
+  it("pans with the hand tool without starting marquee or changing selection", async () => {
+    const originalRect = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      if ((this as HTMLElement).dataset.canvasStage === "true") {
+        return {
+          x: 0,
+          y: 0,
+          left: 0,
+          top: 0,
+          width: 1240,
+          height: 760,
+          right: 1240,
+          bottom: 760,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+      return originalRect.call(this);
+    };
+
+    try {
+      render(
+        <InteractiveCanvasEditor
+          document={syntheticCanvasDocument}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const stage = document.querySelector("[data-canvas-stage='true']") as HTMLElement;
+      const worldLayer = document.querySelector(".interactive-canvas-world-layer") as HTMLElement;
+      const object = screen.getByRole("button", { name: /Agent summarizes/i });
+
+      fireEvent.pointerDown(object, { pointerId: 11, button: 0, clientX: 560, clientY: 220 });
+      fireEvent.pointerUp(window, { pointerId: 11 });
+      expect(object.getAttribute("data-selected")).toBe("true");
+
+      fireEvent.click(screen.getByRole("button", { name: "Hand" }));
+      const beforeTransform = worldLayer.style.transform;
+
+      fireEvent.pointerDown(stage, { pointerId: 12, button: 0, clientX: 400, clientY: 300 });
+      expect(stage.style.cursor).toBe("grabbing");
+      fireEvent.pointerMove(stage, { pointerId: 12, clientX: 360, clientY: 280 });
+      await waitForAnimationFrame();
+      fireEvent.pointerUp(stage, { pointerId: 12 });
+
+      expect(worldLayer.style.transform).not.toBe(beforeTransform);
+      expect(document.querySelector("[data-canvas-marquee='true']")).toBeNull();
+      expect(object.getAttribute("data-selected")).toBe("true");
+      expect(stage.style.cursor).toBe("grab");
+
+      fireEvent.keyDown(window, { key: "v", code: "KeyV" });
+      expect(stage.style.cursor).toContain('url("data:image/svg+xml');
+      expect(stage.style.cursor).toContain(", default");
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = originalRect;
+    }
+  });
+
+  it("does not stay in space-pan mode after a lost keyup (window blur)", async () => {
+    render(
+      <InteractiveCanvasEditor
+        document={syntheticCanvasDocument}
+        onSave={() => undefined}
+        onCancel={() => undefined}
+      />,
+    );
+
+    const stage = document.querySelector("[data-canvas-stage='true']") as HTMLElement;
+
+    // Space keydown reaches the app, but the keyup is swallowed elsewhere
+    // (macOS ⌘⇧4+Space screenshot mode, app switch). The blur must reset the
+    // held state — otherwise every plain left-drag in select mode pans.
+    fireEvent.keyDown(window, { key: " ", code: "Space" });
+
+    // Sanity: while space is held, a drag really is a pan (cursor: grabbing).
+    fireEvent.pointerDown(stage, { pointerId: 13, button: 0, clientX: 400, clientY: 300 });
+    expect(stage.style.cursor).toBe("grabbing");
+    fireEvent.pointerUp(stage, { pointerId: 13 });
+
+    fireEvent.keyDown(window, { key: " ", code: "Space" });
+    fireEvent.blur(window);
+
+    // After the lost keyup, a plain drag must NOT enter pan mode.
+    fireEvent.pointerDown(stage, { pointerId: 14, button: 0, clientX: 400, clientY: 300 });
+    expect(stage.style.cursor).not.toBe("grabbing");
+    fireEvent.pointerUp(stage, { pointerId: 14 });
   });
 });
 

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-person",
+  "title": "Person — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 518,
+    "height": 538
+  },
+  "objects": [
+    {
+      "id": "subject-person",
+      "type": "person",
+      "label": "Person",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 120,
+        "height": 140
+      }
+    },
+    {
+      "id": "marker-person-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 188,
+        "y": 57,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-person-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 355,
+        "y": 216,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-person-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 188,
+        "y": 375,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-person-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 216,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-person",
+      "type": "text",
+      "label": "label renders below the icon (bold, black)",
+      "geometry": {
+        "x": 120,
+        "y": 443,
+        "width": 200,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-person-top",
+      "from": {
+        "objectId": "marker-person-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-person",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-person-right",
+      "from": {
+        "objectId": "marker-person-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-person",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-person-bottom",
+      "from": {
+        "objectId": "marker-person-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-person",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-person-left",
+      "from": {
+        "objectId": "marker-person-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-person",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

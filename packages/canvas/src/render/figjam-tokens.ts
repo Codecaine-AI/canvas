@@ -314,20 +314,71 @@ export const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
 export const CONNECTOR_END_GAP_PX = 10;
 
 /**
- * Arrow-shape (fat chevron) proportions, measured from
- * board-design-reference/analysis/figjam-style-spec.md's arrow-shape row:
- * "total 722x200 export (361x100 logical); body height 106 export (53
- * logical); head = full height 200 export (100 logical), head length 272
- * export (136 logical) => head is 38% of total width, 1.9x body height; body
- * corners rounded ~= 20 export (10 logical)." Ratios (not raw px) so callers
- * derive head/body geometry from the object's actual width/height.
+ * Arrow-shape (fat chevron) proportions. Head width and body corner radius
+ * come from board-design-reference/analysis/figjam-style-spec.md's sampled
+ * arrow-shape row ("head is 38% of total width"; rounded corners ~= 10
+ * logical px). Wave B1 intentionally raises the body-height ratio from the
+ * older 0.53 sample to 0.60 so the rendered arrow reads blockier; approximate
+ * pending FigJam pixel sample.
  */
 export const ARROW_SHAPE_GEOMETRY = {
   /** Fraction of total width occupied by the chevron head. */
   headWidthRatio: 0.38,
-  /** Body height as a multiple of... no: body height / total height ratio. */
-  bodyHeightRatio: 0.53,
+  /** Fraction of total height occupied by the arrow body. */
+  bodyHeightRatio: 0.6,
   bodyCornerRadiusPx: 10,
+} as const;
+
+/**
+ * Off-page connector geometry (Wave B1 implementation brief). Shoulder ratio
+ * mirrors connection-overlay.ts's true-outline pentagon math; approximate
+ * pending FigJam pixel sample for label placement.
+ */
+export const OFF_PAGE_CONNECTOR_GEOMETRY = {
+  shoulderRatio: 0.6,
+} as const;
+
+/**
+ * Manual-input geometry (Wave B1 implementation brief). Drop ratio mirrors
+ * connection-overlay.ts's slanted-top polygon math; approximate pending FigJam
+ * pixel sample for label placement.
+ */
+export const MANUAL_INPUT_GEOMETRY = {
+  dropRatio: 0.25,
+} as const;
+
+/**
+ * Folder silhouette geometry (Wave B1 implementation brief); approximate
+ * pending FigJam pixel sample.
+ */
+export const FOLDER_GEOMETRY = {
+  tabWidthRatio: 0.38,
+} as const;
+
+/**
+ * Document wavy-bottom silhouette geometry (Wave B1 implementation brief);
+ * approximate pending FigJam pixel sample.
+ */
+export const DOCUMENT_GEOMETRY = {
+  waveShoulderYRatio: 0.82,
+  waveCrestYRatio: 0.96,
+} as const;
+
+/**
+ * Document-stack silhouette geometry (Wave B1 implementation brief);
+ * approximate pending FigJam pixel sample.
+ */
+export const DOCUMENT_STACK_GEOMETRY = {
+  offsetPx: 6,
+} as const;
+
+/**
+ * Chevron silhouette geometry (Wave B1 implementation brief). Notch ratio
+ * mirrors connection-overlay.ts's true-outline chevron math; approximate
+ * pending FigJam pixel sample for label positioning.
+ */
+export const CHEVRON_GEOMETRY = {
+  notchWidthRatio: 0.25,
 } as const;
 
 /**
@@ -424,11 +475,38 @@ export const TEXT_ALPHA_RULES = {
 // Chrome (not built this wave — tokens captured early for W2/W3)
 // ---------------------------------------------------------------------------
 
+// Same kite-shaped pointer as the dock's Select glyph (Nucleo
+// maps-location/pointer), filled for cursor use — the tool icon and the
+// on-canvas cursor are literally the same form.
+const SELECT_CURSOR_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+
+const SELECT_CURSOR_DATA_URI = `data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}`;
+
 export const CHROME = {
   topBarBg: "#E6E6E6",
   topBarBorderBottom: "#DFDFDF",
   bottomToolbarBg: "#FFFFFF",
+  dockHeightPx: 48,
+  dockRadiusPx: 13,
+  dockPaddingXPx: 8,
+  dockButtonSizePx: 36,
+  dockButtonRadiusPx: 9,
+  dockIconSizePx: 20,
+  dockGroupGapPx: 4,
+  dockDividerHeightPx: 24,
+  dockDividerMarginXPx: 8,
+  dockDividerColor: "rgba(0, 0, 0, 0.10)",
+  dockGlyphColor: "#333333",
+  dockHoverBg: "#F0F0F0",
+  dockShadow: "0 2px 10px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06)",
+  selectCursor: `url("${SELECT_CURSOR_DATA_URI}") 3 3, default`,
   contextToolbarBg: "#1D1D1D",
+  contextToolbarSwatchPx: 22,
+  colorPopoverSwatchPx: 32,
+  colorPopoverGapPx: 10,
+  colorPopoverPaddingPx: 18,
+  colorPopoverRadiusPx: 20,
   accentPurple: "#8C2EF2",
   /** Selection outline/handle color (Figma/FigJam blue). */
   selectionBlue: "#0D99FF",

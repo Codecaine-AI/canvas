@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-chip-icon",
+  "title": "Chip — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 518,
+    "height": 538
+  },
+  "objects": [
+    {
+      "id": "subject-chip-icon",
+      "type": "chip-icon",
+      "label": "Chip",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 120,
+        "height": 140
+      }
+    },
+    {
+      "id": "marker-chip-icon-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 188,
+        "y": 57,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-chip-icon-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 355,
+        "y": 216,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-chip-icon-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 188,
+        "y": 375,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-chip-icon-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 216,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-chip-icon",
+      "type": "text",
+      "label": "label renders below the icon (bold, black)",
+      "geometry": {
+        "x": 120,
+        "y": 443,
+        "width": 200,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-chip-icon-top",
+      "from": {
+        "objectId": "marker-chip-icon-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-chip-icon",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-chip-icon-right",
+      "from": {
+        "objectId": "marker-chip-icon-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-chip-icon",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-chip-icon-bottom",
+      "from": {
+        "objectId": "marker-chip-icon-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-chip-icon",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-chip-icon-left",
+      "from": {
+        "objectId": "marker-chip-icon-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-chip-icon",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

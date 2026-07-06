@@ -1,0 +1,6712 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-model",
+  "title": "Canvas Engine — Model Layer",
+  "root": "b-model-root",
+  "blocks": {
+    "b-model-root": {
+      "id": "b-model-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "The data model at the core of the interactive canvas engine: the document schema, the typed action vocabulary, the single reducer that mutates it, and the pure geometry helpers it relies on.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "InteractiveCanvasDocument",
+          "CanvasAction",
+          "reduceInteractiveCanvasState",
+          "SpectreRef",
+          "connection waypoints"
+        ]
+      },
+      "children": [
+        "b-model-heading-title",
+        "b-model-intro-1",
+        "b-model-heading-schema",
+        "b-model-schema-p1",
+        "b-model-schema-p2",
+        "b-model-schema-object-types-heading",
+        "b-model-schema-object-types-list-container",
+        "b-model-schema-object-types-list-process",
+        "b-model-schema-object-types-list-decision",
+        "b-model-schema-object-types-list-text",
+        "b-model-schema-object-types-list-sticky",
+        "b-model-schema-object-types-list-source-node",
+        "b-model-schema-object-types-list-annotation-marker",
+        "b-model-schema-object-types-list-document",
+        "b-model-schema-object-types-list-person",
+        "b-model-schema-object-types-list-database",
+        "b-model-schema-object-types-list-chat",
+        "b-model-schema-object-types-list-section",
+        "b-model-schema-object-types-list-pill",
+        "b-model-schema-object-types-list-arrow-shape",
+        "b-model-schema-object-types-list-predefined-process",
+        "b-model-schema-object-types-list-code-block",
+        "b-model-schema-object-types-list-chip-icon",
+        "b-model-schema-p3",
+        "b-model-schema-color-heading",
+        "b-model-schema-color-p1",
+        "b-model-schema-validator-heading",
+        "b-model-schema-validator-p1",
+        "b-model-heading-object-ref",
+        "b-model-object-ref-intro",
+        "b-model-type-container",
+        "b-model-type-container-p1",
+        "b-model-type-container-p2",
+        "b-model-type-container-fit",
+        "b-model-type-process",
+        "b-model-type-process-p1",
+        "b-model-type-process-p2",
+        "b-model-type-decision",
+        "b-model-type-decision-p1",
+        "b-model-type-decision-p2",
+        "b-model-type-text",
+        "b-model-type-text-p1",
+        "b-model-type-text-p2",
+        "b-model-type-sticky",
+        "b-model-type-sticky-p1",
+        "b-model-type-sticky-p2",
+        "b-model-type-source-node",
+        "b-model-type-source-node-p1",
+        "b-model-type-annotation-marker",
+        "b-model-type-annotation-marker-p1",
+        "b-model-type-document",
+        "b-model-type-document-p1",
+        "b-model-type-document-p2",
+        "b-model-type-person",
+        "b-model-type-person-p1",
+        "b-model-type-person-p2",
+        "b-model-type-database",
+        "b-model-type-database-p1",
+        "b-model-type-database-p2",
+        "b-model-type-chat",
+        "b-model-type-chat-p1",
+        "b-model-type-chat-p2",
+        "b-model-type-section",
+        "b-model-type-section-p1",
+        "b-model-type-section-p2",
+        "b-model-type-section-p3",
+        "b-model-type-section-capture",
+        "b-model-type-section-p4",
+        "b-model-type-pill",
+        "b-model-type-pill-p1",
+        "b-model-type-arrow-shape",
+        "b-model-type-arrow-shape-p1",
+        "b-model-type-arrow-shape-p2",
+        "b-model-type-predefined-process",
+        "b-model-type-predefined-process-p1",
+        "b-model-type-predefined-process-p2",
+        "b-model-type-code-block",
+        "b-model-type-code-block-p1",
+        "b-model-type-code-block-p2",
+        "b-model-type-chip-icon",
+        "b-model-type-chip-icon-p1",
+        "b-model-type-chip-icon-p2",
+        "b-model-heading-layout-conventions",
+        "b-model-layout-conventions-p1",
+        "b-model-layout-conventions-p2",
+        "b-model-layout-conventions-p3",
+        "b-model-layout-conventions-p4",
+        "b-model-heading-actions",
+        "b-model-actions-p1",
+        "b-model-actions-list-select",
+        "b-model-actions-list-setTool",
+        "b-model-actions-list-addObject",
+        "b-model-actions-list-addObjects",
+        "b-model-actions-list-updateObject",
+        "b-model-actions-list-updateObjectGeometries",
+        "b-model-actions-list-resizeObject",
+        "b-model-actions-list-moveSelection",
+        "b-model-actions-list-duplicateSelection",
+        "b-model-actions-list-deleteSelection",
+        "b-model-actions-list-addConnection",
+        "b-model-actions-list-updateConnection",
+        "b-model-actions-list-deleteConnection",
+        "b-model-actions-list-quickConnect",
+        "b-model-actions-list-addAnnotation",
+        "b-model-actions-list-setObjectType",
+        "b-model-actions-list-setParent",
+        "b-model-actions-list-alignSelection",
+        "b-model-actions-list-distributeSelection",
+        "b-model-actions-list-fitContainerToChildren",
+        "b-model-actions-list-resolveLinkStatuses",
+        "b-model-actions-list-undo",
+        "b-model-actions-list-redo",
+        "b-model-actions-list-reset",
+        "b-model-actions-p2",
+        "b-model-decision-single-reducer",
+        "b-model-decision-waypoints",
+        "b-model-heading-geometry",
+        "b-model-geometry-p1",
+        "b-model-geometry-p2",
+        "b-model-heading-spectre-ref",
+        "b-model-spectre-ref-p1",
+        "b-model-spectre-ref-p2",
+        "b-model-constraint-single-authority",
+        "b-model-testing-coverage",
+        "b-model-closing-p1"
+      ]
+    },
+    "b-model-heading-title": {
+      "id": "b-model-heading-title",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Canvas Engine — Model Layer"
+        }
+      ],
+      "children": []
+    },
+    "b-model-intro-1": {
+      "id": "b-model-intro-1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The model layer is the data core of "
+        },
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": a FigJam-parity, typed-action, world-space interactive canvas engine, extracted into its own git submodule. It defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer — pointer interaction, connector routing, rendering, the chrome UI, the editor shell — reads and writes through these types and functions rather than inventing its own notion of canvas state."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-schema": {
+      "id": "b-model-heading-schema",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Document schema"
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-p1": {
+      "id": "b-model-schema-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": ", defined in "
+        },
+        {
+          "insert": "schema.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", is the serializable, versioned shape of a canvas: "
+        },
+        {
+          "insert": "schemaVersion",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (currently always "
+        },
+        {
+          "insert": "1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), an "
+        },
+        {
+          "insert": "id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", an optional "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a "
+        },
+        {
+          "insert": "mode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (only "
+        },
+        {
+          "insert": "\"diagram\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exists today), an optional viewport (pan/zoom) and canvas size, and four collections: "
+        },
+        {
+          "insert": "objects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connections",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "links",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-p2": {
+      "id": "b-model-schema-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "objects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (typed "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": ") each carry an id, a "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the object type vocabulary below, a label, optional body text, an optional "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for container nesting, required world-space "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (x/y/width/height), and optional style/layout/source metadata. "
+        },
+        {
+          "insert": "connections",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "InteractiveCanvasConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasConnection"
+            }
+          }
+        },
+        {
+          "insert": ") link two object endpoints (each with an optional side anchor and an optional precise [0..1, 0..1] relative "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), carry style/arrow/color, and may carry an explicit "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " world-space polyline override that wins over auto-routing when present. "
+        },
+        {
+          "insert": "links",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attach a "
+        },
+        {
+          "insert": "SpectreRef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/spectre-ref.ts",
+              "symbol": "SpectreRef"
+            }
+          }
+        },
+        {
+          "insert": " cross-reference target to an object, with a resolution "
+        },
+        {
+          "insert": "status",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "resolved",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "stale",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "missing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "unresolved",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attach a note or an agent-request to an object, connection, or arbitrary region, with an "
+        },
+        {
+          "insert": "intent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "status",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lifecycle of their own."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-heading": {
+      "id": "b-model-schema-object-types-heading",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Object type vocabulary"
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-container": {
+      "id": "b-model-schema-object-types-list-container",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "container",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a nesting/grouping box; other objects reference it via "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-process": {
+      "id": "b-model-schema-object-types-list-process",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a rounded-rect flow step."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-decision": {
+      "id": "b-model-schema-object-types-list-decision",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "decision",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a diamond branch point."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-text": {
+      "id": "b-model-schema-object-types-list-text",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — free-floating label text."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-sticky": {
+      "id": "b-model-schema-object-types-list-sticky",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "sticky",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a note card; can carry an "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rendered bottom-left."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-source-node": {
+      "id": "b-model-schema-object-types-list-source-node",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "source-node",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — an agent/source-code origin marker."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-annotation-marker": {
+      "id": "b-model-schema-object-types-list-annotation-marker",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "annotation-marker",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a small pinned marker glyph, distinct from the "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " collection's note/agent-request records."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-document": {
+      "id": "b-model-schema-object-types-list-document",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in D16, expanded vocabulary for reference diagrams."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-person": {
+      "id": "b-model-schema-object-types-list-person",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in D16, expanded vocabulary for reference diagrams."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-database": {
+      "id": "b-model-schema-object-types-list-database",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in D16, expanded vocabulary for reference diagrams."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-chat": {
+      "id": "b-model-schema-object-types-list-chat",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in D16, expanded vocabulary for reference diagrams."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-section": {
+      "id": "b-model-schema-object-types-list-section",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2 (FigJam sections + V2 Flow shape vocabulary); requires a "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and a known "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " family, and geometrically \"captures\" overlapping objects when dragged."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-pill": {
+      "id": "b-model-schema-object-types-list-pill",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "pill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2, FigJam sections + V2 Flow shape vocabulary."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-arrow-shape": {
+      "id": "b-model-schema-object-types-list-arrow-shape",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2; a chevron with a left/right "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (defaults to right)."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-predefined-process": {
+      "id": "b-model-schema-object-types-list-predefined-process",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2, FigJam sections + V2 Flow shape vocabulary."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-code-block": {
+      "id": "b-model-schema-object-types-list-code-block",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "code-block",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2; carries a "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " used to select a minimal tokenizer."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-object-types-list-chip-icon": {
+      "id": "b-model-schema-object-types-list-chip-icon",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — added in W2, FigJam sections + V2 Flow shape vocabulary."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-p3": {
+      "id": "b-model-schema-p3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "That's 17 object types in total. The D16 wave (document, person, database, chat) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block, chip-icon) added FigJam-parity sections plus the V2 Flow shape set, in step with the engine's move toward pixel-level FigJam fidelity."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-color-heading": {
+      "id": "b-model-schema-color-heading",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Color resolution: tone, palette token, section tint"
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-color-p1": {
+      "id": "b-model-schema-color-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Color layers in increasing precedence. "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the base semantic bucket (neutral, input, process, decision, memory, agent, warning, annotation) that most object types resolve their default fill/stroke from. "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (D16) is a coarser color-as-meaning preset — process=blue, input=green, hot=orange/red, memory=purple, note=yellow — and wins over "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when set. An explicit "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (W4) wins over both, letting the FigJam pastel-pair palette apply directly. "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " objects sit outside this ladder entirely: their fill/chip color comes from a separate "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " family (green, purple, orange, yellow, gray, white, pink, red, blue, teal) resolved against FigJam's own section color tokens, not the tone/paletteToken system."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-validator-heading": {
+      "id": "b-model-schema-validator-heading",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Validation without throwing"
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-validator-p1": {
+      "id": "b-model-schema-validator-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " is a hand-written validator over an "
+        },
+        {
+          "insert": "unknown",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " input — no schema library, just explicit type-guard functions per field. It returns a discriminated "
+        },
+        {
+          "insert": "CanvasValidationResult",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than throwing: on success, "
+        },
+        {
+          "insert": "{ ok: true, document, warnings? }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; on failure, "
+        },
+        {
+          "insert": "{ ok: false, issues }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The key distinction is soft vs. hard: an unknown "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or an invalid "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "strokeWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is just dropped with a warning and normalization continues, while a missing geometry, a duplicate id, an unknown object type, or a section missing its "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a hard error that fails the whole document. "
+        },
+        {
+          "insert": "assertInteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the one place that turns a failed validation into a thrown error, for callers that want fail-fast semantics instead of handling the result union themselves."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-actions": {
+      "id": "b-model-heading-actions",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Action vocabulary"
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-p1": {
+      "id": "b-model-actions-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "CanvasAction"
+            }
+          }
+        },
+        {
+          "insert": ", defined in "
+        },
+        {
+          "insert": "actions.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", is a single discriminated union with exactly 22 variants, every one prefixed "
+        },
+        {
+          "insert": "canvas.",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". This closed vocabulary is the entire surface area through which a canvas document can change — nothing mutates a document by any other path. Alongside it, "
+        },
+        {
+          "insert": "CanvasTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enumerates the active tool: "
+        },
+        {
+          "insert": "select, hand, container, process, decision, text, sticky, source-node, annotation-marker, annotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", plus the D16 tools "
+        },
+        {
+          "insert": "document, person, database, chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the W2 tools "
+        },
+        {
+          "insert": "section, pill, arrow-shape, predefined-process, code-block, chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-select": {
+      "id": "b-model-actions-list-select",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — replaces the current selection (none / objects / connection / annotation / region)."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-setTool": {
+      "id": "b-model-actions-list-setTool",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.setTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — switches the active "
+        },
+        {
+          "insert": "CanvasTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-addObject": {
+      "id": "b-model-actions-list-addObject",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.addObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — creates one new object of a given type, with default geometry/tone/shape if not supplied, and selects it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-addObjects": {
+      "id": "b-model-actions-list-addObjects",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.addObjects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — bulk-inserts objects (and optional connections) in one history entry, remapping ids on collision; used for paste."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-updateObject": {
+      "id": "b-model-actions-list-updateObject",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.updateObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — patches one object's fields (geometry is re-snapped, style is shallow-merged)."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-updateObjectGeometries": {
+      "id": "b-model-actions-list-updateObjectGeometries",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.updateObjectGeometries",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — bulk geometry patch for many objects at once (drag/section-carry), with an opt-out of history recording for live-preview frames."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-resizeObject": {
+      "id": "b-model-actions-list-resizeObject",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.resizeObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — sets one object's width/height, snapped unless opted out."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-moveSelection": {
+      "id": "b-model-actions-list-moveSelection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.moveSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — nudges every selected object by (dx, dy), snapped unless opted out."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-duplicateSelection": {
+      "id": "b-model-actions-list-duplicateSelection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.duplicateSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — clones the selected objects (and connections between them) offset by +24/+24, and selects the clones."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-deleteSelection": {
+      "id": "b-model-actions-list-deleteSelection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.deleteSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — removes the current selection (objects, or the one selected connection) and any connections/links/annotations that referenced it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-addConnection": {
+      "id": "b-model-actions-list-addConnection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.addConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — creates a connection between two existing objects, optionally with anchors and a precise relative "
+        },
+        {
+          "insert": "toPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-updateConnection": {
+      "id": "b-model-actions-list-updateConnection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — patches a connection's fields, validating that any new endpoints reference real objects and aren't self-loops."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-deleteConnection": {
+      "id": "b-model-actions-list-deleteConnection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.deleteConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — removes one connection by id."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-quickConnect": {
+      "id": "b-model-actions-list-quickConnect",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — drag-to-connect gesture: connects to an existing object under the drop point, or creates a new process object at the drop point and connects to it, in one history entry."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-addAnnotation": {
+      "id": "b-model-actions-list-addAnnotation",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.addAnnotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — attaches a note or agent-request annotation to an object, connection, or region."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-setObjectType": {
+      "id": "b-model-actions-list-setObjectType",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.setObjectType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — shape-swaps an object to a different type in place, preserving geometry/label/parentId while re-deriving "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and seeding or clearing section-only title/tint fields."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-setParent": {
+      "id": "b-model-actions-list-setParent",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.setParent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — reparents objects into a container (or clears parent), rejecting cycles and non-container targets."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-alignSelection": {
+      "id": "b-model-actions-list-alignSelection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.alignSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — aligns selected objects along an edge or center axis, via "
+        },
+        {
+          "insert": "geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "alignObjects"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-distributeSelection": {
+      "id": "b-model-actions-list-distributeSelection",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.distributeSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — spaces three or more selected objects evenly along an axis."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-fitContainerToChildren": {
+      "id": "b-model-actions-list-fitContainerToChildren",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.fitContainerToChildren",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — resizes a container to the padded bounding box of its children."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-resolveLinkStatuses": {
+      "id": "b-model-actions-list-resolveLinkStatuses",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.resolveLinkStatuses",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — re-derives every link's resolved/stale/missing/unresolved status against a set of known and stale paths."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-undo": {
+      "id": "b-model-actions-list-undo",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.undo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — pops the most recent document off history.past, pushing the current document onto history.future."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-redo": {
+      "id": "b-model-actions-list-redo",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.redo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the inverse of undo, replaying a previously undone document."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-reset": {
+      "id": "b-model-actions-list-reset",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.reset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — replaces the entire state with a fresh document, clearing history and selection."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-p2": {
+      "id": "b-model-actions-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Most actions record a history entry via an internal "
+        },
+        {
+          "insert": "withHistory",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " helper and a "
+        },
+        {
+          "insert": "CanvasChangeSummary",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (source, human-readable summary, and the specific object/connection/annotation ids touched) — this is what backs both the undo ledger and any \"what just changed\" highlight in a consuming UI."
+        }
+      ],
+      "children": []
+    },
+    "b-model-decision-single-reducer": {
+      "id": "b-model-decision-single-reducer",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Single reducer as mutation authority"
+      },
+      "text": [
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": " is the one function that turns "
+        },
+        {
+          "insert": "(InteractiveCanvasState, CanvasAction)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " into a new state, and it is the only place a document is ever mutated. Interactive UI gestures — drags, resizes, connector drops, keyboard nudges, all wired up in "
+        },
+        {
+          "insert": "interaction.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — dispatch the exact same "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values that an external agent or automation script would dispatch to make the identical change programmatically. Neither path has a shortcut around the other: a pointer drag and an agent's "
+        },
+        {
+          "insert": "canvas.updateObjectGeometries",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " call are, to the reducer, indistinguishable inputs.\n\nThis single choke point is what guarantees two properties hold regardless of an action's origin: consistent undo/history (every mutating action goes through the same "
+        },
+        {
+          "insert": "withHistory",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " bookkeeping, so a human edit and an agent edit undo identically), and connector-waypoint reconciliation (every action that can move or resize an object flows through the same post-action "
+        },
+        {
+          "insert": "reconcileConnectionWaypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pass — see below — so no caller can accidentally leave a connection's explicit waypoints stale). Splitting the reducer, or giving any caller a way to patch the document object directly, would let these guarantees diverge quietly between human and agent-driven edits."
+        }
+      ],
+      "children": []
+    },
+    "b-model-decision-waypoints": {
+      "id": "b-model-decision-waypoints",
+      "flavour": "observation",
+      "props": {
+        "title": "Waypoint reconciliation rides inside the reducer"
+      },
+      "text": [
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": " wraps the actual action switch ("
+        },
+        {
+          "insert": "reduceCanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") with a stale-waypoint choke point: after any action that changed the document (excluding undo/redo/reset, which restore stored documents verbatim), "
+        },
+        {
+          "insert": "reconcileConnectionWaypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " compares each explicitly-waypointed connection's two endpoint owners before and after. If both owners translated by the same delta with no resize (a rigid move — a multi-select drag, a nudge, a section carrying its members), every waypoint shifts by that same delta, preserving trunk-and-branch fan shapes. If the owners moved asymmetrically or either was resized, the waypoints are dropped so the connector falls back to obstacle-avoiding auto-routing — FigJam's own re-route-on-asymmetric-move behavior. Because this runs inside the single reducer choke point, the waypoint change shares the triggering action's own history entry: one undo restores both geometry and waypoints together."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-geometry": {
+      "id": "b-model-heading-geometry",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Geometry helpers"
+        }
+      ],
+      "children": []
+    },
+    "b-model-geometry-p1": {
+      "id": "b-model-geometry-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " is a set of pure, DOM-free geometry functions operating purely on plain numbers and "
+        },
+        {
+          "insert": "CanvasGeometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records: grid-snapping ("
+        },
+        {
+          "insert": "snapGeometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "snapCanvasNumber",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at a 16px grid), anchor-point resolution for connection endpoints ("
+        },
+        {
+          "insert": "anchorPoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), bounding-box math over one or many geometries ("
+        },
+        {
+          "insert": "boundsForGeometries",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "documentBounds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), rectangle-overlap hit-testing ("
+        },
+        {
+          "insert": "boundsIntersect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "overlapArea",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), align/distribute layout math, container-fit sizing, and stable id generation ("
+        },
+        {
+          "insert": "createObjectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-model-geometry-p2": {
+      "id": "b-model-geometry-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "sectionCaptureMembers",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "sectionCaptureMembers"
+            }
+          }
+        },
+        {
+          "insert": " is the FigJam section-capture algorithm: it computes which objects a section \"carries\" when dragged purely from geometric overlap (an object is captured once its overlap with the section's bounds reaches a threshold fraction of the object's own area) — never via persisted "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " membership. Capture is recursive: a captured nested section pulls in its own captured members transitively, so dragging an outer section carries everything nested inside it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-spectre-ref": {
+      "id": "b-model-heading-spectre-ref",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Self-containment: SpectreRef"
+        }
+      ],
+      "children": []
+    },
+    "b-model-spectre-ref-p1": {
+      "id": "b-model-spectre-ref-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "spectre-ref.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/spectre-ref.ts"
+            }
+          }
+        },
+        {
+          "insert": " is a type-only vendored copy of "
+        },
+        {
+          "insert": "SpectreRef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/spectre-ref.ts",
+              "symbol": "SpectreRef"
+            }
+          }
+        },
+        {
+          "insert": " — the same cross-reference shape ("
+        },
+        {
+          "insert": "kind",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "\"doc\" | \"source\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", plus "
+        },
+        {
+          "insert": "path",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "symbol",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "line",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") originally defined in the host Spectre application's own docs-model. It exists here purely so this package has zero runtime dependency back on that host app: the canvas engine only needs the "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to type "
+        },
+        {
+          "insert": "InteractiveCanvasLink.target",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not the host's runtime "
+        },
+        {
+          "insert": "validateSpectreRef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " validator, which stays host-side. The file's own comment is explicit that the two copies must be kept in sync by hand if either evolves — there is no build-time link between them, by design."
+        }
+      ],
+      "children": []
+    },
+    "b-model-spectre-ref-p2": {
+      "id": "b-model-spectre-ref-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "There's a fitting irony here: this very doc.json's own "
+        },
+        {
+          "insert": "reference",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " span attributes — the ones wrapping every "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " mention above — use exactly this "
+        },
+        {
+          "insert": "SpectreRef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " shape. The one cross-reference type this package vendors to stay decoupled from its host is the same type structuring the prose that documents it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-constraint-single-authority": {
+      "id": "b-model-constraint-single-authority",
+      "flavour": "constraint",
+      "props": {
+        "severity": "hard",
+        "title": "All mutation goes through reduceInteractiveCanvasState"
+      },
+      "text": [
+        {
+          "insert": "Every change to an "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — whether triggered by pointer interaction, keyboard shortcuts, the chrome UI, or an external agent — must be expressed as a "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " dispatched through "
+        },
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Do not hand-roll ad hoc state mutations elsewhere (e.g. mutating "
+        },
+        {
+          "insert": "document.objects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directly, or writing a parallel update path that bypasses the reducer) — doing so silently breaks undo/redo history and skips the waypoint-reconciliation pass, producing state that looks fine until the next drag or undo exposes the drift."
+        }
+      ],
+      "children": []
+    },
+    "b-model-testing-coverage": {
+      "id": "b-model-testing-coverage",
+      "flavour": "testing",
+      "props": {
+        "title": "Model layer test coverage"
+      },
+      "text": [
+        {
+          "insert": "Tests are colocated under "
+        },
+        {
+          "insert": "src/model/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/__tests__"
+            }
+          }
+        },
+        {
+          "insert": ", following the project-wide convention of keeping tests next to the source they exercise rather than in a separate top-level test tree. Three files cover this layer: "
+        },
+        {
+          "insert": "schema-and-actions.test.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the largest file, exercising document validation and the full action/reducer vocabulary — object and connection CRUD, selection, undo/redo, alignment/distribution, container fitting, link status resolution), "
+        },
+        {
+          "insert": "schema.waypoints.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (focused coverage of explicit connection "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — normalization during validation and the rigid-translate vs. drop-on-asymmetric-move reconciliation behavior in the reducer), and "
+        },
+        {
+          "insert": "w2-sections-and-shapes.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the W2 wave's section capture/tint/title validation and the new V2 Flow shape vocabulary — pill, arrow-shape, predefined-process, code-block, chip-icon)."
+        }
+      ],
+      "children": []
+    },
+    "b-model-closing-p1": {
+      "id": "b-model-closing-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Next: "
+        },
+        {
+          "insert": "canvas-20-interaction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/20-interaction",
+              "label": "canvas-20-interaction"
+            }
+          }
+        },
+        {
+          "insert": " covers how pointer gestures — drag, resize, connector-drop, section-carry — get translated into the "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values this document describes, and how "
+        },
+        {
+          "insert": "interaction.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " dispatches them through the same reducer an external agent would use."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-object-ref": {
+      "id": "b-model-heading-object-ref",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Object type reference"
+        }
+      ],
+      "children": []
+    },
+    "b-model-object-ref-intro": {
+      "id": "b-model-object-ref-intro",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " value below is documented against its actual defaults: "
+        },
+        {
+          "insert": "defaultGeometryFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": " (creation-time size), "
+        },
+        {
+          "insert": "toneForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "toneForType"
+            }
+          }
+        },
+        {
+          "insert": " (default color tone), "
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": " (the "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " a fresh "
+        },
+        {
+          "insert": "canvas.addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "CanvasAction"
+            }
+          }
+        },
+        {
+          "insert": " seeds), and the "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " render function in "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " that actually lays each shape out. The shared base fields ("
+        },
+        {
+          "insert": "id",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "layout",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "source",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ") are covered above; this section calls out what each of them means for a specific type, plus the type-only fields ("
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " for sections, "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " for arrow-shape, "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " for code-block, "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " for sticky) documented inline on "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-container": {
+      "id": "b-model-type-container",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "container"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-container-p1": {
+      "id": "b-model-type-container-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A plain nesting/grouping box for the older ("
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")-based containment model — distinct from FigJam "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which captures members geometrically instead (see below). Other objects opt into membership by setting their "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " to the container's "
+        },
+        {
+          "insert": "id",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "; the container itself carries no list of children — membership is always read by scanning "
+        },
+        {
+          "insert": "document.objects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " for a matching "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-container-p2": {
+      "id": "b-model-type-container-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Default geometry is "
+        },
+        {
+          "insert": "{ x: 80, y: 80, width: 360, height: 240 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the largest default footprint after "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — sized to comfortably hold a few default-sized shapes at creation time. Default tone is "
+        },
+        {
+          "insert": "\"neutral\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " resolves to "
+        },
+        {
+          "insert": "\"rounded-rect\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": " has no dedicated container case, so it falls through to the function's default). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
+        },
+        {
+          "insert": "align-items: flex-start",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ") — with no icon or special sub-elements."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-container-fit": {
+      "id": "b-model-type-container-fit",
+      "flavour": "constraint",
+      "props": {
+        "severity": "soft",
+        "title": "fitContainerToChildren resizes only container objects"
+      },
+      "text": [
+        {
+          "insert": "fitContainerToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "fitContainerToChildren"
+            }
+          }
+        },
+        {
+          "insert": " (and the "
+        },
+        {
+          "insert": "canvas.fitContainerToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " action wrapping it) is a no-op unless the target object's "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is exactly "
+        },
+        {
+          "insert": "\"container\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " — it resizes the container to the "
+        },
+        {
+          "insert": "boundsForGeometries",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "boundsForGeometries"
+            }
+          }
+        },
+        {
+          "insert": " of every object whose "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " points at it, padded by 32px by default. Sections use a different, geometry-only capture mechanism ("
+        },
+        {
+          "insert": "sectionCaptureMembers",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "sectionCaptureMembers"
+            }
+          }
+        },
+        {
+          "insert": ") and are never affected by this action."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-process": {
+      "id": "b-model-type-process",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "process"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-process-p1": {
+      "id": "b-model-type-process-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A rounded-rect flow step — the generic "
+        },
+        {
+          "insert": "addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " fallback shape and tone: "
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "toneForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "toneForType"
+            }
+          }
+        },
+        {
+          "insert": " both fall through their if-chains to "
+        },
+        {
+          "insert": "\"rounded-rect\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "\"process\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " for any type they don't special-case, and "
+        },
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the type that fallback was written for. "
+        },
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s drag-to-empty-space gesture also creates a "
+        },
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object specifically when the drop point isn't over an existing object."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-process-p2": {
+      "id": "b-model-type-process-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Default geometry falls through to "
+        },
+        {
+          "insert": "defaultGeometryFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": "'s catch-all: "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " renders top-left, bold-ish ("
+        },
+        {
+          "insert": "font-weight: 650",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", 15px — "
+        },
+        {
+          "insert": "TEXT_SIZES_PX.shapeText",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " (when present and not "
+        },
+        {
+          "insert": "compact",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") renders below it, clamped to 3 lines."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-decision": {
+      "id": "b-model-type-decision",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "decision"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-decision-p1": {
+      "id": "b-model-type-decision-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A diamond branch point. Default geometry is "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 112 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"decision\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"diamond\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-decision-p2": {
+      "id": "b-model-type-decision-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered with "
+        },
+        {
+          "insert": "clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " over the object's full bounding box — "
+        },
+        {
+          "insert": "geometry.width",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "height",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " are the diamond's bounding box, not its point-to-point span. Label and body are centered ("
+        },
+        {
+          "insert": "align-items: center; text-align: center",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), with extra padding (18px/28px) versus the base 12px/14px, since a diamond's usable interior is smaller than its bounding box for a given corner-to-corner size."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-text": {
+      "id": "b-model-type-text",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "text"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-text-p1": {
+      "id": "b-model-type-text-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Free-floating label text with no surrounding box — FigJam's plain-text tool. Uses the shared "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " field like every other type, but "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is not rendered for this shape (there is no space for it once the box chrome is gone)."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-text-p2": {
+      "id": "b-model-type-text-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Default geometry falls through to the catch-all "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the one type with no entry in "
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": "'s if-chain at all; instead "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " special-cases it directly: "
+        },
+        {
+          "insert": "object.style?.shape ?? (object.type === \"text\" ? \"label\" : \"rounded-rect\")",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — so a "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object with no explicit "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " renders as the borderless "
+        },
+        {
+          "insert": "\"label\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " shape: bold black text, 20px ("
+        },
+        {
+          "insert": "TEXT_SIZES_PX.boldLabel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": "), transparent background, 4px padding, no border."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-sticky": {
+      "id": "b-model-type-sticky",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "sticky"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-sticky-p1": {
+      "id": "b-model-type-sticky-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A FigJam note card. Default geometry is "
+        },
+        {
+          "insert": "{ x: 180, y: 180, width: 176, height: 128 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " at creation (smaller than FigJam's own "
+        },
+        {
+          "insert": "STICKY_GEOMETRY.defaultSizePx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " of 416x420 — the creation default is deliberately compact; the token constant describes the reference board's own stickies, not "
+        },
+        {
+          "insert": "addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s seed size). Default tone "
+        },
+        {
+          "insert": "\"warning\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"note\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Sticky is the only object type with a "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " override in color resolution that bypasses the desaturated tone-mix in favor of an exact "
+        },
+        {
+          "insert": "STICKY_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "STICKY_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " hex (yellow/red/pink/blue/lightBlue/blueGray) — FigJam stickies are saturated, unlike other shapes' pastel tone-mix fills."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-sticky-p2": {
+      "id": "b-model-type-sticky-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Type-only fields: "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " (\"rendered bottom-left at 12px/40% black\" per its own doc comment in schema.ts) renders as an absolutely-positioned chip at "
+        },
+        {
+          "insert": "left: STICKY_GEOMETRY.author.insetLeftPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " (20px), "
+        },
+        {
+          "insert": "bottom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " computed from "
+        },
+        {
+          "insert": "baselineFromBottomPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " (24) minus the author font size (12px). "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is split on newlines and rendered as one line per "
+        },
+        {
+          "insert": "\\n",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-separated segment; any line starting with "
+        },
+        {
+          "insert": "\"- \"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " renders as a bulleted line (the "
+        },
+        {
+          "insert": "\"- \"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prefix is stripped and replaced with a "
+        },
+        {
+          "insert": "•",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " glyph via CSS "
+        },
+        {
+          "insert": "::before",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "). Sticky is also the only shape with a drop shadow ("
+        },
+        {
+          "insert": "STICKY_GEOMETRY.shadow",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " = "
+        },
+        {
+          "insert": "\"0 3px 12px rgba(0, 0, 0, 0.15)\""
+        },
+        {
+          "insert": ") and square corners ("
+        },
+        {
+          "insert": "cornerRadiusPx: 0",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ") — every other shape is flat/shadowless per the FigJam parity spec."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-source-node": {
+      "id": "b-model-type-source-node",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "source-node"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-source-node-p1": {
+      "id": "b-model-type-source-node-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An agent/source-code origin marker — pins a canvas position to a place an agent or automation originated from. Default tone "
+        },
+        {
+          "insert": "\"agent\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " falls through to "
+        },
+        {
+          "insert": "\"rounded-rect\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (no dedicated case in "
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": "). Default geometry falls through to the catch-all "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Typically pairs with the "
+        },
+        {
+          "insert": "source",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " field ("
+        },
+        {
+          "insert": "path",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "symbol",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ") to record exactly where in the codebase the marker points, though nothing enforces that pairing at the schema level."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-annotation-marker": {
+      "id": "b-model-type-annotation-marker",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "annotation-marker"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-annotation-marker-p1": {
+      "id": "b-model-type-annotation-marker-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A small pinned marker glyph — distinct from the document's "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " collection (note/agent-request records with their own lifecycle); this is just a visual pin object placed on the canvas like any other "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Default geometry is a small square, "
+        },
+        {
+          "insert": "{ x: 220, y: 220, width: 40, height: 40 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"annotation\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"marker\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Renders as a circular pill ("
+        },
+        {
+          "insert": "border-radius: 999px",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", zero padding), label/body centered."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-document": {
+      "id": "b-model-type-document",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "document"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-document-p1": {
+      "id": "b-model-type-document-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in the D16 wave for reference-style architecture diagrams — represents a file/document. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"memory\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (documents/intents/memory per the "
+        },
+        {
+          "insert": "CanvasPaletteToken",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " doc comment), "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"document\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-document-p2": {
+      "id": "b-model-type-document-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered with a dog-eared-page silhouette via CSS "
+        },
+        {
+          "insert": "clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and an asymmetric border radius ("
+        },
+        {
+          "insert": "2px 8px 8px 8px",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — square top-left corner where the fold notch is, rounded elsewhere). Uses the shared base chrome otherwise: label top-left, body below it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-person": {
+      "id": "b-model-type-person",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "person"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-person-p1": {
+      "id": "b-model-type-person-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in D16 — represents a human actor. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 120, height: 140 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (the tallest of the D16 defaults, to fit a head-and-shoulders silhouette), default tone "
+        },
+        {
+          "insert": "\"input\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (user/input/confirmed per the palette-token doc comment), "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"person\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-person-p2": {
+      "id": "b-model-type-person-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered via an SVG "
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ShapeSilhouette"
+            }
+          }
+        },
+        {
+          "insert": " (a rounded-shoulders body path plus a head circle, "
+        },
+        {
+          "insert": "viewBox "
+        },
+        {
+          "insert": "0 0 100 100",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " scaled to fill the object's actual box) rather than the CSS-box chrome other shapes use — the button element itself is transparent/borderless. Fill/stroke default to "
+        },
+        {
+          "insert": "PERSON_ICON_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "PERSON_ICON_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "fill \"#66D575\" / stroke \"#3E9B4B\""
+        },
+        {
+          "insert": ") unless the object has an explicit "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "fill",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "stroke",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", in which case the resolved theme color is used instead. "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " renders below the icon in bold black, not overlaid on it; when "
+        },
+        {
+          "insert": "geometry.height",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is under 100px ("
+        },
+        {
+          "insert": "isCompactSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), the label is dropped entirely to keep the icon legible at small sizes."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-database": {
+      "id": "b-model-type-database",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "database"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-database-p1": {
+      "id": "b-model-type-database-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in D16 — represents a data store. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"memory\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"database\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-database-p2": {
+      "id": "b-model-type-database-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Also rendered via the SVG "
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ShapeSilhouette"
+            }
+          }
+        },
+        {
+          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike person/chat/chip-icon — it was "
+        },
+        {
+          "insert": "not part of the W2 restyle's \"label below icon\" treatment: database keeps the older tone-driven pastel-pair styling, and its label/body render "
+        },
+        {
+          "insert": "centered over the silhouette ("
+        },
+        {
+          "insert": "justify-content: center; padding-top: 14%",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ") rather than below it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chat": {
+      "id": "b-model-type-chat",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "chat"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chat-p1": {
+      "id": "b-model-type-chat-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in D16 — represents a chat/conversation surface. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 180, height: 110 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"process\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"chat\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chat-p2": {
+      "id": "b-model-type-chat-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "SVG silhouette is a rounded speech-bubble path with a small tail at the bottom-left. Like "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", chat got the W2 restyle: fill/stroke default to "
+        },
+        {
+          "insert": "CHAT_ICON_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CHAT_ICON_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "fill \"#FF9E42\" / stroke \"#EB7500\""
+        },
+        {
+          "insert": ") unless overridden by an explicit tone/palette/fill, and "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " renders below the icon in bold black ("
+        },
+        {
+          "insert": "justify-content: flex-end; padding-bottom: 10%",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "). Below 100px height, the compact-silhouette height check does "
+        },
+        {
+          "insert": "NOT drop chat's label the way it drops person's — only "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is suppressed at small sizes for both."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section": {
+      "id": "b-model-type-section",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "section"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-p1": {
+      "id": "b-model-type-section-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 (FigJam sections + V2 Flow shape vocabulary) — the one type that captures membership by geometry rather than "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Requires "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " (the text shown in the section's floating title chip — distinct from "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which every object still carries but which sections don't separately render) and a known "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " family from "
+        },
+        {
+          "insert": "CanvasSectionTint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasSectionTint"
+            }
+          }
+        },
+        {
+          "insert": " (green/purple/orange/yellow/gray/white/pink/red/blue/teal); both are hard validation errors when missing, per "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is reserved for a later wave — accepted by the schema but not enforced anywhere yet."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-p2": {
+      "id": "b-model-type-section-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Default geometry is deliberately large — "
+        },
+        {
+          "insert": "{ x: 80, y: 80, width: 480, height: 360 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " — since sections exist to wrap other objects, not to be sized like a shape. "
+        },
+        {
+          "insert": "canvas.addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " seeds a fresh section's "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " to its "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " and its "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "\"gray\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " so it validates immediately. "
+        },
+        {
+          "insert": "canvas.setObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (shape-swap) seeds the same defaults when swapping an existing object INTO a section, and clears "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " when swapping away from one, since every other type's renderer ignores those fields anyway."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-p3": {
+      "id": "b-model-type-section-p3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered by a dedicated "
+        },
+        {
+          "insert": "SectionShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SectionShape"
+            }
+          }
+        },
+        {
+          "insert": " component, not the generic button/label/body layout every other shape shares: no centered label, no shadow, and the visible \"border\" is literally the title chip's fill color ("
+        },
+        {
+          "insert": "borderColor = family.chipBorder ?? \"transparent\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "). The title chip is absolutely positioned near the top-left corner ("
+        },
+        {
+          "insert": "SECTION_GEOMETRY.titleChip",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ": 3px inset, 27px tall, 16px/500-weight text, 10px horizontal padding). Section fill/chip colors resolve against "
+        },
+        {
+          "insert": "SECTION_FAMILIES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "SECTION_FAMILIES"
+            }
+          }
+        },
+        {
+          "insert": ", a separate palette from the tone/paletteToken ladder every other type uses."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-capture": {
+      "id": "b-model-type-section-capture",
+      "flavour": "constraint",
+      "props": {
+        "severity": "hard",
+        "title": "Section membership is geometric, never persisted parentId"
+      },
+      "text": [
+        {
+          "insert": "sectionCaptureMembers",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "sectionCaptureMembers"
+            }
+          }
+        },
+        {
+          "insert": " computes which objects a section \"carries\" when dragged purely from bounds overlap — an object is captured once its overlap with the section's bounds reaches "
+        },
+        {
+          "insert": "SECTION_CAPTURE_OVERLAP_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "SECTION_CAPTURE_OVERLAP_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " (0.6, i.e. 60%) of the OBJECT's own area, recomputed fresh on every drag rather than read from any stored relationship. Capture is recursive: a captured nested section pulls in its own captured members transitively. Do not attempt to read section membership from "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " — sections never set or rely on it for this purpose."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-p4": {
+      "id": "b-model-type-section-p4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Z-order: sections always render below every non-section object ("
+        },
+        {
+          "insert": "zIndex: 0",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "SectionShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " vs. "
+        },
+        {
+          "insert": "zIndex: 2",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " for "
+        },
+        {
+          "insert": "objectStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "objectStyle"
+            }
+          }
+        },
+        {
+          "insert": ", with the connector SVG layer between them at "
+        },
+        {
+          "insert": "zIndex: 1",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), so shapes placed \"on\" a section visually sit on its surface. Among multiple sections, "
+        },
+        {
+          "insert": "renderOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "renderOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " computes nesting depth from the same 60%-bounds-containment reading "
+        },
+        {
+          "insert": "sectionCaptureMembers",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " uses, and paints deeper (more-nested) sections after their ancestors — so a nested section's tint visibly layers on top rather than blending underneath. Ties (non-section-vs-non-section, or sibling sections at the same depth) fall back to the document's own "
+        },
+        {
+          "insert": "objects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " array order."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-pill": {
+      "id": "b-model-type-pill",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "pill"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-pill-p1": {
+      "id": "b-model-type-pill-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 — a true stadium/pill shape from the V2 Flow vocabulary. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 200, height: 64 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"input\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"pill\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Rendered with "
+        },
+        {
+          "insert": "border-radius: 999px",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " (a true stadium — "
+        },
+        {
+          "insert": "SHAPE_CORNER_RADII_PX.pill",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s doc comment notes the real radius is "
+        },
+        {
+          "insert": "height / 2",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": ", left to the browser via the 999px shorthand rather than computed per-object). Label and body centered."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-arrow-shape": {
+      "id": "b-model-type-arrow-shape",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "arrow-shape"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-arrow-shape-p1": {
+      "id": "b-model-type-arrow-shape-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 — a fat chevron from the V2 Flow vocabulary, pointing left or right via the type-only "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " field ("
+        },
+        {
+          "insert": "CanvasArrowShapeDirection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasArrowShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": ", defaults to "
+        },
+        {
+          "insert": "\"right\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " when omitted or invalid — a soft default in "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", not a hard validation error). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 361, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " matches the measured reference proportions (361x100 logical px), default tone "
+        },
+        {
+          "insert": "\"process\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"arrow-shape\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-arrow-shape-p2": {
+      "id": "b-model-type-arrow-shape-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered as a single SVG polygon tracing the full 7-point chevron silhouette (body + head + notch) via "
+        },
+        {
+          "insert": "arrowShapePoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the same outline the connector routing/attachment code uses, so a connector snapping to this shape's outline lines up with what's drawn. Proportions come from "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "headWidthRatio",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " 0.38 (head is 38% of total width), "
+        },
+        {
+          "insert": "bodyHeightRatio",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " 0.53, "
+        },
+        {
+          "insert": "bodyCornerRadiusPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " 10. "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is centered but offset away from the head — a "
+        },
+        {
+          "insert": "marginLeft",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "marginRight",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " (depending on "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ") equal to "
+        },
+        {
+          "insert": "headWidthRatio * 100%",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", since FigJam's chevrons carry no text on the pointed head side, only the body."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-predefined-process": {
+      "id": "b-model-type-predefined-process",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "predefined-process"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-predefined-process-p1": {
+      "id": "b-model-type-predefined-process-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 — a flowchart \"predefined process\" rect with two inner vertical bars near each edge, signaling a called subroutine. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 200, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"memory\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"predefined-process\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-predefined-process-p2": {
+      "id": "b-model-type-predefined-process-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered as the base rounded rect ("
+        },
+        {
+          "insert": "PREDEFINED_PROCESS_GEOMETRY.cornerRadiusPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " = 5) plus two absolutely-positioned "
+        },
+        {
+          "insert": "<span>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " bars, one inset from each edge by "
+        },
+        {
+          "insert": "barInsetRatio",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " (0.047, i.e. 4.7% of total width) at "
+        },
+        {
+          "insert": "barWidthPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " = 4px wide, drawn at 60% opacity in "
+        },
+        {
+          "insert": "currentColor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ". Label and body centered like a normal process shape."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-code-block": {
+      "id": "b-model-type-code-block",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "code-block"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-code-block-p1": {
+      "id": "b-model-type-code-block-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 — an in-canvas syntax-highlighted code snippet. The type-only "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " field selects the tokenizer in "
+        },
+        {
+          "insert": "code-tokenizer.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts"
+            }
+          }
+        },
+        {
+          "insert": " (not "
+        },
+        {
+          "insert": "src/model/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — despite the schema.ts comment's phrasing, the tokenizer actually lives under "
+        },
+        {
+          "insert": "src/render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 320, height: 200 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default tone "
+        },
+        {
+          "insert": "\"neutral\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (inert — code-block resolves its background from "
+        },
+        {
+          "insert": "CODE_BLOCK",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CODE_BLOCK"
+            }
+          }
+        },
+        {
+          "insert": " fixed tokens, not the tone system), "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"code-block\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-code-block-p2": {
+      "id": "b-model-type-code-block-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Body text ("
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ") is split on newlines; each line renders as its own row with a right-aligned line-number gutter (24px wide, "
+        },
+        {
+          "insert": "color \"#999999\""
+        },
+        {
+          "insert": ") and a tokenized code span. "
+        },
+        {
+          "insert": "tokenizeCodeBlock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts",
+              "symbol": "tokenizeCodeBlock"
+            }
+          }
+        },
+        {
+          "insert": " dispatches per line by "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "\"python\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts"
+            }
+          }
+        },
+        {
+          "insert": " recognizes comments, strings, a fixed keyword set, and capitalized identifiers (colored as a type/class name); "
+        },
+        {
+          "insert": "\"json\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/code-tokenizer.ts"
+            }
+          }
+        },
+        {
+          "insert": " splits quoted-string spans from plain spans, coloring a quoted string followed by "
+        },
+        {
+          "insert": ":",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as a key versus a value, and recognizing "
+        },
+        {
+          "insert": "true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "null",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as keywords; any other language falls back to untokenized plain text. The tokenizer's own header comment is explicit it is \"NOT a real syntax-highlighting engine\" — no grammar, no AST. Rendered on a fixed Dracula-theme background ("
+        },
+        {
+          "insert": "CODE_BLOCK.bg",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " = "
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"#282A36\""
+        },
+        {
+          "insert": ", 10px corner radius, monospace 13px/1.5) — code-block is the one type that renders body-only: it carries no label chrome at all, even though "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is still a required field on the object."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chip-icon": {
+      "id": "b-model-type-chip-icon",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "chip-icon"
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chip-icon-p1": {
+      "id": "b-model-type-chip-icon-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Added in W2 — a small CPU/chip glyph from the V2 Flow icon set. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 120, height: 140 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (same footprint as "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), default tone "
+        },
+        {
+          "insert": "\"neutral\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " (inert — resolves from "
+        },
+        {
+          "insert": "CHIP_ICON_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CHIP_ICON_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " unless overridden), "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "\"chip-icon\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-chip-icon-p2": {
+      "id": "b-model-type-chip-icon-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Rendered via the same "
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ShapeSilhouette"
+            }
+          }
+        },
+        {
+          "insert": " SVG mechanism as person/database/chat: a rounded square body with 4 pins per side ("
+        },
+        {
+          "insert": "viewBox \"0 0 100 100\""
+        },
+        {
+          "insert": "), fill/stroke defaulting to "
+        },
+        {
+          "insert": "CHIP_ICON_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "fill \"#FFE0C2\" / stroke \"#FF9E42\""
+        },
+        {
+          "insert": ") unless the object has an explicit tone/palette/fill override. Like person and chat, "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " renders below the icon in bold black rather than overlaid on it."
+        }
+      ],
+      "children": []
+    },
+    "b-model-heading-layout-conventions": {
+      "id": "b-model-heading-layout-conventions",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Layout & coordinate conventions"
+        }
+      ],
+      "children": []
+    },
+    "b-model-layout-conventions-p1": {
+      "id": "b-model-layout-conventions-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " (and connection "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " point) is a plain number pair in a single flat world-space coordinate system — logical px, no separate \"world\" vs. \"screen\" unit split baked into the schema. The origin "
+        },
+        {
+          "insert": "(0, 0)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is not pinned to any object; a document's optional "
+        },
+        {
+          "insert": "size",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "width",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "height",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": ", default 1200x720 per "
+        },
+        {
+          "insert": "documentBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "documentBounds"
+            }
+          }
+        },
+        {
+          "insert": ") describes a nominal canvas footprint starting at the origin, but objects are free to have negative "
+        },
+        {
+          "insert": "x",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "y",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " or extend past "
+        },
+        {
+          "insert": "size",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "documentBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " always recomputes the real bounding box from the canvas-base rect plus every object's actual geometry, padded 80px by default, rather than trusting "
+        },
+        {
+          "insert": "size",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " as authoritative."
+        }
+      ],
+      "children": []
+    },
+    "b-model-layout-conventions-p2": {
+      "id": "b-model-layout-conventions-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "All geometry is snapped to a "
+        },
+        {
+          "insert": "CANVAS_GRID_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "CANVAS_GRID_SIZE"
+            }
+          }
+        },
+        {
+          "insert": " = 16px grid by "
+        },
+        {
+          "insert": "snapGeometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "snapGeometry"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "snapCanvasNumber",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "snapCanvasNumber"
+            }
+          }
+        },
+        {
+          "insert": " (round-to-nearest-multiple, with width/height floored at one grid cell) — this is a model-layer concern independent of the render layer's own adaptive dot-grid ("
+        },
+        {
+          "insert": "GRID_BASE_STEP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "GRID_BASE_STEP_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 8, doubling/halving to stay in a comfortable on-screen pitch band as zoom changes; see "
+        },
+        {
+          "insert": "canvas-40-render",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/40-render",
+              "label": "canvas-40-render"
+            }
+          }
+        },
+        {
+          "insert": " for that). The two grids are unrelated in size (16px snap vs. 8px-based adaptive dots) and serve different purposes: one is placement snapping, the other is visual density."
+        }
+      ],
+      "children": []
+    },
+    "b-model-layout-conventions-p3": {
+      "id": "b-model-layout-conventions-p3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The default sizes in the per-type reference above (set by "
+        },
+        {
+          "insert": "defaultGeometryFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ") are creation-time seeds only, chosen for a reasonable initial placement — they are not the same numbers as "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s pixel-sampled reference constants (e.g. "
+        },
+        {
+          "insert": "STICKY_GEOMETRY.defaultSizePx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " is 416x420, sampled from real FigJam exports, versus "
+        },
+        {
+          "insert": "addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s smaller 176x128 sticky seed). Treat "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " as the visual-fidelity source of truth (corner radii, stroke widths, font sizes, per-shape color tokens) and "
+        },
+        {
+          "insert": "defaultGeometryFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " as just the placement convenience every "
+        },
+        {
+          "insert": "canvas.addObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " call falls back to when no explicit "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": " is supplied."
+        }
+      ],
+      "children": []
+    },
+    "b-model-layout-conventions-p4": {
+      "id": "b-model-layout-conventions-p4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Auto-layout helpers all live in "
+        },
+        {
+          "insert": "geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "alignObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "alignObjects"
+            }
+          }
+        },
+        {
+          "insert": " moves a selection's shared bounding-box edge or center axis (left/center-x/right/top/center-y/bottom) to align every selected object along it; "
+        },
+        {
+          "insert": "distributeObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "distributeObjects"
+            }
+          }
+        },
+        {
+          "insert": " (3+ objects required) spaces objects evenly between the first and last member's position along an axis, by sorting on that axis and interpolating equal gaps; "
+        },
+        {
+          "insert": "fitContainerToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/geometry.ts",
+              "symbol": "fitContainerToChildren"
+            }
+          }
+        },
+        {
+          "insert": " resizes a "
+        },
+        {
+          "insert": "container",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-type object to the padded (32px default) bounding box of its "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts"
+            }
+          }
+        },
+        {
+          "insert": "-linked children. All three are pure document-in/document-out functions — no mutation, no history bookkeeping of their own — which is why the "
+        },
+        {
+          "insert": "canvas.alignSelection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "canvas.distributeSelection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "canvas.fitContainerToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts"
+            }
+          }
+        },
+        {
+          "insert": " actions exist as thin reducer cases that call them and then run the result through "
+        },
+        {
+          "insert": "withHistory",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "withHistory"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

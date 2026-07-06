@@ -1,0 +1,1340 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-60-chrome",
+  "title": "Canvas Engine — Chrome Layer",
+  "root": "b-chrome-root",
+  "blocks": {
+    "b-chrome-root": {
+      "id": "b-chrome-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "The FigJam-parity chrome layer: standalone, unwired UI components (dock, context toolbar, color palette, shape surfaces, zoom controls) built pixel-first against reference recordings, before being wired into the live editor.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "chrome layer",
+          "standalone components",
+          "FigJamDock",
+          "ContextToolbar",
+          "modal relinquishing",
+          "variant derivation",
+          "shape catalog"
+        ]
+      },
+      "children": [
+        "b-chrome-title-1",
+        "b-chrome-intro-2",
+        "b-chrome-heading-methodology-3",
+        "b-chrome-decision-standalone-4",
+        "b-chrome-heading-inventory-5",
+        "b-chrome-list-tooltip-6",
+        "b-chrome-list-dock-icons-7",
+        "b-chrome-list-figjamdock-8",
+        "b-chrome-list-toolbar-icons-9",
+        "b-chrome-list-position-fn-10",
+        "b-chrome-list-context-toolbar-11",
+        "b-chrome-list-color-palette-12",
+        "b-chrome-list-shape-catalog-13",
+        "b-chrome-list-shape-search-14",
+        "b-chrome-list-shapes-panel-15",
+        "b-chrome-list-zoom-controls-16",
+        "b-chrome-heading-figjamdock-17",
+        "b-chrome-para-figjamdock-18",
+        "b-chrome-heading-context-toolbar-19",
+        "b-chrome-para-context-toolbar-20",
+        "b-chrome-constraint-multi-variant-21",
+        "b-chrome-heading-color-palette-22",
+        "b-chrome-para-color-palette-23",
+        "b-chrome-heading-shapes-24",
+        "b-chrome-para-shapes-25",
+        "b-chrome-heading-zoom-26",
+        "b-chrome-para-zoom-27",
+        "b-chrome-testing-28",
+        "b-chrome-closing-29"
+      ]
+    },
+    "b-chrome-title-1": {
+      "id": "b-chrome-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Chrome Layer"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-intro-2": {
+      "id": "b-chrome-intro-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The chrome layer lives at "
+        },
+        {
+          "insert": "packages/canvas/src/chrome/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome"
+            }
+          }
+        },
+        {
+          "insert": " and implements the FigJam-parity surface UI for the canvas engine: the bottom tool dock, the selection-aware context toolbar, the color palette popover, the two shape-browsing surfaces, and the zoom pill. It was built per the spec docs under "
+        },
+        {
+          "insert": "board-design-reference/analysis/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "figjam-bottom-dock-spec.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "figjam-chrome-catalog.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "figjam-style-tokens.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "figjam-style-spec.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") and is documented in full in the chrome directory's own "
+        },
+        {
+          "insert": "README.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/README.md"
+            }
+          }
+        },
+        {
+          "insert": ", which this doc summarizes and cross-links."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-methodology-3": {
+      "id": "b-chrome-heading-methodology-3",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Design-parity methodology"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-standalone-4": {
+      "id": "b-chrome-decision-standalone-4",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Build chrome standalone and unwired, then wire it in a later pass"
+      },
+      "text": [
+        {
+          "insert": "Every component under "
+        },
+        {
+          "insert": "src/chrome/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome"
+            }
+          }
+        },
+        {
+          "insert": " was built with zero imports from the live editor — no "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "InteractiveCanvasEditor.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "actions.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "interaction.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — and zero edits to those files. This was deliberate: it let the chrome surface be developed, styled, and pixel-matched against FigJam reference recordings entirely on its own, in parallel with unrelated model and interaction work, and wired into the live editor only in a later pass (W3-wire) once the visual layer was settled. Two concrete benefits follow from the isolation: the UI work is parallelizable against other tracks touching the editor internals, and each component's test can assert measured geometry (stadium radius, colors, button counts, group/divider structure) against plain props in jsdom, with no dependency on canvas interaction state, model wiring, or a running editor instance."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-inventory-5": {
+      "id": "b-chrome-heading-inventory-5",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Component inventory"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-tooltip-6": {
+      "id": "b-chrome-list-tooltip-6",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ChromeTooltip.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ChromeTooltip.tsx",
+              "symbol": "ChromeTooltip"
+            }
+          }
+        },
+        {
+          "insert": " — the shared dark hover-label used by every other component below."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-dock-icons-7": {
+      "id": "b-chrome-list-dock-icons-7",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "dock-icons.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/dock-icons.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — 13 icon components plus 2 zoom glyphs: inline SVG glyphs for the bottom dock and the zoom pill."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-figjamdock-8": {
+      "id": "b-chrome-list-figjamdock-8",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "FigJamDock.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
+              "symbol": "FigJamDock"
+            }
+          }
+        },
+        {
+          "insert": " — the white stadium bottom dock: 462x37px, 13 buttons across 5 whitespace groups."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-toolbar-icons-9": {
+      "id": "b-chrome-list-toolbar-icons-9",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "toolbar-icons.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/toolbar-icons.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — roughly 20 icon components: glyphs for "
+        },
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " controls."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-position-fn-10": {
+      "id": "b-chrome-list-position-fn-10",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "context-toolbar-position.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/context-toolbar-position.ts",
+              "symbol": "positionContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "positionContextToolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": a pure clamp-to-viewport positioning function."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-context-toolbar-11": {
+      "id": "b-chrome-list-context-toolbar-11",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ContextToolbar.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "ContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "CONTEXT_TOOLBAR_REGISTRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "CONTEXT_TOOLBAR_REGISTRY"
+            }
+          }
+        },
+        {
+          "insert": " — the dark floating pill whose control set is variant-driven."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-color-palette-12": {
+      "id": "b-chrome-list-color-palette-12",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ColorPalettePopover.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "symbol": "ColorPalettePopover"
+            }
+          }
+        },
+        {
+          "insert": " — a 2x11 swatch grid plus a rainbow-ring current-color swatch."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-shape-catalog-13": {
+      "id": "b-chrome-list-shape-catalog-13",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "shape-catalog.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/shape-catalog.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — shape catalog data and icon glyphs, intentionally a "
+        },
+        {
+          "insert": ".tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " file (not "
+        },
+        {
+          "insert": ".ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") because its entries embed inline JSX icon factories."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-shape-search-14": {
+      "id": "b-chrome-list-shape-search-14",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ShapeSearchPopover.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ShapeSearchPopover.tsx",
+              "symbol": "ShapeSearchPopover"
+            }
+          }
+        },
+        {
+          "insert": " — the compact dark \"search for a shape\" popover (Panel A), anchored above a selected object's shape-swap control."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-shapes-panel-15": {
+      "id": "b-chrome-list-shapes-panel-15",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ShapesPanel.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "symbol": "ShapesPanel"
+            }
+          }
+        },
+        {
+          "insert": " — the full-height left-docked white Shapes sidebar (Panel B), invoked from the bottom dock's shape-tool button."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-list-zoom-controls-16": {
+      "id": "b-chrome-list-zoom-controls-16",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "ZoomControls.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "symbol": "ZoomControls"
+            }
+          }
+        },
+        {
+          "insert": " — the bottom-right zoom pill."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-figjamdock-17": {
+      "id": "b-chrome-heading-figjamdock-17",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "FigJamDock"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-figjamdock-18": {
+      "id": "b-chrome-para-figjamdock-18",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "FigJamDock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
+              "symbol": "FigJamDock"
+            }
+          }
+        },
+        {
+          "insert": " renders bottom-centered; the component only sizes itself, exporting "
+        },
+        {
+          "insert": "FIGJAM_DOCK_WIDTH_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "HEIGHT_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "RADIUS_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for layout math. Its "
+        },
+        {
+          "insert": "activeTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop is "
+        },
+        {
+          "insert": "nullable by design",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — this is the dock spec's \"modal relinquishing\" rule (fj-053 onward): no dock button shows active/violet while the Shapes panel or another surface owns focus. The consuming editor must derive this prop from the current interaction mode, not from \"last tool used\"; the dock itself must never track sticky/last-selected state internally. Separately, "
+        },
+        {
+          "insert": "onSelectTool(tool)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fires for every button including "
+        },
+        {
+          "insert": "\"shapes\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", while "
+        },
+        {
+          "insert": "onOpenShapes()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fires in addition for that one button — a consumer may keep both effects or treat "
+        },
+        {
+          "insert": "onOpenShapes",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as the sole handler, since the component fires both. The "
+        },
+        {
+          "insert": "ToolId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " union intentionally excludes "
+        },
+        {
+          "insert": "\"overflow\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (handled instead by "
+        },
+        {
+          "insert": "onOpenOverflow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), since the \"+\" button is not a \"tool\" in the schema sense."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-context-toolbar-19": {
+      "id": "b-chrome-heading-context-toolbar-19",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "ContextToolbar"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-context-toolbar-20": {
+      "id": "b-chrome-para-context-toolbar-20",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "ContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "variant",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop must be derived by the consumer from the current selection: a single shape object maps to "
+        },
+        {
+          "insert": "\"shape\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a section type to "
+        },
+        {
+          "insert": "\"section\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a connection to "
+        },
+        {
+          "insert": "\"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", active text-edit (shape label, sticky body, or connector label) to "
+        },
+        {
+          "insert": "\"text\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a sticky to "
+        },
+        {
+          "insert": "\"sticky\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The toolbar is positioned via "
+        },
+        {
+          "insert": "positionContextToolbar(selectionRect, { width: measuredWidth, height: 29 }, viewportSize)",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/context-toolbar-position.ts",
+              "symbol": "positionContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": " — because the pill's real width depends on which variant (and therefore how many controls) is rendered, a consumer should measure the rendered pill via a ref and "
+        },
+        {
+          "insert": "getBoundingClientRect()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than hardcode a width. "
+        },
+        {
+          "insert": "onAction(actionId, value?)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a single callback for the whole toolbar; flyout controls (marked "
+        },
+        {
+          "insert": "hasFlyout: true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in the registry) currently only toggle local "
+        },
+        {
+          "insert": "aria-expanded",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " state and do not render flyout contents themselves — a consumer renders the appropriate flyout (reusing "
+        },
+        {
+          "insert": "ColorPalettePopover",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for any "
+        },
+        {
+          "insert": "\"color\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "\"tint\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " action) anchored below the clicked control. The connector's \"T\" add-text-label control is exported separately as "
+        },
+        {
+          "insert": "CONNECTOR_ADD_LABEL_ICON",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "CONNECTOR_ADD_LABEL_ICON"
+            }
+          }
+        },
+        {
+          "insert": ", since the connector's default 6-control set ("
+        },
+        {
+          "insert": "color/stroke/dash/routing/arrowhead/label-align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") already reaches the catalog's measured count of 6 without it."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-constraint-multi-variant-21": {
+      "id": "b-chrome-constraint-multi-variant-21",
+      "flavour": "constraint",
+      "props": {
+        "severity": "soft",
+        "title": "\"multi\" ContextToolbar variant is an unconfirmed extrapolation"
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "\"multi\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " variant of "
+        },
+        {
+          "insert": "ContextToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
+              "symbol": "ContextToolbar"
+            }
+          }
+        },
+        {
+          "insert": " (for a multi-select) is a flagged extrapolation: the source FigJam reference recording never actually captured a multi-select toolbar, so its control set was inferred rather than observed. Treat it as a placeholder. Anyone relying on its exact control set — which controls appear, in what order, with what behavior — should verify against the live FigJam product first, rather than assuming this component's current shape is authoritative."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-color-palette-22": {
+      "id": "b-chrome-heading-color-palette-22",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "ColorPalettePopover"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-color-palette-23": {
+      "id": "b-chrome-para-color-palette-23",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ColorPalettePopover",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "symbol": "ColorPalettePopover"
+            }
+          }
+        },
+        {
+          "insert": " anchors roughly 9px above the toolbar's color-swatch button (the gap is exported as "
+        },
+        {
+          "insert": "COLOR_PALETTE_ANCHOR_GAP_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") using "
+        },
+        {
+          "insert": "@floating-ui/react",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "useFloating",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "offset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "flip",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "shift",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the component does not self-position beyond that. "
+        },
+        {
+          "insert": "currentColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " drives the rainbow-ringed final swatch; "
+        },
+        {
+          "insert": "onPick",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fires the same for every swatch including that one. The underlying tokens file's "
+        },
+        {
+          "insert": "PALETTE_POPOVER_SWATCHES",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ships an 11+9 split, not the 11+11 the visual grid needs — "
+        },
+        {
+          "insert": "ColorPalettePopover",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pads row 2 up to 10 direct swatches (repeating from the front of row 1) before appending the rainbow-current swatch, purely to hit the catalog's exact 2x11=22 layout without editing the shared tokens file. If a future tokens re-sample adds real, distinct row-2 colors, the padding logic in this component should be removed."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-shapes-24": {
+      "id": "b-chrome-heading-shapes-24",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Shapes: search popover vs panel"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-shapes-25": {
+      "id": "b-chrome-para-shapes-25",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ShapeSearchPopover",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ShapeSearchPopover.tsx",
+              "symbol": "ShapeSearchPopover"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "ShapesPanel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "symbol": "ShapesPanel"
+            }
+          }
+        },
+        {
+          "insert": " are explicitly two different surfaces — do not conflate them. "
+        },
+        {
+          "insert": "ShapeSearchPopover",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (Panel A) is a compact dark \"search for a shape\" popover that anchors above a selected object's shape-swap control. "
+        },
+        {
+          "insert": "ShapesPanel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (Panel B) is a full-height, left-docked white sidebar invoked from the bottom dock's shape-tool button. Both are backed by the same "
+        },
+        {
+          "insert": "shape-catalog.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/shape-catalog.tsx"
+            }
+          }
+        },
+        {
+          "insert": " data. "
+        },
+        {
+          "insert": "ShapeCatalogObjectType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " covers both today's "
+        },
+        {
+          "insert": "schema.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " vocabulary ("
+        },
+        {
+          "insert": "container/process/decision/text/sticky/document/person/database/chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") and six W2-model types coordinated with the parallel schema work ("
+        },
+        {
+          "insert": "section/pill/arrow-shape/predefined-process/code-block/chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "EXISTING_SCHEMA_OBJECT_TYPES",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the single toggle gating which catalog entries render as enabled versus \"coming soon\" — once "
+        },
+        {
+          "insert": "schema.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lands those six types, updating that one set (or deriving it directly from "
+        },
+        {
+          "insert": "schema.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") lights up every currently-disabled entry in both popovers automatically. The \"Other libraries\" (AWS/Azure/Cisco) footer rows in "
+        },
+        {
+          "insert": "ShapesPanel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are intentionally static and non-interactive (\""
+        },
+        {
+          "insert": "aria-disabled=\"true\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "\", no "
+        },
+        {
+          "insert": "onClick",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "\") — they exist only for visual parity with the reference frames."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-zoom-26": {
+      "id": "b-chrome-heading-zoom-26",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "ZoomControls"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-zoom-27": {
+      "id": "b-chrome-para-zoom-27",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The FigJam source reference recording shows only \"-\"/\"+\" controls, with no percentage readout ever visible. "
+        },
+        {
+          "insert": "ZoomControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "symbol": "ZoomControls"
+            }
+          }
+        },
+        {
+          "insert": " supports an optional "
+        },
+        {
+          "insert": "zoomPercent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop anyway, since a task brief asked for one — a consumer aiming for strict frame-parity can omit the prop entirely, or wire it to the canvas viewport's current zoom otherwise. Suggested wrapper position is bottom-right, independent of "
+        },
+        {
+          "insert": "FigJamDock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s bottom-centering."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-testing-28": {
+      "id": "b-chrome-testing-28",
+      "flavour": "testing",
+      "props": {
+        "title": "Geometry-assertion tests, not visual screenshots"
+      },
+      "text": [
+        {
+          "insert": "Each chrome component has a focused jsdom test under "
+        },
+        {
+          "insert": "src/chrome/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/chrome/__tests__"
+            }
+          }
+        },
+        {
+          "insert": " that asserts measured geometry — stadium radius, background colors, button/control counts, group/divider DOM structure — as style and DOM assertions rather than visual screenshots. This follows from the same no-routes, standalone-component constraint that shaped the build: without a running editor or a rendered page to screenshot, tests instead pin down the concrete numbers and structure a pixel-matched component must produce (e.g. exact swatch counts, exact button groupings) so a regression shows up as a failing assertion rather than a diff someone has to eyeball. Run the suite with "
+        },
+        {
+          "insert": "bun test src/chrome",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the canvas package root."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-closing-29": {
+      "id": "b-chrome-closing-29",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For how the chrome layer is exercised and pixel-checked in an actual running environment — the Storybook-style studio harness and sample canvas data used to develop and review these components — see "
+        },
+        {
+          "insert": "canvas-70-studio-and-canvas JSON files",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/70-studio-and-canvas JSON files",
+              "label": "canvas-70-studio-and-canvas JSON files"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

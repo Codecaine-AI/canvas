@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { ZoomControls, ZOOM_CONTROLS_HEIGHT_PX } from "../ZoomControls";
+import { CHROME } from "../../render/figjam-tokens";
+import { ZoomControls, ZOOM_CONTROLS_HEIGHT_PX, ZOOM_CONTROLS_RADIUS_PX } from "../ZoomControls";
 
 afterEach(() => {
   cleanup();
@@ -11,9 +12,10 @@ describe("ZoomControls geometry", () => {
     const { container } = render(<ZoomControls />);
     const pill = container.querySelector("[data-zoom-controls]") as HTMLElement;
     expect(pill).toBeTruthy();
-    expect(pill.style.background).toBe("#FDFDFD");
+    expect(pill.style.background).toBe("#FFFFFF");
     expect(pill.style.height).toBe(`${ZOOM_CONTROLS_HEIGHT_PX}px`);
-    expect(parseFloat(pill.style.borderRadius)).toBe(ZOOM_CONTROLS_HEIGHT_PX / 2);
+    expect(parseFloat(pill.style.borderRadius)).toBe(ZOOM_CONTROLS_RADIUS_PX);
+    expect(pill.style.boxShadow).toBe(CHROME.dockShadow);
   });
 
   it("renders only - and + when zoomPercent is omitted (matches the observed frames with no % readout)", () => {

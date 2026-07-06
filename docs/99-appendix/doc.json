@@ -67,7 +67,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "00-overview",
+              "path": "10-system-design/00-overview",
               "label": "canvas-00-overview"
             }
           }
@@ -132,7 +132,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "30-routing",
+              "path": "20-implementation/30-routing",
               "label": "canvas-30-routing"
             }
           }
@@ -650,7 +650,7 @@
           }
         },
         {
-          "insert": " (\"figjam-w5: connection waypoints follow moved objects (rigid translate / asymmetric re-route)\"), on 2026-07-05. The engine, chrome components, fixtures, and test suite moved from "
+          "insert": " (\"figjam-w5: connection waypoints follow moved objects (rigid translate / asymmetric re-route)\"), on 2026-07-05. The engine, chrome components, canvas JSON files, and test suite moved from "
         },
         {
           "insert": "apps/frontend/src/lib/interactive-canvas/**",
@@ -875,7 +875,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "60-chrome",
+              "path": "20-implementation/60-chrome",
               "label": "canvas-60-chrome"
             }
           }
@@ -953,7 +953,7 @@
           "insert": ", "
         },
         {
-          "insert": "fixtures/",
+          "insert": "canvases/",
           "attributes": {
             "code": true
           }
@@ -1079,7 +1079,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "60-chrome",
+              "path": "20-implementation/60-chrome",
               "label": "canvas-60-chrome"
             }
           }
@@ -1104,7 +1104,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "00-overview",
+              "path": "10-system-design/00-overview",
               "label": "canvas-00-overview"
             }
           }
@@ -1128,7 +1128,7 @@
           }
         },
         {
-          "insert": " engine — start back at the overview for the map of how model, interaction, routing, render, editor, chrome, and studio/fixtures fit together."
+          "insert": " engine — start back at the overview for the map of how model, interaction, routing, render, editor, chrome, and studio/canvas JSON files fit together."
         }
       ],
       "children": []

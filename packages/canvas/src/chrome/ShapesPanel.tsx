@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { isShapeEntryEnabled, OTHER_LIBRARIES, SHAPE_CATALOG, type ShapeCatalogEntry } from "./shape-catalog";
 import { ChromeTooltip } from "./ChromeTooltip";
 
@@ -84,6 +84,7 @@ function ShapeGridButton({
   const [hovered, setHovered] = useState(false);
   const enabled = isShapeEntryEnabled(entry);
   const Icon = entry.icon;
+  const clearHover = () => setHovered(false);
 
   return (
     <div style={{ position: "relative", display: "inline-flex" }}>
@@ -93,9 +94,14 @@ function ShapeGridButton({
         data-object-type={entry.objectType}
         aria-label={enabled ? entry.label : `${entry.label} (coming soon)`}
         disabled={!enabled}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onClick={() => enabled && onPick?.(entry.objectType)}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={clearHover}
+        onPointerCancel={clearHover}
+        onBlur={clearHover}
+        onClick={() => {
+          clearHover();
+          if (enabled) onPick?.(entry.objectType);
+        }}
         style={{
           width: 36,
           height: 36,
@@ -116,7 +122,7 @@ function ShapeGridButton({
   );
 }
 
-export function ShapesPanel({ onPick, onClose, className, style }: ShapesPanelProps) {
+function ShapesPanelComponent({ onPick, onClose, className, style }: ShapesPanelProps) {
   const [query, setQuery] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const [focused, setFocused] = useState(false);
@@ -253,5 +259,7 @@ export function ShapesPanel({ onPick, onClose, className, style }: ShapesPanelPr
     </div>
   );
 }
+
+export const ShapesPanel = memo(ShapesPanelComponent);
 
 export const SHAPES_PANEL_WIDTH_PX = PANEL_WIDTH_PX;

@@ -14,7 +14,3 @@ export * from "./model/spectre-ref";
 export * from "./render/theme";
 export * from "./editor/use-canvas-viewport";
 export * from "./editor/viewport";
-export * from "./fixtures/synthetic-canvas";
-export * from "./fixtures/v2-flow-canvas";
-export * from "./fixtures/v2-flow-elements";
-export * from "./fixtures/v2-flow-figjam";

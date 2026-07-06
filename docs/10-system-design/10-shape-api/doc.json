@@ -1,0 +1,2492 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-10-shape-api",
+  "title": "Shape API Structure",
+  "root": "b-shape-api-root",
+  "blocks": {
+    "b-shape-api-root": {
+      "id": "b-shape-api-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "The four-facet contract every canvas shape satisfies — geometry, style, text slot, connection anchors — and what a future custom-shape API would need to implement to add a new one.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "InteractiveCanvasObjectType",
+          "CanvasGeometry",
+          "resolveObjectColors",
+          "outlinePolygon",
+          "resolveConnectionCascade"
+        ]
+      },
+      "children": [
+        "b-shape-api-heading-title-1",
+        "b-shape-api-p-intro-1-2",
+        "b-shape-api-p-intro-2-3",
+        "b-shape-api-p-intro-3-4",
+        "b-shape-api-heading-anatomy-5",
+        "b-shape-api-p-anatomy-intro-6",
+        "b-shape-api-heading-geometry-7",
+        "b-shape-api-p-geometry-p1-8",
+        "b-shape-api-heading-style-9",
+        "b-shape-api-p-style-p1-10",
+        "b-shape-api-p-style-p2-11",
+        "b-shape-api-p-style-p3-12",
+        "b-shape-api-heading-text-13",
+        "b-shape-api-p-text-p1-14",
+        "b-shape-api-p-text-p2-15",
+        "b-shape-api-p-text-p3-16",
+        "b-shape-api-p-text-p4-17",
+        "b-shape-api-heading-connections-18",
+        "b-shape-api-p-connections-p1-19",
+        "b-shape-api-p-connections-p2-20",
+        "b-shape-api-p-connections-p3-21",
+        "b-shape-api-p-connections-p4-22",
+        "b-shape-api-heading-contract-23",
+        "b-shape-api-p-contract-intro-24",
+        "b-shape-api-li-contract-a-25",
+        "b-shape-api-li-contract-b-26",
+        "b-shape-api-li-contract-c-27",
+        "b-shape-api-li-contract-d-28",
+        "b-shape-api-li-contract-e-29",
+        "b-shape-api-li-contract-f-30",
+        "b-shape-api-li-contract-g-31",
+        "b-shape-api-decision-true-outline-32",
+        "b-shape-api-constraint-closed-vocabulary-33",
+        "b-shape-api-p-closing-1-34"
+      ]
+    },
+    "b-shape-api-heading-title-1": {
+      "children": [],
+      "id": "b-shape-api-heading-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Shape API Structure"
+        }
+      ]
+    },
+    "b-shape-api-p-intro-1-2": {
+      "children": [],
+      "id": "b-shape-api-p-intro-1-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A "
+        },
+        {
+          "insert": "shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in this engine is not a drawing primitive — it is a typed, agent-editable JSON record: a member of the closed "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " union, carrying axis-aligned geometry, a style surface, a text slot, and a set of connection anchors that other code (routing, rendering, validation) derives mechanically from those fields. There is no freeform vector path, no per-instance transform matrix, and no plugin-registered shape class — a shape is exactly what its object record says it is, and nothing else is allowed to read or write canvas state around it (every mutation flows through the single reducer documented in "
+        },
+        {
+          "insert": "canvas-10-model",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/10-model",
+              "label": "canvas-10-model"
+            }
+          }
+        },
+        {
+          "insert": "). That closedness is deliberate: an agent (or a human) constructing or editing a shape only ever needs to produce valid JSON matching this schema, never to author code."
+        }
+      ]
+    },
+    "b-shape-api-p-intro-2-3": {
+      "children": [],
+      "id": "b-shape-api-p-intro-2-3",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Figma/FigJam's own plugin API models the same problem differently, and the contrast is instructive. A FigJam shape is a "
+        },
+        {
+          "insert": "ShapeWithTextNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " whose "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is drawn from a closed 31-value enum (SQUARE, ELLIPSE, ROUNDED_RECTANGLE, DIAMOND, TRIANGLE_UP/DOWN, PARALLELOGRAM_RIGHT/LEFT, the ENG_* engineering shapes, PREDEFINED_PROCESS, HEXAGON, STAR, SPEECH_BUBBLE, and so on) — not user-extensible; there is no plugin-API call that registers a 32nd "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Text lives on the node as a dedicated, non-resizable sublayer ("
+        },
+        {
+          "insert": "TextSublayerNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") whose box is fully derived from the parent shape's bounds — you cannot reposition or resize the text independently of the shape. Connectors attach via a "
+        },
+        {
+          "insert": "magnet",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enum with seven values — "
+        },
+        {
+          "insert": "NONE, AUTO, TOP, BOTTOM, LEFT, RIGHT, CENTER",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — resolved by Figma's own (undocumented) geometry against each node. Fills and strokes are arrays of "
+        },
+        {
+          "insert": "Paint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values (solid/gradient/image/pattern/shader) with a separate "
+        },
+        {
+          "insert": "dashPattern",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " numeric array for dash/gap lengths, even though FigJam's own shape toolbar UI only exposes a color picker and a solid/dashed toggle over that richer model. And critically: Figma's documented extension path for a genuinely new shape-like object is not the Plugin API's shape enum at all — it's the separate Widgets API, a different persistent-object system built from ordinary layers. There is no supported way to add a 32nd "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "ShapeWithTextNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-shape-api-p-intro-3-4": {
+      "children": [],
+      "id": "b-shape-api-p-intro-3-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This engine takes the narrower, more literal version of that idea: the vocabulary is a TypeScript union validated by a hand-written schema, the document is plain JSON an agent can read and write directly, and \"extending the shape vocabulary\" means adding a value to that union plus the handful of functions described below — not authoring a plugin, a widget, or an SVG path in isolation. The rest of this document specs out exactly what those functions are, so a future custom-shape API has a precise contract to implement against."
+        }
+      ]
+    },
+    "b-shape-api-heading-anatomy-5": {
+      "children": [],
+      "id": "b-shape-api-heading-anatomy-5",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Anatomy of a shape"
+        }
+      ]
+    },
+    "b-shape-api-p-anatomy-intro-6": {
+      "children": [],
+      "id": "b-shape-api-p-anatomy-intro-6",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every canvas object — regardless of "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " — is built from the same four facets: geometry, a fill/stroke/border-style surface, a text slot, and a set of connection points. A new shape is defined by how it answers each of these four questions, not by inventing a fifth axis."
+        }
+      ]
+    },
+    "b-shape-api-heading-geometry-7": {
+      "children": [],
+      "id": "b-shape-api-heading-geometry-7",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Geometry"
+        }
+      ]
+    },
+    "b-shape-api-p-geometry-p1-8": {
+      "children": [],
+      "id": "b-shape-api-p-geometry-p1-8",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every object's "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasGeometry"
+            }
+          }
+        },
+        {
+          "insert": " is exactly four numbers: "
+        },
+        {
+          "insert": "{ x, y, width, height }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a world-space, axis-aligned bounding box. There is no rotation field anywhere in the schema: not on "
+        },
+        {
+          "insert": "CanvasGeometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasGeometry"
+            }
+          }
+        },
+        {
+          "insert": ", not on "
+        },
+        {
+          "insert": "CanvasObjectStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasObjectStyle"
+            }
+          }
+        },
+        {
+          "insert": ", not anywhere else in the object record. This is a deliberate, explicit contrast with Figma's "
+        },
+        {
+          "insert": "ShapeWithTextNode.rotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a writable degrees value, pivoting around the node's top-left corner) and "
+        },
+        {
+          "insert": "ConnectorNode.rotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The "
+        },
+        {
+          "insert": "connection-overlay.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts"
+            }
+          }
+        },
+        {
+          "insert": " header comment states this plainly: the anchor/outline algorithm ported from BlockSuite deliberately drops \"no rotation (this repo's schema has no per-object rotation field, unlike BlockSuite's "
+        },
+        {
+          "insert": "ele.rotate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") — anchors are computed directly against each object's axis-aligned bounds/outline.\" Every downstream computation — outline polygons, connection anchors, obstacle bounds for routing, hit-testing — assumes the bounding box is axis-aligned. A shape that needed rotation would require a new schema field plus new geometry math through every one of those consumers; nothing in the current model treats rotation as a future toggle on the existing fields."
+        }
+      ]
+    },
+    "b-shape-api-heading-style-9": {
+      "children": [],
+      "id": "b-shape-api-heading-style-9",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Fill, stroke, and border style"
+        }
+      ]
+    },
+    "b-shape-api-p-style-p1-10": {
+      "children": [],
+      "id": "b-shape-api-p-style-p1-10",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The style surface lives on "
+        },
+        {
+          "insert": "CanvasObjectStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasObjectStyle"
+            }
+          }
+        },
+        {
+          "insert": " and resolves through a fixed-precedence cascade implemented by "
+        },
+        {
+          "insert": "resolveObjectColors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveObjectColors"
+            }
+          }
+        },
+        {
+          "insert": ": an explicit "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " always wins when set; failing that, a sticky note ("
+        },
+        {
+          "insert": "style.shape === \"note\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") with a "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " resolves to an exact FigJam hex from "
+        },
+        {
+          "insert": "STICKY_COLORS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than a washed-out mix; failing that, "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a coarse color-as-meaning preset — process=blue, input=green, hot=orange/red, memory=purple, note=yellow) wins over "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; failing that, "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the base semantic bucket: neutral, input, process, decision, memory, agent, warning, annotation) resolves via a theme-mix table; and with nothing set at all, the neutral tone is the fallback. "
+        },
+        {
+          "insert": "resolveObjectStrokeWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a separate, parallel cascade: an explicit "
+        },
+        {
+          "insert": "style.strokeWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wins; otherwise, if "
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is set at all, the width is "
+        },
+        {
+          "insert": "SHAPE_STROKE_WIDTH_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "SHAPE_STROKE_WIDTH_PX"
+            }
+          }
+        },
+        {
+          "insert": " (FigJam's universal shape stroke, 4 logical px); otherwise it's the legacy 2px chrome border used by tone-only objects. "
+        },
+        {
+          "insert": "style.strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (solid | dashed | none) selects the border's line style."
+        }
+      ]
+    },
+    "b-shape-api-p-style-p2-11": {
+      "children": [],
+      "id": "b-shape-api-p-style-p2-11",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This style surface landed first for sections specifically — "
+        },
+        {
+          "insert": "strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " was originally a section-only field, and its type is still literally named "
+        },
+        {
+          "insert": "CanvasSectionStrokeStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasSectionStrokeStyle"
+            }
+          }
+        },
+        {
+          "insert": " in schema.ts. But the mechanism it expresses — explicit fill/stroke/width/style overriding a semantic default — is general: any object type can set "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "style.strokeWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "style.strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a new shape type participates in this cascade automatically just by having a "
+        },
+        {
+          "insert": "style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object at all — no per-type plumbing is required to opt in. The intended fill/stroke vocabulary for explicit colors is FigJam's own pastel pair palette ("
+        },
+        {
+          "insert": "PASTEL_PAIRS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "PASTEL_PAIRS"
+            }
+          }
+        },
+        {
+          "insert": "), each entry a matched fill+stroke hex pair (e.g. blue "
+        },
+        {
+          "insert": "#C2E5FF / #3DADFF",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), though "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " accept any CSS color string, not just those pairs."
+        }
+      ]
+    },
+    "b-shape-api-p-style-p3-12": {
+      "children": [],
+      "id": "b-shape-api-p-style-p3-12",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Compare to FigJam's own surface: the plugin API's "
+        },
+        {
+          "insert": "MinimalFillsMixin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "MinimalStrokesMixin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " expose full "
+        },
+        {
+          "insert": "Paint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " arrays (solid, gradient, image, video, pattern, shader) plus "
+        },
+        {
+          "insert": "strokeWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "strokeJoin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "strokeAlign",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and an arbitrary numeric "
+        },
+        {
+          "insert": "dashPattern",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " array — yet FigJam's actual shape-toolbar UI only exposes a color picker (fill color/opacity) and a binary solid-vs-dashed toggle over that richer model. Our "
+        },
+        {
+          "insert": "strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (solid | dashed | none) matches that same UI-facing surface almost exactly — deliberately a thinner mechanism than Figma's full Paint model, matching what the product actually exposes rather than what the underlying API could theoretically support."
+        }
+      ]
+    },
+    "b-shape-api-heading-text-13": {
+      "children": [],
+      "id": "b-shape-api-heading-text-13",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Text slot"
+        }
+      ]
+    },
+    "b-shape-api-p-text-p1-14": {
+      "children": [],
+      "id": "b-shape-api-p-text-p1-14",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every object carries a required "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and an optional "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", but where and how those render is a per-shape-family placement rule implemented in "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " — not a single universal layout. The base case (plain rounded-rect: "
+        },
+        {
+          "insert": "container",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "source-node",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and any type without a dedicated visual shape) stacks label above body, "
+        },
+        {
+          "insert": "align-items: flex-start",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "justify-content: center",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — left-aligned text, vertically centered in the box. Shapes with "
+        },
+        {
+          "insert": "style.shape === \"diamond\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "decision",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "pill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " override this to true horizontal+vertical centering ("
+        },
+        {
+          "insert": "align-items: center; text-align: center",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Arrow-shape additionally offsets the label away from the chevron head, so text centers within the body region rather than the full bounding box (the head carries no text, matching FigJam)."
+        }
+      ]
+    },
+    "b-shape-api-p-text-p2-15": {
+      "children": [],
+      "id": "b-shape-api-p-text-p2-15",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A second family renders an icon silhouette via "
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ShapeSilhouette"
+            }
+          }
+        },
+        {
+          "insert": " and places the label below the icon rather than centered on top of it: "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " all set "
+        },
+        {
+          "insert": "labelBelowIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", pin the label near the bottom of the box ("
+        },
+        {
+          "insert": "justify-content: flex-end",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and suppress body text entirely so the silhouette stays legible. "
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " also renders via "
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " but is NOT in that below-icon family — its label/body render through the ordinary centered path, nudged down with top padding to clear the cylinder's top ellipse."
+        }
+      ]
+    },
+    "b-shape-api-p-text-p3-16": {
+      "children": [],
+      "id": "b-shape-api-p-text-p3-16",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The remaining shapes carry dedicated, special-purpose text slots. "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " has no centered label at all: its visible title comes from a separate "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field ("
+        },
+        {
+          "insert": "object.title ?? object.label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), rendered in a floating, absolutely-positioned title chip pinned to the section's top-left corner — per "
+        },
+        {
+          "insert": "SECTION_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "SECTION_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": ", not flowed inside the section body. "
+        },
+        {
+          "insert": "sticky",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " splits its "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " into lines with bullet handling (a line starting "
+        },
+        {
+          "insert": "\"- \"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renders as a bullet) in a dedicated sticky-body slot, and renders an optional "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field in its own absolutely-positioned bottom-left chip, entirely independent of the label/body flow — the schema comment on "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": " notes it renders bottom-left at 12px / 40% black. "
+        },
+        {
+          "insert": "code-block",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renders its "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as tokenized, line-numbered code (via a minimal tokenizer keyed on "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") and explicitly suppresses the generic label span altogether — FigJam code blocks carry no label chrome, body-as-code is the entire content."
+        }
+      ]
+    },
+    "b-shape-api-p-text-p4-17": {
+      "children": [],
+      "id": "b-shape-api-p-text-p4-17",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This mirrors Figma's own structural choice at one level and diverges at another: FigJam's "
+        },
+        {
+          "insert": "TextSublayerNode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is likewise \"owned\" by its parent shape rather than an independent resizable node — you cannot move or resize the text box separately from the shape, exactly as our label/body spans have no independent geometry of their own. Where we diverge is granularity: Figma exposes exactly one text sublayer per shape node (with per-character-range styling inside it), while this engine gives each shape family its own placement rule and, for section/sticky/code-block, entirely separate named slots (title, author, code body) rather than one generic text box reused everywhere."
+        }
+      ]
+    },
+    "b-shape-api-heading-connections-18": {
+      "children": [],
+      "id": "b-shape-api-heading-connections-18",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Connection points"
+        }
+      ]
+    },
+    "b-shape-api-p-connections-p1-19": {
+      "children": [],
+      "id": "b-shape-api-p-connections-p1-19",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every object exposes exactly four connection anchors — "
+        },
+        {
+          "insert": "top, right, bottom, left",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — computed by "
+        },
+        {
+          "insert": "getConnectionAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "getConnectionAnchors"
+            }
+          }
+        },
+        {
+          "insert": ": four cardinal candidate points offset "
+        },
+        {
+          "insert": "ANCHOR_OFFSET_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "ANCHOR_OFFSET_PX"
+            }
+          }
+        },
+        {
+          "insert": " (10 world px) outside the object's bounds, each projected inward onto the object's real outline — the point where a line from the object's center to that candidate actually crosses the shape's border. Where an object's outline is a simple analytic polygon this engine already models, the projection uses the "
+        },
+        {
+          "insert": "true outline",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": rect/rounded-rect, "
+        },
+        {
+          "insert": "pill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (stadium, approximated as a 16-segment polygon via "
+        },
+        {
+          "insert": "outlinePolygon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "outlinePolygon"
+            }
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "diamond",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a 4-point polygon at the bounds' top/right/bottom/left midpoints), and "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the true 7-point chevron silhouette, built from "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s headWidthRatio via "
+        },
+        {
+          "insert": "arrowShapePoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "arrowShapePoints"
+            }
+          }
+        },
+        {
+          "insert": "). Every other object type — icons ("
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "sticky",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "code-block",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — falls back to its plain axis-aligned bounding-box outline. This is documented in the module header as the same conservative fallback BlockSuite itself uses for diamond/ellipse/triangle shapes, not a gap unique to this engine."
+        }
+      ]
+    },
+    "b-shape-api-p-connections-p2-20": {
+      "children": [],
+      "id": "b-shape-api-p-connections-p2-20",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A connection endpoint ("
+        },
+        {
+          "insert": "CanvasConnectionEndpoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasConnectionEndpoint"
+            }
+          }
+        },
+        {
+          "insert": ") stores an "
+        },
+        {
+          "insert": "objectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus two optional, independently-meaningful fields: a coarse "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "\"top\" | \"right\" | \"bottom\" | \"left\" | \"center\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — and a precise "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": a "
+        },
+        {
+          "insert": "[0..1, 0..1]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fractional coordinate over the object's own (width, height), with "
+        },
+        {
+          "insert": "[0, 0]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at the top-left. When "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is present, routing uses it directly as the more precise anchor; when absent, routing falls back to "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or an auto-picked side."
+        }
+      ]
+    },
+    "b-shape-api-p-connections-p3-21": {
+      "children": [],
+      "id": "b-shape-api-p-connections-p3-21",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Which of these an interactive drag actually produces is decided by "
+        },
+        {
+          "insert": "resolveConnectionCascade",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "resolveConnectionCascade"
+            }
+          }
+        },
+        {
+          "insert": ", a five-step decision cascade ported from BlockSuite's "
+        },
+        {
+          "insert": "ConnectionOverlay.renderConnector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": (1) only objects whose bounds, expanded by "
+        },
+        {
+          "insert": "HOVER_HIT_EXPAND_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "HOVER_HIT_EXPAND_PX"
+            }
+          }
+        },
+        {
+          "insert": " (10 world px), contain the pointer are even considered; (2) among those, snap to the nearest of the 4 cardinal anchors if its "
+        },
+        {
+          "insert": "SCREEN",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " distance is under "
+        },
+        {
+          "insert": "ANCHOR_SNAP_VIEW_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "ANCHOR_SNAP_VIEW_PX"
+            }
+          }
+        },
+        {
+          "insert": " (8 view px, converted to world px by dividing by zoom) — this produces an "
+        },
+        {
+          "insert": "{ kind: \"anchor\" }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " result carrying both the coarse "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " side and the precise "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; (3) else snap to the nearest outline point if its "
+        },
+        {
+          "insert": "WORLD",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " distance is under "
+        },
+        {
+          "insert": "OUTLINE_SNAP_WORLD_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "OUTLINE_SNAP_WORLD_PX"
+            }
+          }
+        },
+        {
+          "insert": " (8 world px) — an "
+        },
+        {
+          "insert": "{ kind: \"outline\" }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " result with just a precise "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", no named "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; (4) else, if the pointer is inside the shape's outline polygon, connect to "
+        },
+        {
+          "insert": "{ kind: \"inside\" }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (id only — no explicit position, resolved to center at render time); (5) else the candidate doesn't win and the loop continues. If nothing wins at all, the result is "
+        },
+        {
+          "insert": "{ kind: \"free\", point }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a connector endpoint floating on empty canvas, unattached to any object."
+        }
+      ]
+    },
+    "b-shape-api-p-connections-p4-22": {
+      "children": [],
+      "id": "b-shape-api-p-connections-p4-22",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Contrast with FigJam's magnet model: our "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is structurally the closest analogue to Figma's "
+        },
+        {
+          "insert": "ConnectorEndpointPositionAndEndpointNodeId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "{ endpointNodeId, position }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — an attached endpoint at an explicit local point), and our "
+        },
+        {
+          "insert": "anchor: \"center\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the direct match for Figma's "
+        },
+        {
+          "insert": "CENTER",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " magnet. But this engine has no equivalent of Figma's "
+        },
+        {
+          "insert": "NONE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "AUTO",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " magnet values as endpoint-stored state — there is no \"unattached but tracking a node\" or \"let the renderer pick a side\" flag on the endpoint record itself. The closest analogue to "
+        },
+        {
+          "insert": "AUTO",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lives one layer up, in routing rather than the endpoint schema: when an endpoint has neither "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " nor "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the routing layer picks a side automatically at render/route time, rather than that choice being persisted as an explicit "
+        },
+        {
+          "insert": "\"AUTO\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value on the endpoint. Figma's magnet is a closed 7-value enum resolved by an internal, largely undocumented geometry function; this engine's cascade is fully specified above, in this repository, in the open."
+        }
+      ]
+    },
+    "b-shape-api-heading-contract-23": {
+      "children": [],
+      "id": "b-shape-api-heading-contract-23",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The shape definition contract"
+        }
+      ]
+    },
+    "b-shape-api-p-contract-intro-24": {
+      "children": [],
+      "id": "b-shape-api-p-contract-intro-24",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Distilling the four facets above into what actually has to exist for a new shape type to work end-to-end — this is the spec a future custom-shape API would need to implement against, whether that API is internal (a new value added to this repo's union) or externally pluggable:"
+        }
+      ]
+    },
+    "b-shape-api-li-contract-a-25": {
+      "children": [],
+      "id": "b-shape-api-li-contract-a-25",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A type name in the vocabulary"
+        },
+        {
+          "insert": " — a new literal added to "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", plus the corresponding branch in the "
+        },
+        {
+          "insert": "isCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "isCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " type guard schema.ts uses to validate incoming documents."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-b-26": {
+      "children": [],
+      "id": "b-shape-api-li-contract-b-26",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Default geometry"
+        },
+        {
+          "insert": " — a "
+        },
+        {
+          "insert": "width",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "height",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (and placement "
+        },
+        {
+          "insert": "x",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "y",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") entry in "
+        },
+        {
+          "insert": "defaultGeometryFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", so "
+        },
+        {
+          "insert": "canvas.addObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " has a sane creation-time size without the caller specifying one."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-c-27": {
+      "children": [],
+      "id": "b-shape-api-li-contract-c-27",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "An outline function"
+        },
+        {
+          "insert": " — either a genuine analytic polygon (add a branch to "
+        },
+        {
+          "insert": "outlineShapeFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "outlineShapeFor"
+            }
+          }
+        },
+        {
+          "insert": " and a point-generating function alongside "
+        },
+        {
+          "insert": "diamondPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "diamondPoints"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "pillPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "pillPoints"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "arrowShapePoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "arrowShapePoints"
+            }
+          }
+        },
+        {
+          "insert": "), or an explicit acceptance of the bbox fallback ("
+        },
+        {
+          "insert": "rectPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "rectPoints"
+            }
+          }
+        },
+        {
+          "insert": "). This single function is what feeds both the four connection anchors and the obstacle bounds A* routing avoids — there is no separate obstacle-shape concept to define."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-d-28": {
+      "children": [],
+      "id": "b-shape-api-li-contract-d-28",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A text-slot placement rule"
+        },
+        {
+          "insert": " — where "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " render relative to the shape's box: centered, top-left/base-flow, below-icon, or a dedicated named slot (title chip, author chip, code body). This is a CSS/JSX decision inside "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": ", not a schema field — the schema only guarantees "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exist; placement is the render layer's responsibility per shape family."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-e-29": {
+      "children": [],
+      "id": "b-shape-api-li-contract-e-29",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Style-surface participation"
+        },
+        {
+          "insert": " — nothing to implement, strictly speaking: any object with a "
+        },
+        {
+          "insert": "style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object automatically participates in the fill/stroke/strokeWidth/strokeStyle cascade via "
+        },
+        {
+          "insert": "resolveObjectColors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/theme.ts",
+              "symbol": "resolveObjectColors"
+            }
+          }
+        },
+        {
+          "insert": ". A new shape only needs to decide its default "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a branch in "
+        },
+        {
+          "insert": "toneForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "toneForType"
+            }
+          }
+        },
+        {
+          "insert": ") and default "
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value (a branch in "
+        },
+        {
+          "insert": "shapeForType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "shapeForType"
+            }
+          }
+        },
+        {
+          "insert": ") — everything past that point is the shared cascade, not new code."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-f-30": {
+      "children": [],
+      "id": "b-shape-api-li-contract-f-30",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Optional per-type fields"
+        },
+        {
+          "insert": " — a shape family with genuinely distinct data (chevron "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", code-block "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", sticky "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", section "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") adds an optional field to "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": " and a validation branch inside "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " keyed on the new type — hard-validated (like section's "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") if the object can't render sensibly without it, or soft-defaulted (like arrow-shape's "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", defaulting to \"right\") otherwise."
+        }
+      ]
+    },
+    "b-shape-api-li-contract-g-31": {
+      "children": [],
+      "id": "b-shape-api-li-contract-g-31",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A render function"
+        },
+        {
+          "insert": " — the actual JSX/SVG in "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " that paints the shape's chrome, silhouette, and text slot together. This is the one facet with no shortcut: every shape ultimately needs paint code, whether that's a CSS clip-path ("
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s folded-corner "
+        },
+        {
+          "insert": "clip-path: polygon(...)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), an inline SVG silhouette ("
+        },
+        {
+          "insert": "ShapeSilhouette",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "ShapeSilhouette"
+            }
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "chip-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), or a full custom component ("
+        },
+        {
+          "insert": "SectionShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "SectionShape"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-shape-api-decision-true-outline-32": {
+      "children": [],
+      "id": "b-shape-api-decision-true-outline-32",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Anchors resolve against the true outline where one exists, bbox otherwise"
+      },
+      "text": [
+        {
+          "insert": "Connection anchors and outline-snap points are computed against each object's real silhouette for the four shapes whose outline is a simple analytic polygon this engine already models — rect/rounded-rect, pill, diamond, arrow-shape — and against the plain axis-aligned bounding box for every other type (icons, sticky, section, code-block, predefined-process, and any future shape that doesn't add a case to "
+        },
+        {
+          "insert": "outlineShapeFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "outlineShapeFor"
+            }
+          }
+        },
+        {
+          "insert": "). This mirrors BlockSuite's own upstream fallback for diamond/ellipse/triangle (per the FIXME cited in the connection-overlay.ts header) — it's an intentional, documented conservative default, not a shortcut taken under time pressure. A new shape type is free to skip adding a true-outline case entirely and simply accept bbox-based anchors; doing so costs some anchor precision on irregular silhouettes (e.g. an anchor landing outside a chevron's notch) but nothing else — bbox-fallback shapes render and connect correctly today."
+        }
+      ]
+    },
+    "b-shape-api-constraint-closed-vocabulary-33": {
+      "children": [],
+      "id": "b-shape-api-constraint-closed-vocabulary-33",
+      "flavour": "constraint",
+      "props": {
+        "title": "Shape vocabulary is closed and typed, not freeform SVG",
+        "severity": "hard"
+      },
+      "text": [
+        {
+          "insert": "Extending the shape vocabulary means adding a value to "
+        },
+        {
+          "insert": "InteractiveCanvasObjectType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " and touching the fixed set of call sites above — schema validation, default geometry/tone/style-shape factories, optionally an outline function, a render function, and this documentation — not authoring an arbitrary SVG path or a runtime-registered shape class. There is no plugin-style registration API, no user-supplied path string field, and no mechanism for a canvas document itself to define a shape the engine doesn't already know how to validate and render. This is the same tradeoff Figma's own Plugin API makes for its "
+        },
+        {
+          "insert": "shapeType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enum (31 closed values, no plugin-time registration) — the difference is that Figma's genuine extension point for new shape-like objects is a wholly separate system (the Widgets API), whereas this engine has no equivalent second system: every shape lives in the one typed union, full stop."
+        }
+      ]
+    },
+    "b-shape-api-p-closing-1-34": {
+      "children": [],
+      "id": "b-shape-api-p-closing-1-34",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For the full enumeration of all 17 shape types with their concrete geometry/tone/style-shape defaults and any per-type quirks, see "
+        },
+        {
+          "insert": "canvas-20-implementation-80-shape-reference",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/80-shape-reference",
+              "label": "canvas-20-implementation-80-shape-reference"
+            }
+          }
+        },
+        {
+          "insert": ". For how this engine's shape set and stroke/fill surface map onto FigJam's own 59-shape picker and connector model end to end, see "
+        },
+        {
+          "insert": "canvas-10-system-design-20-figjam-parity",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-figjam-parity",
+              "label": "canvas-10-system-design-20-figjam-parity"
+            }
+          }
+        },
+        {
+          "insert": ". For the schema and reducer these shapes are validated and mutated through, see "
+        },
+        {
+          "insert": "canvas-10-model",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/10-model",
+              "label": "canvas-10-model"
+            }
+          }
+        },
+        {
+          "insert": ". For the full A*/anchor routing pipeline that consumes the outline/anchor contract described above, see "
+        },
+        {
+          "insert": "canvas-30-routing",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/30-routing",
+              "label": "canvas-30-routing"
+            }
+          }
+        },
+        {
+          "insert": ". And for the product-level motivation behind an agent-editable, typed canvas in the first place, see "
+        },
+        {
+          "insert": "canvas-00-foundation-00-overview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "00-foundation/00-overview",
+              "label": "canvas-00-foundation-00-overview"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    }
+  }
+}

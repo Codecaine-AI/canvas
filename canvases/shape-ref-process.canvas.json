@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "shape-ref-process",
+  "title": "Process — anchors & text slot",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 582,
+    "height": 494
+  },
+  "objects": [
+    {
+      "id": "subject-process",
+      "type": "process",
+      "label": "Process",
+      "geometry": {
+        "x": 160,
+        "y": 160,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "marker-process-top",
+      "type": "text",
+      "label": "top",
+      "geometry": {
+        "x": 220,
+        "y": 57,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-process-right",
+      "type": "text",
+      "label": "right",
+      "geometry": {
+        "x": 419,
+        "y": 194,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-process-bottom",
+      "type": "text",
+      "label": "bottom",
+      "geometry": {
+        "x": 220,
+        "y": 331,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "marker-process-left",
+      "type": "text",
+      "label": "left",
+      "geometry": {
+        "x": 21,
+        "y": 194,
+        "width": 64,
+        "height": 28
+      }
+    },
+    {
+      "id": "note-process",
+      "type": "text",
+      "label": "label renders centered",
+      "geometry": {
+        "x": 120,
+        "y": 399,
+        "width": 264,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-process-top",
+      "from": {
+        "objectId": "marker-process-top",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-process",
+        "anchor": "top",
+        "position": [
+          0.5,
+          0
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-process-right",
+      "from": {
+        "objectId": "marker-process-right",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-process",
+        "anchor": "right",
+        "position": [
+          1,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-process-bottom",
+      "from": {
+        "objectId": "marker-process-bottom",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-process",
+        "anchor": "bottom",
+        "position": [
+          0.5,
+          1
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-process-left",
+      "from": {
+        "objectId": "marker-process-left",
+        "anchor": "center"
+      },
+      "to": {
+        "objectId": "subject-process",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "links": [],
+  "annotations": []
+}

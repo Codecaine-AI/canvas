@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements.canvas.json";
 import {
   IDLE_INTERACTION_STATE,
   cancelInteraction,
@@ -11,13 +12,15 @@ import { sectionCaptureMembers } from "../geometry";
 import { renderOrderedObjects } from "../../render/CanvasStage";
 import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../../render/figjam-tokens";
 import { tokenizeCodeBlock, tokenizeCodeLine } from "../../render/code-tokenizer";
-import { v2FlowElementsCanvas } from "../../fixtures/v2-flow-elements";
 import { validateInteractiveCanvasDocument } from "../schema";
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../actions";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../schema";
+
+const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDocument;
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
@@ -89,8 +92,8 @@ function updateGeometriesActions(actions: ReturnType<typeof stepInteraction>["di
 }
 
 describe("schema: W2 object types round-trip", () => {
-  it("validates the v2-flow-elements fixture end to end", () => {
-    const validation = validateInteractiveCanvasDocument(v2FlowElementsCanvas);
+  it("validates the v2-flow-elements canvas JSON end to end", () => {
+    const validation = validateInteractiveCanvasDocument(v2FlowElementsDocument);
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
     const types = new Set(validation.document.objects.map((object) => object.type));
@@ -104,7 +107,7 @@ describe("schema: W2 object types round-trip", () => {
   });
 
   it("preserves each new type's dedicated props through validation", () => {
-    const validation = validateInteractiveCanvasDocument(v2FlowElementsCanvas);
+    const validation = validateInteractiveCanvasDocument(v2FlowElementsDocument);
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
     const byId = new Map(validation.document.objects.map((object) => [object.id, object]));
@@ -172,6 +175,65 @@ describe("schema: W2 object types round-trip", () => {
     expect(style?.strokeWidth).toBe(8);
   });
 
+  it("preserves section strokeStyle through validation", () => {
+    const doc = makeDocument([
+      {
+        ...makeObject({ id: "section-a" }),
+        type: "section",
+        title: "A",
+        tint: "gray",
+        style: { shape: "section", strokeStyle: "dashed" },
+      },
+    ]);
+
+    const validation = validateInteractiveCanvasDocument(doc);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.style?.strokeStyle).toBe("dashed");
+  });
+
+  it("preserves section visibility and lock flags through validation", () => {
+    const doc = makeDocument([
+      {
+        ...makeObject({ id: "section-a" }),
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: true,
+        contentHidden: true,
+        style: { shape: "section" },
+      },
+    ]);
+
+    const validation = validateInteractiveCanvasDocument(doc);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.locked).toBe(true);
+    expect(validation.document.objects[0]?.contentHidden).toBe(true);
+  });
+
+  it("updates a section fill through the undoable object reducer path", () => {
+    const doc = makeDocument([
+      {
+        ...makeObject({ id: "section-a" }),
+        type: "section",
+        title: "A",
+        tint: "gray",
+        style: { shape: "section" },
+      },
+    ]);
+    const state = createInteractiveCanvasState(doc);
+
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "section-a",
+      patch: { style: { fill: "#C2E5FF", stroke: "#3DADFF" } },
+    });
+
+    expect(next.document.objects[0]?.style?.fill).toBe("#C2E5FF");
+    expect(next.history.past.length).toBe(1);
+  });
+
   it("drops invalid style.fill/stroke/strokeWidth with warnings, not hard errors", () => {
     const document = makeDocument([
       makeObject({
@@ -195,6 +257,177 @@ describe("schema: W2 object types round-trip", () => {
     expect(style?.fill).toBeUndefined();
     expect(style?.stroke).toBeUndefined();
     expect(style?.strokeWidth).toBeUndefined();
+  });
+});
+
+describe("schema: W5 FigJam parity shape set (Wave A)", () => {
+  const NEW_TYPES = [
+    "ellipse",
+    "triangle",
+    "parallelogram",
+    "pentagon",
+    "octagon",
+    "star",
+    "plus",
+    "chevron",
+    "folder",
+    "document-stack",
+    "off-page-connector",
+    "trapezoid",
+    "manual-input",
+    "hexagon",
+    "internal-storage",
+    "or-junction",
+    "summing-junction",
+    "cylinder-horizontal",
+    "page-corner",
+  ] as const;
+
+  it("validates every new native type (19 total, not counting icon)", () => {
+    expect(NEW_TYPES.length).toBe(19);
+    const objects = NEW_TYPES.map((type, index) =>
+      ({ ...makeObject({ id: `shape-${index}` }), type }) as InteractiveCanvasObject,
+    );
+    const validation = validateInteractiveCanvasDocument(makeDocument(objects));
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    const types = new Set(validation.document.objects.map((object) => object.type));
+    for (const type of NEW_TYPES) {
+      expect(types.has(type)).toBe(true);
+    }
+  });
+
+  it("validates a type: 'icon' object with a known glyph", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "icon-a" }), type: "icon", icon: "database" } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.icon).toBe("database");
+  });
+
+  it("rejects an icon object with a missing glyph as a hard validation error", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "icon-a" }), type: "icon" } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(false);
+    if (validation.ok) return;
+    expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("glyph");
+  });
+
+  it("rejects an icon object with an unknown glyph id as a hard validation error", () => {
+    const document = makeDocument([
+      {
+        ...makeObject({ id: "icon-a" }),
+        type: "icon",
+        icon: "not-a-real-glyph",
+      } as unknown as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(false);
+    if (validation.ok) return;
+    expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("glyph");
+  });
+
+  it("defaults triangle direction to 'up' when omitted, and preserves 'down' when set", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "tri-default" }), type: "triangle" } as InteractiveCanvasObject,
+      {
+        ...makeObject({ id: "tri-down" }),
+        type: "triangle",
+        direction: "down",
+      } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    const byId = new Map(validation.document.objects.map((object) => [object.id, object]));
+    expect(byId.get("tri-default")?.direction).toBe("up");
+    expect(byId.get("tri-down")?.direction).toBe("down");
+  });
+
+  it("ignores an invalid triangle direction and soft-defaults to 'up'", () => {
+    const document = makeDocument([
+      {
+        ...makeObject({ id: "tri-bad" }),
+        type: "triangle",
+        direction: "left",
+      } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.direction).toBe("up");
+  });
+
+  it("defaults parallelogram and chevron direction to 'right' when omitted", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "para" }), type: "parallelogram" } as InteractiveCanvasObject,
+      { ...makeObject({ id: "chev" }), type: "chevron" } as InteractiveCanvasObject,
+      {
+        ...makeObject({ id: "para-left" }),
+        type: "parallelogram",
+        direction: "left",
+      } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    const byId = new Map(validation.document.objects.map((object) => [object.id, object]));
+    expect(byId.get("para")?.direction).toBe("right");
+    expect(byId.get("chev")?.direction).toBe("right");
+    expect(byId.get("para-left")?.direction).toBe("left");
+  });
+
+  it("leaves direction undefined for a type that doesn't use it (e.g. pentagon)", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "pent" }), type: "pentagon" } as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.direction).toBeUndefined();
+  });
+
+  it("addObject applies the brief's default geometry/tone/shape for each new native type", () => {
+    const state = createInteractiveCanvasState(makeDocument([makeObject({ id: "seed" })]));
+    const cases: Array<{ type: InteractiveCanvasObject["type"]; width: number; height: number }> = [
+      { type: "ellipse", width: 160, height: 128 },
+      { type: "triangle", width: 144, height: 128 }, // snapped to 16px grid
+      { type: "parallelogram", width: 160, height: 96 },
+      { type: "pentagon", width: 144, height: 144 },
+      { type: "octagon", width: 144, height: 144 },
+      { type: "star", width: 144, height: 144 },
+      { type: "plus", width: 128, height: 128 },
+      { type: "chevron", width: 160, height: 128 },
+      { type: "folder", width: 144, height: 112 },
+      { type: "document-stack", width: 160, height: 128 },
+      { type: "off-page-connector", width: 128, height: 96 },
+      { type: "trapezoid", width: 144, height: 96 },
+      { type: "manual-input", width: 144, height: 96 },
+      { type: "hexagon", width: 144, height: 96 },
+      { type: "internal-storage", width: 144, height: 112 },
+      { type: "or-junction", width: 96, height: 96 },
+      { type: "summing-junction", width: 96, height: 96 },
+      { type: "cylinder-horizontal", width: 144, height: 96 },
+      { type: "page-corner", width: 160, height: 128 },
+      { type: "icon", width: 128, height: 128 },
+    ];
+
+    for (const testCase of cases) {
+      const next = reduceInteractiveCanvasState(state, {
+        type: "canvas.addObject",
+        objectType: testCase.type,
+      });
+      const added = next.document.objects.at(-1);
+      expect(added?.type).toBe(testCase.type);
+      expect(added?.style?.shape).toBe(testCase.type);
+      expect(added?.style?.tone).toBe("neutral");
+      expect(added?.geometry.width).toBe(testCase.width);
+      expect(added?.geometry.height).toBe(testCase.height);
+    }
   });
 });
 
@@ -239,9 +472,9 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
     expect(members.has("grandchild")).toBe(true);
   });
 
-  it("captures every object and nested section from the v2-flow-elements fixture when dragging outer-section", () => {
+  it("captures every object and nested section from the v2-flow-elements canvas JSON when dragging outer-section", () => {
     const members = sectionCaptureMembers(
-      v2FlowElementsCanvas,
+      v2FlowElementsDocument,
       "outer-section",
       SECTION_CAPTURE_OVERLAP_THRESHOLD,
     );
@@ -369,24 +602,24 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
   });
 });
 
-describe("code-tokenizer: tokenizeCodeBlock integration with the fixture bodies", () => {
-  it("tokenizes the python code-block body from the fixture without dropping characters", () => {
-    const codeBlock = v2FlowElementsCanvas.objects.find((object) => object.id === "captured-code-block");
+describe("code-tokenizer: tokenizeCodeBlock integration with the canvas JSON bodies", () => {
+  it("tokenizes the python code-block body from the canvas JSON without dropping characters", () => {
+    const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "captured-code-block");
     expect(codeBlock?.body).toBeDefined();
     const lines = tokenizeCodeBlock(codeBlock!.body!, codeBlock!.language);
     const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
     expect(rejoined).toBe(codeBlock!.body);
   });
 
-  it("tokenizes the JSON code-block body from the fixture without dropping characters", () => {
-    const codeBlock = v2FlowElementsCanvas.objects.find((object) => object.id === "json-code-block");
+  it("tokenizes the JSON code-block body from the canvas JSON without dropping characters", () => {
+    const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "json-code-block");
     expect(codeBlock?.body).toBeDefined();
     const lines = tokenizeCodeBlock(codeBlock!.body!, codeBlock!.language);
     const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
     expect(rejoined).toBe(codeBlock!.body);
   });
 
-  it("colors the fixture's python class/def line as expected", () => {
+  it("colors the canvas JSON's python class/def line as expected", () => {
     const tokens = tokenizeCodeLine("class Agent(BaseModel):", "python");
     expect(tokens.some((token) => token.text === "class")).toBe(true);
     expect(tokens.some((token) => token.text === "Agent")).toBe(true);

@@ -37,12 +37,13 @@ export type ColorPalettePopoverProps = {
    * ringed current-color swatch is still appended to the last row.
    */
   swatches?: string[][];
+  header?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 };
 
-const SWATCH_DIAMETER_PX = 20;
-const SWATCH_GAP_PX = 5;
+const SWATCH_DIAMETER_PX = CHROME.colorPopoverSwatchPx;
+const SWATCH_GAP_PX = CHROME.colorPopoverGapPx;
 const POPOVER_BG = "#1D1D1D";
 
 // W3: promoted to figjam-tokens.ts's CHROME.rainbowRingGradient (shared with
@@ -93,7 +94,7 @@ function Swatch({
   );
 }
 
-export function ColorPalettePopover({ currentColor, onPick, swatches, className, style }: ColorPalettePopoverProps) {
+export function ColorPalettePopover({ currentColor, onPick, swatches, header, className, style }: ColorPalettePopoverProps) {
   const [row1, row2Base] = PALETTE_POPOVER_SWATCHES;
   // figjam-tokens.ts ships row 2 as 9 entries (8 saturated + pink); the
   // catalog's measured layout wants 10 direct swatches + 1 rainbow-current
@@ -116,12 +117,13 @@ export function ColorPalettePopover({ currentColor, onPick, swatches, className,
         flexDirection: "column",
         gap: SWATCH_GAP_PX,
         background: POPOVER_BG,
-        borderRadius: 28,
-        padding: "16px 20px",
+        borderRadius: CHROME.colorPopoverRadiusPx,
+        padding: CHROME.colorPopoverPaddingPx,
         boxSizing: "border-box",
         ...style,
       }}
     >
+      {header}
       {rows.map((row, rowIndex) => (
         <div key={`row-${rowIndex}`} style={{ display: "flex", gap: SWATCH_GAP_PX }} data-swatch-row={rowIndex + 1}>
           {row.map((color, i) => (

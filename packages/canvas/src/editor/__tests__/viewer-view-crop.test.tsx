@@ -1,14 +1,16 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
+import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
 import {
   containerViewBounds,
   fitBounds,
   fitDocument,
   InteractiveCanvasViewer,
   paletteTokenStyle,
-  syntheticInteractiveCanvas,
   type InteractiveCanvasDocument,
 } from "../../index";
+
+const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 
 afterEach(() => {
   cleanup();
@@ -52,14 +54,14 @@ describe("InteractiveCanvasViewer view cropping", () => {
   it("renders every object at raw world px coordinates under one transformed world layer", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
-        <InteractiveCanvasViewer document={syntheticInteractiveCanvas} />,
+        <InteractiveCanvasViewer document={syntheticCanvasDocument} />,
       );
 
       const worldLayer = container.querySelector(".interactive-canvas-world-layer") as HTMLElement | null;
       expect(worldLayer).toBeTruthy();
       expect(worldLayer!.style.transform).toMatch(/^translate\(.+\) scale\(.+\)$/);
 
-      for (const object of syntheticInteractiveCanvas.objects) {
+      for (const object of syntheticCanvasDocument.objects) {
         const node = container.querySelector(`[data-canvas-object-id="${object.id}"]`) as HTMLElement | null;
         expect(node).toBeTruthy();
         expect(node!.style.left).toBe(`${object.geometry.x}px`);
@@ -73,10 +75,10 @@ describe("InteractiveCanvasViewer view cropping", () => {
   it("fits the viewport to the full document when no view is set", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
-        <InteractiveCanvasViewer document={syntheticInteractiveCanvas} />,
+        <InteractiveCanvasViewer document={syntheticCanvasDocument} />,
       );
 
-      const expected = fitDocument(syntheticInteractiveCanvas, SCREEN);
+      const expected = fitDocument(syntheticCanvasDocument, SCREEN);
       const worldLayer = container.querySelector(".interactive-canvas-world-layer") as HTMLElement;
       const expectedTransform = `translate(${-expected.x * expected.zoom}px, ${-expected.y * expected.zoom}px) scale(${expected.zoom})`;
       expect(worldLayer.style.transform).toBe(expectedTransform);
@@ -85,12 +87,12 @@ describe("InteractiveCanvasViewer view cropping", () => {
 
   it("crops the viewport to a container's bounds when view is set, matching fitBounds(containerViewBounds(...))", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const bounds = containerViewBounds(syntheticInteractiveCanvas, "input-context");
+      const bounds = containerViewBounds(syntheticCanvasDocument, "input-context");
       expect(bounds).toBeTruthy();
       const expected = fitBounds(bounds!, SCREEN);
 
       const { container } = render(
-        <InteractiveCanvasViewer document={syntheticInteractiveCanvas} view="input-context" />,
+        <InteractiveCanvasViewer document={syntheticCanvasDocument} view="input-context" />,
       );
 
       const worldLayer = container.querySelector(".interactive-canvas-world-layer") as HTMLElement;
@@ -98,7 +100,7 @@ describe("InteractiveCanvasViewer view cropping", () => {
       expect(worldLayer.style.transform).toBe(expectedTransform);
 
       // Sanity: cropped zoom should differ from the full-document fit.
-      const fullFit = fitDocument(syntheticInteractiveCanvas, SCREEN);
+      const fullFit = fitDocument(syntheticCanvasDocument, SCREEN);
       expect(expected.zoom).not.toBeCloseTo(fullFit.zoom, 5);
     });
   });
@@ -106,12 +108,12 @@ describe("InteractiveCanvasViewer view cropping", () => {
   it("falls back to the full document and shows a warning badge when view references an unknown or non-container id", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container, getByText } = render(
-        <InteractiveCanvasViewer document={syntheticInteractiveCanvas} view="does-not-exist" />,
+        <InteractiveCanvasViewer document={syntheticCanvasDocument} view="does-not-exist" />,
       );
 
       expect(getByText("View not found: does-not-exist")).toBeTruthy();
 
-      const expected = fitDocument(syntheticInteractiveCanvas, SCREEN);
+      const expected = fitDocument(syntheticCanvasDocument, SCREEN);
       const worldLayer = container.querySelector(".interactive-canvas-world-layer") as HTMLElement;
       const expectedTransform = `translate(${-expected.x * expected.zoom}px, ${-expected.y * expected.zoom}px) scale(${expected.zoom})`;
       expect(worldLayer.style.transform).toBe(expectedTransform);
@@ -250,7 +252,7 @@ describe("InteractiveCanvasViewer: expanded shape vocabulary rendering (checkpoi
     });
   });
 
-  it("gives the document shape a folded top-right corner via clip-path", () => {
+  it("gives the document shape the wavy-bottom SVG silhouette (Wave B1 — the dog-ear clip-path moved to page-corner)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
         <InteractiveCanvasViewer document={makeExpandedVocabDocument()} />,
@@ -258,6 +260,10 @@ describe("InteractiveCanvasViewer: expanded shape vocabulary rendering (checkpoi
       const node = container.querySelector('[data-canvas-object-id="doc-a"]') as HTMLElement | null;
       expect(node).toBeTruthy();
       expect(node!.className).toContain("interactive-canvas-object-document");
+      const silhouettePath = node!.querySelector('[data-canvas-shape-silhouette="document"] path');
+      expect(silhouettePath).toBeTruthy();
+      // Wavy bottom = cubic Bezier crests, not the old straight-edged clip-path.
+      expect(silhouettePath?.getAttribute("d") ?? "").toContain("C");
     });
   });
 });

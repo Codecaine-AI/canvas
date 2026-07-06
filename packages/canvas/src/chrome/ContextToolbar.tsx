@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { CHROME } from "../render/figjam-tokens";
 import { ChromeTooltip } from "./ChromeTooltip";
 import {
@@ -11,15 +11,15 @@ import {
   ChevronDownIcon,
   ColorSwatchIcon,
   DashIcon,
-  ExpandIcon,
   EyeIcon,
+  EyeOffIcon,
   FontStyleIcon,
-  FrameIcon,
   LabelAlignIcon,
-  LayersIcon,
   LinkIcon,
   LockIcon,
+  NoStrokeIcon,
   ParagraphAlignIcon,
+  RenameIcon,
   RoutingIcon,
   ShapeSwapIcon,
   SizeIcon,
@@ -61,8 +61,8 @@ export type ContextToolbarActionId =
   | "paragraph-align"
   // section
   | "tint"
-  | "list"
-  | "frame"
+  | "section-border-style"
+  | "rename"
   | "visibility"
   | "lock"
   | "expand"
@@ -86,11 +86,13 @@ export type ContextToolbarControl = {
   dividerAfter?: boolean;
 };
 
+export type SectionBorderStyleValue = "solid" | "dashed" | "none";
+
 /**
  * Registry mapping each selection-type variant to its measured control set.
  * Order and membership per figjam-chrome-catalog.md section 2:
  *   shape: shape-swap▾, color▾, align▾, Aa▾, size▾, B, strike, link, bullets, align▾(paragraph)
- *   section: tint▾, list▾, frame, eye, lock▾, expand — divider after tint/list pair per catalog's "a divider" note
+ *   section: color▾, border style▾
  *   connector: color▾, align▾, add-text(T), line-style▾, corner-style▾, arrowhead▾
  *   text (label editing variant): color▾, Aa▾, size▾, B, strike
  */
@@ -108,12 +110,11 @@ export const CONTEXT_TOOLBAR_REGISTRY: Record<ContextToolbarVariant, ContextTool
     { action: "paragraph-align", label: "Paragraph alignment", Icon: ParagraphAlignIcon, hasFlyout: true },
   ],
   section: [
-    { action: "tint", label: "Section color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "list", label: "Layers", Icon: LayersIcon, hasFlyout: true, dividerAfter: true },
-    { action: "frame", label: "Duplicate as frame", Icon: FrameIcon },
-    { action: "visibility", label: "Toggle visibility", Icon: EyeIcon },
+    { action: "color", label: "Color", Icon: ColorSwatchIcon, hasFlyout: true },
+    { action: "section-border-style", label: "Border style", Icon: StrokeIcon, hasFlyout: true },
+    { action: "rename", label: "Rename", Icon: RenameIcon, dividerAfter: true },
+    { action: "visibility", label: "Hide contents", Icon: EyeIcon },
     { action: "lock", label: "Lock", Icon: LockIcon, hasFlyout: true },
-    { action: "expand", label: "Zoom to fit", Icon: ExpandIcon },
   ],
   connector: [
     { action: "color", label: "Line color", Icon: ColorSwatchIcon, hasFlyout: true },
@@ -153,6 +154,12 @@ export type ContextToolbarProps = {
   /** Optional style overrides for positioning; consumer supplies via wrapper. Height is fixed to the measured 29px per spec. */
   style?: React.CSSProperties;
   className?: string;
+  currentColor?: string;
+  currentSectionStroke?: string;
+  currentSectionBorderStyle?: SectionBorderStyleValue;
+  activeFlyout?: ContextToolbarActionId | null;
+  sectionContentHidden?: boolean;
+  sectionLocked?: boolean;
 };
 
 const TOOLBAR_HEIGHT_PX = 29;
@@ -161,24 +168,56 @@ const TOOLBAR_BG = CHROME.contextToolbarBg; // #1D1D1D
 function ToolbarButton({
   control,
   onAction,
+  currentColor,
+  currentSectionStroke,
+  currentSectionBorderStyle,
+  activeFlyout,
+  sectionContentHidden,
+  sectionLocked,
 }: {
   control: ContextToolbarControl;
   onAction?: (action: ContextToolbarActionId, value?: unknown) => void;
+  currentColor?: string;
+  currentSectionStroke?: string;
+  currentSectionBorderStyle?: SectionBorderStyleValue;
+  activeFlyout?: ContextToolbarActionId | null;
+  sectionContentHidden?: boolean;
+  sectionLocked?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
-  const { Icon, label, action, hasFlyout, text } = control;
-
+  const { Icon, action, hasFlyout, text } = control;
+  const label =
+    action === "visibility"
+      ? sectionContentHidden ? "Show contents" : "Hide contents"
+      : action === "lock"
+        ? sectionLocked ? "Unlock" : "Lock"
+        : control.label;
+  const clearHover = () => setHovered(false);
+  const BorderIcon =
+    currentSectionBorderStyle === "dashed" ? DashIcon : currentSectionBorderStyle === "none" ? NoStrokeIcon : StrokeIcon;
+  const EffectiveIcon =
+    action === "section-border-style"
+      ? BorderIcon
+      : action === "visibility" && sectionContentHidden
+        ? EyeOffIcon
+        : Icon;
+  const expanded = activeFlyout !== undefined ? activeFlyout === action : open;
   return (
     <div style={{ position: "relative", display: "inline-flex" }}>
       <button
         type="button"
         data-toolbar-action={action}
         aria-label={label}
-        aria-expanded={hasFlyout ? open : undefined}
+        aria-expanded={hasFlyout ? expanded : undefined}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={clearHover}
+        onPointerCancel={clearHover}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseLeave={clearHover}
+        onBlur={clearHover}
         onClick={() => {
+          clearHover();
           if (hasFlyout) setOpen((v) => !v);
           onAction?.(action);
         }}
@@ -190,12 +229,31 @@ function ToolbarButton({
           padding: "0 6px",
           borderRadius: 6,
           border: "none",
-          background: hovered ? "rgba(255,255,255,0.12)" : "transparent",
+          background:
+            action === "lock" && sectionLocked
+              ? CHROME.accentPurple
+              : hovered
+                ? "rgba(255,255,255,0.12)"
+                : "transparent",
           color: "#FFFFFF",
           cursor: "pointer",
         }}
       >
-        <Icon className="h-4 w-4" />
+        {action === "color" ? (
+          <span
+            style={{
+              display: "inline-flex",
+              width: CHROME.contextToolbarSwatchPx,
+              height: CHROME.contextToolbarSwatchPx,
+            }}
+          >
+            <ColorSwatchIcon color={currentColor} style={{ width: "100%", height: "100%" }} />
+          </span>
+        ) : (
+          <span style={{ color: action === "section-border-style" ? currentSectionStroke : undefined }}>
+            <EffectiveIcon className="h-4 w-4" />
+          </span>
+        )}
         {text ? <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>{text}</span> : null}
         {hasFlyout ? <ChevronDownIcon className="h-2.5 w-2.5" /> : null}
       </button>
@@ -204,7 +262,18 @@ function ToolbarButton({
   );
 }
 
-export function ContextToolbar({ variant, onAction, style, className }: ContextToolbarProps) {
+function ContextToolbarComponent({
+  variant,
+  onAction,
+  style,
+  className,
+  currentColor,
+  currentSectionStroke,
+  currentSectionBorderStyle,
+  activeFlyout,
+  sectionContentHidden,
+  sectionLocked,
+}: ContextToolbarProps) {
   const controls = CONTEXT_TOOLBAR_REGISTRY[variant];
 
   return (
@@ -228,7 +297,16 @@ export function ContextToolbar({ variant, onAction, style, className }: ContextT
     >
       {controls.map((control, i) => (
         <span key={control.action} style={{ display: "inline-flex", alignItems: "center" }}>
-          <ToolbarButton control={control} onAction={onAction} />
+          <ToolbarButton
+            control={control}
+            onAction={onAction}
+            currentColor={currentColor}
+            currentSectionStroke={currentSectionStroke}
+            currentSectionBorderStyle={currentSectionBorderStyle}
+            activeFlyout={activeFlyout}
+            sectionContentHidden={sectionContentHidden}
+            sectionLocked={sectionLocked}
+          />
           {control.dividerAfter && i < controls.length - 1 ? (
             <span
               data-divider=""
@@ -245,6 +323,8 @@ export function ContextToolbar({ variant, onAction, style, className }: ContextT
     </div>
   );
 }
+
+export const ContextToolbar = memo(ContextToolbarComponent);
 
 // Extra control for the connector text-label-editing swap (catalog: "the
 // toolbar swaps to a text-formatting variant" when editing a connector's

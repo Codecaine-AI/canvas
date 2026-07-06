@@ -21,6 +21,7 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   D              decision tool
  *   T              text tool
  *   S              sticky tool
+ *   Shift+S        section tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)
  *   U              person tool (checkpoint 5 — D16 expanded vocabulary)
  *   B              database tool (checkpoint 5 — D16 expanded vocabulary)
@@ -234,6 +235,16 @@ export function useCanvasHotkeys({
         dispatchRef.current({ type: "canvas.moveSelection", dx, dy, snap: false });
         return;
       }
+
+      if (event.altKey) return;
+
+      if (event.shiftKey && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        dispatchRef.current({ type: "canvas.setTool", tool: "section" });
+        return;
+      }
+
+      if (event.shiftKey) return;
 
       // Tool hotkeys (single letter, no modifier).
       const tool = TOOL_KEY_MAP[event.key.toLowerCase()];

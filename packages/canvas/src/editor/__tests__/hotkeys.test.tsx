@@ -1,12 +1,15 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { useRef } from "react";
+import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
 import type { CanvasAction, CanvasSelection } from "../../model/actions";
-import { syntheticInteractiveCanvas } from "../../fixtures/synthetic-canvas";
 import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction/interaction";
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
 import { useCanvasHotkeys } from "../use-canvas-hotkeys";
+import { SECTION_GEOMETRY } from "../../render/figjam-tokens";
+
+const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
@@ -75,6 +78,28 @@ function setup(overrides: {
   });
 
   return { view, dispatch, onCancelInteraction, onCloseContextMenu, controls, document, selection };
+}
+
+function sectionRenameDocument(): InteractiveCanvasDocument {
+  return {
+    schemaVersion: 1,
+    id: "section-rename-test",
+    mode: "diagram",
+    size: { width: 1000, height: 700 },
+    viewport: { x: 0, y: 0, zoom: 1 },
+    objects: [
+      {
+        id: "section-a",
+        type: "section",
+        label: "Original section",
+        title: "Original section",
+        tint: "purple",
+        geometry: { x: 100, y: 80, width: 520, height: 360 },
+        style: { shape: "section" },
+      },
+    ],
+    connections: [],
+  };
 }
 
 describe("useCanvasHotkeys", () => {
@@ -193,6 +218,20 @@ describe("useCanvasHotkeys", () => {
       dispatchKeyDown({ key: "c" });
     });
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "container" });
+  });
+
+  it("maps plain S to sticky and Shift+S to section", () => {
+    const { dispatch } = setup();
+
+    act(() => {
+      dispatchKeyDown({ key: "s" });
+    });
+    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "sticky" });
+
+    act(() => {
+      dispatchKeyDown({ key: "S", shiftKey: true });
+    });
+    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "section" });
   });
 
   it("maps the checkpoint-5 expanded-vocabulary letters (O/U/B/M) to canvas.setTool", () => {
@@ -320,6 +359,11 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     };
   }
 
+  function pointerClick(element: Element, init: Partial<PointerEventInit> = {}) {
+    fireEvent.pointerDown(element, { button: 0, pointerId: 1, ...init });
+    fireEvent.pointerUp(element, { button: 0, pointerId: 1, ...init });
+  }
+
   afterEach(() => {
     cleanup();
   });
@@ -330,7 +374,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       const saved: InteractiveCanvasDocument[] = [];
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={(document) => {
             saved.push(document);
           }}
@@ -361,7 +405,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
         />,
@@ -387,7 +431,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
         />,
@@ -398,7 +442,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       ).find((element) => element instanceof HTMLElement && element.tagName === "DIV") as HTMLElement;
       expect(canvasLayer).toBeTruthy();
 
-      // A point clearly outside every existing fixture object's geometry.
+      // A point clearly outside every existing canvas JSON object's geometry.
       fireEvent.doubleClick(canvasLayer, { clientX: 1150, clientY: 700 });
 
       const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
@@ -419,7 +463,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
         />,
@@ -443,7 +487,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
         />,
@@ -458,6 +502,75 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
 
       expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
       expect(screen.getAllByText("Blurred rename").length).toBeGreaterThan(0);
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("double-clicking a section body selects but does not open the label editor", () => {
+    const restoreRect = stubStageRect();
+    try {
+      render(<InteractiveCanvasEditor document={sectionRenameDocument()} onSave={() => undefined} onCancel={() => undefined} />);
+
+      const section = screen.getByRole("button", { name: /Original section/i });
+      pointerClick(section, { clientX: 360, clientY: 280 });
+      fireEvent.doubleClick(section, { clientX: 360, clientY: 280 });
+
+      expect(screen.getByRole("button", { name: /Original section/i }).getAttribute("data-selected")).toBe("true");
+      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Section title" })).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("double-clicking a section title chip opens a chip-anchored editor", () => {
+    const restoreRect = stubStageRect();
+    try {
+      render(<InteractiveCanvasEditor document={sectionRenameDocument()} onSave={() => undefined} onCancel={() => undefined} />);
+
+      const chip = document.querySelector("[data-canvas-section-title-chip='section-a']");
+      expect(chip).toBeTruthy();
+      fireEvent.doubleClick(chip!, { clientX: 112, clientY: 92 });
+
+      const input = screen.getByRole("textbox", { name: "Section title" }) as HTMLInputElement;
+      expect(input.value).toBe("Original section");
+      expect(input.tagName).toBe("INPUT");
+      expect(input.className).toContain("interactive-canvas-section-title-editor");
+      expect(input.style.left).toBe(`${100 + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`);
+      expect(input.style.top).toBe(`${80 + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`);
+      expect(input.style.height).toBe(`${SECTION_GEOMETRY.titleChip.heightPx}px`);
+      expect(Number.parseFloat(input.style.width)).toBeLessThan(520);
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("commits, cancels, and reverts empty section renames through the chip editor", () => {
+    const restoreRect = stubStageRect();
+    try {
+      render(<InteractiveCanvasEditor document={sectionRenameDocument()} onSave={() => undefined} onCancel={() => undefined} />);
+
+      const chip = () => document.querySelector("[data-canvas-section-title-chip='section-a']")!;
+      fireEvent.doubleClick(chip(), { clientX: 112, clientY: 92 });
+      let input = screen.getByRole("textbox", { name: "Section title" }) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: "Renamed section" } });
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(screen.queryByRole("textbox", { name: "Section title" })).toBeNull();
+      expect(screen.getAllByText("Renamed section").length).toBeGreaterThan(0);
+
+      fireEvent.doubleClick(chip(), { clientX: 112, clientY: 92 });
+      input = screen.getByRole("textbox", { name: "Section title" }) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: "Cancelled section" } });
+      fireEvent.keyDown(input, { key: "Escape" });
+      expect(screen.queryByText("Cancelled section")).toBeNull();
+      expect(screen.getAllByText("Renamed section").length).toBeGreaterThan(0);
+
+      fireEvent.doubleClick(chip(), { clientX: 112, clientY: 92 });
+      input = screen.getByRole("textbox", { name: "Section title" }) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: "   " } });
+      fireEvent.blur(input);
+      expect(screen.getAllByText("Renamed section").length).toBeGreaterThan(0);
     } finally {
       restoreRect();
     }
@@ -497,14 +610,68 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     fireEvent.pointerUp(element, { button: 0, ...init });
   }
 
+  function sectionDocument(): InteractiveCanvasDocument {
+    return {
+      schemaVersion: 1,
+      id: "section-toolbar-test",
+      mode: "diagram",
+      size: { width: 1240, height: 760 },
+      viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [
+        {
+          id: "section-a",
+          type: "section",
+          label: "Section A",
+          title: "Section A",
+          tint: "blue",
+          geometry: { x: 120, y: 120, width: 320, height: 220 },
+          style: { shape: "section", fill: "#C2E5FF", stroke: "#3DADFF", strokeStyle: "solid" },
+        },
+      ],
+      connections: [],
+    };
+  }
+
+  function selectSection() {
+    const section = screen.getByRole("button", { name: /Section A/i });
+    pointerClick(section, { clientX: 180, clientY: 160 });
+    return section as HTMLElement;
+  }
+
+  it("does not render the inspector by default, but renders it when enabled", () => {
+    const { rerender } = render(
+      <InteractiveCanvasEditor
+        document={syntheticCanvasDocument}
+        onSave={() => undefined}
+        onCancel={() => undefined}
+      />,
+    );
+
+    expect(screen.queryByText("Inspector")).toBeNull();
+    expect(screen.queryByText("Selection context")).toBeNull();
+
+    rerender(
+      <InteractiveCanvasEditor
+        document={syntheticCanvasDocument}
+        onSave={() => undefined}
+        onCancel={() => undefined}
+        showInspector
+      />,
+    );
+
+    expect(screen.getByText("Inspector")).toBeTruthy();
+    expect(screen.getByText("Selection context")).toBeTruthy();
+  });
+
   it("clicking a swatch sets paletteToken on the selected object without touching its shape/tone", () => {
     const restoreRect = stubStageRect();
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
+          showInspector
         />,
       );
 
@@ -527,9 +694,10 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
+          showInspector
         />,
       );
 
@@ -560,9 +728,10 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     try {
       render(
         <InteractiveCanvasEditor
-          document={syntheticInteractiveCanvas}
+          document={syntheticCanvasDocument}
           onSave={() => undefined}
           onCancel={() => undefined}
+          showInspector
         />,
       );
 
@@ -578,6 +747,78 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       expect(noneSwatch.getAttribute("data-selected")).toBe("true");
       expect(hotSwatch.getAttribute("data-selected")).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("keeps only one section toolbar popover mounted when switching fill and border", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={sectionDocument()}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      selectSection();
+      fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
+      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
+
+      fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
+      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeTruthy();
+
+      fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
+      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("section fill palette updates style.fill without changing style.stroke", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={sectionDocument()}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const section = selectSection();
+      fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
+      fireEvent.click(container.querySelector('[data-color="#F24822"]')!);
+
+      expect(section.style.background).toBe("#F24822");
+      expect(section.style.borderColor).toBe("#3DADFF");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("section border palette updates style.stroke without changing style.fill", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={sectionDocument()}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const section = selectSection();
+      fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
+      fireEvent.click(container.querySelector('[data-color="#14AE5C"]')!);
+
+      expect(section.style.background).toBe("#C2E5FF");
+      expect(section.style.borderColor).toBe("#14AE5C");
     } finally {
       restoreRect();
     }

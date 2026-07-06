@@ -221,6 +221,12 @@ export function useCanvasViewport({
 
     let spaceHeld = false;
     let panState: { pointerId: number; lastX: number; lastY: number } | null = null;
+    let pendingPan = { dx: 0, dy: 0 };
+    const panCoalescer = createFrameCoalescer<typeof pendingPan>((frame) => {
+      pendingPan = { dx: 0, dy: 0 };
+      if (frame.dx === 0 && frame.dy === 0) return;
+      setViewportState((previous) => panBy(previous, frame.dx, frame.dy));
+    });
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "Space" || isEditableTarget(event.target)) return;
@@ -230,6 +236,17 @@ export function useCanvasViewport({
       if (event.code !== "Space") return;
       spaceHeld = false;
     };
+    // A lost keyup leaves space-pan stuck on (e.g. macOS ⌘⇧4+Space screenshot
+    // mode, app switches: the keydown reaches us, the keyup never does) —
+    // after which every plain left-drag pans in select mode. Any focus loss
+    // must reset the held state.
+    const onFocusLost = () => {
+      spaceHeld = false;
+    };
+    const onVisibilityChange = () => {
+      // `document` is shadowed here by the canvas document — use the global.
+      if (window.document.visibilityState === "hidden") spaceHeld = false;
+    };
 
     const onPointerDown = (event: PointerEvent) => {
       const shouldPan =
@@ -238,9 +255,16 @@ export function useCanvasViewport({
       if (!shouldPan) return;
       event.preventDefault();
       // Claim the pointer before React's root-delegated handlers run so an
-      // object drag can't start alongside the pan gesture.
+      // object drag can't start alongside the pan gesture. setPointerCapture
+      // throws NotFoundError for pointers the browser doesn't consider active
+      // (fast release races, synthetic/automation events) — the pan must
+      // survive that, so capture is best-effort.
       event.stopPropagation();
-      stage.setPointerCapture?.(event.pointerId);
+      try {
+        stage.setPointerCapture?.(event.pointerId);
+      } catch {
+        // best-effort capture only
+      }
       panState = { pointerId: event.pointerId, lastX: event.clientX, lastY: event.clientY };
       setIsPanning(true);
     };
@@ -251,28 +275,36 @@ export function useCanvasViewport({
       const dy = panState.lastY - event.clientY;
       panState.lastX = event.clientX;
       panState.lastY = event.clientY;
-      setViewportState((previous) => panBy(previous, dx, dy));
+      pendingPan.dx += dx;
+      pendingPan.dy += dy;
+      panCoalescer.push(pendingPan);
     };
 
     const endPan = (event: PointerEvent) => {
       if (!panState || panState.pointerId !== event.pointerId) return;
+      panCoalescer.flush();
       panState = null;
       setIsPanning(false);
     };
 
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    stage.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("blur", onFocusLost);
+    window.document.addEventListener("visibilitychange", onVisibilityChange);
+    stage.addEventListener("pointerdown", onPointerDown, { capture: true });
     stage.addEventListener("pointermove", onPointerMove);
     stage.addEventListener("pointerup", endPan);
     stage.addEventListener("pointercancel", endPan);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
-      stage.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("blur", onFocusLost);
+      window.document.removeEventListener("visibilitychange", onVisibilityChange);
+      stage.removeEventListener("pointerdown", onPointerDown, { capture: true });
       stage.removeEventListener("pointermove", onPointerMove);
       stage.removeEventListener("pointerup", endPan);
       stage.removeEventListener("pointercancel", endPan);
+      panCoalescer.cancel();
     };
   }, [enabled, stageRef]);
 

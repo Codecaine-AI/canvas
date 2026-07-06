@@ -14,7 +14,6 @@
     "./figjam-tokens": "./src/render/figjam-tokens.ts",
     "./chrome": "./src/chrome/index.ts",
     "./connection-overlay": "./src/routing/connection-overlay.ts",
-    "./fixtures/*": "./src/fixtures/*.ts",
     "./ui/cn": "./src/ui/cn.ts",
     "./ui/button": "./src/ui/button.tsx",
     "./ui/input": "./src/ui/input.tsx",

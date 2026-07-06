@@ -11,8 +11,8 @@ edits to those files. Wave 3 (W3-wire) wires these into the live editor.
 | File | Component | Purpose |
 |---|---|---|
 | `ChromeTooltip.tsx` | `ChromeTooltip` | Shared dark hover-label used by every other component below. |
-| `dock-icons.tsx` | 13 icon components + 2 zoom glyphs | Inline SVG glyphs for the bottom dock and zoom pill. |
-| `FigJamDock.tsx` | `FigJamDock` | White stadium bottom dock, 462x37, 13 buttons / 5 whitespace groups. |
+| `dock-icons.tsx` | Dock icons + 2 zoom glyphs | Inline SVG glyphs for the bottom dock and zoom pill. |
+| `FigJamDock.tsx` | `FigJamDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
 | `toolbar-icons.tsx` | ~20 icon components | Glyphs for `ContextToolbar` controls. |
 | `context-toolbar-position.ts` | `positionContextToolbar` | Pure clamp-to-viewport positioning function. |
 | `ContextToolbar.tsx` | `ContextToolbar`, `CONTEXT_TOOLBAR_REGISTRY` | Dark floating pill, variant-driven control sets. |
@@ -41,8 +41,8 @@ edits to those files. Wave 3 (W3-wire) wires these into the live editor.
   `ShapesPanel`. W3 can choose to keep both effects or treat `onOpenShapes`
   as the sole handler and ignore the `onSelectTool("shapes")` call — the
   component fires both so either integration shape works.
-- `ToolId` union intentionally excludes `"overflow"` (handled by
-  `onOpenOverflow`) since the "+" button is not a "tool" in the schema sense.
+- The simplified Station-1 dock has no overflow button; `ToolId` only covers
+  visible dock tools.
 
 ### ContextToolbar
 
