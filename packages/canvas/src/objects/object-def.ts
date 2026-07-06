@@ -18,15 +18,30 @@ import { textDef } from "./text/def";
 import { annotationMarkerDef } from "./shapes/annotation-marker";
 import { arrowShapeDef } from "./shapes/arrow-shape";
 import { chatDef } from "./shapes/chat";
+import { chevronDef } from "./shapes/chevron";
 import { chipIconDef } from "./shapes/chip-icon";
 import { databaseDef } from "./shapes/database";
 import { decisionDef } from "./shapes/decision";
 import { documentDef } from "./shapes/document";
 import { ellipseDef } from "./shapes/ellipse";
+import { hexagonDef } from "./shapes/hexagon";
+import { internalStorageDef } from "./shapes/internal-storage";
+import { manualInputDef } from "./shapes/manual-input";
+import { octagonDef } from "./shapes/octagon";
+import { offPageConnectorDef } from "./shapes/off-page-connector";
+import { orJunctionDef } from "./shapes/or-junction";
+import { pageCornerDef } from "./shapes/page-corner";
+import { parallelogramDef } from "./shapes/parallelogram";
+import { pentagonDef } from "./shapes/pentagon";
 import { personDef } from "./shapes/person";
 import { pillDef } from "./shapes/pill";
+import { plusDef } from "./shapes/plus";
 import { predefinedProcessDef } from "./shapes/predefined-process";
 import { processDef } from "./shapes/process";
+import { starDef } from "./shapes/star";
+import { summingJunctionDef } from "./shapes/summing-junction";
+import { trapezoidDef } from "./shapes/trapezoid";
+import { triangleDef } from "./shapes/triangle";
 
 /**
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
@@ -180,6 +195,21 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   pill: pillDef,
   "arrow-shape": arrowShapeDef,
   "predefined-process": predefinedProcessDef,
+  triangle: triangleDef,
+  parallelogram: parallelogramDef,
+  pentagon: pentagonDef,
+  octagon: octagonDef,
+  hexagon: hexagonDef,
+  star: starDef,
+  plus: plusDef,
+  chevron: chevronDef,
+  trapezoid: trapezoidDef,
+  "off-page-connector": offPageConnectorDef,
+  "manual-input": manualInputDef,
+  "internal-storage": internalStorageDef,
+  "or-junction": orJunctionDef,
+  "summing-junction": summingJunctionDef,
+  "page-corner": pageCornerDef,
 };
 
 /** Registered defs in stylesheet order (their `css` is appended in this order). */
@@ -202,6 +232,21 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   pillDef,
   arrowShapeDef,
   predefinedProcessDef,
+  triangleDef,
+  parallelogramDef,
+  pentagonDef,
+  octagonDef,
+  hexagonDef,
+  starDef,
+  plusDef,
+  chevronDef,
+  trapezoidDef,
+  offPageConnectorDef,
+  manualInputDef,
+  internalStorageDef,
+  orJunctionDef,
+  summingJunctionDef,
+  pageCornerDef,
 ];
 
 export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undefined {

@@ -37,9 +37,6 @@ import {
   DOCUMENT_STACK_GEOMETRY,
   SECTION_CAPTURE_OVERLAP_THRESHOLD,
   GRID_DOT_COLOR,
-  MANUAL_INPUT_GEOMETRY,
-  OFF_PAGE_CONNECTOR_GEOMETRY,
-  PREDEFINED_PROCESS_GEOMETRY,
   STICKY_GEOMETRY,
   TEXT_SIZES_PX,
 } from "./figjam-tokens";
@@ -336,26 +333,9 @@ export function CanvasStage({
           font-size: ${STICKY_GEOMETRY.bodyFontSizePx}px;
           line-height: ${STICKY_GEOMETRY.bodyLineHeightPx}px;
         }
-        .interactive-canvas-object-page-corner {
-          clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%);
-          border-radius: 2px 8px 8px 8px;
-        }
         .interactive-canvas-object-folder,
         .interactive-canvas-object-document-stack,
-        .interactive-canvas-object-cylinder-horizontal,
-        .interactive-canvas-object-triangle,
-        .interactive-canvas-object-parallelogram,
-        .interactive-canvas-object-pentagon,
-        .interactive-canvas-object-octagon,
-        .interactive-canvas-object-star,
-        .interactive-canvas-object-plus,
-        .interactive-canvas-object-chevron,
-        .interactive-canvas-object-off-page-connector,
-        .interactive-canvas-object-trapezoid,
-        .interactive-canvas-object-manual-input,
-        .interactive-canvas-object-hexagon,
-        .interactive-canvas-object-or-junction,
-        .interactive-canvas-object-summing-junction {
+        .interactive-canvas-object-cylinder-horizontal {
           align-items: center;
           justify-content: center;
           text-align: center;
@@ -374,44 +354,6 @@ export function CanvasStage({
         .interactive-canvas-object-document-stack {
           padding-top: calc(12px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
           padding-left: calc(14px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
-        }
-        .interactive-canvas-object-triangle {
-          justify-content: flex-end;
-          padding: 18% 18% 10%;
-        }
-        .interactive-canvas-object-off-page-connector {
-          padding-bottom: ${(1 - OFF_PAGE_CONNECTOR_GEOMETRY.shoulderRatio) * 70}%;
-        }
-        .interactive-canvas-object-manual-input {
-          padding-top: ${MANUAL_INPUT_GEOMETRY.dropRatio * 80}%;
-        }
-        .interactive-canvas-object-star .interactive-canvas-object-label {
-          font-size: 12px;
-        }
-        .interactive-canvas-object-internal-storage {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 18% 12% 12% 22%;
-        }
-        .interactive-canvas-internal-storage-rule {
-          position: absolute;
-          background: currentColor;
-          opacity: 0.6;
-          pointer-events: none;
-          z-index: 0;
-        }
-        .interactive-canvas-internal-storage-rule-vertical {
-          top: 0;
-          bottom: 0;
-          left: 15%;
-          width: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
-        }
-        .interactive-canvas-internal-storage-rule-horizontal {
-          left: 0;
-          right: 0;
-          top: 15%;
-          height: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
         }
         .interactive-canvas-label-below-icon {
           position: relative;
