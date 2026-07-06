@@ -35,7 +35,7 @@
  *     file's pre-existing hand-drawn preview style (RectangleIcon, CylinderIcon,
  *     FolderIcon, TrapezoidIcon, ... below).
  *   - Advanced-tier entries (all 26 icon glyphs) reuse the glyph paths
- *     directly from objects/shapes/icon/glyphs.tsx's ICON_GLYPHS registry (the same
+ *     directly from ui/icons/icon-glyphs.tsx's ICON_GLYPHS registry (the same
  *     registry IconShapeBody renders on-canvas) via `iconGlyphPreview()` —
  *     both now live under objects/ (catalog/ and shapes/icon/), so this is a
  *     same-layer import.
@@ -43,7 +43,7 @@
 
 import type { CanvasBounds } from "../../model/geometry";
 import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../../model/schema";
-import { ICON_GLYPHS, type IconGlyphId } from "../shapes/icon/glyphs";
+import { ICON_GLYPHS, type IconGlyphId } from "../../ui/icons/icon-glyphs";
 import {
   chevronPoints,
   ellipsePoints,
@@ -110,7 +110,7 @@ function svgIcon(children: string) {
   };
 }
 
-/** Advanced-tier preview: renders the exact glyph path data from objects/shapes/icon/glyphs.tsx's ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the 20x20 preview viewBox. */
+/** Advanced-tier preview: renders the exact glyph path data from ui/icons/icon-glyphs.tsx's ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the 20x20 preview viewBox. */
 function iconGlyphPreview(glyphId: IconGlyphId) {
   const glyph = ICON_GLYPHS[glyphId];
   return function IconGlyphPreview({ className }: { className?: string }) {

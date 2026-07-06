@@ -107,7 +107,7 @@ src/
     palette.ts
     section/  sticky/  text/  container/  connector/  code-block/  source-node/
     shapes/                one file per shape; base.tsx adapter; toolbar.tsx
-      icon/                def + IconShapeBody + glyphs together
+      icon/                def + IconShapeBody (glyph data lives in ui/icons/)
     catalog/               SHAPE_CATALOG + ShapeSearchPopover (registry-driven)
   render/                LAYER 3a — document → pixels; stateless; shared by
     CanvasStage.tsx        the editor AND the read-only viewer/embeds
@@ -117,13 +117,15 @@ src/
   interaction/           LAYER 3b — pointer input → actions; pure TS, no React
     interaction.ts barrel; core.ts; gestures/; hit-testing; snapping; clipboard
   ui/                    shared dumb primitives, importable from objects up:
-    button/input/… plus Tooltip, ColorPalettePopover, toolbar-icons
+    button/input/… plus Tooltip, ColorPalettePopover
+    icons/               ALL icon modules (amended 2026-07-06): toolbar-icons,
+                         dock-icons, icon-glyphs, nucleo/ (reference SVGs)
   editor/                LAYER 4 — the app; nothing below imports it
     InteractiveCanvasEditor.tsx   composition root
     InteractiveCanvasViewer.tsx   read-only variant
     components/            what shows up on the page: FigJamDock, ShapesPanel,
-                           ContextToolbar (dumb host), ZoomControls, dock-icons,
-                           icons-nucleo/, context-toolbar-position
+                           ContextToolbar (dumb host), ZoomControls,
+                           context-toolbar-position
     features/              the state + wiring behind them: context-toolbar/,
                            label-editing/, context-menu/, drag-pipeline/,
                            inspector/, top-bar/
