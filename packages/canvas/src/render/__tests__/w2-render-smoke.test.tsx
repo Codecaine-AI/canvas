@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements.canvas.json";
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDocument;
 

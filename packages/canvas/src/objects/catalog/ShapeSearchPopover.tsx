@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { CHROME } from "../../tokens/figjam-tokens";
 import { SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
 import { Tooltip } from "../../ui/Tooltip";
-import type { InteractiveCanvasObjectType } from "../../model/schema";
+import type { InteractiveCanvasObjectType } from "../../state/schema";
 
 /**
  * ShapeSearchPopover — Panel A from figjam-chrome-catalog.md section 4: the

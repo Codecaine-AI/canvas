@@ -7,8 +7,8 @@
  * gesture steppers live in ./gestures/*; the shared types/constants in
  * ./types. Consumers import everything through ./interaction (the barrel).
  */
-import { objectTypeLabel, type CanvasAction, type CanvasSelection } from "../model/actions";
-import { createObjectId } from "../model/geometry";
+import { objectTypeLabel, type CanvasAction, type CanvasSelection } from "../state/actions";
+import { createObjectId } from "../state/geometry";
 import { objectDefForType } from "../objects/object-def";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";

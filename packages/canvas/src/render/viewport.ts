@@ -5,8 +5,8 @@ import {
   documentBounds,
   type CanvasBounds,
   type CanvasPoint,
-} from "../model/geometry";
-import type { InteractiveCanvasDocument } from "../model/schema";
+} from "../state/geometry";
+import type { InteractiveCanvasDocument } from "../state/schema";
 
 /**
  * Viewport coordinate convention:

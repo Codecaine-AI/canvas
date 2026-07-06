@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { CanvasAction, CanvasSelection, CanvasTool } from "../model/actions";
+import type { CanvasAction, CanvasSelection, CanvasTool } from "../state/actions";
 import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../interaction/clipboard";
-import { CANVAS_GRID_SIZE } from "../model/geometry";
+import { CANVAS_GRID_SIZE } from "../state/geometry";
 import { cancelInteraction, type InteractionState } from "../interaction/interaction";
-import type { InteractiveCanvasDocument } from "../model/schema";
+import type { InteractiveCanvasDocument } from "../state/schema";
 import type { CanvasViewportControls } from "./use-canvas-viewport";
 
 /**

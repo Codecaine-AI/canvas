@@ -9,7 +9,7 @@
  */
 import { computeSnapGuides } from "../snapping";
 import { gatherSnapCandidates } from "../hit-testing";
-import type { CanvasGeometry } from "../../model/schema";
+import type { CanvasGeometry } from "../../state/schema";
 import {
   IDLE_INTERACTION_STATE,
   SNAP_THRESHOLD_SCREEN_PX,

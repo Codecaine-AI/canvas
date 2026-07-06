@@ -1,12 +1,12 @@
 "use client";
 
-import type { CanvasSelection } from "../model/actions";
-import { boundsForGeometries, type CanvasPoint } from "../model/geometry";
+import type { CanvasSelection } from "../state/actions";
+import { boundsForGeometries, type CanvasPoint } from "../state/geometry";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../model/schema";
+} from "../state/schema";
 
 export type CanvasClipboardPayload = {
   objects: InteractiveCanvasObject[];

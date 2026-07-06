@@ -16,8 +16,8 @@ import {
   positionSelectionToolbar,
   type PositionSelectionToolbarResult,
 } from "./position";
-import type { CanvasAction, CanvasSelection } from "../../../model/actions";
-import { boundsForGeometries, type CanvasBounds } from "../../../model/geometry";
+import type { CanvasAction, CanvasSelection } from "../../../state/actions";
+import { boundsForGeometries, type CanvasBounds } from "../../../state/geometry";
 import {
   connectorDef,
   intersectToolbarControls,
@@ -38,7 +38,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-} from "../../../model/schema";
+} from "../../../state/schema";
 
 // Moved to objects/palette.ts (step 5) so toolbar flyout components declared
 // on ObjectDefs can share it; re-exported here for existing importers.

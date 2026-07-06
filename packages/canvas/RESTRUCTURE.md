@@ -7,7 +7,7 @@ restructure of the canvas engine source. Read it before moving any file.
 
 Four files absorb every feature (sizes at time of writing):
 `editor/InteractiveCanvasEditor.tsx` (2,235), `render/CanvasStage.tsx` (1,916),
-`interaction/interaction.ts` (1,507), `model/actions.ts` (1,409). A feature like
+`interaction/interaction.ts` (1,507), `state/actions.ts` (1,409). A feature like
 sections smears across 21 files. Two distinct causes, two distinct fixes:
 
 1. **Per-type boilerplate smear** — adding a shape touches the schema union,
@@ -98,7 +98,7 @@ src/
   tokens/                LAYER 0 — design constants; imports nothing
     figjam-tokens.ts       colors, text sizes, shape-geometry ratios (sampled)
     theme.ts               tone/palette → fill/border/text resolution
-  model/                 LAYER 1 — the document
+  state/                 LAYER 1 — the document (renamed from model/ 2026-07-06)
     schema.ts → schema/    what a canvas JSON is (path kept: exports target)
     actions.ts → actions/  reducer — the only way the document changes
     geometry.ts
@@ -133,7 +133,7 @@ src/
   routing/  vendor/  fixtures/   unchanged (MPL boundary untouched)
 ```
 
-Import rule (boundary-tested): tokens ← model ← objects ← render|interaction
+Import rule (boundary-tested): tokens ← state ← objects ← render|interaction
 ← editor; `ui` sits beside tokens (importable from objects up); nothing
 outside `editor/` imports `editor/`.
 
@@ -157,7 +157,7 @@ outside `editor/` imports `editor/`.
    (it currently touches every src directory — see Sequencing).
 1. Editor split → `editor/features/` (six extractions, one commit each).
 2. Interaction split → `core.ts` + `gestures/`; move capture threshold to
-   model/geometry; relocate `ViewportState`.
+   state/geometry; relocate `ViewportState`.
 3. Render split → `connectors/`, `overlays/`, `ObjectShape.tsx` (pure moves).
 4. Registry: introduce `objects/` contracts + `shapes/base.ts`; convert
    shape-by-shape (className chain, render branches, per-shape CSS into defs).
@@ -175,4 +175,4 @@ The W5 shape-set work has uncommitted changes across all src directories.
 Restructure starts from a tree that INCLUDES W5 (committed), so file moves
 carry W5 content and W5 never has to merge across renames. Steps 1–3 can
 proceed while W5 stabilizes only if W5's remaining churn is confined to
-shapes/model; step 6 strictly waits for W5.
+shapes/state; step 6 strictly waits for W5.

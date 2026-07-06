@@ -1,7 +1,7 @@
 "use client";
 
-import { centerOf, type CanvasBounds, type CanvasPoint } from "../model/geometry";
-import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../model/schema";
+import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
+import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
 import { CONNECTOR_ELBOW_CORNER_RADIUS_PX, CONNECTOR_END_GAP_PX } from "../tokens/figjam-tokens";
 

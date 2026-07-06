@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 afterEach(() => {
   cleanup();

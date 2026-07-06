@@ -6,8 +6,8 @@
  * gesture state lives here — everything is a straight function of the
  * document + a world point/bounds, so it's independently unit-testable.
  */
-import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../model/geometry";
-import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../model/schema";
+import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../state/geometry";
+import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 import { objectDefForType } from "../objects/object-def";
 
 /** Width (world units) of the border band on containers that is hittable for move/select. */

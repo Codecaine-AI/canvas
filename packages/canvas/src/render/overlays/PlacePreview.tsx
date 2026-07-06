@@ -1,6 +1,6 @@
 "use client";
 
-import type { CanvasBounds } from "../../model/geometry";
+import type { CanvasBounds } from "../../state/geometry";
 import { worldToScreen, type ViewportState } from "../viewport";
 
 /** Ghost preview outline for an in-progress armed-tool placement (4.2.2). */

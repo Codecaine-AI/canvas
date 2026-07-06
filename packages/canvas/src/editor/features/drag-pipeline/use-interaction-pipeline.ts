@@ -24,12 +24,12 @@ import {
   type InteractionState,
   type ResizeHandle,
 } from "../../../interaction/interaction";
-import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../model/actions";
-import { type CanvasPoint } from "../../../model/geometry";
+import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../state/actions";
+import { type CanvasPoint } from "../../../state/geometry";
 import { type Anchor } from "../../../routing/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
 import { panBy, type ViewportState } from "../../../render/viewport";
-import type { InteractiveCanvasDocument } from "../../../model/schema";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
 
 /** Width of the stage-edge band (screen px) where drag auto-pan kicks in (T1.2.1). */
 const EDGE_PAN_BAND_PX = 36;

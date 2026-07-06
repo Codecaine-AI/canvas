@@ -1,12 +1,12 @@
 "use client";
 
-import { objectById, type CanvasPoint } from "../../model/geometry";
+import { objectById, type CanvasPoint } from "../../state/geometry";
 import type { InteractionOverlay } from "../../interaction/interaction";
 import { getConnectionAnchors } from "../../routing/connection-overlay";
 import { pointForAnchor, routeConnection, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
 import { CHROME } from "../../tokens/figjam-tokens";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 /**
  * Live preview rendered while a connector endpoint is being dragged (3.2.2

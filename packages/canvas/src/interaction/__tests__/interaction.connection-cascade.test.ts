@@ -9,7 +9,7 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../model/schema";
+} from "../../state/schema";
 
 /**
  * W3b: the connector create/endpoint-drag gestures resolve their hover

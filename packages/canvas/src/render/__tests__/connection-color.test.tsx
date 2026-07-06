@@ -3,12 +3,12 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import {
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
-} from "../../model/actions";
+} from "../../state/actions";
 import { InteractiveCanvasEditor } from "../../editor/InteractiveCanvasEditor";
 import {
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
-} from "../../model/schema";
+} from "../../state/schema";
 
 afterEach(() => {
   cleanup();

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {
   cleanup();

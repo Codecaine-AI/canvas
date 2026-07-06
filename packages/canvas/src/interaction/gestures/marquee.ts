@@ -5,7 +5,7 @@
  * (shift) marquees union with the existing selection; plain marquees replace
  * it (or clear it when nothing intersects).
  */
-import { normalizeBounds } from "../../model/geometry";
+import { normalizeBounds } from "../../state/geometry";
 import { objectsIntersectingBounds } from "../hit-testing";
 import {
   IDLE_INTERACTION_STATE,

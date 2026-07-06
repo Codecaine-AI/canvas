@@ -1,6 +1,6 @@
 "use client";
 
-import type { CanvasBounds } from "../../model/geometry";
+import type { CanvasBounds } from "../../state/geometry";
 import { worldToScreen, type ViewportState } from "../viewport";
 
 export function Marquee({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {

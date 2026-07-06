@@ -8,7 +8,7 @@ import type { ShapeDef } from "./shape-def";
  * base `interactive-canvas-object` chrome (border + background) plus a
  * pill-shaped border-radius override and centered, padding-free content.
  * Placement default (220, 220) diverges from the shape-family standard
- * (160, 160) — see defaultGeometryFor in model/actions/defaults.ts.
+ * (160, 160) — see defaultGeometryFor in state/actions/defaults.ts.
  */
 export const annotationMarkerShapeDef: ShapeDef = {
   type: "annotation-marker",

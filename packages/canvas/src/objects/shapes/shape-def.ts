@@ -1,13 +1,13 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import type { CanvasBounds, CanvasPoint } from "../../model/geometry";
+import type { CanvasBounds, CanvasPoint } from "../../state/geometry";
 import type {
   CanvasObjectStyle,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
-} from "../../model/schema";
+} from "../../state/schema";
 import type { Anchor } from "../../routing/routing";
 import type { CanvasToneStyle } from "../../tokens/theme";
 

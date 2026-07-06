@@ -1,8 +1,8 @@
 "use client";
 
 import type { ComponentType, MouseEvent as ReactMouseEvent } from "react";
-import type { CanvasAction } from "../model/actions";
-import type { CanvasBounds } from "../model/geometry";
+import type { CanvasAction } from "../state/actions";
+import type { CanvasBounds } from "../state/geometry";
 import type {
   CanvasGeometry,
   CanvasObjectStyle,
@@ -13,7 +13,7 @@ import type {
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
-} from "../model/schema";
+} from "../state/schema";
 import { codeBlockDef } from "./code-block/def";
 import { connectorDef } from "./connector/def";
 import { containerDef } from "./container/def";
@@ -68,7 +68,7 @@ import { triangleDef } from "./shapes/triangle";
  * from the registry. `labelEditing` is DECLARED but not yet consumed —
  * inline label-editing dispatch still checks `object.type === "section"`
  * directly. `defaults` is likewise DECLARED but not yet consumed — per-type
- * defaults still live in model/actions/defaults.ts and are wired through the
+ * defaults still live in state/actions/defaults.ts and are wired through the
  * registry in a later chunk (RESTRUCTURE.md step 6).
  */
 
@@ -166,7 +166,7 @@ export interface ToolbarSpec {
   flyouts?: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>>;
 }
 
-/** Type-level defaults, the registry-side replacement for model/actions/defaults.ts (wired in step 6). */
+/** Type-level defaults, the registry-side replacement for state/actions/defaults.ts (wired in step 6). */
 export interface ObjectDefaults {
   geometry: CanvasGeometry;
   tone: InteractiveCanvasTone;

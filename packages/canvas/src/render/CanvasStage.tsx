@@ -12,7 +12,7 @@ import {
   objectById,
   sectionCaptureMembers,
   type CanvasBounds,
-} from "../model/geometry";
+} from "../state/geometry";
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
 import { canvasSurfaceStyle } from "../tokens/theme";
@@ -27,7 +27,7 @@ import { PlacePreview } from "./overlays/PlacePreview";
 import { SnapGuideLine } from "./overlays/SnapGuideLine";
 import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
-import type { CanvasTool } from "../model/actions";
+import type { CanvasTool } from "../state/actions";
 import {
   CANVAS_BG,
   CANVAS_FONT_FAMILY,
@@ -44,7 +44,7 @@ import type {
   CanvasAnnotationTarget,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../model/schema";
+} from "../state/schema";
 
 /** Arrowhead marker geometry, expressed in units of the connector's own stroke width (see marker `<defs>` below). */
 const ARROW_LENGTH_RATIO = CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO;

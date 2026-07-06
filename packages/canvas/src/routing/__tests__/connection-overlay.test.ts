@@ -8,7 +8,7 @@ import {
   OUTLINE_SNAP_WORLD_PX,
   resolveConnectionCascade,
 } from "../connection-overlay";
-import type { InteractiveCanvasObject } from "../../model/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
 function rectObject(overrides: Partial<InteractiveCanvasObject> = {}): InteractiveCanvasObject {
   return {

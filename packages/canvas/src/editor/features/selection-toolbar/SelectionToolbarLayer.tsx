@@ -1,11 +1,11 @@
 "use client";
 
 import { SelectionToolbar } from "./SelectionToolbar";
-import type { CanvasAction } from "../../../model/actions";
+import type { CanvasAction } from "../../../state/actions";
 import { CONNECTOR_DEFAULT_COLOR } from "../../../tokens/figjam-tokens";
 import { paletteTokenStyle, resolveSectionColors } from "../../../tokens/theme";
 import type { SelectionToolbarApi } from "./use-selection-toolbar";
-import type { InteractiveCanvasConnection } from "../../../model/schema";
+import type { InteractiveCanvasConnection } from "../../../state/schema";
 
 export interface SelectionToolbarLayerProps {
   toolbar: SelectionToolbarApi;

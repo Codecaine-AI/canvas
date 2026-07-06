@@ -14,7 +14,7 @@
  * (those were placeholders from before the real W5 shape vocabulary landed;
  * connectors are a dock-only tool — see CanvasDock.tsx's `"connector"`
  * ToolId — not a Shapes-panel concept). `objectType` now maps to the REAL
- * `InteractiveCanvasObjectType` from ../model/schema (all 19 W5 native types
+ * `InteractiveCanvasObjectType` from ../state/schema (all 19 W5 native types
  * + "icon" are live), so every entry in this catalog is enabled — there is
  * no more "coming soon" disabled state.
  *
@@ -41,8 +41,8 @@
  *     same-layer import.
  */
 
-import type { CanvasBounds } from "../../model/geometry";
-import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../../model/schema";
+import type { CanvasBounds } from "../../state/geometry";
+import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../../state/schema";
 import { ICON_GLYPHS, type IconGlyphId } from "../../ui/icons/icon-glyphs";
 import {
   chevronPoints,

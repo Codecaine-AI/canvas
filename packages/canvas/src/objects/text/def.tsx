@@ -61,7 +61,7 @@ export const textDef: ObjectDef = {
   defaults: {
     geometry: { x: 160, y: 160, width: 184, height: 96 },
     tone: "neutral",
-    // model/actions/defaults.ts cannot currently express this: shapeForType("text")
+    // state/actions/defaults.ts cannot currently express this: shapeForType("text")
     // falls through to "rounded-rect", while rendering uses the "label" fallback.
     // The registry default records the semantic/effective render shape for step 6.
     shape: "label",

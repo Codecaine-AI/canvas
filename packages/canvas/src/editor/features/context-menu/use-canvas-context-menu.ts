@@ -2,15 +2,15 @@
 
 import { useCallback, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../../../interaction/clipboard";
-import { defaultGeometryFor, type CanvasAction } from "../../../model/actions";
-import type { CanvasBounds, CanvasPoint } from "../../../model/geometry";
+import { defaultGeometryFor, type CanvasAction } from "../../../state/actions";
+import type { CanvasBounds, CanvasPoint } from "../../../state/geometry";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
 import type {
   CanvasGeometry,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-} from "../../../model/schema";
+} from "../../../state/schema";
 
 export type CanvasContextMenuState =
   | {

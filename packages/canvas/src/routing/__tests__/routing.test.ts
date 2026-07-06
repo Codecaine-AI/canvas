@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import type { CanvasPoint } from "../../model/geometry";
-import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../model/schema";
+import type { CanvasPoint } from "../../state/geometry";
+import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
 import { autoPickAnchors, routeConnection, type Anchor } from "../routing";
 import { CONNECTOR_END_GAP_PX } from "../../tokens/figjam-tokens";
 

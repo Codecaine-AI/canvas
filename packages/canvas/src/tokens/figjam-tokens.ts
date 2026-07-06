@@ -117,11 +117,11 @@ export const SECTION_GEOMETRY = {
 } as const;
 
 // Section capture-membership threshold: model semantics, not a visual token —
-// it now lives in model/geometry.ts next to sectionCaptureMembers (its
+// it now lives in state/geometry.ts next to sectionCaptureMembers (its
 // consumer; the full rationale for the 0.6 default moved with it).
 // Re-exported here because this module is a public exports-map entry
 // ("./figjam-tokens") and existing importers pull the constant from this path.
-export { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../model/geometry";
+export { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../state/geometry";
 
 // ---------------------------------------------------------------------------
 // Sticky notes

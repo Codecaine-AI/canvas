@@ -35,9 +35,9 @@
  * (our fallback is intentionally the same conservative choice, not a gap).
  */
 
-import type { CanvasBounds, CanvasPoint } from "../model/geometry";
+import type { CanvasBounds, CanvasPoint } from "../state/geometry";
 import { ARROW_SHAPE_GEOMETRY } from "../tokens/figjam-tokens";
-import type { InteractiveCanvasObject } from "../model/schema";
+import type { InteractiveCanvasObject } from "../state/schema";
 
 /** World-space offset each cardinal anchor candidate starts at, outside the object's bound. Upstream `connector-manager.ts:135`. */
 export const ANCHOR_OFFSET_PX = 10;

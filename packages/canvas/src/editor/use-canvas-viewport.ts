@@ -11,8 +11,8 @@ import {
   type ScreenSize,
   type ViewportState,
 } from "../render/viewport";
-import type { CanvasPoint } from "../model/geometry";
-import type { InteractiveCanvasDocument } from "../model/schema";
+import type { CanvasPoint } from "../state/geometry";
+import type { InteractiveCanvasDocument } from "../state/schema";
 
 const ZOOM_STEP = 1.2;
 

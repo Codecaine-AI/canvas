@@ -1,6 +1,6 @@
 "use client";
 
-import type { CanvasPoint } from "../../model/geometry";
+import type { CanvasPoint } from "../../state/geometry";
 import { starPoints } from "../../routing/connection-overlay";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";

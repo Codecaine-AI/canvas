@@ -2,12 +2,12 @@
 
 import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "../../../ui/icons/icon-glyphs";
 import { ICON_APPROX_SIZE_PX } from "../../../tokens/figjam-tokens";
-import type { InteractiveCanvasObject } from "../../../model/schema";
+import type { InteractiveCanvasObject } from "../../../state/schema";
 
 /**
  * Minimal structural shape this component needs from an interactive canvas
  * object. Originally a hand-rolled structural type (the `icon` object type /
- * `icon` field hadn't landed in model/schema.ts yet when this file was
+ * `icon` field hadn't landed in state/schema.ts yet when this file was
  * written, owned by a different in-flight wave); now that the real schema
  * has both, this is just a `Pick` of the fields actually used so the type
  * stays in lockstep with schema.ts without pulling in the full object shape.

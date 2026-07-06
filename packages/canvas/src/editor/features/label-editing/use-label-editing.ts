@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
-import type { CanvasAction } from "../../../model/actions";
-import type { CanvasPoint } from "../../../model/geometry";
+import type { CanvasAction } from "../../../state/actions";
+import type { CanvasPoint } from "../../../state/geometry";
 import { routeConnection } from "../../../routing/routing";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../../model/schema";
+} from "../../../state/schema";
 
 export interface UseLabelEditingArgs {
   document: InteractiveCanvasDocument;

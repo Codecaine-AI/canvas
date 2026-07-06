@@ -11,7 +11,7 @@ import type {
   CanvasPaletteToken,
   CanvasSectionTint,
   InteractiveCanvasTone,
-} from "../model/schema";
+} from "../state/schema";
 
 export type CanvasToneStyle = {
   fill: string;

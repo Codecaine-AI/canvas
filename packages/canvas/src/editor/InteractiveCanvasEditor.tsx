@@ -16,7 +16,7 @@ import {
   type CanvasAction,
   type CanvasSelection,
   type CanvasTool,
-} from "../model/actions";
+} from "../state/actions";
 import { CanvasStage } from "../render/CanvasStage";
 import { CanvasDock, type ToolId } from "./components/CanvasDock";
 import { ShapesPanel } from "./components/ShapesPanel";
@@ -35,7 +35,7 @@ import { useCanvasViewport } from "./use-canvas-viewport";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObjectType,
-} from "../model/schema";
+} from "../state/schema";
 
 export interface InteractiveCanvasEditorProps {
   document: InteractiveCanvasDocument;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
-import type { CanvasBounds, CanvasPoint } from "../../model/geometry";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { CanvasBounds, CanvasPoint } from "../../state/geometry";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 import {
   clampZoom,
   containerViewBounds,

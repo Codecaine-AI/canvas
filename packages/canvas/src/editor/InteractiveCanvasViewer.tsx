@@ -10,9 +10,9 @@ import {
 } from "react";
 import { AlertTriangleIcon, MessageSquareIcon } from "lucide-react";
 import { annotationTargetLabel, CanvasStage } from "../render/CanvasStage";
-import type { CanvasBounds } from "../model/geometry";
+import type { CanvasBounds } from "../state/geometry";
 import { containerViewBounds, fitBounds, fitDocument, type ScreenSize, type ViewportState } from "../render/viewport";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../model/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 
 export interface InteractiveCanvasViewerProps {
   document: InteractiveCanvasDocument;

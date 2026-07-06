@@ -7,9 +7,9 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/model/schema.ts",
-    "./actions": "./src/model/actions.ts",
-    "./geometry": "./src/model/geometry.ts",
+    "./schema": "./src/state/schema.ts",
+    "./actions": "./src/state/actions.ts",
+    "./geometry": "./src/state/geometry.ts",
     "./theme": "./src/tokens/theme.ts",
     "./figjam-tokens": "./src/tokens/figjam-tokens.ts",
     "./connection-overlay": "./src/routing/connection-overlay.ts",

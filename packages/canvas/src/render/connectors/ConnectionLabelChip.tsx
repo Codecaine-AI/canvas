@@ -3,7 +3,7 @@
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
-} from "../../model/schema";
+} from "../../state/schema";
 import { routeConnection } from "../../routing/routing";
 
 /**

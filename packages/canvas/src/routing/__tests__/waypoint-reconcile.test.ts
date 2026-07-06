@@ -3,13 +3,13 @@ import {
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
   type InteractiveCanvasState,
-} from "../../model/actions";
+} from "../../state/actions";
 import { buildPastePayload, type CanvasClipboardPayload } from "../../interaction/clipboard";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../model/schema";
+} from "../../state/schema";
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {

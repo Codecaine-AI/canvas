@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { useRef } from "react";
 import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
-import type { CanvasAction, CanvasSelection } from "../../model/actions";
+import type { CanvasAction, CanvasSelection } from "../../state/actions";
 import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction/interaction";
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { useCanvasHotkeys } from "../use-canvas-hotkeys";
 import { SECTION_GEOMETRY } from "../../tokens/figjam-tokens";
 

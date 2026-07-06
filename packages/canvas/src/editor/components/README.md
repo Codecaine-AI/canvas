@@ -79,7 +79,7 @@ an `ObjectDef.toolbar`.
   expected: flyouts are dumb UI, and defs assemble them into their
   `ToolbarSpec`.
 - `editor/components/` sits in layer 4: it may import `objects/`, `render/`,
-  `ui/`, `tokens/`, and `model/`, but nothing outside `editor/` may import it.
+  `ui/`, `tokens/`, and `state/`, but nothing outside `editor/` may import it.
 - `ui/` must **not** import `objects/`, `render/`, `interaction/`, or
   `editor/` — primitives stay dumb. A type-only import from `objects/` in an
   editor component (e.g. `SelectionToolbar.tsx`'s `ToolbarControlSpec`) is an

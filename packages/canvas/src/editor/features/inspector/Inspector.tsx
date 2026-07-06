@@ -20,14 +20,14 @@ import {
   buildSelectionContext,
   type CanvasAction,
   type CanvasChangeSummary,
-} from "../../../model/actions";
+} from "../../../state/actions";
 import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../../../tokens/theme";
 import type {
   CanvasPaletteToken,
   InteractiveCanvasConnection,
   InteractiveCanvasLink,
   InteractiveCanvasObject,
-} from "../../../model/schema";
+} from "../../../state/schema";
 
 export interface InspectorProps {
   lastChange: CanvasChangeSummary | undefined;

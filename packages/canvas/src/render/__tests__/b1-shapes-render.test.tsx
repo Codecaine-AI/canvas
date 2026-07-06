@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {
   cleanup();
@@ -42,7 +42,7 @@ const SCREEN = { width: 1600, height: 900 };
 /**
  * One object per Wave B1 native type (default sizes from the implementation
  * brief), laid out on a simple grid. `style.shape` mirrors `type` the same way
- * `shapeForType` (model/actions.ts) writes it for placed objects.
+ * `shapeForType` (state/actions.ts) writes it for placed objects.
  */
 function b1Object(
   id: string,

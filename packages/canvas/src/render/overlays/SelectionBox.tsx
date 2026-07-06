@@ -6,7 +6,7 @@ import {
   type ResizeHandle,
 } from "../../interaction/interaction";
 import { worldToScreen, type ViewportState } from "../viewport";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 import { objectDefForType } from "../../objects/object-def";
 
 const HANDLE_SIZE = 10;

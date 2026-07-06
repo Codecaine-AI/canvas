@@ -5,9 +5,9 @@
  * mapping, the default-size placement geometry shared with double-click
  * creation (4.2.1), and the ghost-preview sizing for click-vs-drag placement.
  */
-import { defaultGeometryFor, type CanvasTool } from "../../model/actions";
-import { normalizeBounds, type CanvasPoint } from "../../model/geometry";
-import type { CanvasGeometry, InteractiveCanvasObjectType } from "../../model/schema";
+import { defaultGeometryFor, type CanvasTool } from "../../state/actions";
+import { normalizeBounds, type CanvasPoint } from "../../state/geometry";
+import type { CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
 import { hitTestDropTarget } from "../hit-testing";
 import {
   DRAG_THRESHOLD,

@@ -1,4 +1,4 @@
-import type { CanvasPoint } from "../model/geometry";
+import type { CanvasPoint } from "../state/geometry";
 
 /** Screen-space size of the canvas stage element (pointer is assumed already stage-relative). */
 export type StageRect = {

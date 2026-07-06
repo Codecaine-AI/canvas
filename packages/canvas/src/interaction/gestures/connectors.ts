@@ -8,8 +8,8 @@
  */
 import { resolveConnectionCascade } from "../../routing/connection-overlay";
 import { nearestAnchor, pointForAnchor } from "../../routing/routing";
-import type { CanvasPoint } from "../../model/geometry";
-import type { InteractiveCanvasDocument } from "../../model/schema";
+import type { CanvasPoint } from "../../state/geometry";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,

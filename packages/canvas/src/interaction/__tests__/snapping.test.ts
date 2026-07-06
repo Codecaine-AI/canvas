@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../model/geometry";
+import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../state/geometry";
 import {
   applyGridFallback,
   computeSnapGuides,

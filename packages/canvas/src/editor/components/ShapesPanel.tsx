@@ -3,7 +3,7 @@
 import { memo, useMemo, useState } from "react";
 import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../objects/catalog/shape-catalog";
 import { Tooltip } from "../../ui/Tooltip";
-import type { InteractiveCanvasObjectType } from "../../model/schema";
+import type { InteractiveCanvasObjectType } from "../../state/schema";
 
 /**
  * ShapesPanel — the full-height, left-docked white "Shapes" sidebar opened by

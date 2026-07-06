@@ -1,4 +1,4 @@
-import type { CanvasPoint } from "../model/geometry";
+import type { CanvasPoint } from "../state/geometry";
 
 /** Client (viewport) coords -> stage-relative screen coords, for screenToWorld(). */
 export function stageScreenPointFromClient(

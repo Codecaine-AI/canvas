@@ -15,7 +15,7 @@ import { SHAPE_TOOLBAR } from "../shapes/toolbar";
  *
  * DOM-DISPATCH CAVEAT (read before registering): `defaultGeometryFor`,
  * `toneForType`, `objectTypeLabel`, and `shapeForType` in
- * model/actions/defaults.ts all fall through to their generic defaults for
+ * state/actions/defaults.ts all fall through to their generic defaults for
  * "source-node" TODAY — i.e. legacy ObjectShape dispatches a source-node
  * purely on `renderShapeFor(object)` (= `object.style?.shape ?? "rounded-rect"`),
  * NOT on `object.type`. Container/section are the only kinds legacy

@@ -1,6 +1,6 @@
 "use client";
 
-import type { CanvasPaletteToken } from "../model/schema";
+import type { CanvasPaletteToken } from "../state/schema";
 
 /**
  * Hex color -> nearest CanvasPaletteToken, for bridging ColorPalettePopover's

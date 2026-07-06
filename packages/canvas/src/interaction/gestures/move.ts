@@ -8,14 +8,14 @@
  * set (core.ts's press-pending router calls createMoveGesture when the drag
  * threshold is crossed).
  */
-import type { CanvasAction } from "../../model/actions";
+import type { CanvasAction } from "../../state/actions";
 import {
   SECTION_CAPTURE_OVERLAP_THRESHOLD,
   boundsForGeometries,
   sectionCaptureMembers,
   type CanvasPoint,
-} from "../../model/geometry";
-import type { CanvasGeometry, InteractiveCanvasDocument } from "../../model/schema";
+} from "../../state/geometry";
+import type { CanvasGeometry, InteractiveCanvasDocument } from "../../state/schema";
 import { objectDefForType } from "../../objects/object-def";
 import {
   computeSnapCorrection,

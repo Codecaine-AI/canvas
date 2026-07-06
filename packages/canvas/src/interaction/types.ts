@@ -6,13 +6,13 @@
  * the ephemeral overlay shape, the read-only step context/result types, the
  * shared thresholds, and a few tiny cross-gesture helpers (selectedObjectIds,
  * worldDistance, emptyOverlay, toIdle). This is the bottom layer of
- * src/interaction/ — it imports only from model/, routing/, snapping and the
+ * src/interaction/ — it imports only from state/, routing/, snapping and the
  * viewport module, never from the gesture steppers or core, so gestures/ and
  * core.ts can both depend on it without cycles.
  */
-import type { CanvasAction, CanvasSelection, CanvasTool } from "../model/actions";
-import type { CanvasBounds, CanvasPoint } from "../model/geometry";
-import type { CanvasGeometry, InteractiveCanvasObjectType, InteractiveCanvasDocument } from "../model/schema";
+import type { CanvasAction, CanvasSelection, CanvasTool } from "../state/actions";
+import type { CanvasBounds, CanvasPoint } from "../state/geometry";
+import type { CanvasGeometry, InteractiveCanvasObjectType, InteractiveCanvasDocument } from "../state/schema";
 import type { Anchor } from "../routing/routing";
 import type { DistributionGuideSegment, SnapCorrection, SnapGuide, SpacingHint } from "./snapping";
 import type { ViewportState } from "../render/viewport";

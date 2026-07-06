@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactive.canvas.json";
-import { objectById, type CanvasBounds } from "../../model/geometry";
+import { objectById, type CanvasBounds } from "../../state/geometry";
 import { routeConnection, type RoutedConnection } from "../routing";
-import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../../model/schema";
+import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { CONNECTOR_END_GAP_PX } from "../../tokens/figjam-tokens";
 
 const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
