@@ -2,6 +2,7 @@
 
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import { SHAPE_TOOLBAR } from "../shapes/toolbar";
 
 /**
  * Source Node renders pixel/DOM-identically to ObjectShape's plain default
@@ -76,5 +77,7 @@ export const sourceNodeDef: ObjectDef = {
   handles: "all",
   hitTest: "solid",
   dragCapture: "none",
+  // Pre-migration, this type resolved to the "shape" toolbar variant.
+  toolbar: SHAPE_TOOLBAR,
   labelEditing: { target: "label" },
 };

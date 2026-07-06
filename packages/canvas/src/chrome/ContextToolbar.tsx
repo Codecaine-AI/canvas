@@ -1,6 +1,9 @@
 "use client";
 
 import { memo, useState } from "react";
+// Type-only import: chrome must never import objects/ at runtime — the
+// dependency points the other way (object defs import chrome components).
+import type { ToolbarControlSpec } from "../objects/object-def";
 import { CHROME } from "../render/figjam-tokens";
 import { ChromeTooltip } from "./ChromeTooltip";
 import {
@@ -37,12 +40,13 @@ import {
  * #1D1D1D). Height 29-30px matches the catalog's dark-pill family (same
  * family as the color popover, ~28-30px radius scaled to pill height).
  *
- * Variant-driven via CONTEXT_TOOLBAR_REGISTRY (mirrors AFFiNE's
- * registry-data pattern per the task brief): each variant supplies its own
- * ordered control list + divider positions. Buttons fire a single typed
- * `onAction(actionId, value?)` callback rather than one callback per button,
- * so W3 can wire the whole registry to editor commands without per-control
- * plumbing.
+ * Since RESTRUCTURE.md step 5 this is a DUMB HOST: callers pass the icon-free
+ * `controls` spec list resolved from the object registry (objects/ defs are
+ * the source of truth for which controls each selection kind gets), and this
+ * component resolves each action id to its icon via ACTION_ICONS. The legacy
+ * `variant` prop keeps working for back-compat by resolving through the
+ * deprecated CONTEXT_TOOLBAR_REGISTRY. Buttons fire a single typed
+ * `onAction(actionId, value?)` callback rather than one callback per button.
  */
 
 export type ContextToolbarVariant = "shape" | "section" | "connector" | "text" | "sticky" | "multi";
@@ -89,6 +93,12 @@ export type ContextToolbarControl = {
 export type SectionBorderStyleValue = "solid" | "dashed" | "none";
 
 /**
+ * @deprecated The objects/ registry is now the source of truth for context
+ * toolbar control sets (each ObjectDef carries its own `toolbar` spec, and
+ * multi-select is a capability intersection over the selected defs — see
+ * objects/object-def.ts). This table remains only for back-compat with the
+ * `variant` prop on the public `@codecaine-ai/canvas/chrome` surface.
+ *
  * Registry mapping each selection-type variant to its measured control set.
  * Order and membership per figjam-chrome-catalog.md section 2:
  *   shape: shape-swap▾, color▾, align▾, Aa▾, size▾, B, strike, link, bullets, align▾(paragraph)
@@ -148,8 +158,53 @@ export const CONTEXT_TOOLBAR_REGISTRY: Record<ContextToolbarVariant, ContextTool
   ],
 };
 
+/**
+ * Icon resolution for registry-driven (icon-free) control specs: each action
+ * id maps 1:1 onto the icon the legacy CONTEXT_TOOLBAR_REGISTRY carried for
+ * it. "color" additionally keeps its special current-color swatch rendering
+ * inside ToolbarButton.
+ */
+const ACTION_ICONS: Record<string, ContextToolbarControl["Icon"]> = {
+  "shape-swap": ShapeSwapIcon,
+  color: ColorSwatchIcon,
+  align: AlignIcon,
+  "font-style": FontStyleIcon,
+  size: SizeIcon,
+  bold: BoldIcon,
+  strikethrough: StrikethroughIcon,
+  link: LinkIcon,
+  bullets: BulletsIcon,
+  "paragraph-align": ParagraphAlignIcon,
+  "section-border-style": StrokeIcon,
+  rename: RenameIcon,
+  visibility: EyeIcon,
+  lock: LockIcon,
+  stroke: StrokeIcon,
+  dash: DashIcon,
+  routing: RoutingIcon,
+  arrowhead: ArrowheadIcon,
+  "label-align": LabelAlignIcon,
+  "add-label": TextLabelIcon,
+};
+
+/** Fallback for out-of-vocabulary action ids in a registry-supplied spec. */
+function BlankIcon({ className }: { className?: string; color?: string }) {
+  return <span className={className} />;
+}
+
 export type ContextToolbarProps = {
-  variant: ContextToolbarVariant;
+  /**
+   * Legacy variant-keyed control lookup (resolves through the deprecated
+   * CONTEXT_TOOLBAR_REGISTRY). Ignored when `controls` is provided.
+   */
+  variant?: ContextToolbarVariant;
+  /**
+   * Registry-driven control specs (objects/ ObjectDef.toolbar) — icon-free;
+   * icons resolve via ACTION_ICONS. Takes precedence over `variant`.
+   */
+  controls?: readonly ToolbarControlSpec[];
+  /** `data-variant` / aria label override; falls back to `variant`. */
+  variantLabel?: string;
   onAction?: (action: ContextToolbarActionId, value?: unknown) => void;
   /** Optional style overrides for positioning; consumer supplies via wrapper. Height is fixed to the measured 29px per spec. */
   style?: React.CSSProperties;
@@ -264,6 +319,8 @@ function ToolbarButton({
 
 function ContextToolbarComponent({
   variant,
+  controls: controlSpecs,
+  variantLabel,
   onAction,
   style,
   className,
@@ -274,14 +331,26 @@ function ContextToolbarComponent({
   sectionContentHidden,
   sectionLocked,
 }: ContextToolbarProps) {
-  const controls = CONTEXT_TOOLBAR_REGISTRY[variant];
+  const controls: readonly ContextToolbarControl[] = controlSpecs
+    ? controlSpecs.map((spec) => ({
+        action: spec.action as ContextToolbarActionId,
+        label: spec.label,
+        Icon: ACTION_ICONS[spec.action] ?? BlankIcon,
+        hasFlyout: spec.hasFlyout,
+        text: spec.text,
+        dividerAfter: spec.dividerAfter,
+      }))
+    : variant
+      ? CONTEXT_TOOLBAR_REGISTRY[variant]
+      : [];
+  const label = variantLabel ?? variant;
 
   return (
     <div
       role="toolbar"
-      aria-label={`${variant} selection toolbar`}
+      aria-label={label ? `${label} selection toolbar` : "selection toolbar"}
       data-context-toolbar=""
-      data-variant={variant}
+      data-variant={label}
       className={className}
       style={{
         display: "inline-flex",

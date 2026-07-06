@@ -4,6 +4,7 @@ import { CODE_BLOCK } from "../../render/figjam-tokens";
 import { tokenizeCodeBlock } from "../../render/code-tokenizer";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import { SHAPE_TOOLBAR } from "../shapes/toolbar";
 
 /**
  * Code block (W2) — tokenized per-line rendering with a right-aligned
@@ -101,5 +102,7 @@ export const codeBlockDef: ObjectDef = {
   handles: "all",
   hitTest: "solid",
   dragCapture: "none",
+  // Pre-migration, this type resolved to the "shape" toolbar variant.
+  toolbar: SHAPE_TOOLBAR,
   labelEditing: { target: "label" },
 };

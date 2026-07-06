@@ -4,6 +4,7 @@ import { resolveObjectColors, resolveObjectStrokeWidth } from "../../render/them
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ShapeDef } from "./shape-def";
+import { SHAPE_TOOLBAR } from "./toolbar";
 
 /**
  * Adapts any ShapeDef (tier-2 variant data) into an ObjectDef (tier-1
@@ -84,5 +85,6 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
     hitTest: "solid",
     dragCapture: "none",
     labelEditing: { target: "label" },
+    toolbar: SHAPE_TOOLBAR,
   };
 }

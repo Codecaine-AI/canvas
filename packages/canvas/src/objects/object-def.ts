@@ -1,15 +1,21 @@
 "use client";
 
 import type { ComponentType, MouseEvent as ReactMouseEvent } from "react";
+import type { CanvasAction } from "../model/actions";
 import type { CanvasBounds } from "../model/geometry";
 import type {
   CanvasGeometry,
   CanvasObjectStyle,
+  CanvasPaletteToken,
+  CanvasSectionStrokeStyle,
+  CanvasSectionTint,
+  InteractiveCanvasConnection,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
 } from "../model/schema";
 import { codeBlockDef } from "./code-block/def";
+import { connectorDef } from "./connector/def";
 import { containerDef } from "./container/def";
 import { sectionDef } from "./section/def";
 import { sourceNodeDef } from "./source-node/def";
@@ -111,12 +117,50 @@ export interface LabelEditingSpec {
 }
 
 /**
- * Context-toolbar contract (step 5 wires this): action ids resolved against
- * the editor's action/flyout tables. Declared now so multi-select toolbars
- * can become a capability intersection over the selected defs.
+ * Context-toolbar contract (step 5): each def owns its ordered control list
+ * and the flyout components those controls open. Specs are ICON-FREE — the
+ * chrome ContextToolbar host resolves each action id to its icon via an
+ * internal map, so objects/ never depends on chrome's icon set.
  */
+export interface ToolbarControlSpec {
+  action: string;
+  label: string;
+  /** Whether this control opens a flyout (renders a chevron affordance). */
+  hasFlyout?: boolean;
+  /** Rendered as literal text instead of an icon (e.g. "Medium", "B"). */
+  text?: string;
+  /** Divider rendered immediately AFTER this control. */
+  dividerAfter?: boolean;
+}
+
+/**
+ * Props every toolbar flyout component receives from the editor's
+ * ContextToolbarLayer host: the primary selection, the dispatcher, a
+ * `close` callback, and the selection-wide style-apply helpers from
+ * use-context-toolbar. Flyouts pick the subset they need.
+ */
+export interface ToolbarFlyoutProps {
+  primaryObject?: InteractiveCanvasObject;
+  selectedConnection?: InteractiveCanvasConnection;
+  dispatch: (action: CanvasAction) => void;
+  close: () => void;
+  applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
+  applySectionFillToSelection: (fill: string) => void;
+  applySectionStrokeToSelection: (stroke: string) => void;
+  applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
+  applyTintToSelection: (tint: CanvasSectionTint) => void;
+  toggleLockForSelection: () => void;
+  swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
+}
+
 export interface ToolbarSpec {
-  actions: readonly string[];
+  controls: readonly ToolbarControlSpec[];
+  /**
+   * Flyout components keyed by the action id that opens them. May include
+   * flyouts with no backing control (section's "tint" is opened from the
+   * context menu, not a toolbar button).
+   */
+  flyouts?: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>>;
 }
 
 /** Type-level defaults, the registry-side replacement for model/actions/defaults.ts (wired in step 6). */
@@ -145,7 +189,7 @@ export interface ObjectDef {
   hitTest: ObjectHitTest;
   dragCapture: ObjectDragCapture;
   labelEditing: LabelEditingSpec;
-  /** Declared for step 5 (toolbar migration); unconsumed in the pilot. */
+  /** This kind's context toolbar (step 5): control list + flyout components. */
   toolbar?: ToolbarSpec;
 }
 
@@ -222,6 +266,10 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
 
 /** Registered defs in stylesheet order (their `css` is appended in this order). */
 export const OBJECT_DEFS: readonly ObjectDef[] = [
+  // Selection-kind def (connections aren't objects): carries the connector
+  // toolbar; css is empty and objectDefForType never resolves to it since
+  // "connector" is not an InteractiveCanvasObjectType.
+  connectorDef,
   sectionDef,
   stickyDef,
   codeBlockDef,
@@ -283,14 +331,19 @@ export function objectDefForType(type: InteractiveCanvasObjectType): ObjectDef |
 export const OBJECT_DEFS_CSS: string = OBJECT_DEFS.map((def) => def.css).join("");
 
 /**
- * Capability-intersection helper for the multi-select toolbar (step 5):
- * replaces the hard-coded `multi` toolbar variant with "action ids offered
- * by EVERY selected def, in the first def's order". Declared, unconsumed.
+ * Capability-intersection for the multi-select toolbar (step 5): the first
+ * def's controls (order donor) filtered to actions present in EVERY selected
+ * def's control set. Defs without a toolbar contribute nothing, so any
+ * toolbar-less def collapses the intersection to empty.
  */
-export function intersectToolbarActions(defs: readonly ObjectDef[]): string[] {
+export function intersectToolbarControls(defs: readonly ObjectDef[]): ToolbarControlSpec[] {
   const [first, ...rest] = defs;
-  if (!first) return [];
-  return (first.toolbar?.actions ?? []).filter((action) =>
-    rest.every((def) => def.toolbar?.actions.includes(action)),
+  if (!first?.toolbar) return [];
+  return first.toolbar.controls.filter((control) =>
+    rest.every((def) =>
+      def.toolbar?.controls.some((candidate) => candidate.action === control.action),
+    ),
   );
 }
+
+export { connectorDef };

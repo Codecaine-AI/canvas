@@ -4,6 +4,7 @@ import { IconShapeBody } from "../../render/IconShapeBody";
 import { resolveObjectColors } from "../../render/theme";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import { SHAPE_TOOLBAR } from "./toolbar";
 
 /**
  * The `icon` shape (Advanced-tier glyph family) renders its own self-contained
@@ -61,5 +62,7 @@ export const iconDef: ObjectDef = {
   handles: "all",
   hitTest: "solid",
   dragCapture: "none",
+  // Pre-migration, this type resolved to the "shape" toolbar variant.
+  toolbar: SHAPE_TOOLBAR,
   labelEditing: { target: "label" },
 };

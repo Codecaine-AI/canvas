@@ -3,6 +3,7 @@
 import { resolveSectionColors } from "../../render/theme";
 import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "../../render/figjam-tokens";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import { SECTION_TOOLBAR } from "./toolbar";
 
 /**
  * FigJam section (W2) — a large tinted backdrop with a floating title chip
@@ -166,5 +167,6 @@ export const sectionDef: ObjectDef = {
   // Section membership is geometric and ephemeral (sectionCaptureMembers,
   // ≥60% overlap at drag start, recursive) — never persisted.
   dragCapture: "geometric-overlap",
+  toolbar: SECTION_TOOLBAR,
   labelEditing: { target: "section-title" },
 };

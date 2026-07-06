@@ -6,20 +6,27 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentType,
   type Dispatch,
   type RefObject,
   type SetStateAction,
 } from "react";
-import type {
-  ContextToolbarActionId,
-  ContextToolbarVariant,
-} from "../../../chrome/ContextToolbar";
+import type { ContextToolbarActionId } from "../../../chrome/ContextToolbar";
 import {
   positionContextToolbar,
   type PositionContextToolbarResult,
 } from "../../../chrome/context-toolbar-position";
 import type { CanvasAction, CanvasSelection } from "../../../model/actions";
 import { boundsForGeometries, type CanvasBounds } from "../../../model/geometry";
+import {
+  connectorDef,
+  intersectToolbarControls,
+  objectDefForType,
+  type ObjectDef,
+  type ToolbarControlSpec,
+  type ToolbarFlyoutProps,
+} from "../../../objects/object-def";
+import { nearestPaletteToken } from "../../../objects/palette";
 import { paletteTokenStyle } from "../../../render/theme";
 import type { CanvasViewportControls } from "../../use-canvas-viewport";
 import { worldToScreen, type ViewportState } from "../../viewport";
@@ -33,83 +40,72 @@ import type {
   InteractiveCanvasObjectType,
 } from "../../../model/schema";
 
+// Moved to objects/palette.ts (step 5) so toolbar flyout components declared
+// on ObjectDefs can share it; re-exported here for existing importers.
+export { nearestPaletteToken } from "../../../objects/palette";
+
+/** The registry-resolved context toolbar for the current selection (step 5). */
+interface ResolvedContextToolbar {
+  /** "connector" | "multi" | the primary def's kind. */
+  kind: string;
+  /**
+   * DOM back-compat string for `data-variant` / the toolbar aria label:
+   * single-object non-special kinds keep reading "shape" like the
+   * pre-registry variant derivation did.
+   */
+  variantLabel: string;
+  controls: readonly ToolbarControlSpec[];
+  /** Flyout components of the PRIMARY selection's def (order donor for multi). */
+  flyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | undefined;
+}
+
+const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky", "text"]);
+
 /**
- * Hex color -> nearest CanvasPaletteToken, for bridging ColorPalettePopover's
- * raw FigJam hex swatches onto the schema's 5-value semantic palette
- * (CanvasPaletteToken). Converts to HSL and picks the token whose anchor hue
- * (theme.ts's PALETTE_TOKEN_HUE, restated here as plain hue angles since
- * that map is OKLCH-string-only and not exported in a form usable for
- * distance math) is angularly closest on the hue circle. Low-saturation
- * (near-gray) swatches fall back to "note" (yellow) only when hue is
- * otherwise undefined (achromatic) — picked arbitrarily among the 5 anchors
- * since a gray swap has no strong semantic match; documented as a known
- * approximation in the wave-3a report.
+ * Derives the toolbar for the current selection by def resolution (step 5):
+ * connection → connectorDef; single object → its type's def; multi → the
+ * capability intersection over the selected defs in selection order (first
+ * selected donates control order and the flyout table).
  */
-const PALETTE_TOKEN_HUE_ANGLES: Record<CanvasPaletteToken, number> = {
-  process: 255,
-  input: 145,
-  hot: 35,
-  memory: 300,
-  note: 95,
-};
-
-function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
-  const normalized = hex.replace("#", "");
-  if (normalized.length !== 6) return null;
-  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255;
-  if ([r, g, b].some((value) => Number.isNaN(value))) return null;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  const delta = max - min;
-  if (delta === 0) return { h: 0, s: 0, l };
-  const s = delta / (1 - Math.abs(2 * l - 1));
-  let h: number;
-  if (max === r) h = ((g - b) / delta) % 6;
-  else if (max === g) h = (b - r) / delta + 2;
-  else h = (r - g) / delta + 4;
-  h *= 60;
-  if (h < 0) h += 360;
-  return { h, s, l };
-}
-
-function hueDistance(a: number, b: number): number {
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
-
-export function nearestPaletteToken(hex: string): CanvasPaletteToken {
-  const hsl = hexToHsl(hex);
-  if (!hsl || hsl.s < 0.08) return "note";
-  let best: CanvasPaletteToken = "note";
-  let bestDistance = Infinity;
-  for (const token of Object.keys(PALETTE_TOKEN_HUE_ANGLES) as CanvasPaletteToken[]) {
-    const distance = hueDistance(hsl.h, PALETTE_TOKEN_HUE_ANGLES[token]);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      best = token;
-    }
-  }
-  return best;
-}
-
-/** Derives the ContextToolbar variant for the current selection (Wave 3a scope item 2). */
-function contextToolbarVariantForSelection(args: {
+function resolveContextToolbarForSelection(args: {
   selection: CanvasSelection;
   selectedObjects: InteractiveCanvasObject[];
   selectedConnection: InteractiveCanvasConnection | undefined;
-}): ContextToolbarVariant | null {
+}): ResolvedContextToolbar | null {
   const { selection, selectedObjects, selectedConnection } = args;
-  if (selection.kind === "connection" && selectedConnection) return "connector";
+  if (selection.kind === "connection" && selectedConnection) {
+    return {
+      kind: "connector",
+      variantLabel: "connector",
+      controls: connectorDef.toolbar?.controls ?? [],
+      flyouts: connectorDef.toolbar?.flyouts,
+    };
+  }
   if (selection.kind === "objects" && selectedObjects.length > 0) {
-    if (selectedObjects.length > 1) return "multi";
-    const object = selectedObjects[0];
-    if (object.type === "section") return "section";
-    if (object.type === "sticky") return "sticky";
-    if (object.type === "text") return "text";
-    return "shape";
+    const defs = selectedObjects.map((object) => objectDefForType(object.type));
+    const primaryDef = defs[0];
+    if (selectedObjects.length > 1) {
+      // Defs without a toolbar (or unknown types) contribute nothing, which
+      // collapses the intersection to empty — hide the toolbar entirely then
+      // rather than float an empty pill.
+      const controls = defs.some((def) => !def)
+        ? []
+        : intersectToolbarControls(defs as ObjectDef[]);
+      if (controls.length === 0) return null;
+      return {
+        kind: "multi",
+        variantLabel: "multi",
+        controls,
+        flyouts: primaryDef?.toolbar?.flyouts,
+      };
+    }
+    if (!primaryDef?.toolbar) return null;
+    return {
+      kind: primaryDef.kind,
+      variantLabel: SPECIAL_SINGLE_VARIANT_LABELS.has(primaryDef.kind) ? primaryDef.kind : "shape",
+      controls: primaryDef.toolbar.controls,
+      flyouts: primaryDef.toolbar.flyouts,
+    };
   }
   return null;
 }
@@ -137,7 +133,14 @@ export interface UseContextToolbarArgs {
 export interface ContextToolbarApi {
   /** Attached to the positioned wrapper so the measuring ResizeObserver sees the real size. */
   contextToolbarRef: RefObject<HTMLDivElement | null>;
-  contextToolbarVariant: ContextToolbarVariant | null;
+  /** Resolved toolbar kind: "connector" | "multi" | the primary def's kind. */
+  contextToolbarVariant: string | null;
+  /** DOM back-compat `data-variant`/aria string (single non-special kinds read "shape"). */
+  contextToolbarVariantLabel: string | null;
+  /** Registry-resolved control specs for the chrome ContextToolbar host. */
+  contextToolbarControls: readonly ToolbarControlSpec[] | null;
+  /** The primary selection's flyout components, keyed by opening action id. */
+  contextToolbarFlyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | null;
   contextToolbarPosition: PositionContextToolbarResult | null;
   openFlyout: ContextToolbarActionId | null;
   setOpenFlyout: Dispatch<SetStateAction<ContextToolbarActionId | null>>;
@@ -155,13 +158,12 @@ export interface ContextToolbarApi {
 }
 
 /**
- * ContextToolbar layer state + actions, extracted verbatim from
- * InteractiveCanvasEditor.tsx: the selection-derived variant/anchor-rect/
+ * ContextToolbar layer state + actions: the selection-derived toolbar
+ * resolution (registry-driven since RESTRUCTURE.md step 5), anchor-rect/
  * position memos, the measured toolbar size (ResizeObserver), the open-flyout
- * state, every style-apply callback, and the onAction dispatch table. The
- * action/flyout tables deliberately keep their current shape — they migrate
- * into the object registry in a later restructure step (RESTRUCTURE.md step
- * 5); this module is a pure move.
+ * state, every style-apply callback, and the onAction dispatch table. Control
+ * lists and flyout components live on the ObjectDefs (objects/); this hook
+ * resolves them per selection and hands them to ContextToolbarLayer.
  */
 export function useContextToolbar({
   document,
@@ -182,15 +184,22 @@ export function useContextToolbar({
   const [openFlyout, setOpenFlyout] = useState<ContextToolbarActionId | null>(null);
   const contextToolbarRef = useRef<HTMLDivElement | null>(null);
   const [contextToolbarSize, setContextToolbarSize] = useState({ width: 220, height: 29 });
+  // IN SELECTION ORDER (selection.objectIds click order), not document order:
+  // step 5's multi-select capability intersection makes the FIRST SELECTED
+  // object the order donor, and its def donates the flyout table.
   const selectedObjectsForToolbar = useMemo(
-    () => document.objects.filter((object) => selectedIds.includes(object.id)),
+    () =>
+      selectedIds
+        .map((id) => document.objects.find((object) => object.id === id))
+        .filter((object): object is InteractiveCanvasObject => object !== undefined),
     [document.objects, selectedIds],
   );
-  const contextToolbarVariant = contextToolbarVariantForSelection({
+  const resolvedToolbar = resolveContextToolbarForSelection({
     selection,
     selectedObjects: selectedObjectsForToolbar,
     selectedConnection,
   });
+  const contextToolbarVariant = resolvedToolbar?.kind ?? null;
   /**
    * Screen-space rect the ContextToolbar anchors above (Wave 3a scope item 2).
    * Computed read-only from CanvasStage's own pure helpers — worldToScreen
@@ -309,6 +318,10 @@ export function useContextToolbar({
   }, [contextToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
 
   const primarySelectedObject = selectedObjectsForToolbar[0];
+  const primaryDefKind = primarySelectedObject
+    ? objectDefForType(primarySelectedObject.type)?.kind
+    : undefined;
+  const contextToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
 
   /**
    * Section lock toggle (Wave 3a scope item 2's "lock" action + scope item
@@ -385,7 +398,7 @@ export function useContextToolbar({
         return;
       }
       if (action === "color" && typeof value === "string") {
-        if (contextToolbarVariant === "section") {
+        if (primaryDefKind === "section") {
           applySectionFillToSelection(value);
         } else {
           applyPaletteTokenToSelection(nearestPaletteToken(value));
@@ -405,17 +418,11 @@ export function useContextToolbar({
         toggleSectionContentHiddenForSelection();
         return;
       }
-      const FLYOUT_ACTIONS = new Set<ContextToolbarActionId>([
-        "shape-swap",
-        "color",
-        "tint",
-        "section-border-style",
-        "dash",
-        "routing",
-        "arrowhead",
-        "lock",
-      ]);
-      if (FLYOUT_ACTIONS.has(action)) {
+      // An action opens a flyout iff the resolved def's flyout table declares
+      // a component for it (replaces the static FLYOUT_ACTIONS set) — e.g.
+      // section: color/section-border-style/tint/lock; connector: color/dash/
+      // routing/arrowhead; shape: shape-swap/color; sticky/text: color.
+      if (contextToolbarFlyouts && action in contextToolbarFlyouts) {
         setOpenFlyout((current) => (current === action ? null : action));
         return;
       }
@@ -438,7 +445,8 @@ export function useContextToolbar({
       applySectionFillToSelection,
       applySectionBorderStyleToSelection,
       controls,
-      contextToolbarVariant,
+      contextToolbarFlyouts,
+      primaryDefKind,
       primarySelectedObject,
       toggleSectionContentHiddenForSelection,
       setObjectLabelEditId,
@@ -449,6 +457,9 @@ export function useContextToolbar({
   return {
     contextToolbarRef,
     contextToolbarVariant,
+    contextToolbarVariantLabel: resolvedToolbar?.variantLabel ?? null,
+    contextToolbarControls: resolvedToolbar?.controls ?? null,
+    contextToolbarFlyouts,
     contextToolbarPosition,
     openFlyout,
     setOpenFlyout,

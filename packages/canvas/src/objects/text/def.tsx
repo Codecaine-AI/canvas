@@ -3,6 +3,7 @@
 import { TEXT_SIZES_PX } from "../../render/figjam-tokens";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import { PaletteColorFlyout } from "../shapes/toolbar";
 
 /**
  * Text objects are the W2 borderless bold label special. They are dispatched
@@ -69,5 +70,17 @@ export const textDef: ObjectDef = {
   handles: "all",
   hitTest: "solid",
   dragCapture: "none",
+  toolbar: {
+    // Control list moved verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY
+    // ["text"] (minus the Icon field — the chrome host resolves icons).
+    controls: [
+      { action: "color", label: "Text color", hasFlyout: true },
+      { action: "font-style", label: "Font style", hasFlyout: true },
+      { action: "size", label: "Text size", hasFlyout: true, text: "Small" },
+      { action: "bold", label: "Bold" },
+      { action: "strikethrough", label: "Strikethrough / clear formatting" },
+    ],
+    flyouts: { color: PaletteColorFlyout },
+  },
   labelEditing: { target: "label" },
 };
