@@ -19,7 +19,6 @@ import { RESIZE_HANDLES, resizeCursorFor, type InteractionOverlay, type ResizeHa
 import {
   arrowShapePoints,
   chevronPoints,
-  getConnectionAnchors,
   hexagonPoints,
   manualInputPoints,
   octagonPoints,
@@ -31,7 +30,7 @@ import {
   trapezoidPoints,
   trianglePoints,
 } from "../routing/connection-overlay";
-import { pointForAnchor, routeConnection, type Anchor } from "../routing/routing";
+import type { Anchor } from "../routing/routing";
 import type { DistributionGuideSegment, SnapGuide, SpacingHint } from "../interaction/snapping";
 import {
   DISTRIBUTION_GUIDE_COLOR,
@@ -47,6 +46,9 @@ import {
 import { worldToScreen, type ViewportState } from "../editor/viewport";
 import { tokenizeCodeBlock } from "./code-tokenizer";
 import { IconShapeBody } from "./IconShapeBody";
+import { Connector } from "./connectors/Connector";
+import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";
+import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import type { CanvasTool } from "../model/actions";
 import {
   ARROW_SHAPE_GEOMETRY,
@@ -60,12 +62,10 @@ import {
   CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO,
   CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
   CONNECTOR_DASH_PATTERN_PX,
-  CONNECTOR_DEFAULT_COLOR,
   DOCUMENT_GEOMETRY,
   DOCUMENT_STACK_GEOMETRY,
   FOLDER_GEOMETRY,
   SECTION_CAPTURE_OVERLAP_THRESHOLD,
-  CONNECTOR_STROKE_WIDTH_PX,
   GRID_DOT_COLOR,
   MANUAL_INPUT_GEOMETRY,
   OFF_PAGE_CONNECTOR_GEOMETRY,
@@ -78,16 +78,11 @@ import {
 } from "./figjam-tokens";
 import type {
   CanvasAnnotationTarget,
-  InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../model/schema";
 
 const HANDLE_SIZE = 10;
-const CONNECTION_HIT_WIDTH = 14;
-const ENDPOINT_HANDLE_RADIUS = 6;
-/** Side length of the render-only bend-affordance square at elbow corners (W3b stub). */
-const BEND_STUB_SIZE = 12;
 const EDGE_PORT_ANCHORS: Anchor[] = ["top", "right", "bottom", "left"];
 /** Arrowhead marker geometry, expressed in units of the connector's own stroke width (see marker `<defs>` below). */
 const ARROW_LENGTH_RATIO = CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO;
@@ -251,291 +246,6 @@ function annotationTargetLabel(target: CanvasAnnotationTarget): string {
 }
 
 export { annotationTargetLabel, renderOrderedObjects };
-
-/**
- * One routed connector: an invisible wide hit path (for click-to-select),
- * the visible routed path (elbow/smooth/straight per connection.style, with
- * forward/back/both arrowheads), and — when selected — small endpoint handles
- * at the routed start/end so 3.2.2's endpoint-drag gesture has a hit target.
- */
-function Connector({
-  document,
-  connection,
-  fromObject,
-  toObject,
-  selected,
-  dimmed,
-  onDoubleClick,
-}: {
-  document: InteractiveCanvasDocument;
-  connection: InteractiveCanvasConnection;
-  fromObject: InteractiveCanvasObject;
-  toObject: InteractiveCanvasObject;
-  selected: boolean;
-  /** True while this connector's own endpoint is mid-drag — visible path dims, hit path stays inert. */
-  dimmed?: boolean;
-  onDoubleClick?: (connectionId: string) => void;
-}) {
-  const routed = routeConnection(fromObject, toObject, connection, document.objects);
-  // FigJam's dash pattern (figjam-tokens.ts, CONNECTOR_DASH_PATTERN_PX).
-  const strokeDasharray =
-    connection.style === "dotted" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
-  const arrow = connection.arrow ?? "forward";
-  const showForwardArrow = arrow === "forward" || arrow === "both";
-  const showBackArrow = arrow === "back" || arrow === "both";
-  // Per-connection color (W4) falling back to FigJam's chunky neutral gray —
-  // selection still recolors to the selection blue. Arrowheads inherit via the
-  // markers' fill="context-stroke" (see the <defs> block).
-  const stroke = selected ? "var(--primary)" : (connection.color ?? CONNECTOR_DEFAULT_COLOR);
-  // Bend-affordance stubs (W3b, render-only): the routed polyline's interior
-  // corners. Reroute editing is a later wave — these only show the affordance
-  // (translucent gray square + crosshair cursor) on the selected connector.
-  const bendPoints = selected ? (routed.points ?? []).slice(1, -1) : [];
-
-  return (
-    <g data-canvas-connection-group={connection.id}>
-      <path
-        d={routed.path}
-        fill="none"
-        stroke="transparent"
-        strokeWidth={CONNECTION_HIT_WIDTH}
-        strokeLinecap="round"
-        data-canvas-connection-id={connection.id}
-        style={{ pointerEvents: "stroke", cursor: "pointer" }}
-        onDoubleClick={(event) => {
-          event.stopPropagation();
-          onDoubleClick?.(connection.id);
-        }}
-      />
-      <path
-        d={routed.path}
-        fill="none"
-        stroke={stroke}
-        strokeWidth={CONNECTOR_STROKE_WIDTH_PX}
-        strokeLinecap="butt"
-        strokeDasharray={strokeDasharray}
-        opacity={dimmed ? 0.35 : 1}
-        pointerEvents="none"
-        markerEnd={showForwardArrow ? `url(#${document.id}-arrow-forward)` : undefined}
-        markerStart={showBackArrow ? `url(#${document.id}-arrow-back)` : undefined}
-      />
-      {selected && (
-        <>
-          {/* Bend-affordance stubs (W3b, render-only): translucent gray square +
-              crosshair cursor at each elbow corner. No reroute editing yet. */}
-          {bendPoints.map((point, index) => (
-            <rect
-              key={`bend-${index}`}
-              x={point.x - BEND_STUB_SIZE / 2}
-              y={point.y - BEND_STUB_SIZE / 2}
-              width={BEND_STUB_SIZE}
-              height={BEND_STUB_SIZE}
-              rx={2}
-              fill="rgba(120, 120, 120, 0.35)"
-              data-canvas-bend-stub={connection.id}
-              style={{ pointerEvents: "all", cursor: "crosshair" }}
-            />
-          ))}
-          {/* Hollow FigJam-blue endpoint circles (W3b): white fill + selection-
-              blue ring at both routed terminals — the endpoint-drag hit targets. */}
-          <circle
-            cx={routed.start.x}
-            cy={routed.start.y}
-            r={ENDPOINT_HANDLE_RADIUS}
-            fill="#FFFFFF"
-            stroke={CHROME.selectionBlue}
-            strokeWidth={1.5}
-            data-canvas-endpoint="from"
-            data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "crosshair" }}
-          />
-          <circle
-            cx={routed.end.x}
-            cy={routed.end.y}
-            r={ENDPOINT_HANDLE_RADIUS}
-            fill="#FFFFFF"
-            stroke={CHROME.selectionBlue}
-            strokeWidth={1.5}
-            data-canvas-endpoint="to"
-            data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "crosshair" }}
-          />
-        </>
-      )}
-    </g>
-  );
-}
-
-/**
- * Pill chip rendered at a connector's routed label point (world layer, so it
- * pans/zooms with the canvas). Double-clicking opens the inline label editor
- * (owned by the editor via `onConnectionDoubleClick`/`worldOverlay`).
- */
-function ConnectionLabelChip({
-  connection,
-  fromObject,
-  toObject,
-  obstacles,
-  onDoubleClick,
-}: {
-  connection: InteractiveCanvasConnection;
-  fromObject: InteractiveCanvasObject;
-  toObject: InteractiveCanvasObject;
-  /** Full document object list so the label sits on the same obstacle-avoiding route the connector renders. */
-  obstacles: ReadonlyArray<InteractiveCanvasObject>;
-  onDoubleClick?: (connectionId: string) => void;
-}) {
-  if (!connection.label) return null;
-  const routed = routeConnection(fromObject, toObject, connection, obstacles);
-  return (
-    <div
-      data-canvas-connection-label={connection.id}
-      onDoubleClick={(event) => {
-        event.stopPropagation();
-        onDoubleClick?.(connection.id);
-      }}
-      style={{
-        position: "absolute",
-        left: `${routed.labelPoint.x}px`,
-        top: `${routed.labelPoint.y}px`,
-        transform: "translate(-50%, -50%)",
-        background: "var(--background)",
-        color: "var(--foreground)",
-        border: "1px solid var(--border)",
-        borderRadius: "999px",
-        padding: "2px 8px",
-        fontSize: "11px",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-        pointerEvents: "auto",
-        cursor: "pointer",
-      }}
-    >
-      {connection.label}
-    </div>
-  );
-}
-
-/**
- * Live preview rendered while a connector endpoint is being dragged (3.2.2
- * reconnect) or a brand-new connector is being pulled from a port (3.3.2
- * create): a dashed path from the fixed end to either the hovered candidate's
- * anchor point or the raw pointer position, plus 4 anchor dots on the
- * currently-hovered candidate object (the snapped one emphasized).
- */
-function ConnectorDragPreview({
-  document,
-  viewport,
-  drag,
-}: {
-  document: InteractiveCanvasDocument;
-  viewport: ViewportState;
-  drag: NonNullable<InteractionOverlay["connectorDrag"]>;
-}) {
-  let fixedWorld: CanvasPoint | null = null;
-
-  if (drag.connectionId) {
-    const connection = document.connections.find((item) => item.id === drag.connectionId);
-    if (connection) {
-      const fromObject = objectById(document, connection.from.objectId);
-      const toObject = objectById(document, connection.to.objectId);
-      if (fromObject && toObject) {
-        const routed = routeConnection(fromObject, toObject, connection, document.objects);
-        fixedWorld = drag.end === "from" ? routed.end : routed.start;
-      }
-    }
-  } else if (drag.fromObjectId && drag.fromAnchor) {
-    const fromObject = objectById(document, drag.fromObjectId);
-    if (fromObject) {
-      fixedWorld = pointForAnchor(fromObject.geometry, drag.fromAnchor);
-    }
-  }
-
-  if (!fixedWorld) return null;
-
-  // The dashed preview aims at the exact snapped point (anchor or outline —
-  // W3b cascade) when one exists, else the coarse anchor side, else the raw
-  // pointer.
-  const candidateObject = drag.candidate ? objectById(document, drag.candidate.objectId) : undefined;
-  const targetWorld =
-    drag.candidate?.point ??
-    (candidateObject ? pointForAnchor(candidateObject.geometry, drag.candidate!.anchor) : drag.point);
-
-  const start = worldToScreen(viewport, fixedWorld);
-  const end = worldToScreen(viewport, targetWorld);
-  // True-outline port anchors (connection-overlay.ts getConnectionAnchors) in
-  // a stable top/bottom/left/right order (matching its candidates array).
-  const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
-  const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];
-  const snappedWorld = drag.candidate?.snapKind === "outline" ? drag.candidate.point : undefined;
-
-  return (
-    <>
-      <svg
-        style={{ position: "absolute", left: 0, top: 0, overflow: "visible", pointerEvents: "none" }}
-        aria-hidden="true"
-      >
-        <path
-          d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
-          fill="none"
-          stroke={CHROME.selectionBlue}
-          strokeWidth={2}
-          strokeDasharray="6 6"
-          strokeLinecap="round"
-        />
-      </svg>
-      {/* FigJam-style hover ports (W3b): 4 white-fill, selection-blue-ring
-          circles on the hovered object's true outline; the anchor the cascade
-          snapped to renders emphasized (bigger, filled blue). */}
-      {portAnchors.map((portAnchor, index) => {
-        const screenPoint = worldToScreen(viewport, portAnchor.point);
-        const isSnapped =
-          drag.candidate?.snapKind === "anchor" &&
-          !!drag.candidate.point &&
-          Math.abs(drag.candidate.point.x - portAnchor.point.x) < 0.5 &&
-          Math.abs(drag.candidate.point.y - portAnchor.point.y) < 0.5;
-        return (
-          <div
-            key={PORT_ANCHOR_NAMES[index]}
-            data-canvas-anchor-dot={PORT_ANCHOR_NAMES[index]}
-            data-canvas-anchor-snapped={isSnapped ? "" : undefined}
-            style={{
-              position: "absolute",
-              left: `${screenPoint.x}px`,
-              top: `${screenPoint.y}px`,
-              width: isSnapped ? "12px" : "8px",
-              height: isSnapped ? "12px" : "8px",
-              transform: "translate(-50%, -50%)",
-              borderRadius: "999px",
-              background: isSnapped ? CHROME.selectionBlue : "#FFFFFF",
-              border: `1.5px solid ${CHROME.selectionBlue}`,
-              pointerEvents: "none",
-            }}
-          />
-        );
-      })}
-      {/* Off-anchor outline snap: a filled dot at the exact outline point the
-          endpoint will attach to (stored as `position` on drop). */}
-      {snappedWorld && (
-        <div
-          data-canvas-outline-snap-dot=""
-          style={{
-            position: "absolute",
-            left: `${worldToScreen(viewport, snappedWorld).x}px`,
-            top: `${worldToScreen(viewport, snappedWorld).y}px`,
-            width: "10px",
-            height: "10px",
-            transform: "translate(-50%, -50%)",
-            borderRadius: "999px",
-            background: CHROME.selectionBlue,
-            border: "1.5px solid #FFFFFF",
-            pointerEvents: "none",
-          }}
-        />
-      )}
-    </>
-  );
-}
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
