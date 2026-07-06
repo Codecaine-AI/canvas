@@ -127,11 +127,11 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("chrome/ does not runtime-import from objects/ (type-only imports allowed)", () => {
+  test("chrome/ does not runtime-import from objects/ (type-only imports allowed; objects/catalog exempt — the shape catalog lives in objects/ now)", () => {
     expect(
       violations(
         join(SRC_ROOT, "chrome"),
-        /^(\.\.\/)+objects(\/|$)/,
+        /^(\.\.\/)+objects\/(?!catalog(\/|$))/,
         { skipTypeOnly: true },
       ),
     ).toEqual([]);

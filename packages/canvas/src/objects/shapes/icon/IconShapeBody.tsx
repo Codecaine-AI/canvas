@@ -1,8 +1,8 @@
 "use client";
 
-import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
-import { ICON_APPROX_SIZE_PX } from "../tokens/figjam-tokens";
-import type { InteractiveCanvasObject } from "../model/schema";
+import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./glyphs";
+import { ICON_APPROX_SIZE_PX } from "../../../tokens/figjam-tokens";
+import type { InteractiveCanvasObject } from "../../../model/schema";
 
 /**
  * Minimal structural shape this component needs from an interactive canvas

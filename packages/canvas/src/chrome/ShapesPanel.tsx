@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
-import { SHAPE_CATALOG, type ShapeCatalogEntry } from "./shape-catalog";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../objects/catalog/shape-catalog";
 import { ChromeTooltip } from "./ChromeTooltip";
 import type { InteractiveCanvasObjectType } from "../model/schema";
 

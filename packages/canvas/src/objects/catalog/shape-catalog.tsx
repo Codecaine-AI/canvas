@@ -35,16 +35,16 @@
  *     file's pre-existing hand-drawn preview style (RectangleIcon, CylinderIcon,
  *     FolderIcon, TrapezoidIcon, ... below).
  *   - Advanced-tier entries (all 26 icon glyphs) reuse the glyph paths
- *     directly from render/icon-glyphs.tsx's ICON_GLYPHS registry (the same
+ *     directly from objects/shapes/icon/glyphs.tsx's ICON_GLYPHS registry (the same
  *     registry IconShapeBody renders on-canvas) via `iconGlyphPreview()` —
  *     cross-directory `chrome/` -> `render/` imports are already established
  *     precedent (ColorPalettePopover.tsx, FigJamDock.tsx, ContextToolbar.tsx,
  *     ShapeSearchPopover.tsx, ZoomControls.tsx all import tokens/figjam-tokens).
  */
 
-import type { CanvasBounds } from "../model/geometry";
-import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../model/schema";
-import { ICON_GLYPHS, type IconGlyphId } from "../render/icon-glyphs";
+import type { CanvasBounds } from "../../model/geometry";
+import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../../model/schema";
+import { ICON_GLYPHS, type IconGlyphId } from "../shapes/icon/glyphs";
 import {
   chevronPoints,
   ellipsePoints,
@@ -57,7 +57,7 @@ import {
   starPoints,
   trapezoidPoints,
   trianglePoints,
-} from "../routing/connection-overlay";
+} from "../../routing/connection-overlay";
 
 export type ShapeCatalogEntry = {
   id: string;
@@ -111,7 +111,7 @@ function svgIcon(children: string) {
   };
 }
 
-/** Advanced-tier preview: renders the exact glyph path data from render/icon-glyphs.tsx's ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the 20x20 preview viewBox. */
+/** Advanced-tier preview: renders the exact glyph path data from objects/shapes/icon/glyphs.tsx's ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the 20x20 preview viewBox. */
 function iconGlyphPreview(glyphId: IconGlyphId) {
   const glyph = ICON_GLYPHS[glyphId];
   return function IconGlyphPreview({ className }: { className?: string }) {

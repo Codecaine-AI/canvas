@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CHROME } from "../tokens/figjam-tokens";
+import { CHROME } from "../../tokens/figjam-tokens";
 import { SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
-import { ChromeTooltip } from "./ChromeTooltip";
-import type { InteractiveCanvasObjectType } from "../model/schema";
+import { ChromeTooltip } from "../../chrome/ChromeTooltip";
+import type { InteractiveCanvasObjectType } from "../../model/schema";
 
 /**
  * ShapeSearchPopover — Panel A from figjam-chrome-catalog.md section 4: the

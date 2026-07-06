@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
-import { ICON_GLYPHS, ICON_GLYPH_IDS, type IconGlyphId } from "../icon-glyphs";
-import { IconShapeBody } from "../IconShapeBody";
+import { ICON_GLYPHS, ICON_GLYPH_IDS, type IconGlyphId } from "../../objects/shapes/icon/glyphs";
+import { IconShapeBody } from "../../objects/shapes/icon/IconShapeBody";
 
 afterEach(() => {
   cleanup();

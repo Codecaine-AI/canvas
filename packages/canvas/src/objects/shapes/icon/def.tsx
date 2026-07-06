@@ -1,10 +1,10 @@
 "use client";
 
-import { IconShapeBody } from "../../render/IconShapeBody";
-import { resolveObjectColors } from "../../tokens/theme";
-import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
-import type { ObjectDef, ObjectRenderProps } from "../object-def";
-import { SHAPE_TOOLBAR } from "./toolbar";
+import { IconShapeBody } from "./IconShapeBody";
+import { resolveObjectColors } from "../../../tokens/theme";
+import { EdgePorts, ObjectButtonChrome } from "../../object-chrome";
+import type { ObjectDef, ObjectRenderProps } from "../../object-def";
+import { SHAPE_TOOLBAR } from "../toolbar";
 
 /**
  * The `icon` shape (Advanced-tier glyph family) renders its own self-contained

@@ -34,7 +34,7 @@ import { documentStackDef } from "./shapes/document-stack";
 import { ellipseDef } from "./shapes/ellipse";
 import { folderDef } from "./shapes/folder";
 import { hexagonDef } from "./shapes/hexagon";
-import { iconDef } from "./shapes/icon";
+import { iconDef } from "./shapes/icon/def";
 import { internalStorageDef } from "./shapes/internal-storage";
 import { manualInputDef } from "./shapes/manual-input";
 import { octagonDef } from "./shapes/octagon";

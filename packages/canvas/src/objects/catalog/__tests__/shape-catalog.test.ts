@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { ICON_GLYPH_IDS } from "../../render/icon-glyphs";
+import { ICON_GLYPH_IDS } from "../../shapes/icon/glyphs";
 import {
   isShapeEntryEnabled,
   SHAPE_CATALOG,
