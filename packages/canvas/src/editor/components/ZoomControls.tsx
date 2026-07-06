@@ -1,9 +1,9 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../tokens/figjam-tokens";
-import { ChromeTooltip } from "./ChromeTooltip";
-import { ZoomMinusIcon, ZoomPlusIcon } from "./dock-icons";
+import { CHROME } from "../../tokens/figjam-tokens";
+import { Tooltip } from "../../ui/Tooltip";
+import { ZoomMinusIcon, ZoomPlusIcon } from "../../ui/icons/dock-icons";
 
 /**
  * ZoomControls — bottom-right zoom pill (matches the dock's white styling).
@@ -78,7 +78,7 @@ function ZoomButton({
       >
         {children}
       </button>
-      <ChromeTooltip label={label} visible={hovered && !disabled} placement="top" />
+      <Tooltip label={label} visible={hovered && !disabled} placement="top" />
     </div>
   );
 }

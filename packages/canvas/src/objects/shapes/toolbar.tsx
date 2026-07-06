@@ -1,6 +1,6 @@
 "use client";
 
-import { ColorPalettePopover } from "../../chrome/ColorPalettePopover";
+import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
 import { ShapeSearchPopover } from "../catalog/ShapeSearchPopover";
 import { paletteTokenStyle } from "../../tokens/theme";
 import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { CHROME } from "../../tokens/figjam-tokens";
 import { SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
-import { ChromeTooltip } from "../../chrome/ChromeTooltip";
+import { Tooltip } from "../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../model/schema";
 
 /**
@@ -124,7 +124,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
               >
                 <Icon className="h-4 w-4" />
               </button>
-              <ChromeTooltip label={entry.label} visible={hovered} placement="top" />
+              <Tooltip label={entry.label} visible={hovered} placement="top" />
             </div>
           );
         })}

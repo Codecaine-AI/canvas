@@ -12,7 +12,6 @@
     "./geometry": "./src/model/geometry.ts",
     "./theme": "./src/tokens/theme.ts",
     "./figjam-tokens": "./src/tokens/figjam-tokens.ts",
-    "./chrome": "./src/chrome/index.ts",
     "./connection-overlay": "./src/routing/connection-overlay.ts",
     "./ui/cn": "./src/ui/cn.ts",
     "./ui/button": "./src/ui/button.tsx",

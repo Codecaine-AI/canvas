@@ -11,11 +11,11 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import type { ContextToolbarActionId } from "../../../chrome/ContextToolbar";
+import type { ContextToolbarActionId } from "../../components/ContextToolbar";
 import {
   positionContextToolbar,
   type PositionContextToolbarResult,
-} from "../../../chrome/context-toolbar-position";
+} from "../../components/context-toolbar-position";
 import type { CanvasAction, CanvasSelection } from "../../../model/actions";
 import { boundsForGeometries, type CanvasBounds } from "../../../model/geometry";
 import {
@@ -437,7 +437,7 @@ export function useContextToolbar({
       // render but are no-ops beyond ContextToolbar's own local
       // aria-expanded toggle. Documented in the wave-3a report as
       // disabled-with-tooltip (ContextToolbar doesn't support a disabled prop
-      // per-control today, so the tooltip still shows via ChromeTooltip's
+      // per-control today, so the tooltip still shows via Tooltip's
       // hover label; clicking is inert).
     },
     [

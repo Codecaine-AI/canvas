@@ -3,9 +3,9 @@
 import { memo, useState } from "react";
 // Type-only import: chrome must never import objects/ at runtime — the
 // dependency points the other way (object defs import chrome components).
-import type { ToolbarControlSpec } from "../objects/object-def";
-import { CHROME } from "../tokens/figjam-tokens";
-import { ChromeTooltip } from "./ChromeTooltip";
+import type { ToolbarControlSpec } from "../../objects/object-def";
+import { CHROME } from "../../tokens/figjam-tokens";
+import { Tooltip } from "../../ui/Tooltip";
 import {
   AlignIcon,
   ArrowheadIcon,
@@ -29,7 +29,7 @@ import {
   StrikethroughIcon,
   StrokeIcon,
   TextLabelIcon,
-} from "./toolbar-icons";
+} from "../../ui/icons/toolbar-icons";
 
 /**
  * ContextToolbar — the dark floating pill shown above a selection.
@@ -97,7 +97,8 @@ export type SectionBorderStyleValue = "solid" | "dashed" | "none";
  * toolbar control sets (each ObjectDef carries its own `toolbar` spec, and
  * multi-select is a capability intersection over the selected defs — see
  * objects/object-def.ts). This table remains only for back-compat with the
- * `variant` prop on the public `@codecaine-ai/canvas/chrome` surface.
+ * legacy `variant` prop (the `@codecaine-ai/canvas/chrome` subpath export it
+ * once served was deleted in the restructure — no real external consumer).
  *
  * Registry mapping each selection-type variant to its measured control set.
  * Order and membership per figjam-chrome-catalog.md section 2:
@@ -312,7 +313,7 @@ function ToolbarButton({
         {text ? <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>{text}</span> : null}
         {hasFlyout ? <ChevronDownIcon className="h-2.5 w-2.5" /> : null}
       </button>
-      <ChromeTooltip label={label} visible={hovered} placement="top" />
+      <Tooltip label={label} visible={hovered} placement="top" />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { LockIcon, UnlockIcon } from "lucide-react";
-import { ColorPalettePopover } from "../../chrome/ColorPalettePopover";
-import { DashIcon, NoStrokeIcon, StrokeIcon } from "../../chrome/toolbar-icons";
+import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
+import { DashIcon, NoStrokeIcon, StrokeIcon } from "../../ui/icons/toolbar-icons";
 import { resolveSectionColors } from "../../tokens/theme";
 import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 import type { CanvasSectionTint } from "../../model/schema";

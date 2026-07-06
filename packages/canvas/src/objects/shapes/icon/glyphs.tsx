@@ -7,8 +7,8 @@
  *
  * Each glyph is stroke-outline-only (fill="none"), drawn on a 24x24 grid,
  * round caps/joins, matching the FigJam/Nucleo Advanced icon set aesthetic
- * used elsewhere in this package (see chrome/toolbar-icons.tsx and
- * chrome/dock-icons.tsx for the sibling stroke-icon conventions — those are
+ * used elsewhere in this package (see ui/icons/toolbar-icons.tsx and
+ * ui/icons/dock-icons.tsx for the sibling stroke-icon conventions — those are
  * 16px/18px chrome glyphs; these are the larger 24px canvas-object glyphs
  * rendered by IconShapeBody).
  *

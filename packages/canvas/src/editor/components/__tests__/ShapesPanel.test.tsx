@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapesPanel, SHAPES_PANEL_WIDTH_PX } from "../ShapesPanel";
-import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../objects/catalog/shape-catalog";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../../objects/catalog/shape-catalog";
 
 afterEach(() => {
   cleanup();

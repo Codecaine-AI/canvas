@@ -37,9 +37,8 @@
  *   - Advanced-tier entries (all 26 icon glyphs) reuse the glyph paths
  *     directly from objects/shapes/icon/glyphs.tsx's ICON_GLYPHS registry (the same
  *     registry IconShapeBody renders on-canvas) via `iconGlyphPreview()` —
- *     cross-directory `chrome/` -> `render/` imports are already established
- *     precedent (ColorPalettePopover.tsx, FigJamDock.tsx, ContextToolbar.tsx,
- *     ShapeSearchPopover.tsx, ZoomControls.tsx all import tokens/figjam-tokens).
+ *     both now live under objects/ (catalog/ and shapes/icon/), so this is a
+ *     same-layer import.
  */
 
 import type { CanvasBounds } from "../../model/geometry";

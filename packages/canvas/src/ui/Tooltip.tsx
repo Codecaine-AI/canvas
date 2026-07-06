@@ -3,7 +3,7 @@
 import { useEffect, useId, useSyncExternalStore } from "react";
 
 /**
- * ChromeTooltip — shared dark hover-label used by all FigJam chrome
+ * Tooltip — shared dark hover-label used by all FigJam chrome
  * components (dock buttons, context-toolbar controls, etc.).
  *
  * Ground truth: the one confirmed tooltip in the source recording is the
@@ -20,12 +20,12 @@ import { useEffect, useId, useSyncExternalStore } from "react";
  * survive that swap unchanged.
  */
 
-export type ChromeTooltipPlacement = "top" | "bottom";
+export type TooltipPlacement = "top" | "bottom";
 
-export type ChromeTooltipProps = {
+export type TooltipProps = {
   label: string;
   visible: boolean;
-  placement?: ChromeTooltipPlacement;
+  placement?: TooltipPlacement;
   /** Optional id for aria-describedby wiring by the caller. */
   id?: string;
 };
@@ -46,7 +46,7 @@ function subscribe(callback: () => void) {
   return () => window.removeEventListener(TOOLTIP_EVENT, callback);
 }
 
-export function ChromeTooltip({ label, visible, placement = "top", id }: ChromeTooltipProps) {
+export function Tooltip({ label, visible, placement = "top", id }: TooltipProps) {
   const fallbackId = useId();
   const tooltipId = id ?? fallbackId;
   const currentTooltipId = useSyncExternalStore(

@@ -18,9 +18,9 @@ import {
   type CanvasTool,
 } from "../model/actions";
 import { CanvasStage } from "../render/CanvasStage";
-import { FigJamDock, type ToolId } from "../chrome/FigJamDock";
-import { ShapesPanel } from "../chrome/ShapesPanel";
-import { ZoomControls } from "../chrome/ZoomControls";
+import { FigJamDock, type ToolId } from "./components/FigJamDock";
+import { ShapesPanel } from "./components/ShapesPanel";
+import { ZoomControls } from "./components/ZoomControls";
 import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
 import { useCanvasContextMenu } from "./features/context-menu/use-canvas-context-menu";
 import { ContextToolbarLayer } from "./features/context-toolbar/ContextToolbarLayer";
@@ -62,7 +62,7 @@ function selectedObjectIds(selection: CanvasSelection): string[] {
  * Wave 3a — FigJamDock ↔ CanvasTool mapping.
  *
  * The dock speaks a small fixed vocabulary of chrome-level tool ids
- * (ToolId, from chrome/FigJamDock.tsx) while the reducer speaks the much
+ * (ToolId, from editor/components/FigJamDock.tsx) while the reducer speaks the much
  * larger CanvasTool vocabulary (one entry per placeable object type, plus
  * select/hand/annotation). Most dock ids map 1:1 to an editor tool; "shapes"
  * is special-cased (it opens ShapesPanel instead of arming a single type —

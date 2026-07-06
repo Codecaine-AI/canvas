@@ -1,6 +1,6 @@
 "use client";
 
-import { ColorPalettePopover } from "../../chrome/ColorPalettePopover";
+import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
 import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../tokens/figjam-tokens";
 import type { ObjectDef, ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 

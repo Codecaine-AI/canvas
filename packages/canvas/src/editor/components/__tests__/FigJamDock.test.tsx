@@ -6,7 +6,7 @@ import {
   FIGJAM_DOCK_RADIUS_PX,
   FIGJAM_DOCK_WIDTH_PX,
 } from "../FigJamDock";
-import { CHROME } from "../../tokens/figjam-tokens";
+import { CHROME } from "../../../tokens/figjam-tokens";
 
 afterEach(() => {
   cleanup();

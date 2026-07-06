@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../tokens/figjam-tokens";
-import { ChromeTooltip } from "./ChromeTooltip";
+import { CHROME } from "../../tokens/figjam-tokens";
+import { Tooltip } from "../../ui/Tooltip";
 import {
   ArrowIcon,
   ConnectorIcon,
@@ -11,7 +11,7 @@ import {
   ShapeSquareIcon,
   StickyIcon,
   TextIcon,
-} from "./dock-icons";
+} from "../../ui/icons/dock-icons";
 
 /**
  * FigJamDock — the white rounded bottom dock.
@@ -142,7 +142,7 @@ function DockButton({
       >
         <Icon className="h-5 w-5" />
       </button>
-      <ChromeTooltip label={tooltipLabel} visible={hovered} placement="top" />
+      <Tooltip label={tooltipLabel} visible={hovered} placement="top" />
     </div>
   );
 }

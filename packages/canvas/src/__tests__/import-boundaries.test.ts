@@ -127,12 +127,11 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("chrome/ does not runtime-import from objects/ (type-only imports allowed; objects/catalog exempt — the shape catalog lives in objects/ now)", () => {
+  test("ui/ does not import objects/, render/, interaction/, or editor/ (shared dumb primitives)", () => {
     expect(
       violations(
-        join(SRC_ROOT, "chrome"),
-        /^(\.\.\/)+objects\/(?!catalog(\/|$))/,
-        { skipTypeOnly: true },
+        join(SRC_ROOT, "ui"),
+        /^(\.\.\/)+(objects|render|interaction|editor)(\/|$)/,
       ),
     ).toEqual([]);
   });

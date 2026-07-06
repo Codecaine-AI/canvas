@@ -1,9 +1,9 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
-import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../objects/catalog/shape-catalog";
-import { ChromeTooltip } from "./ChromeTooltip";
-import type { InteractiveCanvasObjectType } from "../model/schema";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../objects/catalog/shape-catalog";
+import { Tooltip } from "../../ui/Tooltip";
+import type { InteractiveCanvasObjectType } from "../../model/schema";
 
 /**
  * ShapesPanel — the full-height, left-docked white "Shapes" sidebar opened by
@@ -140,7 +140,7 @@ function ShapeGridButton({
       >
         <Icon className="h-5 w-5" />
       </button>
-      <ChromeTooltip label={entry.label} visible={hovered} placement="top" />
+      <Tooltip label={entry.label} visible={hovered} placement="top" />
     </div>
   );
 }
