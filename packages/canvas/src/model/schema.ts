@@ -46,9 +46,15 @@ export type {
   InteractiveCanvasDocument,
   InteractiveCanvasMode,
 } from "./schema/document";
+// Explicit .ts extension: this is the barrel's ONE value re-export, so it is
+// the one specifier Node's type-stripping loader must resolve when a Node
+// process loads this module directly (packages/studio/vite.config.ts imports
+// validateInteractiveCanvasDocument from @codecaine-ai/canvas/schema). The
+// type-only re-exports above are erased before resolution and stay
+// extensionless.
 export {
   assertInteractiveCanvasDocument,
   validateInteractiveCanvasDocument,
   type CanvasValidationIssue,
   type CanvasValidationResult,
-} from "./schema/validate";
+} from "./schema/validate.ts";
