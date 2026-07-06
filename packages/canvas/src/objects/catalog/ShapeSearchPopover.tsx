@@ -139,4 +139,4 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
 }
 
 export const SHAPE_SEARCH_POPOVER_WIDTH_PX = POPOVER_WIDTH_PX;
-export const SHAPE_SEARCH_POPOVER_BG = CHROME.contextToolbarBg;
+export const SHAPE_SEARCH_POPOVER_BG = CHROME.selectionToolbarBg;

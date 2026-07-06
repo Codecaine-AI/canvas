@@ -15,7 +15,7 @@ import type { CanvasPaletteToken } from "../model/schema";
  * approximation in the wave-3a report.
  *
  * Lives in objects/ (not editor/) so toolbar flyout components declared on
- * ObjectDefs can use it; editor/features/context-toolbar/use-context-toolbar
+ * ObjectDefs can use it; editor/features/selection-toolbar/use-selection-toolbar
  * re-exports it for its existing importers.
  */
 const PALETTE_TOKEN_HUE_ANGLES: Record<CanvasPaletteToken, number> = {

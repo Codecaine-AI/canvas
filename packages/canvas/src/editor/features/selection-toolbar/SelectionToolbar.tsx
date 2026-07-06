@@ -32,26 +32,26 @@ import {
 } from "../../../ui/icons/toolbar-icons";
 
 /**
- * ContextToolbar — the dark floating pill shown above a selection.
+ * SelectionToolbar — the dark floating pill shown above a selection.
  *
  * Ground truth: board-design-reference/analysis/figjam-chrome-catalog.md
  * section 2 (control sets per selection type, measured via fj-007/fj-012/
- * fj-030 etc.) + figjam-style-tokens.json `chrome` key (contextToolbarBg
- * #1D1D1D). Height 29-30px matches the catalog's dark-pill family (same
- * family as the color popover, ~28-30px radius scaled to pill height).
+ * fj-030 etc.) + figjam-style-tokens.json `chrome` key (historically named
+ * "contextToolbarBg" there, #1D1D1D). Height 29-30px matches the catalog's
+ * dark-pill family (same family as the color popover, ~28-30px radius scaled
+ * to pill height).
  *
  * Since RESTRUCTURE.md step 5 this is a DUMB HOST: callers pass the icon-free
  * `controls` spec list resolved from the object registry (objects/ defs are
  * the source of truth for which controls each selection kind gets), and this
- * component resolves each action id to its icon via ACTION_ICONS. The legacy
- * `variant` prop keeps working for back-compat by resolving through the
- * deprecated CONTEXT_TOOLBAR_REGISTRY. Buttons fire a single typed
- * `onAction(actionId, value?)` callback rather than one callback per button.
+ * component resolves each action id to its icon via ACTION_ICONS. Buttons
+ * fire a single typed `onAction(actionId, value?)` callback rather than one
+ * callback per button. (The legacy variant-keyed CONTEXT_TOOLBAR_REGISTRY and
+ * its `variant` prop were deleted once the registry migration landed — no
+ * consumer remained.)
  */
 
-export type ContextToolbarVariant = "shape" | "section" | "connector" | "text" | "sticky" | "multi";
-
-export type ContextToolbarActionId =
+export type SelectionToolbarActionId =
   // shape-swap / connector routing etc.
   | "shape-swap"
   | "color"
@@ -78,8 +78,8 @@ export type ContextToolbarActionId =
   | "label-align"
   | "add-label";
 
-export type ContextToolbarControl = {
-  action: ContextToolbarActionId;
+export type SelectionToolbarControl = {
+  action: SelectionToolbarActionId;
   label: string;
   Icon: (props: { className?: string; color?: string }) => React.JSX.Element;
   /** Whether this control opens a flyout (renders a chevron affordance). */
@@ -93,79 +93,12 @@ export type ContextToolbarControl = {
 export type SectionBorderStyleValue = "solid" | "dashed" | "none";
 
 /**
- * @deprecated The objects/ registry is now the source of truth for context
- * toolbar control sets (each ObjectDef carries its own `toolbar` spec, and
- * multi-select is a capability intersection over the selected defs — see
- * objects/object-def.ts). This table remains only for back-compat with the
- * legacy `variant` prop (the `@codecaine-ai/canvas/chrome` subpath export it
- * once served was deleted in the restructure — no real external consumer).
- *
- * Registry mapping each selection-type variant to its measured control set.
- * Order and membership per figjam-chrome-catalog.md section 2:
- *   shape: shape-swap▾, color▾, align▾, Aa▾, size▾, B, strike, link, bullets, align▾(paragraph)
- *   section: color▾, border style▾
- *   connector: color▾, align▾, add-text(T), line-style▾, corner-style▾, arrowhead▾
- *   text (label editing variant): color▾, Aa▾, size▾, B, strike
- */
-export const CONTEXT_TOOLBAR_REGISTRY: Record<ContextToolbarVariant, ContextToolbarControl[]> = {
-  shape: [
-    { action: "shape-swap", label: "Change shape", Icon: ShapeSwapIcon, hasFlyout: true },
-    { action: "color", label: "Fill color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "align", label: "Alignment", Icon: AlignIcon, hasFlyout: true },
-    { action: "font-style", label: "Font style", Icon: FontStyleIcon, hasFlyout: true },
-    { action: "size", label: "Text size", Icon: SizeIcon, hasFlyout: true, text: "Medium" },
-    { action: "bold", label: "Bold", Icon: BoldIcon },
-    { action: "strikethrough", label: "Strikethrough", Icon: StrikethroughIcon },
-    { action: "link", label: "Link", Icon: LinkIcon },
-    { action: "bullets", label: "Bullet list", Icon: BulletsIcon },
-    { action: "paragraph-align", label: "Paragraph alignment", Icon: ParagraphAlignIcon, hasFlyout: true },
-  ],
-  section: [
-    { action: "color", label: "Color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "section-border-style", label: "Border style", Icon: StrokeIcon, hasFlyout: true },
-    { action: "rename", label: "Rename", Icon: RenameIcon, dividerAfter: true },
-    { action: "visibility", label: "Hide contents", Icon: EyeIcon },
-    { action: "lock", label: "Lock", Icon: LockIcon, hasFlyout: true },
-  ],
-  connector: [
-    { action: "color", label: "Line color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "stroke", label: "Stroke", Icon: StrokeIcon, hasFlyout: true },
-    { action: "dash", label: "Line style", Icon: DashIcon, hasFlyout: true },
-    { action: "routing", label: "Corner style", Icon: RoutingIcon, hasFlyout: true },
-    { action: "arrowhead", label: "Arrowhead style", Icon: ArrowheadIcon, hasFlyout: true },
-    { action: "label-align", label: "Label alignment", Icon: LabelAlignIcon, hasFlyout: true },
-  ],
-  text: [
-    { action: "color", label: "Text color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "font-style", label: "Font style", Icon: FontStyleIcon, hasFlyout: true },
-    { action: "size", label: "Text size", Icon: SizeIcon, hasFlyout: true, text: "Small" },
-    { action: "bold", label: "Bold", Icon: BoldIcon },
-    { action: "strikethrough", label: "Strikethrough / clear formatting", Icon: StrikethroughIcon },
-  ],
-  // Multi-select was never observed in the source recording (catalog section 2,
-  // "Multi-select: not observed"). We reuse the shape variant's control set as
-  // the most reasonable default rather than fabricate an unverified layout —
-  // flagged for W3/live-product confirmation.
-  sticky: [
-    { action: "color", label: "Sticky color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "font-style", label: "Font style", Icon: FontStyleIcon, hasFlyout: true },
-    { action: "size", label: "Text size", Icon: SizeIcon, hasFlyout: true, text: "Medium" },
-    { action: "bold", label: "Bold", Icon: BoldIcon },
-    { action: "bullets", label: "Bullet list", Icon: BulletsIcon },
-  ],
-  multi: [
-    { action: "color", label: "Fill color", Icon: ColorSwatchIcon, hasFlyout: true },
-    { action: "align", label: "Alignment", Icon: AlignIcon, hasFlyout: true },
-  ],
-};
-
-/**
  * Icon resolution for registry-driven (icon-free) control specs: each action
- * id maps 1:1 onto the icon the legacy CONTEXT_TOOLBAR_REGISTRY carried for
- * it. "color" additionally keeps its special current-color swatch rendering
- * inside ToolbarButton.
+ * id maps 1:1 onto the icon measured for it in figjam-chrome-catalog.md
+ * section 2. "color" additionally keeps its special current-color swatch
+ * rendering inside ToolbarButton.
  */
-const ACTION_ICONS: Record<string, ContextToolbarControl["Icon"]> = {
+const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
   "shape-swap": ShapeSwapIcon,
   color: ColorSwatchIcon,
   align: AlignIcon,
@@ -193,33 +126,28 @@ function BlankIcon({ className }: { className?: string; color?: string }) {
   return <span className={className} />;
 }
 
-export type ContextToolbarProps = {
-  /**
-   * Legacy variant-keyed control lookup (resolves through the deprecated
-   * CONTEXT_TOOLBAR_REGISTRY). Ignored when `controls` is provided.
-   */
-  variant?: ContextToolbarVariant;
+export type SelectionToolbarProps = {
   /**
    * Registry-driven control specs (objects/ ObjectDef.toolbar) — icon-free;
-   * icons resolve via ACTION_ICONS. Takes precedence over `variant`.
+   * icons resolve via ACTION_ICONS.
    */
-  controls?: readonly ToolbarControlSpec[];
-  /** `data-variant` / aria label override; falls back to `variant`. */
+  controls: readonly ToolbarControlSpec[];
+  /** Feeds `data-variant` and the toolbar's aria label. */
   variantLabel?: string;
-  onAction?: (action: ContextToolbarActionId, value?: unknown) => void;
+  onAction?: (action: SelectionToolbarActionId, value?: unknown) => void;
   /** Optional style overrides for positioning; consumer supplies via wrapper. Height is fixed to the measured 29px per spec. */
   style?: React.CSSProperties;
   className?: string;
   currentColor?: string;
   currentSectionStroke?: string;
   currentSectionBorderStyle?: SectionBorderStyleValue;
-  activeFlyout?: ContextToolbarActionId | null;
+  activeFlyout?: SelectionToolbarActionId | null;
   sectionContentHidden?: boolean;
   sectionLocked?: boolean;
 };
 
 const TOOLBAR_HEIGHT_PX = 29;
-const TOOLBAR_BG = CHROME.contextToolbarBg; // #1D1D1D
+const TOOLBAR_BG = CHROME.selectionToolbarBg; // #1D1D1D
 
 function ToolbarButton({
   control,
@@ -231,12 +159,12 @@ function ToolbarButton({
   sectionContentHidden,
   sectionLocked,
 }: {
-  control: ContextToolbarControl;
-  onAction?: (action: ContextToolbarActionId, value?: unknown) => void;
+  control: SelectionToolbarControl;
+  onAction?: (action: SelectionToolbarActionId, value?: unknown) => void;
   currentColor?: string;
   currentSectionStroke?: string;
   currentSectionBorderStyle?: SectionBorderStyleValue;
-  activeFlyout?: ContextToolbarActionId | null;
+  activeFlyout?: SelectionToolbarActionId | null;
   sectionContentHidden?: boolean;
   sectionLocked?: boolean;
 }) {
@@ -299,8 +227,8 @@ function ToolbarButton({
           <span
             style={{
               display: "inline-flex",
-              width: CHROME.contextToolbarSwatchPx,
-              height: CHROME.contextToolbarSwatchPx,
+              width: CHROME.selectionToolbarSwatchPx,
+              height: CHROME.selectionToolbarSwatchPx,
             }}
           >
             <ColorSwatchIcon color={currentColor} style={{ width: "100%", height: "100%" }} />
@@ -318,8 +246,7 @@ function ToolbarButton({
   );
 }
 
-function ContextToolbarComponent({
-  variant,
+function SelectionToolbarComponent({
   controls: controlSpecs,
   variantLabel,
   onAction,
@@ -331,26 +258,22 @@ function ContextToolbarComponent({
   activeFlyout,
   sectionContentHidden,
   sectionLocked,
-}: ContextToolbarProps) {
-  const controls: readonly ContextToolbarControl[] = controlSpecs
-    ? controlSpecs.map((spec) => ({
-        action: spec.action as ContextToolbarActionId,
-        label: spec.label,
-        Icon: ACTION_ICONS[spec.action] ?? BlankIcon,
-        hasFlyout: spec.hasFlyout,
-        text: spec.text,
-        dividerAfter: spec.dividerAfter,
-      }))
-    : variant
-      ? CONTEXT_TOOLBAR_REGISTRY[variant]
-      : [];
-  const label = variantLabel ?? variant;
+}: SelectionToolbarProps) {
+  const controls: readonly SelectionToolbarControl[] = controlSpecs.map((spec) => ({
+    action: spec.action as SelectionToolbarActionId,
+    label: spec.label,
+    Icon: ACTION_ICONS[spec.action] ?? BlankIcon,
+    hasFlyout: spec.hasFlyout,
+    text: spec.text,
+    dividerAfter: spec.dividerAfter,
+  }));
+  const label = variantLabel;
 
   return (
     <div
       role="toolbar"
       aria-label={label ? `${label} selection toolbar` : "selection toolbar"}
-      data-context-toolbar=""
+      data-selection-toolbar=""
       data-variant={label}
       className={className}
       style={{
@@ -394,13 +317,4 @@ function ContextToolbarComponent({
   );
 }
 
-export const ContextToolbar = memo(ContextToolbarComponent);
-
-// Extra control for the connector text-label-editing swap (catalog: "the
-// toolbar swaps to a text-formatting variant" when editing a connector's
-// label) — this is just the "text" variant, already covered above. Exported
-// alias for clarity at call sites.
-export const CONNECTOR_LABEL_EDIT_VARIANT: ContextToolbarVariant = "text";
-
-/** Standalone "add text label" control used only by the connector variant per the catalog ("T" add-text-label icon). Exposed for W3 to splice in if it needs a 7th connector control; kept out of the registry default set since the catalog's 6-control count for "connector" already matches without it (color/align/T/line-style/corner-style/arrowhead = 6; we render color/stroke/dash/routing/arrowhead/label-align = 6 per the task brief's exact spec). */
-export const CONNECTOR_ADD_LABEL_ICON = TextLabelIcon;
+export const SelectionToolbar = memo(SelectionToolbarComponent);

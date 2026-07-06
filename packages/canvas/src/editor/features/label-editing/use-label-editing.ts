@@ -41,7 +41,7 @@ export interface LabelEditingApi {
  * extracted verbatim from InteractiveCanvasEditor.tsx. Owns the two editor
  * states and their open/commit/cancel callbacks; the raw setters are exposed
  * because the editor's one-shot interaction signal (overlay.editObjectLabelId)
- * and the ContextToolbar "rename" action seed the editor with values computed
+ * and the SelectionToolbar "rename" action seed the editor with values computed
  * at the call site.
  */
 export function useLabelEditing({ document, dispatch }: UseLabelEditingArgs): LabelEditingApi {

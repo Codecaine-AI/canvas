@@ -3,14 +3,14 @@
 Built per `board-design-reference/analysis/figjam-bottom-dock-spec.md`,
 `figjam-chrome-catalog.md`, `figjam-style-tokens.json`/`figjam-style-spec.md`.
 This directory holds what shows up on the page around the canvas — the
-bottom dock, the shapes panel, and the zoom pill. It started as a standalone
-component library (W2-chrome, the old `src/chrome/`); since W3 it **is**
-wired in: `editor/InteractiveCanvasEditor.tsx` composes these components
-directly.
+top bar, the bottom dock, the shapes panel, and the zoom pill. It started as
+a standalone component library (W2-chrome, the old `src/chrome/`); since W3
+it **is** wired in: `editor/InteractiveCanvasEditor.tsx` composes these
+components directly.
 
 The floating selection toolbar is NOT here: the whole feature — pill view
-(`ContextToolbar.tsx`), positioning math (`position.ts`), state hook, and
-flyout host — lives together in `editor/features/context-toolbar/`.
+(`SelectionToolbar.tsx`), positioning math (`position.ts`), state hook, and
+flyout host — lives together in `editor/features/selection-toolbar/`.
 
 Per RESTRUCTURE.md's amended target tree, the old `chrome/` directory was
 dissolved into two homes:
@@ -30,19 +30,20 @@ The shape catalog (`shape-catalog.tsx`) and `ShapeSearchPopover` moved to
 |---|---|---|
 | `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
 | `ShapesPanel.tsx` | `ShapesPanel` | Full-height left-docked white Shapes sidebar (Panel B). |
+| `TopBar.tsx` | `TopBar` | Top bar: board title (optionally inline-editable), undo/reset history controls, save/cancel, host-provided leading/action slots. |
 | `ZoomControls.tsx` | `ZoomControls` | Bottom-right zoom pill. |
 
 Shared primitives these components draw on live in `src/ui/`:
 `ui/Tooltip.tsx` (dark hover-label used by every component above),
 `ui/ColorPalettePopover.tsx` (2x11 swatch grid flyout, also assembled into
 `ToolbarSpec`s by object defs), and `ui/icons/` — `toolbar-icons.tsx`
-(~20 glyphs for `ContextToolbar` controls), `dock-icons.tsx` (dock + zoom
+(~20 glyphs for `SelectionToolbar` controls), `dock-icons.tsx` (dock + zoom
 glyphs), and `nucleo/` (reference SVG sources for the dock/toolbar glyphs).
 
-## ContextToolbar is a dumb host
+## SelectionToolbar is a dumb host
 
-Since the RESTRUCTURE.md step-5 toolbar migration, `ContextToolbar`
-(`editor/features/context-toolbar/ContextToolbar.tsx`) no longer
+Since the RESTRUCTURE.md step-5 toolbar migration, `SelectionToolbar`
+(`editor/features/selection-toolbar/SelectionToolbar.tsx`) no longer
 owns *what* controls appear for a given selection. Per-kind control lists and
 their flyout components live on the object defs in `src/objects/` as each
 def's `toolbar: ToolbarSpec` (see `objects/object-def.ts`):
@@ -54,20 +55,20 @@ interface ToolbarSpec {
 }
 ```
 
-`editor/features/context-toolbar/ContextToolbarLayer.tsx` resolves the
+`editor/features/selection-toolbar/SelectionToolbarLayer.tsx` resolves the
 current selection's def(s) (capability-intersection over defs for
 multi-select — `intersectToolbarControls` in `objects/object-def.ts`), passes
-the resulting `controls` list to `<ContextToolbar controls={...} />`, and
+the resulting `controls` list to `<SelectionToolbar controls={...} />`, and
 renders whichever flyout component the resolved def declares for the
-currently open action. `ContextToolbar` itself only resolves each action id
+currently open action. `SelectionToolbar` itself only resolves each action id
 to an icon (`ACTION_ICONS`) and renders the pill/buttons/dividers — it has no
 knowledge of which selection kind produced the controls it's given.
 
-`CONTEXT_TOOLBAR_REGISTRY` (the old variant-keyed control table) still
-exists and still works via the legacy `variant` prop, but it is
-**`@deprecated`** (the `@codecaine-ai/canvas/chrome` subpath export it once
-served was deleted in the restructure — no real external consumer existed).
-New control sets belong on an `ObjectDef.toolbar`, not in that table.
+The old variant-keyed control table (`CONTEXT_TOOLBAR_REGISTRY`) and its
+legacy `variant` prop were **deleted** once the registry migration landed
+(the `@codecaine-ai/canvas/chrome` subpath export they once served had no
+real external consumer). `controls` is now required; control sets belong on
+an `ObjectDef.toolbar`.
 
 ## Import direction
 
@@ -81,7 +82,7 @@ New control sets belong on an `ObjectDef.toolbar`, not in that table.
   `ui/`, `tokens/`, and `model/`, but nothing outside `editor/` may import it.
 - `ui/` must **not** import `objects/`, `render/`, `interaction/`, or
   `editor/` — primitives stay dumb. A type-only import from `objects/` in an
-  editor component (e.g. `ContextToolbar.tsx`'s `ToolbarControlSpec`) is an
+  editor component (e.g. `SelectionToolbar.tsx`'s `ToolbarControlSpec`) is an
   ordinary editor→objects import and is fine.
 
 These rules are encoded in `src/__tests__/import-boundaries.test.ts`.

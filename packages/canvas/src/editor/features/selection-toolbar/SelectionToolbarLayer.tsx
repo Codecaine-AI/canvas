@@ -1,20 +1,20 @@
 "use client";
 
-import { ContextToolbar } from "./ContextToolbar";
+import { SelectionToolbar } from "./SelectionToolbar";
 import type { CanvasAction } from "../../../model/actions";
 import { CONNECTOR_DEFAULT_COLOR } from "../../../tokens/figjam-tokens";
 import { paletteTokenStyle, resolveSectionColors } from "../../../tokens/theme";
-import type { ContextToolbarApi } from "./use-context-toolbar";
+import type { SelectionToolbarApi } from "./use-selection-toolbar";
 import type { InteractiveCanvasConnection } from "../../../model/schema";
 
-export interface ContextToolbarLayerProps {
-  toolbar: ContextToolbarApi;
+export interface SelectionToolbarLayerProps {
+  toolbar: SelectionToolbarApi;
   selectedConnection: InteractiveCanvasConnection | undefined;
   dispatch: (action: CanvasAction) => void;
 }
 
 /**
- * Floating ContextToolbar host (RESTRUCTURE.md step 5): renders the chrome
+ * Floating SelectionToolbar host (RESTRUCTURE.md step 5): renders the chrome
  * pill with the registry-resolved control specs, plus whichever flyout
  * component the resolved def declares for the currently open action. The
  * flyout JSX itself lives on the ObjectDefs (objects/section/toolbar.tsx,
@@ -23,22 +23,22 @@ export interface ContextToolbarLayerProps {
  * nothing until the selection resolves a toolbar and the measured position
  * resolves.
  */
-export function ContextToolbarLayer({
+export function SelectionToolbarLayer({
   toolbar,
   selectedConnection,
   dispatch,
-}: ContextToolbarLayerProps) {
+}: SelectionToolbarLayerProps) {
   const {
-    contextToolbarRef,
-    contextToolbarVariant,
-    contextToolbarVariantLabel,
-    contextToolbarControls,
-    contextToolbarFlyouts,
-    contextToolbarPosition,
+    selectionToolbarRef,
+    selectionToolbarVariant,
+    selectionToolbarVariantLabel,
+    selectionToolbarControls,
+    selectionToolbarFlyouts,
+    selectionToolbarPosition,
     openFlyout,
     setOpenFlyout,
     primarySelectedObject,
-    handleContextToolbarAction,
+    handleSelectionToolbarAction,
     applyPaletteTokenToSelection,
     applySectionFillToSelection,
     applySectionStrokeToSelection,
@@ -47,18 +47,18 @@ export function ContextToolbarLayer({
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   } = toolbar;
-  if (!contextToolbarVariant || !contextToolbarPosition || !contextToolbarControls) return null;
-  const FlyoutComponent = openFlyout ? contextToolbarFlyouts?.[openFlyout] : undefined;
+  if (!selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
+  const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
   return (
     <div
-      ref={contextToolbarRef}
+      ref={selectionToolbarRef}
       className="pointer-events-auto absolute z-40"
-      style={{ left: contextToolbarPosition.x, top: contextToolbarPosition.y }}
+      style={{ left: selectionToolbarPosition.x, top: selectionToolbarPosition.y }}
     >
-      <ContextToolbar
-        controls={contextToolbarControls}
-        variantLabel={contextToolbarVariantLabel ?? contextToolbarVariant}
-        onAction={handleContextToolbarAction}
+      <SelectionToolbar
+        controls={selectionToolbarControls}
+        variantLabel={selectionToolbarVariantLabel ?? selectionToolbarVariant}
+        onAction={handleSelectionToolbarAction}
         currentColor={
           primarySelectedObject?.type === "section"
             ? primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint

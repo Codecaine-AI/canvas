@@ -8,10 +8,10 @@ import type { ObjectDef, ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
  * Connector def (step 5) — a SELECTION-KIND def, not an object type:
  * connections aren't objects, so `objectDefForType` never resolves to it and
  * its `render` is never dispatched (connections draw through
- * render/connectors/*). It exists to carry the connector context toolbar:
+ * render/connectors/*). It exists to carry the connector selection toolbar:
  * control list moved verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY
  * ["connector"] (minus the Icon field), flyout JSX moved verbatim from
- * editor/features/context-toolbar/ContextToolbarLayer.tsx.
+ * editor/features/selection-toolbar/SelectionToolbarLayer.tsx.
  */
 
 /**

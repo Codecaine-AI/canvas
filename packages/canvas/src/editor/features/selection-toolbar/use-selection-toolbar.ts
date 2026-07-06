@@ -11,10 +11,10 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import type { ContextToolbarActionId } from "./ContextToolbar";
+import type { SelectionToolbarActionId } from "./SelectionToolbar";
 import {
-  positionContextToolbar,
-  type PositionContextToolbarResult,
+  positionSelectionToolbar,
+  type PositionSelectionToolbarResult,
 } from "./position";
 import type { CanvasAction, CanvasSelection } from "../../../model/actions";
 import { boundsForGeometries, type CanvasBounds } from "../../../model/geometry";
@@ -44,8 +44,8 @@ import type {
 // on ObjectDefs can share it; re-exported here for existing importers.
 export { nearestPaletteToken } from "../../../objects/palette";
 
-/** The registry-resolved context toolbar for the current selection (step 5). */
-interface ResolvedContextToolbar {
+/** The registry-resolved selection toolbar for the current selection (step 5). */
+interface ResolvedSelectionToolbar {
   /** "connector" | "multi" | the primary def's kind. */
   kind: string;
   /**
@@ -67,11 +67,11 @@ const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky", "text"]);
  * capability intersection over the selected defs in selection order (first
  * selected donates control order and the flyout table).
  */
-function resolveContextToolbarForSelection(args: {
+function resolveSelectionToolbarForSelection(args: {
   selection: CanvasSelection;
   selectedObjects: InteractiveCanvasObject[];
   selectedConnection: InteractiveCanvasConnection | undefined;
-}): ResolvedContextToolbar | null {
+}): ResolvedSelectionToolbar | null {
   const { selection, selectedObjects, selectedConnection } = args;
   if (selection.kind === "connection" && selectedConnection) {
     return {
@@ -110,7 +110,7 @@ function resolveContextToolbarForSelection(args: {
   return null;
 }
 
-export interface UseContextToolbarArgs {
+export interface UseSelectionToolbarArgs {
   document: InteractiveCanvasDocument;
   dispatch: (action: CanvasAction) => void;
   selection: CanvasSelection;
@@ -130,23 +130,23 @@ export interface UseContextToolbarArgs {
   setObjectLabelEditValue: Dispatch<SetStateAction<string>>;
 }
 
-export interface ContextToolbarApi {
+export interface SelectionToolbarApi {
   /** Attached to the positioned wrapper so the measuring ResizeObserver sees the real size. */
-  contextToolbarRef: RefObject<HTMLDivElement | null>;
+  selectionToolbarRef: RefObject<HTMLDivElement | null>;
   /** Resolved toolbar kind: "connector" | "multi" | the primary def's kind. */
-  contextToolbarVariant: string | null;
+  selectionToolbarVariant: string | null;
   /** DOM back-compat `data-variant`/aria string (single non-special kinds read "shape"). */
-  contextToolbarVariantLabel: string | null;
-  /** Registry-resolved control specs for the chrome ContextToolbar host. */
-  contextToolbarControls: readonly ToolbarControlSpec[] | null;
+  selectionToolbarVariantLabel: string | null;
+  /** Registry-resolved control specs for the chrome SelectionToolbar host. */
+  selectionToolbarControls: readonly ToolbarControlSpec[] | null;
   /** The primary selection's flyout components, keyed by opening action id. */
-  contextToolbarFlyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | null;
-  contextToolbarPosition: PositionContextToolbarResult | null;
-  openFlyout: ContextToolbarActionId | null;
-  setOpenFlyout: Dispatch<SetStateAction<ContextToolbarActionId | null>>;
+  selectionToolbarFlyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | null;
+  selectionToolbarPosition: PositionSelectionToolbarResult | null;
+  openFlyout: SelectionToolbarActionId | null;
+  setOpenFlyout: Dispatch<SetStateAction<SelectionToolbarActionId | null>>;
   selectedObjectsForToolbar: InteractiveCanvasObject[];
   primarySelectedObject: InteractiveCanvasObject | undefined;
-  handleContextToolbarAction: (action: ContextToolbarActionId, value?: unknown) => void;
+  handleSelectionToolbarAction: (action: SelectionToolbarActionId, value?: unknown) => void;
   /** Also wired into the Inspector's "Color" swatches (checkpoint 5, D16). */
   applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
   applySectionFillToSelection: (fill: string) => void;
@@ -158,14 +158,14 @@ export interface ContextToolbarApi {
 }
 
 /**
- * ContextToolbar layer state + actions: the selection-derived toolbar
+ * SelectionToolbar layer state + actions: the selection-derived toolbar
  * resolution (registry-driven since RESTRUCTURE.md step 5), anchor-rect/
  * position memos, the measured toolbar size (ResizeObserver), the open-flyout
  * state, every style-apply callback, and the onAction dispatch table. Control
  * lists and flyout components live on the ObjectDefs (objects/); this hook
- * resolves them per selection and hands them to ContextToolbarLayer.
+ * resolves them per selection and hands them to SelectionToolbarLayer.
  */
-export function useContextToolbar({
+export function useSelectionToolbar({
   document,
   dispatch,
   selection,
@@ -177,13 +177,13 @@ export function useContextToolbar({
   controls,
   setObjectLabelEditId,
   setObjectLabelEditValue,
-}: UseContextToolbarArgs): ContextToolbarApi {
-  // Which ContextToolbar flyout (if any) is currently open, tracked by action
-  // id since ContextToolbar's buttons only report `onAction(action)` without
+}: UseSelectionToolbarArgs): SelectionToolbarApi {
+  // Which SelectionToolbar flyout (if any) is currently open, tracked by action
+  // id since SelectionToolbar's buttons only report `onAction(action)` without
   // exposing their own open/closed state to the parent.
-  const [openFlyout, setOpenFlyout] = useState<ContextToolbarActionId | null>(null);
-  const contextToolbarRef = useRef<HTMLDivElement | null>(null);
-  const [contextToolbarSize, setContextToolbarSize] = useState({ width: 220, height: 29 });
+  const [openFlyout, setOpenFlyout] = useState<SelectionToolbarActionId | null>(null);
+  const selectionToolbarRef = useRef<HTMLDivElement | null>(null);
+  const [selectionToolbarSize, setSelectionToolbarSize] = useState({ width: 220, height: 29 });
   // IN SELECTION ORDER (selection.objectIds click order), not document order:
   // step 5's multi-select capability intersection makes the FIRST SELECTED
   // object the order donor, and its def donates the flyout table.
@@ -194,23 +194,23 @@ export function useContextToolbar({
         .filter((object): object is InteractiveCanvasObject => object !== undefined),
     [document.objects, selectedIds],
   );
-  const resolvedToolbar = resolveContextToolbarForSelection({
+  const resolvedToolbar = resolveSelectionToolbarForSelection({
     selection,
     selectedObjects: selectedObjectsForToolbar,
     selectedConnection,
   });
-  const contextToolbarVariant = resolvedToolbar?.kind ?? null;
+  const selectionToolbarVariant = resolvedToolbar?.kind ?? null;
   /**
-   * Screen-space rect the ContextToolbar anchors above (Wave 3a scope item 2).
+   * Screen-space rect the SelectionToolbar anchors above (Wave 3a scope item 2).
    * Computed read-only from CanvasStage's own pure helpers — worldToScreen
    * (viewport.ts) + boundsForGeometries (geometry.ts) — rather than touching
    * CanvasStage.tsx, per this wave's file-ownership constraints. Recomputes on
    * every viewport change (pan/zoom) since it's derived, not stored.
    */
   const selectionScreenRect = useMemo(() => {
-    if (!contextToolbarVariant) return null;
+    if (!selectionToolbarVariant) return null;
     let worldBounds: CanvasBounds | null = null;
-    if (contextToolbarVariant === "connector" && selectedConnection) {
+    if (selectionToolbarVariant === "connector" && selectedConnection) {
       const from = document.objects.find((o) => o.id === selectedConnection.from.objectId);
       const to = document.objects.find((o) => o.id === selectedConnection.to.objectId);
       if (from && to) worldBounds = boundsForGeometries([from.geometry, to.geometry]);
@@ -225,15 +225,15 @@ export function useContextToolbar({
       width: worldBounds.width * viewport.zoom,
       height: worldBounds.height * viewport.zoom,
     };
-  }, [contextToolbarVariant, selectedConnection, selectedObjectsForToolbar, document.objects, viewport]);
-  const contextToolbarPosition = useMemo(() => {
+  }, [selectionToolbarVariant, selectedConnection, selectedObjectsForToolbar, document.objects, viewport]);
+  const selectionToolbarPosition = useMemo(() => {
     if (!selectionScreenRect || !stageRef.current) return null;
     const stageRect = stageRef.current.getBoundingClientRect();
-    return positionContextToolbar(selectionScreenRect, contextToolbarSize, {
+    return positionSelectionToolbar(selectionScreenRect, selectionToolbarSize, {
       width: stageRect.width,
       height: stageRect.height,
     });
-  }, [selectionScreenRect, contextToolbarSize, stageRef]);
+  }, [selectionScreenRect, selectionToolbarSize, stageRef]);
   /**
    * Inspector "Color" swatches (checkpoint 5, D16) apply to every selected
    * object, not just the primary one — canvas.updateObject only patches a
@@ -292,15 +292,15 @@ export function useContextToolbar({
     [dispatch, selectedObjectsForToolbar],
   );
 
-  // Measure the ContextToolbar's actual rendered size so positioning is exact
+  // Measure the SelectionToolbar's actual rendered size so positioning is exact
   // rather than assumed — width varies per variant (different control counts).
   useEffect(() => {
-    const element = contextToolbarRef.current;
-    if (!element || !contextToolbarVariant) return;
+    const element = selectionToolbarRef.current;
+    if (!element || !selectionToolbarVariant) return;
     const measure = () => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
-        setContextToolbarSize({ width: rect.width, height: rect.height });
+        setSelectionToolbarSize({ width: rect.width, height: rect.height });
       }
     };
     measure();
@@ -308,20 +308,20 @@ export function useContextToolbar({
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [contextToolbarVariant]);
+  }, [selectionToolbarVariant]);
 
-  // Close any open ContextToolbar flyout whenever the selection changes shape
+  // Close any open SelectionToolbar flyout whenever the selection changes shape
   // (different variant, or selection cleared) so a stale flyout doesn't linger
   // anchored to a control that's no longer rendered.
   useEffect(() => {
     setOpenFlyout(null);
-  }, [contextToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
+  }, [selectionToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
 
   const primarySelectedObject = selectedObjectsForToolbar[0];
   const primaryDefKind = primarySelectedObject
     ? objectDefForType(primarySelectedObject.type)?.kind
     : undefined;
-  const contextToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
+  const selectionToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
 
   /**
    * Section lock toggle (Wave 3a scope item 2's "lock" action + scope item
@@ -384,15 +384,15 @@ export function useContextToolbar({
   );
 
   /**
-   * ContextToolbar onAction dispatch table (Wave 3a scope item 2). Actions
+   * SelectionToolbar onAction dispatch table (Wave 3a scope item 2). Actions
    * with a real backing schema field dispatch immediately on click (bold-ish
    * toggle actions have none to toggle, so those are effectively disabled —
    * see the report's disabled-with-tooltip list); actions that need a value
    * picker (color/tint/dash/routing/arrowhead/shape-swap/lock) instead toggle
    * a flyout, rendered just below the toolbar in the overlay.
    */
-  const handleContextToolbarAction = useCallback(
-    (action: ContextToolbarActionId, value?: unknown) => {
+  const handleSelectionToolbarAction = useCallback(
+    (action: SelectionToolbarActionId, value?: unknown) => {
       if (action === "section-border-style" && (value === "solid" || value === "dashed" || value === "none")) {
         applySectionBorderStyleToSelection(value);
         return;
@@ -422,7 +422,7 @@ export function useContextToolbar({
       // a component for it (replaces the static FLYOUT_ACTIONS set) — e.g.
       // section: color/section-border-style/tint/lock; connector: color/dash/
       // routing/arrowhead; shape: shape-swap/color; sticky/text: color.
-      if (contextToolbarFlyouts && action in contextToolbarFlyouts) {
+      if (selectionToolbarFlyouts && action in selectionToolbarFlyouts) {
         setOpenFlyout((current) => (current === action ? null : action));
         return;
       }
@@ -434,9 +434,9 @@ export function useContextToolbar({
       // list/frame/visibility/label-align/add-label: no supporting schema
       // field exists yet (object/connection style is limited to
       // paletteToken/tone + shape, and connections to style/arrow) — these
-      // render but are no-ops beyond ContextToolbar's own local
+      // render but are no-ops beyond SelectionToolbar's own local
       // aria-expanded toggle. Documented in the wave-3a report as
-      // disabled-with-tooltip (ContextToolbar doesn't support a disabled prop
+      // disabled-with-tooltip (SelectionToolbar doesn't support a disabled prop
       // per-control today, so the tooltip still shows via Tooltip's
       // hover label; clicking is inert).
     },
@@ -445,7 +445,7 @@ export function useContextToolbar({
       applySectionFillToSelection,
       applySectionBorderStyleToSelection,
       controls,
-      contextToolbarFlyouts,
+      selectionToolbarFlyouts,
       primaryDefKind,
       primarySelectedObject,
       toggleSectionContentHiddenForSelection,
@@ -455,17 +455,17 @@ export function useContextToolbar({
   );
 
   return {
-    contextToolbarRef,
-    contextToolbarVariant,
-    contextToolbarVariantLabel: resolvedToolbar?.variantLabel ?? null,
-    contextToolbarControls: resolvedToolbar?.controls ?? null,
-    contextToolbarFlyouts,
-    contextToolbarPosition,
+    selectionToolbarRef,
+    selectionToolbarVariant,
+    selectionToolbarVariantLabel: resolvedToolbar?.variantLabel ?? null,
+    selectionToolbarControls: resolvedToolbar?.controls ?? null,
+    selectionToolbarFlyouts,
+    selectionToolbarPosition,
     openFlyout,
     setOpenFlyout,
     selectedObjectsForToolbar,
     primarySelectedObject,
-    handleContextToolbarAction,
+    handleSelectionToolbarAction,
     applyPaletteTokenToSelection,
     applySectionFillToSelection,
     applySectionStrokeToSelection,

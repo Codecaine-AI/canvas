@@ -4,7 +4,7 @@ import { useEffect, useId, useSyncExternalStore } from "react";
 
 /**
  * Tooltip — shared dark hover-label used by all FigJam chrome
- * components (dock buttons, context-toolbar controls, etc.).
+ * components (dock buttons, selection-toolbar controls, etc.).
  *
  * Ground truth: the one confirmed tooltip in the source recording is the
  * "Line style" label over the connector toolbar's line-style icon (fj-029) —

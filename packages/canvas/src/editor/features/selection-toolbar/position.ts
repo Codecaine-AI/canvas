@@ -1,6 +1,6 @@
 /**
- * positionContextToolbar — pure geometry helper for floating the dark
- * context toolbar above a selection, clamped fully inside the viewport.
+ * positionSelectionToolbar — pure geometry helper for floating the dark
+ * selection toolbar above a selection, clamped fully inside the viewport.
  *
  * Ground truth: figjam-chrome-catalog.md section 2 describes the toolbar as
  * floating "above the current selection"; figjam-style-tokens.json/spec
@@ -16,7 +16,7 @@
 export type Rect = { x: number; y: number; width: number; height: number };
 export type Size = { width: number; height: number };
 
-export type PositionContextToolbarResult = {
+export type PositionSelectionToolbarResult = {
   x: number;
   y: number;
   /** Which side of the selection the toolbar ended up on, post-clamp. */
@@ -27,11 +27,11 @@ const GAP_ABOVE_SELECTION_PX = 27;
 /** Minimum breathing room kept between the toolbar and any viewport edge. */
 const VIEWPORT_MARGIN_PX = 8;
 
-export function positionContextToolbar(
+export function positionSelectionToolbar(
   selectionRect: Rect,
   toolbarSize: Size,
   viewport: Size,
-): PositionContextToolbarResult {
+): PositionSelectionToolbarResult {
   const selectionCenterX = selectionRect.x + selectionRect.width / 2;
 
   // Horizontal: center on the selection, then clamp fully inside the viewport.

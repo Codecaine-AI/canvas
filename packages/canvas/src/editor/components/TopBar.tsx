@@ -2,9 +2,9 @@
 
 import { useCallback, useState, type ReactNode } from "react";
 import { RotateCcwIcon, Undo2Icon } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { Input } from "../../../ui/input";
-import type { CanvasAction } from "../../../model/actions";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import type { CanvasAction } from "../../model/actions";
 
 export interface TopBarProps {
   title: string | undefined;

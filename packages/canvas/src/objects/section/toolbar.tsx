@@ -8,9 +8,9 @@ import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 import type { CanvasSectionTint } from "../../model/schema";
 
 /**
- * Section context toolbar (step 5): control list moved verbatim from chrome's
+ * Section selection toolbar (step 5): control list moved verbatim from chrome's
  * CONTEXT_TOOLBAR_REGISTRY["section"] (minus the Icon field), flyout JSX
- * moved verbatim from editor/features/context-toolbar/ContextToolbarLayer.tsx.
+ * moved verbatim from editor/features/selection-toolbar/SelectionToolbarLayer.tsx.
  * The "tint" flyout has no toolbar control — it is opened via the editor's
  * context menu — but lives here so the flyout table stays complete.
  */

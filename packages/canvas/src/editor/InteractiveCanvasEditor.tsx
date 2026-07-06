@@ -23,13 +23,13 @@ import { ShapesPanel } from "./components/ShapesPanel";
 import { ZoomControls } from "./components/ZoomControls";
 import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
 import { useCanvasContextMenu } from "./features/context-menu/use-canvas-context-menu";
-import { ContextToolbarLayer } from "./features/context-toolbar/ContextToolbarLayer";
-import { useContextToolbar } from "./features/context-toolbar/use-context-toolbar";
+import { SelectionToolbarLayer } from "./features/selection-toolbar/SelectionToolbarLayer";
+import { useSelectionToolbar } from "./features/selection-toolbar/use-selection-toolbar";
 import { useInteractionPipeline } from "./features/drag-pipeline/use-interaction-pipeline";
 import { Inspector } from "./features/inspector/Inspector";
 import { LabelEditingOverlay } from "./features/label-editing/LabelEditingOverlay";
 import { useLabelEditing } from "./features/label-editing/use-label-editing";
-import { TopBar } from "./features/top-bar/TopBar";
+import { TopBar } from "./components/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
 import type {
@@ -154,10 +154,10 @@ export function InteractiveCanvasEditor({
   const selectedLinks = selectedObject
     ? (state.document.links ?? []).filter((link) => link.objectId === selectedObject.id)
     : [];
-  // Floating ContextToolbar (selection-derived variant/position, flyouts,
+  // Floating SelectionToolbar (selection-derived variant/position, flyouts,
   // style-apply actions) — state and actions live in
-  // editor/features/context-toolbar.
-  const contextToolbar = useContextToolbar({
+  // editor/features/selection-toolbar.
+  const selectionToolbar = useSelectionToolbar({
     document: state.document,
     dispatch,
     selection: state.selection,
@@ -170,7 +170,7 @@ export function InteractiveCanvasEditor({
     setObjectLabelEditId,
     setObjectLabelEditValue,
   });
-  const { applyPaletteTokenToSelection } = contextToolbar;
+  const { applyPaletteTokenToSelection } = selectionToolbar;
   const selectionContext = useMemo(
     () => buildSelectionContext(state.document, state.selection),
     [state.document, state.selection],
@@ -318,8 +318,8 @@ export function InteractiveCanvasEditor({
         />
       ) : null}
 
-      <ContextToolbarLayer
-        toolbar={contextToolbar}
+      <SelectionToolbarLayer
+        toolbar={selectionToolbar}
         selectedConnection={selectedConnection}
         dispatch={dispatch}
       />

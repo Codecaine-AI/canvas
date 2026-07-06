@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 
 /**
- * Inline SVG glyphs for context-toolbar controls (shape/section/connector/
+ * Inline SVG glyphs for selection-toolbar controls (shape/section/connector/
  * text variants). Approximated from figjam-chrome-catalog.md section 2 and
  * fj-007/fj-012/fj-030/fj-053 frame reads. White glyphs (currentColor) on the
  * dark #1D1D1D pill.

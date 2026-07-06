@@ -64,7 +64,7 @@ import { triangleDef } from "./shapes/triangle";
  * Current scope: `render`, `css`, the className carried by the render path,
  * `handles`/`hitTest`/`dragCapture` (interaction/core.ts, hit-testing.ts,
  * gestures/move.ts, SelectionBox — cf3aec8), and `toolbar` (the
- * context-toolbar layer's use-context-toolbar.ts — 4c0d62d) are all CONSUMED
+ * selection-toolbar layer's use-selection-toolbar.ts — 4c0d62d) are all CONSUMED
  * from the registry. `labelEditing` is DECLARED but not yet consumed —
  * inline label-editing dispatch still checks `object.type === "section"`
  * directly. `defaults` is likewise DECLARED but not yet consumed — per-type
@@ -120,9 +120,9 @@ export interface LabelEditingSpec {
 }
 
 /**
- * Context-toolbar contract (step 5): each def owns its ordered control list
+ * Selection-toolbar contract (step 5): each def owns its ordered control list
  * and the flyout components those controls open. Specs are ICON-FREE — the
- * chrome ContextToolbar host resolves each action id to its icon via an
+ * chrome SelectionToolbar host resolves each action id to its icon via an
  * internal map, so objects/ never depends on chrome's icon set.
  */
 export interface ToolbarControlSpec {
@@ -138,9 +138,9 @@ export interface ToolbarControlSpec {
 
 /**
  * Props every toolbar flyout component receives from the editor's
- * ContextToolbarLayer host: the primary selection, the dispatcher, a
+ * SelectionToolbarLayer host: the primary selection, the dispatcher, a
  * `close` callback, and the selection-wide style-apply helpers from
- * use-context-toolbar. Flyouts pick the subset they need.
+ * use-selection-toolbar. Flyouts pick the subset they need.
  */
 export interface ToolbarFlyoutProps {
   primaryObject?: InteractiveCanvasObject;
@@ -193,7 +193,7 @@ export interface ObjectDef {
   hitTest: ObjectHitTest;
   dragCapture: ObjectDragCapture;
   labelEditing: LabelEditingSpec;
-  /** This kind's context toolbar (step 5): control list + flyout components. */
+  /** This kind's selection toolbar (step 5): control list + flyout components. */
   toolbar?: ToolbarSpec;
 }
 

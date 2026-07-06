@@ -219,7 +219,7 @@ export const SATURATED_PALETTE = [
 ] as const;
 
 /**
- * The 2x11 palette-popover swatch list (chrome context-toolbar color picker).
+ * The 2x11 palette-popover swatch list (chrome selection-toolbar color picker).
  * Not separately captured in figjam-style-tokens.json's `chrome` block (no
  * dedicated popover swatch array was sampled) — derived here by concatenating
  * the pastel-pair fills (row 1, the "tint" swatches users pick most) with the
@@ -494,8 +494,8 @@ export const CHROME = {
   dockHoverBg: "#F0F0F0",
   dockShadow: "0 2px 10px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06)",
   selectCursor: `url("${SELECT_CURSOR_DATA_URI}") 3 3, default`,
-  contextToolbarBg: "#1D1D1D",
-  contextToolbarSwatchPx: 22,
+  selectionToolbarBg: "#1D1D1D",
+  selectionToolbarSwatchPx: 22,
   colorPopoverSwatchPx: 32,
   colorPopoverGapPx: 10,
   colorPopoverPaddingPx: 18,

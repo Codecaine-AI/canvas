@@ -7,10 +7,10 @@ import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 import { nearestPaletteToken } from "../palette";
 
 /**
- * The ONE shared shape-family context toolbar (step 5): control list moved
+ * The ONE shared shape-family selection toolbar (step 5): control list moved
  * verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY["shape"] (minus the Icon
  * field — icons are resolved by the chrome host), flyout JSX moved verbatim
- * from editor/features/context-toolbar/ContextToolbarLayer.tsx. Attached by
+ * from editor/features/selection-toolbar/SelectionToolbarLayer.tsx. Attached by
  * shapes/base.tsx to every shape-family def and explicitly by the
  * container/source-node/icon/code-block defs (their types resolved to the
  * "shape" toolbar variant before the registry migration).

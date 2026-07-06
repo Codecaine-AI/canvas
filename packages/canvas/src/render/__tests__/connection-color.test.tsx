@@ -18,7 +18,7 @@ afterEach(() => {
  * W4 blocker: connections carry an additive `color?: string` (any non-empty
  * string; hex expected) that round-trips through schema validation, is
  * patchable via canvas.updateConnection, and is wired to the connector
- * context toolbar's color flyout.
+ * selection toolbar's color flyout.
  */
 
 function makeDocument(color?: string): InteractiveCanvasDocument {
@@ -79,7 +79,7 @@ describe("actions: canvas.updateConnection color patch", () => {
   });
 });
 
-describe("editor: connector color flyout (context toolbar)", () => {
+describe("editor: connector color flyout (selection toolbar)", () => {
   function stubStageRect() {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
@@ -126,7 +126,7 @@ describe("editor: connector color flyout (context toolbar)", () => {
         fireEvent.pointerUp(window, { pointerId: 1, clientX: 320, clientY: 88 });
       });
 
-      // The connector context toolbar appears; open the "Line color" flyout.
+      // The connector selection toolbar appears; open the "Line color" flyout.
       const colorButton = await screen.findByRole("button", { name: "Line color" });
       fireEvent.click(colorButton);
 

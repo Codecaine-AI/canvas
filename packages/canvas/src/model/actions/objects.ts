@@ -244,7 +244,7 @@ export function handleSetObjectType(
 ): InteractiveCanvasState {
   const existing = state.document.objects.find((object) => object.id === action.objectId);
   if (!existing || existing.type === action.objectType) return state;
-  // Shape-swap (context-toolbar "shape-swap" action, W3): preserves
+  // Shape-swap (selection-toolbar "shape-swap" action, W3): preserves
   // geometry/label/parentId/body — only `type` + the derived `style.shape`
   // change, plus the section-only title/tint fields, which are seeded (on
   // swap-into-section) or cleared (on swap-away-from-section) since every
