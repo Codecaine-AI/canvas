@@ -11,32 +11,16 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import {
-  ArrowRightIcon,
-  BoxIcon,
-  CheckIcon,
-  ClipboardPasteIcon,
-  CopyIcon,
-  DiamondIcon,
-  FrameIcon,
-  LockIcon,
-  MessageSquareIcon,
-  StickyNoteIcon,
-  Trash2Icon,
-  TypeIcon,
-  UnlockIcon,
-} from "lucide-react";
+import { LockIcon, UnlockIcon } from "lucide-react";
 import {
   buildSelectionContext,
   createInteractiveCanvasState,
-  defaultGeometryFor,
   reduceInteractiveCanvasState,
   type CanvasAction,
   type CanvasSelection,
   type CanvasTool,
 } from "../model/actions";
 import { CanvasStage } from "../render/CanvasStage";
-import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../interaction/clipboard";
 import {
   ColorPalettePopover,
   type ColorPalettePopoverProps,
@@ -72,15 +56,17 @@ import {
 import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../render/figjam-tokens";
 import { type Anchor } from "../routing/routing";
 import { paletteTokenStyle, resolveSectionColors } from "../render/theme";
+import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
+import { useCanvasContextMenu } from "./features/context-menu/use-canvas-context-menu";
 import { Inspector } from "./features/inspector/Inspector";
 import { LabelEditingOverlay } from "./features/label-editing/LabelEditingOverlay";
 import { useLabelEditing } from "./features/label-editing/use-label-editing";
 import { TopBar } from "./features/top-bar/TopBar";
+import { stageFromEventTarget, stageScreenPointFromClient } from "./stage-dom";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
 import { panBy, worldToScreen } from "./viewport";
 import type {
-  CanvasGeometry,
   CanvasPaletteToken,
   CanvasSectionStrokeStyle,
   CanvasSectionTint,
@@ -266,35 +252,6 @@ function contextToolbarVariantForSelection(args: {
   return null;
 }
 
-type CanvasContextMenuState =
-  | {
-      kind: "canvas";
-      x: number;
-      y: number;
-      canvasPoint: CanvasPoint;
-    }
-  | {
-      kind: "object";
-      x: number;
-      y: number;
-      objectId: string;
-      canvasPoint: CanvasPoint;
-    };
-
-/** Client (viewport) coords -> stage-relative screen coords, for screenToWorld(). */
-function stageScreenPointFromClient(
-  event: Pick<PointerEvent | MouseEvent, "clientX" | "clientY">,
-  stage: HTMLElement,
-): CanvasPoint {
-  const rect = stage.getBoundingClientRect();
-  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
-}
-
-function stageFromEventTarget(target: Element): HTMLElement | null {
-  const stage = target.closest("[data-canvas-stage='true']");
-  return stage instanceof HTMLElement ? stage : null;
-}
-
 /**
  * Resolves a raw pointer event's target into a CanvasHit by walking the DOM:
  * resize handles carry data-canvas-handle + data-canvas-object-id; connector
@@ -355,19 +312,6 @@ function resolveHit(
   return { kind: "canvas" };
 }
 
-function geometryForContextObject(
-  objectType: InteractiveCanvasObjectType,
-  point: CanvasPoint,
-): CanvasGeometry {
-  const size = defaultGeometryFor(objectType);
-  return {
-    x: point.x - size.width / 2,
-    y: point.y - size.height / 2,
-    width: size.width,
-    height: size.height,
-  };
-}
-
 export function InteractiveCanvasEditor({
   document,
   onSave,
@@ -382,7 +326,6 @@ export function InteractiveCanvasEditor({
 }: InteractiveCanvasEditorProps) {
   const [state, dispatch] = useReducer(reducer, document, createInteractiveCanvasState);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
   // Inline label editing (connector labels + object labels/section titles) —
   // state and callbacks live in editor/features/label-editing.
   const labelEditing = useLabelEditing({ document: state.document, dispatch });
@@ -409,6 +352,19 @@ export function InteractiveCanvasEditor({
     stageRef,
     panOnPlainDrag: state.tool === "hand",
   });
+  // Right-click context menu (canvas + object variants) — state and actions
+  // live in editor/features/context-menu.
+  const canvasContextMenu = useCanvasContextMenu({
+    document: state.document,
+    dispatch,
+    screenToWorld,
+  });
+  const {
+    isContextMenuOpen,
+    closeContextMenu,
+    openCanvasContextMenu,
+    openObjectContextMenu,
+  } = canvasContextMenu;
   const selectedIds = selectedObjectIds(state.selection);
   const selectedObject = state.document.objects.find((object) => object.id === selectedIds[0]);
   const selectedConnectionId = state.selection.kind === "connection" ? state.selection.connectionId : null;
@@ -924,7 +880,7 @@ export function InteractiveCanvasEditor({
       if (event.button !== 0) return;
       if (stateRef.current.tool === "hand") return;
       const stage = event.currentTarget;
-      setContextMenu(null);
+      closeContextMenu();
       activeGestureRef.current = { pointerId: event.pointerId, stage };
       // Seed the pointer snapshot so the edge-pan loop has a position even
       // before the first pointermove, then start the per-gesture rAF loop
@@ -933,11 +889,8 @@ export function InteractiveCanvasEditor({
       startEdgePanLoop();
       runInteraction(buildPointerEvent("down", event.nativeEvent, stage));
     },
-    [buildPointerEvent, runInteraction, startEdgePanLoop],
+    [buildPointerEvent, closeContextMenu, runInteraction, startEdgePanLoop],
   );
-
-  const contextMenuRef = useRef(contextMenu);
-  contextMenuRef.current = contextMenu;
 
   const applyCancelInteraction = useCallback((result: ReturnType<typeof cancelInteraction>) => {
     // Drop any coalesced-but-uncommitted move and stop edge-panning first: a
@@ -953,9 +906,6 @@ export function InteractiveCanvasEditor({
       dispatch(action);
     }
   }, [dispatch, moveCoalescer, stopEdgePanLoop]);
-
-  const isContextMenuOpen = useCallback(() => contextMenuRef.current !== null, []);
-  const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
   const isTypingContextActive = useCallback(
     () => labelEditConnectionId !== null || objectLabelEditId !== null,
@@ -973,151 +923,6 @@ export function InteractiveCanvasEditor({
     onCloseContextMenu: closeContextMenu,
     controls,
   });
-
-  const canvasPointFromContextMenu = useCallback(
-    (event: ReactMouseEvent<HTMLElement>): CanvasPoint => {
-      const stage = stageFromEventTarget(event.currentTarget);
-      if (!stage) return { x: 0, y: 0 };
-      return screenToWorld(stageScreenPointFromClient(event.nativeEvent, stage));
-    },
-    [screenToWorld],
-  );
-
-  const openCanvasContextMenu = useCallback(
-    (event: ReactMouseEvent<HTMLElement>, _bounds: CanvasBounds) => {
-      event.preventDefault();
-      event.stopPropagation();
-      dispatch({ type: "canvas.select", selection: { kind: "none" } });
-      setContextMenu({
-        kind: "canvas",
-        x: event.clientX,
-        y: event.clientY,
-        canvasPoint: canvasPointFromContextMenu(event),
-      });
-    },
-    [canvasPointFromContextMenu],
-  );
-
-  const openObjectContextMenu = useCallback(
-    (
-      event: ReactMouseEvent<HTMLElement>,
-      object: InteractiveCanvasObject,
-      _bounds: CanvasBounds,
-    ) => {
-      event.preventDefault();
-      event.stopPropagation();
-      dispatch({
-        type: "canvas.select",
-        selection: { kind: "objects", objectIds: [object.id] },
-      });
-      setContextMenu({
-        kind: "object",
-        x: event.clientX,
-        y: event.clientY,
-        objectId: object.id,
-        canvasPoint: canvasPointFromContextMenu(event),
-      });
-    },
-    [canvasPointFromContextMenu],
-  );
-
-  const addObjectFromContextMenu = (objectType: InteractiveCanvasObjectType) => {
-    if (!contextMenu) return;
-    const contextObject =
-      contextMenu.kind === "object"
-        ? state.document.objects.find((object) => object.id === contextMenu.objectId)
-        : null;
-    dispatch({
-      type: "canvas.addObject",
-      objectType,
-      geometry: geometryForContextObject(objectType, contextMenu.canvasPoint),
-      parentId:
-        contextObject?.type === "container"
-          ? contextObject.id
-          : contextObject?.parentId ?? null,
-    });
-    setContextMenu(null);
-  };
-
-  /**
-   * "Paste" context-menu entry (Wave 3a scope item 5) — reuses the exact
-   * clipboard mechanism already backing Cmd/Ctrl-V (use-canvas-hotkeys.ts):
-   * clipboard.ts's in-memory store + buildPastePayload, targeted at the
-   * right-clicked canvas point instead of the last pointer position.
-   */
-  const pasteFromContextMenu = () => {
-    if (!contextMenu) return;
-    const clipboard = getClipboardMemory();
-    if (!clipboard) return;
-    const payload = buildPastePayload(clipboard, contextMenu.canvasPoint);
-    dispatch({
-      type: "canvas.addObjects",
-      objects: payload.objects,
-      connections: payload.connections,
-      select: true,
-    });
-    setContextMenu(null);
-  };
-
-  const canPasteFromContextMenu = getClipboardMemory() !== null;
-
-  /**
-   * "Copy" context-menu entry — pairs with "Paste" above using the same
-   * clipboard.ts mechanism as the Cmd/Ctrl-C hotkey. Right-clicking an
-   * object doesn't necessarily change state.selection (see
-   * toggleLockFromContextMenu, which also reads contextMenu.objectId
-   * directly), so this builds a one-off selection over just the
-   * right-clicked object rather than assuming it's already selected.
-   */
-  const copyFromContextMenu = () => {
-    if (contextMenu?.kind !== "object") return;
-    const payload = copySelection(state.document, {
-      kind: "objects",
-      objectIds: [contextMenu.objectId],
-    });
-    if (!payload) return;
-    setClipboardMemory(payload);
-    setContextMenu(null);
-  };
-
-  const toggleLockFromContextMenu = () => {
-    if (contextMenu?.kind !== "object") return;
-    const object = state.document.objects.find((item) => item.id === contextMenu.objectId);
-    if (!object) return;
-    dispatch({
-      type: "canvas.updateObject",
-      objectId: object.id,
-      patch: { locked: !object.locked },
-    });
-    setContextMenu(null);
-  };
-
-  const addContextAnnotation = () => {
-    if (contextMenu?.kind !== "object") return;
-    dispatch({
-      type: "canvas.addAnnotation",
-      target: { kind: "object", objectId: contextMenu.objectId },
-      body: "Review this object.",
-      intent: "agent-request",
-    });
-    setContextMenu(null);
-  };
-
-  const fitContextObject = () => {
-    if (contextMenu?.kind !== "object") return;
-    const contextObject = state.document.objects.find((object) => object.id === contextMenu.objectId);
-    if (contextObject?.type !== "container") return;
-    dispatch({
-      type: "canvas.fitContainerToChildren",
-      containerId: contextObject.id,
-    });
-    setContextMenu(null);
-  };
-
-  const deleteContextSelection = () => {
-    dispatch({ type: "canvas.deleteSelection" });
-    setContextMenu(null);
-  };
 
   const handleShapePick = useCallback(
     (shapeType: InteractiveCanvasObjectType) => {
@@ -1140,11 +945,6 @@ export function InteractiveCanvasEditor({
   );
 
   const openShapesPanel = useCallback(() => setShapesPanelOpen(true), []);
-
-  const contextObject =
-    contextMenu?.kind === "object"
-      ? state.document.objects.find((object) => object.id === contextMenu.objectId)
-      : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-background">
@@ -1176,150 +976,7 @@ export function InteractiveCanvasEditor({
         worldOverlay={<LabelEditingOverlay labelEditing={labelEditing} zoom={viewport.zoom} />}
       />
 
-      {contextMenu && (
-        <div
-          role="menu"
-          aria-label="Canvas context menu"
-          className="absolute z-40 w-56 overflow-hidden rounded-md border border-border/70 bg-background/95 p-1 text-sm shadow-xl backdrop-blur"
-          style={{
-            left: `min(${contextMenu.x}px, calc(100vw - 15rem))`,
-            top: `min(${contextMenu.y}px, calc(100vh - 18rem))`,
-          }}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          {contextMenu.kind === "object" && contextObject ? (
-            <>
-              <div className="truncate border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
-                {contextObject.label}
-              </div>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={addContextAnnotation}
-              >
-                <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
-                Add annotation
-              </button>
-              {contextObject.type === "container" && (
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                  onClick={fitContextObject}
-                >
-                  <CheckIcon className="h-4 w-4 text-muted-foreground" />
-                  Fit children
-                </button>
-              )}
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={copyFromContextMenu}
-              >
-                <CopyIcon className="h-4 w-4 text-muted-foreground" />
-                Copy
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={toggleLockFromContextMenu}
-              >
-                {contextObject.locked ? (
-                  <UnlockIcon className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <LockIcon className="h-4 w-4 text-muted-foreground" />
-                )}
-                {contextObject.locked ? "Unlock" : "Lock"}
-              </button>
-              <div className="my-1 border-t border-border/60" />
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-destructive hover:bg-muted hover:text-destructive"
-                onClick={deleteContextSelection}
-              >
-                <Trash2Icon className="h-4 w-4" />
-                Delete object
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
-                Add to canvas
-              </div>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={pasteFromContextMenu}
-                disabled={!canPasteFromContextMenu}
-                title={canPasteFromContextMenu ? undefined : "Nothing to paste — copy something first"}
-              >
-                <ClipboardPasteIcon className="h-4 w-4 text-muted-foreground" />
-                Paste
-              </button>
-              <div className="my-1 border-t border-border/60" />
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("process")}
-              >
-                <ArrowRightIcon className="h-4 w-4 text-muted-foreground" />
-                Add process
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("sticky")}
-              >
-                <StickyNoteIcon className="h-4 w-4 text-muted-foreground" />
-                Add sticky
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("text")}
-              >
-                <TypeIcon className="h-4 w-4 text-muted-foreground" />
-                Add text
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("decision")}
-              >
-                <DiamondIcon className="h-4 w-4 text-muted-foreground" />
-                Add decision
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("container")}
-              >
-                <BoxIcon className="h-4 w-4 text-muted-foreground" />
-                Add container
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => addObjectFromContextMenu("section")}
-              >
-                <FrameIcon className="h-4 w-4 text-muted-foreground" />
-                Add section
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      <CanvasContextMenu menu={canvasContextMenu} />
 
       <TopBar
         title={title}
