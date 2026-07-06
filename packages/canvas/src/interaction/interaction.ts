@@ -11,11 +11,11 @@
  * everything is testable with plain objects.
  */
 import { defaultGeometryFor, objectTypeLabel, type CanvasAction, type CanvasSelection, type CanvasTool } from "../model/actions";
-import { boundsForGeometries, boundsIntersect, createObjectId, normalizeBounds, sectionCaptureMembers, type CanvasBounds, type CanvasPoint } from "../model/geometry";
+import { boundsForGeometries, createObjectId, normalizeBounds, sectionCaptureMembers, type CanvasBounds, type CanvasPoint } from "../model/geometry";
 import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../render/figjam-tokens";
 import { resolveConnectionCascade } from "../routing/connection-overlay";
 import { nearestAnchor, pointForAnchor, type Anchor } from "../routing/routing";
-import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject, InteractiveCanvasObjectType } from "../model/schema";
+import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObjectType } from "../model/schema";
 import {
   computeSnapCorrection,
   computeSnapGuides,
@@ -25,16 +25,30 @@ import {
   type SnapGuide,
   type SpacingHint,
 } from "./snapping";
+import {
+  descendantIds,
+  gatherSnapCandidates,
+  hitTestDropTarget,
+  hitTestObjects,
+  objectGeometryMap,
+  objectsIntersectingBounds,
+  selectionBounds,
+} from "./hit-testing";
 import type { ViewportState } from "../editor/viewport";
+
+// Hit-testing helpers live in hit-testing.ts; the public ones are re-exported
+// here so this module keeps being the interaction entry point for consumers
+// (editor/, render/, tests) — its export surface is unchanged by the split.
+export { hitTestDropTarget, hitTestObjects, selectionBounds };
+
+// Frame coalescing lives in frame-coalescer.ts (same re-export rationale).
+export { createFrameCoalescer, type FrameCoalescer, type FrameScheduler } from "./frame-coalescer";
 
 /** Minimum object size enforced by direct (handle) resize. */
 export const MIN_DIRECT_RESIZE_SIZE = 48;
 
 /** World-space drag threshold below which a press+release is treated as a click. */
 const DRAG_THRESHOLD = 3;
-
-/** Width (world units) of the border band on containers that is hittable for move/select. */
-const CONTAINER_BORDER_BAND = 16;
 
 /** Screen-space snap threshold (px); divided by zoom so snapping feels constant at any zoom. */
 const SNAP_THRESHOLD_SCREEN_PX = 6;
@@ -269,135 +283,6 @@ function selectedObjectIds(selection: CanvasSelection): string[] {
 
 function worldDistance(a: CanvasPoint, b: CanvasPoint): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function objectGeometryMap(
-  document: InteractiveCanvasDocument,
-  objectIds: string[],
-): Record<string, CanvasGeometry> {
-  const ids = new Set(objectIds);
-  const result: Record<string, CanvasGeometry> = {};
-  for (const object of document.objects) {
-    if (ids.has(object.id)) result[object.id] = object.geometry;
-  }
-  return result;
-}
-
-/**
- * Returns descendants (transitively) of `containerId`, not including itself.
- */
-function descendantIds(document: InteractiveCanvasDocument, containerId: string): Set<string> {
-  const children = new Map<string, string[]>();
-  for (const object of document.objects) {
-    if (!object.parentId) continue;
-    const list = children.get(object.parentId) ?? [];
-    list.push(object.id);
-    children.set(object.parentId, list);
-  }
-  const result = new Set<string>();
-  const stack = [...(children.get(containerId) ?? [])];
-  while (stack.length > 0) {
-    const id = stack.pop()!;
-    if (id === containerId) continue;
-    if (result.has(id)) continue;
-    result.add(id);
-    stack.push(...(children.get(id) ?? []));
-  }
-  return result;
-}
-
-/**
- * Hit-tests world point against document objects, topmost-first (later objects in
- * the array render on top, mirroring CanvasStage's render order). Containers are
- * only hittable on their border band so interior clicks fall through to children
- * (matching FigJam: a container's interior is "see-through" for pointer purposes).
- */
-export function hitTestObjects(
-  document: InteractiveCanvasDocument,
-  worldPoint: CanvasPoint,
-): InteractiveCanvasObject | null {
-  for (let index = document.objects.length - 1; index >= 0; index -= 1) {
-    const object = document.objects[index]!;
-    const { x, y, width, height } = object.geometry;
-    const inside =
-      worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
-    if (!inside) continue;
-    if (object.type !== "container") return object;
-    // Container: only the border band is hittable; interior is pass-through.
-    const band = CONTAINER_BORDER_BAND;
-    const onBorderBand =
-      worldPoint.x <= x + band ||
-      worldPoint.x >= x + width - band ||
-      worldPoint.y <= y + band ||
-      worldPoint.y >= y + height - band;
-    if (onBorderBand) return object;
-    // Inside the container interior but not on the band: keep searching
-    // underneath in case a child object is rendered before/behind (topmost
-    // search already covers ordering — here we just skip the container itself).
-  }
-  return null;
-}
-
-/** Reuses boundsForGeometries to compute the union bounds of a selection. */
-export function selectionBounds(
-  document: InteractiveCanvasDocument,
-  objectIds: string[],
-): CanvasBounds | null {
-  const geometries = document.objects
-    .filter((object) => objectIds.includes(object.id))
-    .map((object) => object.geometry);
-  return boundsForGeometries(geometries);
-}
-
-/**
- * Candidate bounds for live snap guides while dragging `objectIds`: siblings
- * sharing the dragged set's parent, plus every container (containers act as
- * alignment targets regardless of nesting level), excluding the dragged
- * objects themselves.
- */
-function gatherSnapCandidates(
-  document: InteractiveCanvasDocument,
-  objectIds: string[],
-): CanvasBounds[] {
-  const draggedIds = new Set(objectIds);
-  const parentIds = new Set(
-    document.objects
-      .filter((object) => draggedIds.has(object.id))
-      .map((object) => object.parentId ?? null),
-  );
-  const candidates = new Map<string, CanvasBounds>();
-  for (const object of document.objects) {
-    if (draggedIds.has(object.id)) continue;
-    const isSibling = parentIds.has(object.parentId ?? null);
-    const isContainer = object.type === "container";
-    if (!isSibling && !isContainer) continue;
-    candidates.set(object.id, object.geometry);
-  }
-  return Array.from(candidates.values());
-}
-
-/**
- * Hit-tests world point against container objects only (full container area,
- * not just the border band — used for drop targeting during a move gesture),
- * excluding `excludeIds` (the dragged objects and their descendants) so a
- * container can't be dropped into itself or into one of its own children.
- * Topmost-first, matching hitTestObjects ordering.
- */
-export function hitTestDropTarget(
-  document: InteractiveCanvasDocument,
-  worldPoint: CanvasPoint,
-  excludeIds: Set<string>,
-): InteractiveCanvasObject | null {
-  for (let index = document.objects.length - 1; index >= 0; index -= 1) {
-    const object = document.objects[index]!;
-    if (object.type !== "container") continue;
-    if (excludeIds.has(object.id)) continue;
-    const { x, y, width, height } = object.geometry;
-    const inside =
-      worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
-    if (inside) return object;
-  }
-  return null;
 }
 
 /**
@@ -1087,15 +972,6 @@ function stepFromResize(
   };
 }
 
-function objectsIntersectingBounds(
-  document: InteractiveCanvasDocument,
-  bounds: CanvasBounds,
-): string[] {
-  return document.objects
-    .filter((object) => boundsIntersect(object.geometry, bounds))
-    .map((object) => object.id);
-}
-
 function stepFromMarquee(
   state: MarqueeGesture,
   event: CanvasPointerEvent,
@@ -1364,108 +1240,6 @@ function stepFromConnectorCreate(
   const candidate = connectorCandidateAt(ctx.document, event.world, state.fromObjectId, ctx.viewport.zoom);
   const nextState: ConnectorCreateGesture = { ...state, point: event.world, candidate };
   return { state: nextState, dispatch: [], overlay: { connectorDrag: nextState } };
-}
-
-/**
- * Injectable scheduler shape for createFrameCoalescer — mirrors the subset of
- * window.requestAnimationFrame/cancelAnimationFrame the coalescer needs, so
- * tests can supply a deterministic fake instead of a real rAF loop.
- */
-export type FrameScheduler = {
-  request: (callback: () => void) => number;
-  cancel: (handle: number) => void;
-};
-
-const rafScheduler: FrameScheduler = {
-  request: (callback) => requestAnimationFrame(callback),
-  cancel: (handle) => cancelAnimationFrame(handle),
-};
-
-/** Handle returned by createFrameCoalescer — named so hosts can store one in a ref. */
-export type FrameCoalescer<T> = {
-  /** Records the latest value; schedules exactly one frame if none is pending. */
-  push(value: T): void;
-  /** Cancels any pending frame and synchronously commits the queued value, if any. */
-  flush(): void;
-  /** Cancels any pending frame WITHOUT committing. */
-  cancel(): void;
-  /** True while a frame is scheduled and waiting to commit. */
-  readonly isPending: boolean;
-};
-
-/**
- * Coalesces a rapid stream of values (e.g. pointermove positions, wheel
- * deltas) down to at most one `commit` call per animation frame (checkpoint 1,
- * T1.1.1/T1.1.2). Every `push` overwrites the pending value and schedules a
- * frame only if one isn't already pending — so N pushes within the same frame
- * collapse into a single commit of the *latest* value.
- *
- * This is a plain, DOM-free unit extracted specifically so the coalescing
- * behavior itself (collapse-to-latest, synchronous flush, cancel-without-
- * commit) can be unit tested deterministically with a fake scheduler, rather
- * than relying on a brittle React-component test that has to fake real
- * animation frames through jsdom. InteractiveCanvasEditor wires this to the
- * real requestAnimationFrame/cancelAnimationFrame by default (via the
- * internal `rafScheduler`, used when no scheduler is passed).
- */
-export function createFrameCoalescer<T>(
-  commit: (value: T) => void,
-  scheduler: FrameScheduler = rafScheduler,
-): FrameCoalescer<T> {
-  let pendingValue: T | null = null;
-  let pendingHandle: number | null = null;
-  let hasPending = false;
-
-  const runPending = () => {
-    pendingHandle = null;
-    if (!hasPending) return;
-    const value = pendingValue as T;
-    hasPending = false;
-    pendingValue = null;
-    commit(value);
-  };
-
-  return {
-    /** Records the latest value; schedules exactly one frame if none is pending. */
-    push(value: T) {
-      pendingValue = value;
-      hasPending = true;
-      if (pendingHandle !== null) return;
-      pendingHandle = scheduler.request(runPending);
-    },
-    /**
-     * Cancels any pending frame and, if a value was queued, commits it
-     * synchronously right now. Used on pointerup/pointercancel so the drag end
-     * is never dropped behind a frame that never fires (e.g. tab backgrounded).
-     */
-    flush() {
-      if (pendingHandle !== null) {
-        scheduler.cancel(pendingHandle);
-        pendingHandle = null;
-      }
-      if (!hasPending) return;
-      const value = pendingValue as T;
-      hasPending = false;
-      pendingValue = null;
-      commit(value);
-    },
-    /**
-     * Cancels any pending frame WITHOUT committing — used on unmount, where
-     * committing a stale value after the component is gone would be wrong.
-     */
-    cancel() {
-      if (pendingHandle !== null) {
-        scheduler.cancel(pendingHandle);
-        pendingHandle = null;
-      }
-      hasPending = false;
-      pendingValue = null;
-    },
-    /** True while a frame is scheduled and waiting to commit. */
-    get isPending() {
-      return pendingHandle !== null;
-    },
-  };
 }
 
 /**
