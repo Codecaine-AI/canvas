@@ -253,8 +253,8 @@ function overlapArea(a: CanvasBounds, b: CanvasBounds): number {
  * feel of "drop it mostly inside the section and it's captured."
  *
  * Lives here (next to sectionCaptureMembers, its consumer) rather than in
- * tokens/figjam-tokens.ts because it's model semantics, not a visual token;
- * figjam-tokens re-exports it to keep its public surface unchanged.
+ * theme/tokens.ts because it's model semantics, not a visual token;
+ * theme/tokens re-exports it to keep its public surface unchanged.
  */
 export const SECTION_CAPTURE_OVERLAP_THRESHOLD = 0.6;
 

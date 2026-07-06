@@ -2,7 +2,7 @@
 
 import type { CanvasPoint } from "../../state/geometry";
 import { offPageConnectorPoints } from "../../routing/connection-overlay";
-import { OFF_PAGE_CONNECTOR_GEOMETRY } from "../../tokens/figjam-tokens";
+import { OFF_PAGE_CONNECTOR_GEOMETRY } from "../../theme/tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

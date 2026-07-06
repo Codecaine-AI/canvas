@@ -5,7 +5,7 @@ import type { InteractionOverlay } from "../../interaction/interaction";
 import { getConnectionAnchors } from "../../routing/connection-overlay";
 import { pointForAnchor, routeConnection, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
-import { CHROME } from "../../tokens/figjam-tokens";
+import { CHROME } from "../../theme/tokens";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 /**

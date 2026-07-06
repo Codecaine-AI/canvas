@@ -11,7 +11,7 @@ import {
   CONNECTOR_DASH_PATTERN_PX,
   CONNECTOR_DEFAULT_COLOR,
   CONNECTOR_STROKE_WIDTH_PX,
-} from "../../tokens/figjam-tokens";
+} from "../../theme/tokens";
 
 const CONNECTION_HIT_WIDTH = 14;
 const ENDPOINT_HANDLE_RADIUS = 6;
@@ -43,7 +43,7 @@ export function Connector({
   onDoubleClick?: (connectionId: string) => void;
 }) {
   const routed = routeConnection(fromObject, toObject, connection, document.objects);
-  // FigJam's dash pattern (figjam-tokens.ts, CONNECTOR_DASH_PATTERN_PX).
+  // FigJam's dash pattern (theme/tokens.ts, CONNECTOR_DASH_PATTERN_PX).
   const strokeDasharray =
     connection.style === "dotted" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
   const arrow = connection.arrow ?? "forward";

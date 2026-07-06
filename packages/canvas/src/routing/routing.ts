@@ -3,19 +3,19 @@
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
-import { CONNECTOR_ELBOW_CORNER_RADIUS_PX, CONNECTOR_END_GAP_PX } from "../tokens/figjam-tokens";
+import { CONNECTOR_ELBOW_CORNER_RADIUS_PX, CONNECTOR_END_GAP_PX } from "../theme/tokens";
 
 const MIN_STUB = 24;
 /**
  * Elbow/polyline corner radius, world px. FigJam measures ~21.5 logical px
- * centerline radius on an unconstrained turn (figjam-tokens.ts,
+ * centerline radius on an unconstrained turn (theme/tokens.ts,
  * CONNECTOR_ELBOW_CORNER_RADIUS_PX) — `roundedPolylinePath` already clamps
  * this down to half the shorter adjacent segment length, so short segments
  * still get a sane (smaller) rounded corner instead of overshooting.
  */
 const CORNER_RADIUS = CONNECTOR_ELBOW_CORNER_RADIUS_PX;
 /**
- * Endpoints never touch the target border (figjam-tokens.ts,
+ * Endpoints never touch the target border (theme/tokens.ts,
  * CONNECTOR_END_GAP_PX — 10px, between the measured 8px plain-end and 12px
  * arrowhead-tip gaps). Applied only to the *rendered* path's first/last
  * points — `RoutedConnection.start`/`.end` stay the true anchor points so
@@ -393,7 +393,7 @@ function isHorizontalAnchor(anchor: Anchor): boolean {
 /**
  * Builds the rendered SVG path from a polyline, rounding interior corners and
  * pulling the first/last points back by END_GAP along their own segment's
- * tangent — FigJam connectors never touch the target border (figjam-tokens.ts
+ * tangent — FigJam connectors never touch the target border (theme/tokens.ts
  * CONNECTOR_END_GAP_PX). The pullback only affects the drawn path: the caller
  * still receives the true anchor points in `RoutedConnection.start`/`.end`,
  * so the connector still visually aims directly at the anchor, it just stops

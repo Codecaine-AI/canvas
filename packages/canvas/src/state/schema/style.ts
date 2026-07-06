@@ -48,7 +48,7 @@ export type CanvasObjectStyle = {
   /**
    * Explicit fill color (W4) — any CSS color. Wins over the `paletteToken`/
    * `tone` theme-mix when set; the FigJam pastel PAIR palette
-   * (figjam-tokens.ts PASTEL_PAIRS) is the intended vocabulary.
+   * (theme/tokens.ts PASTEL_PAIRS) is the intended vocabulary.
    */
   fill?: string;
   /** Explicit border/stroke color (W4) — wins over the theme-mix border when set. */

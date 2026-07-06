@@ -1,6 +1,6 @@
 "use client";
 
-import { STICKY_GEOMETRY } from "../../tokens/figjam-tokens";
+import { STICKY_GEOMETRY } from "../../theme/tokens";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { PaletteColorFlyout } from "../shapes/toolbar";

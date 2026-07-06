@@ -7,8 +7,8 @@ import {
   SECTION_FAMILIES,
   STICKY_COLORS,
   type SectionFamily,
-} from "../../tokens/figjam-tokens";
-import { resolveObjectColors, resolveObjectStrokeWidth } from "../../tokens/theme";
+} from "../../theme/tokens";
+import { resolveObjectColors, resolveObjectStrokeWidth } from "../../theme/resolve";
 
 const v2FlowDocument = v2FlowCanvas as InteractiveCanvasDocument;
 
@@ -95,7 +95,7 @@ describe("v2-flow canvas JSON", () => {
     }
   });
 
-  it("every section tint is a known SECTION_FAMILIES key from figjam-tokens", () => {
+  it("every section tint is a known SECTION_FAMILIES key from theme/tokens", () => {
     const knownTints = new Set(Object.keys(SECTION_FAMILIES) as SectionFamily[]);
     for (const object of v2FlowDocument.objects) {
       if (object.type === "section") {
@@ -105,7 +105,7 @@ describe("v2-flow canvas JSON", () => {
     }
   });
 
-  it("every connector color is a known CONNECTOR_COLORS hex value from figjam-tokens", () => {
+  it("every connector color is a known CONNECTOR_COLORS hex value from theme/tokens", () => {
     const knownColors = new Set(Object.values(CONNECTOR_COLORS));
     for (const connection of v2FlowDocument.connections) {
       expect(connection.color).toBeDefined();

@@ -38,7 +38,7 @@ export type InteractiveCanvasObject = {
    * floating title chip (distinct from `label`, which every object still
    * carries for a11y/docs-targeting/consistency but is not separately
    * rendered on sections — the chip IS the visible title). `tint` selects the
-   * fill/chip family from figjam-tokens.ts's SECTION_FAMILIES. `locked`
+   * fill/chip family from theme/tokens.ts's SECTION_FAMILIES. `locked`
    * reserved for a later wave (no enforcement yet — see actions.ts).
    */
   title?: string;

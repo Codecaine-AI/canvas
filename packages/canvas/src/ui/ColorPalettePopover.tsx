@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CHROME, PALETTE_POPOVER_SWATCHES } from "../tokens/figjam-tokens";
+import { CHROME, PALETTE_POPOVER_SWATCHES } from "../theme/tokens";
 
 /**
  * ColorPalettePopover — the dark 2x11 swatch grid with a rainbow-ring
@@ -17,7 +17,7 @@ import { CHROME, PALETTE_POPOVER_SWATCHES } from "../tokens/figjam-tokens";
  *     component does not self-position — see the floating-ui usage note
  *     below; W3 wires the actual anchor).
  *
- * Token note: figjam-tokens.ts's PALETTE_POPOVER_SWATCHES ships 11 + 9 = 20
+ * Token note: theme/tokens.ts's PALETTE_POPOVER_SWATCHES ships 11 + 9 = 20
  * entries (its own doc comment flags this as a derived/extrapolated list,
  * not a directly-sampled 22-swatch array). To hit the catalog's exact 2x11
  * = 22 layout without editing the shared tokens file, we pad row 2 with the
@@ -33,7 +33,7 @@ export type ColorPalettePopoverProps = {
   /**
    * Optional swatch rows overriding the default 2x11 object-fill grid (W3b):
    * used by the connector color flyout to show the sampled FigJam connector
-   * stroke set (figjam-tokens.ts CONNECTOR_COLORS) instead. The rainbow-
+   * stroke set (theme/tokens.ts CONNECTOR_COLORS) instead. The rainbow-
    * ringed current-color swatch is still appended to the last row.
    */
   swatches?: string[][];
@@ -46,7 +46,7 @@ const SWATCH_DIAMETER_PX = CHROME.colorPopoverSwatchPx;
 const SWATCH_GAP_PX = CHROME.colorPopoverGapPx;
 const POPOVER_BG = "#1D1D1D";
 
-// W3: promoted to figjam-tokens.ts's CHROME.rainbowRingGradient (shared with
+// W3: promoted to theme/tokens.ts's CHROME.rainbowRingGradient (shared with
 // the editor's color-swap wiring).
 const RAINBOW_RING_GRADIENT = CHROME.rainbowRingGradient;
 
@@ -96,7 +96,7 @@ function Swatch({
 
 export function ColorPalettePopover({ currentColor, onPick, swatches, header, className, style }: ColorPalettePopoverProps) {
   const [row1, row2Base] = PALETTE_POPOVER_SWATCHES;
-  // figjam-tokens.ts ships row 2 as 9 entries (8 saturated + pink); the
+  // theme/tokens.ts ships row 2 as 9 entries (8 saturated + pink); the
   // catalog's measured layout wants 10 direct swatches + 1 rainbow-current
   // swatch = 11 in row 2. Pad the shortfall by repeating from the front of
   // row 1 (gray, gray2) rather than fabricating new colors — keeps every

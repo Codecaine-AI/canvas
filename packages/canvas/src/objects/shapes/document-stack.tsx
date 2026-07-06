@@ -1,6 +1,6 @@
 "use client";
 
-import { DOCUMENT_STACK_GEOMETRY } from "../../tokens/figjam-tokens";
+import { DOCUMENT_STACK_GEOMETRY } from "../../theme/tokens";
 import { documentWavyPath } from "./document";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";

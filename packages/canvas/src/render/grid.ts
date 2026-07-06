@@ -3,7 +3,7 @@ import {
   GRID_DOT_DIAMETER_PX,
   GRID_MAX_SCREEN_STEP_PX,
   GRID_MIN_SCREEN_STEP_PX,
-} from "../tokens/figjam-tokens";
+} from "../theme/tokens";
 
 /** @deprecated kept for callers still importing the old name; equals GRID_BASE_STEP_PX. */
 export const BASE_GRID_STEP = GRID_BASE_STEP_PX;
@@ -34,7 +34,7 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Returns CSS values for a zoom-aware dot grid pinned to world coordinates.
  *
- * FigJam's adaptive grid law (figjam-tokens.ts, canvas.gridDot): the world
+ * FigJam's adaptive grid law (theme/tokens.ts, canvas.gridDot): the world
  * step is `GRID_BASE_STEP_PX * 2^n` for whichever integer `n` keeps the
  * on-screen spacing (`step * scale`) inside
  * `[GRID_MIN_SCREEN_STEP_PX, GRID_MAX_SCREEN_STEP_PX]` = ~[6.5, 13]px.

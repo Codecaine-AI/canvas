@@ -2,7 +2,7 @@
 
 import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
 import { ShapeSearchPopover } from "../catalog/ShapeSearchPopover";
-import { paletteTokenStyle } from "../../tokens/theme";
+import { paletteTokenStyle } from "../../theme/resolve";
 import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 import { nearestPaletteToken } from "../palette";
 

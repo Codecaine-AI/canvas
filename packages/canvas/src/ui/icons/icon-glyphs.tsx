@@ -14,7 +14,7 @@
  *
  * Stroke width is NOT baked into the path data — callers apply
  * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` (mirrors ICON_STROKE_WIDTH_PX in
- * figjam-tokens.ts, which is tuned for the ~130px object size) so the glyph
+ * theme/tokens.ts, which is tuned for the ~130px object size) so the glyph
  * scales cleanly if the viewBox is later re-projected into a differently
  * sized object.
  */

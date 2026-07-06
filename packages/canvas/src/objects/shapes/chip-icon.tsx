@@ -1,6 +1,6 @@
 "use client";
 
-import { CHIP_ICON_COLORS } from "../../tokens/figjam-tokens";
+import { CHIP_ICON_COLORS } from "../../theme/tokens";
 import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 

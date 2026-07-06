@@ -9,7 +9,7 @@ import type {
   InteractiveCanvasTone,
 } from "../../state/schema";
 import type { Anchor } from "../../routing/routing";
-import type { CanvasToneStyle } from "../../tokens/theme";
+import type { CanvasToneStyle } from "../../theme/resolve";
 
 /**
  * Tier 2 of the two-tier registry (RESTRUCTURE.md): variant DATA for the
@@ -22,11 +22,11 @@ import type { CanvasToneStyle } from "../../tokens/theme";
 /** Everything a shape outline renderer may need, resolved once by the shared shape view. */
 export interface ShapeOutlineArgs {
   object: InteractiveCanvasObject;
-  /** Resolved fill/border/text colors (tokens/theme.ts resolveObjectColors). */
+  /** Resolved fill/border/text colors (theme/resolve.ts resolveObjectColors). */
   colors: CanvasToneStyle;
   /** True when the object carries an explicit paletteToken/tone/fill/stroke. */
   hasExplicitColor: boolean;
-  /** Resolved stroke width (tokens/theme.ts resolveObjectStrokeWidth). */
+  /** Resolved stroke width (theme/resolve.ts resolveObjectStrokeWidth). */
   strokeWidth: number;
 }
 

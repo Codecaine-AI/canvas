@@ -1,7 +1,7 @@
 "use client";
 
 import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
-import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../tokens/figjam-tokens";
+import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../theme/tokens";
 import type { ObjectDef, ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 
 /**
@@ -16,7 +16,7 @@ import type { ObjectDef, ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
 
 /**
  * Connector color flyout (W3b/W4): the sampled FigJam connector stroke set
- * (figjam-tokens.ts CONNECTOR_COLORS), patched onto the selected connection
+ * (theme/tokens.ts CONNECTOR_COLORS), patched onto the selected connection
  * as `color`.
  */
 function ConnectorColorFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../../tokens/figjam-tokens";
+import { CHROME } from "../../theme/tokens";
 import { Tooltip } from "../../ui/Tooltip";
 import {
   ArrowIcon,

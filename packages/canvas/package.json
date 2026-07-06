@@ -10,8 +10,6 @@
     "./schema": "./src/state/schema.ts",
     "./actions": "./src/state/actions.ts",
     "./geometry": "./src/state/geometry.ts",
-    "./theme": "./src/tokens/theme.ts",
-    "./figjam-tokens": "./src/tokens/figjam-tokens.ts",
     "./connection-overlay": "./src/routing/connection-overlay.ts",
     "./ui/cn": "./src/ui/cn.ts",
     "./ui/button": "./src/ui/button.tsx",

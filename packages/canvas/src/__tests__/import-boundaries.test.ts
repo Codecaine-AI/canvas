@@ -7,8 +7,8 @@ import { join, relative } from "node:path";
  * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
  * amended 2026-07-06).
  *
- * Layering: tokens <- state <- objects <- render|interaction <- editor.
- * ui/ sits beside tokens (shared dumb primitives, importable from objects
+ * Layering: theme <- state <- objects <- render|interaction <- editor.
+ * ui/ sits beside theme (shared dumb primitives, importable from objects
  * up). Nothing outside editor/ imports editor/. vendor/ is an MPL-2.0
  * boundary: only routing/ and interaction/snapping.ts may import
  * vendor/blocksuite, and vendor imports nothing first-party.
@@ -16,13 +16,13 @@ import { join, relative } from "node:path";
  * Known, deliberate exceptions (encoded below so drift is loud):
  *  - interaction/types.ts may TYPE-import ViewportState from
  *    render/viewport (never runtime code).
- *  - tokens/figjam-tokens.ts value-re-exports
+ *  - theme/tokens.ts value-re-exports
  *    SECTION_CAPTURE_OVERLAP_THRESHOLD from state/geometry (the threshold
- *    is model semantics; the re-export keeps figjam-tokens' public surface
- *    unchanged). All other tokens/ -> src imports must be type-only
+ *    is model semantics; the re-export keeps the tokens module's public
+ *    surface unchanged). All other theme/ -> src imports must be type-only
  *    state/schema imports.
  *  - objects/code-block/def.tsx still runtime-imports
- *    render/code-tokenizer (a pure lexer whose only dependency is tokens/).
+ *    render/code-tokenizer (a pure lexer whose only dependency is theme/).
  *    This is the one remaining objects/ -> render/ edge; it goes away if
  *    the tokenizer is ever rehomed with the code-block slice.
  *
@@ -150,7 +150,7 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("ui/ does not import objects/, render/, interaction/, or editor/ (tokens/state imports are fine)", () => {
+  test("ui/ does not import objects/, render/, interaction/, or editor/ (theme/state imports are fine)", () => {
     expect(
       violations(
         join(SRC_ROOT, "ui"),
@@ -159,13 +159,13 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("tokens/ is layer 0: no runtime src imports except the documented state/geometry re-export", () => {
-    // Type-only state/schema imports are allowed (theme.ts needs the style
-    // unions); the ONLY runtime edge is figjam-tokens re-exporting
+  test("theme/ is layer 0: no runtime src imports except the documented state/geometry re-export", () => {
+    // Type-only state/schema imports are allowed (resolve.ts needs the style
+    // unions); the ONLY runtime edge is tokens.ts re-exporting
     // SECTION_CAPTURE_OVERLAP_THRESHOLD from state/geometry.
     expect(
-      violations(join(SRC_ROOT, "tokens"), /^\.\.\//, { skipTypeOnly: true }),
-    ).toEqual([`${join("tokens", "figjam-tokens.ts")} -> ../state/geometry`]);
+      violations(join(SRC_ROOT, "theme"), /^\.\.\//, { skipTypeOnly: true }),
+    ).toEqual([`${join("theme", "tokens.ts")} -> ../state/geometry`]);
   });
 
   test("nothing outside editor/ imports editor/ (root index.ts is the composition entry and is exempt)", () => {
@@ -181,7 +181,7 @@ describe("import boundaries", () => {
     expect(
       violations(
         join(SRC_ROOT, "vendor"),
-        /^(\.\.\/)+(tokens|state|objects|interaction|routing|render|editor|ui|fixtures)(\/|$)/,
+        /^(\.\.\/)+(theme|state|objects|interaction|routing|render|editor|ui|fixtures)(\/|$)/,
       ),
     ).toEqual([]);
   });

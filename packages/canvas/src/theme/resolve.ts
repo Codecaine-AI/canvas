@@ -5,7 +5,7 @@ import {
   SHAPE_STROKE_WIDTH_PX,
   STICKY_COLORS,
   type SectionFamilyStyle,
-} from "./figjam-tokens";
+} from "./tokens";
 import type {
   CanvasObjectStyle,
   CanvasPaletteToken,
@@ -109,9 +109,9 @@ export function paletteTokenStyle(token: CanvasPaletteToken): CanvasToneStyle {
 }
 
 /**
- * Sticky notes bypass the theme-mix desaturation (W4): FigJam stickies are
- * exact saturated hexes (figjam-tokens.ts STICKY_COLORS), so palette tokens on
- * a `shape: "note"` object resolve to the literal sticky color instead of the
+ * Sticky notes bypass the theme-mix desaturation (W4): stickies are exact
+ * saturated hexes (tokens.ts STICKY_COLORS), so palette tokens on a
+ * `shape: "note"` object resolve to the literal sticky color instead of the
  * washed-out `paletteTokenStyle` mix. Tokens with no sticky analogue (input)
  * fall through to the theme mix.
  */
@@ -145,10 +145,10 @@ export function resolveObjectColors(style: CanvasObjectStyle | undefined): Canva
 }
 
 /**
- * Border width for an object's chrome (logical px). FigJam's universal shape
- * stroke is 4px whenever a stroke color is explicitly set (figjam-style-spec
- * "Shape / connector stroke width"); `strokeWidth` overrides it. Objects
- * without an explicit stroke keep the legacy 2px chrome border.
+ * Border width for an object's chrome (logical px). The universal shape
+ * stroke (SHAPE_STROKE_WIDTH_PX, 4px) applies whenever a stroke color is
+ * explicitly set; `strokeWidth` overrides it. Objects without an explicit
+ * stroke keep the legacy 2px chrome border.
  */
 export function resolveObjectStrokeWidth(style: CanvasObjectStyle | undefined): number {
   if (style?.strokeWidth !== undefined && style.strokeWidth > 0) return style.strokeWidth;
@@ -159,8 +159,8 @@ export function resolveObjectStrokeWidth(style: CanvasObjectStyle | undefined): 
 /**
  * Resolves a section's tint family (W2) to its fill/chip/border colors —
  * separate from `resolveObjectColors` since sections key off `tint`
- * (figjam-tokens.ts's SECTION_FAMILIES), not `tone`/`paletteToken`. Per spec,
- * the section's border color equals its title chip's fill color.
+ * (tokens.ts's SECTION_FAMILIES), not `tone`/`paletteToken`. The section's
+ * border color equals its title chip's fill color.
  */
 export function resolveSectionColors(tint: CanvasSectionTint | undefined): SectionFamilyStyle {
   return SECTION_FAMILIES[tint ?? "gray"] ?? SECTION_FAMILIES.gray;

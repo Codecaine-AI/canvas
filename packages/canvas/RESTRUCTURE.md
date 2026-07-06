@@ -95,9 +95,10 @@ deleted where none does (./chrome had no real external consumer).
 
 ```
 src/
-  tokens/                LAYER 0 — design constants; imports nothing
-    figjam-tokens.ts       colors, text sizes, shape-geometry ratios (sampled)
-    theme.ts               tone/palette → fill/border/text resolution
+  theme/                 LAYER 0 — design constants; imports nothing
+                         (renamed from tokens/, de-FigJam-ified 2026-07-06)
+    tokens.ts              design constants: colors, text sizes, geometry ratios
+    resolve.ts             style resolution: tone/palette → fill/border/text
   state/                 LAYER 1 — the document (renamed from model/ 2026-07-06)
     schema.ts → schema/    what a canvas JSON is (path kept: exports target)
     actions.ts → actions/  reducer — the only way the document changes
@@ -133,8 +134,8 @@ src/
   routing/  vendor/  fixtures/   unchanged (MPL boundary untouched)
 ```
 
-Import rule (boundary-tested): tokens ← state ← objects ← render|interaction
-← editor; `ui` sits beside tokens (importable from objects up); nothing
+Import rule (boundary-tested): theme ← state ← objects ← render|interaction
+← editor; `ui` sits beside theme (importable from objects up); nothing
 outside `editor/` imports `editor/`.
 
 ## Invariants (hold at every step)

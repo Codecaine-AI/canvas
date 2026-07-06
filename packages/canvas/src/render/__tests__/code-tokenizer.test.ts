@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { CODE_BLOCK } from "../../tokens/figjam-tokens";
+import { CODE_BLOCK } from "../../theme/tokens";
 import { tokenizeCodeBlock, tokenizeCodeLine } from "../code-tokenizer";
 
 function joined(tokens: { text: string }[]): string {

@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveObjectColors, resolveObjectStrokeWidth } from "../../tokens/theme";
+import { resolveObjectColors, resolveObjectStrokeWidth } from "../../theme/resolve";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ShapeDef } from "./shape-def";

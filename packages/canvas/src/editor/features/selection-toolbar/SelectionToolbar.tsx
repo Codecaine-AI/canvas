@@ -4,7 +4,7 @@ import { memo, useState } from "react";
 // Type-only import: chrome must never import objects/ at runtime — the
 // dependency points the other way (object defs import chrome components).
 import type { ToolbarControlSpec } from "../../../objects/object-def";
-import { CHROME } from "../../../tokens/figjam-tokens";
+import { CHROME } from "../../../theme/tokens";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
   AlignIcon,

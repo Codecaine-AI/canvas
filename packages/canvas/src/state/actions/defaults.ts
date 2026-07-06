@@ -103,7 +103,7 @@ export function toneForType(type: InteractiveCanvasObjectType): InteractiveCanva
   if (type === "person") return "input";
   if (type === "database") return "memory";
   if (type === "chat") return "process";
-  // W2 — new shapes resolve their fill/stroke from figjam-tokens (pastel
+  // W2 — new shapes resolve their fill/stroke from theme/tokens (pastel
   // pairs / fixed tokens) via theme.ts, not the tone system; "neutral" here
   // is an inert fallback that's never actually read for these types.
   if (type === "section") return "neutral";
@@ -113,7 +113,7 @@ export function toneForType(type: InteractiveCanvasObjectType): InteractiveCanva
   if (type === "code-block") return "neutral";
   if (type === "chip-icon") return "neutral";
   // W5 — FigJam parity shape set (Wave A): every new type resolves color
-  // from figjam-tokens/theme.ts directly (not the tone system), so "neutral"
+  // from figjam-theme/resolve.ts directly (not the tone system), so "neutral"
   // here is the same inert fallback the W2 shapes above already use.
   if (
     type === "ellipse" ||

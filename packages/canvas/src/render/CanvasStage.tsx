@@ -15,7 +15,7 @@ import {
 } from "../state/geometry";
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
-import { canvasSurfaceStyle } from "../tokens/theme";
+import { canvasSurfaceStyle } from "../theme/resolve";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
@@ -38,7 +38,7 @@ import {
   GRID_DOT_COLOR,
   STICKY_GEOMETRY,
   TEXT_SIZES_PX,
-} from "../tokens/figjam-tokens";
+} from "../theme/tokens";
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
@@ -260,11 +260,10 @@ export function CanvasStage({
         overflow: "hidden",
         width: "100%",
         height: "100%",
-        // FigJam-parity board surface (figjam-tokens.ts CANVAS_BG /
+        // FigJam-parity board surface (theme/tokens.ts CANVAS_BG /
         // GRID_DOT_COLOR): fixed light values in BOTH app themes — FigJam's
         // board is light-only, it never dark-themes the canvas surface
-        // itself (only chrome around it changes). Flagged in figjam-tokens.ts
-        // as a call worth user feedback once seen live.
+        // itself (only chrome around it changes).
         backgroundImage: `radial-gradient(circle, ${GRID_DOT_COLOR} ${grid.dotRadius}px, transparent ${grid.dotRadius}px)`,
         backgroundPosition: grid.backgroundPosition,
         backgroundSize: grid.backgroundSize,
@@ -435,7 +434,7 @@ export function CanvasStage({
               this viewBox is expressed in units of the connector's own
               stroke width — a solid triangle ARROW_LENGTH_RATIO units long
               and ARROW_WIDTH_RATIO units at the base reproduces FigJam's
-              5x/4.5x-of-stroke arrowhead (figjam-tokens.ts,
+              5x/4.5x-of-stroke arrowhead (theme/tokens.ts,
               CONNECTOR_ARROWHEAD_*_TO_STROKE_RATIO) regardless of the
               connector's stroke color/width.
             */}
