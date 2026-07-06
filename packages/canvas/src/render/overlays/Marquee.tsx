@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasBounds } from "../../model/geometry";
-import { worldToScreen, type ViewportState } from "../../editor/viewport";
+import { worldToScreen, type ViewportState } from "../viewport";
 
 export function Marquee({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {
   const topLeft = worldToScreen(viewport, { x: bounds.x, y: bounds.y });

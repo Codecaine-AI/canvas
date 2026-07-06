@@ -1,7 +1,7 @@
 "use client";
 
 import type { SpacingHint } from "../../interaction/snapping";
-import { worldToScreen, type ViewportState } from "../../editor/viewport";
+import { worldToScreen, type ViewportState } from "../viewport";
 
 /**
  * Small pill chip showing the px gap value, centered on an equal-gap segment

@@ -1,7 +1,7 @@
 "use client";
 
 import type { SnapGuide } from "../../interaction/snapping";
-import { worldToScreen, type ViewportState } from "../../editor/viewport";
+import { worldToScreen, type ViewportState } from "../viewport";
 
 /**
  * Screen-space 1px alignment guide line, projected from a world-space

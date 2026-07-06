@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { screenToWorld, worldToScreen, zoomAtPoint, type ViewportState } from "../viewport";
+import { screenToWorld, worldToScreen, zoomAtPoint, type ViewportState } from "../../render/viewport";
 
 /**
  * T1.1.2 requires cursor-anchored zoom: the world point currently under the

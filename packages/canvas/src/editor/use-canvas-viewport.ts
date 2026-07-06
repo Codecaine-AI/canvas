@@ -10,7 +10,7 @@ import {
   zoomAtPoint,
   type ScreenSize,
   type ViewportState,
-} from "./viewport";
+} from "../render/viewport";
 import type { CanvasPoint } from "../model/geometry";
 import type { InteractiveCanvasDocument } from "../model/schema";
 

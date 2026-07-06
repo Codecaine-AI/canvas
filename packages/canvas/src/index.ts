@@ -13,4 +13,4 @@ export * from "./model/schema";
 export * from "./model/spectre-ref";
 export * from "./tokens/theme";
 export * from "./editor/use-canvas-viewport";
-export * from "./editor/viewport";
+export * from "./render/viewport";

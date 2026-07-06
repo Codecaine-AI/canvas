@@ -16,7 +16,7 @@ import {
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
 import { canvasSurfaceStyle } from "../tokens/theme";
-import type { ViewportState } from "../editor/viewport";
+import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
 import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";

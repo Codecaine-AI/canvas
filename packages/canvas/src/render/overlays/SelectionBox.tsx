@@ -5,7 +5,7 @@ import {
   resizeCursorFor,
   type ResizeHandle,
 } from "../../interaction/interaction";
-import { worldToScreen, type ViewportState } from "../../editor/viewport";
+import { worldToScreen, type ViewportState } from "../viewport";
 import type { InteractiveCanvasDocument } from "../../model/schema";
 import { objectDefForType } from "../../objects/object-def";
 

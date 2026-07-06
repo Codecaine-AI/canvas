@@ -28,7 +28,7 @@ import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../model/a
 import { type CanvasPoint } from "../../../model/geometry";
 import { type Anchor } from "../../../routing/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
-import { panBy, type ViewportState } from "../../viewport";
+import { panBy, type ViewportState } from "../../../render/viewport";
 import type { InteractiveCanvasDocument } from "../../../model/schema";
 
 /** Width of the stage-edge band (screen px) where drag auto-pan kicks in (T1.2.1). */

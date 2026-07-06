@@ -93,9 +93,16 @@ function violationsAcrossTree(
 }
 
 describe("import boundaries", () => {
-  test("interaction/ does not import from editor/ or render/", () => {
+  test("interaction/ does not import from editor/ or render/ (type-only ViewportState from render/viewport allowed)", () => {
     expect(
-      violations(join(SRC_ROOT, "interaction"), /^\.\.\/(editor|render)(\/|$)/),
+      violations(join(SRC_ROOT, "interaction"), /^\.\.\/editor(\/|$)/),
+    ).toEqual([]);
+    // viewport.ts (ViewportState + world/screen transforms) lives in render/;
+    // interaction/types.ts may import its TYPES but never runtime code.
+    expect(
+      violations(join(SRC_ROOT, "interaction"), /^\.\.\/render(\/|$)/, {
+        skipTypeOnly: true,
+      }),
     ).toEqual([]);
   });
 

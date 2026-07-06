@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasBounds } from "../../model/geometry";
-import { worldToScreen, type ViewportState } from "../../editor/viewport";
+import { worldToScreen, type ViewportState } from "../viewport";
 
 /** Ghost preview outline for an in-progress armed-tool placement (4.2.2). */
 export function PlacePreview({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {

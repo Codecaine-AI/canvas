@@ -15,7 +15,7 @@ import type { CanvasBounds, CanvasPoint } from "../model/geometry";
 import type { CanvasGeometry, InteractiveCanvasObjectType, InteractiveCanvasDocument } from "../model/schema";
 import type { Anchor } from "../routing/routing";
 import type { DistributionGuideSegment, SnapCorrection, SnapGuide, SpacingHint } from "./snapping";
-import type { ViewportState } from "../viewport";
+import type { ViewportState } from "../render/viewport";
 
 /** World-space drag threshold below which a press+release is treated as a click. */
 export const DRAG_THRESHOLD = 3;

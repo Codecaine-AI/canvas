@@ -29,7 +29,7 @@ import {
 import { nearestPaletteToken } from "../../../objects/palette";
 import { paletteTokenStyle } from "../../../tokens/theme";
 import type { CanvasViewportControls } from "../../use-canvas-viewport";
-import { worldToScreen, type ViewportState } from "../../viewport";
+import { worldToScreen, type ViewportState } from "../../../render/viewport";
 import type {
   CanvasPaletteToken,
   CanvasSectionStrokeStyle,

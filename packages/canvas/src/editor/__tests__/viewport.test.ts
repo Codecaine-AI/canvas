@@ -14,7 +14,7 @@ import {
   zoomAtPoint,
   type ScreenSize,
   type ViewportState,
-} from "../viewport";
+} from "../../render/viewport";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 const EPSILON = 1e-6;
