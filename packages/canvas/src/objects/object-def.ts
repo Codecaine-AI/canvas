@@ -20,11 +20,15 @@ import { arrowShapeDef } from "./shapes/arrow-shape";
 import { chatDef } from "./shapes/chat";
 import { chevronDef } from "./shapes/chevron";
 import { chipIconDef } from "./shapes/chip-icon";
+import { cylinderHorizontalDef } from "./shapes/cylinder-horizontal";
 import { databaseDef } from "./shapes/database";
 import { decisionDef } from "./shapes/decision";
 import { documentDef } from "./shapes/document";
+import { documentStackDef } from "./shapes/document-stack";
 import { ellipseDef } from "./shapes/ellipse";
+import { folderDef } from "./shapes/folder";
 import { hexagonDef } from "./shapes/hexagon";
+import { iconDef } from "./shapes/icon";
 import { internalStorageDef } from "./shapes/internal-storage";
 import { manualInputDef } from "./shapes/manual-input";
 import { octagonDef } from "./shapes/octagon";
@@ -210,6 +214,10 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   "or-junction": orJunctionDef,
   "summing-junction": summingJunctionDef,
   "page-corner": pageCornerDef,
+  folder: folderDef,
+  "document-stack": documentStackDef,
+  "cylinder-horizontal": cylinderHorizontalDef,
+  icon: iconDef,
 };
 
 /** Registered defs in stylesheet order (their `css` is appended in this order). */
@@ -247,6 +255,10 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   orJunctionDef,
   summingJunctionDef,
   pageCornerDef,
+  folderDef,
+  documentStackDef,
+  cylinderHorizontalDef,
+  iconDef,
 ];
 
 export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undefined {

@@ -5,11 +5,9 @@ import { shapeObjectDef } from "./base";
 import type { ShapeDef } from "./shape-def";
 
 /**
- * Wavy-bottom document silhouette geometry — moved here from
- * render/ShapeSilhouette.tsx verbatim. `document-stack` (render/
- * ShapeSilhouette.tsx) still imports this export until its own batch-3
- * conversion; do not delete the export when document-stack is the only
- * remaining consumer.
+ * Wavy-bottom document silhouette geometry — moved here verbatim from the
+ * now-deleted render/ShapeSilhouette.tsx. Shared with the document-stack
+ * def, which draws the same wave twice at an offset.
  */
 export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): string {
   const top = y;

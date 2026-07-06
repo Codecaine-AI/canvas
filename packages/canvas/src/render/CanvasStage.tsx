@@ -34,7 +34,6 @@ import {
   CHROME,
   CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO,
   CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
-  DOCUMENT_STACK_GEOMETRY,
   SECTION_CAPTURE_OVERLAP_THRESHOLD,
   GRID_DOT_COLOR,
   STICKY_GEOMETRY,
@@ -333,27 +332,10 @@ export function CanvasStage({
           font-size: ${STICKY_GEOMETRY.bodyFontSizePx}px;
           line-height: ${STICKY_GEOMETRY.bodyLineHeightPx}px;
         }
-        .interactive-canvas-object-folder,
-        .interactive-canvas-object-document-stack,
-        .interactive-canvas-object-cylinder-horizontal {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          border: none;
-          border-radius: 0;
-          background: transparent !important;
-          box-shadow: none;
-          overflow: visible;
-        }
+        /* Shared z-plumbing for every def-rendered true-outline SVG silhouette
+           (polygon shapes, junctions) — infrastructure, not per-shape CSS. */
         .interactive-canvas-true-outline-silhouette {
           z-index: 0;
-        }
-        .interactive-canvas-object-folder {
-          padding-top: 26%;
-        }
-        .interactive-canvas-object-document-stack {
-          padding-top: calc(12px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
-          padding-left: calc(14px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
         }
         .interactive-canvas-label-below-icon {
           position: relative;
