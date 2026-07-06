@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "canvas-70-studio-and-canvas JSON files",
+  "id": "canvas-70-studio-and-canvases",
   "title": "Canvas Engine — Studio App and Canvas JSON Files",
   "root": "b-studio-root",
   "blocks": {
@@ -27,8 +27,8 @@
         "b-studio-app-para-5",
         "b-studio-app-para-6",
         "b-studio-app-para-7",
-        "b-studio-heading-canvas JSON files-8",
-        "b-studio-canvas JSON files-intro-9",
+        "b-studio-heading-canvases-8",
+        "b-studio-canvases-intro-9",
         "b-studio-sample-item-synthetic-10",
         "b-studio-sample-item-v2-flow-11",
         "b-studio-sample-item-v2-flow-elements-12",
@@ -515,76 +515,6 @@
       ],
       "children": []
     },
-    "b-studio-heading-canvas JSON files-8": {
-      "id": "b-studio-heading-canvas JSON files-8",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Canvas JSON store"
-        }
-      ],
-      "children": []
-    },
-    "b-studio-canvas JSON files-intro-9": {
-      "id": "b-studio-canvas JSON files-intro-9",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "canvases/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases"
-            }
-          }
-        },
-        {
-          "insert": " holds sample "
-        },
-        {
-          "insert": "InteractiveCanvasDocument",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
-              "symbol": "InteractiveCanvasDocument"
-            }
-          }
-        },
-        {
-          "insert": " values bundled directly with the "
-        },
-        {
-          "insert": "@codecaine-ai/canvas",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " package. Every file in the directory is re-exported from the package barrel, "
-        },
-        {
-          "insert": "src/index.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/index.ts"
-            }
-          }
-        },
-        {
-          "insert": ", so any consumer of the package — tests, the studio app, or a doc's canvas embed — can import a sample the same way it imports any other engine export."
-        }
-      ],
-      "children": []
-    },
     "b-studio-sample-item-synthetic-10": {
       "id": "b-studio-sample-item-synthetic-10",
       "flavour": "list-item",
@@ -982,6 +912,76 @@
         },
         {
           "insert": ", the final doc in this bundle set."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-heading-canvases-8": {
+      "id": "b-studio-heading-canvases-8",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Canvas JSON store"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-canvases-intro-9": {
+      "id": "b-studio-canvases-intro-9",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases"
+            }
+          }
+        },
+        {
+          "insert": " holds sample "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " values bundled directly with the "
+        },
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " package. Every file in the directory is re-exported from the package barrel, "
+        },
+        {
+          "insert": "src/index.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/index.ts"
+            }
+          }
+        },
+        {
+          "insert": ", so any consumer of the package — tests, the studio app, or a doc's canvas embed — can import a sample the same way it imports any other engine export."
         }
       ],
       "children": []

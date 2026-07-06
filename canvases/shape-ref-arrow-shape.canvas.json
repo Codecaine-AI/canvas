@@ -10,7 +10,7 @@
   },
   "size": {
     "width": 759,
-    "height": 475
+    "height": 478
   },
   "objects": [
     {
@@ -34,7 +34,7 @@
       "label": "top",
       "geometry": {
         "x": 308.5,
-        "y": 80.5,
+        "y": 77,
         "width": 64,
         "height": 28
       }
@@ -56,7 +56,7 @@
       "label": "bottom",
       "geometry": {
         "x": 308.5,
-        "y": 311.5,
+        "y": 315,
         "width": 64,
         "height": 28
       }
@@ -75,7 +75,7 @@
     {
       "id": "note-arrow-shape",
       "type": "text",
-      "label": "label renders centered within the chevron BODY only (head carries no text)",
+      "label": "label renders centered within the chevron BODY only (head carries no text); body-height ratio raised to 0.60 in W5 (approximate, pending pixel sample)",
       "geometry": {
         "x": 120,
         "y": 403,
@@ -96,7 +96,7 @@
         "anchor": "top",
         "position": [
           0.5,
-          0.235
+          0.2
         ]
       },
       "style": "solid",
@@ -130,7 +130,7 @@
         "anchor": "bottom",
         "position": [
           0.5,
-          0.765
+          0.8
         ]
       },
       "style": "solid",

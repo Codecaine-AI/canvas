@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapeSearchPopover } from "../ShapeSearchPopover";
-import { isShapeEntryEnabled, SHAPE_SEARCH_ENTRIES } from "../shape-catalog";
+import { SHAPE_SEARCH_ENTRIES } from "../shape-catalog";
 
 afterEach(() => {
   cleanup();
@@ -33,10 +33,10 @@ describe("ShapeSearchPopover search filtering", () => {
   it("filters entries as the user types, case-insensitively", () => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "chip" } });
+    fireEvent.change(input, { target: { value: "cpu" } });
     const buttons = container.querySelectorAll("[data-shape-entry]");
     expect(buttons.length).toBe(1);
-    expect(buttons[0].getAttribute("aria-label")).toContain("Chip");
+    expect(buttons[0].getAttribute("aria-label")?.toLowerCase()).toContain("cpu");
   });
 
   it("shows a no-results message when nothing matches", () => {
@@ -47,35 +47,12 @@ describe("ShapeSearchPopover search filtering", () => {
   });
 });
 
-describe("ShapeSearchPopover disabled ('coming soon') entries", () => {
-  it("disables entries whose objectType isn't yet in the schema vocabulary", () => {
-    const { container } = render(<ShapeSearchPopover />);
-    const disabledSearchEntries = SHAPE_SEARCH_ENTRIES.filter((e) => !isShapeEntryEnabled(e));
-    for (const entry of disabledSearchEntries) {
-      const btn = container.querySelector(`[data-shape-entry="${entry.id}"]`) as HTMLButtonElement;
-      expect(btn.disabled).toBe(true);
-      expect(btn.getAttribute("aria-label")).toContain("coming soon");
-    }
-  });
-});
-
 describe("ShapeSearchPopover interaction", () => {
-  it("fires onPick with the entry's objectType when an enabled entry is clicked", () => {
+  it("fires onPick with the entry's objectType when an entry is clicked", () => {
     const onPick = mock((_type: string) => {});
     const { container } = render(<ShapeSearchPopover onPick={onPick} />);
-    const enabledEntry = SHAPE_SEARCH_ENTRIES.find((e) => isShapeEntryEnabled(e));
-    expect(enabledEntry).toBeTruthy();
-    fireEvent.click(container.querySelector(`[data-shape-entry="${enabledEntry!.id}"]`)!);
-    expect(onPick).toHaveBeenCalledWith(enabledEntry!.objectType);
-  });
-
-  it("does not fire onPick when a disabled entry is clicked", () => {
-    const onPick = mock((_type: string) => {});
-    const { container } = render(<ShapeSearchPopover onPick={onPick} />);
-    const disabledEntry = SHAPE_SEARCH_ENTRIES.find((e) => !isShapeEntryEnabled(e));
-    if (disabledEntry) {
-      fireEvent.click(container.querySelector(`[data-shape-entry="${disabledEntry.id}"]`)!);
-      expect(onPick).not.toHaveBeenCalled();
-    }
+    const entry = SHAPE_SEARCH_ENTRIES[0];
+    fireEvent.click(container.querySelector(`[data-shape-entry="${entry.id}"]`)!);
+    expect(onPick).toHaveBeenCalledWith(entry.objectType);
   });
 });

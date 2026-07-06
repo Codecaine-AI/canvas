@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-summing-junction",
+  "title": "Summing Junction — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,86 +9,86 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
-    "height": 518
+    "width": 498,
+    "height": 498
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-summing-junction",
+      "type": "summing-junction",
+      "label": "Summing Junction",
       "geometry": {
         "x": 160,
         "y": 160,
-        "width": 160,
-        "height": 120
+        "width": 100,
+        "height": 100
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-summing-junction-top",
       "type": "text",
       "label": "top",
       "geometry": {
-        "x": 208,
+        "x": 178,
         "y": 57,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-summing-junction-right",
       "type": "text",
       "label": "right",
       "geometry": {
-        "x": 395,
-        "y": 206,
+        "x": 335,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-summing-junction-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
-        "x": 208,
-        "y": 355,
+        "x": 178,
+        "y": 335,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-summing-junction-left",
       "type": "text",
       "label": "left",
       "geometry": {
         "x": 21,
-        "y": 206,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-summing-junction",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "no visible label text is rendered for summing-junction (accessibility-only; hidesVisibleText); silhouette is a circle with an inscribed x",
       "geometry": {
         "x": 120,
-        "y": 423,
-        "width": 240,
+        "y": 403,
+        "width": 180,
         "height": 32
       }
     }
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-summing-junction-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-summing-junction-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-summing-junction",
         "anchor": "top",
         "position": [
           0.5,
@@ -99,13 +99,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-summing-junction-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-summing-junction-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-summing-junction",
         "anchor": "right",
         "position": [
           1,
@@ -116,13 +116,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-summing-junction-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-summing-junction-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-summing-junction",
         "anchor": "bottom",
         "position": [
           0.5,
@@ -133,13 +133,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-summing-junction-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-summing-junction-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-summing-junction",
         "anchor": "left",
         "position": [
           0,

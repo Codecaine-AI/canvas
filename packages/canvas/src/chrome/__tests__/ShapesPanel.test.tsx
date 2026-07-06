@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapesPanel, SHAPES_PANEL_WIDTH_PX } from "../ShapesPanel";
-import { isShapeEntryEnabled, SHAPE_CATALOG } from "../shape-catalog";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../shape-catalog";
 
 afterEach(() => {
   cleanup();
@@ -35,17 +35,22 @@ describe("ShapesPanel geometry", () => {
 });
 
 describe("ShapesPanel sections", () => {
-  it("renders all 5 catalog category sections", () => {
+  it("renders exactly the 3 catalog category sections, in order: Basic, Flowchart, Advanced", () => {
     const { container } = render(<ShapesPanel />);
     const categories = container.querySelectorAll("[data-shape-category]");
-    expect(categories.length).toBe(5);
+    expect(categories.length).toBe(3);
     expect(Array.from(categories).map((c) => c.getAttribute("data-shape-category"))).toEqual([
-      "recents",
-      "connections",
       "basic",
       "flowchart",
       "advanced",
     ]);
+  });
+
+  it("does NOT render a Connectors section — connectors are dock-only, never a Shapes-panel entry", () => {
+    const { container, queryByText } = render(<ShapesPanel />);
+    expect(container.querySelector('[data-shape-category="connections"]')).toBeNull();
+    expect(queryByText("Connections")).toBeNull();
+    expect(queryByText("Connectors")).toBeNull();
   });
 
   it("collapses and expands a section's grid when its header is clicked", () => {
@@ -58,22 +63,18 @@ describe("ShapesPanel sections", () => {
     expect(container.querySelector('[data-shape-grid="basic"]')).toBeTruthy();
   });
 
-  it("renders the correct entry count for each section", () => {
+  it("renders the correct entry count for each section (Basic=14, Flowchart=16, Advanced=26)", () => {
     const { container } = render(<ShapesPanel />);
     for (const category of SHAPE_CATALOG) {
       const grid = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
       expect(grid.querySelectorAll("[data-shape-entry]").length).toBe(category.entries.length);
     }
-  });
-});
-
-describe("ShapesPanel 'Other libraries' footer", () => {
-  it("renders the AWS/Azure/Cisco rows as static/disabled", () => {
-    const { container } = render(<ShapesPanel />);
-    const aws = container.querySelector('[data-other-library="aws"]') as HTMLElement;
-    expect(aws.textContent).toContain("AWS");
-    expect(aws.textContent).toContain("805 shapes");
-    expect(aws.getAttribute("aria-disabled")).toBe("true");
+    const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
+    const flowchart = SHAPE_CATALOG.find((c) => c.id === "flowchart")!;
+    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
+    expect(basic.entries.length).toBe(14);
+    expect(flowchart.entries.length).toBe(16);
+    expect(advanced.entries.length).toBe(26);
   });
 });
 
@@ -82,20 +83,49 @@ describe("ShapesPanel search", () => {
     const { getByLabelText, container } = render(<ShapesPanel />);
     fireEvent.change(getByLabelText("Search shapes"), { target: { value: "hexagon" } });
     const categories = container.querySelectorAll("[data-shape-category]");
-    // "Hexagon" only appears in Basic per the catalog data.
+    // "Hexagon" only appears in Flowchart per the catalog data.
     expect(categories.length).toBe(1);
-    expect(categories[0].getAttribute("data-shape-category")).toBe("basic");
+    expect(categories[0].getAttribute("data-shape-category")).toBe("flowchart");
   });
 });
 
 describe("ShapesPanel interaction", () => {
-  it("fires onPick with the objectType of an enabled clicked entry", () => {
+  it("fires onPick with the objectType of a clicked entry", () => {
     const onPick = mock((_type: string) => {});
     const { container } = render(<ShapesPanel onPick={onPick} />);
-    const enabledEntry = SHAPE_CATALOG.flatMap((c) => c.entries).find((e) => isShapeEntryEnabled(e));
-    expect(enabledEntry).toBeTruthy();
-    fireEvent.click(container.querySelector(`[data-shape-entry="${enabledEntry!.id}"]`)!);
-    expect(onPick).toHaveBeenCalledWith(enabledEntry!.objectType);
+    const anyEntry = SHAPE_CATALOG.flatMap((c) => c.entries)[0];
+    fireEvent.click(container.querySelector(`[data-shape-entry="${anyEntry.id}"]`)!);
+    expect(onPick).toHaveBeenCalledWith(anyEntry.objectType);
+  });
+
+  it("clicking an Advanced entry dispatches an insert with type 'icon' and the correct glyph (via onPickEntry)", () => {
+    const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
+    const { container } = render(<ShapesPanel onPickEntry={onPickEntry} />);
+    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
+    const cpuEntry = advanced.entries.find((e) => e.icon === "cpu")!;
+    expect(cpuEntry).toBeTruthy();
+    fireEvent.click(container.querySelector(`[data-shape-entry="${cpuEntry.id}"]`)!);
+    expect(onPickEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ objectType: "icon", icon: "cpu" }),
+    );
+  });
+
+  it("clicking the triangle-down entry dispatches an insert with direction 'down' (via onPickEntry)", () => {
+    const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
+    const { container } = render(<ShapesPanel onPickEntry={onPickEntry} />);
+    fireEvent.click(container.querySelector('[data-shape-entry="basic-triangle-down"]')!);
+    expect(onPickEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ objectType: "triangle", direction: "down" }),
+    );
+  });
+
+  it("both onPick and onPickEntry fire together on the same click", () => {
+    const onPick = mock((_type: string) => {});
+    const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
+    const { container } = render(<ShapesPanel onPick={onPick} onPickEntry={onPickEntry} />);
+    fireEvent.click(container.querySelector('[data-shape-entry="basic-square"]')!);
+    expect(onPick).toHaveBeenCalledWith("container");
+    expect(onPickEntry).toHaveBeenCalledTimes(1);
   });
 
   it("fires onClose when the close button is clicked", () => {

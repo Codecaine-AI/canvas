@@ -161,6 +161,19 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
     });
   });
 
+  it("distinguishes the junctions: or-junction carries a + cross, summing-junction an x", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = renderB1();
+      const orLines = container.querySelectorAll('[data-canvas-object-id="or-junction-1"] line');
+      const sumLines = container.querySelectorAll('[data-canvas-object-id="summing-junction-1"] line');
+      expect(orLines.length).toBe(2);
+      expect(sumLines.length).toBe(2);
+      // "+" runs through the cardinals; "x" endpoints sit at the 45deg outline points.
+      expect(orLines[0]?.getAttribute("x1")).toBe("50%");
+      expect(sumLines[0]?.getAttribute("x1")).toBe("14.64%");
+    });
+  });
+
   it("renders NO visible label text for plus / or-junction / summing-junction (a11y-only labels)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderB1();

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-chevron",
+  "title": "Chevron — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,23 +9,24 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
+    "width": 518,
     "height": 518
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-chevron",
+      "type": "chevron",
+      "label": "Chevron",
       "geometry": {
         "x": 160,
         "y": 160,
         "width": 160,
         "height": 120
-      }
+      },
+      "direction": "right"
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-chevron-top",
       "type": "text",
       "label": "top",
       "geometry": {
@@ -36,7 +37,7 @@
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-chevron-right",
       "type": "text",
       "label": "right",
       "geometry": {
@@ -47,7 +48,7 @@
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-chevron-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
@@ -58,20 +59,20 @@
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-chevron-left",
       "type": "text",
       "label": "left",
       "geometry": {
-        "x": 21,
+        "x": 61,
         "y": 206,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-chevron",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders centered in the chevron body, offset away from the point",
       "geometry": {
         "x": 120,
         "y": 423,
@@ -82,13 +83,13 @@
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-chevron-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-chevron-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-chevron",
         "anchor": "top",
         "position": [
           0.5,
@@ -99,13 +100,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-chevron-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-chevron-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-chevron",
         "anchor": "right",
         "position": [
           1,
@@ -116,13 +117,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-chevron-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-chevron-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-chevron",
         "anchor": "bottom",
         "position": [
           0.5,
@@ -133,16 +134,16 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-chevron-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-chevron-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-chevron",
         "anchor": "left",
         "position": [
-          0,
+          0.25,
           0.5
         ]
       },

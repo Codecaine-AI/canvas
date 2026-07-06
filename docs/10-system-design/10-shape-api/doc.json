@@ -2404,6 +2404,9 @@
         },
         {
           "insert": " enum (31 closed values, no plugin-time registration) — the difference is that Figma's genuine extension point for new shape-like objects is a wholly separate system (the Widgets API), whereas this engine has no equivalent second system: every shape lives in the one typed union, full stop."
+        },
+        {
+          "insert": " The W5 implementation wave exercised this contract end-to-end at scale: 20 new shape types (ellipse through the icon-glyph family) were added touching exactly the call sites enumerated above — schema union, default geometry/tone/style-shape factories, outline functions for the true-outline subset, render functions, and this documentation set — with no new seams required."
         }
       ]
     },
@@ -2414,7 +2417,7 @@
       "props": {},
       "text": [
         {
-          "insert": "For the full enumeration of all 17 shape types with their concrete geometry/tone/style-shape defaults and any per-type quirks, see "
+          "insert": "For the full enumeration of all 37 shape types with their concrete geometry/tone/style-shape defaults and any per-type quirks, see "
         },
         {
           "insert": "canvas-20-implementation-80-shape-reference",

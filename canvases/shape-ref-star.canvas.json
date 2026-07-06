@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-star",
+  "title": "Star — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,86 +9,86 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
-    "height": 518
+    "width": 475,
+    "height": 538
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-star",
+      "type": "star",
+      "label": "Star",
       "geometry": {
         "x": 160,
         "y": 160,
-        "width": 160,
-        "height": 120
+        "width": 140,
+        "height": 140
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-star-top",
       "type": "text",
       "label": "top",
       "geometry": {
-        "x": 208,
+        "x": 198,
         "y": 57,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-star-right",
       "type": "text",
       "label": "right",
       "geometry": {
-        "x": 395,
-        "y": 206,
+        "x": 343.04226065180615,
+        "y": 216,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-star-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
-        "x": 208,
-        "y": 355,
+        "x": 198,
+        "y": 333,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-star-left",
       "type": "text",
       "label": "left",
       "geometry": {
-        "x": 21,
-        "y": 206,
+        "x": 52.957739348193854,
+        "y": 216,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-star",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders small and centered (limited usable area inside the star point cluster)",
       "geometry": {
         "x": 120,
-        "y": 423,
-        "width": 240,
+        "y": 443,
+        "width": 220,
         "height": 32
       }
     }
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-star-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-star-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-star",
         "anchor": "top",
         "position": [
           0.5,
@@ -99,16 +99,16 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-star-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-star-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-star",
         "anchor": "right",
         "position": [
-          1,
+          0.7717304332271867,
           0.5
         ]
       },
@@ -116,33 +116,33 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-star-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-star-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-star",
         "anchor": "bottom",
         "position": [
           0.5,
-          1
+          0.7
         ]
       },
       "style": "solid",
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-star-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-star-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-star",
         "anchor": "left",
         "position": [
-          0,
+          0.22826956677281324,
           0.5
         ]
       },

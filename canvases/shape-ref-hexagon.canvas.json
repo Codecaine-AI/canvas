@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-hexagon",
+  "title": "Hexagon — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,103 +9,103 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
-    "height": 518
+    "width": 548,
+    "height": 492
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-hexagon",
+      "type": "hexagon",
+      "label": "Hexagon",
       "geometry": {
         "x": 160,
         "y": 160,
-        "width": 160,
-        "height": 120
+        "width": 150,
+        "height": 100
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-hexagon-top",
       "type": "text",
       "label": "top",
       "geometry": {
-        "x": 208,
-        "y": 57,
+        "x": 203,
+        "y": 63.698729810778076,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-hexagon-right",
       "type": "text",
       "label": "right",
       "geometry": {
-        "x": 395,
-        "y": 206,
+        "x": 385,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-hexagon-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
-        "x": 208,
-        "y": 355,
+        "x": 203,
+        "y": 328.30127018922195,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-hexagon-left",
       "type": "text",
       "label": "left",
       "geometry": {
         "x": 21,
-        "y": 206,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-hexagon",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders centered inside the hexagon",
       "geometry": {
         "x": 120,
-        "y": 423,
-        "width": 240,
+        "y": 403,
+        "width": 230,
         "height": 32
       }
     }
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-hexagon-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-hexagon-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-hexagon",
         "anchor": "top",
         "position": [
           0.5,
-          0
+          0.06698729810778076
         ]
       },
       "style": "solid",
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-hexagon-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-hexagon-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-hexagon",
         "anchor": "right",
         "position": [
           1,
@@ -116,30 +116,30 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-hexagon-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-hexagon-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-hexagon",
         "anchor": "bottom",
         "position": [
           0.5,
-          1
+          0.9330127018922195
         ]
       },
       "style": "solid",
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-hexagon-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-hexagon-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-hexagon",
         "anchor": "left",
         "position": [
           0,

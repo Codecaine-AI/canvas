@@ -43,6 +43,26 @@
         "b-model-schema-object-types-list-predefined-process",
         "b-model-schema-object-types-list-code-block",
         "b-model-schema-object-types-list-chip-icon",
+        "b-model-schema-object-types-list-ellipse",
+        "b-model-schema-object-types-list-triangle",
+        "b-model-schema-object-types-list-parallelogram",
+        "b-model-schema-object-types-list-pentagon",
+        "b-model-schema-object-types-list-octagon",
+        "b-model-schema-object-types-list-star",
+        "b-model-schema-object-types-list-plus",
+        "b-model-schema-object-types-list-chevron",
+        "b-model-schema-object-types-list-folder",
+        "b-model-schema-object-types-list-document-stack",
+        "b-model-schema-object-types-list-off-page-connector",
+        "b-model-schema-object-types-list-trapezoid",
+        "b-model-schema-object-types-list-manual-input",
+        "b-model-schema-object-types-list-hexagon",
+        "b-model-schema-object-types-list-internal-storage",
+        "b-model-schema-object-types-list-or-junction",
+        "b-model-schema-object-types-list-summing-junction",
+        "b-model-schema-object-types-list-cylinder-horizontal",
+        "b-model-schema-object-types-list-page-corner",
+        "b-model-schema-object-types-list-icon",
         "b-model-schema-p3",
         "b-model-schema-color-heading",
         "b-model-schema-color-p1",
@@ -102,6 +122,66 @@
         "b-model-type-chip-icon",
         "b-model-type-chip-icon-p1",
         "b-model-type-chip-icon-p2",
+        "b-model-type-ellipse",
+        "b-model-type-ellipse-p1",
+        "b-model-type-ellipse-p2",
+        "b-model-type-triangle",
+        "b-model-type-triangle-p1",
+        "b-model-type-triangle-p2",
+        "b-model-type-parallelogram",
+        "b-model-type-parallelogram-p1",
+        "b-model-type-parallelogram-p2",
+        "b-model-type-pentagon",
+        "b-model-type-pentagon-p1",
+        "b-model-type-pentagon-p2",
+        "b-model-type-octagon",
+        "b-model-type-octagon-p1",
+        "b-model-type-octagon-p2",
+        "b-model-type-star",
+        "b-model-type-star-p1",
+        "b-model-type-star-p2",
+        "b-model-type-plus",
+        "b-model-type-plus-p1",
+        "b-model-type-plus-p2",
+        "b-model-type-chevron",
+        "b-model-type-chevron-p1",
+        "b-model-type-chevron-p2",
+        "b-model-type-folder",
+        "b-model-type-folder-p1",
+        "b-model-type-folder-p2",
+        "b-model-type-document-stack",
+        "b-model-type-document-stack-p1",
+        "b-model-type-document-stack-p2",
+        "b-model-type-off-page-connector",
+        "b-model-type-off-page-connector-p1",
+        "b-model-type-off-page-connector-p2",
+        "b-model-type-trapezoid",
+        "b-model-type-trapezoid-p1",
+        "b-model-type-trapezoid-p2",
+        "b-model-type-manual-input",
+        "b-model-type-manual-input-p1",
+        "b-model-type-manual-input-p2",
+        "b-model-type-hexagon",
+        "b-model-type-hexagon-p1",
+        "b-model-type-hexagon-p2",
+        "b-model-type-internal-storage",
+        "b-model-type-internal-storage-p1",
+        "b-model-type-internal-storage-p2",
+        "b-model-type-or-junction",
+        "b-model-type-or-junction-p1",
+        "b-model-type-or-junction-p2",
+        "b-model-type-summing-junction",
+        "b-model-type-summing-junction-p1",
+        "b-model-type-summing-junction-p2",
+        "b-model-type-cylinder-horizontal",
+        "b-model-type-cylinder-horizontal-p1",
+        "b-model-type-cylinder-horizontal-p2",
+        "b-model-type-page-corner",
+        "b-model-type-page-corner-p1",
+        "b-model-type-page-corner-p2",
+        "b-model-type-icon",
+        "b-model-type-icon-p1",
+        "b-model-type-icon-p2",
         "b-model-heading-layout-conventions",
         "b-model-layout-conventions-p1",
         "b-model-layout-conventions-p2",
@@ -917,7 +997,35 @@
       "props": {},
       "text": [
         {
-          "insert": "That's 17 object types in total. The D16 wave (document, person, database, chat) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block, chip-icon) added FigJam-parity sections plus the V2 Flow shape set, in step with the engine's move toward pixel-level FigJam fidelity."
+          "insert": "That's 37 object types in total. The D16 wave (document, person, database, chat) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block, chip-icon) added FigJam-parity sections plus the V2 Flow shape set; the W5 wave (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, folder, document-stack, off-page-connector, trapezoid, manual-input, hexagon, internal-storage, or-junction, summing-junction, cylinder-horizontal, page-corner, icon) closed out FigJam's Basic/Flowchart/Advanced picker tiers — 19 native shape primitives plus one icon-glyph family ("
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": ", parameterized by a required "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": " field drawn from a 26-value CanvasIconGlyph enum) covering the Advanced tier's 26 component icons in one type instead of 26 bespoke ones."
         }
       ],
       "children": []
@@ -4188,33 +4296,49 @@
       "props": {},
       "text": [
         {
-          "insert": "Rendered with a dog-eared-page silhouette via CSS "
+          "insert": "W5 replaced the dog-eared-page silhouette with a wavy bottom edge, drawn via "
         },
         {
-          "insert": "clip-path: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)",
+          "insert": "documentWavyPath",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "documentWavyPath"
             }
           }
         },
         {
-          "insert": " and an asymmetric border radius ("
+          "insert": " — a rectangle whose bottom edge follows a shallow sine-like curve, proportioned by "
         },
         {
-          "insert": "2px 8px 8px 8px",
+          "insert": "DOCUMENT_GEOMETRY",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "DOCUMENT_GEOMETRY"
             }
           }
         },
         {
-          "insert": " — square top-left corner where the fold notch is, rounded elsewhere). Uses the shared base chrome otherwise: label top-left, body below it."
+          "insert": "'s waveShoulderYRatio (0.82) and waveCrestYRatio (0.96). The old dog-ear/folded-corner notch (CSS clip-path polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)) moved verbatim to the new "
+        },
+        {
+          "insert": "page-corner",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " type, which now owns that silhouette exactly. document is still bbox-fallback for connection-anchor purposes (the wavy edge is not modeled as a true outline). Uses the shared base chrome otherwise: label top-left, body below it."
         }
       ],
       "children": []
@@ -5355,7 +5479,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasShapeDirection"
             }
           }
         },
@@ -5363,44 +5488,18 @@
           "insert": " field ("
         },
         {
-          "insert": "CanvasArrowShapeDirection",
+          "insert": "CanvasShapeDirection",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/model/schema.ts",
-              "symbol": "CanvasArrowShapeDirection"
+              "symbol": "CanvasShapeDirection"
             }
           }
         },
         {
-          "insert": ", defaults to "
-        },
-        {
-          "insert": "\"right\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
-          }
-        },
-        {
-          "insert": " when omitted or invalid — a soft default in "
-        },
-        {
-          "insert": "validateInteractiveCanvasDocument",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
-          }
-        },
-        {
-          "insert": ", not a hard validation error). Default geometry "
+          "insert": " — generalized in W5 from the original CanvasArrowShapeDirection, now kept as a back-compat type alias, since triangle/parallelogram/chevron reuse the same left/right/up/down field — defaults to \"right\" when omitted or invalid, a soft default in validateInteractiveCanvasDocument, not a hard validation error). Default geometry "
         },
         {
           "insert": "{ x: 160, y: 160, width: 361, height: 100 }",
@@ -5408,51 +5507,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts"
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": " matches the measured reference proportions (361x100 logical px), default tone "
-        },
-        {
-          "insert": "\"process\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"arrow-shape\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": " matches the measured reference proportions (361x100 logical px), default tone \"process\", style.shape \"arrow-shape\"."
         }
       ],
       "children": []
@@ -5512,7 +5573,7 @@
           }
         },
         {
-          "insert": " 0.53, "
+          "insert": " 0.60 (raised from 0.53 in W5 so the rendered body reads blockier; approximate, pending a live FigJam pixel sample), "
         },
         {
           "insert": "bodyCornerRadiusPx",
@@ -6707,6 +6768,1582 @@
         }
       ],
       "children": []
+    },
+    "b-model-schema-object-types-list-ellipse": {
+      "id": "b-model-schema-object-types-list-ellipse",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "ellipse — added in W5; a true ellipse inscribed in the bounding box."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-triangle": {
+      "id": "b-model-schema-object-types-list-triangle",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "triangle — added in W5; an isosceles triangle with an up/down direction (defaults to up)."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-parallelogram": {
+      "id": "b-model-schema-object-types-list-parallelogram",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "parallelogram — added in W5; a skewed quadrilateral with a left/right direction (defaults to right)."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-pentagon": {
+      "id": "b-model-schema-object-types-list-pentagon",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "pentagon — added in W5; a 5-point regular polygon."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-octagon": {
+      "id": "b-model-schema-object-types-list-octagon",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "octagon — added in W5; an 8-point regular polygon."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-star": {
+      "id": "b-model-schema-object-types-list-star",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "star — added in W5; a 5-point star polygon."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-plus": {
+      "id": "b-model-schema-object-types-list-plus",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "plus — added in W5; a 12-point cross polygon; renders no visible label text."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-chevron": {
+      "id": "b-model-schema-object-types-list-chevron",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "chevron — added in W5; a fat-chevron polygon distinct from arrow-shape, with a left/right direction (defaults to right)."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-folder": {
+      "id": "b-model-schema-object-types-list-folder",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "folder — added in W5; a manila-folder silhouette with a tab notch."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-document-stack": {
+      "id": "b-model-schema-object-types-list-document-stack",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "document-stack — added in W5; offset duplicate document silhouettes suggesting multiple stacked files."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-off-page-connector": {
+      "id": "b-model-schema-object-types-list-off-page-connector",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "off-page-connector — added in W5; a downward-pointing pentagon."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-trapezoid": {
+      "id": "b-model-schema-object-types-list-trapezoid",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "trapezoid — added in W5; a 4-point trapezoid (manual-operation flowchart symbol)."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-manual-input": {
+      "id": "b-model-schema-object-types-list-manual-input",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "manual-input — added in W5; a rectangle with a slanted top edge."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-hexagon": {
+      "id": "b-model-schema-object-types-list-hexagon",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "hexagon — added in W5; a 6-point regular hexagon (flowchart preparation symbol)."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-internal-storage": {
+      "id": "b-model-schema-object-types-list-internal-storage",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "internal-storage — added in W5; a rectangle with interior top-row and left-column rule lines."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-or-junction": {
+      "id": "b-model-schema-object-types-list-or-junction",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "or-junction — added in W5; a circle with an inscribed \"+\"; renders no visible label text."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-summing-junction": {
+      "id": "b-model-schema-object-types-list-summing-junction",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "summing-junction — added in W5; a circle with an inscribed \"x\"; renders no visible label text."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-cylinder-horizontal": {
+      "id": "b-model-schema-object-types-list-cylinder-horizontal",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "cylinder-horizontal — added in W5; a horizontal-orientation cylinder, distinct from database's vertical cylinder."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-page-corner": {
+      "id": "b-model-schema-object-types-list-page-corner",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "page-corner — added in W5; the dog-eared/folded-corner page silhouette document used before W5."
+        }
+      ]
+    },
+    "b-model-schema-object-types-list-icon": {
+      "id": "b-model-schema-object-types-list-icon",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "icon — added in W5; a single icon-glyph family parameterized by a required icon field (26-value CanvasIconGlyph enum), covering FigJam's Advanced picker tier."
+        }
+      ]
+    },
+    "b-model-type-ellipse": {
+      "id": "b-model-type-ellipse",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "ellipse"
+        }
+      ]
+    },
+    "b-model-type-ellipse-p1": {
+      "id": "b-model-type-ellipse-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a true ellipse inscribed in the object's bounding box. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\" (inert — ellipse resolves color from figjam-tokens directly), style.shape \"ellipse\"."
+        }
+      ]
+    },
+    "b-model-type-ellipse-p2": {
+      "id": "b-model-type-ellipse-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type: connection anchors project onto the actual ellipse curve via "
+        },
+        {
+          "insert": "ellipsePoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "ellipsePoints"
+            }
+          }
+        },
+        {
+          "insert": ", not the bounding box. Label renders centered."
+        }
+      ]
+    },
+    "b-model-type-triangle": {
+      "id": "b-model-type-triangle",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "triangle"
+        }
+      ]
+    },
+    "b-model-type-triangle-p1": {
+      "id": "b-model-type-triangle-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — an isosceles triangle, pointing up or down via the type-only "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": " field (soft-defaults to \"up\" when omitted or invalid). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"triangle\"."
+        }
+      ]
+    },
+    "b-model-type-triangle-p2": {
+      "id": "b-model-type-triangle-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "trianglePoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "trianglePoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered in the lower two-thirds of the shape (the apex carries no text)."
+        }
+      ]
+    },
+    "b-model-type-parallelogram": {
+      "id": "b-model-type-parallelogram",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "parallelogram"
+        }
+      ]
+    },
+    "b-model-type-parallelogram-p1": {
+      "id": "b-model-type-parallelogram-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a skewed quadrilateral, skewed right or left via the type-only "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": " field (soft-defaults to \"right\"). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"parallelogram\"."
+        }
+      ]
+    },
+    "b-model-type-parallelogram-p2": {
+      "id": "b-model-type-parallelogram-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "parallelogramPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "parallelogramPoints"
+            }
+          }
+        },
+        {
+          "insert": ", skew a fixed fraction of width (approximate, pending a pixel-reference check against FigJam). Text slot is centered."
+        }
+      ]
+    },
+    "b-model-type-pentagon": {
+      "id": "b-model-type-pentagon",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "pentagon"
+        }
+      ]
+    },
+    "b-model-type-pentagon-p1": {
+      "id": "b-model-type-pentagon-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a 5-point regular polygon (one point up). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 140 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"pentagon\"."
+        }
+      ]
+    },
+    "b-model-type-pentagon-p2": {
+      "id": "b-model-type-pentagon-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "pentagonPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "pentagonPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered."
+        }
+      ]
+    },
+    "b-model-type-octagon": {
+      "id": "b-model-type-octagon",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "octagon"
+        }
+      ]
+    },
+    "b-model-type-octagon-p1": {
+      "id": "b-model-type-octagon-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — an 8-point regular polygon. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 140 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"octagon\"."
+        }
+      ]
+    },
+    "b-model-type-octagon-p2": {
+      "id": "b-model-type-octagon-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "octagonPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "octagonPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered."
+        }
+      ]
+    },
+    "b-model-type-star": {
+      "id": "b-model-type-star",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "star"
+        }
+      ]
+    },
+    "b-model-type-star-p1": {
+      "id": "b-model-type-star-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a 5-point star polygon (10 alternating outer/inner vertices). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 140 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"star\"."
+        }
+      ]
+    },
+    "b-model-type-star-p2": {
+      "id": "b-model-type-star-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "starPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "starPoints"
+            }
+          }
+        },
+        {
+          "insert": ", inner radius a fixed fraction of outer (approximate, pending a pixel-reference check). Text slot is small and centered."
+        }
+      ]
+    },
+    "b-model-type-plus": {
+      "id": "b-model-type-plus",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "plus"
+        }
+      ]
+    },
+    "b-model-type-plus-p1": {
+      "id": "b-model-type-plus-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a 12-point cross/plus polygon (equal-width horizontal and vertical bars). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 120, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"plus\"."
+        }
+      ]
+    },
+    "b-model-type-plus-p2": {
+      "id": "b-model-type-plus-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "plusPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "plusPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Renders no visible label text — the cross's usable text area is too small, so the label is accessibility-only (hidesVisibleText)."
+        }
+      ]
+    },
+    "b-model-type-chevron": {
+      "id": "b-model-type-chevron",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "chevron"
+        }
+      ]
+    },
+    "b-model-type-chevron-p1": {
+      "id": "b-model-type-chevron-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — FigJam's \"fat chevron arrow\", pointing left or right via the type-only "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasShapeDirection"
+            }
+          }
+        },
+        {
+          "insert": " field (soft-defaults to \"right\"). Distinct from arrow-shape: the two silhouettes diverged enough in FigJam's own picker to justify separate types rather than a shared weight field. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"chevron\"."
+        }
+      ]
+    },
+    "b-model-type-chevron-p2": {
+      "id": "b-model-type-chevron-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "chevronPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "chevronPoints"
+            }
+          }
+        },
+        {
+          "insert": ", proportioned by "
+        },
+        {
+          "insert": "CHEVRON_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "CHEVRON_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s notchWidthRatio (0.25). Text slot is centered, offset away from the notch."
+        }
+      ]
+    },
+    "b-model-type-folder": {
+      "id": "b-model-type-folder",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "folder"
+        }
+      ]
+    },
+    "b-model-type-folder-p1": {
+      "id": "b-model-type-folder-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a manila-folder silhouette: a rectangle with a small tab notch on the top edge. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 140, height: 110 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"folder\", tab width proportioned by "
+        },
+        {
+          "insert": "FOLDER_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "FOLDER_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s tabWidthRatio (0.38)."
+        }
+      ]
+    },
+    "b-model-type-folder-p2": {
+      "id": "b-model-type-folder-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Bbox-fallback outline (the tab notch doesn't perturb connection anchors). Text slot is centered in the main body, below the tab."
+        }
+      ]
+    },
+    "b-model-type-document-stack": {
+      "id": "b-model-type-document-stack",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "document-stack"
+        }
+      ]
+    },
+    "b-model-type-document-stack-p1": {
+      "id": "b-model-type-document-stack-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — FigJam's \"multiple documents (stacked)\" symbol: offset duplicate wavy-document outlines behind the primary. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"document-stack\", offset proportioned by "
+        },
+        {
+          "insert": "DOCUMENT_STACK_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "DOCUMENT_STACK_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s offsetPx (6)."
+        }
+      ]
+    },
+    "b-model-type-document-stack-p2": {
+      "id": "b-model-type-document-stack-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Bbox-fallback outline. Text slot is centered on the front-most document silhouette."
+        }
+      ]
+    },
+    "b-model-type-off-page-connector": {
+      "id": "b-model-type-off-page-connector",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "off-page-connector"
+        }
+      ]
+    },
+    "b-model-type-off-page-connector-p1": {
+      "id": "b-model-type-off-page-connector-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a downward-pointing pentagon (FigJam's SHIELD shapeType). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 120, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"off-page-connector\", point proportioned by "
+        },
+        {
+          "insert": "OFF_PAGE_CONNECTOR_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "OFF_PAGE_CONNECTOR_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s shoulderRatio (0.6)."
+        }
+      ]
+    },
+    "b-model-type-off-page-connector-p2": {
+      "id": "b-model-type-off-page-connector-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "offPageConnectorPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "offPageConnectorPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered in the upper rectangular band, above the point."
+        }
+      ]
+    },
+    "b-model-type-trapezoid": {
+      "id": "b-model-type-trapezoid",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "trapezoid"
+        }
+      ]
+    },
+    "b-model-type-trapezoid-p1": {
+      "id": "b-model-type-trapezoid-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a 4-point trapezoid (FigJam's \"manual operation\" symbol): wider bottom edge, narrower symmetric top edge. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"trapezoid\"."
+        }
+      ]
+    },
+    "b-model-type-trapezoid-p2": {
+      "id": "b-model-type-trapezoid-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "trapezoidPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "trapezoidPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered."
+        }
+      ]
+    },
+    "b-model-type-manual-input": {
+      "id": "b-model-type-manual-input",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "manual-input"
+        }
+      ]
+    },
+    "b-model-type-manual-input-p1": {
+      "id": "b-model-type-manual-input-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a rectangle with a slanted top edge (top-left corner dropped). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"manual-input\", drop proportioned by "
+        },
+        {
+          "insert": "MANUAL_INPUT_GEOMETRY",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "symbol": "MANUAL_INPUT_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "'s dropRatio (0.25)."
+        }
+      ]
+    },
+    "b-model-type-manual-input-p2": {
+      "id": "b-model-type-manual-input-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "manualInputPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "manualInputPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered in the lower rectangular band, below the slanted edge."
+        }
+      ]
+    },
+    "b-model-type-hexagon": {
+      "id": "b-model-type-hexagon",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "hexagon"
+        }
+      ]
+    },
+    "b-model-type-hexagon-p1": {
+      "id": "b-model-type-hexagon-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a 6-point regular hexagon, flat-top orientation (FigJam's \"preparation\" symbol). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"hexagon\"."
+        }
+      ]
+    },
+    "b-model-type-hexagon-p2": {
+      "id": "b-model-type-hexagon-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "True-outline type via "
+        },
+        {
+          "insert": "hexagonPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "hexagonPoints"
+            }
+          }
+        },
+        {
+          "insert": ". Text slot is centered."
+        }
+      ]
+    },
+    "b-model-type-internal-storage": {
+      "id": "b-model-type-internal-storage",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "internal-storage"
+        }
+      ]
+    },
+    "b-model-type-internal-storage-p1": {
+      "id": "b-model-type-internal-storage-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a rectangle with two additional straight rule lines drawn inside near the top and left edges (FigJam's \"internal storage\" symbol). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 150, height: 110 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"internal-storage\"."
+        }
+      ]
+    },
+    "b-model-type-internal-storage-p2": {
+      "id": "b-model-type-internal-storage-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Outline is a plain rect — the interior rule lines are decoration only and don't perturb where a connector crosses the border. Text slot is centered in the remaining lower-right cell, below the top rule and right of the left rule."
+        }
+      ]
+    },
+    "b-model-type-or-junction": {
+      "id": "b-model-type-or-junction",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "or-junction"
+        }
+      ]
+    },
+    "b-model-type-or-junction-p1": {
+      "id": "b-model-type-or-junction-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a circle with an inscribed \"+\" (FigJam's OR flowchart junction). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 100, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"or-junction\"."
+        }
+      ]
+    },
+    "b-model-type-or-junction-p2": {
+      "id": "b-model-type-or-junction-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Ellipse-silhouette true-outline type (shares the \"junction\" outline tier with summing-junction, both via "
+        },
+        {
+          "insert": "ellipsePoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "ellipsePoints"
+            }
+          }
+        },
+        {
+          "insert": "). The inscribed \"+\" is drawn from cardinal lines at 50%/50%, distinguishing it from summing-junction's \"x\". Renders no visible label text (accessibility-only)."
+        }
+      ]
+    },
+    "b-model-type-summing-junction": {
+      "id": "b-model-type-summing-junction",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "summing-junction"
+        }
+      ]
+    },
+    "b-model-type-summing-junction-p1": {
+      "id": "b-model-type-summing-junction-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a circle with an inscribed \"x\" (FigJam's summing-junction flowchart symbol). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 100, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"summing-junction\"."
+        }
+      ]
+    },
+    "b-model-type-summing-junction-p2": {
+      "id": "b-model-type-summing-junction-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Ellipse-silhouette true-outline type, same tier as or-junction. The inscribed \"x\" is drawn from diagonal lines at roughly 14.64%/85.36% (cos 45° scaled), distinguishing it from or-junction's \"+\". Renders no visible label text (accessibility-only)."
+        }
+      ]
+    },
+    "b-model-type-cylinder-horizontal": {
+      "id": "b-model-type-cylinder-horizontal",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "cylinder-horizontal"
+        }
+      ]
+    },
+    "b-model-type-cylinder-horizontal-p1": {
+      "id": "b-model-type-cylinder-horizontal-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a horizontal-orientation cylinder (FigJam's ENG_QUEUE shapeType), distinct from database's vertical cylinder. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"cylinder-horizontal\"."
+        }
+      ]
+    },
+    "b-model-type-cylinder-horizontal-p2": {
+      "id": "b-model-type-cylinder-horizontal-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Bbox-fallback outline (like database). Text slot is centered on the silhouette."
+        }
+      ]
+    },
+    "b-model-type-page-corner": {
+      "id": "b-model-type-page-corner",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "page-corner"
+        }
+      ]
+    },
+    "b-model-type-page-corner-p1": {
+      "id": "b-model-type-page-corner-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — the dog-eared/folded-corner page silhouette document used before W5 (FigJam's ENG_FILE shapeType), now split into its own type since document moved to a wavy-bottom silhouette instead. Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"page-corner\"."
+        }
+      ]
+    },
+    "b-model-type-page-corner-p2": {
+      "id": "b-model-type-page-corner-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Rendered with the same CSS clip-path dog-ear notch document used to carry: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%), asymmetric border radius (2px 8px 8px 8px). Bbox-fallback outline. Text slot is centered on the silhouette."
+        }
+      ]
+    },
+    "b-model-type-icon": {
+      "id": "b-model-type-icon",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "children": [],
+      "text": [
+        {
+          "insert": "icon"
+        }
+      ]
+    },
+    "b-model-type-icon-p1": {
+      "id": "b-model-type-icon-p1",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Added in W5 — a single icon-glyph family covering FigJam's 26-item Advanced picker tier, parameterized by a required "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": " field (missing or unknown glyph is a hard validation error, unlike the soft-defaulted direction field). Default geometry "
+        },
+        {
+          "insert": "{ x: 160, y: 160, width: 120, height: 120 }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/actions.ts",
+              "symbol": "defaultGeometryFor"
+            }
+          }
+        },
+        {
+          "insert": ", default tone \"neutral\", style.shape \"icon\"."
+        }
+      ]
+    },
+    "b-model-type-icon-p2": {
+      "id": "b-model-type-icon-p2",
+      "flavour": "paragraph",
+      "props": {},
+      "children": [],
+      "text": [
+        {
+          "insert": "Rendered via "
+        },
+        {
+          "insert": "IconShapeBody",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/IconShapeBody.tsx",
+              "symbol": "IconShapeBody"
+            }
+          }
+        },
+        {
+          "insert": ", the same label-below-glyph layout chip-icon/person/chat use, drawing from the "
+        },
+        {
+          "insert": "ICON_GLYPHS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/icon-glyphs.tsx",
+              "symbol": "ICON_GLYPHS"
+            }
+          }
+        },
+        {
+          "insert": " registry (26 glyphs: activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe). Bbox-fallback outline."
+        }
+      ]
     }
   }
 }

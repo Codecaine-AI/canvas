@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-trapezoid",
+  "title": "Trapezoid — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,86 +9,86 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
-    "height": 518
+    "width": 518,
+    "height": 498
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-trapezoid",
+      "type": "trapezoid",
+      "label": "Trapezoid",
       "geometry": {
         "x": 160,
         "y": 160,
-        "width": 160,
-        "height": 120
+        "width": 150,
+        "height": 100
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-trapezoid-top",
       "type": "text",
       "label": "top",
       "geometry": {
-        "x": 208,
+        "x": 203,
         "y": 57,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-trapezoid-right",
       "type": "text",
       "label": "right",
       "geometry": {
-        "x": 395,
-        "y": 206,
+        "x": 370,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-trapezoid-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
-        "x": 208,
-        "y": 355,
+        "x": 203,
+        "y": 335,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-trapezoid-left",
       "type": "text",
       "label": "left",
       "geometry": {
-        "x": 21,
-        "y": 206,
+        "x": 36,
+        "y": 196,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-trapezoid",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders centered inside the trapezoid",
       "geometry": {
         "x": 120,
-        "y": 423,
-        "width": 240,
+        "y": 403,
+        "width": 230,
         "height": 32
       }
     }
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-trapezoid-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-trapezoid-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-trapezoid",
         "anchor": "top",
         "position": [
           0.5,
@@ -99,16 +99,16 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-trapezoid-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-trapezoid-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-trapezoid",
         "anchor": "right",
         "position": [
-          1,
+          0.9,
           0.5
         ]
       },
@@ -116,13 +116,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-trapezoid-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-trapezoid-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-trapezoid",
         "anchor": "bottom",
         "position": [
           0.5,
@@ -133,16 +133,16 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-trapezoid-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-trapezoid-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-trapezoid",
         "anchor": "left",
         "position": [
-          0,
+          0.1,
           0.5
         ]
       },

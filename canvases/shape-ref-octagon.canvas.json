@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-octagon",
+  "title": "Octagon — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -9,106 +9,106 @@
     "zoom": 1
   },
   "size": {
-    "width": 558,
-    "height": 518
+    "width": 528,
+    "height": 533
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-octagon",
+      "type": "octagon",
+      "label": "Octagon",
       "geometry": {
         "x": 160,
         "y": 160,
-        "width": 160,
-        "height": 120
+        "width": 140,
+        "height": 140
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-octagon-top",
       "type": "text",
       "label": "top",
       "geometry": {
-        "x": 208,
-        "y": 57,
+        "x": 198,
+        "y": 62.32843272420996,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-octagon-right",
       "type": "text",
       "label": "right",
       "geometry": {
-        "x": 395,
-        "y": 206,
+        "x": 369.67156727579004,
+        "y": 216,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-octagon-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
-        "x": 208,
-        "y": 355,
+        "x": 198,
+        "y": 369.67156727579004,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-octagon-left",
       "type": "text",
       "label": "left",
       "geometry": {
-        "x": 21,
-        "y": 206,
+        "x": 26.328432724209904,
+        "y": 216,
         "width": 64,
         "height": 28
       }
     },
     {
-      "id": "note-document",
+      "id": "note-octagon",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders centered inside the octagon",
       "geometry": {
         "x": 120,
-        "y": 423,
-        "width": 240,
+        "y": 443,
+        "width": 220,
         "height": 32
       }
     }
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-octagon-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-octagon-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-octagon",
         "anchor": "top",
         "position": [
           0.5,
-          0
+          0.03806023374435686
         ]
       },
       "style": "solid",
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-octagon-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-octagon-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-octagon",
         "anchor": "right",
         "position": [
-          1,
+          0.9619397662556431,
           0.5
         ]
       },
@@ -116,33 +116,33 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-octagon-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-octagon-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-octagon",
         "anchor": "bottom",
         "position": [
           0.5,
-          1
+          0.9619397662556431
         ]
       },
       "style": "solid",
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-octagon-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-octagon-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-octagon",
         "anchor": "left",
         "position": [
-          0,
+          0.03806023374435646,
           0.5
         ]
       },

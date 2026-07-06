@@ -37,7 +37,7 @@
         "b-overview-surfaces-intro-15",
         "b-overview-surfaces-list-editor-16",
         "b-overview-surfaces-list-viewer-17",
-        "b-overview-surfaces-list-canvas JSON files-18",
+        "b-overview-surfaces-list-canvases-18",
         "b-overview-surfaces-exports-body-19",
         "b-overview-lightboard-decision-20",
         "b-overview-sample-heading-21",
@@ -665,29 +665,6 @@
       ],
       "children": []
     },
-    "b-overview-surfaces-list-canvas JSON files-18": {
-      "id": "b-overview-surfaces-list-canvas JSON files-18",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "canvases/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases"
-            }
-          }
-        },
-        {
-          "insert": " holds sample documents — e.g. the V2 Flow FigJam sample embedded below — useful for tests and demos."
-        }
-      ],
-      "children": []
-    },
     "b-overview-surfaces-exports-body-19": {
       "id": "b-overview-surfaces-exports-body-19",
       "flavour": "paragraph",
@@ -1132,6 +1109,29 @@
         },
         {
           "insert": " — the full extraction history: what moved from Spectre, what was vendored in, and the BlockSuite (MPL-2.0) licensing notes."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-surfaces-list-canvases-18": {
+      "id": "b-overview-surfaces-list-canvases-18",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases"
+            }
+          }
+        },
+        {
+          "insert": " holds sample documents — e.g. the V2 Flow FigJam sample embedded below — useful for tests and demos."
         }
       ],
       "children": []

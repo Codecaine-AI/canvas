@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { CHROME } from "../render/figjam-tokens";
-import { isShapeEntryEnabled, SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
+import { SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
 import { ChromeTooltip } from "./ChromeTooltip";
+import type { InteractiveCanvasObjectType } from "../model/schema";
 
 /**
  * ShapeSearchPopover — Panel A from figjam-chrome-catalog.md section 4: the
@@ -18,7 +19,7 @@ import { ChromeTooltip } from "./ChromeTooltip";
  */
 
 export type ShapeSearchPopoverProps = {
-  onPick?: (shapeType: ShapeCatalogEntry["objectType"]) => void;
+  onPick?: (shapeType: InteractiveCanvasObjectType) => void;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -96,8 +97,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
         }}
       >
         {filtered.map((entry) => {
-          const Icon = entry.icon;
-          const enabled = isShapeEntryEnabled(entry);
+          const Icon = entry.Icon;
           const hovered = hoveredId === entry.id;
           return (
             <div key={entry.id} style={{ position: "relative", display: "inline-flex" }}>
@@ -105,11 +105,10 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
                 type="button"
                 data-shape-entry={entry.id}
                 data-object-type={entry.objectType}
-                aria-label={enabled ? entry.label : `${entry.label} (coming soon)`}
-                disabled={!enabled}
+                aria-label={entry.label}
                 onMouseEnter={() => setHoveredId(entry.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                onClick={() => enabled && onPick?.(entry.objectType)}
+                onClick={() => onPick?.(entry.objectType)}
                 style={{
                   width: 28,
                   height: 28,
@@ -118,18 +117,14 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
                   justifyContent: "center",
                   borderRadius: 6,
                   border: "none",
-                  background: hovered && enabled ? "rgba(255,255,255,0.14)" : "transparent",
-                  color: enabled ? "#FFFFFF" : "rgba(255,255,255,0.35)",
-                  cursor: enabled ? "pointer" : "default",
+                  background: hovered ? "rgba(255,255,255,0.14)" : "transparent",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
                 }}
               >
                 <Icon className="h-4 w-4" />
               </button>
-              <ChromeTooltip
-                label={enabled ? entry.label : "Coming soon"}
-                visible={hovered}
-                placement="top"
-              />
+              <ChromeTooltip label={entry.label} visible={hovered} placement="top" />
             </div>
           );
         })}

@@ -1171,6 +1171,21 @@ export function ObjectShape({
             stroke={colors.border}
             strokeWidth={shapeStrokeWidth}
           />
+          {/* FigJam or-junction carries an inscribed "+" and summing-junction an
+              inscribed "x" — endpoints sit on the ellipse outline (cardinals for
+              the cross; the 45deg parametric points, cos45 ~= 0.3536, for the X). */}
+          {shape === "or-junction" && (
+            <>
+              <line x1="50%" y1="0%" x2="50%" y2="100%" stroke={colors.border} strokeWidth={shapeStrokeWidth} />
+              <line x1="0%" y1="50%" x2="100%" y2="50%" stroke={colors.border} strokeWidth={shapeStrokeWidth} />
+            </>
+          )}
+          {shape === "summing-junction" && (
+            <>
+              <line x1="14.64%" y1="14.64%" x2="85.36%" y2="85.36%" stroke={colors.border} strokeWidth={shapeStrokeWidth} />
+              <line x1="14.64%" y1="85.36%" x2="85.36%" y2="14.64%" stroke={colors.border} strokeWidth={shapeStrokeWidth} />
+            </>
+          )}
         </svg>
       )}
       {trueOutlinePolygonPoints && (

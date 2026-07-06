@@ -1,17 +1,22 @@
 import { describe, expect, it } from "bun:test";
+import { ICON_GLYPH_IDS } from "../../render/icon-glyphs";
 import {
-  EXISTING_SCHEMA_OBJECT_TYPES,
   isShapeEntryEnabled,
-  OTHER_LIBRARIES,
   SHAPE_CATALOG,
   SHAPE_CATALOG_ENTRIES,
   SHAPE_SEARCH_ENTRIES,
 } from "../shape-catalog";
 
+// Wave C: restructured to exactly 3 sections (Basic/Flowchart/Advanced),
+// mirroring FigJam's actual picker model — see docs/10-system-design/
+// 20-figjam-parity/doc.json. Recents/Connections/"Other libraries" (the
+// pre-schema placeholder scaffolding) are gone; connectors remain a
+// dock-only tool, never a Shapes-panel entry.
 describe("shape-catalog data shape", () => {
-  it("defines the 5 sectioned categories from the catalog (Recents/Connections/Basic/Flowchart/Advanced)", () => {
+  it("defines exactly the 3 sectioned categories, in order: Basic, Flowchart, Advanced", () => {
     const ids = SHAPE_CATALOG.map((c) => c.id);
-    expect(ids).toEqual(["recents", "connections", "basic", "flowchart", "advanced"]);
+    expect(ids).toEqual(["basic", "flowchart", "advanced"]);
+    expect(SHAPE_CATALOG.map((c) => c.label)).toEqual(["Basic", "Flowchart", "Advanced"]);
   });
 
   it("every category has at least one entry, and every entry has a unique id", () => {
@@ -27,67 +32,93 @@ describe("shape-catalog data shape", () => {
     expect(SHAPE_CATALOG_ENTRIES.length).toBe(total);
   });
 
-  it("every entry has a callable icon component and a non-empty label", () => {
+  it("every entry has a callable Icon component and a non-empty label", () => {
     for (const entry of SHAPE_CATALOG_ENTRIES) {
-      expect(typeof entry.icon).toBe("function");
+      expect(typeof entry.Icon).toBe("function");
       expect(entry.label.length).toBeGreaterThan(0);
     }
   });
 
-  it("defines the compact search popover's technical/object icon set, distinct in kind from Basic's geometric shapes", () => {
-    expect(SHAPE_SEARCH_ENTRIES.length).toBeGreaterThanOrEqual(5);
-    const basicLabels = new Set(
-      SHAPE_CATALOG.find((c) => c.id === "basic")!.entries.map((e) => e.label),
-    );
-    for (const entry of SHAPE_SEARCH_ENTRIES) {
-      expect(basicLabels.has(entry.label)).toBe(false);
+  it("Basic has exactly the 14 entries from the brief, in order, with correct directions", () => {
+    const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
+    expect(basic.entries.map((e) => e.id)).toEqual([
+      "basic-square",
+      "basic-ellipse",
+      "basic-decision-diamond",
+      "basic-triangle-up",
+      "basic-triangle-down",
+      "basic-rounded-rect",
+      "basic-pentagon",
+      "basic-octagon",
+      "basic-plus",
+      "basic-arrow-left",
+      "basic-arrow-right",
+      "basic-chevron",
+      "basic-star",
+      "basic-chat",
+    ]);
+    expect(basic.entries.find((e) => e.id === "basic-triangle-up")?.direction).toBe("up");
+    expect(basic.entries.find((e) => e.id === "basic-triangle-down")?.direction).toBe("down");
+    expect(basic.entries.find((e) => e.id === "basic-arrow-left")?.direction).toBe("left");
+    expect(basic.entries.find((e) => e.id === "basic-arrow-right")?.direction).toBe("right");
+    expect(basic.entries.find((e) => e.id === "basic-chevron")?.direction).toBe("right");
+  });
+
+  it("Flowchart has exactly the 16 entries from the brief, in order, with correct directions", () => {
+    const flowchart = SHAPE_CATALOG.find((c) => c.id === "flowchart")!;
+    expect(flowchart.entries.map((e) => e.id)).toEqual([
+      "flow-parallelogram-right",
+      "flow-parallelogram-left",
+      "flow-database",
+      "flow-cylinder-horizontal",
+      "flow-page-corner",
+      "flow-folder",
+      "flow-document",
+      "flow-document-stack",
+      "flow-predefined-process",
+      "flow-off-page-connector",
+      "flow-trapezoid",
+      "flow-manual-input",
+      "flow-hexagon",
+      "flow-internal-storage",
+      "flow-or-junction",
+      "flow-summing-junction",
+    ]);
+    expect(flowchart.entries.find((e) => e.id === "flow-parallelogram-right")?.direction).toBe("right");
+    expect(flowchart.entries.find((e) => e.id === "flow-parallelogram-left")?.direction).toBe("left");
+  });
+
+  it("Advanced has exactly the 26 icon glyphs, each inserting type: 'icon' with the matching glyph id and its display name as the label", () => {
+    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
+    expect(advanced.entries.length).toBe(26);
+    expect(advanced.entries.length).toBe(ICON_GLYPH_IDS.length);
+    for (const glyphId of ICON_GLYPH_IDS) {
+      const entry = advanced.entries.find((e) => e.icon === glyphId);
+      expect(entry).toBeTruthy();
+      expect(entry!.objectType).toBe("icon");
+      expect(entry!.label.length).toBeGreaterThan(0);
     }
   });
 
-  it("lists the 3 'Other libraries' footer rows with their measured shape counts", () => {
-    expect(OTHER_LIBRARIES).toEqual([
-      { id: "aws", label: "AWS", shapeCount: 805 },
-      { id: "azure", label: "Azure", shapeCount: 637 },
-      { id: "cisco", label: "Cisco", shapeCount: 292 },
-    ]);
+  it("no entry maps to a connector-family type — connectors are dock-only, never a Shapes-panel entry", () => {
+    for (const entry of SHAPE_CATALOG_ENTRIES) {
+      expect(entry.objectType).not.toBe("connector");
+    }
+    expect(SHAPE_CATALOG.some((c) => c.id === "connections" || c.label.toLowerCase().includes("connector"))).toBe(false);
+  });
+
+  it("defines the compact search popover's entry set, all mapped to real schema types", () => {
+    expect(SHAPE_SEARCH_ENTRIES.length).toBeGreaterThanOrEqual(5);
+    for (const entry of SHAPE_SEARCH_ENTRIES) {
+      expect(isShapeEntryEnabled(entry)).toBe(true);
+    }
   });
 });
 
 describe("shape-catalog / schema-vocabulary coordination", () => {
-  // W3: the parallel schema worker landed the W2-model types (section/pill/
-  // arrow-shape/predefined-process/code-block/chip-icon) in schema.ts, so
-  // EXISTING_SCHEMA_OBJECT_TYPES now includes them and every catalog entry
-  // targeting them is enabled — this test was written against the
-  // "not yet landed" state and is updated here to assert the current,
-  // fully-unlocked vocabulary instead.
-  it("includes the W2-model types in the existing schema vocabulary, and enables their catalog entries", () => {
-    const w2Types = ["section", "pill", "arrow-shape", "predefined-process", "code-block", "chip-icon"];
-    for (const t of w2Types) {
-      expect(EXISTING_SCHEMA_OBJECT_TYPES.has(t as never)).toBe(true);
-    }
-
-    const w2Entries = SHAPE_CATALOG_ENTRIES.filter((e) => w2Types.includes(e.objectType));
-    expect(w2Entries.length).toBeGreaterThan(0);
-    for (const entry of w2Entries) {
+  it("every catalog entry maps to a live InteractiveCanvasObjectType — nothing is 'coming soon' anymore", () => {
+    for (const entry of SHAPE_CATALOG_ENTRIES) {
       expect(isShapeEntryEnabled(entry)).toBe(true);
-    }
-  });
-
-  it("marks entries mapping to existing schema types as enabled", () => {
-    const enabledEntries = SHAPE_CATALOG_ENTRIES.filter((e) =>
-      EXISTING_SCHEMA_OBJECT_TYPES.has(e.objectType),
-    );
-    expect(enabledEntries.length).toBeGreaterThan(0);
-    for (const entry of enabledEntries) {
-      expect(isShapeEntryEnabled(entry)).toBe(true);
-    }
-  });
-
-  it("includes at least one catalog entry for each of the 6 new W2-model types (coordinated naming)", () => {
-    const newTypes = ["section", "pill", "arrow-shape", "predefined-process", "code-block", "chip-icon"];
-    for (const t of newTypes) {
-      const found = SHAPE_CATALOG_ENTRIES.some((e) => e.objectType === t);
-      expect(found).toBe(true);
     }
   });
 });

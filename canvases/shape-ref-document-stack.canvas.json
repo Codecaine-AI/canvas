@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "shape-ref-document",
-  "title": "Document — anchors & text slot",
+  "id": "shape-ref-document-stack",
+  "title": "Document Stack — anchors & text slot",
   "mode": "diagram",
   "viewport": {
     "x": 0,
@@ -14,9 +14,9 @@
   },
   "objects": [
     {
-      "id": "subject-document",
-      "type": "document",
-      "label": "Document",
+      "id": "subject-document-stack",
+      "type": "document-stack",
+      "label": "Document Stack",
       "geometry": {
         "x": 160,
         "y": 160,
@@ -25,7 +25,7 @@
       }
     },
     {
-      "id": "marker-document-top",
+      "id": "marker-document-stack-top",
       "type": "text",
       "label": "top",
       "geometry": {
@@ -36,7 +36,7 @@
       }
     },
     {
-      "id": "marker-document-right",
+      "id": "marker-document-stack-right",
       "type": "text",
       "label": "right",
       "geometry": {
@@ -47,7 +47,7 @@
       }
     },
     {
-      "id": "marker-document-bottom",
+      "id": "marker-document-stack-bottom",
       "type": "text",
       "label": "bottom",
       "geometry": {
@@ -58,7 +58,7 @@
       }
     },
     {
-      "id": "marker-document-left",
+      "id": "marker-document-stack-left",
       "type": "text",
       "label": "left",
       "geometry": {
@@ -69,9 +69,9 @@
       }
     },
     {
-      "id": "note-document",
+      "id": "note-document-stack",
       "type": "text",
-      "label": "label renders centered on the document silhouette; W5 replaced the dog-ear notch with a wavy bottom edge (the dog-ear moved verbatim to the new page-corner type)",
+      "label": "label renders centered on the front-most document silhouette",
       "geometry": {
         "x": 120,
         "y": 423,
@@ -82,13 +82,13 @@
   ],
   "connections": [
     {
-      "id": "conn-document-top",
+      "id": "conn-document-stack-top",
       "from": {
-        "objectId": "marker-document-top",
+        "objectId": "marker-document-stack-top",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-document-stack",
         "anchor": "top",
         "position": [
           0.5,
@@ -99,13 +99,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-right",
+      "id": "conn-document-stack-right",
       "from": {
-        "objectId": "marker-document-right",
+        "objectId": "marker-document-stack-right",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-document-stack",
         "anchor": "right",
         "position": [
           1,
@@ -116,13 +116,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-bottom",
+      "id": "conn-document-stack-bottom",
       "from": {
-        "objectId": "marker-document-bottom",
+        "objectId": "marker-document-stack-bottom",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-document-stack",
         "anchor": "bottom",
         "position": [
           0.5,
@@ -133,13 +133,13 @@
       "arrow": "forward"
     },
     {
-      "id": "conn-document-left",
+      "id": "conn-document-stack-left",
       "from": {
-        "objectId": "marker-document-left",
+        "objectId": "marker-document-stack-left",
         "anchor": "center"
       },
       "to": {
-        "objectId": "subject-document",
+        "objectId": "subject-document-stack",
         "anchor": "left",
         "position": [
           0,

@@ -1,27 +1,47 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
-import { isShapeEntryEnabled, OTHER_LIBRARIES, SHAPE_CATALOG, type ShapeCatalogEntry } from "./shape-catalog";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "./shape-catalog";
 import { ChromeTooltip } from "./ChromeTooltip";
+import type { InteractiveCanvasObjectType } from "../model/schema";
 
 /**
- * ShapesPanel — Panel B from figjam-chrome-catalog.md section 4: the
- * full-height, left-docked white "Shapes" sidebar opened by the dock's
- * shape-tool button (bottom-dock-spec: "Clicking button 5 -> full-height
- * LEFT-docked white panel").
+ * ShapesPanel — the full-height, left-docked white "Shapes" sidebar opened by
+ * the dock's shape-tool button (bottom-dock-spec: "Clicking button 5-> full-
+ * height LEFT-docked white panel").
+ *
+ * Wave C rewrite: restructured to exactly 3 sections — Basic / Flowchart /
+ * Advanced — mirroring FigJam's actual picker model (parity doc:
+ * docs/10-system-design/20-figjam-parity/doc.json). Dropped the earlier
+ * Recents/Connections sections and the "Other libraries" (AWS/Azure/Cisco)
+ * footer: those were placeholder scaffolding from before the real W5 shape
+ * vocabulary landed, and FigJam's own picker has no such concepts (connectors
+ * are the dock's separate "connector" tool, not a Shapes-panel entry — see
+ * FigJamDock.tsx's ToolId union).
  *
  * Ground truth (fj-053-072): x~8-197 (width ~197-198px), full viewport
  * height, white bg, "Shapes" header + close (x), "Search shapes" input with
- * purple focus ring, 5 collapsible sections (Recents/Connections/Basic/
- * Flowchart/Advanced), footer "Other libraries" rows (AWS/Azure/Cisco,
- * static/disabled per the task brief — we render them but they do nothing).
- * The bottom dock remains visible/unaffected while this panel is open (no
- * layout conflict modeled here — this component doesn't touch dock state;
- * W3's editor is responsible for coexistence).
+ * purple focus ring, collapsible sections. The bottom dock remains visible/
+ * unaffected while this panel is open (no layout conflict modeled here —
+ * this component doesn't touch dock state; the editor is responsible for
+ * coexistence).
+ *
+ * Callback design: `onPick` keeps its original, narrower signature
+ * (objectType only) for back-compat with existing consumers (e.g.
+ * InteractiveCanvasEditor.tsx's `handleShapePick`, which arms
+ * `canvas.setTool`). `onPickEntry` is a new, additive, richer callback that
+ * carries the FULL catalog entry — including `direction` (triangle up/down,
+ * parallelogram/chevron/arrow-shape left/right) and `icon` (the Advanced
+ * tier's glyph selector) — for any consumer that wants to insert a
+ * fully-formed object directly (e.g. via the `canvas.addObjects` action,
+ * which accepts complete InteractiveCanvasObject values including these
+ * fields) rather than going through the tool-arm-and-click pipeline. Both
+ * fire on every click; a consumer may use either or both.
  */
 
 export type ShapesPanelProps = {
-  onPick?: (shapeType: ShapeCatalogEntry["objectType"]) => void;
+  onPick?: (shapeType: InteractiveCanvasObjectType) => void;
+  onPickEntry?: (entry: ShapeCatalogEntry) => void;
   onClose?: () => void;
   className?: string;
   style?: React.CSSProperties;
@@ -77,13 +97,14 @@ function SectionHeader({
 function ShapeGridButton({
   entry,
   onPick,
+  onPickEntry,
 }: {
   entry: ShapeCatalogEntry;
-  onPick?: (shapeType: ShapeCatalogEntry["objectType"]) => void;
+  onPick?: (shapeType: InteractiveCanvasObjectType) => void;
+  onPickEntry?: (entry: ShapeCatalogEntry) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const enabled = isShapeEntryEnabled(entry);
-  const Icon = entry.icon;
+  const Icon = entry.Icon;
   const clearHover = () => setHovered(false);
 
   return (
@@ -92,15 +113,17 @@ function ShapeGridButton({
         type="button"
         data-shape-entry={entry.id}
         data-object-type={entry.objectType}
-        aria-label={enabled ? entry.label : `${entry.label} (coming soon)`}
-        disabled={!enabled}
+        data-direction={entry.direction}
+        data-icon={entry.icon}
+        aria-label={entry.label}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={clearHover}
         onPointerCancel={clearHover}
         onBlur={clearHover}
         onClick={() => {
           clearHover();
-          if (enabled) onPick?.(entry.objectType);
+          onPick?.(entry.objectType);
+          onPickEntry?.(entry);
         }}
         style={{
           width: 36,
@@ -110,19 +133,19 @@ function ShapeGridButton({
           justifyContent: "center",
           borderRadius: 6,
           border: "none",
-          background: hovered && enabled ? "rgba(0,0,0,0.06)" : "transparent",
-          color: enabled ? "#333333" : "rgba(51,51,51,0.35)",
-          cursor: enabled ? "pointer" : "default",
+          background: hovered ? "rgba(0,0,0,0.06)" : "transparent",
+          color: "#333333",
+          cursor: "pointer",
         }}
       >
         <Icon className="h-5 w-5" />
       </button>
-      <ChromeTooltip label={enabled ? entry.label : "Coming soon"} visible={hovered} placement="top" />
+      <ChromeTooltip label={entry.label} visible={hovered} placement="top" />
     </div>
   );
 }
 
-function ShapesPanelComponent({ onPick, onClose, className, style }: ShapesPanelProps) {
+function ShapesPanelComponent({ onPick, onPickEntry, onClose, className, style }: ShapesPanelProps) {
   const [query, setQuery] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const [focused, setFocused] = useState(false);
@@ -223,39 +246,13 @@ function ShapesPanelComponent({ onPick, onClose, className, style }: ShapesPanel
                 }}
               >
                 {category.entries.map((entry) => (
-                  <ShapeGridButton key={entry.id} entry={entry} onPick={onPick} />
+                  <ShapeGridButton key={entry.id} entry={entry} onPick={onPick} onPickEntry={onPickEntry} />
                 ))}
               </div>
             ) : null}
           </div>
         );
       })}
-
-      <div style={{ borderTop: "1px solid #EEEEEE", paddingTop: 8, marginTop: 4 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#333333", padding: "2px 4px 6px" }}>
-          Other libraries
-        </div>
-        {OTHER_LIBRARIES.map((lib) => (
-          <div
-            key={lib.id}
-            data-other-library={lib.id}
-            aria-disabled="true"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "6px 4px",
-              color: "#999999",
-              fontSize: 12,
-              cursor: "default",
-              opacity: 0.6,
-            }}
-          >
-            <span>{lib.label}</span>
-            <span>{lib.shapeCount} shapes</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

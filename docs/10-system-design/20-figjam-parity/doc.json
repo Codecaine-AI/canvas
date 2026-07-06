@@ -73,7 +73,7 @@
           }
         },
         {
-          "insert": ", each a first-class shape a user can place directly. This is the tier our 17 "
+          "insert": ", each a first-class shape a user can place directly. This is the tier our 37 "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -87,7 +87,7 @@
           }
         },
         {
-          "insert": " values and 14 "
+          "insert": " values and 34 "
         },
         {
           "insert": "style.shape",
@@ -456,7 +456,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name               shapeType          verdict         our mapping                     notes\n------------------------  -----------------  --------------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE            rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            MISSING         -                               no ellipse/circle primitive anywhere in schema or renderer\nDiamond                   DIAMOND            HAVE            decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        MISSING         -                               no triangle primitive\nTriangle (down)           TRIANGLE_DOWN      MISSING         -                               no triangle primitive\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE            container/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           MISSING         -                               no pentagon primitive\nOctagon                   OCTAGON            MISSING         -                               no octagon primitive\nPlus/cross                PLUS               MISSING         -                               no plus/cross primitive\nBlock arrow (left)        ARROW_LEFT         HAVE-BUT-WRONG  arrow-shape (direction:left)    ours is a thin 7-point chevron sliver (headWidthRatio 0.38, bodyHeightRatio 0.53), not FigJam's blockier full-height arrow body\nBlock arrow (right)       ARROW_RIGHT        HAVE-BUT-WRONG  arrow-shape (direction:right)   same chevron-vs-block-arrow silhouette gap as ARROW_LEFT\nFat chevron arrow         CHEVRON            MISSING         -                               distinct from ARROW_LEFT/RIGHT in Figma's own enum; we only have the arrow-shape chevron, not a separate fat-chevron primitive\nStar                      STAR               MISSING         -                               no star primitive\nSpeech bubble             SPEECH_BUBBLE      HAVE            chat                            true SVG path with bottom-left triangular tail; close silhouette match, tail position/angle is a fixed style choice not user-configurable"
+          "insert": "FigJam name               shapeType          verdict  our mapping                     notes\n------------------------  -----------------  -------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE     rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            HAVE     ellipse                         true ellipse inscribed in the bounding box, true-outline anchors (W5)\nDiamond                   DIAMOND            HAVE     decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        HAVE     triangle (direction:up)         isosceles triangle polygon, true-outline anchors (W5)\nTriangle (down)           TRIANGLE_DOWN      HAVE     triangle (direction:down)       same primitive as TRIANGLE_UP, flipped via the direction field (W5)\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE     container/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           HAVE     pentagon                        5-point regular polygon, true-outline anchors (W5)\nOctagon                   OCTAGON            HAVE     octagon                         8-point regular polygon, true-outline anchors (W5)\nPlus/cross                PLUS               HAVE     plus                            12-point cross polygon, true-outline anchors; renders no visible label text (a11y-only) (W5)\nBlock arrow (left)        ARROW_LEFT         HAVE     arrow-shape (direction:left)    bodyHeightRatio raised 0.53->0.60 in W5 so the body reads blockier; approximate pending pixel sample\nBlock arrow (right)       ARROW_RIGHT        HAVE     arrow-shape (direction:right)   same bodyHeightRatio 0.60 update as ARROW_LEFT; approximate pending pixel sample\nFat chevron arrow         CHEVRON            HAVE     chevron                         landed as its own object type distinct from arrow-shape, not a weight variant (W5)\nStar                      STAR               HAVE     star                            5-point star polygon, true-outline anchors; inner-radius ratio flagged approximate pending pixel-reference check (W5)\nSpeech bubble             SPEECH_BUBBLE      HAVE     chat                            true SVG path with bottom-left triangular tail; close silhouette match, tail position/angle is a fixed style choice not user-configurable"
         }
       ]
     },
@@ -599,7 +599,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name                         shapeType            verdict         our mapping         notes\n----------------------------------  -------------------  --------------  ------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nParallelogram (skew right)          PARALLELOGRAM_RIGHT  MISSING         -                   no parallelogram primitive\nParallelogram (skew left)           PARALLELOGRAM_LEFT   MISSING         -                   no parallelogram primitive\nCylinder vertical (database/drum)   ENG_DATABASE         HAVE            database            true geometric cylinder: closed barrel path + ellipse lid, matches FigJam's silhouette closely\nCylinder horizontal                 ENG_QUEUE            MISSING         -                   our database shape is vertical-only; no rotated/horizontal variant, and schema has no rotation field to derive one from\nPage with folded corner             ENG_FILE             HAVE-BUT-WRONG  document            our \"document\" IS this shape (dog-ear clip-path notch top-right), but it's mapped to the wrong FigJam concept — see DOCUMENT_SINGLE below\nFolder (tabbed)                     ENG_FOLDER           MISSING         -                   no folder primitive\nDocument (wavy bottom edge)         DOCUMENT_SINGLE      HAVE-BUT-WRONG  document            our \"document\" type renders a straight-edged dog-ear/folded-corner notch (clip-path polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)), NOT a wavy flowchart-document bottom edge; visually it is ENG_FILE's silhouette, not DOCUMENT_SINGLE's\nMultiple documents (stacked)        DOCUMENT_MULTIPLE    MISSING         -                   no stacked/multi-document primitive; would require a genuine new shape (offset duplicate outline behind the primary)\nPredefined process                  PREDEFINED_PROCESS   HAVE            predefined-process  rounded-rect + two inset vertical bars near left/right edges, matches the FigJam symbol\nOff-page connector (pentagon down)  SHIELD               MISSING         -                   no shield or off-page-connector primitive; shapeType name and picker visual don't obviously correspond (see doc note below)\nTrapezoid (manual operation)        TRAPEZOID            MISSING         -                   no trapezoid primitive\nManual input (slanted top edge)     MANUAL_INPUT         MISSING         -                   no manual-input primitive\nHexagon (preparation)               HEXAGON              MISSING         -                   no hexagon primitive\nInternal storage                    INTERNAL_STORAGE     MISSING         -                   no internal-storage primitive (rect + top row + left column rule lines)\nOr-junction (circle with +)         OR                   MISSING         -                   no or-junction primitive; unrelated to our unrelated \"plus\" gap above (different context: circle+cross vs standalone cross)\nSumming junction (circle with X)    SUMMING_JUNCTION     MISSING         -                   no summing-junction primitive"
+          "insert": "FigJam name                         shapeType            verdict  our mapping                      notes\n----------------------------------  -------------------  -------  -------------------------------  ----------------------------------------------------------------------------------------------------------------------\nParallelogram (skew right)          PARALLELOGRAM_RIGHT  HAVE     parallelogram (direction:right)  skewPx a fixed fraction of width; flagged approximate pending pixel-reference check (W5)\nParallelogram (skew left)           PARALLELOGRAM_LEFT   HAVE     parallelogram (direction:left)   same skew-ratio approximation as PARALLELOGRAM_RIGHT (W5)\nCylinder vertical (database/drum)   ENG_DATABASE         HAVE     database                         true geometric cylinder: closed barrel path + ellipse lid, matches FigJam's silhouette closely\nCylinder horizontal                 ENG_QUEUE            HAVE     cylinder-horizontal              dedicated horizontal-orientation cylinder primitive, bbox-fallback outline (W5)\nPage with folded corner             ENG_FILE             HAVE     page-corner                      the old dog-ear/folded-corner notch moved verbatim from document to this new dedicated type (W5)\nFolder (tabbed)                     ENG_FOLDER           HAVE     folder                           rectangle with a tab notch on the top edge, bbox-fallback outline (W5)\nDocument (wavy bottom edge)         DOCUMENT_SINGLE      HAVE     document                         document now renders a genuine wavy/sinusoidal bottom edge via documentWavyPath; the dog-ear moved to page-corner (W5)\nMultiple documents (stacked)        DOCUMENT_MULTIPLE    HAVE     document-stack                   offset duplicate wavy-document outlines behind the primary, bbox-fallback outline (W5)\nPredefined process                  PREDEFINED_PROCESS   HAVE     predefined-process               rounded-rect + two inset vertical bars near left/right edges, matches the FigJam symbol\nOff-page connector (pentagon down)  SHIELD               HAVE     off-page-connector               downward-pointing pentagon, true-outline anchors (W5)\nTrapezoid (manual operation)        TRAPEZOID            HAVE     trapezoid                        4-point trapezoid polygon, true-outline anchors (W5)\nManual input (slanted top edge)     MANUAL_INPUT         HAVE     manual-input                     rectangle with a slanted top edge, true-outline anchors (W5)\nHexagon (preparation)               HEXAGON              HAVE     hexagon                          6-point regular hexagon, flat-top orientation, true-outline anchors (W5)\nInternal storage                    INTERNAL_STORAGE     HAVE     internal-storage                 rect + top row + left column rule lines; outline is a plain rect (interior rules don't perturb it) (W5)\nOr-junction (circle with +)         OR                   HAVE     or-junction                      ellipse-silhouette with an inscribed '+'; renders no visible label text (a11y-only) (W5)\nSumming junction (circle with X)    SUMMING_JUNCTION     HAVE     summing-junction                 ellipse-silhouette with an inscribed 'x'; renders no visible label text (a11y-only) (W5)"
         }
       ]
     },
@@ -820,7 +820,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name                          verdict         our mapping  notes\n-----------------------------------  --------------  -----------  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  MISSING         -            no matching icon\nArchive box                          MISSING         -            no matching icon\nKey                                  MISSING         -            no matching icon\nChat bubble (outline)                HAVE-BUT-WRONG  chat         our chat is a full native shapeType-tier shape (SPEECH_BUBBLE parity target), not a small component icon; using it to stand in for this Advanced tile means it's oversized/over-featured relative to sibling icons, and it's identical to the Basic-tier speech bubble, not a distinct chip glyph\nCloud                                MISSING         -            no matching icon\nCPU/chip                             HAVE            chip-icon    dedicated rounded-square + pin-lines SVG silhouette, direct match\nDatabase (stacked discs)             HAVE-BUT-WRONG  database     our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch as chat: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape\nDisplay/monitor                      MISSING         -            no matching icon\nEnvelope/mail                        MISSING         -            no matching icon\nFile/document                        HAVE-BUT-WRONG  document     same tier mismatch as chat/database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip\nCode (angle brackets)                HAVE-BUT-WRONG  code-block   our code-block is a full syntax-highlighted editor surface (Dracula theme, tokenizer, line numbers), not a small angle-bracket icon chip — same tier mismatch pattern\nLightning bolt                       MISSING         -            no matching icon\nLocation pin                         MISSING         -            no matching icon\nMobile phone                         MISSING         -            no matching icon\nPackage (3D box, tape)               MISSING         -            no matching icon\nDollar coin                          MISSING         -            no matching icon\nShield                               MISSING         -            no matching icon (distinct from the Flowchart SHIELD shapeType entry — Advanced's shield is a component icon, Flowchart's SHIELD is a full shapeType; conceptually adjacent, not the same picker entry)\nPaper plane/send                     MISSING         -            no matching icon\nServer stack (2 rows)                MISSING         -            no matching icon\nCube (3D)                            MISSING         -            no matching icon\nGear                                 MISSING         -            no matching icon\nHard drive/disk enclosure            MISSING         -            no matching icon\nTerminal window                      MISSING         -            no matching icon\nPerson/user                          HAVE-BUT-WRONG  person       our person is a full shapeType-tier silhouette (rounded-shoulders body + head circle), same over-scaled tier mismatch as chat/database/document\nWallet/card holder                   MISSING         -            no matching icon\nGlobe                                MISSING         -            no matching icon"
+          "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      superseded the old chat-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       chip-icon (W2) remains the dedicated shapeType-tier CPU silhouette; icon/cpu is the Advanced-tier chip glyph\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      superseded the old code-block-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    superseded the old person-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
         }
       ]
     },
@@ -935,7 +935,7 @@
           }
         },
         {
-          "insert": ", not shapeType primitives — placing one drops a small pre-styled icon-in-a-chip onto the board, not a resizable geometric shape. Genuine parity with this tier therefore doesn't mean building 26 bespoke [CODE-REF:InteractiveCanvasObjectType|packages/canvas/src/model/schema.ts|InteractiveCanvasObjectType] values; it means one icon-shape ",
+          "insert": ", not shapeType primitives — placing one drops a small pre-styled icon-in-a-chip onto the board, not a resizable geometric shape. Genuine parity with this tier therefore doesn't mean building 26 bespoke InteractiveCanvasObjectType values; it means one icon-shape ",
           "attributes": {
             "italic": true
           }
@@ -1007,6 +1007,37 @@
         },
         {
           "insert": " (schema.ts) is the closest structural precedent: it's already a fixed-glyph icon-in-a-chip, just hardcoded to a single CPU glyph with no selector — extending it with an icon-name field is the natural path to real Advanced-tier parity."
+        },
+        {
+          "insert": " W5 built exactly this: a single "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " object type parameterized by a required "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": " field drawn from a 26-value CanvasIconGlyph enum — covering the tier in one type rather than 26 bespoke ones, and superseding the five tier-mismatched reuses (chat, database, document, code-block, person) noted above with correctly-scoped icon glyphs instead."
         }
       ]
     },
@@ -1526,6 +1557,12 @@
         },
         {
           "insert": " a fixed fraction of width (e.g. 15-20%, matching FigJam's visual skew angle — needs a pixel-reference check against a live sample, flag as approximate)."
+        },
+        {
+          "insert": " Landed in W5 as a fixed ratio in figjam-tokens.ts, with the approximate-pending-pixel-check flag preserved in its doc comment.",
+          "attributes": {
+            "italic": true
+          }
         }
       ]
     },
@@ -1699,6 +1736,12 @@
       "text": [
         {
           "insert": "A 5-point star polygon: 10 alternating outer/inner vertices around the bounding box center, outer radius touching the box edge, inner radius a fixed fraction (~0.4x outer, matching FigJam's visual proportions — flag as approximate pending a pixel-reference check)."
+        },
+        {
+          "insert": " Landed in W5 as a fixed ratio in figjam-tokens.ts, with the approximate-pending-pixel-check flag preserved in its doc comment.",
+          "attributes": {
+            "italic": true
+          }
         }
       ]
     },
@@ -1815,7 +1858,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Our existing "
+          "insert": "W5 resolved this two ways. "
         },
         {
           "insert": "arrow-shape",
@@ -1829,20 +1872,16 @@
           }
         },
         {
-          "insert": " ("
+          "insert": "'s "
         },
         {
-          "insert": "CanvasStage.tsx",
+          "insert": "bodyHeightRatio",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
+            "code": true
           }
         },
         {
-          "insert": "'s 7-point chevron, geometry in "
+          "insert": " widened from 0.53 to 0.60 in "
         },
         {
           "insert": "ARROW_SHAPE_GEOMETRY",
@@ -1856,25 +1895,7 @@
           }
         },
         {
-          "insert": ") is a thin sliver chevron, not FigJam's blockier full-body block arrow. Closing the ARROW_LEFT/ARROW_RIGHT gap likely means widening "
-        },
-        {
-          "insert": "bodyHeightRatio",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "headWidthRatio",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " toward FigJam's proportions rather than adding a new type. FigJam's separate "
+          "insert": " so the rendered body reads blockier, closing most of the ARROW_LEFT/ARROW_RIGHT gap (flagged approximate pending a live pixel sample). Separately, FigJam's "
         },
         {
           "insert": "CHEVRON",
@@ -1883,43 +1904,35 @@
           }
         },
         {
-          "insert": " (\"fat chevron arrow\") entry is a distinct, even blockier silhouette from ARROW_LEFT/RIGHT in Figma's own enum — worth a second look at whether it's actually a wider "
+          "insert": " (\"fat chevron arrow\") landed as its own dedicated "
         },
         {
-          "insert": "bodyHeightRatio",
+          "insert": "chevron",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
-          "insert": " variant of the same "
+          "insert": " object type rather than a weight variant of arrow-shape — the two silhouettes turned out distinct enough (arrow-shape keeps its 7-point sliver chevron; chevron is its own notch-based polygon via "
         },
         {
-          "insert": "arrow-shape",
+          "insert": "chevronPoints",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "symbol": "chevronPoints"
+            }
           }
         },
         {
-          "insert": " polygon (a third "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "-adjacent field, e.g. "
-        },
-        {
-          "insert": "weight: \"sliver\" | \"block\" | \"fat\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") or genuinely a separate 3-point/different-vertex-count polygon; recommend a pixel-comparison against live FigJam exports before deciding, rather than guessing the vertex count here."
+          "insert": ", proportioned by CHEVRON_GEOMETRY.notchWidthRatio) to justify separate types instead of a shared field."
         }
       ]
     },
@@ -3534,6 +3547,7 @@
         "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
         "b-figjam-parity-missing-shape-specs-35",
         "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",
+        "b-figjam-parity-missing-specs-w5-status-36b",
         "b-figjam-parity-ellipse-37",
         "b-figjam-parity-ellipse-geometry-38",
         "b-figjam-parity-default-size-160x120-wide-oval-same-de-39",
@@ -3589,6 +3603,44 @@
         "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89",
         "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90"
       ]
+    },
+    "b-figjam-parity-missing-specs-w5-status-36b": {
+      "id": "b-figjam-parity-missing-specs-w5-status-36b",
+      "flavour": "paragraph",
+      "children": [],
+      "text": [
+        {
+          "insert": "Status: every spec below shipped in the W5 implementation wave — "
+        },
+        {
+          "insert": "ellipse",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/model/schema.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " through the icon-glyph family, all 20, are now real InteractiveCanvasObjectType values with working outlines, anchors, and text slots. These specs are no longer forward-looking design notes; they now double as the shape-API's worked examples, and the per-type reference lives in "
+        },
+        {
+          "insert": "Shape Reference",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/80-shape-reference"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "props": {}
     }
   }
 }
