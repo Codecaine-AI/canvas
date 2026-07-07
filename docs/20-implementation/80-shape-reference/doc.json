@@ -1062,10 +1062,10 @@
           }
         },
         {
-          "insert": " renders as a bullet. The type-only "
+          "insert": " renders as a bullet. Sticky notes do not render the generic "
         },
         {
-          "insert": "author",
+          "insert": "label",
           "attributes": {
             "code": true,
             "reference": {
@@ -1076,30 +1076,62 @@
           }
         },
         {
-          "insert": " field renders as a chip pinned bottom-left at 12px in 40% black ("
+          "insert": " field — all user-facing text is the "
         },
         {
-          "insert": "STICKY_GEOMETRY.author",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/def.tsx",
-              "symbol": "STICKY_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": ") — the embed sets "
-        },
-        {
-          "insert": "author: \"ford\"",
+          "insert": "body",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " so the chip is visible."
+          "insert": "; "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " persists only as the accessible name (the "
+        },
+        {
+          "insert": "aria-label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-chrome.tsx",
+              "symbol": "ObjectButtonChrome"
+            }
+          }
+        },
+        {
+          "insert": " on the object button), and inline editing targets the body ("
+        },
+        {
+          "insert": "labelEditing: { target: \"body\" }",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/sticky/def.tsx",
+              "symbol": "stickyDef"
+            }
+          }
+        },
+        {
+          "insert": "). The former author chip is gone — the type-only "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field no longer renders on the canvas."
         }
       ]
     },

@@ -104,6 +104,7 @@
         "b-model-type-chat-p2",
         "b-model-type-section",
         "b-model-type-section-p1",
+        "b-model-type-section-lock-decision",
         "b-model-type-section-p2",
         "b-model-type-section-p3",
         "b-model-type-section-p3a-title-zoom",
@@ -4945,7 +4946,123 @@
           }
         },
         {
-          "insert": " is reserved for a later wave — accepted by the schema but not enforced anywhere yet."
+          "insert": " is an optional two-mode lock — "
+        },
+        {
+          "insert": "\"all\" | \"background\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", declared on "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/objects.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": " and enforced by "
+        },
+        {
+          "insert": "isLockedForManipulation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "isLockedForManipulation"
+            }
+          }
+        },
+        {
+          "insert": " in the interaction layer: \"background\" means the section frame itself refuses drag/resize while its children stay movable; \"all\" additionally locks every parentId-descendant against drag/resize. See the decision below for the validation/migration story."
+        }
+      ],
+      "children": []
+    },
+    "b-model-type-section-lock-decision": {
+      "id": "b-model-type-section-lock-decision",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Section lock is a two-mode field with legacy-boolean migration"
+      },
+      "text": [
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/objects.ts"
+            }
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "\"all\" | \"background\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than a boolean. \"background\" locks only the section frame — the section itself refuses drag and resize while its children stay movable; \"all\" also locks every parentId-descendant, so nothing inside the section can be dragged or resized either. Both modes are enforced at gesture-entry time by "
+        },
+        {
+          "insert": "isLockedForManipulation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "isLockedForManipulation"
+            }
+          }
+        },
+        {
+          "insert": ". Validation is migration-aware: "
+        },
+        {
+          "insert": "parseSectionLockMode",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts",
+              "symbol": "parseSectionLockMode"
+            }
+          }
+        },
+        {
+          "insert": " passes \"all\"/\"background\" through, maps the legacy boolean "
+        },
+        {
+          "insert": "true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to \"background\", and turns anything else into "
+        },
+        {
+          "insert": "undefined",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — so documents saved before the two-mode field keep loading instead of failing validation."
         }
       ],
       "children": []

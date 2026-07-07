@@ -34,6 +34,7 @@
         "b-interaction-pointer-sm-marquee-10",
         "b-interaction-pointer-sm-place-11",
         "b-interaction-pointer-sm-connector-12",
+        "b-interaction-pointer-sm-lock-gate-12a",
         "b-interaction-pointer-sm-coalescer-13",
         "b-interaction-pointer-sm-cancel-14",
         "b-interaction-decision-pure-sm-15",
@@ -417,7 +418,30 @@
           }
         },
         {
-          "insert": "), folded into the same move gesture rather than a separate mechanism."
+          "insert": "), folded into the same move gesture rather than a separate mechanism. Promotion is also lock-gated: before entering move, every id in the dragged set is checked with "
+        },
+        {
+          "insert": "isLockedForManipulation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "isLockedForManipulation"
+            }
+          }
+        },
+        {
+          "insert": " — if any dragged object is itself a locked section, or sits under a parentId-ancestor section with "
+        },
+        {
+          "insert": "locked === \"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the gesture returns to idle instead of promoting."
         }
       ],
       "children": []
@@ -620,7 +644,30 @@
           }
         },
         {
-          "insert": " (48 world units). Only the edges the active handle actually moves are snap-corrected."
+          "insert": " (48 world units). Only the edges the active handle actually moves are snap-corrected. The handle-down entry path is gated by the same "
+        },
+        {
+          "insert": "isLockedForManipulation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "isLockedForManipulation"
+            }
+          }
+        },
+        {
+          "insert": " check — a locked section (either mode), or any object under a locked-"
+        },
+        {
+          "insert": "\"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " section, refuses resize and the pointer-down falls back to idle."
         }
       ],
       "children": []
@@ -858,6 +905,62 @@
         },
         {
           "insert": " (create-and-connect as one history entry) when dropped on empty canvas."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-pointer-sm-lock-gate-12a": {
+      "id": "b-interaction-pointer-sm-lock-gate-12a",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Both lock gates above share "
+        },
+        {
+          "insert": "isLockedForManipulation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "isLockedForManipulation"
+            }
+          }
+        },
+        {
+          "insert": " — an exported pure helper that answers \"may this object be dragged or resized?\": true when the object itself carries "
+        },
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/objects.ts"
+            }
+          }
+        },
+        {
+          "insert": " (either mode), or when the walk up its "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " chain reaches a section with "
+        },
+        {
+          "insert": "locked === \"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The walk is cycle-safe — a visited set plus an iteration cap bounded by the document's object count — so a corrupt parent cycle degrades to \"not locked\" rather than hanging the pointer pipeline."
         }
       ],
       "children": []

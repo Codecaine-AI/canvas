@@ -8,16 +8,16 @@
       "id": "b-chrome-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The FigJam-parity chrome layer: standalone, unwired UI components (dock, context toolbar, color palette, shape surfaces, zoom controls) built pixel-first against reference recordings, before being wired into the live editor.",
+        "covers": "The FigJam-parity chrome layer: standalone, unwired UI components (dock, selection toolbar, color palette, shape surfaces, zoom controls) built pixel-first against reference recordings, before being wired into the live editor.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
           "chrome layer",
           "standalone components",
           "FigJamDock",
-          "ContextToolbar",
+          "SelectionToolbar",
           "modal relinquishing",
-          "variant derivation",
+          "toolbar control specs",
           "shape catalog"
         ]
       },
@@ -43,6 +43,9 @@
         "b-chrome-heading-context-toolbar-19",
         "b-chrome-para-context-toolbar-20",
         "b-chrome-constraint-multi-variant-21",
+        "b-chrome-decision-toolbar-specs-30",
+        "b-chrome-decision-figjam-scale-31",
+        "b-chrome-decision-one-color-32",
         "b-chrome-heading-color-palette-22",
         "b-chrome-para-color-palette-23",
         "b-chrome-heading-shapes-24",
@@ -75,7 +78,7 @@
           "insert": "The chrome layer lives at "
         },
         {
-          "insert": "packages/canvas/src/chrome/",
+          "insert": "packages/canvas/src/editor/components/",
           "attributes": {
             "code": true,
             "reference": {
@@ -130,7 +133,7 @@
           }
         },
         {
-          "insert": ") and is documented in full in the chrome directory's own "
+          "insert": ") and is documented in full in the components directory's own "
         },
         {
           "insert": "README.md",
@@ -173,7 +176,7 @@
           "insert": "Every component under "
         },
         {
-          "insert": "src/chrome/",
+          "insert": "the chrome layer (now packages/canvas/src/editor/components/)",
           "attributes": {
             "code": true,
             "reference": {
@@ -316,7 +319,7 @@
       },
       "text": [
         {
-          "insert": "toolbar-icons.tsx",
+          "insert": "toolbar icons",
           "attributes": {
             "code": true,
             "reference": {
@@ -326,16 +329,30 @@
           }
         },
         {
-          "insert": " — roughly 20 icon components: glyphs for "
+          "insert": " — toolbar glyphs now live in the shared icon set and are resolved per action id by "
         },
         {
-          "insert": "ContextToolbar",
+          "insert": "SelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": "'s internal "
+        },
+        {
+          "insert": "ACTION_ICONS",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " controls."
+          "insert": " table, so control specs on object defs stay icon-free."
         }
       ],
       "children": []
@@ -348,7 +365,7 @@
       },
       "text": [
         {
-          "insert": "context-toolbar-position.ts",
+          "insert": "position.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -362,13 +379,13 @@
           "insert": " — "
         },
         {
-          "insert": "positionContextToolbar",
+          "insert": "positionSelectionToolbar",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ": a pure clamp-to-viewport positioning function."
+          "insert": ": a pure clamp-to-viewport positioning function fed the measured toolbar size (a ResizeObserver in the hook; height defaults to EDITOR_STYLE.selectionToolbarHeightPx = 48 before first measure)."
         }
       ],
       "children": []
@@ -381,7 +398,7 @@
       },
       "text": [
         {
-          "insert": "ContextToolbar.tsx",
+          "insert": "SelectionToolbar.tsx",
           "attributes": {
             "code": true,
             "reference": {
@@ -392,25 +409,94 @@
           }
         },
         {
-          "insert": " — "
+          "insert": " — the dark floating selection toolbar: a generic host rendering a "
         },
         {
-          "insert": "ContextToolbar",
+          "insert": "controls",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and "
+          "insert": " list of data-only "
         },
         {
-          "insert": "CONTEXT_TOOLBAR_REGISTRY",
+          "insert": "ToolbarControlSpec",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "ToolbarControlSpec"
+            }
+          }
+        },
+        {
+          "insert": " entries resolved from each ObjectDef's "
+        },
+        {
+          "insert": "toolbar",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " — the dark floating pill whose control set is variant-driven."
+          "insert": " field — "
+        },
+        {
+          "insert": "SHAPE_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/toolbar.ts",
+              "symbol": "SHAPE_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SECTION_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/toolbar.ts",
+              "symbol": "SECTION_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": ", the sticky def's inline list ("
+        },
+        {
+          "insert": "objects/sticky/def.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/sticky/def.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), and "
+        },
+        {
+          "insert": "CONNECTOR_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "CONNECTOR_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -447,7 +533,7 @@
       },
       "text": [
         {
-          "insert": "shape-catalog.tsx",
+          "insert": "catalog.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -457,16 +543,7 @@
           }
         },
         {
-          "insert": " — shape catalog data and icon glyphs, intentionally a "
-        },
-        {
-          "insert": ".tsx",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " file (not "
+          "insert": " — shape catalog data, now deliberately data-only (plain "
         },
         {
           "insert": ".ts",
@@ -475,7 +552,20 @@
           }
         },
         {
-          "insert": ") because its entries embed inline JSX icon factories."
+          "insert": "): the inline JSX preview factories it used to embed moved editor-side to "
+        },
+        {
+          "insert": "shape-previews.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/shape-previews.tsx"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -499,7 +589,21 @@
           }
         },
         {
-          "insert": " — the compact dark \"search for a shape\" popover (Panel A), anchored above a selected object's shape-swap control."
+          "insert": " — the compact dark \"search for a shape\" popover (Panel A), 232px wide, anchored above a selected object's shape-swap control; it lists the 30 geometric/flowchart "
+        },
+        {
+          "insert": "SHAPE_SEARCH_ENTRIES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/catalog.ts",
+              "symbol": "SHAPE_SEARCH_ENTRIES"
+            }
+          }
+        },
+        {
+          "insert": " (icon glyphs excluded, since swap changes an existing object's type)."
         }
       ],
       "children": []
@@ -703,7 +807,7 @@
       },
       "text": [
         {
-          "insert": "ContextToolbar"
+          "insert": "SelectionToolbar"
         }
       ],
       "children": []
@@ -714,7 +818,7 @@
       "props": {},
       "text": [
         {
-          "insert": "ContextToolbar",
+          "insert": "SelectionToolbar",
           "attributes": {
             "code": true,
             "reference": {
@@ -725,7 +829,57 @@
           }
         },
         {
-          "insert": "'s "
+          "insert": " is a dumb host: it takes a "
+        },
+        {
+          "insert": "controls",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " list of data-only "
+        },
+        {
+          "insert": "ToolbarControlSpec",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "ToolbarControlSpec"
+            }
+          }
+        },
+        {
+          "insert": " entries resolved from the selected ObjectDef's "
+        },
+        {
+          "insert": "toolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field, resolves each action id to a glyph via its internal "
+        },
+        {
+          "insert": "ACTION_ICONS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " table, and reads a generic per-action "
+        },
+        {
+          "insert": "controlState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " map (active/color/variant/label) that replaced every section-specific prop. The old consumer-derived "
         },
         {
           "insert": "variant",
@@ -734,55 +888,51 @@
           }
         },
         {
-          "insert": " prop must be derived by the consumer from the current selection: a single shape object maps to "
+          "insert": " prop and the variant-keyed "
         },
         {
-          "insert": "\"shape\"",
+          "insert": "CONTEXT_TOOLBAR_REGISTRY",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", a section type to "
+          "insert": " are gone; "
         },
         {
-          "insert": "\"section\"",
+          "insert": "data-variant",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", a connection to "
+          "insert": " survives only as a DOM/aria label ("
         },
         {
-          "insert": "\"connector\"",
+          "insert": "\"shape\" | \"section\" | \"sticky\" | \"connector\" | \"multi\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", active text-edit (shape label, sticky body, or connector label) to "
+          "insert": ") resolved by "
         },
         {
-          "insert": "\"text\"",
+          "insert": "useSelectionToolbar",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "useSelectionToolbar"
+            }
           }
         },
         {
-          "insert": ", and a sticky to "
+          "insert": ". The bar is positioned by "
         },
         {
-          "insert": "\"sticky\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". The toolbar is positioned via "
-        },
-        {
-          "insert": "positionContextToolbar(selectionRect, { width: measuredWidth, height: 29 }, viewportSize)",
+          "insert": "positionSelectionToolbar",
           "attributes": {
             "code": true,
             "reference": {
@@ -793,16 +943,21 @@
           }
         },
         {
-          "insert": " — because the pill's real width depends on which variant (and therefore how many controls) is rendered, a consumer should measure the rendered pill via a ref and "
+          "insert": ", fed the real rendered size from a ResizeObserver in the hook (falling back to "
         },
         {
-          "insert": "getBoundingClientRect()",
+          "insert": "EDITOR_STYLE.selectionToolbarHeightPx",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "symbol": "EDITOR_STYLE"
+            }
           }
         },
         {
-          "insert": " rather than hardcode a width. "
+          "insert": " = 48 before the first measure) — never a hardcoded width, since width varies with the control count. "
         },
         {
           "insert": "onAction(actionId, value?)",
@@ -811,70 +966,21 @@
           }
         },
         {
-          "insert": " is a single callback for the whole toolbar; flyout controls (marked "
+          "insert": " remains the single callback for every button; controls whose action id appears in the editor-side flyout registry ("
         },
         {
-          "insert": "hasFlyout: true",
+          "insert": "toolbarFlyoutsForKind",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/index.ts",
+              "symbol": "toolbarFlyoutsForKind"
+            }
           }
         },
         {
-          "insert": " in the registry) currently only toggle local "
-        },
-        {
-          "insert": "aria-expanded",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " state and do not render flyout contents themselves — a consumer renders the appropriate flyout (reusing "
-        },
-        {
-          "insert": "ColorPalettePopover",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for any "
-        },
-        {
-          "insert": "\"color\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "\"tint\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " action) anchored below the clicked control. The connector's \"T\" add-text-label control is exported separately as "
-        },
-        {
-          "insert": "CONNECTOR_ADD_LABEL_ICON",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", since the connector's default 6-control set ("
-        },
-        {
-          "insert": "color/stroke/dash/routing/arrowhead/label-align",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") already reaches the catalog's measured count of 6 without it."
+          "insert": ") open their flyout component above the bar rather than handling it inline."
         }
       ],
       "children": []
@@ -884,23 +990,143 @@
       "flavour": "constraint",
       "props": {
         "severity": "soft",
-        "title": "\"multi\" ContextToolbar variant is an unconfirmed extrapolation"
+        "title": "\"multi\" selection toolbar is computed, not reference-verified"
       },
       "text": [
         {
-          "insert": "The "
+          "insert": "The multi-select toolbar is no longer a hand-authored variant: it is computed as the capability intersection of the selected defs' control lists via "
         },
         {
-          "insert": "\"multi\"",
+          "insert": "intersectToolbarControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "intersectToolbarControls"
+            }
+          }
+        },
+        {
+          "insert": ", surfaced with "
+        },
+        {
+          "insert": "data-variant=\"multi\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " variant of "
+          "insert": ". The caveat stands, though: the source FigJam reference recording never captured a multi-select toolbar, so the intersection's ordering and control choice were never verified against the real product. Anyone relying on exact multi-select control sets should check live FigJam first."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-toolbar-specs-30": {
+      "id": "b-chrome-decision-toolbar-specs-30",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Toolbar control lists are data-only on ObjectDefs; the chrome host is generic"
+      },
+      "text": [
+        {
+          "insert": "Each object def carries an icon-free "
         },
         {
-          "insert": "ContextToolbar",
+          "insert": "ToolbarControlSpec",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "ToolbarControlSpec"
+            }
+          }
+        },
+        {
+          "insert": " list on "
+        },
+        {
+          "insert": "ObjectDef.toolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": shapes get shape-swap/color/text ("
+        },
+        {
+          "insert": "SHAPE_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/toolbar.ts",
+              "symbol": "SHAPE_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": "), stickies color/text ("
+        },
+        {
+          "insert": "objects/sticky/def.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/sticky/def.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), connectors color/dash/routing/arrowhead ("
+        },
+        {
+          "insert": "CONNECTOR_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "CONNECTOR_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": "), and sections color/border-style/rename/visibility/lock ("
+        },
+        {
+          "insert": "SECTION_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/toolbar.ts",
+              "symbol": "SECTION_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": "); a multi-select shows the capability intersection via "
+        },
+        {
+          "insert": "intersectToolbarControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "intersectToolbarControls"
+            }
+          }
+        },
+        {
+          "insert": ". The chrome host stays generic: "
+        },
+        {
+          "insert": "SelectionToolbar",
           "attributes": {
             "code": true,
             "reference": {
@@ -911,7 +1137,204 @@
           }
         },
         {
-          "insert": " (for a multi-select) is a flagged extrapolation: the source FigJam reference recording never actually captured a multi-select toolbar, so its control set was inferred rather than observed. Treat it as a placeholder. Anyone relying on its exact control set — which controls appear, in what order, with what behavior — should verify against the live FigJam product first, rather than assuming this component's current shape is authoritative."
+          "insert": " resolves icons through its "
+        },
+        {
+          "insert": "ACTION_ICONS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " table and per-action state through the "
+        },
+        {
+          "insert": "controlState",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " map, while flyout components live in an editor-side registry keyed by def kind + action id: "
+        },
+        {
+          "insert": "toolbarFlyoutsForKind",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/index.ts",
+              "symbol": "toolbarFlyoutsForKind"
+            }
+          }
+        },
+        {
+          "insert": ". Object defs never import React chrome; the chrome never hardcodes per-kind knowledge."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-figjam-scale-31": {
+      "id": "b-chrome-decision-figjam-scale-31",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "FigJam-scale chrome, deliberately larger than the measured baseline"
+      },
+      "text": [
+        {
+          "insert": "The live toolbar supersedes the measured 29px pill from the reference recordings: it is a 48px rounded-rect bar (radius 14) with 36px buttons and a 28px color swatch, all sourced from "
+        },
+        {
+          "insert": "EDITOR_STYLE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "symbol": "EDITOR_STYLE"
+            }
+          }
+        },
+        {
+          "insert": " tokens ("
+        },
+        {
+          "insert": "selectionToolbarHeightPx/RadiusPx/ButtonHeightPx/SwatchPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). All flyouts open ABOVE the toolbar on the shared "
+        },
+        {
+          "insert": "FlyoutPanel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/FlyoutPanel.tsx",
+              "symbol": "FlyoutPanel"
+            }
+          }
+        },
+        {
+          "insert": " primitive (radius 16, "
+        },
+        {
+          "insert": "EDITOR_STYLE.flyoutRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and "
+        },
+        {
+          "insert": "ColorPalettePopover",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
+              "symbol": "ColorPalettePopover"
+            }
+          }
+        },
+        {
+          "insert": " uses 34px swatches ("
+        },
+        {
+          "insert": "colorPopoverSwatchPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). The pixel-matched 29px measurements remain documented history, not the shipping geometry."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-one-color-32": {
+      "id": "b-chrome-decision-one-color-32",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "One color per object"
+      },
+      "text": [
+        {
+          "insert": "Shapes and stickies apply palette tokens directly; sections are tint-driven. The section color flyout is a single 10-tint row ("
+        },
+        {
+          "insert": "section-flyouts.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/section-flyouts.tsx"
+            }
+          }
+        },
+        {
+          "insert": "): one pick sets fill + border together through the tint family and clears any "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " overrides ("
+        },
+        {
+          "insert": "applyTintToSelection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "applyTintToSelection"
+            }
+          }
+        },
+        {
+          "insert": " patches "
+        },
+        {
+          "insert": "{ tint, style: { fill: undefined, stroke: undefined } }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). The border-style flyout is style-only (solid/dashed/none); the old separate fill and stroke palettes and their appliers were deleted. Section lock is likewise a flyout — Lock all / Lock background only / Unlock — writing the schema's "
+        },
+        {
+          "insert": "locked?: \"all\" | \"background\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/objects.ts",
+              "symbol": "locked"
+            }
+          }
+        },
+        {
+          "insert": " field."
         }
       ],
       "children": []
@@ -1106,7 +1529,7 @@
           "insert": " (Panel B) is a full-height, left-docked white sidebar invoked from the bottom dock's shape-tool button. Both are backed by the same "
         },
         {
-          "insert": "shape-catalog.tsx",
+          "insert": "catalog.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -1119,67 +1542,24 @@
           "insert": " data. "
         },
         {
-          "insert": "ShapeCatalogObjectType",
+          "insert": "Every catalog entry now maps to a live schema type — the old \"coming soon\" disabled state is gone, and "
+        },
+        {
+          "insert": "isShapeEntryEnabled",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/catalog.ts",
+              "symbol": "isShapeEntryEnabled"
+            }
           }
         },
         {
-          "insert": " covers both today's "
+          "insert": " always returns true (kept as a function so call sites did not need to change). "
         },
         {
-          "insert": "schema.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " vocabulary ("
-        },
-        {
-          "insert": "rectangle/process/decision/text/sticky/document/person/database/chat",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and six W2-model types coordinated with the parallel schema work ("
-        },
-        {
-          "insert": "section/pill/arrow-shape/predefined-process/code-block/chip-icon",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). "
-        },
-        {
-          "insert": "EXISTING_SCHEMA_OBJECT_TYPES",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the single toggle gating which catalog entries render as enabled versus \"coming soon\" — once "
-        },
-        {
-          "insert": "schema.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " lands those six types, updating that one set (or deriving it directly from "
-        },
-        {
-          "insert": "schema.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") lights up every currently-disabled entry in both popovers automatically. The \"Other libraries\" (AWS/Azure/Cisco) footer rows in "
+          "insert": "The \"Other libraries\" (AWS/Azure/Cisco) footer rows in "
         },
         {
           "insert": "ShapesPanel",
@@ -1278,7 +1658,7 @@
           "insert": "Each chrome component has a focused jsdom test under "
         },
         {
-          "insert": "src/chrome/__tests__/",
+          "insert": "src/editor/components/__tests__/",
           "attributes": {
             "code": true,
             "reference": {
@@ -1291,13 +1671,13 @@
           "insert": " that asserts measured geometry — stadium radius, background colors, button/control counts, group/divider DOM structure — as style and DOM assertions rather than visual screenshots. This follows from the same no-routes, standalone-component constraint that shaped the build: without a running editor or a rendered page to screenshot, tests instead pin down the concrete numbers and structure a pixel-matched component must produce (e.g. exact swatch counts, exact button groupings) so a regression shows up as a failing assertion rather than a diff someone has to eyeball. Run the suite with "
         },
         {
-          "insert": "bun test src/chrome",
+          "insert": "bun test src/editor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " from the canvas package root."
+          "insert": " from the canvas package root (selection-toolbar tests live beside the feature under src/editor/features/selection-toolbar/__tests__/)."
         }
       ],
       "children": []

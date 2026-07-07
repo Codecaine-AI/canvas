@@ -172,7 +172,7 @@
           },
           {
             "path": "packages/canvas/src/chrome/",
-            "note": "FigJam-parity UI chrome: dock, context toolbar, color palette, shapes panel"
+            "note": "FigJam-parity UI chrome: dock, selection toolbar, color palette, shapes panel"
           },
           {
             "path": "packages/canvas/src/ui/",
@@ -439,7 +439,7 @@
           }
         },
         {
-          "insert": " holds FigJam-parity UI chrome — dock, context toolbar, color palette, shapes panel — standalone components wired into the live editor."
+          "insert": " holds FigJam-parity UI chrome — dock, selection toolbar, color palette, shapes panel — standalone components wired into the live editor."
         }
       ],
       "children": []

@@ -483,7 +483,7 @@
           }
         },
         {
-          "insert": " (direction: left) renders a thin 7-point chevron sliver ("
+          "insert": " (direction: left) renders a 7-point block arrow ("
         },
         {
           "insert": "headWidthRatio",
@@ -501,7 +501,7 @@
           }
         },
         {
-          "insert": " 0.53 in figjam-tokens.ts's "
+          "insert": " 0.60 — raised from 0.53 in W5 — in connection-overlay.ts's "
         },
         {
           "insert": "ARROW_SHAPE_GEOMETRY",
@@ -515,7 +515,7 @@
           }
         },
         {
-          "insert": ") — FigJam's block arrow is a blockier, full-height arrow body. Same silhouette gap as the right-pointing variant."
+          "insert": ") — FigJam's block arrow is a blockier, full-height arrow body; the W5 bump closes most of the former thin-sliver silhouette gap (still flagged approximate pending a live pixel sample). Same geometry as the right-pointing variant."
         }
       ]
     },
@@ -528,7 +528,7 @@
       },
       "text": [
         {
-          "insert": "Block arrow (right) / ARROW_RIGHT: Same chevron-vs-block-arrow silhouette gap as the left-pointing variant — both are the same "
+          "insert": "Block arrow (right) / ARROW_RIGHT: Same bodyHeightRatio 0.60 geometry (and the same W5 blockier-body update) as the left-pointing variant — both are the same "
         },
         {
           "insert": "arrow-shape",
@@ -2854,6 +2854,178 @@
         }
       ]
     },
+    "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91": {
+      "id": "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Chrome scale intentionally exceeds the measured baseline"
+      },
+      "text": [
+        {
+          "insert": "The selection toolbar is a 48px-tall rounded rect (radius 14) with 36px controls — deliberately larger than the measured 29px FigJam pill it supersedes. Flyouts open above the toolbar, and the color popover's swatches are enlarged to 34px. The scaled-up values live in "
+        },
+        {
+          "insert": "EDITOR_STYLE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "symbol": "EDITOR_STYLE"
+            }
+          }
+        },
+        {
+          "insert": " (selectionToolbarHeightPx / selectionToolbarRadiusPx / selectionToolbarButtonHeightPx / colorPopoverSwatchPx) and render through "
+        },
+        {
+          "insert": "SelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": ". This is a product decision, not a parity gap — any earlier measured-baseline figure for these chrome surfaces is superseded by the deliberate scale-up."
+        }
+      ],
+      "children": []
+    },
+    "b-figjam-parity-toolbar-control-sets-deliberately-sim-92": {
+      "id": "b-figjam-parity-toolbar-control-sets-deliberately-sim-92",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Toolbar control sets deliberately simplified — no text-formatting tier"
+      },
+      "text": [
+        {
+          "insert": "One typeface and one text size everywhere: FigJam's bold/strikethrough/link/bullet-list/font/size/alignment controls are intentionally absent. Emphasis is planned to arrive via markdown-style body rendering instead (sticky \"- \" bullet lines exist today). Per-type control sets: shape — shape-swap / color / text ("
+        },
+        {
+          "insert": "SHAPE_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/toolbar.ts",
+              "symbol": "SHAPE_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": "); sticky — color / text ("
+        },
+        {
+          "insert": "stickyDef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/sticky/def.tsx",
+              "symbol": "stickyDef"
+            }
+          }
+        },
+        {
+          "insert": "); connector — color / dash / routing / arrowhead ("
+        },
+        {
+          "insert": "connectorDef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "connectorDef"
+            }
+          }
+        },
+        {
+          "insert": "); section — color / border-style / rename / visibility / lock ("
+        },
+        {
+          "insert": "SECTION_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/toolbar.ts",
+              "symbol": "SECTION_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-figjam-parity-one-color-per-object-93": {
+      "id": "b-figjam-parity-one-color-per-object-93",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "One color per object"
+      },
+      "text": [
+        {
+          "insert": "A single color pick drives both fill and border — there are no separate border-color or stroke-width pickers. Shapes and stickies set a palette token and derive fill/stroke from it ("
+        },
+        {
+          "insert": "useSelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "useSelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": "); sections pick one of the 10 tint families in "
+        },
+        {
+          "insert": "SECTION_FAMILIES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme.ts",
+              "symbol": "SECTION_FAMILIES"
+            }
+          }
+        },
+        {
+          "insert": ", and picking a tint clears any "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " overrides so the family fully owns the section's colors."
+        }
+      ],
+      "children": []
+    },
     "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85": {
       "id": "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",
       "flavour": "paragraph",
@@ -3596,6 +3768,9 @@
         "b-figjam-parity-junction-geometry-82",
         "b-figjam-parity-default-size-90x90-small-these-are-ju-83",
         "b-figjam-parity-where-our-model-diverges-from-figma-s-84",
+        "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91",
+        "b-figjam-parity-toolbar-control-sets-deliberately-sim-92",
+        "b-figjam-parity-one-color-per-object-93",
         "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",
         "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86",
         "b-figjam-parity-no-rotation-anywhere-87",
