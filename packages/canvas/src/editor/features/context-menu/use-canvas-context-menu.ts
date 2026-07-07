@@ -65,6 +65,7 @@ export interface CanvasContextMenuApi {
   toggleLockFromContextMenu: () => void;
   addContextAnnotation: () => void;
   fitContextObject: () => void;
+  captureContextSectionContents: () => void;
   deleteContextSelection: () => void;
 }
 
@@ -146,7 +147,7 @@ export function useCanvasContextMenu({
       objectType,
       geometry: geometryForContextObject(objectType, contextMenu.canvasPoint),
       parentId:
-        contextObject?.type === "container"
+        contextObject?.type === "section"
           ? contextObject.id
           : contextObject?.parentId ?? null,
     });
@@ -220,10 +221,21 @@ export function useCanvasContextMenu({
   const fitContextObject = () => {
     if (contextMenu?.kind !== "object") return;
     const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
-    if (contextObject?.type !== "container") return;
+    if (contextObject?.type !== "section") return;
     dispatch({
-      type: "canvas.fitContainerToChildren",
-      containerId: contextObject.id,
+      type: "canvas.fitSectionToChildren",
+      sectionId: contextObject.id,
+    });
+    setContextMenu(null);
+  };
+
+  const captureContextSectionContents = () => {
+    if (contextMenu?.kind !== "object") return;
+    const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
+    if (contextObject?.type !== "section") return;
+    dispatch({
+      type: "canvas.captureSectionContents",
+      sectionId: contextObject.id,
     });
     setContextMenu(null);
   };
@@ -252,6 +264,7 @@ export function useCanvasContextMenu({
     toggleLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
+    captureContextSectionContents,
     deleteContextSelection,
   };
 }

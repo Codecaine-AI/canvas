@@ -87,7 +87,7 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
 };
 
 /**
- * Every other CanvasTool value (container/process/decision/source-node/
+ * Every other CanvasTool value (rectangle/process/decision/source-node/
  * document/person/database/chat/pill/arrow-shape/predefined-process/
  * code-block/chip-icon/annotation) is armed exclusively via the Shapes panel
  * or the shape-search swap popover now — the dock's "shapes" button opens

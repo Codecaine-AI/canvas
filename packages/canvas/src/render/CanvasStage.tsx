@@ -10,7 +10,7 @@ import {
 import {
   documentBounds,
   objectById,
-  sectionCaptureMembers,
+  sectionDescendantIds,
   type CanvasBounds,
 } from "../state/geometry";
 import { gridBackground } from "./grid";
@@ -34,7 +34,6 @@ import {
   CHROME,
   CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO,
   CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
-  SECTION_CAPTURE_OVERLAP_THRESHOLD,
   GRID_DOT_COLOR,
   STICKY_GEOMETRY,
   TEXT_SIZES_PX,
@@ -110,41 +109,35 @@ export interface CanvasStageProps {
  * FigJam z-layering (W2): sections always render below every non-section
  * object, so shapes/stickies/etc. placed "on top of" a section visually sit
  * on its surface rather than being obscured by it. Among sections
- * themselves, nesting wins: a section fully/mostly inside another section
- * (per the same positional-containment reading used for drag-capture) should
- * render above its geometric parent, so the nested section's tint is visibly
- * layered on top rather than blended underneath. Stable otherwise (schema
- * order is preserved as the tiebreaker), so non-section-vs-non-section and
- * sibling-section-vs-sibling-section order never changes from the document's
- * natural order.
+ * themselves, nesting wins: a section nested inside another (sections nest
+ * via the same persisted, auto-managed `parentId` membership as every other
+ * section child) renders above its ancestors, so the nested section's tint
+ * is visibly layered on top rather than blended underneath. Stable otherwise
+ * (schema order is preserved as the tiebreaker), so
+ * non-section-vs-non-section and sibling-section-vs-sibling-section order
+ * never changes from the document's natural order.
  *
- * Depth is computed purely from bounds-containment (a section "contains"
- * another section when the other's bounds are >=60% inside it, mirroring
- * sectionCaptureMembers' geometric reading) rather than any parentId, since
- * sections never use parentId for their nesting relationship.
+ * Depth is the length of a section's `parentId` ancestor chain (root
+ * sections are depth 0). Sections are the only legal parent type, so every
+ * ancestor on the chain is a section.
  */
 function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCanvasObject[] {
   const sections = objects.filter((object) => object.type === "section");
   if (sections.length === 0) return objects;
 
+  const byId = new Map(objects.map((object) => [object.id, object]));
+
   function sectionDepth(section: InteractiveCanvasObject): number {
     let depth = 0;
-    for (const other of sections) {
-      if (other.id === section.id) continue;
-      const otherArea = other.geometry.width * other.geometry.height;
-      if (otherArea <= 0) continue;
-      // Is `section` positionally inside `other`? (other is the ancestor)
-      const overlapWidth =
-        Math.min(section.geometry.x + section.geometry.width, other.geometry.x + other.geometry.width) -
-        Math.max(section.geometry.x, other.geometry.x);
-      const overlapHeight =
-        Math.min(section.geometry.y + section.geometry.height, other.geometry.y + other.geometry.height) -
-        Math.max(section.geometry.y, other.geometry.y);
-      if (overlapWidth <= 0 || overlapHeight <= 0) continue;
-      const sectionArea = section.geometry.width * section.geometry.height;
-      if (sectionArea <= 0) continue;
-      const fractionOfSectionInsideOther = (overlapWidth * overlapHeight) / sectionArea;
-      if (fractionOfSectionInsideOther >= 0.6 && otherArea > sectionArea) depth += 1;
+    // Guard against dangling parentIds and (invalid) cycles.
+    const visited = new Set<string>([section.id]);
+    let parentId = section.parentId ?? null;
+    while (parentId && !visited.has(parentId)) {
+      const parent = byId.get(parentId);
+      if (!parent) break;
+      visited.add(parent.id);
+      depth += 1;
+      parentId = parent.parentId ?? null;
     }
     return depth;
   }
@@ -164,6 +157,7 @@ function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCa
   });
 }
 
+/** contentHidden hides a section's RECORDED members — its transitive parentId descendants — while nested section backdrops stay visible. */
 function visibleObjectsForSections(
   objects: InteractiveCanvasObject[],
   document: InteractiveCanvasDocument,
@@ -171,7 +165,7 @@ function visibleObjectsForSections(
   const hidden = new Set<string>();
   for (const section of objects) {
     if (section.type !== "section" || !section.contentHidden) continue;
-    for (const memberId of sectionCaptureMembers(document, section.id, SECTION_CAPTURE_OVERLAP_THRESHOLD)) {
+    for (const memberId of sectionDescendantIds(document, section.id)) {
       hidden.add(memberId);
     }
   }

@@ -8,6 +8,7 @@ import {
   CopyIcon,
   DiamondIcon,
   FrameIcon,
+  LayersIcon,
   LockIcon,
   MessageSquareIcon,
   StickyIcon,
@@ -36,6 +37,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
     toggleLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
+    captureContextSectionContents,
     deleteContextSelection,
   } = menu;
   if (!contextMenu) return null;
@@ -64,16 +66,27 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
             <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
             Add annotation
           </button>
-          {contextObject.type === "container" && (
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-              onClick={fitContextObject}
-            >
-              <CheckIcon className="h-4 w-4 text-muted-foreground" />
-              Fit children
-            </button>
+          {contextObject.type === "section" && (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                onClick={fitContextObject}
+              >
+                <CheckIcon className="h-4 w-4 text-muted-foreground" />
+                Fit children
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                onClick={captureContextSectionContents}
+              >
+                <LayersIcon className="h-4 w-4 text-muted-foreground" />
+                Capture contents
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -165,10 +178,10 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
             type="button"
             role="menuitem"
             className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-            onClick={() => addObjectFromContextMenu("container")}
+            onClick={() => addObjectFromContextMenu("rectangle")}
           >
             <BoxIcon className="h-4 w-4 text-muted-foreground" />
-            Add container
+            Add rectangle
           </button>
           <button
             type="button"

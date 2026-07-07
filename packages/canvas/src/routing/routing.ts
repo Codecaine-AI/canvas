@@ -69,7 +69,7 @@ export function autoPickAnchors(
  * Routes a connection between two object border midpoints.
  *
  * `obstacles` is optional: pass the current document's objects (typically all
- * of them — the two endpoints and their container ancestors are excluded
+ * of them — the two endpoints and their section ancestors are excluded
  * automatically) so elbow-style routes detour around unrelated shapes via A*
  * orthogonal routing. Omitting it keeps the pre-existing 3-arg behavior:
  * elbow routes still upgrade to a real orthogonal A* path around the two
@@ -171,9 +171,13 @@ function routeWaypoints(
  * A* path generator (D33 thread B). Builds obstacle bounds from the two
  * endpoint objects (so the route doesn't cut through either shape) plus the
  * caller-supplied `obstacles` objects, excluding the two endpoints' own
- * owners and their container ancestors from that extra obstacle set (a
+ * owners and their section ancestors from that extra obstacle set (a
  * connection touching a nested object must necessarily pass through its
- * parent containers' bounds — that's containment, not an obstacle crossing).
+ * parent sections' bounds — that's containment, not an obstacle crossing).
+ * Also excludes any obstacle whose interior strictly contains the start or
+ * end anchor point: a shape enclosing an endpoint can never be routed around
+ * (e.g. a plain rectangle drawn behind a cluster of nodes), and feeding it to
+ * the generator poisons the rest of the route.
  * Returns null (letting the caller fall back to the simple elbow route) when
  * the generator can't produce a usable multi-point path.
  */
@@ -191,7 +195,12 @@ function routeOrthogonalAStar(
   collectAncestorIds(toObject.id, excludedIds, obstacles);
 
   const extraObstacles: OrthogonalObstacle[] = obstacles
-    .filter((object) => !excludedIds.has(object.id))
+    .filter(
+      (object) =>
+        !excludedIds.has(object.id) &&
+        !boundsStrictlyContain(object.geometry, start) &&
+        !boundsStrictlyContain(object.geometry, end),
+    )
     .map((object) => toObstacle(object.geometry));
 
   let waypoints: Array<[number, number]>;
@@ -230,6 +239,16 @@ function routeOrthogonalAStar(
 
 function toObstacle(bounds: CanvasBounds): OrthogonalObstacle {
   return { x: bounds.x, y: bounds.y, w: bounds.width, h: bounds.height };
+}
+
+/** Whether `point` lies strictly inside `bounds` (border contact does not count). */
+function boundsStrictlyContain(bounds: CanvasBounds, point: CanvasPoint): boolean {
+  return (
+    point.x > bounds.x &&
+    point.x < bounds.x + bounds.width &&
+    point.y > bounds.y &&
+    point.y < bounds.y + bounds.height
+  );
 }
 
 /** Walks `objects`' parent chain from `objectId` upward, adding each ancestor id to `into`. */

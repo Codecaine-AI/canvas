@@ -12,7 +12,7 @@ import { nearestPaletteToken } from "../palette";
  * field — icons are resolved by the chrome host), flyout JSX moved verbatim
  * from editor/features/selection-toolbar/SelectionToolbarLayer.tsx. Attached by
  * shapes/base.tsx to every shape-family def and explicitly by the
- * container/source-node/icon/code-block defs (their types resolved to the
+ * source-node/icon/code-block defs (their types resolved to the
  * "shape" toolbar variant before the registry migration).
  */
 

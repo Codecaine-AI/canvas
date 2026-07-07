@@ -16,7 +16,7 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *
  *   V              select tool
  *   H              hand tool
- *   C              container tool
+ *   C              rectangle tool
  *   P              process tool
  *   D              decision tool
  *   T              text tool
@@ -51,7 +51,7 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
 const TOOL_KEY_MAP: Record<string, CanvasTool> = {
   v: "select",
   h: "hand",
-  c: "container",
+  c: "rectangle",
   p: "process",
   d: "decision",
   t: "text",

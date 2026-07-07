@@ -108,33 +108,32 @@ describe("interaction: hitTestObjects", () => {
     expect(hitTestObjects(document, { x: 500, y: 500 })).toBeNull();
   });
 
-  it("hits a child object inside a container's interior (container is see-through)", () => {
+  it("hits a member object rendered above its section", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
-      makeObject({ id: "child", parentId: "container", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+      makeObject({ id: "section", type: "section", title: "S", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
     ]);
-    // Point is inside the container's interior, away from any border band, and
-    // inside the child's bounds.
+    // Point is inside both the section and the child; the child renders on
+    // top (later in document order) so it wins.
     const hit = hitTestObjects(document, { x: 120, y: 120 });
     expect(hit?.id).toBe("child");
   });
 
-  it("hits the container itself when the point is on its border band", () => {
+  it("hits the section itself when the point is inside it but outside its members", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
-      makeObject({ id: "child", parentId: "container", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+      makeObject({ id: "section", type: "section", title: "S", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
     ]);
-    // Near the top-left edge of the container, well outside the child bounds.
     const hit = hitTestObjects(document, { x: 5, y: 5 });
-    expect(hit?.id).toBe("container");
+    expect(hit?.id).toBe("section");
   });
 
-  it("does not hit a container when the point is in its interior away from children and border band", () => {
+  it("hits a rectangle anywhere in its interior — rectangles are solid shapes, not see-through containers", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "rect", type: "rectangle", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
     ]);
     const hit = hitTestObjects(document, { x: 150, y: 150 });
-    expect(hit).toBeNull();
+    expect(hit?.id).toBe("rect");
   });
 });
 
@@ -340,27 +339,35 @@ describe("interaction: drag/move gesture", () => {
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
   });
 
-  it("moves a dragged container and its descendants exactly once", () => {
+  it("moves a dragged section and its recorded parentId descendants exactly once", () => {
+    // Membership is the persisted parentId chain (sections nest via parentId);
+    // no geometric recapture happens at drag start, so "outside" stays put even
+    // though it isn't far from the section.
     const document = makeDocument([
       makeObject({
-        id: "container",
-        type: "container",
+        id: "outer",
+        type: "section",
+        title: "Outer",
+        tint: "gray",
         geometry: { x: 80, y: 80, width: 320, height: 220 },
       }),
       makeObject({
-        id: "child",
-        parentId: "container",
-        geometry: { x: 120, y: 120, width: 80, height: 40 },
+        id: "inner",
+        type: "section",
+        title: "Inner",
+        tint: "gray",
+        parentId: "outer",
+        geometry: { x: 120, y: 120, width: 120, height: 80 },
       }),
       makeObject({
-        id: "grandchild",
-        parentId: "child",
-        geometry: { x: 140, y: 180, width: 60, height: 30 },
+        id: "leaf",
+        parentId: "inner",
+        geometry: { x: 140, y: 140, width: 60, height: 30 },
       }),
       makeObject({ id: "outside", geometry: { x: 500, y: 500, width: 80, height: 40 } }),
     ]);
     const ctx = makeContext(document);
-    const hit = { kind: "object" as const, objectId: "container" };
+    const hit = { kind: "object" as const, objectId: "outer" };
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 90, y: 90 }, hit), ctx);
     result = stepInteraction(result.state, move({ x: 130, y: 110 }, hit), ctx);
@@ -369,11 +376,30 @@ describe("interaction: drag/move gesture", () => {
     const geometryActions = updateGeometriesActions(result.dispatch);
     expect(geometryActions).toHaveLength(1);
     expect(geometryActions[0]!.geometries).toEqual({
-      container: { x: 120, y: 100, width: 320, height: 220 },
-      child: { x: 160, y: 140, width: 80, height: 40 },
-      grandchild: { x: 180, y: 200, width: 60, height: 30 },
+      outer: { x: 120, y: 100, width: 320, height: 220 },
+      inner: { x: 160, y: 140, width: 120, height: 80 },
+      leaf: { x: 180, y: 160, width: 60, height: 30 },
     });
     expect(geometryActions[0]!.geometries.outside).toBeUndefined();
+  });
+
+  it("does not drag descendants along with a plain rectangle (rectangles are dumb shapes)", () => {
+    // Geometric overlap no longer captures anything — only sections have
+    // dragCapture: "descendants", and rectangles are plain shapes.
+    const document = makeDocument([
+      makeObject({ id: "rect", type: "rectangle", geometry: { x: 80, y: 80, width: 320, height: 220 } }),
+      makeObject({ id: "overlapping", geometry: { x: 120, y: 120, width: 80, height: 40 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "rect" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 90, y: 90 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 130, y: 110 }, hit), ctx);
+
+    expect(result.state.kind).toBe("move");
+    const geometryActions = updateGeometriesActions(result.dispatch);
+    expect(geometryActions).toHaveLength(1);
+    expect(Object.keys(geometryActions[0]!.geometries)).toEqual(["rect"]);
   });
 
   it("does not start a move gesture until the 3px world threshold is crossed", () => {
@@ -725,26 +751,52 @@ describe("interaction: live snap guides during move", () => {
   });
 });
 
-describe("interaction: container drop-in/out during move", () => {
-  it("sets overlay.dropTargetId when dragging over a container's full area (not just the border band)", () => {
+describe("interaction: section drop-in/out during move", () => {
+  function makeSection(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
+    return makeObject({ type: "section", title: overrides.id, tint: "gray", ...overrides });
+  }
+
+  it("sets overlay.dropTargetId when the dragged object's bounds-center lands inside a section", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "a" };
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    // Drag "a" so its center lands deep in the container's interior (well past
-    // the 16px border band) — full-area hit testing should still register it.
+    // Drag "a" so its center lands deep in the section's interior.
     result = stepInteraction(result.state, move({ x: 460, y: 150 }, hit), ctx);
     expect(result.state.kind).toBe("move");
-    expect(result.overlay.dropTargetId).toBe("container");
+    expect(result.overlay.dropTargetId).toBe("section");
+  });
+
+  it("probes with the dragged object's bounds-center, not the pointer position", () => {
+    const document = makeDocument([
+      makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "a" };
+
+    // Grab "a" near its top-left corner: pointer at (280,150) is OUTSIDE the
+    // section (x < 300), but "a" has moved to (275,145) so its center
+    // (325,195) is inside — the section must still register.
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 5, y: 5 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 280, y: 150 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("section");
+
+    // Converse: grab near the bottom-right corner so the pointer at (310,180)
+    // is INSIDE the section but "a" sits at (215,85) with its center (265,135)
+    // outside — no drop target.
+    result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 95, y: 95 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 310, y: 180 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBeNull();
   });
 
   it("dispatches canvas.setParent on release when the drop target differs from the current parent", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
     ]);
     const ctx = makeContext(document);
@@ -752,42 +804,42 @@ describe("interaction: container drop-in/out during move", () => {
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
     result = stepInteraction(result.state, move({ x: 460, y: 150 }, hit), ctx);
-    expect(result.overlay.dropTargetId).toBe("container");
+    expect(result.overlay.dropTargetId).toBe("section");
 
     result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
     expect(result.dispatch).toEqual([
-      { type: "canvas.setParent", objectIds: ["a"], parentId: "container" },
+      { type: "canvas.setParent", objectIds: ["a"], parentId: "section" },
     ]);
   });
 
   it("does not dispatch canvas.setParent when the drop target matches the current parent", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
-      makeObject({ id: "a", parentId: "container", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
+      makeSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "a", parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "a" };
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 45, y: 45 }, hit), ctx);
-    // Small move that stays inside the same container.
+    // Small move that stays inside the same section.
     result = stepInteraction(result.state, move({ x: 60, y: 60 }, hit), ctx);
-    expect(result.overlay.dropTargetId).toBe("container");
+    expect(result.overlay.dropTargetId).toBe("section");
 
     result = stepInteraction(result.state, up({ x: 60, y: 60 }, hit), ctx);
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
     expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
   });
 
-  it("dispatches canvas.setParent with parentId null when dropped on open canvas from inside a container", () => {
+  it("dispatches canvas.setParent with parentId null when dropped on open canvas from inside a section", () => {
     const document = makeDocument([
-      makeObject({ id: "container", type: "container", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
-      makeObject({ id: "a", parentId: "container", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
+      makeSection({ id: "section", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
+      makeObject({ id: "a", parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "a" };
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 45, y: 45 }, hit), ctx);
-    // Drag far outside the container onto open canvas.
+    // Drag far outside the section onto open canvas.
     result = stepInteraction(result.state, move({ x: 1000, y: 1000 }, hit), ctx);
     expect(result.overlay.dropTargetId).toBeNull();
 
@@ -797,12 +849,28 @@ describe("interaction: container drop-in/out during move", () => {
     ]);
   });
 
-  it("excludes the dragged container and its descendants from drop-target hit-testing", () => {
+  it("a rectangle is never a drop target — only sections are", () => {
     const document = makeDocument([
-      makeObject({ id: "outer", type: "container", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
-      makeObject({
+      makeObject({ id: "rect", type: "rectangle", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "a" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 460, y: 150 }, hit), ctx);
+    expect(result.state.kind).toBe("move");
+    expect(result.overlay.dropTargetId).toBeNull();
+
+    result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
+    expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
+  });
+
+  it("excludes the dragged section and its descendants from drop-target hit-testing", () => {
+    const document = makeDocument([
+      makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
+      makeSection({
         id: "inner",
-        type: "container",
         parentId: "outer",
         geometry: { x: 20, y: 20, width: 200, height: 200 },
       }),
@@ -811,15 +879,13 @@ describe("interaction: container drop-in/out during move", () => {
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "inner" };
 
-    // Drag "inner" (and its descendant "child") around within "outer" — since
-    // "outer" contains "inner", moving "inner" around inside it should not
-    // register "outer" as a *different* drop target requiring reparenting
-    // (it's already inner's parent), and dragging onto itself/descendants
-    // must never be selected as the drop target.
+    // Drag "inner" (and its recorded descendant "child") around within
+    // "outer" — dragging onto itself/descendants must never be selected as
+    // the drop target; the enclosing "outer" is the only legal candidate.
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 30, y: 30 }, hit), ctx);
     result = stepInteraction(result.state, move({ x: 300, y: 300 }, hit), ctx);
     expect(result.state.kind).toBe("move");
-    expect(result.overlay.dropTargetId).not.toBe("inner");
+    expect(result.overlay.dropTargetId).toBe("outer");
   });
 });
 
@@ -1025,7 +1091,7 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
 
   it("a drag with an armed tool creates an object sized to the normalized dragged rect", () => {
     const document = makeDocument([]);
-    const ctx = makeContext(document, { tool: "container" });
+    const ctx = makeContext(document, { tool: "rectangle" });
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 100 }, { kind: "canvas" }), ctx);
     result = stepInteraction(result.state, move({ x: 300, y: 220 }), ctx);
@@ -1037,7 +1103,7 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     expect(result.dispatch).toEqual([
       {
         type: "canvas.addObject",
-        objectType: "container",
+        objectType: "rectangle",
         parentId: null,
         geometry: { x: 100, y: 100, width: 200, height: 120 },
       },
@@ -1060,9 +1126,9 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     }
   });
 
-  it("assigns parentId when the placement point lands inside a container (reusing drop-target hit-testing)", () => {
+  it("assigns parentId when the placement point lands inside a section (reusing drop-target hit-testing)", () => {
     const document = makeDocument([
-      makeObject({ id: "group", type: "container", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+      makeObject({ id: "group", type: "section", title: "Group", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
     ]);
     const ctx = makeContext(document, { tool: "text" });
 

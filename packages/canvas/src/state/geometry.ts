@@ -128,14 +128,14 @@ export function objectById(
   return document.objects.find((object) => object.id === objectId) ?? null;
 }
 
-export function fitContainerToChildren(
+export function fitSectionToChildren(
   document: InteractiveCanvasDocument,
-  containerId: string,
+  sectionId: string,
   padding = 32,
 ): InteractiveCanvasDocument {
-  const container = objectById(document, containerId);
-  if (!container || container.type !== "container") return document;
-  const children = document.objects.filter((object) => object.parentId === containerId);
+  const section = objectById(document, sectionId);
+  if (!section || section.type !== "section") return document;
+  const children = document.objects.filter((object) => object.parentId === sectionId);
   const bounds = boundsForGeometries(
     children.map((object) => object.geometry),
     padding,
@@ -144,7 +144,7 @@ export function fitContainerToChildren(
   return {
     ...document,
     objects: document.objects.map((object) =>
-      object.id === containerId ? { ...object, geometry: snapGeometry(bounds) } : object,
+      object.id === sectionId ? { ...object, geometry: snapGeometry(bounds) } : object,
     ),
   };
 }
@@ -244,9 +244,10 @@ function overlapArea(a: CanvasBounds, b: CanvasBounds): number {
  * Section capture-membership threshold (W2 design decision — not directly
  * pixel-sampled; FigJam's own overlap fraction was never captured in the
  * screen-recording chrome catalog, see affine-mining-map.md §1's flagged
- * caveat). A dragged section carries every object whose bounds overlap the
- * section's bounds by at least this fraction of the OBJECT's own area,
- * computed once at drag-start. 1.0 would require full containment (too
+ * caveat). Capture claims every object whose bounds overlap the section's
+ * bounds by at least this fraction of the OBJECT's own area (since W6 the
+ * result is persisted as auto-managed parentId membership rather than
+ * recomputed per drag). 1.0 would require full containment (too
  * strict — FigJam visibly captures objects that graze a section's inset
  * padding); 0.6 was chosen as a documented, testable middle ground: an object
  * more than half "inside" reads as a member, matching the intuitive FigJam
@@ -260,11 +261,13 @@ export const SECTION_CAPTURE_OVERLAP_THRESHOLD = 0.6;
 
 /**
  * FigJam section capture semantics (W2): computes which objects a section
- * "carries" when dragged, purely from geometry — NOT persisted membership
- * (no parentId/setParent involved). An object is captured when its bounds
- * overlap the section's bounds by at least `threshold` of the OBJECT's OWN
- * area (see SECTION_CAPTURE_OVERLAP_THRESHOLD above for the rationale behind
- * the default 0.6).
+ * geometrically "captures", purely from bounds overlap. Since W6, membership
+ * IS persisted (an auto-managed parentId, assigned on drop into a section and
+ * cleared on drop onto open canvas) — this function is the geometric probe
+ * that seeds it (see canvas.captureSectionContents). An object is captured
+ * when its bounds overlap the section's bounds by at least `threshold` of the
+ * OBJECT's OWN area (see SECTION_CAPTURE_OVERLAP_THRESHOLD above for the
+ * rationale behind the default 0.6).
  *
  * Recursive: if a captured object is itself a section, that nested section's
  * own captured members (computed the same way, against the nested section's
@@ -307,6 +310,37 @@ export function sectionCaptureMembers(
 
   captureInto(sectionId);
   return captured;
+}
+
+/**
+ * Transitive parentId-based descendants of a section (W6): every object whose
+ * parentId chain leads to `sectionId`, including nested sections' members.
+ * This is the persisted-membership counterpart to sectionCaptureMembers'
+ * geometric probe — drag-carry, delete-cascade, and contentHidden all walk
+ * this recorded chain. Returns a Set NOT including `sectionId` itself.
+ */
+export function sectionDescendantIds(
+  document: InteractiveCanvasDocument,
+  sectionId: string,
+): Set<string> {
+  const childrenByParent = new Map<string, string[]>();
+  for (const object of document.objects) {
+    if (!object.parentId) continue;
+    const siblings = childrenByParent.get(object.parentId);
+    if (siblings) siblings.push(object.id);
+    else childrenByParent.set(object.parentId, [object.id]);
+  }
+  const descendants = new Set<string>();
+  const queue = [sectionId];
+  while (queue.length > 0) {
+    const currentId = queue.pop()!;
+    for (const childId of childrenByParent.get(currentId) ?? []) {
+      if (descendants.has(childId)) continue;
+      descendants.add(childId);
+      queue.push(childId);
+    }
+  }
+  return descendants;
 }
 
 export function createObjectId(document: InteractiveCanvasDocument, base: string): string {

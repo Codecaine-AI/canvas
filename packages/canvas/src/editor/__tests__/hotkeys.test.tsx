@@ -217,7 +217,7 @@ describe("useCanvasHotkeys", () => {
     act(() => {
       dispatchKeyDown({ key: "c" });
     });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "container" });
+    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "rectangle" });
   });
 
   it("maps plain S to sticky and Shift+S to section", () => {

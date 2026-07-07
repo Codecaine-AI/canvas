@@ -28,7 +28,7 @@ resist it and are correct as-is:
 - the single validated document schema (frozen public surface, 13+ external
   importers of `@codecaine-ai/canvas/schema`).
 
-Behavioral features (section, container, connector, text-edit) keep their
+Behavioral features (section, connector, text-edit) keep their
 logic in the shared machines behind **typed extension points declared on their
 defs** (see `dragCapture`, `hitTest`, `handles` below).
 
@@ -37,7 +37,7 @@ defs** (see `dragCapture`, `hitTest`, `handles` below).
 **Tier 1 — `ObjectDef`: behavior contract.** One per kind of thing that
 *behaves* differently. Specials are first-class: `section/`, `sticky/`,
 `connector/` (keyed by selection kind — connections aren't objects),
-`container/`, `text/`, `code-block/`.
+`text/`, `code-block/`.
 
 ```ts
 interface ObjectDef {
@@ -45,8 +45,8 @@ interface ObjectDef {
   render: Component
   toolbar: ToolbarSpec        // its context menu: action ids + flyout components
   handles: "all" | "corners" | "none"
-  hitTest: "solid" | "border-band"
-  dragCapture: "geometric-overlap" | "descendants" | "none"
+  hitTest: "solid"              // border-band died with the container type
+  dragCapture: "descendants" | "none"
   labelEditing: LabelSpec     // label vs section title-chip vs body
   defaults: { geometry, tone?, ... }
 }
@@ -75,12 +75,17 @@ Multi-select toolbar = capability intersection over the selected defs
 current behavior case by case).
 
 Facts to preserve, now expressed as def properties instead of inline
-`type ===` checks:
-- Section membership is geometric and ephemeral (`sectionCaptureMembers`,
-  ≥60% overlap at drag start, recursive) — never persisted. `parentId`
-  hierarchy belongs to containers only. Section: `dragCapture:
-  "geometric-overlap"`; container: `dragCapture: "descendants"`.
-- Containers hit-test on a 16px border band; interiors pass through.
+`type ===` checks (first two amended 2026-07-07 — the W6 container removal
+deliberately reversed them):
+- Section membership is a persisted, auto-managed `parentId` — assigned when
+  an object is dropped into a section, cleared when it is dropped onto open
+  canvas. Sections are the ONLY legal parent (validated), nest via their own
+  `parentId`, and drag their recorded descendants: `dragCapture:
+  "descendants"`. Nested-section z-depth derives from the `parentId` chain.
+  `sectionCaptureMembers` (≥60% overlap, recursive) survives only as the
+  seed for `canvas.captureSectionContents`.
+- The container type is gone — replaced by the dumb `rectangle` shape — and
+  the 16px border-band hit-test went with it; every def hit-tests solid.
 - Sections get corner-only handles; locked sections refuse resize/drag.
 
 ## Target tree
@@ -106,7 +111,7 @@ src/
   objects/               LAYER 2 — one def per kind of thing on the canvas
     object-def.ts          registry + render/behavior dispatch + intersection
     palette.ts
-    section/  sticky/  text/  container/  connector/  code-block/  source-node/
+    section/  sticky/  text/  connector/  code-block/  source-node/
     shapes/                one file per shape; base.tsx adapter; toolbar.tsx
       icon/                def + IconShapeBody (glyph data lives in ui/icons/)
     catalog/               SHAPE_CATALOG + ShapeSearchPopover (registry-driven)

@@ -486,11 +486,14 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
   });
 });
 
-describe("interaction: dragging a section carries its captured members", () => {
-  it("moves the section and every captured member together, with one history entry", () => {
+describe("interaction: dragging a section carries its recorded parentId members", () => {
+  it("moves the section and every recorded member together, with one history entry", () => {
     const document = makeDocument([
       { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
-      makeObject({ id: "member-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
+      makeObject({ id: "member-a", parentId: "section-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
+      // Geometrically inside the section but with no recorded membership —
+      // drags no longer recapture by overlap, so it must stay put.
+      makeObject({ id: "squatter", geometry: { x: 150, y: 150, width: 60, height: 60 } }),
       makeObject({ id: "outsider", geometry: { x: 1000, y: 1000, width: 60, height: 60 } }),
     ]);
     const ctx = makeContext(document);
@@ -506,9 +509,10 @@ describe("interaction: dragging a section carries its captured members", () => {
     let geometryActions = updateGeometriesActions(result.dispatch);
     expect(geometryActions).toHaveLength(1);
     expect(geometryActions[0]!.recordHistory).toBe(true);
-    // dx = 20, dy = 20 for both the section and its captured member.
+    // dx = 20, dy = 20 for both the section and its recorded member.
     expect(geometryActions[0]!.geometries["section-a"]).toEqual({ x: 20, y: 20, width: 300, height: 300 });
     expect(geometryActions[0]!.geometries["member-a"]).toEqual({ x: 60, y: 60, width: 60, height: 60 });
+    expect(geometryActions[0]!.geometries["squatter"]).toBeUndefined();
     expect(geometryActions[0]!.geometries["outsider"]).toBeUndefined();
 
     // Second move in the same gesture: still a single history entry (recordHistory false).
@@ -522,10 +526,10 @@ describe("interaction: dragging a section carries its captured members", () => {
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
   });
 
-  it("restores the section and all captured members on Escape", () => {
+  it("restores the section and all carried members on Escape", () => {
     const document = makeDocument([
       { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
-      makeObject({ id: "member-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
+      makeObject({ id: "member-a", parentId: "section-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "section-a" };
@@ -546,8 +550,8 @@ describe("interaction: dragging a section carries its captured members", () => {
   it("recursively carries a nested section and its own members when dragging the outer section", () => {
     const document = makeDocument([
       { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 600, height: 600 } },
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", geometry: { x: 50, y: 50, width: 300, height: 300 } },
-      makeObject({ id: "grandchild", geometry: { x: 80, y: 80, width: 100, height: 100 } }),
+      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 300, height: 300 } },
+      makeObject({ id: "grandchild", parentId: "inner", geometry: { x: 80, y: 80, width: 100, height: 100 } }),
     ]);
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "outer" };
@@ -577,15 +581,29 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
     expect(sectionIndex).toBeLessThan(shapeBIndex);
   });
 
-  it("renders a nested section above its geometric parent section", () => {
+  it("renders a nested section above its parentId ancestor sections", () => {
     const objects: InteractiveCanvasObject[] = [
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "innermost" }), type: "section", title: "Innermost", tint: "green", parentId: "inner", geometry: { x: 60, y: 60, width: 40, height: 40 } },
       { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
     ];
     const ordered = renderOrderedObjects(objects);
     const outerIndex = ordered.findIndex((object) => object.id === "outer");
     const innerIndex = ordered.findIndex((object) => object.id === "inner");
+    const innermostIndex = ordered.findIndex((object) => object.id === "innermost");
     expect(outerIndex).toBeLessThan(innerIndex);
+    expect(innerIndex).toBeLessThan(innermostIndex);
+  });
+
+  it("ignores geometric containment for section depth when no parentId is recorded", () => {
+    // "inner" sits geometrically inside "outer" but has no recorded parent,
+    // so document order (the stable-sort tiebreaker) wins.
+    const objects: InteractiveCanvasObject[] = [
+      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
+    ];
+    const ordered = renderOrderedObjects(objects);
+    expect(ordered.map((object) => object.id)).toEqual(["inner", "outer"]);
   });
 
   it("preserves schema order for non-sections and sibling sections (stable sort)", () => {

@@ -420,7 +420,7 @@
           }
         },
         {
-          "insert": " (a container object id to crop the viewport to, per "
+          "insert": " (a section object id to crop the viewport to, per "
         },
         {
           "insert": "containerViewBounds",
@@ -745,7 +745,7 @@
           }
         },
         {
-          "insert": " rounds this out: given a container object id, it walks "
+          "insert": " rounds this out (the exported name predates the W6 container-type removal): given a section object id, it walks "
         },
         {
           "insert": "parentId",
@@ -1061,7 +1061,7 @@
           }
         },
         {
-          "insert": " — container tool"
+          "insert": " — rectangle tool"
         }
       ],
       "children": []
@@ -1684,7 +1684,7 @@
           }
         },
         {
-          "insert": "'s D4 view-cropping behavior — fitting the viewport to a named container's bounds via the "
+          "insert": "'s D4 view-cropping behavior — fitting the viewport to a named section's bounds via the "
         },
         {
           "insert": "view",
@@ -1693,7 +1693,7 @@
           }
         },
         {
-          "insert": " prop, and surfacing the \"view not found\" warning badge when the requested container id doesn't resolve."
+          "insert": " prop, and surfacing the \"view not found\" warning badge when the requested section id doesn't resolve."
         }
       ],
       "children": []

@@ -10,8 +10,9 @@ import {
 } from "./connections";
 import {
   handleAlignSelection,
+  handleCaptureSectionContents,
   handleDistributeSelection,
-  handleFitContainerToChildren,
+  handleFitSectionToChildren,
   handleMoveSelection,
   handleResizeObject,
   handleSetParent,
@@ -46,7 +47,7 @@ export function createInteractiveCanvasState(
  * stale-waypoint choke point: every action that commits geometry changes —
  * drag/section-carry commits (canvas.updateObjectGeometries, both the history
  * and live-preview branches), nudges (canvas.moveSelection), resize, align/
- * distribute, fit-container, inspector geometry patches (canvas.updateObject)
+ * distribute, fit-section, inspector geometry patches (canvas.updateObject)
  * — flows through here, so waypoints are reconciled exactly once per action.
  * undo/redo/reset restore stored documents verbatim and are exempt.
  */
@@ -170,8 +171,12 @@ function reduceCanvasAction(
     return handleDistributeSelection(state, action);
   }
 
-  if (action.type === "canvas.fitContainerToChildren") {
-    return handleFitContainerToChildren(state, action);
+  if (action.type === "canvas.fitSectionToChildren") {
+    return handleFitSectionToChildren(state, action);
+  }
+
+  if (action.type === "canvas.captureSectionContents") {
+    return handleCaptureSectionContents(state, action);
   }
 
   if (action.type === "canvas.resolveLinkStatuses") {

@@ -18,12 +18,12 @@ import { SHAPE_TOOLBAR } from "../shapes/toolbar";
  * state/actions/defaults.ts all fall through to their generic defaults for
  * "source-node" TODAY — i.e. legacy ObjectShape dispatches a source-node
  * purely on `renderShapeFor(object)` (= `object.style?.shape ?? "rounded-rect"`),
- * NOT on `object.type`. Container/section are the only kinds legacy
- * special-cases by `object.type` before reading `style.shape`.
+ * NOT on `object.type`. Section is the only kind legacy special-cases by
+ * `object.type` before reading `style.shape`.
  *
- * That means source-node is NOT like container: it is not a "type-keyed
- * special" in the legacy dispatch sense. If this def is registered in
- * `DEFS_BY_TYPE` (object-def.ts) the way container/section are, ANY
+ * That means source-node is not a "type-keyed special" in the legacy
+ * dispatch sense. If this def is registered in
+ * `DEFS_BY_TYPE` (object-def.ts) the way section is, ANY
  * source-node object carrying an explicit `style.shape` other than
  * "rounded-rect" (e.g. "diamond", "ellipse", ...) would be forced through
  * this plain rounded-rect view instead of the shape-specific registered

@@ -547,7 +547,7 @@
           }
         },
         {
-          "insert": ", a small \"Synthetic Interview Flow\" board (nested containers, processes) used as a minimal validation sample for the first interactive-canvas slice."
+          "insert": ", a small \"Synthetic Interview Flow\" board (nested grouping boxes, processes) used as a minimal validation sample for the first interactive-canvas slice."
         }
       ],
       "children": []
@@ -584,7 +584,7 @@
           }
         },
         {
-          "insert": ", the original \"V2 Interview Agent Flow\" sample built from generic shape vocabulary (stickies, containers, processes) predating the FigJam-styled object types. Left untouched as its own distinct sample even after the FigJam-parity recreation below was added."
+          "insert": ", the original \"V2 Interview Agent Flow\" sample built from generic shape vocabulary (stickies, grouping boxes, processes) predating the FigJam-styled object types. Left untouched as its own distinct sample even after the FigJam-parity recreation below was added."
         }
       ],
       "children": []

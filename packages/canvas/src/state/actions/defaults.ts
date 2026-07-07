@@ -8,7 +8,7 @@ import type {
 } from "../schema";
 
 export function defaultGeometryFor(type: InteractiveCanvasObjectType): CanvasGeometry {
-  if (type === "container") return { x: 80, y: 80, width: 360, height: 240 };
+  if (type === "rectangle") return { x: 80, y: 80, width: 360, height: 240 };
   if (type === "decision") return { x: 160, y: 160, width: 160, height: 112 };
   if (type === "sticky") return { x: 180, y: 180, width: 176, height: 128 };
   if (type === "annotation-marker") return { x: 220, y: 220, width: 40, height: 40 };
@@ -53,7 +53,7 @@ export function defaultGeometryFor(type: InteractiveCanvasObjectType): CanvasGeo
 }
 
 export function objectTypeLabel(type: InteractiveCanvasObjectType): string {
-  if (type === "container") return "Container";
+  if (type === "rectangle") return "Rectangle";
   if (type === "process") return "Process";
   if (type === "decision") return "Decision";
   if (type === "text") return "Text";
@@ -94,7 +94,7 @@ export function objectTypeLabel(type: InteractiveCanvasObjectType): string {
 }
 
 export function toneForType(type: InteractiveCanvasObjectType): InteractiveCanvasTone {
-  if (type === "container") return "neutral";
+  if (type === "rectangle") return "neutral";
   if (type === "decision") return "decision";
   if (type === "sticky") return "warning";
   if (type === "source-node") return "agent";

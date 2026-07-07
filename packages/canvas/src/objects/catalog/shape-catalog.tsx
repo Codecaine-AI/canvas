@@ -234,7 +234,7 @@ export const SHAPE_CATALOG: ShapeCatalogCategory[] = [
     id: "basic",
     label: "Basic",
     entries: [
-      { id: "basic-square", label: "Square", objectType: "container", Icon: SquareIcon },
+      { id: "basic-square", label: "Square", objectType: "rectangle", Icon: SquareIcon },
       { id: "basic-ellipse", label: "Ellipse", objectType: "ellipse", Icon: EllipseIcon },
       { id: "basic-decision-diamond", label: "Decision", objectType: "decision", Icon: DiamondIcon },
       { id: "basic-triangle-up", label: "Triangle up", objectType: "triangle", direction: "up", Icon: TriangleUpIcon },

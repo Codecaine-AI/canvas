@@ -422,7 +422,7 @@
       "children": [],
       "text": [
         {
-          "insert": "container"
+          "insert": "rectangle"
         }
       ]
     },
@@ -433,7 +433,7 @@
       "children": [],
       "text": [
         {
-          "insert": "A "
+          "insert": "A plain rounded-rect shape — the W6 successor to the removed container type, with no containment role ("
         },
         {
           "insert": "parentId",
@@ -442,7 +442,7 @@
           }
         },
         {
-          "insert": "-based grouping box. Default creation geometry is "
+          "insert": " now records section membership only). Default creation geometry is "
         },
         {
           "insert": "{ width: 360, height: 240 }",
@@ -478,7 +478,7 @@
           }
         },
         {
-          "insert": "), with body text below it; nested children render as their own objects on top."
+          "insert": "), with body text below it."
         }
       ]
     },
@@ -540,7 +540,7 @@
       "id": "b-shape-ref-type-container-canvas",
       "flavour": "canvas",
       "props": {
-        "title": "Container — anchors & text slot",
+        "title": "Rectangle — anchors & text slot",
         "canvasId": "shape-ref-container"
       },
       "children": []

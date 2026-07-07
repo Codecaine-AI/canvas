@@ -97,7 +97,7 @@ function outlineShapeFor(object: InteractiveCanvasObject): OutlineShape | null {
   // 1:1 to its own polygon builder below. Checked via `type` (not
   // `style.shape`) to mirror how `arrow-shape`/`pill` are checked above —
   // `style.shape` is consulted as a secondary signal only where a pre-W5
-  // type (e.g. plain "container"/"process") might carry a shape override.
+  // type (e.g. plain "rectangle"/"process") might carry a shape override.
   if (object.type === "ellipse" || object.style?.shape === "ellipse") return "ellipse";
   if (object.type === "triangle") return "triangle";
   if (object.type === "parallelogram") return "parallelogram";
@@ -111,7 +111,7 @@ function outlineShapeFor(object: InteractiveCanvasObject): OutlineShape | null {
   if (object.type === "manual-input") return "manual-input";
   if (object.type === "hexagon") return "hexagon";
   if (object.type === "or-junction" || object.type === "summing-junction") return "junction";
-  // "container"/"process"/"document"/etc. all render as plain (rounded) rects
+  // "rectangle"/"process"/"document"/etc. all render as plain (rounded) rects
   // for outline purposes — corner radius doesn't change where a line from the
   // center crosses the border for any of our practical shape sizes. This also
   // covers "internal-storage" (TRUE-tier but its outline is a plain rect —

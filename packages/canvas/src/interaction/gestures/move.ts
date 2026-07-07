@@ -2,19 +2,13 @@
 
 /**
  * Move gesture: dragging one or more selected objects, with live snap
- * correction, spacing hints, and container drop-target tracking. Also owns
- * the drag-start "expansion" rules — FigJam section capture and container
- * descendants — that decide which extra objects ride along with the pressed
- * set (core.ts's press-pending router calls createMoveGesture when the drag
- * threshold is crossed).
+ * correction, spacing hints, and section drop-target tracking. Also owns the
+ * drag-start "expansion" rule — section descendants ride along with the
+ * pressed set (core.ts's press-pending router calls createMoveGesture when
+ * the drag threshold is crossed).
  */
 import type { CanvasAction } from "../../state/actions";
-import {
-  SECTION_CAPTURE_OVERLAP_THRESHOLD,
-  boundsForGeometries,
-  sectionCaptureMembers,
-  type CanvasPoint,
-} from "../../state/geometry";
+import { boundsForGeometries, type CanvasPoint } from "../../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../state/schema";
 import { objectDefForType } from "../../objects/object-def";
 import {
@@ -35,12 +29,11 @@ import {
 } from "../types";
 
 /**
- * FigJam section capture (W2): dragging a section also carries every object
- * positionally "inside" it (recursively, including nested sections' own
- * members) — computed once, at drag-start, and simply folded into the same
- * objectIds/startGeometries the generic move machinery already drags/snaps/
- * undoes as a single unit. Containers likewise carry their persisted
- * descendants. No new gesture kind or history plumbing needed.
+ * Dragging a section also carries its persisted parentId-descendants
+ * (recursively, including nested sections' own members) — computed once, at
+ * drag-start, and simply folded into the same objectIds/startGeometries the
+ * generic move machinery already drags/snaps/undoes as a single unit. No new
+ * gesture kind or history plumbing needed.
  */
 export function expandMoveObjectIds(
   document: InteractiveCanvasDocument,
@@ -50,15 +43,6 @@ export function expandMoveObjectIds(
   for (const id of dragObjectIds) {
     const object = document.objects.find((candidate) => candidate.id === id);
     const dragCapture = object ? objectDefForType(object.type)?.dragCapture : undefined;
-    if (dragCapture === "geometric-overlap") {
-      for (const memberId of sectionCaptureMembers(
-        document,
-        id,
-        SECTION_CAPTURE_OVERLAP_THRESHOLD,
-      )) {
-        expandedObjectIds.add(memberId);
-      }
-    }
     if (dragCapture === "descendants") {
       for (const memberId of descendantIds(document, id)) {
         expandedObjectIds.add(memberId);
@@ -70,7 +54,7 @@ export function expandMoveObjectIds(
 
 /**
  * Builds the MoveGesture state for a threshold-crossing drag of
- * `dragObjectIds`: expands the set (sections/containers, see
+ * `dragObjectIds`: expands the set (section descendants, see
  * expandMoveObjectIds) and captures start geometries for cancel-restore.
  */
 export function createMoveGesture(
@@ -152,7 +136,7 @@ export function stepFromMove(
   }
 
   // Live snap guides: compare the dragged set's union bounds against siblings
-  // + containers, then apply the resulting correction uniformly to every
+  // + sections, then apply the resulting correction uniformly to every
   // dragged object so relative offsets within a multi-selection are preserved.
   // ctx.snapResolver (T1.2.2) lets the host override/extend this closest-wins
   // computation (e.g. with a different candidate set) — when supplied, it wins;
@@ -188,18 +172,20 @@ export function stepFromMove(
       ]
     : [];
 
-  // Drop-target hit-testing: full container area (not just the border band),
-  // excluding the dragged objects and their own descendants so a container
-  // can't be dropped into itself or a child it contains.
+  // Drop-target hit-testing: probe with the center of the PRIMARY dragged
+  // object's current (snapped) bounds — not the pointer, and not the union of
+  // a multi-selection — excluding the dragged objects and their own
+  // descendants so a section can't be dropped into itself or a child it
+  // contains. objectIds preserves press order, so [0] is the primary object.
   const excludeIds = new Set(state.objectIds);
   for (const objectId of state.objectIds) {
     for (const descendantId of descendantIds(ctx.document, objectId)) {
       excludeIds.add(descendantId);
     }
   }
-  const snappedBounds = boundsForGeometries(Object.values(geometries));
-  const dropTargetCenter = snappedBounds
-    ? { x: snappedBounds.x + snappedBounds.width / 2, y: snappedBounds.y + snappedBounds.height / 2 }
+  const primaryGeometry = state.objectIds[0] ? geometries[state.objectIds[0]] : undefined;
+  const dropTargetCenter = primaryGeometry
+    ? { x: primaryGeometry.x + primaryGeometry.width / 2, y: primaryGeometry.y + primaryGeometry.height / 2 }
     : event.world;
   const dropTarget = hitTestDropTarget(ctx.document, dropTargetCenter, excludeIds);
 

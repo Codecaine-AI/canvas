@@ -48,7 +48,8 @@ function isId(value: unknown): value is string {
 
 function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectType {
   return (
-    value === "container" ||
+    // W6 — "rectangle" replaces the legacy "container" type:
+    value === "rectangle" ||
     value === "process" ||
     value === "decision" ||
     value === "text" ||
@@ -493,15 +494,23 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     });
   }
 
+  const objectById = new Map(objects.map((object) => [object.id, object]));
   for (const object of objects) {
-    if (object.parentId && !objectIds.has(object.parentId)) {
+    if (!object.parentId) continue;
+    if (!objectIds.has(object.parentId)) {
       issues.push({
         path: `$.objects.${object.id}.parentId`,
         message: `Unknown parent object: ${object.parentId}`,
       });
+    } else if (objectById.get(object.parentId)?.type !== "section") {
+      // W6 — sections are the only grouping object; parentId is auto-managed
+      // section membership, so any other parent type is a hard error.
+      issues.push({
+        path: `$.objects.${object.id}.parentId`,
+        message: `Parent must be a section: ${object.parentId}`,
+      });
     }
   }
-  const objectById = new Map(objects.map((object) => [object.id, object]));
   for (const object of objects) {
     const visited = new Set<string>([object.id]);
     let parentId = object.parentId ?? null;

@@ -215,15 +215,15 @@ export function Inspector({
             </button>
           </div>
         </div>
-        {selectedObject.type === "container" && (
+        {selectedObject.type === "section" && (
           <Button
             type="button"
             variant="outline"
             className="justify-start"
             onClick={() =>
               dispatch({
-                type: "canvas.fitContainerToChildren",
-                containerId: selectedObject.id,
+                type: "canvas.fitSectionToChildren",
+                sectionId: selectedObject.id,
               })
             }
           >

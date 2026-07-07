@@ -442,7 +442,7 @@
           }
         },
         {
-          "insert": " for container nesting, required world-space "
+          "insert": " recording section membership (auto-managed; a section is the only legal parent), required world-space "
         },
         {
           "insert": "geometry",
@@ -613,13 +613,13 @@
       },
       "text": [
         {
-          "insert": "container",
+          "insert": "rectangle",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " — a nesting/grouping box; other objects reference it via "
+          "insert": " — a plain rounded-rect box (W6 successor to the removed container type); no children, no containment role — grouping belongs exclusively to sections via "
         },
         {
           "insert": "parentId",
@@ -873,7 +873,7 @@
           }
         },
         {
-          "insert": " family, and geometrically \"captures\" overlapping objects when dragged."
+          "insert": " family; since W6 the only grouping object — members record membership via a persisted, auto-managed parentId and move with the section when it is dragged."
         }
       ],
       "children": []
@@ -1315,7 +1315,7 @@
           "insert": " enumerates the active tool: "
         },
         {
-          "insert": "select, hand, container, process, decision, text, sticky, source-node, annotation-marker, annotation",
+          "insert": "select, hand, rectangle, process, decision, text, sticky, source-node, annotation-marker, annotation",
           "attributes": {
             "code": true
           }
@@ -1689,7 +1689,7 @@
           }
         },
         {
-          "insert": " — reparents objects into a container (or clears parent), rejecting cycles and non-container targets."
+          "insert": " — reparents objects into a section (or clears parent), rejecting cycles and non-section targets."
         }
       ],
       "children": []
@@ -1754,13 +1754,22 @@
       },
       "text": [
         {
-          "insert": "canvas.fitContainerToChildren",
+          "insert": "canvas.fitSectionToChildren",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " — resizes a container to the padded bounding box of its children."
+          "insert": " — resizes a section to the padded bounding box of its parentId children. Its adopt-side sibling "
+        },
+        {
+          "insert": "canvas.captureSectionContents",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " assigns parentId to parentless objects overlapping the section by ≥60%."
         }
       ],
       "children": []
@@ -2092,7 +2101,16 @@
           }
         },
         {
-          "insert": "), align/distribute layout math, container-fit sizing, and stable id generation ("
+          "insert": "), align/distribute layout math, section-fit sizing, transitive section-membership walking ("
+        },
+        {
+          "insert": "sectionDescendantIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and stable id generation ("
         },
         {
           "insert": "createObjectId",
@@ -2123,7 +2141,16 @@
           }
         },
         {
-          "insert": " is the FigJam section-capture algorithm: it computes which objects a section \"carries\" when dragged purely from geometric overlap (an object is captured once its overlap with the section's bounds reaches a threshold fraction of the object's own area) — never via persisted "
+          "insert": " is the geometric capture seed behind "
+        },
+        {
+          "insert": "canvas.captureSectionContents",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": it computes which parentless objects a section should adopt purely from bounds overlap (an object qualifies once its overlap with the section's bounds reaches a threshold fraction of the object's own area). Capture is recursive — a qualifying nested section pulls in its own qualifying members transitively. It is NOT how membership is read day-to-day: membership is the persisted "
         },
         {
           "insert": "parentId",
@@ -2132,7 +2159,16 @@
           }
         },
         {
-          "insert": " membership. Capture is recursive: a captured nested section pulls in its own captured members transitively, so dragging an outer section carries everything nested inside it."
+          "insert": ", and "
+        },
+        {
+          "insert": "sectionDescendantIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " walks it transitively (drag carry, delete cascade, contentHidden, and view-crop all read that)."
         }
       ],
       "children": []
@@ -2402,7 +2438,7 @@
           }
         },
         {
-          "insert": " (the largest file, exercising document validation and the full action/reducer vocabulary — object and connection CRUD, selection, undo/redo, alignment/distribution, container fitting, link status resolution), "
+          "insert": " (the largest file, exercising document validation and the full action/reducer vocabulary — object and connection CRUD, selection, undo/redo, alignment/distribution, section fitting, link status resolution), "
         },
         {
           "insert": "schema.waypoints.test.ts",
@@ -2828,7 +2864,7 @@
       },
       "text": [
         {
-          "insert": "container"
+          "insert": "rectangle"
         }
       ],
       "children": []
@@ -2839,16 +2875,16 @@
       "props": {},
       "text": [
         {
-          "insert": "A plain nesting/grouping box for the older ("
+          "insert": "A plain rounded-rect shape — the W6 successor to the removed "
         },
         {
-          "insert": "parentId",
+          "insert": "container",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ")-based containment model — distinct from FigJam "
+          "insert": " type, stripped of any containment role. The old container-based containment model is gone: grouping now belongs exclusively to "
         },
         {
           "insert": "section",
@@ -2857,7 +2893,7 @@
           }
         },
         {
-          "insert": ", which captures members geometrically instead (see below). Other objects opt into membership by setting their "
+          "insert": ", and membership is a persisted, auto-managed "
         },
         {
           "insert": "parentId",
@@ -2870,20 +2906,7 @@
           }
         },
         {
-          "insert": " to the container's "
-        },
-        {
-          "insert": "id",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
-          }
-        },
-        {
-          "insert": "; the container itself carries no list of children — membership is always read by scanning "
+          "insert": " — assigned when an object is dropped into a section, cleared when it is dropped onto open canvas — still read by scanning "
         },
         {
           "insert": "document.objects",
@@ -2909,7 +2932,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": ". A rectangle itself carries no children and captures nothing."
         }
       ],
       "children": []
@@ -2995,7 +3018,7 @@
           }
         },
         {
-          "insert": " has no dedicated container case, so it falls through to the function's default). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
+          "insert": " has no dedicated rectangle case, so it falls through to the function's default). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
         },
         {
           "insert": "align-items: flex-start",
@@ -3018,17 +3041,17 @@
       "flavour": "constraint",
       "props": {
         "severity": "soft",
-        "title": "fitContainerToChildren resizes only container objects"
+        "title": "fitSectionToChildren resizes only section objects"
       },
       "text": [
         {
-          "insert": "fitContainerToChildren",
+          "insert": "fitSectionToChildren",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/model/geometry.ts",
-              "symbol": "fitContainerToChildren"
+              "symbol": "fitSectionToChildren"
             }
           }
         },
@@ -3036,7 +3059,7 @@
           "insert": " (and the "
         },
         {
-          "insert": "canvas.fitContainerToChildren",
+          "insert": "canvas.fitSectionToChildren",
           "attributes": {
             "code": true,
             "reference": {
@@ -3062,7 +3085,7 @@
           "insert": " is exactly "
         },
         {
-          "insert": "\"container\"",
+          "insert": "\"section\"",
           "attributes": {
             "code": true,
             "reference": {
@@ -3072,7 +3095,7 @@
           }
         },
         {
-          "insert": " — it resizes the container to the "
+          "insert": " — it resizes the section to the "
         },
         {
           "insert": "boundsForGeometries",
@@ -3099,7 +3122,7 @@
           }
         },
         {
-          "insert": " points at it, padded by 32px by default. Sections use a different, geometry-only capture mechanism ("
+          "insert": " points at it, padded by 32px by default. The geometric capture helper ("
         },
         {
           "insert": "sectionCaptureMembers",
@@ -3113,7 +3136,16 @@
           }
         },
         {
-          "insert": ") and are never affected by this action."
+          "insert": ", ≥60% overlap, recursive) survives only as the seed for "
+        },
+        {
+          "insert": "canvas.captureSectionContents",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which adopts overlapping parentless objects by setting their parentId to the section."
         }
       ],
       "children": []
@@ -4877,7 +4909,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Added in W2 (FigJam sections + V2 Flow shape vocabulary) — the one type that captures membership by geometry rather than "
+          "insert": "Added in W2 (FigJam sections + V2 Flow shape vocabulary) — since W6 the ONLY grouping object: members record membership via a persisted, auto-managed "
         },
         {
           "insert": "parentId",
@@ -4890,7 +4922,7 @@
           }
         },
         {
-          "insert": ". Requires "
+          "insert": " (see the constraint below). Requires "
         },
         {
           "insert": "title",
@@ -5173,9 +5205,48 @@
       "flavour": "constraint",
       "props": {
         "severity": "hard",
-        "title": "Section membership is geometric, never persisted parentId"
+        "title": "Section membership is persisted parentId, auto-managed on drop"
       },
       "text": [
+        {
+          "insert": "Membership is recorded on the member: its "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is set to the section's id when a drop lands inside a section (the drop target is probed at the center of the primary dragged object's bounds, not the pointer) and cleared when it lands on open canvas. Dragging a section carries its transitive "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " descendants ("
+        },
+        {
+          "insert": "dragCapture: \"descendants\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", walked by "
+        },
+        {
+          "insert": "sectionDescendantIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and sections nest in sections the same way — the only legal parent type, with cycles rejected by validation. "
+        },
         {
           "insert": "sectionCaptureMembers",
           "attributes": {
@@ -5188,34 +5259,25 @@
           }
         },
         {
-          "insert": " computes which objects a section \"carries\" when dragged purely from bounds overlap — an object is captured once its overlap with the section's bounds reaches "
+          "insert": " ("
         },
         {
           "insert": "SECTION_CAPTURE_OVERLAP_THRESHOLD",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
-              "symbol": "SECTION_CAPTURE_OVERLAP_THRESHOLD"
-            }
+            "code": true
           }
         },
         {
-          "insert": " (0.6, i.e. 60%) of the OBJECT's own area, recomputed fresh on every drag rather than read from any stored relationship. Capture is recursive: a captured nested section pulls in its own captured members transitively. Do not attempt to read section membership from "
+          "insert": ", 0.6 of the object's own area, recursive) is no longer consulted during drags — it survives only as the seed for "
         },
         {
-          "insert": "parentId",
+          "insert": "canvas.captureSectionContents",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " — sections never set or rely on it for this purpose."
+          "insert": ", which adopts overlapping parentless objects."
         }
       ],
       "children": []
@@ -5306,20 +5368,16 @@
           }
         },
         {
-          "insert": " computes nesting depth from the same 60%-bounds-containment reading "
+          "insert": " computes nesting depth from the "
         },
         {
-          "insert": "sectionCaptureMembers",
+          "insert": "parentId",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/geometry.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " uses, and paints deeper (more-nested) sections after their ancestors — so a nested section's tint visibly layers on top rather than blending underneath. Ties (non-section-vs-non-section, or sibling sections at the same depth) fall back to the document's own "
+          "insert": " chain (root sections lowest), and paints deeper (more-nested) sections after their ancestors — so a nested section's tint visibly layers on top rather than blending underneath. Ties (non-section-vs-non-section, or sibling sections at the same depth) fall back to the document's own "
         },
         {
           "insert": "objects",
@@ -6678,13 +6736,13 @@
           "insert": " (3+ objects required) spaces objects evenly between the first and last member's position along an axis, by sorting on that axis and interpolating equal gaps; "
         },
         {
-          "insert": "fitContainerToChildren",
+          "insert": "fitSectionToChildren",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/model/geometry.ts",
-              "symbol": "fitContainerToChildren"
+              "symbol": "fitSectionToChildren"
             }
           }
         },
@@ -6692,7 +6750,7 @@
           "insert": " resizes a "
         },
         {
-          "insert": "container",
+          "insert": "section",
           "attributes": {
             "code": true
           }
@@ -6740,7 +6798,7 @@
           "insert": "/"
         },
         {
-          "insert": "canvas.fitContainerToChildren",
+          "insert": "canvas.fitSectionToChildren",
           "attributes": {
             "code": true,
             "reference": {

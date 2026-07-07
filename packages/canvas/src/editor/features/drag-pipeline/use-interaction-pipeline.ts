@@ -74,7 +74,7 @@ type DragPointerSnapshot = {
  * endpoint circle is rendered as a sibling, not inside, the hit path — order
  * here matters only for elements nested under one another); object shapes
  * carry data-canvas-object-id; everything else falls through to a pure
- * world-space hitTestObjects (topmost-first, container border band).
+ * world-space hitTestObjects (topmost-first, section border band).
  */
 function resolveHit(
   target: Element,

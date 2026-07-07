@@ -148,7 +148,7 @@ export type MoveGesture = {
   objectIds: string[];
   startGeometries: Record<string, CanvasGeometry>;
   hasEmitted: boolean;
-  /** Container currently under the pointer (drop target), tracked for release-time canvas.setParent. */
+  /** Section currently under the drag probe (drop target), tracked for release-time canvas.setParent. */
   dropTargetId: string | null;
 };
 
@@ -170,7 +170,7 @@ export type MarqueeGesture = {
 
 /**
  * Armed-tool object creation (4.2.2): pointer-down with a creatable tool armed
- * (container/process/decision/text/sticky/source-node/annotation-marker)
+ * (rectangle/process/decision/text/sticky/source-node/annotation-marker)
  * starts this gesture over empty canvas. A sub-threshold release creates a
  * default-size object centered at the point; a drag creates an object sized
  * to the normalized, min-size-clamped dragged rect. Either way, on completion

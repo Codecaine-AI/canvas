@@ -109,23 +109,28 @@ export function fitDocument(
   return fitBounds(documentBounds(document, 0), screen, padding);
 }
 
+/**
+ * Bounds of a named view's section plus its transitive parentId descendants
+ * (sections are the only grouping object). Exported name predates the
+ * container-type removal; kept for the editor's existing import.
+ */
 export function containerViewBounds(
   document: InteractiveCanvasDocument,
-  containerId: string,
+  sectionId: string,
   padding = 32,
 ): CanvasBounds | null {
-  const container = document.objects.find(
-    (object) => object.id === containerId && object.type === "container",
+  const section = document.objects.find(
+    (object) => object.id === sectionId && object.type === "section",
   );
-  if (!container) return null;
+  if (!section) return null;
 
   const objectById = new Map(document.objects.map((object) => [object.id, object]));
-  const isDescendantOfContainer = (objectId: string): boolean => {
+  const isDescendantOfSection = (objectId: string): boolean => {
     let parentId = objectById.get(objectId)?.parentId ?? null;
     const visited = new Set<string>();
 
     while (parentId) {
-      if (parentId === containerId) return true;
+      if (parentId === sectionId) return true;
       if (visited.has(parentId)) return false;
       visited.add(parentId);
       parentId = objectById.get(parentId)?.parentId ?? null;
@@ -134,7 +139,7 @@ export function containerViewBounds(
     return false;
   };
   const geometries = document.objects
-    .filter((object) => object.id === containerId || isDescendantOfContainer(object.id))
+    .filter((object) => object.id === sectionId || isDescendantOfSection(object.id))
     .map((object) => object.geometry);
 
   return boundsForGeometries(geometries, padding);

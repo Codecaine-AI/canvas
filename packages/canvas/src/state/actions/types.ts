@@ -17,7 +17,7 @@ import type {
 export type CanvasTool =
   | "select"
   | "hand"
-  | "container"
+  | "rectangle"
   | "process"
   | "decision"
   | "text"
@@ -92,8 +92,8 @@ export type CanvasAgentPatchOperation =
       annotation: InteractiveCanvasAnnotation;
     }
   | {
-      type: "fitContainerToChildren";
-      containerId: string;
+      type: "fitSectionToChildren";
+      sectionId: string;
       padding?: number;
     };
 
@@ -198,7 +198,11 @@ export type CanvasAction =
       axis: "left" | "center-x" | "right" | "top" | "center-y" | "bottom";
     }
   | { type: "canvas.distributeSelection"; axis: "horizontal" | "vertical" }
-  | { type: "canvas.fitContainerToChildren"; containerId: string; padding?: number }
+  | { type: "canvas.fitSectionToChildren"; sectionId: string; padding?: number }
+  // W6 — records geometric capture as persisted membership: sets
+  // parentId = sectionId for objects sectionCaptureMembers() finds whose
+  // current parentId is null.
+  | { type: "canvas.captureSectionContents"; sectionId: string }
   | {
       type: "canvas.resolveLinkStatuses";
       knownPaths: string[];

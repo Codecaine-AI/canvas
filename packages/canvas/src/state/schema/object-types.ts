@@ -1,7 +1,9 @@
 "use client";
 
 export type InteractiveCanvasObjectType =
-  | "container"
+  // W6 — "rectangle" replaces the legacy "container" type: a dumb rounded-rect
+  // shape with no children. Sections are the only grouping object now.
+  | "rectangle"
   | "process"
   | "decision"
   | "text"

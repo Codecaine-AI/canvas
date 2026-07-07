@@ -402,17 +402,17 @@
           }
         },
         {
-          "insert": ". This is also where FigJam-style section capture happens: dragging a section expands the dragged id set to every object positionally inside it (recursively, via "
+          "insert": ". This is also where a section drag picks up its members: promotion to move expands the dragged id set to the section's recorded parentId descendants (recursively, via "
         },
         {
-          "insert": "sectionCaptureMembers",
+          "insert": "expandMoveObjectIds",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/geometry.ts",
-              "symbol": "sectionCaptureMembers",
-              "label": "sectionCaptureMembers"
+              "path": "packages/canvas/src/interaction/gestures/move.ts",
+              "symbol": "expandMoveObjectIds",
+              "label": "expandMoveObjectIds"
             }
           }
         },
@@ -490,7 +490,7 @@
           }
         },
         {
-          "insert": "), applies it uniformly across the dragged set, tracks a live drop-target container for release-time "
+          "insert": "), applies it uniformly across the dragged set, tracks a live drop-target section — probed at the center of the primary dragged object's current bounds — for release-time "
         },
         {
           "insert": "canvas.setParent",
@@ -499,7 +499,7 @@
           }
         },
         {
-          "insert": ", and dispatches "
+          "insert": " (assigning membership on drop into a section, clearing it on open canvas), and dispatches "
         },
         {
           "insert": "canvas.updateObjectGeometries",
@@ -718,7 +718,7 @@
           }
         },
         {
-          "insert": ". Starts when a creatable tool (container, process, decision, text, sticky, source-node, annotation-marker, document, person, database, chat, section, pill, arrow-shape, predefined-process, code-block, chip-icon) is armed and the pointer goes down. A sub-threshold release creates a default-size object centered at the point; a drag creates an object sized to the normalized, "
+          "insert": ". Starts when a creatable tool (rectangle, process, decision, text, sticky, source-node, annotation-marker, document, person, database, chat, section, pill, arrow-shape, predefined-process, code-block, chip-icon) is armed and the pointer goes down. A sub-threshold release creates a default-size object centered at the point; a drag creates an object sized to the normalized, "
         },
         {
           "insert": "MIN_PLACE_DRAG_SIZE",
@@ -742,7 +742,7 @@
           }
         },
         {
-          "insert": " and the new object becomes the selection."
+          "insert": " and the new object becomes the selection, adopting a parentId when placed inside a section."
         }
       ],
       "children": []
@@ -1027,7 +1027,7 @@
           }
         },
         {
-          "insert": " during a connector drag, and section-capture during a move — becomes unit-testable with plain objects and a fake clock/scheduler, which is exactly what the interaction test suite below exercises. Second, and more fundamentally, it means every "
+          "insert": " during a connector drag, and section drop-targeting during a move — becomes unit-testable with plain objects and a fake clock/scheduler, which is exactly what the interaction test suite below exercises. Second, and more fundamentally, it means every "
         },
         {
           "insert": "CanvasAction",
@@ -1114,7 +1114,7 @@
           }
         },
         {
-          "insert": " (100) nearest candidates — siblings sharing the dragged set's parent, plus every container regardless of nesting — within a caller-supplied screen-space threshold (6px, divided by zoom so the snap feels constant at any zoom level, per "
+          "insert": " (100) nearest candidates — siblings sharing the dragged set's parent, plus every section regardless of nesting — within a caller-supplied screen-space threshold (6px, divided by zoom so the snap feels constant at any zoom level, per "
         },
         {
           "insert": "SNAP_THRESHOLD_SCREEN_PX",
@@ -1334,7 +1334,7 @@
           }
         },
         {
-          "insert": ", so copying a container brings its children along), plus every connection whose both endpoints land inside the captured set, deep-cloned via "
+          "insert": ", so copying a section brings its children along), plus every connection whose both endpoints land inside the captured set, deep-cloned via "
         },
         {
           "insert": "structuredClone",

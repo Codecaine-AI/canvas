@@ -814,7 +814,7 @@
           "insert": " — not a single universal layout. The base case (plain rounded-rect: "
         },
         {
-          "insert": "container",
+          "insert": "rectangle",
           "attributes": {
             "code": true
           }

@@ -3,7 +3,9 @@
 import {
   alignObjects,
   distributeObjects,
-  fitContainerToChildren,
+  fitSectionToChildren,
+  SECTION_CAPTURE_OVERLAP_THRESHOLD,
+  sectionCaptureMembers,
   snapGeometry,
 } from "../geometry";
 import { selectedObjectIds } from "./helpers";
@@ -118,7 +120,7 @@ export function handleSetParent(
   const objectIdSet = new Set(action.objectIds);
   const objectById = new Map(state.document.objects.map((object) => [object.id, object]));
   const parent = action.parentId ? objectById.get(action.parentId) : null;
-  if (action.parentId && parent?.type !== "container") return state;
+  if (action.parentId && parent?.type !== "section") return state;
   if (action.parentId && objectIdSet.has(action.parentId)) return state;
 
   let ancestorId = parent?.parentId ?? null;
@@ -148,7 +150,7 @@ export function handleSetParent(
   };
   return withHistory(state, document, {
     source: "human",
-    summary: parent ? `Moved into ${parent.label}` : "Moved out of container",
+    summary: parent ? `Moved into ${parent.label}` : "Moved out of section",
     changedObjectIds,
     changedConnectionIds: [],
     changedAnnotationIds: [],
@@ -185,19 +187,64 @@ export function handleDistributeSelection(
   });
 }
 
-export function handleFitContainerToChildren(
+export function handleFitSectionToChildren(
   state: InteractiveCanvasState,
-  action: Extract<CanvasAction, { type: "canvas.fitContainerToChildren" }>,
+  action: Extract<CanvasAction, { type: "canvas.fitSectionToChildren" }>,
 ): InteractiveCanvasState {
   return withHistory(
     state,
-    fitContainerToChildren(state.document, action.containerId, action.padding),
+    fitSectionToChildren(state.document, action.sectionId, action.padding),
     {
       source: "human",
-      summary: "Fit container",
-      changedObjectIds: [action.containerId],
+      summary: "Fit section",
+      changedObjectIds: [action.sectionId],
       changedConnectionIds: [],
       changedAnnotationIds: [],
     },
   );
+}
+
+export function handleCaptureSectionContents(
+  state: InteractiveCanvasState,
+  action: Extract<CanvasAction, { type: "canvas.captureSectionContents" }>,
+): InteractiveCanvasState {
+  const section = state.document.objects.find((object) => object.id === action.sectionId);
+  if (section?.type !== "section") return state;
+  const captured = sectionCaptureMembers(
+    state.document,
+    action.sectionId,
+    SECTION_CAPTURE_OVERLAP_THRESHOLD,
+  );
+  // Geometric capture can claim the section's own (root) ancestor when their
+  // bounds overlap enough; adopting it would create a parentId cycle, so the
+  // ancestor chain is excluded (mirrors handleSetParent's guard).
+  const objectById = new Map(state.document.objects.map((object) => [object.id, object]));
+  const ancestorIds = new Set<string>();
+  let ancestorId = section.parentId ?? null;
+  while (ancestorId && !ancestorIds.has(ancestorId)) {
+    ancestorIds.add(ancestorId);
+    ancestorId = objectById.get(ancestorId)?.parentId ?? null;
+  }
+  // Only unparented objects are adopted — objects already inside another
+  // section (or this one) keep their recorded membership.
+  const changedObjectIds = state.document.objects
+    .filter(
+      (object) => captured.has(object.id) && !object.parentId && !ancestorIds.has(object.id),
+    )
+    .map((object) => object.id);
+  if (changedObjectIds.length === 0) return state;
+  const changedIdSet = new Set(changedObjectIds);
+  const document = {
+    ...state.document,
+    objects: state.document.objects.map((object) =>
+      changedIdSet.has(object.id) ? { ...object, parentId: action.sectionId } : object,
+    ),
+  };
+  return withHistory(state, document, {
+    source: "human",
+    summary: `Captured into ${section.label}`,
+    changedObjectIds,
+    changedConnectionIds: [],
+    changedAnnotationIds: [],
+  });
 }

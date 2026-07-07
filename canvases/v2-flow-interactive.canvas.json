@@ -47,7 +47,7 @@
     },
     {
       "id": "interview-inputs",
-      "type": "container",
+      "type": "rectangle",
       "label": "Interview Inputs",
       "geometry": {
         "x": 300,
@@ -69,7 +69,7 @@
       "id": "interview-purpose",
       "type": "process",
       "label": "Overall context / purpose",
-      "parentId": "interview-inputs",
+      "parentId": null,
       "geometry": {
         "x": 350,
         "y": 150,
@@ -83,9 +83,9 @@
     },
     {
       "id": "question-bank",
-      "type": "container",
+      "type": "rectangle",
       "label": "Questions",
-      "parentId": "interview-inputs",
+      "parentId": null,
       "geometry": {
         "x": 340,
         "y": 280,
@@ -101,7 +101,7 @@
       "id": "question-one",
       "type": "process",
       "label": "Question 1",
-      "parentId": "question-bank",
+      "parentId": null,
       "geometry": {
         "x": 365,
         "y": 330,
@@ -117,7 +117,7 @@
       "id": "question-two",
       "type": "process",
       "label": "Question 2",
-      "parentId": "question-bank",
+      "parentId": null,
       "geometry": {
         "x": 365,
         "y": 460,
@@ -133,7 +133,7 @@
       "id": "question-n",
       "type": "process",
       "label": "Question N",
-      "parentId": "question-bank",
+      "parentId": null,
       "geometry": {
         "x": 365,
         "y": 635,
@@ -147,7 +147,7 @@
     },
     {
       "id": "interview-flow",
-      "type": "container",
+      "type": "rectangle",
       "label": "Interview Flow",
       "geometry": {
         "x": 660,
@@ -169,7 +169,7 @@
       "id": "generate-transition-response",
       "type": "source-node",
       "label": "Generate transition response",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 750,
         "y": 285,
@@ -185,7 +185,7 @@
       "id": "adapt-question",
       "type": "source-node",
       "label": "Adapt question based on history",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 750,
         "y": 430,
@@ -201,7 +201,7 @@
       "id": "get-next-question",
       "type": "process",
       "label": "Get next question",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 720,
         "y": 700,
@@ -217,7 +217,7 @@
       "id": "ai-asks-question",
       "type": "process",
       "label": "AI asks question",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1120,
         "y": 110,
@@ -233,7 +233,7 @@
       "id": "interviewee-response",
       "type": "process",
       "label": "Interviewee response",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1130,
         "y": 300,
@@ -247,9 +247,9 @@
     },
     {
       "id": "memory-bank",
-      "type": "container",
+      "type": "rectangle",
       "label": "Memory Bank",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1325,
         "y": 175,
@@ -271,7 +271,7 @@
       "type": "sticky",
       "label": "Memory bank",
       "body": "Memory of the current interview across all questions.",
-      "parentId": "memory-bank",
+      "parentId": null,
       "geometry": {
         "x": 1460,
         "y": 205,
@@ -285,9 +285,9 @@
     },
     {
       "id": "memory-actions",
-      "type": "container",
+      "type": "rectangle",
       "label": "Memory Actions",
-      "parentId": "memory-bank",
+      "parentId": null,
       "geometry": {
         "x": 1360,
         "y": 345,
@@ -304,7 +304,7 @@
       "type": "database",
       "label": "Memory structure",
       "body": "Typed memory schema and stored memories.",
-      "parentId": "memory-bank",
+      "parentId": null,
       "geometry": {
         "x": 1530,
         "y": 345,
@@ -320,7 +320,7 @@
       "id": "enough-context-decision",
       "type": "decision",
       "label": "Enough context?",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 980,
         "y": 635,
@@ -336,7 +336,7 @@
       "id": "response-enough-context",
       "type": "decision",
       "label": "Does response provide enough context?",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1200,
         "y": 665,
@@ -350,9 +350,9 @@
     },
     {
       "id": "probing-response",
-      "type": "container",
+      "type": "rectangle",
       "label": "Probing response",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1465,
         "y": 620,
@@ -368,7 +368,7 @@
       "id": "not-enough-context",
       "type": "decision",
       "label": "Not enough context",
-      "parentId": "probing-response",
+      "parentId": null,
       "geometry": {
         "x": 1495,
         "y": 665,
@@ -384,7 +384,7 @@
       "id": "unclear-message",
       "type": "decision",
       "label": "Unclear message",
-      "parentId": "probing-response",
+      "parentId": null,
       "geometry": {
         "x": 1495,
         "y": 735,
@@ -400,7 +400,7 @@
       "id": "generate-probing-question",
       "type": "source-node",
       "label": "Generate probing question",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1695,
         "y": 330,
@@ -432,7 +432,7 @@
       "type": "chat",
       "label": "Live Q&A exchange",
       "body": "Realtime back-and-forth rendered to the interviewee.",
-      "parentId": "interview-flow",
+      "parentId": null,
       "geometry": {
         "x": 1120,
         "y": 175,

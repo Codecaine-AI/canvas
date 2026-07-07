@@ -36,7 +36,17 @@ function segmentCrossesInterior(
   return false;
 }
 
-/** Collects `objectId` and every transitive parentId above it in `document`. */
+/** Whether `point` lies strictly inside `bounds` (border contact does not count). */
+function boundsStrictlyContain(bounds: CanvasBounds, point: { x: number; y: number }): boolean {
+  return (
+    point.x > bounds.x &&
+    point.x < bounds.x + bounds.width &&
+    point.y > bounds.y &&
+    point.y < bounds.y + bounds.height
+  );
+}
+
+/** Collects `objectId` and every transitive parentId above it in `document` (section ancestors). */
 function collectSelfAndAncestors(document: InteractiveCanvasDocument, objectId: string): Set<string> {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const ids = new Set<string>([objectId]);
@@ -95,15 +105,25 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
 
     for (const { connection, routed, fromObject, toObject } of results) {
       const points = pathPoints(routed.path);
-      // Exclude the two endpoints themselves *and* any container that is an
-      // ancestor of either endpoint — a connection touching a nested object
-      // necessarily passes through that object's parent containers' bounds,
-      // which is containment, not an obstacle crossing.
+      // Exclude the two endpoints themselves *and* any section that is a
+      // parentId ancestor of either endpoint — a connection touching a nested
+      // object necessarily passes through its parent sections' bounds, which
+      // is containment, not an obstacle crossing. Additionally exclude any
+      // shape whose interior strictly contains one of the connection's anchor
+      // points: since sections became the only parentId grouping, ex-container
+      // rectangles (e.g. v2-flow's "interview-flow") enclose their former
+      // children purely geometrically, and no route starting inside a shape
+      // can avoid crossing that shape's interior.
       const excluded = new Set<string>([
         ...collectSelfAndAncestors(v2FlowSampleDocument, fromObject.id),
         ...collectSelfAndAncestors(v2FlowSampleDocument, toObject.id),
       ]);
-      const nonOwnerObjects = v2FlowSampleDocument.objects.filter((object) => !excluded.has(object.id));
+      const nonOwnerObjects = v2FlowSampleDocument.objects.filter(
+        (object) =>
+          !excluded.has(object.id) &&
+          !boundsStrictlyContain(object.geometry, routed.start) &&
+          !boundsStrictlyContain(object.geometry, routed.end),
+      );
 
       for (let i = 1; i < points.length; i += 1) {
         const a = points[i - 1]!;

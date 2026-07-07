@@ -124,7 +124,7 @@ describe("ShapesPanel interaction", () => {
     const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
     const { container } = render(<ShapesPanel onPick={onPick} onPickEntry={onPickEntry} />);
     fireEvent.click(container.querySelector('[data-shape-entry="basic-square"]')!);
-    expect(onPick).toHaveBeenCalledWith("container");
+    expect(onPick).toHaveBeenCalledWith("rectangle");
     expect(onPickEntry).toHaveBeenCalledTimes(1);
   });
 

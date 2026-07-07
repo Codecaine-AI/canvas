@@ -1147,7 +1147,7 @@
           "insert": " vocabulary ("
         },
         {
-          "insert": "container/process/decision/text/sticky/document/person/database/chat",
+          "insert": "rectangle/process/decision/text/sticky/document/person/database/chat",
           "attributes": {
             "code": true
           }

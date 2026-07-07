@@ -38,7 +38,7 @@ export function defaultGeometryForPlacement(
 /** Maps an "armed" creation tool to the object type it creates; null for select/hand (and the stale "annotation" tool). */
 export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType | null {
   switch (tool) {
-    case "container":
+    case "rectangle":
     case "process":
     case "decision":
     case "text":
@@ -100,7 +100,7 @@ export function placeGeometryFor(state: PlaceGesture): CanvasGeometry {
  * editor can render an outline of what will be created. On release, finalizes
  * the object (click -> default size at point; drag -> normalized/clamped
  * rect), assigns parentId via the same full-bounds drop-target hit-test used
- * by drag-and-drop-into-container moves, dispatches the creation, reverts the
+ * by drag-and-drop-into-section moves, dispatches the creation, reverts the
  * tool to "select" (canvas.addObject's reducer already selects the new
  * object), and returns to idle.
  */

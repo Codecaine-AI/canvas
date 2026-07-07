@@ -16,7 +16,6 @@ import type {
 } from "../state/schema";
 import { codeBlockDef } from "./code-block/def";
 import { connectorDef } from "./connector/def";
-import { containerDef } from "./container/def";
 import { sectionDef } from "./section/def";
 import { sourceNodeDef } from "./source-node/def";
 import { stickyDef } from "./sticky/def";
@@ -30,6 +29,7 @@ import { octagonDef } from "./shapes/basic/octagon";
 import { pentagonDef } from "./shapes/basic/pentagon";
 import { plusDef } from "./shapes/basic/plus";
 import { processDef } from "./shapes/basic/process";
+import { rectangleDef } from "./shapes/basic/rectangle";
 import { starDef } from "./shapes/basic/star";
 import { triangleDef } from "./shapes/basic/triangle";
 import { cylinderHorizontalDef } from "./shapes/flowchart/cylinder-horizontal";
@@ -57,7 +57,7 @@ import { pillDef } from "./shapes/misc/pill";
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
  * registry"). An ObjectDef is the behavior contract for one KIND of thing
  * that behaves differently on the canvas — specials (section, sticky,
- * code-block, connector, container, text) are first-class; the ~40 uniform
+ * code-block, connector, text) are first-class; the ~40 uniform
  * shapes share ONE behavior and get their ObjectDef generated from a
  * ShapeDef via `objects/shapes/base.tsx`.
  *
@@ -99,15 +99,14 @@ export interface ObjectRenderProps {
 /** Resize-handle set: full 8-handle compass, corner-only (sections), or none. */
 export type ObjectHandles = "all" | "corners" | "none";
 
-/** Pointer hit-testing: whole box, or a border band with a pass-through interior (containers). */
-export type ObjectHitTest = "solid" | "border-band";
+/** Pointer hit-testing: every kind hit-tests on its whole box. */
+export type ObjectHitTest = "solid";
 
 /**
- * What a drag of this object carries along: geometric ≥60%-overlap capture
- * (sections — ephemeral, never persisted), persisted `parentId` descendants
- * (containers), or nothing.
+ * What a drag of this object carries along: persisted `parentId` descendants
+ * (sections — membership is auto-managed on drop), or nothing.
  */
-export type ObjectDragCapture = "geometric-overlap" | "descendants" | "none";
+export type ObjectDragCapture = "descendants" | "none";
 
 /**
  * What inline text editing targets on this object: the standard `label`, the
@@ -218,14 +217,13 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
  *  - `section` is dispatched on `object.type` (the ONLY type the legacy
- *    renderer checked before style.shape). `container` and `source-node`
- *    deliberately are NOT type-keyed for RENDER dispatch: legacy rendering
- *    for them is purely style.shape-driven (an explicit non-default
- *    style.shape wins), so their objects flow through the render-shape table
- *    — typically to the rounded-rect def. Their ObjectDefs still register in
- *    OBJECT_DEFS to carry defaults (step 6) and behavioral flags (step 4,
- *    which needs a type-keyed BEHAVIOR lookup, distinct from render
- *    dispatch).
+ *    renderer checked before style.shape). `rectangle` and `source-node`
+ *    deliberately are NOT type-keyed for RENDER dispatch: their rendering is
+ *    purely style.shape-driven (an explicit non-default style.shape wins),
+ *    so their objects flow through the render-shape table — typically to the
+ *    rounded-rect def. Their ObjectDefs still register in OBJECT_DEFS to
+ *    carry defaults (step 6) and behavioral flags (step 4, which needs a
+ *    type-keyed BEHAVIOR lookup, distinct from render dispatch).
  *  - everything else is dispatched on the effective render shape, so e.g. a
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
@@ -283,7 +281,7 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   processDef,
   ellipseDef,
   personDef,
-  containerDef,
+  rectangleDef,
   textDef,
   sourceNodeDef,
   decisionDef,

@@ -19,7 +19,7 @@ export interface InteractiveCanvasViewerProps {
   selectedObjectIds?: string[];
   changedObjectIds?: string[];
   compact?: boolean;
-  /** When set, fits the viewport to this container object's bounds (D4 view-cropping). */
+  /** When set, fits the viewport to this section object's bounds (D4 view-cropping). */
   view?: string;
   onObjectSelect?: (objectId: string) => void;
   onCanvasSelect?: () => void;

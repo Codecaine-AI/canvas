@@ -214,7 +214,7 @@
           }
         },
         {
-          "insert": " list (typically every other object in the document), with the two endpoint objects' own owners and their container-ancestor chain excluded via "
+          "insert": " list (typically every other object in the document), with the two endpoint objects' own owners and their section-ancestor chain excluded via "
         },
         {
           "insert": "collectAncestorIds",
@@ -228,7 +228,7 @@
           }
         },
         {
-          "insert": " — a connection touching a nested object necessarily passes through its parent containers' bounds, which is containment rather than an obstacle crossing to be routed around. If the A* generator throws or returns fewer than 2 usable points, routing falls back to "
+          "insert": " — a connection touching a nested object necessarily passes through its ancestor sections' bounds, which is containment rather than an obstacle crossing to be routed around. If the A* generator throws or returns fewer than 2 usable points, routing falls back to "
         },
         {
           "insert": "routeElbow",
@@ -730,7 +730,7 @@
           }
         },
         {
-          "insert": " — a choke point wrapped around every document-producing action (drag/section-carry commits, nudges, resize, align/distribute, fit-container, inspector geometry patches) — so the waypoint fix-up shares the action's own history entry and a single undo restores both geometry and waypoints together. "
+          "insert": " — a choke point wrapped around every document-producing action (drag/section-carry commits, nudges, resize, align/distribute, fit-section, inspector geometry patches) — so the waypoint fix-up shares the action's own history entry and a single undo restores both geometry and waypoints together. "
         },
         {
           "insert": "canvas.undo",
@@ -1227,7 +1227,7 @@
           }
         },
         {
-          "insert": ", container/ancestor exclusion from the obstacle set, and the fallback to "
+          "insert": ", section/ancestor exclusion from the obstacle set, and the fallback to "
         },
         {
           "insert": "routeElbow",

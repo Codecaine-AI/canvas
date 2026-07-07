@@ -330,21 +330,16 @@ function stepFromPressing(
     if (
       dragObjectIds.some((id) => {
         const object = ctx.document.objects.find((candidate) => candidate.id === id);
-        // Locked sections refuse drag (W2). Section-ness is expressed through
-        // the def's capture behavior — "geometric-overlap" is section-only —
-        // while `locked` stays a plain object property.
-        return (
-          object &&
-          objectDefForType(object.type)?.dragCapture === "geometric-overlap" &&
-          object.locked
-        );
+        // Locked sections refuse drag (W2); `locked` stays a plain object
+        // property.
+        return object && object.type === "section" && object.locked;
       })
     ) {
       return toIdle();
     }
-    // Sections carry their geometric members and containers carry their
-    // descendants — createMoveGesture (gestures/move.ts) folds the expansion
-    // into the gesture's objectIds/startGeometries at drag-start.
+    // Sections carry their persisted parentId-descendants — createMoveGesture
+    // (gestures/move.ts) folds the expansion into the gesture's
+    // objectIds/startGeometries at drag-start.
     const moveState = createMoveGesture(ctx.document, state.startWorld, dragObjectIds);
     return stepFromMove(moveState, event, ctx);
   }

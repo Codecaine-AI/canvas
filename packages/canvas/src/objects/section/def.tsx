@@ -136,6 +136,14 @@ export const sectionDef: ObjectDef = {
           outline: 2px solid var(--primary);
           outline-offset: 2px;
         }
+        /* Drop-target state while a drag hovers this section: keep the section's
+           2px outline weight (softer than the generic shape drop glow) with a
+           faint primary wash so the capture area reads without shouting. */
+        .interactive-canvas-object-section[data-drop-target="true"] {
+          outline: 2px solid var(--primary);
+          outline-offset: 2px;
+          box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 16%, transparent);
+        }
         .interactive-canvas-section-title-chip {
           position: absolute;
           left: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
@@ -155,7 +163,7 @@ export const sectionDef: ObjectDef = {
 `,
   defaults: {
     // W2 — sections default large (they're meant to wrap other objects, so a
-    // container-like footprint reads better than a shape-sized default).
+    // backdrop-sized footprint reads better than a shape-sized default).
     geometry: { x: 80, y: 80, width: 480, height: 360 },
     tone: "neutral",
     shape: "section",
@@ -164,9 +172,10 @@ export const sectionDef: ObjectDef = {
   // Sections get corner-only handles; locked sections refuse resize/drag.
   handles: "corners",
   hitTest: "solid",
-  // Section membership is geometric and ephemeral (sectionCaptureMembers,
-  // ≥60% overlap at drag start, recursive) — never persisted.
-  dragCapture: "geometric-overlap",
+  // Section membership is a persisted, auto-managed parentId (assigned on
+  // drop into a section, cleared on drop onto open canvas); dragging a
+  // section carries its transitive parentId descendants along.
+  dragCapture: "descendants",
   toolbar: SECTION_TOOLBAR,
   labelEditing: { target: "section-title" },
 };

@@ -86,11 +86,12 @@ describe("v2-flow canvas JSON", () => {
     }
   });
 
-  it("every object parentId (when set) references an existing object", () => {
-    const objectIds = new Set(v2FlowDocument.objects.map((object) => object.id));
+  it("every object parentId (when set) references an existing section", () => {
+    // W6 — sections are the only legal parent; containment via parentId.
+    const objectById = new Map(v2FlowDocument.objects.map((object) => [object.id, object]));
     for (const object of v2FlowDocument.objects) {
       if (object.parentId) {
-        expect(objectIds.has(object.parentId)).toBe(true);
+        expect(objectById.get(object.parentId)?.type).toBe("section");
       }
     }
   });

@@ -40,16 +40,20 @@ function makeSetParentDocument(): InteractiveCanvasDocument {
     mode: "diagram",
     objects: [
       {
-        id: "container-a",
-        type: "container",
-        label: "Container A",
+        id: "section-a",
+        type: "section",
+        label: "Section A",
+        title: "Section A",
+        tint: "gray",
         geometry: { x: 40, y: 40, width: 320, height: 220 },
       },
       {
-        id: "container-b",
-        type: "container",
-        label: "Container B",
-        parentId: "container-a",
+        id: "section-b",
+        type: "section",
+        label: "Section B",
+        title: "Section B",
+        tint: "blue",
+        parentId: "section-a",
         geometry: { x: 80, y: 80, width: 180, height: 120 },
       },
       {
@@ -62,7 +66,7 @@ function makeSetParentDocument(): InteractiveCanvasDocument {
         id: "process-b",
         type: "process",
         label: "Process B",
-        parentId: "container-a",
+        parentId: "section-a",
         geometry: { x: 460, y: 260, width: 160, height: 96 },
       },
     ],
@@ -139,23 +143,25 @@ function makeClipboardDocument(): InteractiveCanvasDocument {
     mode: "diagram",
     objects: [
       {
-        id: "container-a",
-        type: "container",
-        label: "Container A",
+        id: "section-a",
+        type: "section",
+        label: "Section A",
+        title: "Section A",
+        tint: "gray",
         geometry: { x: 40, y: 40, width: 360, height: 240 },
       },
       {
         id: "process-a",
         type: "process",
         label: "Process A",
-        parentId: "container-a",
+        parentId: "section-a",
         geometry: { x: 80, y: 96, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
         label: "Process B",
-        parentId: "process-a",
+        parentId: "section-a",
         geometry: { x: 280, y: 112, width: 160, height: 96 },
       },
       {
@@ -256,17 +262,21 @@ describe("interactive canvas schema and actions", () => {
       ...syntheticCanvasDocument,
       objects: [
         {
-          id: "container-a",
-          type: "container",
-          label: "Container A",
-          parentId: "container-b",
+          id: "section-a",
+          type: "section",
+          label: "Section A",
+          title: "Section A",
+          tint: "gray",
+          parentId: "section-b",
           geometry: { x: 0, y: 0, width: 200, height: 160 },
         },
         {
-          id: "container-b",
-          type: "container",
-          label: "Container B",
-          parentId: "container-a",
+          id: "section-b",
+          type: "section",
+          label: "Section B",
+          title: "Section B",
+          tint: "blue",
+          parentId: "section-a",
           geometry: { x: 20, y: 20, width: 120, height: 80 },
         },
       ],
@@ -276,6 +286,39 @@ describe("interactive canvas schema and actions", () => {
     expect(validation.ok).toBe(false);
     if (!validation.ok) {
       expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("Parent cycle");
+    }
+  });
+
+  it("rejects a parentId that references a non-section object", () => {
+    const validation = validateInteractiveCanvasDocument({
+      ...syntheticCanvasDocument,
+      objects: [
+        {
+          id: "process-a",
+          type: "process",
+          label: "Process A",
+          geometry: { x: 0, y: 0, width: 160, height: 96 },
+        },
+        {
+          id: "process-b",
+          type: "process",
+          label: "Process B",
+          parentId: "process-a",
+          geometry: { x: 220, y: 0, width: 160, height: 96 },
+        },
+      ],
+      connections: [],
+    });
+
+    expect(validation.ok).toBe(false);
+    if (!validation.ok) {
+      expect(
+        validation.issues.some(
+          (issue) =>
+            issue.path === "$.objects.process-b.parentId" &&
+            issue.message.includes("Parent must be a section"),
+        ),
+      ).toBe(true);
     }
   });
 
@@ -361,7 +404,7 @@ describe("interactive canvas schema and actions", () => {
   it("addObject applies defaults (geometry/label/tone/shape) for each new object type", () => {
     // canvas.addObject runs the default geometry through snapGeometry (16px
     // grid), so expected sizes here are the *snapped* values, matching how
-    // e.g. the pre-existing container default (360) already snaps to 368.
+    // e.g. the pre-existing rectangle default (360) already snaps to 368.
     const base = createInteractiveCanvasState(syntheticCanvasDocument);
     const cases: Array<{
       objectType: InteractiveCanvasObjectType;
@@ -669,7 +712,7 @@ describe("interactive canvas theme: resolveObjectColors precedence (PD4)", () =>
 });
 
 describe("interactive canvas: canvas.setParent action", () => {
-  it("reparents an object into a container", () => {
+  it("reparents an object into a section", () => {
     const initialState = createInteractiveCanvasState(makeSetParentDocument());
     const originalGeometry = initialState.document.objects.find(
       (object) => object.id === "process-a",
@@ -678,13 +721,13 @@ describe("interactive canvas: canvas.setParent action", () => {
     const state = reduceInteractiveCanvasState(initialState, {
       type: "canvas.setParent",
       objectIds: ["process-a"],
-      parentId: "container-a",
+      parentId: "section-a",
     });
 
     const object = state.document.objects.find((candidate) => candidate.id === "process-a");
-    expect(object?.parentId).toBe("container-a");
+    expect(object?.parentId).toBe("section-a");
     expect(object?.geometry).toEqual(originalGeometry);
-    expect(state.lastChange?.summary).toBe("Moved into Container A");
+    expect(state.lastChange?.summary).toBe("Moved into Section A");
     expect(state.history.past.length).toBe(initialState.history.past.length + 1);
   });
 
@@ -696,10 +739,10 @@ describe("interactive canvas: canvas.setParent action", () => {
     });
 
     expect(state.document.objects.find((object) => object.id === "process-b")?.parentId).toBeNull();
-    expect(state.lastChange?.summary).toBe("Moved out of container");
+    expect(state.lastChange?.summary).toBe("Moved out of section");
   });
 
-  it("rejects a non-container target", () => {
+  it("rejects a non-section parent target", () => {
     const initialState = createInteractiveCanvasState(makeSetParentDocument());
 
     const state = reduceInteractiveCanvasState(initialState, {
@@ -710,7 +753,7 @@ describe("interactive canvas: canvas.setParent action", () => {
 
     expect(state).toBe(initialState);
     expect(state.document.objects.find((object) => object.id === "process-b")?.parentId).toBe(
-      "container-a",
+      "section-a",
     );
     expect(state.history.past.length).toBe(initialState.history.past.length);
   });
@@ -720,12 +763,12 @@ describe("interactive canvas: canvas.setParent action", () => {
 
     const state = reduceInteractiveCanvasState(initialState, {
       type: "canvas.setParent",
-      objectIds: ["container-a"],
-      parentId: "container-b",
+      objectIds: ["section-a"],
+      parentId: "section-b",
     });
 
     expect(state).toBe(initialState);
-    expect(state.document.objects.find((object) => object.id === "container-a")?.parentId).toBe(
+    expect(state.document.objects.find((object) => object.id === "section-a")?.parentId).toBe(
       undefined,
     );
     expect(state.history.past.length).toBe(initialState.history.past.length);
@@ -737,7 +780,7 @@ describe("interactive canvas: canvas.setParent action", () => {
     state = reduceInteractiveCanvasState(state, {
       type: "canvas.setParent",
       objectIds: ["process-a"],
-      parentId: "container-a",
+      parentId: "section-a",
     });
     state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
 
@@ -879,29 +922,29 @@ describe("interactive canvas: canvas.duplicateSelection action", () => {
     const clone = state.document.objects.find((object) => object.id === cloneId);
     expect(cloneId).not.toBe("process-a");
     expect(clone?.label).toBe("Process A");
-    expect(clone?.parentId).toBe("container-a");
+    expect(clone?.parentId).toBe("section-a");
     expect(clone?.geometry).toEqual({ x: 104, y: 120, width: 160, height: 96 });
     expect(state.selection).toEqual({ kind: "objects", objectIds: [cloneId] });
   });
 
-  it("remaps a cloned child to the cloned selected container", () => {
+  it("remaps a cloned child to the cloned selected section", () => {
     let state = createInteractiveCanvasState(makeClipboardDocument());
     state = reduceInteractiveCanvasState(state, {
       type: "canvas.select",
-      selection: { kind: "objects", objectIds: ["container-a", "process-a"] },
+      selection: { kind: "objects", objectIds: ["section-a", "process-a"] },
     });
 
     state = reduceInteractiveCanvasState(state, { type: "canvas.duplicateSelection" });
 
     const cloneIds = state.selection.kind === "objects" ? state.selection.objectIds : [];
-    const clonedContainer = state.document.objects.find(
-      (object) => cloneIds.includes(object.id) && object.type === "container",
+    const clonedSection = state.document.objects.find(
+      (object) => cloneIds.includes(object.id) && object.type === "section",
     );
     const clonedChild = state.document.objects.find(
       (object) => cloneIds.includes(object.id) && object.label === "Process A",
     );
-    expect(clonedChild?.parentId).toBe(clonedContainer?.id);
-    expect(clonedChild?.parentId).not.toBe("container-a");
+    expect(clonedChild?.parentId).toBe(clonedSection?.id);
+    expect(clonedChild?.parentId).not.toBe("section-a");
   });
 
   it("duplicates only fully internal selected connections", () => {
@@ -959,7 +1002,7 @@ describe("interactive canvas: canvas.addObjects action", () => {
     const document = makeClipboardDocument();
     const clipboard = copySelection(document, {
       kind: "objects",
-      objectIds: ["process-a"],
+      objectIds: ["section-a"],
     });
     expect(clipboard).toBeTruthy();
     const payload = buildPastePayload(clipboard!, { x: 700, y: 400 });
@@ -970,7 +1013,8 @@ describe("interactive canvas: canvas.addObjects action", () => {
     });
 
     const cloneIds = state.selection.kind === "objects" ? state.selection.objectIds : [];
-    expect(cloneIds).toHaveLength(2);
+    expect(cloneIds).toHaveLength(3);
+    expect(cloneIds).not.toContain("section-a");
     expect(cloneIds).not.toContain("process-a");
     expect(cloneIds).not.toContain("process-b");
     expect(boundsCenter(state.document, cloneIds)).toEqual({ x: 700, y: 400 });
@@ -998,7 +1042,7 @@ describe("interactive canvas: canvas.addObjects action", () => {
     const document = makeClipboardDocument();
     const clipboard = copySelection(document, {
       kind: "objects",
-      objectIds: ["container-a"],
+      objectIds: ["section-a"],
     });
     const payload = buildPastePayload(clipboard!);
 
@@ -1021,14 +1065,14 @@ describe("interactive canvas: canvas.addObjects action", () => {
     const document = makeClipboardDocument();
     const clipboard = copySelection(document, {
       kind: "objects",
-      objectIds: ["process-a"],
+      objectIds: ["section-a"],
     });
     const payload = buildPastePayload(clipboard!);
     let state = createInteractiveCanvasState(document);
 
     state = reduceInteractiveCanvasState(state, { type: "canvas.addObjects", ...payload });
     expect(state.history.past.length).toBe(1);
-    expect(state.document.objects.length).toBe(6);
+    expect(state.document.objects.length).toBe(7);
 
     state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
     expect(state.document.objects.length).toBe(4);
@@ -1043,16 +1087,16 @@ describe("interactive canvas clipboard", () => {
     expect(copySelection(document, { kind: "objects", objectIds: [] })).toBeNull();
   });
 
-  it("copies selected containers with all descendants and internal connections", () => {
+  it("copies selected sections with all recorded descendants and internal connections", () => {
     const clipboard = copySelection(makeClipboardDocument(), {
       kind: "objects",
-      objectIds: ["container-a"],
+      objectIds: ["section-a"],
     });
 
     expect(clipboard?.objects.map((object) => object.id).sort()).toEqual([
-      "container-a",
       "process-a",
       "process-b",
+      "section-a",
     ]);
     expect(clipboard?.connections.map((connection) => connection.id)).toEqual(["connection-a"]);
   });
@@ -1070,7 +1114,7 @@ describe("interactive canvas clipboard", () => {
   it("builds paste payload whose bounds center lands on target point", () => {
     const clipboard = copySelection(makeClipboardDocument(), {
       kind: "objects",
-      objectIds: ["container-a"],
+      objectIds: ["section-a"],
     });
     const payload = buildPastePayload(clipboard!, { x: 900, y: 500 });
     const pastedDocument = { ...makeClipboardDocument(), objects: payload.objects };

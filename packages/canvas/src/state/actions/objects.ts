@@ -1,6 +1,6 @@
 "use client";
 
-import { createObjectId, snapGeometry } from "../geometry";
+import { createObjectId, sectionDescendantIds, snapGeometry } from "../geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../schema";
 import { removeConnection } from "./connections";
 import { defaultGeometryFor, objectTypeLabel, shapeForType, toneForType } from "./defaults";
@@ -297,6 +297,17 @@ export function handleDeleteSelection(
   const ids = selectedObjectIds(state.selection);
   if (ids.length === 0) return state;
   const idSet = new Set(ids);
+  // W6 — deleting a section deletes its recorded members too: fold in the
+  // transitive parentId-descendants of every selected section, so the
+  // existing connection/link/annotation cascades below cover them as well.
+  for (const id of ids) {
+    const object = state.document.objects.find((candidate) => candidate.id === id);
+    if (object?.type !== "section") continue;
+    for (const descendantId of sectionDescendantIds(state.document, id)) {
+      idSet.add(descendantId);
+    }
+  }
+  const deletedIds = [...idSet];
   const document = {
     ...state.document,
     objects: state.document.objects.filter((object) => !idSet.has(object.id)),
@@ -312,7 +323,7 @@ export function handleDeleteSelection(
   return withHistory({ ...state, selection: { kind: "none" } }, document, {
     source: "human",
     summary: "Deleted selection",
-    changedObjectIds: ids,
+    changedObjectIds: deletedIds,
     changedConnectionIds: [],
     changedAnnotationIds: [],
   });
