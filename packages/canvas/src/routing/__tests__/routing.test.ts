@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import type { CanvasPoint } from "../../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
 import { autoPickAnchors, routeConnection, type Anchor } from "../routing";
-import { CONNECTOR_END_GAP_PX } from "../../theme/tokens";
+import { CONNECTOR_END_GAP_PX } from "../routing";
 
 const EPSILON = 1e-6;
 const MIN_STUB = 24;

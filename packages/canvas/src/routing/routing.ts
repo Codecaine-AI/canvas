@@ -3,7 +3,26 @@
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
-import { CONNECTOR_ELBOW_CORNER_RADIUS_PX, CONNECTOR_END_GAP_PX } from "../theme/tokens";
+// Connector routing figures (moved from theme/tokens.ts in the theme
+// dispersal — this router is their consumer; the routing tests import them
+// from here). Logical px.
+
+/**
+ * Elbow corner radius, logical px, on the stroke CENTERLINE (the correct
+ * figure for our stroked-centerline path construction). Short segments clamp
+ * it smaller — `roundedPolylinePath` already clamps to half the shorter
+ * adjacent segment length — so this constant is a ceiling, not a fixed
+ * radius.
+ */
+export const CONNECTOR_ELBOW_CORNER_RADIUS_PX = 21.5;
+
+/**
+ * Endpoint gap: connectors stop short of the target border rather than
+ * touching it flush. A single figure is used for both plain and arrowhead
+ * ends — splitting the two is left to a later wave if the difference reads
+ * as necessary.
+ */
+export const CONNECTOR_END_GAP_PX = 10;
 
 const MIN_STUB = 24;
 /**

@@ -2,7 +2,7 @@
 
 import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
 import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../../../ui/icons";
-import { resolveSectionColors } from "../../../../theme/resolve";
+import { resolveSectionColors } from "../../../../theme";
 import type { CanvasSectionTint } from "../../../../state/schema";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 

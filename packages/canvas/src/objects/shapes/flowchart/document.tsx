@@ -1,8 +1,13 @@
 "use client";
 
-import { DOCUMENT_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Document wavy-bottom silhouette geometry (moved from theme/tokens.ts in the theme dispersal). */
+export const DOCUMENT_GEOMETRY = {
+  waveShoulderYRatio: 0.82,
+  waveCrestYRatio: 0.96,
+} as const;
 
 /**
  * Wavy-bottom document silhouette geometry — moved here verbatim from the

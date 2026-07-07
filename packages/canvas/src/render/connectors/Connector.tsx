@@ -7,11 +7,14 @@ import type {
 } from "../../state/schema";
 import { routeConnection } from "../../routing/routing";
 import {
-  CHROME,
   CONNECTOR_DASH_PATTERN_PX,
   CONNECTOR_DEFAULT_COLOR,
-  CONNECTOR_STROKE_WIDTH_PX,
-} from "../../theme/tokens";
+} from "../../objects/connector/def";
+
+/** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
+const CONNECTOR_STROKE_WIDTH_PX = 4;
+/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
+const SELECTION_BLUE = "#0D99FF";
 
 const CONNECTION_HIT_WIDTH = 14;
 const ENDPOINT_HANDLE_RADIUS = 6;
@@ -109,7 +112,7 @@ export function Connector({
             cy={routed.start.y}
             r={ENDPOINT_HANDLE_RADIUS}
             fill="#FFFFFF"
-            stroke={CHROME.selectionBlue}
+            stroke={SELECTION_BLUE}
             strokeWidth={1.5}
             data-canvas-endpoint="from"
             data-canvas-connection-id={connection.id}
@@ -120,7 +123,7 @@ export function Connector({
             cy={routed.end.y}
             r={ENDPOINT_HANDLE_RADIUS}
             fill="#FFFFFF"
-            stroke={CHROME.selectionBlue}
+            stroke={SELECTION_BLUE}
             strokeWidth={1.5}
             data-canvas-endpoint="to"
             data-canvas-connection-id={connection.id}

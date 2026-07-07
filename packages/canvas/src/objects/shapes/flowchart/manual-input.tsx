@@ -2,9 +2,16 @@
 
 import type { CanvasPoint } from "../../../state/geometry";
 import { manualInputPoints } from "../../../routing/connection-overlay";
-import { MANUAL_INPUT_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/**
+ * Manual-input geometry (moved from theme/tokens.ts in the theme dispersal).
+ * Drop ratio mirrors connection-overlay.ts's slanted-top polygon math.
+ */
+export const MANUAL_INPUT_GEOMETRY = {
+  dropRatio: 0.25,
+} as const;
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");

@@ -1,8 +1,13 @@
 "use client";
 
-import { CHAT_ICON_COLORS } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Chat icon fill+stroke (moved from theme/tokens.ts in the theme dispersal). */
+export const CHAT_ICON_COLORS = {
+  fill: "#FF9E42",
+  stroke: "#EB7500",
+} as const;
 
 /**
  * Chat (W2 restyle) — a filled, saturated, borderless speech-bubble SVG

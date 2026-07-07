@@ -1,9 +1,24 @@
 "use client";
 
-import { resolveSectionColors } from "../../theme/resolve";
-import { CONNECTOR_DASH_PATTERN_PX, SECTION_GEOMETRY } from "../../theme/tokens";
+import { resolveSectionColors } from "../../theme";
+import { CONNECTOR_DASH_PATTERN_PX } from "../connector/def";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { SECTION_TOOLBAR } from "./toolbar";
+
+/** Section geometry (moved from theme/tokens.ts in the theme dispersal — per-kind constants co-locate with their def; also consumed by the editor's label-editing overlay). */
+export const SECTION_GEOMETRY = {
+  cornerRadiusPx: 8.5,
+  borderWidthPx: 2,
+  titleChip: {
+    heightPx: 27,
+    borderWidthPx: 2,
+    textColor: "#000000",
+    fontSizePx: 16,
+    fontWeight: 500,
+    paddingXPx: 10,
+    insetFromSectionCornerPx: 3,
+  },
+} as const;
 
 /**
  * FigJam section (W2) — a large tinted backdrop with a floating title chip

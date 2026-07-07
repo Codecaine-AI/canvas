@@ -5,7 +5,8 @@ import type { InteractionOverlay } from "../../interaction/interaction";
 import { getConnectionAnchors } from "../../routing/connection-overlay";
 import { pointForAnchor, routeConnection, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
-import { CHROME } from "../../theme/tokens";
+/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
+const SELECTION_BLUE = "#0D99FF";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 /**
@@ -70,7 +71,7 @@ export function ConnectorDragPreview({
         <path
           d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
           fill="none"
-          stroke={CHROME.selectionBlue}
+          stroke={SELECTION_BLUE}
           strokeWidth={2}
           strokeDasharray="6 6"
           strokeLinecap="round"
@@ -99,8 +100,8 @@ export function ConnectorDragPreview({
               height: isSnapped ? "12px" : "8px",
               transform: "translate(-50%, -50%)",
               borderRadius: "999px",
-              background: isSnapped ? CHROME.selectionBlue : "#FFFFFF",
-              border: `1.5px solid ${CHROME.selectionBlue}`,
+              background: isSnapped ? SELECTION_BLUE : "#FFFFFF",
+              border: `1.5px solid ${SELECTION_BLUE}`,
               pointerEvents: "none",
             }}
           />
@@ -119,7 +120,7 @@ export function ConnectorDragPreview({
             height: "10px",
             transform: "translate(-50%, -50%)",
             borderRadius: "999px",
-            background: CHROME.selectionBlue,
+            background: SELECTION_BLUE,
             border: "1.5px solid #FFFFFF",
             pointerEvents: "none",
           }}

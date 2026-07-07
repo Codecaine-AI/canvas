@@ -36,7 +36,20 @@
  */
 
 import type { CanvasBounds, CanvasPoint } from "../state/geometry";
-import { ARROW_SHAPE_GEOMETRY } from "../theme/tokens";
+/**
+ * Arrow-shape (fat chevron) proportions (moved from theme/tokens.ts in the
+ * theme dispersal — the true-outline generator below is the shared consumer;
+ * the arrow-shape def imports it from here, objects -> routing): the head
+ * takes 38% of total width; the body is intentionally tall (0.60 of height)
+ * so the rendered arrow reads blocky; body corners are rounded.
+ */
+export const ARROW_SHAPE_GEOMETRY = {
+  /** Fraction of total width occupied by the chevron head. */
+  headWidthRatio: 0.38,
+  /** Fraction of total height occupied by the arrow body. */
+  bodyHeightRatio: 0.6,
+  bodyCornerRadiusPx: 10,
+} as const;
 import type { InteractiveCanvasObject } from "../state/schema";
 
 /** World-space offset each cardinal anchor candidate starts at, outside the object's bound. Upstream `connector-manager.ts:135`. */

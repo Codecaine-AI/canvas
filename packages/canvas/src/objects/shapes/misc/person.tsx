@@ -1,8 +1,13 @@
 "use client";
 
-import { PERSON_ICON_COLORS } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Person icon fill+stroke (moved from theme/tokens.ts in the theme dispersal). */
+export const PERSON_ICON_COLORS = {
+  fill: "#66D575",
+  stroke: "#3E9B4B",
+} as const;
 
 /**
  * Person (D16, W2 restyle) — a filled, saturated, borderless head-and-

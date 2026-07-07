@@ -1,8 +1,20 @@
 "use client";
 
-import { PREDEFINED_PROCESS_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/**
+ * Predefined-process shape: rect with rounded corners and two inner vertical
+ * bars near each end (moved from theme/tokens.ts in the theme dispersal).
+ * SHARED: the internal-storage def imports this too — its corner radius and
+ * rule inset deliberately reuse the same figures.
+ */
+export const PREDEFINED_PROCESS_GEOMETRY = {
+  cornerRadiusPx: 5,
+  barWidthPx: 4,
+  /** Bar inset from each end, as a fraction of total width (17.5/371). */
+  barInsetRatio: 0.047,
+} as const;
 
 /**
  * Predefined process — a rect with two inner vertical bars near each end

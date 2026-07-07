@@ -6,7 +6,7 @@ import {
   FIGJAM_DOCK_RADIUS_PX,
   FIGJAM_DOCK_WIDTH_PX,
 } from "../CanvasDock";
-import { CHROME } from "../../../theme/tokens";
+import { EDITOR_STYLE } from "../editor-style";
 
 afterEach(() => {
   cleanup();
@@ -33,7 +33,7 @@ describe("CanvasDock geometry", () => {
     const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
     expect(dock.style.boxShadow).not.toBe("");
     expect(dock.style.boxShadow.toLowerCase()).toContain("rgba(0, 0, 0");
-    expect(dock.style.boxShadow).toBe(CHROME.dockShadow);
+    expect(dock.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
   });
 });
 
@@ -106,7 +106,7 @@ describe("CanvasDock state rules", () => {
     const { container } = render(<CanvasDock activeTool="select" />);
     const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
     fireEvent.pointerEnter(connectorButton);
-    expect(connectorButton.style.background).toBe(CHROME.dockHoverBg);
+    expect(connectorButton.style.background).toBe(EDITOR_STYLE.dockHoverBg);
     // The active button remains violet, independent of the hovered one.
     const selectButton = container.querySelector('[data-dock-tool="select"]') as HTMLElement;
     expect(selectButton.style.background).toBe("#8C2EF2");

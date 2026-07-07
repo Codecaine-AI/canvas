@@ -28,7 +28,7 @@ export type InteractiveCanvasConnection = {
   /**
    * Stroke color for this connector (W3b/W4). Any non-empty string is
    * accepted (hex expected in practice — see theme/tokens.ts's
-   * CONNECTOR_COLORS for the sampled FigJam set). Absent means the default
+   * CONNECTOR_COLORS in objects/connector/def.ts for the sampled FigJam set). Absent means the default
    * neutral gray (CONNECTOR_DEFAULT_COLOR); arrowheads inherit the stroke.
    */
   color?: string;

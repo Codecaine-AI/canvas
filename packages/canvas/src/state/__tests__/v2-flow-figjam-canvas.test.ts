@@ -1,14 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import v2FlowCanvas from "../../../../../canvases/v2-flow.canvas.json";
 import { validateInteractiveCanvasDocument, type InteractiveCanvasDocument } from "../schema";
+import { CONNECTOR_COLORS } from "../../objects/connector/def";
+import { PASTEL_PAIRS } from "../../objects/shapes/pastels";
+import { STICKY_COLORS } from "../../objects/sticky/colors";
 import {
-  CONNECTOR_COLORS,
-  PASTEL_PAIRS,
+  resolveObjectColors,
+  resolveObjectStrokeWidth,
   SECTION_FAMILIES,
-  STICKY_COLORS,
   type SectionFamily,
-} from "../../theme/tokens";
-import { resolveObjectColors, resolveObjectStrokeWidth } from "../../theme/resolve";
+} from "../../theme";
 
 const v2FlowDocument = v2FlowCanvas as InteractiveCanvasDocument;
 

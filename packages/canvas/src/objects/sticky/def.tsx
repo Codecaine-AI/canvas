@@ -1,8 +1,27 @@
 "use client";
 
-import { STICKY_GEOMETRY } from "../../theme/tokens";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+
+/** Sticky geometry/typography (moved from theme/tokens.ts in the theme dispersal — per-kind constants co-locate with their def; also consumed by render/CanvasStage). */
+export const STICKY_GEOMETRY = {
+  cornerRadiusPx: 0,
+  foldedCorner: false,
+  defaultSizePx: { width: 416, height: 420 },
+  textInsetLeftPx: 21,
+  textInsetTopPx: 28,
+  bodyFontSizePx: 24,
+  bodyLineHeightPx: 36,
+  bodyTextColor: "rgba(0, 0, 0, 0.8)",
+  author: {
+    fontSizePx: 12,
+    color: "rgba(0, 0, 0, 0.4)",
+    insetLeftPx: 20,
+    baselineFromBottomPx: 24,
+  },
+  /** Down-biased falloff shadow. */
+  shadow: "0 3px 12px rgba(0, 0, 0, 0.15)",
+} as const;
 
 /**
  * FigJam sticky note (W2 upgrade) — the generic button chrome plus sticky-

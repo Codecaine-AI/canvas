@@ -2,9 +2,17 @@
 
 import type { CanvasPoint } from "../../../state/geometry";
 import { chevronPoints } from "../../../routing/connection-overlay";
-import { CHEVRON_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/**
+ * Chevron silhouette geometry (moved from theme/tokens.ts in the theme
+ * dispersal). Notch ratio mirrors connection-overlay.ts's true-outline
+ * chevron math.
+ */
+export const CHEVRON_GEOMETRY = {
+  notchWidthRatio: 0.25,
+} as const;
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");

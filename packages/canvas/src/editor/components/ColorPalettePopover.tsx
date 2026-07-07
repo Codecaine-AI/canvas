@@ -1,7 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { CHROME, PALETTE_POPOVER_SWATCHES } from "../../theme/tokens";
+import { EDITOR_STYLE } from "./editor-style";
+import { PASTEL_PAIRS } from "../../objects/shapes/pastels";
+
+// Swatch rows (moved from theme/tokens.ts in the theme dispersal — this
+// popover is their only consumer).
+
+/** Saturated (borderless) swatches — feed PALETTE_POPOVER_SWATCHES row 2. */
+const SATURATED_PALETTE = [
+  "#F24822",
+  "#FF9E42",
+  "#FFCD29",
+  "#14AE5C",
+  "#0D99FF",
+  "#9747FF",
+  "#FFA8DB",
+  "#B3B3B3",
+] as const;
+
+/**
+ * The 2x11 palette-popover swatch list (selection-toolbar color picker):
+ * the pastel-pair fills (row 1, the "tint" swatches users pick most)
+ * followed by the saturated palette (row 2, the "bold" swatches).
+ */
+export const PALETTE_POPOVER_SWATCHES: readonly [
+  readonly string[],
+  readonly string[],
+] = [
+  [
+    PASTEL_PAIRS.gray.fill,
+    PASTEL_PAIRS.gray2.fill,
+    PASTEL_PAIRS.blue.fill,
+    PASTEL_PAIRS.yellow.fill,
+    PASTEL_PAIRS.orange.fill,
+    PASTEL_PAIRS.red.fill,
+    PASTEL_PAIRS.green.fill,
+    PASTEL_PAIRS.greenChip.fill,
+    PASTEL_PAIRS.purple.fill,
+    PASTEL_PAIRS.purple2.fill,
+    PASTEL_PAIRS.teal.fill,
+  ],
+  [...SATURATED_PALETTE, PASTEL_PAIRS.pink.fill],
+];
 
 /**
  * ColorPalettePopover — the dark 2x11 swatch grid with a rainbow-ring
@@ -42,13 +83,13 @@ export type ColorPalettePopoverProps = {
   style?: React.CSSProperties;
 };
 
-const SWATCH_DIAMETER_PX = CHROME.colorPopoverSwatchPx;
-const SWATCH_GAP_PX = CHROME.colorPopoverGapPx;
+const SWATCH_DIAMETER_PX = EDITOR_STYLE.colorPopoverSwatchPx;
+const SWATCH_GAP_PX = EDITOR_STYLE.colorPopoverGapPx;
 const POPOVER_BG = "#1D1D1D";
 
-// W3: promoted to theme/tokens.ts's CHROME.rainbowRingGradient (shared with
+// W3: promoted to theme/tokens.ts's EDITOR_STYLE.rainbowRingGradient (shared with
 // the editor's color-swap wiring).
-const RAINBOW_RING_GRADIENT = CHROME.rainbowRingGradient;
+const RAINBOW_RING_GRADIENT = EDITOR_STYLE.rainbowRingGradient;
 
 function Swatch({
   color,
@@ -117,8 +158,8 @@ export function ColorPalettePopover({ currentColor, onPick, swatches, header, cl
         flexDirection: "column",
         gap: SWATCH_GAP_PX,
         background: POPOVER_BG,
-        borderRadius: CHROME.colorPopoverRadiusPx,
-        padding: CHROME.colorPopoverPaddingPx,
+        borderRadius: EDITOR_STYLE.colorPopoverRadiusPx,
+        padding: EDITOR_STYLE.colorPopoverPaddingPx,
         boxSizing: "border-box",
         ...style,
       }}

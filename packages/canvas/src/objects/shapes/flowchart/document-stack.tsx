@@ -1,9 +1,13 @@
 "use client";
 
-import { DOCUMENT_STACK_GEOMETRY } from "../../../theme/tokens";
 import { documentWavyPath } from "./document";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Document-stack silhouette geometry (moved from theme/tokens.ts in the theme dispersal). */
+export const DOCUMENT_STACK_GEOMETRY = {
+  offsetPx: 6,
+} as const;
 
 /**
  * Document Stack (W5) — two offset wavy-bottom document silhouettes (the

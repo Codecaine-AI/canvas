@@ -1,8 +1,13 @@
 "use client";
 
-import { CHIP_ICON_COLORS } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Chip/CPU icon fill+stroke (orange family; moved from theme/tokens.ts in the theme dispersal). */
+export const CHIP_ICON_COLORS = {
+  fill: "#FFE0C2",
+  stroke: "#FF9E42",
+} as const;
 
 /**
  * Chip-icon (W2 restyle) — a filled, saturated CPU/chip glyph (square body

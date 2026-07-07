@@ -2,9 +2,17 @@
 
 import type { CanvasPoint } from "../../../state/geometry";
 import { offPageConnectorPoints } from "../../../routing/connection-overlay";
-import { OFF_PAGE_CONNECTOR_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/**
+ * Off-page connector geometry (moved from theme/tokens.ts in the theme
+ * dispersal). Shoulder ratio mirrors connection-overlay.ts's true-outline
+ * pentagon math.
+ */
+export const OFF_PAGE_CONNECTOR_GEOMETRY = {
+  shoulderRatio: 0.6,
+} as const;
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");

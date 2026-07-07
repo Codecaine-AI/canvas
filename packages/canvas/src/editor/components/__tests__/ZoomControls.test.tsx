@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { CHROME } from "../../../theme/tokens";
+import { EDITOR_STYLE } from "../editor-style";
 import { ZoomControls, ZOOM_CONTROLS_HEIGHT_PX, ZOOM_CONTROLS_RADIUS_PX } from "../ZoomControls";
 
 afterEach(() => {
@@ -15,7 +15,7 @@ describe("ZoomControls geometry", () => {
     expect(pill.style.background).toBe("#FFFFFF");
     expect(pill.style.height).toBe(`${ZOOM_CONTROLS_HEIGHT_PX}px`);
     expect(parseFloat(pill.style.borderRadius)).toBe(ZOOM_CONTROLS_RADIUS_PX);
-    expect(pill.style.boxShadow).toBe(CHROME.dockShadow);
+    expect(pill.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
   });
 
   it("renders only - and + when zoomPercent is omitted (matches the observed frames with no % readout)", () => {

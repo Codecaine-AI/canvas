@@ -10,7 +10,7 @@ import {
 } from "../../interaction/interaction";
 import { sectionCaptureMembers } from "../geometry";
 import { renderOrderedObjects } from "../../render/CanvasStage";
-import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../../theme/tokens";
+import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../geometry";
 import { tokenizeCodeBlock, tokenizeCodeLine } from "../../render/code-tokenizer";
 import { validateInteractiveCanvasDocument } from "../schema";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../actions";

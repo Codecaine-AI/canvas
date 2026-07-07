@@ -1,9 +1,14 @@
-import {
-  GRID_BASE_STEP_PX,
-  GRID_DOT_DIAMETER_PX,
-  GRID_MAX_SCREEN_STEP_PX,
-  GRID_MIN_SCREEN_STEP_PX,
-} from "../theme/tokens";
+// Grid constants (moved from theme/tokens.ts in the theme dispersal — the
+// adaptive-grid math below is their consumer). The grid is adaptive: a base
+// 8 logical-px step that doubles or halves (powers of two) so the ON-SCREEN
+// dot pitch stays inside a comfortable band — see grid.test.ts for the zoom
+// data points that pin the base step and band.
+export const GRID_BASE_STEP_PX = 8;
+/** Screen-space band the effective step (8 * 2^n) must stay inside. */
+export const GRID_MIN_SCREEN_STEP_PX = 6.5;
+export const GRID_MAX_SCREEN_STEP_PX = 13;
+/** Dot diameter at 100% zoom, logical px. */
+export const GRID_DOT_DIAMETER_PX = 2;
 
 /** @deprecated kept for callers still importing the old name; equals GRID_BASE_STEP_PX. */
 export const BASE_GRID_STEP = GRID_BASE_STEP_PX;

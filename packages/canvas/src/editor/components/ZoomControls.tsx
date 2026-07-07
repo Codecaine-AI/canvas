@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../../theme/tokens";
+import { EDITOR_STYLE } from "./editor-style";
 import { Tooltip } from "../../ui/Tooltip";
 import { MinusIcon, PlusIcon } from "../../ui/icons";
 
@@ -28,9 +28,9 @@ export type ZoomControlsProps = {
 };
 
 const PILL_HEIGHT_PX = 32;
-const PILL_RADIUS_PX = CHROME.dockRadiusPx;
-const GLYPH_CHARCOAL = CHROME.dockGlyphColor;
-const HOVER_BG = CHROME.dockHoverBg;
+const PILL_RADIUS_PX = EDITOR_STYLE.dockRadiusPx;
+const GLYPH_CHARCOAL = EDITOR_STYLE.dockGlyphColor;
+const HOVER_BG = EDITOR_STYLE.dockHoverBg;
 
 function ZoomButton({
   label,
@@ -103,8 +103,8 @@ function ZoomControlsComponent({
         gap: 2,
         height: PILL_HEIGHT_PX,
         borderRadius: PILL_RADIUS_PX,
-        background: CHROME.bottomToolbarBg,
-        boxShadow: CHROME.dockShadow,
+        background: EDITOR_STYLE.bottomToolbarBg,
+        boxShadow: EDITOR_STYLE.dockShadow,
         padding: "0 6px",
         boxSizing: "border-box",
       }}

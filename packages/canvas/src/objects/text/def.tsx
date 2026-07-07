@@ -1,6 +1,6 @@
 "use client";
 
-import { TEXT_SIZES_PX } from "../../theme/tokens";
+import { TEXT_SIZES_PX } from "../../theme";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 

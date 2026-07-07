@@ -1,7 +1,7 @@
 "use client";
 
 import { IconShapeBody } from "./IconShapeBody";
-import { resolveObjectColors } from "../../../theme/resolve";
+import { resolveObjectColors } from "../../../theme";
 import { EdgePorts, ObjectButtonChrome } from "../../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
 import { SHAPE_TOOLBAR } from "../toolbar";

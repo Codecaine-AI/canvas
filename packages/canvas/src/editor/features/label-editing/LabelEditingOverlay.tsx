@@ -1,7 +1,7 @@
 "use client";
 
-import { SECTION_GEOMETRY } from "../../../theme/tokens";
-import { resolveSectionColors } from "../../../theme/resolve";
+import { SECTION_GEOMETRY } from "../../../objects/section/def";
+import { resolveSectionColors } from "../../../theme";
 import type { LabelEditingApi } from "./use-label-editing";
 
 export interface LabelEditingOverlayProps {

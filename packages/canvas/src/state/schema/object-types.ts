@@ -67,7 +67,7 @@ export type CanvasPaletteToken = "process" | "input" | "hot" | "memory" | "note"
 
 /**
  * FigJam section tint family (W2) — keys mirror theme/tokens.ts's
- * SECTION_FAMILIES record exactly (that file is the source of truth for the
+ * SECTION_FAMILIES record (theme.ts) exactly (that file is the source of truth for the
  * actual color values). Note: the W2 brief's prose used "cream" for the warm
  * neutral family; figjam-style-tokens.json's sampled key for that same tint is
  * "orange" — we use "orange" here to stay in lockstep with theme/tokens.ts

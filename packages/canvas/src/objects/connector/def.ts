@@ -1,5 +1,27 @@
 import type { ObjectDef, ToolbarSpec } from "../object-def";
 
+// ---------------------------------------------------------------------------
+// Connector style constants (moved from theme/tokens.ts in the theme
+// dispersal — per-kind constants co-locate with their def). Values sampled
+// from FigJam reference exports; px figures are LOGICAL px.
+// ---------------------------------------------------------------------------
+
+/** Named connector stroke colors. */
+export const CONNECTOR_COLORS = {
+  gray: "#757575",
+  orange: "#EB7500",
+  green: "#3E9B4B",
+  red: "#F24822",
+  purple: "#9747FF",
+  darkYellow: "#E8A302",
+} as const;
+
+/** Default connector color when none is specified — neutral gray. */
+export const CONNECTOR_DEFAULT_COLOR = CONNECTOR_COLORS.gray;
+
+/** Dash pattern, logical px: 19px dash / 7px gap. */
+export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
+
 /**
  * Connector def (step 5) — a SELECTION-KIND def, not an object type:
  * connections aren't objects, so `objectDefForType` never resolves to it and

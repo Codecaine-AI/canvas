@@ -19,10 +19,9 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  * interface icons (co-location alignment).
  *
  * Stroke width is NOT baked into the path data — callers apply
- * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` (mirrors ICON_STROKE_WIDTH_PX in
- * theme/tokens.ts, which is tuned for the ~130px object size) so the glyph
- * scales cleanly if the viewBox is later re-projected into a differently
- * sized object.
+ * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` (tuned for the ~130px object size,
+ * see IconShapeBody's ICON_APPROX_SIZE_PX) so the glyph scales cleanly if
+ * the viewBox is later re-projected into a differently sized object.
  */
 
 /** The 26 Advanced-tier glyph ids (exact enum from the parity brief). */

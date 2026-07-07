@@ -1,6 +1,6 @@
 "use client";
 
-import { CODE_BLOCK } from "../theme/tokens";
+import { CODE_BLOCK } from "../objects/code-block/style";
 
 /**
  * Minimal, pure "good enough to match the reference PNG" code tokenizer for

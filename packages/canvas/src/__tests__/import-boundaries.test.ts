@@ -159,13 +159,17 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("theme/ is layer 0: no runtime src imports except the documented state/geometry re-export", () => {
-    // Type-only state/schema imports are allowed (resolve.ts needs the style
-    // unions); the ONLY runtime edge is tokens.ts re-exporting
-    // SECTION_CAPTURE_OVERLAP_THRESHOLD from state/geometry.
+  test("theme.ts is layer 0: no runtime src imports (type-only state/schema imports allowed)", () => {
+    // Since the theme dispersal (commit 4 of the co-location alignment) the
+    // theme is ONE file, src/theme.ts, and its only src dependency is
+    // type-only state/schema imports (the style unions). The old
+    // SECTION_CAPTURE_OVERLAP_THRESHOLD re-export is gone — importers pull
+    // it from state/geometry directly.
     expect(
-      violations(join(SRC_ROOT, "theme"), /^\.\.\//, { skipTypeOnly: true }),
-    ).toEqual([`${join("theme", "tokens.ts")} -> ../state/geometry`]);
+      importSpecifiers(join(SRC_ROOT, "theme.ts"), { skipTypeOnly: true }).filter((specifier) =>
+        specifier.startsWith("."),
+      ),
+    ).toEqual([]);
   });
 
   test("nothing outside editor/ imports editor/ (root index.ts is the composition entry and is exempt)", () => {

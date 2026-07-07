@@ -15,7 +15,7 @@ import {
 } from "../state/geometry";
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
-import { canvasSurfaceStyle } from "../theme/resolve";
+import { canvasSurfaceStyle, TEXT_SIZES_PX } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
@@ -28,16 +28,40 @@ import { SnapGuideLine } from "./overlays/SnapGuideLine";
 import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
 import type { CanvasTool } from "../state/actions";
-import {
-  CANVAS_BG,
-  CANVAS_FONT_FAMILY,
-  CHROME,
-  CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO,
-  CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO,
-  GRID_DOT_COLOR,
-  STICKY_GEOMETRY,
-  TEXT_SIZES_PX,
-} from "../theme/tokens";
+import { STICKY_GEOMETRY } from "../objects/sticky/def";
+
+// ---------------------------------------------------------------------------
+// Stage surface constants (moved from theme/tokens.ts in the theme dispersal
+// — this stage is their consumer). The board surface is light-only: even the
+// app's dark theme renders the canvas SURFACE with these light values.
+// ---------------------------------------------------------------------------
+
+/** Board background. */
+const CANVAS_BG = "#F5F5F5";
+/** Dot color; this alpha reads as ~#DDDDDD over the board background. */
+const GRID_DOT_COLOR = "rgba(0, 0, 0, 0.13)";
+/**
+ * Canvas content font. Applied to canvas OBJECTS/labels/stickies via the
+ * stage's content root class — never to app chrome (toolbars, panels, etc.
+ * keep the app's existing font stack).
+ */
+const CANVAS_FONT_FAMILY =
+  '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+
+/**
+ * Arrowhead geometry as multiples of the connector's stroke width. We use 5x
+ * for BOTH base width and length — a slightly long, visually "solid" head.
+ */
+const CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO = 5;
+const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
+
+// Same kite-shaped pointer as the dock's Select glyph (Nucleo
+// maps-location/pointer), filled for cursor use — the tool icon and the
+// on-canvas cursor are literally the same form. Inlined from the old
+// CHROME.selectCursor (render must not import editor/components/editor-style).
+const SELECT_CURSOR_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 3 3, default`;
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
@@ -240,7 +264,7 @@ export function CanvasStage({
   const dropTargetId = interactionOverlay?.dropTargetId;
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
-  const stageCursor = style?.cursor ?? (handToolActive ? "grab" : selectToolActive ? CHROME.selectCursor : undefined);
+  const stageCursor = style?.cursor ?? (handToolActive ? "grab" : selectToolActive ? SELECT_CURSOR : undefined);
 
   return (
     <div
@@ -301,7 +325,7 @@ export function CanvasStage({
           touch-action: none;
         }
         .interactive-canvas-stage[data-canvas-select-tool="true"] .interactive-canvas-object[data-editable="true"] {
-          cursor: ${CHROME.selectCursor};
+          cursor: ${SELECT_CURSOR};
         }
         .interactive-canvas-object[data-changed="true"] {
           box-shadow: 0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent);

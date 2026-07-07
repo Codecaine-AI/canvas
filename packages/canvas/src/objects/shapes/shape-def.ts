@@ -9,7 +9,7 @@ import type {
   InteractiveCanvasTone,
 } from "../../state/schema";
 import type { Anchor } from "../../routing/routing";
-import type { CanvasToneStyle } from "../../theme/resolve";
+import type { CanvasToneStyle } from "../../theme";
 
 /**
  * Tier 2 of the two-tier registry (RESTRUCTURE.md): variant DATA for the

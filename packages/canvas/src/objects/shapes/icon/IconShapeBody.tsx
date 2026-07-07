@@ -1,7 +1,8 @@
 "use client";
 
 import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
-import { ICON_APPROX_SIZE_PX } from "../../../theme/tokens";
+/** Approximate on-canvas icon-object size the glyph stroke is tuned for (moved from theme/tokens.ts in the theme dispersal). */
+const ICON_APPROX_SIZE_PX = 130;
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
 /**

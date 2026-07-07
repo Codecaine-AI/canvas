@@ -26,7 +26,7 @@ import {
   type ToolbarControlSpec,
 } from "../../../objects/object-def";
 import { nearestPaletteToken } from "../../../objects/palette";
-import { paletteTokenStyle } from "../../../theme/resolve";
+import { paletteTokenStyle } from "../../../theme";
 import type { CanvasViewportControls } from "../../use-canvas-viewport";
 import { worldToScreen, type ViewportState } from "../../../render/viewport";
 import type {

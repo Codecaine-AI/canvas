@@ -4,7 +4,7 @@ import { memo, useState } from "react";
 // Type-only import: chrome must never import objects/ at runtime — the
 // dependency points the other way (object defs import chrome components).
 import type { ToolbarControlSpec } from "../../../objects/object-def";
-import { CHROME } from "../../../theme/tokens";
+import { EDITOR_STYLE } from "../../components/editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
   AlignIcon,
@@ -147,7 +147,7 @@ export type SelectionToolbarProps = {
 };
 
 const TOOLBAR_HEIGHT_PX = 29;
-const TOOLBAR_BG = CHROME.selectionToolbarBg; // #1D1D1D
+const TOOLBAR_BG = EDITOR_STYLE.selectionToolbarBg; // #1D1D1D
 
 function ToolbarButton({
   control,
@@ -215,7 +215,7 @@ function ToolbarButton({
           border: "none",
           background:
             action === "lock" && sectionLocked
-              ? CHROME.accentPurple
+              ? EDITOR_STYLE.accentPurple
               : hovered
                 ? "rgba(255,255,255,0.12)"
                 : "transparent",
@@ -227,8 +227,8 @@ function ToolbarButton({
           <span
             style={{
               display: "inline-flex",
-              width: CHROME.selectionToolbarSwatchPx,
-              height: CHROME.selectionToolbarSwatchPx,
+              width: EDITOR_STYLE.selectionToolbarSwatchPx,
+              height: EDITOR_STYLE.selectionToolbarSwatchPx,
             }}
           >
             <ColorSwatchIcon color={currentColor} style={{ width: "100%", height: "100%" }} />

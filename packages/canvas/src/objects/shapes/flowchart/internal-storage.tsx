@@ -1,6 +1,8 @@
 "use client";
 
-import { PREDEFINED_PROCESS_GEOMETRY } from "../../../theme/tokens";
+// Shared with the predefined-process def (see the note on its export): the
+// corner radius and rule inset deliberately reuse the same figures.
+import { PREDEFINED_PROCESS_GEOMETRY } from "./predefined-process";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
-import { CHROME } from "../../theme/tokens";
+import { EDITOR_STYLE } from "./editor-style";
 import { Tooltip } from "../../ui/Tooltip";
 import {
   ConnectorIcon,
@@ -21,7 +21,7 @@ import {
  *   - bg #FFFFFF, soft shadow.
  *   - 7 buttons in 3 groups with faint vertical dividers.
  *   - Rest: charcoal glyphs. Hover: light-gray rounded square (~RGB235).
- *     Active: violet rounded square (CHROME.accentPurple family).
+ *     Active: violet rounded square (EDITOR_STYLE.accentPurple family).
  *   - Modal rule: `activeTool` is nullable — null means no button is
  *     highlighted (e.g. a panel like ShapesPanel owns focus). The dock does
  *     NOT track "last selected tool" internally; the consumer (W3 editor)
@@ -54,8 +54,8 @@ export type CanvasDockProps = {
 };
 
 const DOCK_WIDTH_PX = "fit-content";
-const DOCK_HEIGHT_PX = CHROME.dockHeightPx;
-const DOCK_RADIUS_PX = CHROME.dockRadiusPx;
+const DOCK_HEIGHT_PX = EDITOR_STYLE.dockHeightPx;
+const DOCK_RADIUS_PX = EDITOR_STYLE.dockRadiusPx;
 
 type DockButtonSpec = {
   tool: ToolId;
@@ -80,9 +80,9 @@ const GROUP_C: DockButtonSpec[] = [
   { tool: "sticky", label: "Sticky note", tooltip: "Sticky note — S", Icon: StickyIcon },
 ];
 
-const HOVER_BG = CHROME.dockHoverBg;
-const ACTIVE_BG = CHROME.accentPurple;
-const GLYPH_CHARCOAL = CHROME.dockGlyphColor;
+const HOVER_BG = EDITOR_STYLE.dockHoverBg;
+const ACTIVE_BG = EDITOR_STYLE.accentPurple;
+const GLYPH_CHARCOAL = EDITOR_STYLE.dockGlyphColor;
 
 function DockButton({
   spec,
@@ -128,9 +128,9 @@ function DockButton({
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: CHROME.dockButtonSizePx,
-          height: CHROME.dockButtonSizePx,
-          borderRadius: CHROME.dockButtonRadiusPx,
+          width: EDITOR_STYLE.dockButtonSizePx,
+          height: EDITOR_STYLE.dockButtonSizePx,
+          borderRadius: EDITOR_STYLE.dockButtonRadiusPx,
           border: "none",
           background: bg,
           color: glyphColor,
@@ -161,7 +161,7 @@ function DockGroup({
   onOpenShapes?: () => void;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: CHROME.dockGroupGapPx }} data-dock-group="">
+    <div style={{ display: "flex", alignItems: "center", gap: EDITOR_STYLE.dockGroupGapPx }} data-dock-group="">
       {buttons.map((spec) => (
         <DockButton
           key={spec.tool}
@@ -187,9 +187,9 @@ function DockDivider() {
       data-divider=""
       style={{
         width: 1,
-        height: CHROME.dockDividerHeightPx,
-        margin: `0 ${CHROME.dockDividerMarginXPx}px`,
-        background: CHROME.dockDividerColor,
+        height: EDITOR_STYLE.dockDividerHeightPx,
+        margin: `0 ${EDITOR_STYLE.dockDividerMarginXPx}px`,
+        background: EDITOR_STYLE.dockDividerColor,
         flex: "0 0 auto",
       }}
     />
@@ -213,12 +213,12 @@ function CanvasDockComponent({
         width: DOCK_WIDTH_PX,
         height: DOCK_HEIGHT_PX,
         borderRadius: DOCK_RADIUS_PX,
-        background: CHROME.bottomToolbarBg,
-        boxShadow: CHROME.dockShadow,
+        background: EDITOR_STYLE.bottomToolbarBg,
+        boxShadow: EDITOR_STYLE.dockShadow,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: `0 ${CHROME.dockPaddingXPx}px`,
+        padding: `0 ${EDITOR_STYLE.dockPaddingXPx}px`,
         boxSizing: "border-box",
       }}
     >

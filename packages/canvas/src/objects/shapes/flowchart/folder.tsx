@@ -1,8 +1,12 @@
 "use client";
 
-import { FOLDER_GEOMETRY } from "../../../theme/tokens";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+
+/** Folder silhouette geometry (moved from theme/tokens.ts in the theme dispersal). */
+export const FOLDER_GEOMETRY = {
+  tabWidthRatio: 0.38,
+} as const;
 
 /**
  * Folder (W5) — inline SVG silhouette (tab + body path, CSS clip-path can't

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CHROME } from "../../theme/tokens";
+import { EDITOR_STYLE } from "./editor-style";
 import { SHAPE_SEARCH_ENTRIES } from "../../objects/catalog";
 import { shapeCatalogPreview } from "./shape-previews";
 import { Tooltip } from "../../ui/Tooltip";
@@ -140,4 +140,4 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
 }
 
 export const SHAPE_SEARCH_POPOVER_WIDTH_PX = POPOVER_WIDTH_PX;
-export const SHAPE_SEARCH_POPOVER_BG = CHROME.selectionToolbarBg;
+export const SHAPE_SEARCH_POPOVER_BG = EDITOR_STYLE.selectionToolbarBg;
