@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { ArrowLeftIcon, PanelRightIcon, PlusIcon, Trash2Icon, WorkflowIcon } from "lucide-react";
+import { ArrowLeftIcon, PanelRightIcon, PlusIcon, TrashIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
 import {
   InteractiveCanvasEditor,
   type InteractiveCanvasDocument,
@@ -443,7 +443,7 @@ export function App() {
                   onClick={(event) => void deleteCanvas(canvas, event)}
                   className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                 >
-                  <Trash2Icon className="h-3.5 w-3.5" />
+                  <TrashIcon className="h-3.5 w-3.5" />
                 </span>
               </button>
             ))}

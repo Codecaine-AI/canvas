@@ -3,7 +3,7 @@
 import { memo, useState } from "react";
 import { CHROME } from "../../theme/tokens";
 import { Tooltip } from "../../ui/Tooltip";
-import { ZoomMinusIcon, ZoomPlusIcon } from "../../ui/icons/dock-icons";
+import { MinusIcon, PlusIcon } from "../../ui/icons";
 
 /**
  * ZoomControls — bottom-right zoom pill (matches the dock's white styling).
@@ -110,7 +110,7 @@ function ZoomControlsComponent({
       }}
     >
       <ZoomButton label="Zoom out" onClick={onZoomOut} disabled={disabled}>
-        <ZoomMinusIcon className="h-4 w-4" />
+        <MinusIcon className="h-4 w-4" />
       </ZoomButton>
 
       {zoomPercent != null ? (
@@ -135,7 +135,7 @@ function ZoomControlsComponent({
       ) : null}
 
       <ZoomButton label="Zoom in" onClick={onZoomIn} disabled={disabled}>
-        <ZoomPlusIcon className="h-4 w-4" />
+        <PlusIcon className="h-4 w-4" />
       </ZoomButton>
     </div>
   );

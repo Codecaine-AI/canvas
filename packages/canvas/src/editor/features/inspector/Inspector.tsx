@@ -10,9 +10,9 @@ import {
   GitBranchIcon,
   MessageSquareIcon,
   PlusIcon,
-  Trash2Icon,
+  TrashIcon,
   XIcon,
-} from "lucide-react";
+} from "../../../ui/icons";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Textarea } from "../../../ui/textarea";
@@ -283,7 +283,7 @@ export function Inspector({
           className="text-destructive hover:text-destructive"
           onClick={() => dispatch({ type: "canvas.deleteSelection" })}
         >
-          <Trash2Icon className="h-4 w-4" />
+          <TrashIcon className="h-4 w-4" />
           Delete
         </Button>
       </div>
@@ -352,7 +352,7 @@ export function Inspector({
           className="text-destructive hover:text-destructive"
           onClick={() => dispatch({ type: "canvas.deleteSelection" })}
         >
-          <Trash2Icon className="h-4 w-4" />
+          <TrashIcon className="h-4 w-4" />
           Delete
         </Button>
       </div>

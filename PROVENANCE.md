@@ -42,7 +42,17 @@ Spectre's `docs-model` package — the runtime `validateSpectreRef` validator
 was intentionally left behind since only the type is needed here.
 
 `lucide-react` moved from an app dependency to a direct dependency of
-`@codecaine-ai/canvas`.
+`@codecaine-ai/canvas` at extraction time. It has since been removed
+entirely: all icons are now generated from the user's licensed Nucleo SVG
+set. The canonical library lives outside the repo (the user's Dropbox Nucleo
+sets); icons are discovered by grepping it. The icon selection/mapping is in
+`packages/canvas/src/ui/icons/manifest.json`, and the generator in
+`tools/nucleo-icons/generate.ts` resolves each manifest source against that
+library and vendors only the SVGs actually used into
+`packages/canvas/src/ui/icons/nucleo/svg/` (so CI and library-less machines
+regenerate identically). It outputs one component per file under
+`packages/canvas/src/ui/icons/nucleo/` (plus a generated `index.ts` barrel)
+and `packages/canvas/src/ui/icons/icon-glyph-data.generated.ts`.
 
 ## Licensing note
 

@@ -8,7 +8,7 @@ import { CHROME } from "../../../theme/tokens";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
   AlignIcon,
-  ArrowheadIcon,
+  ArrowRightIcon,
   BoldIcon,
   BulletsIcon,
   ChevronDownIcon,
@@ -28,8 +28,8 @@ import {
   SizeIcon,
   StrikethroughIcon,
   StrokeIcon,
-  TextLabelIcon,
-} from "../../../ui/icons/toolbar-icons";
+  TypeIcon,
+} from "../../../ui/icons";
 
 /**
  * SelectionToolbar — the dark floating pill shown above a selection.
@@ -116,9 +116,9 @@ const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
   stroke: StrokeIcon,
   dash: DashIcon,
   routing: RoutingIcon,
-  arrowhead: ArrowheadIcon,
+  arrowhead: ArrowRightIcon,
   "label-align": LabelAlignIcon,
-  "add-label": TextLabelIcon,
+  "add-label": TypeIcon,
 };
 
 /** Fallback for out-of-vocabulary action ids in a registry-supplied spec. */

@@ -4,14 +4,14 @@ import { memo, useState } from "react";
 import { CHROME } from "../../theme/tokens";
 import { Tooltip } from "../../ui/Tooltip";
 import {
-  ArrowIcon,
   ConnectorIcon,
+  CursorIcon,
   HandIcon,
   SectionIcon,
-  ShapeSquareIcon,
+  ShapesIcon,
   StickyIcon,
   TextIcon,
-} from "../../ui/icons/dock-icons";
+} from "../../ui/icons";
 
 /**
  * CanvasDock — the white rounded bottom dock.
@@ -65,12 +65,12 @@ type DockButtonSpec = {
 };
 
 const GROUP_A: DockButtonSpec[] = [
-  { tool: "select", label: "Select", tooltip: "Select — V", Icon: ArrowIcon },
+  { tool: "select", label: "Select", tooltip: "Select — V", Icon: CursorIcon },
   { tool: "hand", label: "Hand", tooltip: "Hand — H", Icon: HandIcon },
 ];
 
 const GROUP_B: DockButtonSpec[] = [
-  { tool: "shapes", label: "Shapes", tooltip: "Shapes", Icon: ShapeSquareIcon },
+  { tool: "shapes", label: "Shapes", tooltip: "Shapes", Icon: ShapesIcon },
   { tool: "connector", label: "Connector", tooltip: "Connector", Icon: ConnectorIcon },
 ];
 

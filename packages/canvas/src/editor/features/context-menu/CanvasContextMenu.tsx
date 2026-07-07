@@ -10,11 +10,11 @@ import {
   FrameIcon,
   LockIcon,
   MessageSquareIcon,
-  StickyNoteIcon,
-  Trash2Icon,
+  StickyIcon,
+  TrashIcon,
   TypeIcon,
   UnlockIcon,
-} from "lucide-react";
+} from "../../../ui/icons";
 import type { CanvasContextMenuApi } from "./use-canvas-context-menu";
 
 export interface CanvasContextMenuProps {
@@ -104,7 +104,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
             className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-destructive hover:bg-muted hover:text-destructive"
             onClick={deleteContextSelection}
           >
-            <Trash2Icon className="h-4 w-4" />
+            <TrashIcon className="h-4 w-4" />
             Delete object
           </button>
         </>
@@ -140,7 +140,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
             className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
             onClick={() => addObjectFromContextMenu("sticky")}
           >
-            <StickyNoteIcon className="h-4 w-4 text-muted-foreground" />
+            <StickyIcon className="h-4 w-4 text-muted-foreground" />
             Add sticky
           </button>
           <button

@@ -8,7 +8,7 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { AlertTriangleIcon, MessageSquareIcon } from "lucide-react";
+import { AlertTriangleIcon, MessageSquareIcon } from "../ui/icons";
 import { annotationTargetLabel, CanvasStage } from "../render/CanvasStage";
 import type { CanvasBounds } from "../state/geometry";
 import { containerViewBounds, fitBounds, fitDocument, type ScreenSize, type ViewportState } from "../render/viewport";

@@ -43,7 +43,7 @@
 
 import type { CanvasBounds } from "../../state/geometry";
 import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../../state/schema";
-import { ICON_GLYPHS, type IconGlyphId } from "../../ui/icons/icon-glyphs";
+import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphId } from "../../ui/icons/icon-glyphs";
 import {
   chevronPoints,
   ellipsePoints,
@@ -116,7 +116,7 @@ function iconGlyphPreview(glyphId: IconGlyphId) {
   return function IconGlyphPreview({ className }: { className?: string }) {
     return (
       <svg viewBox={`0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}`} className={className} fill="none" aria-hidden="true">
-        <g stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <g stroke="currentColor" strokeWidth={ICON_GLYPH_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
           {glyph.elements.map((element, index) => {
             if (element.kind === "path") {
               // eslint-disable-next-line react/no-array-index-key -- glyph element lists are static, position-stable

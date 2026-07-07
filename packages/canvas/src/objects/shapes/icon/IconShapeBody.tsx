@@ -76,7 +76,7 @@ export function IconShapeBody({
       }}
     >
       <svg
-        viewBox={glyph ? `0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}` : "0 0 24 24"}
+        viewBox={glyph ? `0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}` : "0 0 18 18"}
         width={ICON_APPROX_SIZE_PX * 0.55}
         height={ICON_APPROX_SIZE_PX * 0.55}
         fill="none"
@@ -91,8 +91,8 @@ export function IconShapeBody({
           <rect
             x={0}
             y={0}
-            width={glyph?.viewBoxSize ?? 24}
-            height={glyph?.viewBoxSize ?? 24}
+            width={glyph?.viewBoxSize ?? 18}
+            height={glyph?.viewBoxSize ?? 18}
             fill={fill}
             stroke="none"
           />

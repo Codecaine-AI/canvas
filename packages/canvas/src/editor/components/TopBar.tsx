@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, type ReactNode } from "react";
-import { RotateCcwIcon, Undo2Icon } from "lucide-react";
+import { RotateCcwIcon, UndoIcon } from "../../ui/icons";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import type { CanvasAction } from "../../state/actions";
@@ -108,7 +108,7 @@ export function TopBar({
           onClick={() => dispatch({ type: "canvas.undo" })}
           disabled={historyPastLength === 0}
         >
-          <Undo2Icon className="h-4 w-4" />
+          <UndoIcon className="h-4 w-4" />
         </Button>
         <Button
           type="button"

@@ -12,6 +12,7 @@
     "./geometry": "./src/state/geometry.ts",
     "./connection-overlay": "./src/routing/connection-overlay.ts",
     "./ui/cn": "./src/ui/cn.ts",
+    "./ui/icons": "./src/ui/icons/index.ts",
     "./ui/button": "./src/ui/button.tsx",
     "./ui/input": "./src/ui/input.tsx",
     "./ui/textarea": "./src/ui/textarea.tsx",
@@ -24,7 +25,6 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.563.0",
     "radix-ui": "^1.4.3",
     "tailwind-merge": "^3.4.0"
   },

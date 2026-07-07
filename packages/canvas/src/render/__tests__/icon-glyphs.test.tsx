@@ -53,10 +53,10 @@ describe("ICON_GLYPHS registry", () => {
     }
   });
 
-  it("every glyph has a 24x24 viewBox and at least one drawable element", () => {
+  it("every glyph has an 18x18 (native Nucleo grid) viewBox and at least one drawable element", () => {
     for (const id of EXPECTED_IDS) {
       const glyph = ICON_GLYPHS[id];
-      expect(glyph.viewBoxSize).toBe(24);
+      expect(glyph.viewBoxSize).toBe(18);
       expect(glyph.elements.length).toBeGreaterThan(0);
     }
   });

@@ -8,16 +8,16 @@
       "id": "b-foundation-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "This canvas exists to give software diagramming FigJam's designer-grade aesthetics without FigJam's feature sprawl, built from the ground up so an agent can read and write the document model directly.",
-        "format": "mdx",
-        "type": "overview",
         "concepts": [
           "FigJam aesthetics",
           "software diagramming",
           "agent-native",
           "single mutation authority",
           "light board"
-        ]
+        ],
+        "covers": "This canvas exists to give software diagramming FigJam's designer-grade aesthetics without FigJam's feature sprawl, built from the ground up so an agent can read and write the document model directly.",
+        "format": "mdx",
+        "type": "overview"
       },
       "children": [
         "b-foundation-title-1",
@@ -50,6 +50,15 @@
           "insert": "Foundation — Why This Canvas Exists"
         }
       ],
+      "children": [
+        "pm-mr9qgfuo-2-2hss94"
+      ]
+    },
+    "pm-mr9qgfuo-2-2hss94": {
+      "id": "pm-mr9qgfuo-2-2hss94",
+      "flavour": "code",
+      "props": {},
+      "text": [],
       "children": []
     },
     "b-foundation-intro-2": {
@@ -186,7 +195,6 @@
         {
           "insert": "CANVAS_BG = \"#F5F5F5\"",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/figjam-tokens.ts",
@@ -200,7 +208,6 @@
         {
           "insert": "figjam-tokens.ts",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/figjam-tokens.ts"
@@ -213,7 +220,6 @@
         {
           "insert": "theme.ts",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/theme.ts"
@@ -240,7 +246,6 @@
         {
           "insert": "figjam-tokens.ts",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/figjam-tokens.ts"
@@ -294,7 +299,6 @@
         {
           "insert": "reduceInteractiveCanvasState",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/model/actions.ts",
@@ -331,7 +335,6 @@
         {
           "insert": "validateInteractiveCanvasDocument",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/model/schema.ts",
