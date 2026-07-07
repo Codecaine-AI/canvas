@@ -19,7 +19,7 @@
  */
 
 import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../state/schema";
-import { ICON_GLYPHS, type IconGlyphId } from "../ui/icons/icon-glyphs";
+import { ICON_GLYPHS, type IconGlyphId } from "./shapes/icon/icon-glyphs";
 
 export type ShapeCatalogEntry = {
   id: string;

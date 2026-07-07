@@ -1,16 +1,16 @@
 /**
- * ui/icons — the single icon source for the whole repo.
+ * ui/icons — INTERFACE icons only (co-location alignment: the canvas-object
+ * glyph registry for the `icon` object type is canvas CONTENT, not interface
+ * chrome, and lives with its def at objects/shapes/icon/icon-glyphs.ts).
  *
  * - `nucleo/` (generated): one chrome icon component per file, from the
- *   licensed Nucleo library via manifest.json + the Nucleo icon codegen tool.
- *   Re-exports `IconProps` for convenience.
+ *   licensed Nucleo library via manifest.json + the Nucleo icon codegen tool
+ *   (tools/nucleo-icons/generate.ts, which also emits the canvas glyph data
+ *   into objects/shapes/icon/). Re-exports `IconProps` for convenience.
  * - `custom-icons`: the few hand-authored icons that can't be generated
  *   (dynamic-color swatch).
- * - `icon-glyphs`: the canvas-object glyph registry (`icon` object type),
- *   built from the generated glyph data.
  */
 
 export type { IconProps } from "./icon-props";
 export * from "./nucleo";
 export * from "./custom-icons";
-export * from "./icon-glyphs";

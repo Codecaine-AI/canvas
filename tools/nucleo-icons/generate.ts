@@ -4,8 +4,10 @@
  * Reads packages/canvas/src/ui/icons/manifest.json and emits:
  *   1. packages/canvas/src/ui/icons/nucleo/<kebab>-icon.tsx — one React chrome
  *      component per icon, plus a nucleo/index.ts barrel re-exporting them all.
- *   2. packages/canvas/src/ui/icons/icon-glyph-data.generated.ts — a single
- *      serializable glyph-data registry (consumed whole).
+ *   2. packages/canvas/src/objects/shapes/icon/icon-glyph-data.generated.ts —
+ *      a single serializable glyph-data registry (consumed whole). Canvas
+ *      CONTENT, so it co-locates with the icon object def, not with the
+ *      interface icons (co-location alignment).
  *
  * Run: bun tools/nucleo-icons/generate.ts
  *
@@ -47,7 +49,17 @@ const ICONS_DIR = resolve(REPO_ROOT, "packages", "canvas", "src", "ui", "icons")
 const NUCLEO_DIR = resolve(ICONS_DIR, "nucleo");
 const VENDOR_DIR = resolve(NUCLEO_DIR, "svg");
 const MANIFEST_PATH = resolve(ICONS_DIR, "manifest.json");
-const GLYPH_OUT_PATH = resolve(ICONS_DIR, "icon-glyph-data.generated.ts");
+/** Canvas-content output: the glyph registry co-locates with the icon object def. */
+const GLYPH_OUT_PATH = resolve(
+  REPO_ROOT,
+  "packages",
+  "canvas",
+  "src",
+  "objects",
+  "shapes",
+  "icon",
+  "icon-glyph-data.generated.ts",
+);
 
 const DEFAULT_LIBRARY_DIR = "/Users/Ford/Dropbox/UI Components/Icons/nucleo";
 
@@ -791,7 +803,7 @@ function main(): void {
   const glyphOut = [
     GENERATED_HEADER,
     "",
-    "// Structural twin of IconGlyphElement in ./icon-glyphs.tsx (kept local to",
+    "// Structural twin of IconGlyphElement in ./icon-glyphs.ts (kept local to",
     "// avoid an import cycle — the shapes must stay assignment-compatible).",
     "type IconGlyphElement =",
     '  | { kind: "path"; d: string }',

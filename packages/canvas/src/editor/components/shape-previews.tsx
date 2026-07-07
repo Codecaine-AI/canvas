@@ -28,7 +28,7 @@
 
 import type { CanvasBounds } from "../../state/geometry";
 import type { ShapeCatalogEntry } from "../../objects/catalog";
-import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphId } from "../../ui/icons/icon-glyphs";
+import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphId } from "../../objects/shapes/icon/icon-glyphs";
 import {
   chevronPoints,
   ellipsePoints,

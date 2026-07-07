@@ -9,12 +9,14 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  *
  * Each glyph is stroke-outline-only (fill="none"), round caps/joins,
  * matching the FigJam/Nucleo Advanced icon set aesthetic used by the chrome
- * icons in this folder (ui/icons/nucleo/). Since the Nucleo consolidation the
- * path data is GENERATED from the licensed Nucleo sources (the vendored Nucleo
- * SVGs + manifest.json via tools/nucleo-icons/generate.ts) into
+ * icons in ui/icons/nucleo/. Since the Nucleo consolidation the path data is
+ * GENERATED from the licensed Nucleo sources (the vendored Nucleo SVGs +
+ * ui/icons/manifest.json via tools/nucleo-icons/generate.ts) into
  * ./icon-glyph-data.generated — this module keeps the stable id vocabulary,
  * human-readable labels, and the typed registry shape, and joins them onto
- * the generated geometry.
+ * the generated geometry. It lives HERE, beside the icon object def, because
+ * these glyphs are canvas CONTENT (what an `icon` object draws), not
+ * interface icons (co-location alignment).
  *
  * Stroke width is NOT baked into the path data — callers apply
  * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` (mirrors ICON_STROKE_WIDTH_PX in
