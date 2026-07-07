@@ -19,7 +19,6 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   C              rectangle tool
  *   P              process tool
  *   D              decision tool
- *   T              text tool
  *   S              sticky tool
  *   Shift+S        section tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)
@@ -36,7 +35,9 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   Cmd/Ctrl-Z     canvas.undo
  *   Shift-Cmd/Ctrl-Z   canvas.redo
  *   Escape         cancel the active interaction machine gesture, else close an
- *                  open context menu, else clear selection
+ *                  open context menu, else exit shape-placement mode (disarm
+ *                  the creation tool / close the Shapes panel — see
+ *                  onEscapeExitPlacement), else clear selection
  *   Cmd/Ctrl-0     viewport controls.fit
  *   Cmd/Ctrl-=     viewport controls.zoomIn
  *   Cmd/Ctrl--     viewport controls.zoomOut
@@ -54,7 +55,6 @@ const TOOL_KEY_MAP: Record<string, CanvasTool> = {
   c: "rectangle",
   p: "process",
   d: "decision",
-  t: "text",
   s: "sticky",
   // Checkpoint 5 (D16 expanded vocabulary) — chosen to avoid colliding with
   // the letters above: O(dOcument), U(person — "U" reads as a person icon
@@ -79,6 +79,13 @@ export type UseCanvasHotkeysArgs = {
   /** Whether a context menu is currently open (Escape closes it when no gesture is active). */
   isContextMenuOpen: () => boolean;
   onCloseContextMenu: () => void;
+  /**
+   * Escape hook for the Shapes-panel placement mode: called when no gesture is
+   * active and no context menu is open. Return true when the editor consumed
+   * the key (disarmed a creation tool / closed the Shapes panel); false lets
+   * Escape fall through to clear-selection.
+   */
+  onEscapeExitPlacement?: () => boolean;
   controls: Pick<CanvasViewportControls, "fit" | "zoomIn" | "zoomOut">;
   /** World point to center a keyboard paste on (e.g. last known pointer position); omit for the +24 fallback. */
   pastePoint?: () => { x: number; y: number } | undefined;
@@ -105,6 +112,7 @@ export function useCanvasHotkeys({
   onCancelInteraction,
   isContextMenuOpen,
   onCloseContextMenu,
+  onEscapeExitPlacement,
   controls,
   pastePoint,
 }: UseCanvasHotkeysArgs): void {
@@ -125,6 +133,8 @@ export function useCanvasHotkeys({
   isContextMenuOpenRef.current = isContextMenuOpen;
   const onCloseContextMenuRef = useRef(onCloseContextMenu);
   onCloseContextMenuRef.current = onCloseContextMenu;
+  const onEscapeExitPlacementRef = useRef(onEscapeExitPlacement);
+  onEscapeExitPlacementRef.current = onEscapeExitPlacement;
   const controlsRef = useRef(controls);
   controlsRef.current = controls;
   const pastePointRef = useRef(pastePoint);
@@ -149,6 +159,12 @@ export function useCanvasHotkeys({
         if (isContextMenuOpenRef.current()) {
           event.preventDefault();
           onCloseContextMenuRef.current();
+          return;
+        }
+        // Shapes-panel placement mode: disarm the creation tool / close the
+        // panel before falling through to clear-selection.
+        if (onEscapeExitPlacementRef.current?.()) {
+          event.preventDefault();
           return;
         }
         dispatchRef.current({ type: "canvas.select", selection: { kind: "none" } });

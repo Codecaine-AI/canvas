@@ -7,8 +7,8 @@ import type { IconProps } from "../icon-props";
 export function ArrowUpIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <line x1="9" y1="2.75" x2="9" y2="15.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <polyline points="4.75 7 9 2.75 13.25 7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <line x1="9" y1="2.75" x2="9" y2="15.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <polyline points="4.75 7 9 2.75 13.25 7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

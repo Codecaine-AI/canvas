@@ -7,13 +7,17 @@
  * gesture steppers live in ./gestures/*; the shared types/constants in
  * ./types. Consumers import everything through ./interaction (the barrel).
  */
-import { objectTypeLabel, type CanvasAction, type CanvasSelection } from "../state/actions";
-import { createObjectId } from "../state/geometry";
+import type { CanvasAction, CanvasSelection } from "../state/actions";
 import { objectDefForType } from "../objects/object-def";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";
 import { stepFromMarquee } from "./gestures/marquee";
-import { defaultGeometryForPlacement, objectTypeForTool, stepFromPlace } from "./gestures/place";
+import {
+  defaultGeometryForPlacement,
+  objectTypeForTool,
+  placePreviewOverlayFor,
+  stepFromPlace,
+} from "./gestures/place";
 import { stepFromConnectorCreate, stepFromConnectorEndpointDrag } from "./gestures/connectors";
 import {
   DRAG_THRESHOLD,
@@ -89,36 +93,12 @@ function stepFromIdle(
   if (ctx.tool === "hand") return toIdle();
 
   if (event.type === "double") {
-    // Double-click on an existing object: start editing its label inline (the
-    // id is already known). Double-click on empty canvas: create a new text
-    // object centered at the click point and immediately start editing its
-    // label — typing starts right away, mirroring FigJam's "type anywhere"
-    // affordance. The new object's id is predicted with the exact same
-    // deterministic createObjectId() call canvas.addObject's reducer makes,
-    // so this machine (which never mutates the document itself) can request
-    // the label editor open for the correct id without waiting on a render.
+    // Double-click on an existing object: start editing its label inline.
     if (event.hit.kind === "object") {
       return {
         state: IDLE_INTERACTION_STATE,
         dispatch: [],
         overlay: { editObjectLabelId: event.hit.objectId },
-      };
-    }
-    if (event.hit.kind === "canvas") {
-      const label = objectTypeLabel("text");
-      const predictedId = createObjectId(ctx.document, label);
-      const geometry = defaultGeometryForPlacement("text", event.world);
-      return {
-        state: IDLE_INTERACTION_STATE,
-        dispatch: [
-          {
-            type: "canvas.addObject",
-            objectType: "text",
-            label,
-            geometry,
-          },
-        ],
-        overlay: { editObjectLabelId: predictedId, editObjectLabelSeed: label },
       };
     }
     return toIdle();
@@ -188,13 +168,18 @@ function stepFromIdle(
       kind: "place",
       tool: ctx.tool,
       objectType: armedObjectTypeForClick,
+      variant: ctx.armedShape,
       startWorld: event.world,
       currentWorld: event.world,
     };
     return {
       state: pending,
       dispatch: [],
-      overlay: { placePreview: defaultGeometryForPlacement(armedObjectTypeForClick, event.world) },
+      overlay: placePreviewOverlayFor(
+        armedObjectTypeForClick,
+        defaultGeometryForPlacement(armedObjectTypeForClick, event.world),
+        ctx.armedShape,
+      ),
     };
   }
 
@@ -256,13 +241,18 @@ function stepFromIdle(
       kind: "place",
       tool: ctx.tool,
       objectType: armedObjectType,
+      variant: ctx.armedShape,
       startWorld: event.world,
       currentWorld: event.world,
     };
     return {
       state: pending,
       dispatch: [],
-      overlay: { placePreview: defaultGeometryForPlacement(armedObjectType, event.world) },
+      overlay: placePreviewOverlayFor(
+        armedObjectType,
+        defaultGeometryForPlacement(armedObjectType, event.world),
+        ctx.armedShape,
+      ),
     };
   }
 

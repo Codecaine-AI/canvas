@@ -28,11 +28,6 @@ export type InteractiveCanvasObject = {
     padding?: number;
     gap?: number;
   };
-  source?: {
-    path?: string;
-    symbol?: string;
-    section?: string;
-  };
   /**
    * `type: "section"` only (W2). `title` is the text shown in the section's
    * floating title chip (distinct from `label`, which every object still

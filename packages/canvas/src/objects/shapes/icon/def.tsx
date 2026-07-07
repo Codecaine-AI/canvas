@@ -15,8 +15,17 @@ import { SHAPE_TOOLBAR } from "../toolbar";
 function IconObjectView(props: ObjectRenderProps) {
   const { object, showPorts, zoom = 1, hideLabel } = props;
   const colors = resolveObjectColors(object.style);
+  // "neutral" is the inert per-type default every placed object carries
+  // (state/actions/defaults.ts toneForType — "never actually read" for W5
+  // types), NOT a deliberate recolor: counting it as explicit put a washed-out
+  // fill chip behind every freshly placed glyph. Only a real recolor
+  // (paletteToken / non-neutral tone / fill / stroke) switches the glyph off
+  // the default dark-stroke, no-fill "bbox" rendering.
   const hasExplicitColor = Boolean(
-    object.style?.paletteToken || object.style?.tone || object.style?.fill || object.style?.stroke,
+    object.style?.paletteToken ||
+      (object.style?.tone && object.style.tone !== "neutral") ||
+      object.style?.fill ||
+      object.style?.stroke,
   );
 
   return (
@@ -52,7 +61,27 @@ function IconObjectView(props: ObjectRenderProps) {
 export const iconDef: ObjectDef = {
   kind: "icon",
   render: IconObjectView,
-  css: "",
+  /*
+   * Same chrome-strip as the other glyph-only shapes (chip-icon/person):
+   * IconShapeBody paints the glyph itself and the brief's "bbox" tier means
+   * NO chip/box behind it, so the button chrome goes fully transparent —
+   * `!important` beats objectStyle's inline `background: colors.fill`.
+   * Hover/selection feedback comes back as the standard bounding-box outline.
+   */
+  css: `
+        .interactive-canvas-object-icon {
+          border: none;
+          border-radius: 0;
+          background: transparent !important;
+          box-shadow: none;
+          padding: 8px;
+        }
+        .interactive-canvas-object-icon:hover,
+        .interactive-canvas-object-icon[data-selected="true"] {
+          outline: 2px solid var(--primary);
+          outline-offset: 1px;
+        }
+`,
   defaults: {
     geometry: { x: 160, y: 160, width: 120, height: 120 },
     tone: "neutral",

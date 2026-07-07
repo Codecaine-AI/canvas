@@ -7,7 +7,7 @@ import type { IconProps } from "../icon-props";
 export function CheckIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <polyline points="2.75 9.25 6.75 14.25 15.25 3.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <polyline points="2.75 9.25 6.75 14.25 15.25 3.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

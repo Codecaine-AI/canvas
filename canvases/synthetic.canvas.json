@@ -73,7 +73,7 @@
     },
     {
       "id": "current-docs",
-      "type": "source-node",
+      "type": "rectangle",
       "label": "Current docs",
       "body": "Existing MDX docs context.",
       "parentId": null,
@@ -305,18 +305,6 @@
       "label": "yes",
       "style": "dotted",
       "arrow": "forward"
-    }
-  ],
-  "links": [
-    {
-      "id": "docs-link-current-docs",
-      "objectId": "current-docs",
-      "target": {
-        "kind": "doc",
-        "path": "docs/10-system-design/40-docs-mdx-lab.mdx",
-        "label": "Docs MDX lab"
-      },
-      "status": "unresolved"
     }
   ],
   "annotations": [

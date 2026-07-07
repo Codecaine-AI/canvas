@@ -7,14 +7,14 @@ import type { IconProps } from "../icon-props";
 export function RenameIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <polyline points="10.25 13.25 6.565 3.75 5.955 3.75 2.27 13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="3.24" y1="10.75" x2="9.28" y2="10.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="13.75" y1="3.75" x2="13.75" y2="14.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <path d="M11.75,1.75c1.105,0,2,.895,2,2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <path d="M15.75,1.75c-1.105,0-2,.895-2,2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <path d="M11.75,16.25c1.105,0,2-.895,2-2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <path d="M15.75,16.25c-1.105,0-2-.895-2-2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="12.25" y1="9.75" x2="15.25" y2="9.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <polyline points="10.25 13.25 6.565 3.75 5.955 3.75 2.27 13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="3.24" y1="10.75" x2="9.28" y2="10.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="13.75" y1="3.75" x2="13.75" y2="14.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <path d="M11.75,1.75c1.105,0,2,.895,2,2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <path d="M15.75,1.75c-1.105,0-2,.895-2,2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <path d="M11.75,16.25c1.105,0,2-.895,2-2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <path d="M15.75,16.25c-1.105,0-2-.895-2-2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="12.25" y1="9.75" x2="15.25" y2="9.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

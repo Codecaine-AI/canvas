@@ -106,6 +106,7 @@
         "b-model-type-section-p1",
         "b-model-type-section-p2",
         "b-model-type-section-p3",
+        "b-model-type-section-p3a-title-zoom",
         "b-model-type-section-capture",
         "b-model-type-section-p4",
         "b-model-type-pill",
@@ -5176,12 +5177,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts"
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "SECTION_GEOMETRY"
             }
           }
         },
         {
-          "insert": ": 3px inset, 27px tall, 16px/500-weight text, 10px horizontal padding). Section fill/chip colors resolve against "
+          "insert": ": 3px inset, 27px tall, 16px/700-weight (bold) text, 10px horizontal padding). Section fill/chip colors resolve against "
         },
         {
           "insert": "SECTION_FAMILIES",
@@ -8400,6 +8402,91 @@
         },
         {
           "insert": " registry (26 glyphs: activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe). Bbox-fallback outline."
+        }
+      ]
+    },
+    "b-model-type-section-p3a-title-zoom": {
+      "id": "b-model-type-section-p3a-title-zoom",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The chip is zoom-adaptive (the FigJam “big section names when zoomed out” behavior): below zoom 1 it counter-scales by "
+        },
+        {
+          "insert": "(1 / zoom) ** zoomOutGrowth",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "sectionTitleScale"
+            }
+          }
+        },
+        {
+          "insert": " — sub-linear (currently 0.6), so titles read from afar yet still shrink with the board instead of holding a constant screen size — clamped to "
+        },
+        {
+          "insert": "maxZoomOutScale",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (6) and uniform across every section regardless of its width. A scaled chip is width-budgeted to its section's inner width ("
+        },
+        {
+          "insert": "sectionTitleMaxWidthPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "sectionTitleMaxWidthPx"
+            }
+          }
+        },
+        {
+          "insert": ") and ellipsizes via an inner span rather than hard-clipping at the section's "
+        },
+        {
+          "insert": "overflow: hidden",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " edge; at zoom ≥ 1 no transform is emitted, so the resting DOM is unchanged. The section-title editor input ("
+        },
+        {
+          "insert": "LabelEditingOverlay",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/label-editing/LabelEditingOverlay.tsx",
+              "symbol": "SectionTitleEditor"
+            }
+          }
+        },
+        {
+          "insert": ") mirrors the same scale and width budget, so in-place renames match the chip at any zoom. All knobs live on "
+        },
+        {
+          "insert": "SECTION_GEOMETRY.titleChip",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "SECTION_GEOMETRY"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ]
     }

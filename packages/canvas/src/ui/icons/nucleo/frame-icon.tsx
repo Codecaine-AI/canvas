@@ -7,15 +7,15 @@ import type { IconProps } from "../icon-props";
 export function FrameIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <line x1="4.75" y1="2.25" x2="4.75" y2=".75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="13.25" y1="2.25" x2="13.25" y2=".75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="4.75" y1="17.25" x2="4.75" y2="15.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="13.25" y1="17.25" x2="13.25" y2="15.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="15.75" y1="4.75" x2="17.25" y2="4.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="15.75" y1="13.25" x2="17.25" y2="13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1=".75" y1="4.75" x2="2.25" y2="4.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1=".75" y1="13.25" x2="2.25" y2="13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <rect x="4.75" y="4.75" width="8.5" height="8.5" rx="2" ry="2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <line x1="4.75" y1="2.25" x2="4.75" y2=".75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="13.25" y1="2.25" x2="13.25" y2=".75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="4.75" y1="17.25" x2="4.75" y2="15.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="13.25" y1="17.25" x2="13.25" y2="15.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="15.75" y1="4.75" x2="17.25" y2="4.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="15.75" y1="13.25" x2="17.25" y2="13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1=".75" y1="4.75" x2="2.25" y2="4.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1=".75" y1="13.25" x2="2.25" y2="13.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <rect x="4.75" y="4.75" width="8.5" height="8.5" rx="2" ry="2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

@@ -3,7 +3,7 @@
 import { createObjectId, sectionDescendantIds, snapGeometry } from "../geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../schema";
 import { removeConnection } from "./connections";
-import { defaultGeometryFor, objectTypeLabel, shapeForType, toneForType } from "./defaults";
+import { defaultGeometryFor, draftPlacedObject, objectTypeLabel, shapeForType } from "./defaults";
 import { nextId, selectedObjectIds } from "./helpers";
 import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
@@ -14,21 +14,20 @@ export function handleAddObject(
 ): InteractiveCanvasState {
   const label = action.label ?? objectTypeLabel(action.objectType);
   const id = createObjectId(state.document, label);
-  const object: InteractiveCanvasObject = {
-    id,
-    type: action.objectType,
-    label,
-    parentId: action.parentId ?? null,
-    geometry: snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
-    style: {
-      tone: action.tone ?? toneForType(action.objectType),
-      shape: shapeForType(action.objectType),
+  // draftPlacedObject is the same builder the armed-tool ghost preview renders,
+  // so the placed object matches the preview exactly (id/parent/snap aside).
+  const object: InteractiveCanvasObject = draftPlacedObject(
+    action.objectType,
+    snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
+    {
+      id,
+      label,
+      parentId: action.parentId ?? null,
+      tone: action.tone,
+      direction: action.direction,
+      icon: action.icon,
     },
-    // W2 — sections carry their visible title in `title`/`tint`, not the
-    // generic tone/shape style bag; default to a neutral "gray" family so a
-    // freshly-placed section is immediately valid per validateInteractiveCanvasDocument.
-    ...(action.objectType === "section" ? { title: label, tint: "gray" as const } : null),
-  };
+  );
   return withHistory(
     {
       ...state,
@@ -299,7 +298,7 @@ export function handleDeleteSelection(
   const idSet = new Set(ids);
   // W6 — deleting a section deletes its recorded members too: fold in the
   // transitive parentId-descendants of every selected section, so the
-  // existing connection/link/annotation cascades below cover them as well.
+  // existing connection/annotation cascades below cover them as well.
   for (const id of ids) {
     const object = state.document.objects.find((candidate) => candidate.id === id);
     if (object?.type !== "section") continue;
@@ -315,7 +314,6 @@ export function handleDeleteSelection(
       (connection) =>
         !idSet.has(connection.from.objectId) && !idSet.has(connection.to.objectId),
     ),
-    links: state.document.links?.filter((link) => !idSet.has(link.objectId)),
     annotations: state.document.annotations?.filter((annotation) => {
       return !(annotation.target.kind === "object" && idSet.has(annotation.target.objectId));
     }),

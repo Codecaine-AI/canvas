@@ -56,8 +56,8 @@ describe("v2-flow canvas JSON", () => {
     }
     // Sections: page frame + Interview Inputs + General + Questions + Q1/Q2/QN
     // + Interview Flow + Memory Bank + Memory Actions + Structure
-    // + Next Question Response + Probing Response = 13
-    expect(counts.get("section")).toBe(13);
+    // + Probing Response = 12
+    expect(counts.get("section")).toBe(12);
     // Stickies: overall-context, base-question-text, memory-bank = 3
     expect(counts.get("sticky")).toBe(3);
     // Pills: overall-context + (Q1/Q2/QN x2) = 7
@@ -71,8 +71,8 @@ describe("v2-flow canvas JSON", () => {
     expect(counts.get("code-block")).toBe(2);
     // Arrow shapes (chevrons): 3 left + 3 right = 6
     expect(counts.get("arrow-shape")).toBe(6);
-    // Emphasis box modeled as text/rounded-rect
-    expect(counts.get("text")).toBe(1);
+    // Emphasis box modeled as rectangle/rounded-rect
+    expect(counts.get("rectangle")).toBe(1);
   });
 
   it("has a non-trivial connector network", () => {

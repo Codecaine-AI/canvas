@@ -12,7 +12,14 @@
  */
 import type { CanvasAction, CanvasSelection, CanvasTool } from "../state/actions";
 import type { CanvasBounds, CanvasPoint } from "../state/geometry";
-import type { CanvasGeometry, InteractiveCanvasObjectType, InteractiveCanvasDocument } from "../state/schema";
+import type {
+  CanvasGeometry,
+  CanvasIconGlyph,
+  CanvasShapeDirection,
+  InteractiveCanvasObject,
+  InteractiveCanvasObjectType,
+  InteractiveCanvasDocument,
+} from "../state/schema";
 import type { Anchor } from "../routing/routing";
 import type { DistributionGuideSegment, SnapCorrection, SnapGuide, SpacingHint } from "./snapping";
 import type { ViewportState } from "../render/viewport";
@@ -24,6 +31,20 @@ export const DRAG_THRESHOLD = 3;
 export const SNAP_THRESHOLD_SCREEN_PX = 6;
 
 export type ResizeHandle = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+
+/**
+ * Catalog-entry variant of the armed creation tool (Shapes panel flow): the
+ * tool itself is just an object TYPE, but a panel entry can additionally pin
+ * an orientation (triangle up/down, arrow left/right), an Advanced-tier icon
+ * glyph, and a label override (the glyph's display name instead of the
+ * generic "Icon"). Carried through the place gesture into canvas.addObject
+ * and into the ghost preview so both match the picked entry exactly.
+ */
+export type ArmedShapeVariant = {
+  direction?: CanvasShapeDirection;
+  icon?: CanvasIconGlyph;
+  label?: string;
+};
 
 export const RESIZE_HANDLES: ResizeHandle[] = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
 
@@ -105,24 +126,28 @@ export type InteractionOverlay = {
   /**
    * One-shot signal (4.2.1): a double-click resolved to "start editing this
    * object's label inline". Set for both the existing-object case (id already
-   * known) and the empty-canvas case (id predicted via createObjectId using
-   * the exact same deterministic logic canvas.addObject's reducer uses, so it
-   * matches the id the reducer will actually assign). The editor should open
-   * its inline label textarea for this id and then let the overlay go stale on
-   * the next interaction event (this field is not "current state", just an
-   * edge-triggered request).
+   * known). The editor should open its inline label textarea for this id and
+   * then let the overlay go stale on the next interaction event (this field is
+   * not "current state", just an edge-triggered request).
    */
   editObjectLabelId?: string;
   /**
    * Seed label text for editObjectLabelId when the target object won't exist
-   * in the document yet at the time the editor processes this overlay (the
-   * empty-canvas double-click case dispatches canvas.addObject in the same
-   * batch — React hasn't run the reducer yet). Existing-object double-click
-   * omits this; the editor reads the current label from the document instead.
+   * in the document yet at the time the editor processes this overlay.
+   * Existing-object double-click omits this; the editor reads the current
+   * label from the document instead.
    */
   editObjectLabelSeed?: string;
   /** Ghost preview rect for an in-progress armed-tool placement drag (4.2.2). */
   placePreview?: CanvasBounds;
+  /**
+   * Full draft of the object an armed-tool placement will create (built by
+   * draftPlacedObject — same builder canvas.addObject uses), so the ghost can
+   * render the ACTUAL shape (glyph, direction, label, tone) instead of a
+   * generic dashed box. Always accompanies placePreview on the armed-tool
+   * paths; the bounds stay for consumers that only need geometry.
+   */
+  placePreviewObject?: InteractiveCanvasObject;
 };
 
 export type PressPending = {
@@ -170,7 +195,7 @@ export type MarqueeGesture = {
 
 /**
  * Armed-tool object creation (4.2.2): pointer-down with a creatable tool armed
- * (rectangle/process/decision/text/sticky/source-node/annotation-marker)
+ * (rectangle/process/decision/sticky/annotation-marker)
  * starts this gesture over empty canvas. A sub-threshold release creates a
  * default-size object centered at the point; a drag creates an object sized
  * to the normalized, min-size-clamped dragged rect. Either way, on completion
@@ -180,6 +205,8 @@ export type PlaceGesture = {
   kind: "place";
   tool: CanvasTool;
   objectType: InteractiveCanvasObjectType;
+  /** Catalog-entry variant (direction/icon/label) captured from ctx.armedShape at gesture start. */
+  variant?: ArmedShapeVariant;
   startWorld: CanvasPoint;
   currentWorld: CanvasPoint;
 };
@@ -221,6 +248,16 @@ export type InteractionContext = {
   selection: CanvasSelection;
   tool: CanvasTool;
   viewport: ViewportState;
+  /**
+   * Repeat-placement mode (Shapes panel flow): when true, completing a place
+   * gesture keeps the creation tool armed instead of reverting to "select",
+   * so the user can keep clicking to place more of the same shape. The host
+   * sets this while the Shapes panel is open; exiting the mode (closing the
+   * panel, picking a dock tool, Escape) is the host's responsibility.
+   */
+  stickyPlacement?: boolean;
+  /** Catalog-entry variant of the armed tool (Shapes panel pick) — see ArmedShapeVariant. */
+  armedShape?: ArmedShapeVariant;
   /**
    * Optional hook (checkpoint 1, T1.2.2) letting the host inject a snap
    * correction into the drag COMMIT itself, not just the overlay guides.

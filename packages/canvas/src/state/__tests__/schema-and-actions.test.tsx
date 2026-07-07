@@ -13,7 +13,6 @@ import {
   InteractiveCanvasEditor,
   paletteTokenStyle,
   reduceInteractiveCanvasState,
-  resolveCanvasLinkStatuses,
   resolveObjectColors,
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
@@ -431,61 +430,6 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("resolves source and doc link statuses through a typed document update", () => {
-    const document = resolveCanvasLinkStatuses(
-      {
-        ...syntheticCanvasDocument,
-        links: [
-          ...(syntheticCanvasDocument.links ?? []),
-          {
-            id: "stale-source-link",
-            objectId: "agent-summarizes",
-            target: {
-              kind: "source",
-              path: "packages/canvas/src/actions.ts",
-              label: "Canvas actions",
-            },
-            status: "unresolved",
-          },
-          {
-            id: "missing-doc-link",
-            objectId: "write-spec",
-            target: {
-              kind: "doc",
-              path: "docs/missing.md",
-              label: "Missing docs",
-            },
-            status: "unresolved",
-          },
-        ],
-      },
-      {
-        knownPaths: [
-          "docs/10-system-design/40-docs-mdx-lab.mdx",
-          "packages/canvas/src/actions.ts",
-        ],
-        stalePaths: ["packages/canvas/src/actions.ts"],
-        checkedAt: "2026-06-24T00:00:00.000Z",
-      },
-    );
-
-    const statuses = new Map(document.links?.map((link) => [link.id, link.status]));
-    expect(statuses.get("docs-link-current-docs")).toBe("resolved");
-    expect(statuses.get("stale-source-link")).toBe("stale");
-    expect(statuses.get("missing-doc-link")).toBe("missing");
-
-    let state = createInteractiveCanvasState({
-      ...syntheticCanvasDocument,
-      links: document.links,
-    });
-    state = reduceInteractiveCanvasState(state, {
-      type: "canvas.resolveLinkStatuses",
-      knownPaths: ["docs/10-system-design/40-docs-mdx-lab.mdx"],
-    });
-    expect(state.history.past.length).toBe(1);
-    expect(state.lastChange?.summary).toBe("Resolved link statuses");
-  });
-
   it("moves and resizes objects through editor pointer interactions before saving", async () => {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
@@ -787,6 +731,122 @@ describe("interactive canvas: canvas.setParent action", () => {
     expect(state.document.objects.find((object) => object.id === "process-a")?.parentId).toBe(
       undefined,
     );
+  });
+});
+
+describe("interactive canvas: canvas.captureSectionContents action", () => {
+  // Recorded chain: grand > mid > capturing > child-section. Every non-section
+  // object sits geometrically inside "capturing"; what varies is the recorded
+  // parentId, which is what the adoption predicate keys on.
+  function makeCaptureDocument(): InteractiveCanvasDocument {
+    return {
+      schemaVersion: 1,
+      id: "capture-doc",
+      mode: "diagram",
+      objects: [
+        {
+          id: "grand",
+          type: "section",
+          label: "Grand",
+          title: "Grand",
+          tint: "gray",
+          geometry: { x: 0, y: 0, width: 1000, height: 1000 },
+        },
+        {
+          id: "mid",
+          type: "section",
+          label: "Mid",
+          title: "Mid",
+          tint: "blue",
+          parentId: "grand",
+          geometry: { x: 50, y: 50, width: 600, height: 600 },
+        },
+        {
+          id: "capturing",
+          type: "section",
+          label: "Capturing",
+          title: "Capturing",
+          tint: "green",
+          parentId: "mid",
+          geometry: { x: 100, y: 100, width: 400, height: 400 },
+        },
+        {
+          id: "child-section",
+          type: "section",
+          label: "Child",
+          title: "Child",
+          tint: "gray",
+          parentId: "capturing",
+          geometry: { x: 120, y: 120, width: 200, height: 200 },
+        },
+        {
+          id: "deep-note",
+          type: "process",
+          label: "Deep note",
+          parentId: "child-section",
+          geometry: { x: 140, y: 140, width: 50, height: 50 },
+        },
+        // Legacy flat-doc shape: inside "capturing" but recorded on the outer
+        // ancestor "grand".
+        {
+          id: "legacy-flat",
+          type: "process",
+          label: "Legacy flat",
+          parentId: "grand",
+          geometry: { x: 360, y: 360, width: 50, height: 50 },
+        },
+        {
+          id: "unparented",
+          type: "process",
+          label: "Unparented",
+          geometry: { x: 420, y: 360, width: 50, height: 50 },
+        },
+        {
+          id: "sibling-section",
+          type: "section",
+          label: "Sibling",
+          title: "Sibling",
+          tint: "blue",
+          geometry: { x: 2000, y: 0, width: 300, height: 300 },
+        },
+        // Recorded member of the unrelated sibling section, parked inside
+        // "capturing" geometrically.
+        {
+          id: "sibling-member",
+          type: "process",
+          label: "Sibling member",
+          parentId: "sibling-section",
+          geometry: { x: 360, y: 420, width: 50, height: 50 },
+        },
+      ],
+      connections: [],
+    };
+  }
+
+  function capture(): Map<string, string | null | undefined> {
+    const state = reduceInteractiveCanvasState(createInteractiveCanvasState(makeCaptureDocument()), {
+      type: "canvas.captureSectionContents",
+      sectionId: "capturing",
+    });
+    return new Map(state.document.objects.map((object) => [object.id, object.parentId]));
+  }
+
+  it("adopts objects parented to a strict ancestor of the capturing section (legacy flat-doc repair)", () => {
+    const parents = capture();
+    expect(parents.get("legacy-flat")).toBe("capturing");
+    // Unparented captured objects are still adopted, as before.
+    expect(parents.get("unparented")).toBe("capturing");
+  });
+
+  it("does not steal objects parented to an unrelated sibling section", () => {
+    const parents = capture();
+    expect(parents.get("sibling-member")).toBe("sibling-section");
+  });
+
+  it("does not flatten objects parented to the capturing section's own descendants", () => {
+    const parents = capture();
+    expect(parents.get("deep-note")).toBe("child-section");
+    expect(parents.get("child-section")).toBe("capturing");
   });
 });
 

@@ -7,8 +7,8 @@
  *   licensed Nucleo library via manifest.json + the Nucleo icon codegen tool
  *   (tools/nucleo-icons/generate.ts, which also emits the canvas glyph data
  *   into objects/shapes/icon/). Re-exports `IconProps` for convenience.
- * - `custom-icons`: the few hand-authored icons that can't be generated
- *   (dynamic-color swatch).
+ * - `custom-icons`: the few hand-authored icons outside the Nucleo set
+ *   (dynamic-color swatch, FigJam sections icon).
  */
 
 export type { IconProps } from "./icon-props";

@@ -10,7 +10,6 @@ import {
   SectionIcon,
   ShapesIcon,
   StickyIcon,
-  TextIcon,
 } from "../../ui/icons";
 
 /**
@@ -19,13 +18,13 @@ import {
  * Geometry/behavior source: board-design-reference/analysis/figjam-bottom-dock-spec.md
  *   - Content-fit width, 48px logical height, 13px radius.
  *   - bg #FFFFFF, soft shadow.
- *   - 7 buttons in 3 groups with faint vertical dividers.
+ *   - 6 buttons in 3 groups with faint vertical dividers.
  *   - Rest: charcoal glyphs. Hover: light-gray rounded square (~RGB235).
  *     Active: violet rounded square (EDITOR_STYLE.accentPurple family).
- *   - Modal rule: `activeTool` is nullable — null means no button is
- *     highlighted (e.g. a panel like ShapesPanel owns focus). The dock does
- *     NOT track "last selected tool" internally; the consumer (W3 editor)
- *     is the single source of truth for which tool (if any) is active.
+ *   - `activeTool` is nullable — null means no button is highlighted. The
+ *     dock does NOT track "last selected tool" internally; the consumer
+ *     (W3 editor) is the single source of truth for which tool (if any) is
+ *     active.
  *
  * Positioning: this component renders only the pill itself, sized to its
  * exact logical px. The consumer is responsible for bottom-centering it
@@ -39,12 +38,11 @@ export type ToolId =
   | "hand"
   | "shapes"
   | "connector"
-  | "text"
   | "section"
   | "sticky";
 
 export type CanvasDockProps = {
-  /** Currently active tool, or null when no dock button should show the violet active state (modal rule). */
+  /** Currently active tool, or null when no dock button should show the violet active state. */
   activeTool?: ToolId | null;
   onSelectTool?: (tool: ToolId) => void;
   /** Fired specifically for the shape-tool button, which opens the left-docked Shapes panel rather than just becoming "the active tool" in the simple sense. */
@@ -61,7 +59,7 @@ type DockButtonSpec = {
   tool: ToolId;
   label: string;
   tooltip: string;
-  Icon: (props: { className?: string }) => React.JSX.Element;
+  Icon: (props: { className?: string; style?: React.CSSProperties }) => React.JSX.Element;
 };
 
 const GROUP_A: DockButtonSpec[] = [
@@ -75,7 +73,6 @@ const GROUP_B: DockButtonSpec[] = [
 ];
 
 const GROUP_C: DockButtonSpec[] = [
-  { tool: "text", label: "Text", tooltip: "Text — T", Icon: TextIcon },
   { tool: "section", label: "Section", tooltip: "Section — Shift+S", Icon: SectionIcon },
   { tool: "sticky", label: "Sticky note", tooltip: "Sticky note — S", Icon: StickyIcon },
 ];
@@ -83,6 +80,19 @@ const GROUP_C: DockButtonSpec[] = [
 const HOVER_BG = EDITOR_STYLE.dockHoverBg;
 const ACTIVE_BG = EDITOR_STYLE.accentPurple;
 const GLYPH_CHARCOAL = EDITOR_STYLE.dockGlyphColor;
+const DOCK_ICON_STYLES = `
+.canvas-dock-icon:not(.canvas-dock-icon--section) :is(path, line, polyline, rect, circle) {
+  stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx} !important;
+}
+
+.canvas-dock-icon--sticky :is(path, line) {
+  stroke-width: ${EDITOR_STYLE.dockStickyIconStrokeWidthPx} !important;
+}
+
+.canvas-dock-icon--section :is(path, rect) {
+  stroke-width: ${EDITOR_STYLE.dockSectionIconStrokeWidthPx} !important;
+}
+`;
 
 function DockButton({
   spec,
@@ -99,6 +109,7 @@ function DockButton({
   const { Icon, label, tool, tooltip } = spec;
   const buttonDisabled = disabled;
   const tooltipLabel = tooltip;
+  const iconSize = tool === "sticky" ? EDITOR_STYLE.dockStickyIconSizePx : EDITOR_STYLE.dockIconSizePx;
 
   const bg = isActive ? ACTIVE_BG : hovered && !buttonDisabled ? HOVER_BG : "transparent";
   const glyphColor = isActive ? "#FFFFFF" : GLYPH_CHARCOAL;
@@ -140,7 +151,13 @@ function DockButton({
           transition: "background-color 80ms ease-out",
         }}
       >
-        <Icon className="h-5 w-5" />
+        <Icon
+          className={`canvas-dock-icon canvas-dock-icon--${tool}`}
+          style={{
+            width: iconSize,
+            height: iconSize,
+          }}
+        />
       </button>
       <Tooltip label={tooltipLabel} visible={hovered} placement="top" />
     </div>
@@ -186,7 +203,7 @@ function DockDivider() {
       aria-hidden="true"
       data-divider=""
       style={{
-        width: 1,
+        width: EDITOR_STYLE.dockDividerWidthPx,
         height: EDITOR_STYLE.dockDividerHeightPx,
         margin: `0 ${EDITOR_STYLE.dockDividerMarginXPx}px`,
         background: EDITOR_STYLE.dockDividerColor,
@@ -204,48 +221,51 @@ function CanvasDockComponent({
   className,
 }: CanvasDockProps) {
   return (
-    <div
-      role="toolbar"
-      aria-label="FigJam tools"
-      data-figjam-dock=""
-      className={className}
-      style={{
-        width: DOCK_WIDTH_PX,
-        height: DOCK_HEIGHT_PX,
-        borderRadius: DOCK_RADIUS_PX,
-        background: EDITOR_STYLE.bottomToolbarBg,
-        boxShadow: EDITOR_STYLE.dockShadow,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: `0 ${EDITOR_STYLE.dockPaddingXPx}px`,
-        boxSizing: "border-box",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <DockGroup
-          buttons={GROUP_A}
-          activeTool={activeTool}
-          disabled={disabled}
-          onSelectTool={onSelectTool}
-        />
-        <DockDivider />
-        <DockGroup
-          buttons={GROUP_B}
-          activeTool={activeTool}
-          disabled={disabled}
-          onSelectTool={onSelectTool}
-          onOpenShapes={onOpenShapes}
-        />
-        <DockDivider />
-        <DockGroup
-          buttons={GROUP_C}
-          activeTool={activeTool}
-          disabled={disabled}
-          onSelectTool={onSelectTool}
-        />
+    <>
+      <style data-dock-icon-styles="">{DOCK_ICON_STYLES}</style>
+      <div
+        role="toolbar"
+        aria-label="FigJam tools"
+        data-figjam-dock=""
+        className={className}
+        style={{
+          width: DOCK_WIDTH_PX,
+          height: DOCK_HEIGHT_PX,
+          borderRadius: DOCK_RADIUS_PX,
+          background: EDITOR_STYLE.bottomToolbarBg,
+          boxShadow: EDITOR_STYLE.dockShadow,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: `0 ${EDITOR_STYLE.dockPaddingXPx}px`,
+          boxSizing: "border-box",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <DockGroup
+            buttons={GROUP_A}
+            activeTool={activeTool}
+            disabled={disabled}
+            onSelectTool={onSelectTool}
+          />
+          <DockDivider />
+          <DockGroup
+            buttons={GROUP_B}
+            activeTool={activeTool}
+            disabled={disabled}
+            onSelectTool={onSelectTool}
+            onOpenShapes={onOpenShapes}
+          />
+          <DockDivider />
+          <DockGroup
+            buttons={GROUP_C}
+            activeTool={activeTool}
+            disabled={disabled}
+            onSelectTool={onSelectTool}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

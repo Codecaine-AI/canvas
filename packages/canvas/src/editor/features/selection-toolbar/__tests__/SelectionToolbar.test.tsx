@@ -13,7 +13,6 @@ import { SHAPE_TOOLBAR } from "../../../../objects/shapes/toolbar";
 const SHAPE_CONTROLS = SHAPE_TOOLBAR.controls;
 const SECTION_CONTROLS = SECTION_TOOLBAR.controls;
 const CONNECTOR_CONTROLS = connectorDef.toolbar!.controls;
-const TEXT_CONTROLS = objectDefForType("text")!.toolbar!.controls;
 const STICKY_CONTROLS = objectDefForType("sticky")!.toolbar!.controls;
 
 afterEach(() => {
@@ -68,28 +67,19 @@ describe("SelectionToolbar registry-driven control sets", () => {
     expect(actions).toEqual(["color", "stroke", "dash", "routing", "arrowhead", "label-align"]);
   });
 
-  it("text controls render exactly the 5 measured controls (label-edit swap)", () => {
-    const { container } = render(<SelectionToolbar controls={TEXT_CONTROLS} variantLabel="text" />);
-    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
-      el.getAttribute("data-toolbar-action"),
-    );
-    expect(actions).toEqual(["color", "font-style", "size", "bold", "strikethrough"]);
-  });
-
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
     const kinds: Record<string, readonly unknown[]> = {
       shape: SHAPE_CONTROLS,
       section: SECTION_CONTROLS,
       connector: CONNECTOR_CONTROLS,
-      text: TEXT_CONTROLS,
       sticky: STICKY_CONTROLS,
       multi: intersectToolbarControls([
-        objectDefForType("text") as ObjectDef,
+        objectDefForType("process") as ObjectDef,
         objectDefForType("sticky") as ObjectDef,
       ]),
     };
     expect(Object.keys(kinds).sort()).toEqual(
-      ["connector", "multi", "section", "shape", "sticky", "text"].sort(),
+      ["connector", "multi", "section", "shape", "sticky"].sort(),
     );
     for (const controls of Object.values(kinds)) {
       expect(controls.length).toBeGreaterThan(0);

@@ -7,7 +7,7 @@ import type { IconProps } from "../icon-props";
 export function LabelAlignIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <path d="m4.408,5.5554l3.921-3.547c.381-.345.961-.345,1.342,0l3.921,3.547c.419.379.658.918.658,1.483v7.2116c0,1.105-.895,2-2,2h-6.5c-1.105,0-2-.895-2-2v-7.2116c0-.565.239-1.104.658-1.483Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <path d="m4.408,5.5554l3.921-3.547c.381-.345.961-.345,1.342,0l3.921,3.547c.419.379.658.918.658,1.483v7.2116c0,1.105-.895,2-2,2h-6.5c-1.105,0-2-.895-2-2v-7.2116c0-.565.239-1.104.658-1.483Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
       <circle cx="9" cy="6.75" r="1.25" fill="currentColor" strokeWidth="0" />
     </svg>
   );

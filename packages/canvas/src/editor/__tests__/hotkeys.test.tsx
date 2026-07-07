@@ -368,6 +368,59 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     cleanup();
   });
 
+  it("keeps the Shapes dock button highlighted while the Shapes panel is open", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={syntheticCanvasDocument}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const shapesButton = container.querySelector('[data-dock-tool="shapes"]') as HTMLElement;
+      expect(shapesButton.getAttribute("data-active")).toBe("false");
+
+      fireEvent.click(shapesButton);
+
+      expect(container.querySelector("[data-shapes-panel]")).toBeTruthy();
+      expect(shapesButton.getAttribute("data-active")).toBe("true");
+      expect(shapesButton.getAttribute("aria-pressed")).toBe("true");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("plays the Shapes panel exit animation before unmounting it", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={syntheticCanvasDocument}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      fireEvent.click(container.querySelector('[data-dock-tool="shapes"]')!);
+      const closeButton = screen.getByLabelText("Close shapes panel");
+
+      fireEvent.click(closeButton);
+
+      const closingPanel = container.querySelector("[data-shapes-panel]") as HTMLElement;
+      expect(closingPanel).toBeTruthy();
+      expect(closingPanel.getAttribute("data-state")).toBe("closing");
+      expect(closingPanel.style.animation).toContain("canvas-shapes-panel-exit");
+
+      fireEvent.animationEnd(closingPanel, { animationName: "canvas-shapes-panel-exit" });
+
+      expect(container.querySelector("[data-shapes-panel]")).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
   it("double-clicking an object opens a textarea seeded with its label, and Enter commits canvas.updateObject", () => {
     const restoreRect = stubStageRect();
     try {
@@ -421,38 +474,6 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
       expect(screen.getAllByText("User brief").length).toBeGreaterThan(0);
       expect(screen.queryByText("Should not stick")).toBeNull();
-    } finally {
-      restoreRect();
-    }
-  });
-
-  it("double-clicking empty canvas creates a text object and opens its label editor immediately", () => {
-    const restoreRect = stubStageRect();
-    try {
-      render(
-        <InteractiveCanvasEditor
-          document={syntheticCanvasDocument}
-          onSave={() => undefined}
-          onCancel={() => undefined}
-        />,
-      );
-
-      const canvasLayer = Array.from(
-        document.querySelectorAll(".interactive-canvas-stage .interactive-canvas-layer"),
-      ).find((element) => element instanceof HTMLElement && element.tagName === "DIV") as HTMLElement;
-      expect(canvasLayer).toBeTruthy();
-
-      // A point clearly outside every existing canvas JSON object's geometry.
-      fireEvent.doubleClick(canvasLayer, { clientX: 1150, clientY: 700 });
-
-      const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
-      expect(textarea.value).toBe("Text");
-
-      fireEvent.change(textarea, { target: { value: "New note" } });
-      fireEvent.keyDown(textarea, { key: "Enter" });
-
-      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
-      expect(screen.getAllByText("New note").length).toBeGreaterThan(0);
     } finally {
       restoreRect();
     }
@@ -819,6 +840,256 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       expect(section.style.background).toBe("#C2E5FF");
       expect(section.style.borderColor).toBe("#14AE5C");
+    } finally {
+      restoreRect();
+    }
+  });
+});
+
+describe("InteractiveCanvasEditor: Shapes creation flow (panel-armed repeat placement)", () => {
+  function stubStageRect() {
+    const originalRect = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      if ((this as HTMLElement).dataset.canvasStage === "true") {
+        return {
+          x: 0,
+          y: 0,
+          left: 0,
+          top: 0,
+          width: 1240,
+          height: 760,
+          right: 1240,
+          bottom: 760,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+      return originalRect.call(this);
+    };
+    return () => {
+      HTMLElement.prototype.getBoundingClientRect = originalRect;
+    };
+  }
+
+  /** Empty board with an identity viewport so screen coords === world coords. */
+  function emptyBoardDocument(): InteractiveCanvasDocument {
+    return {
+      schemaVersion: 1,
+      id: "shapes-flow-test",
+      mode: "diagram",
+      viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [],
+      connections: [],
+    };
+  }
+
+  function renderEditor(doc: InteractiveCanvasDocument = emptyBoardDocument()) {
+    const view = render(
+      <InteractiveCanvasEditor document={doc} onSave={() => undefined} onCancel={() => undefined} />,
+    );
+    const stage = view.container.querySelector("[data-canvas-stage]") as HTMLElement;
+    return { ...view, stage };
+  }
+
+  function openShapesPanel(container: HTMLElement) {
+    fireEvent.click(container.querySelector('[data-dock-tool="shapes"]')!);
+    return container.querySelector("[data-shapes-panel]") as HTMLElement;
+  }
+
+  function pickShape(container: HTMLElement, entryId: string) {
+    fireEvent.click(container.querySelector(`[data-shape-entry="${entryId}"]`)!);
+  }
+
+  /** Sub-threshold click on the stage — down+up at the same point places at that point. */
+  function placeAt(stage: HTMLElement, clientX: number, clientY: number, pointerId = 1) {
+    fireEvent.pointerDown(stage, { button: 0, pointerId, clientX, clientY });
+    fireEvent.pointerUp(stage, { button: 0, pointerId, clientX, clientY });
+  }
+
+  function placedObjectCount(container: HTMLElement) {
+    return container.querySelectorAll(".interactive-canvas-object").length;
+  }
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("picking a shape keeps the panel open and highlights the picked entry", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = renderEditor();
+      const panel = openShapesPanel(container);
+
+      pickShape(container, "basic-square");
+
+      expect(panel.getAttribute("data-state")).toBe("open");
+      const entry = container.querySelector('[data-shape-entry="basic-square"]') as HTMLElement;
+      expect(entry.getAttribute("data-selected")).toBe("true");
+      expect(entry.getAttribute("aria-pressed")).toBe("true");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("moving the cursor over the canvas with a shape armed shows a real-shape ghost before any click", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "basic-square");
+
+      expect(container.querySelector("[data-canvas-place-ghost]")).toBeNull();
+      fireEvent.pointerMove(stage, { clientX: 400, clientY: 300 });
+      // The ghost renders the ACTUAL draft object through ObjectShape, not a
+      // generic dashed box.
+      const ghost = container.querySelector("[data-canvas-place-ghost]") as HTMLElement;
+      expect(ghost).toBeTruthy();
+      expect(ghost.querySelector(".interactive-canvas-object")).toBeTruthy();
+      expect(container.querySelector("[data-canvas-place-preview]")).toBeNull();
+
+      // Leaving the stage clears the ghost.
+      fireEvent.pointerLeave(stage);
+      expect(container.querySelector("[data-canvas-place-ghost]")).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("an Advanced (icon) pick ghosts and places the actual glyph with its display name", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "adv-database");
+
+      fireEvent.pointerMove(stage, { clientX: 400, clientY: 300 });
+      const ghost = container.querySelector("[data-canvas-place-ghost]") as HTMLElement;
+      expect(ghost.textContent).toContain("Database");
+
+      placeAt(stage, 400, 300);
+      expect(placedObjectCount(container)).toBe(1);
+      const placed = container.querySelector(
+        '[data-canvas-object-layer] .interactive-canvas-object',
+      ) as HTMLElement;
+      expect(placed.textContent).toContain("Database");
+      // The glyph made it onto the object — an icon object without one renders blank.
+      expect(placed.querySelector("svg")).toBeTruthy();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("a direction-variant pick (triangle down) places with that direction", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "basic-triangle-down");
+
+      placeAt(stage, 400, 300);
+      expect(placedObjectCount(container)).toBe(1);
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("a human's own placement never wears the agent-change halo (no data-changed ring)", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "basic-square");
+
+      placeAt(stage, 300, 240);
+      expect(placedObjectCount(container)).toBe(1);
+      // The gray 5px ring is reserved for agent-sourced changes; direct
+      // manipulation (place/move/resize) must not decorate itself.
+      expect(container.querySelector('[data-changed="true"]')).toBeNull();
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("placing a shape keeps the placement tool armed so repeated clicks keep placing", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      const panel = openShapesPanel(container);
+      pickShape(container, "basic-square");
+      expect(placedObjectCount(container)).toBe(0);
+
+      placeAt(stage, 300, 240);
+      expect(placedObjectCount(container)).toBe(1);
+
+      // Still in placement mode: panel open, entry highlighted, next click places again.
+      expect(panel.getAttribute("data-state")).toBe("open");
+      expect(
+        container.querySelector('[data-shape-entry="basic-square"]')!.getAttribute("data-selected"),
+      ).toBe("true");
+
+      placeAt(stage, 700, 500, 2);
+      expect(placedObjectCount(container)).toBe(2);
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("closing the Shapes panel exits placement mode (tool reverts to select)", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "basic-square");
+
+      fireEvent.click(screen.getByLabelText("Close shapes panel"));
+
+      expect(stage.getAttribute("data-canvas-select-tool")).toBe("true");
+      placeAt(stage, 300, 240);
+      expect(placedObjectCount(container)).toBe(0);
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("picking another dock tool closes the panel and exits placement mode", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      openShapesPanel(container);
+      pickShape(container, "basic-square");
+
+      fireEvent.click(container.querySelector('[data-dock-tool="select"]')!);
+
+      const panel = container.querySelector("[data-shapes-panel]") as HTMLElement;
+      expect(panel.getAttribute("data-state")).toBe("closing");
+      expect(stage.getAttribute("data-canvas-select-tool")).toBe("true");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("Escape first disarms the shape tool (panel stays open, highlight clears), then closes the panel", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container, stage } = renderEditor();
+      const panel = openShapesPanel(container);
+      pickShape(container, "basic-square");
+      fireEvent.pointerMove(stage, { clientX: 400, clientY: 300 });
+      expect(container.querySelector("[data-canvas-place-ghost]")).toBeTruthy();
+
+      act(() => {
+        dispatchKeyDown({ key: "Escape" });
+      });
+
+      expect(panel.getAttribute("data-state")).toBe("open");
+      expect(container.querySelector('[data-shape-entry="basic-square"]')!.getAttribute("data-selected")).toBeNull();
+      expect(stage.getAttribute("data-canvas-select-tool")).toBe("true");
+      expect(container.querySelector("[data-canvas-place-ghost]")).toBeNull();
+
+      act(() => {
+        dispatchKeyDown({ key: "Escape" });
+      });
+
+      expect(panel.getAttribute("data-state")).toBe("closing");
     } finally {
       restoreRect();
     }

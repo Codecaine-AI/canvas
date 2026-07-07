@@ -1,7 +1,7 @@
 "use client";
 
 import type { InteractiveCanvasDocument } from "../schema";
-import { handleAddAnnotation, handleResolveLinkStatuses } from "./annotations";
+import { handleAddAnnotation } from "./annotations";
 import {
   handleAddConnection,
   handleDeleteConnection,
@@ -179,10 +179,6 @@ function reduceCanvasAction(
     return handleCaptureSectionContents(state, action);
   }
 
-  if (action.type === "canvas.resolveLinkStatuses") {
-    return handleResolveLinkStatuses(state, action);
-  }
-
   return state;
 }
 
@@ -207,7 +203,6 @@ export function buildSelectionContext(
         objectIds.includes(connection.to.objectId)
       );
     }),
-    links: document.links?.filter((link) => objectIds.includes(link.objectId)) ?? [],
     annotations:
       document.annotations?.filter((annotation) => {
         return annotation.target.kind === "object" && objectIds.includes(annotation.target.objectId);

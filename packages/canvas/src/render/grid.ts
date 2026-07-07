@@ -1,11 +1,13 @@
 // Grid constants (moved from theme/tokens.ts in the theme dispersal — the
-// adaptive-grid math below is their consumer). The grid is adaptive: a base
-// 8 logical-px step that doubles or halves (powers of two) so the ON-SCREEN
-// dot pitch stays inside a comfortable band — see grid.test.ts for the zoom
-// data points that pin the base step and band.
+// adaptive-grid math below is their consumer). The grid is adaptive when
+// zooming out: a base 8 logical-px step doubles by powers of two so the
+// ON-SCREEN dot pitch does not collapse into noise. When zooming in, we keep
+// the base world step so dots spread out naturally instead of forming a dense
+// screen-space pattern.
 export const GRID_BASE_STEP_PX = 8;
-/** Screen-space band the effective step (8 * 2^n) must stay inside. */
+/** Minimum screen-space pitch before the effective world step doubles. */
 export const GRID_MIN_SCREEN_STEP_PX = 6.5;
+/** Reference comfort max; high zoom may exceed this to avoid dense subdivision. */
 export const GRID_MAX_SCREEN_STEP_PX = 13;
 /** Dot diameter at 100% zoom, logical px. */
 export const GRID_DOT_DIAMETER_PX = 2;
@@ -39,13 +41,11 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Returns CSS values for a zoom-aware dot grid pinned to world coordinates.
  *
- * FigJam's adaptive grid law (theme/tokens.ts, canvas.gridDot): the world
- * step is `GRID_BASE_STEP_PX * 2^n` for whichever integer `n` keeps the
- * on-screen spacing (`step * scale`) inside
- * `[GRID_MIN_SCREEN_STEP_PX, GRID_MAX_SCREEN_STEP_PX]` = ~[6.5, 13]px.
- * Step changes happen only by powers of two, so density shifts discretely
- * while background size and pan position still move continuously within
- * each tier.
+ * The world step starts at `GRID_BASE_STEP_PX` and doubles by powers of two
+ * only when zooming out far enough that the on-screen spacing would fall below
+ * `GRID_MIN_SCREEN_STEP_PX`. We intentionally do not halve below the base step
+ * at high zoom; otherwise the grid keeps a tight screen-space pitch and turns
+ * into a dense dot field.
  *
  * Validated against the two pixel-sampled ground-truth observations in
  * figjam-style-tokens.json (canvas.gridDot.observed):
@@ -58,8 +58,7 @@ function clamp(value: number, min: number, max: number): number {
  * exactly reproduced by this law, see grid.test.ts).
  *
  * Dot radius is fixed at FigJam's ~2 logical px diameter (1px screen radius
- * at 100% zoom) rather than scaling with the step tier — FigJam's dots stay
- * a constant, fine on-screen size regardless of zoom tier.
+ * at 100% zoom) and clamped at the extremes.
  */
 export function gridBackground(scale: number, translate: GridTranslate): GridBackground {
   let effectiveStep = GRID_BASE_STEP_PX;
@@ -67,11 +66,6 @@ export function gridBackground(scale: number, translate: GridTranslate): GridBac
 
   while (sizePx < GRID_MIN_SCREEN_STEP_PX) {
     effectiveStep *= 2;
-    sizePx = effectiveStep * scale;
-  }
-
-  while (sizePx > GRID_MAX_SCREEN_STEP_PX) {
-    effectiveStep /= 2;
     sizePx = effectiveStep * scale;
   }
 

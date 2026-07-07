@@ -7,7 +7,7 @@ import type { IconProps } from "../icon-props";
 export function ChevronDownIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <polyline points="15.25 6.5 9 12.75 2.75 6.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <polyline points="15.25 6.5 9 12.75 2.75 6.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

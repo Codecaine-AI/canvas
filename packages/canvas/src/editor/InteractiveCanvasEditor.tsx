@@ -18,6 +18,8 @@ import {
   type CanvasTool,
 } from "../state/actions";
 import { CanvasStage } from "../render/CanvasStage";
+import { objectTypeForTool } from "../interaction/interaction";
+import type { ShapeCatalogEntry } from "../objects/catalog";
 import { CanvasDock, type ToolId } from "./components/CanvasDock";
 import { ShapesPanel } from "./components/ShapesPanel";
 import { ZoomControls } from "./components/ZoomControls";
@@ -58,6 +60,8 @@ function selectedObjectIds(selection: CanvasSelection): string[] {
   return selection.kind === "objects" ? selection.objectIds : [];
 }
 
+type ShapesPanelPhase = "closed" | "open" | "closing";
+
 /**
  * Wave 3a — CanvasDock ↔ CanvasTool mapping.
  *
@@ -71,7 +75,6 @@ function selectedObjectIds(selection: CanvasSelection): string[] {
 const DOCK_TOOL_TO_CANVAS_TOOL: Partial<Record<ToolId, CanvasTool>> = {
   select: "select",
   hand: "hand",
-  text: "text",
   section: "section",
   sticky: "sticky",
   connector: "select", // quick-connect is driven by hovering a port while in "select", not a distinct tool.
@@ -81,13 +84,12 @@ const DOCK_TOOL_TO_CANVAS_TOOL: Partial<Record<ToolId, CanvasTool>> = {
 const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
   select: "select",
   hand: "hand",
-  text: "text",
   section: "section",
   sticky: "sticky",
 };
 
 /**
- * Every other CanvasTool value (rectangle/process/decision/source-node/
+ * Every other CanvasTool value (rectangle/process/decision/
  * document/person/database/chat/pill/arrow-shape/predefined-process/
  * code-block/chip-icon/annotation) is armed exclusively via the Shapes panel
  * or the shape-search swap popover now — the dock's "shapes" button opens
@@ -123,10 +125,34 @@ export function InteractiveCanvasEditor({
     openConnectionLabelEditor,
     openObjectLabelEditor,
   } = labelEditing;
-  // CanvasDock modal rule (Wave 3a scope item 1): while the Shapes panel is
-  // open, the dock shows no active tool (activeTool=null) — the panel owns
-  // placement-arming until a shape is picked or the panel is dismissed.
-  const [shapesPanelOpen, setShapesPanelOpen] = useState(false);
+  // While the Shapes panel is open, keep the dock's Shapes button highlighted
+  // so the bottom chrome reflects the active shape-adding mode.
+  const [shapesPanelPhase, setShapesPanelPhase] = useState<ShapesPanelPhase>("closed");
+  const shapesPanelOpen = shapesPanelPhase === "open";
+  const shapesPanelVisible = shapesPanelPhase !== "closed";
+  const shapesPanelClosing = shapesPanelPhase === "closing";
+  // Last catalog entry picked in the Shapes panel — drives the panel's violet
+  // highlight AND the armed variant (direction/icon/label) that placements and
+  // the ghost preview carry. Both derive against state.tool below so they
+  // clear the moment anything disarms or re-arms the tool (Escape, dock pick,
+  // hotkey); a hotkey-armed tool has no entry and places the bare type.
+  const [pickedShapeEntry, setPickedShapeEntry] = useState<ShapeCatalogEntry | null>(null);
+  const armedShapeEntry =
+    pickedShapeEntry && state.tool === pickedShapeEntry.objectType ? pickedShapeEntry : null;
+  const selectedShapeEntryId = armedShapeEntry?.id ?? null;
+  const armedShape = useMemo(
+    () =>
+      armedShapeEntry
+        ? {
+            direction: armedShapeEntry.direction,
+            icon: armedShapeEntry.icon,
+            // Advanced-tier icons read their glyph's display name ("Database"),
+            // not the generic per-type default ("Icon").
+            label: armedShapeEntry.objectType === "icon" ? armedShapeEntry.label : undefined,
+          }
+        : undefined,
+    [armedShapeEntry],
+  );
   const { viewport, setViewport, isPanning, controls, screenToWorld } = useCanvasViewport({
     document: state.document,
     stageRef,
@@ -151,9 +177,6 @@ export function InteractiveCanvasEditor({
   const selectedConnection = state.document.connections.find(
     (connection) => connection.id === selectedConnectionId,
   );
-  const selectedLinks = selectedObject
-    ? (state.document.links ?? []).filter((link) => link.objectId === selectedObject.id)
-    : [];
   // Floating SelectionToolbar (selection-derived variant/position, flyouts,
   // style-apply actions) — state and actions live in
   // editor/features/selection-toolbar.
@@ -205,12 +228,16 @@ export function InteractiveCanvasEditor({
     interactionOverlay,
     interactionStateRef,
     handleStagePointerDown,
+    handleStagePointerMove,
+    handleStagePointerLeave,
     handleStageDoubleClick,
     applyCancelInteraction,
   } = useInteractionPipeline({
     document: state.document,
     selection: state.selection,
     tool: state.tool,
+    stickyPlacement: shapesPanelOpen,
+    armedShape,
     viewport,
     dispatch,
     setViewport,
@@ -225,6 +252,64 @@ export function InteractiveCanvasEditor({
     [labelEditConnectionId, objectLabelEditId],
   );
 
+  // Picking a shape arms its creation tool but keeps the panel open — the
+  // Shapes creation flow is a mode: ghost preview follows the cursor, each
+  // canvas click places another object (stickyPlacement below), and the mode
+  // only ends via dock tool pick / panel close / Escape.
+  const handleShapePick = useCallback(
+    (shapeType: InteractiveCanvasObjectType) => {
+      dispatch({ type: "canvas.setTool", tool: shapeType });
+    },
+    [dispatch],
+  );
+
+  const handleShapePickEntry = useCallback((entry: ShapeCatalogEntry) => {
+    setPickedShapeEntry(entry);
+  }, []);
+
+  // Closing the panel exits placement mode: any panel-armed creation tool
+  // reverts to select so no invisible armed tool outlives its highlight.
+  const closeShapesPanel = useCallback(() => {
+    setShapesPanelPhase((phase) => (phase === "closed" ? "closed" : "closing"));
+    setPickedShapeEntry(null);
+    if (objectTypeForTool(state.tool) && state.tool !== "sticky" && state.tool !== "section") {
+      dispatch({ type: "canvas.setTool", tool: "select" });
+    }
+  }, [dispatch, state.tool]);
+
+  const finishClosingShapesPanel = useCallback(() => {
+    setShapesPanelPhase((phase) => (phase === "closing" ? "closed" : phase));
+  }, []);
+
+  const handleDockSelectTool = useCallback(
+    (tool: ToolId) => {
+      if (tool === "shapes") return;
+      closeShapesPanel();
+      const canvasTool = DOCK_TOOL_TO_CANVAS_TOOL[tool];
+      if (canvasTool) dispatch({ type: "canvas.setTool", tool: canvasTool });
+    },
+    [closeShapesPanel, dispatch],
+  );
+
+  const openShapesPanel = useCallback(() => setShapesPanelPhase("open"), []);
+
+  // Escape (via useCanvasHotkeys, after gesture-cancel and context-menu):
+  // first press disarms the creation tool but leaves the panel open for
+  // another pick; with nothing armed, it closes the panel. Returns false to
+  // let Escape fall through to clear-selection when neither applies.
+  const handleEscapeExitPlacement = useCallback(() => {
+    if (objectTypeForTool(state.tool)) {
+      dispatch({ type: "canvas.setTool", tool: "select" });
+      setPickedShapeEntry(null);
+      return true;
+    }
+    if (shapesPanelOpen) {
+      closeShapesPanel();
+      return true;
+    }
+    return false;
+  }, [closeShapesPanel, dispatch, shapesPanelOpen, state.tool]);
+
   useCanvasHotkeys({
     document: state.document,
     selection: state.selection,
@@ -234,30 +319,9 @@ export function InteractiveCanvasEditor({
     onCancelInteraction: applyCancelInteraction,
     isContextMenuOpen,
     onCloseContextMenu: closeContextMenu,
+    onEscapeExitPlacement: handleEscapeExitPlacement,
     controls,
   });
-
-  const handleShapePick = useCallback(
-    (shapeType: InteractiveCanvasObjectType) => {
-      dispatch({ type: "canvas.setTool", tool: shapeType });
-      setShapesPanelOpen(false);
-    },
-    [dispatch],
-  );
-
-  const closeShapesPanel = useCallback(() => setShapesPanelOpen(false), []);
-
-  const handleDockSelectTool = useCallback(
-    (tool: ToolId) => {
-      if (tool === "shapes") return;
-      setShapesPanelOpen(false);
-      const canvasTool = DOCK_TOOL_TO_CANVAS_TOOL[tool];
-      if (canvasTool) dispatch({ type: "canvas.setTool", tool: canvasTool });
-    },
-    [dispatch],
-  );
-
-  const openShapesPanel = useCallback(() => setShapesPanelOpen(true), []);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-background">
@@ -266,12 +330,20 @@ export function InteractiveCanvasEditor({
         document={state.document}
         viewport={viewport}
         selectedObjectIds={selectedIds}
-        changedObjectIds={state.lastChange?.changedObjectIds}
+        changedObjectIds={
+          // The data-changed halo exists to flag what an AGENT changed on the
+          // board; a human's own direct manipulation (place/move/resize) must
+          // not decorate itself — the ring lingered on every touched object
+          // until the next action, reading as a stray gray border.
+          state.lastChange?.source === "agent" ? state.lastChange.changedObjectIds : undefined
+        }
         selectedConnectionId={selectedConnectionId}
         onCanvasContextMenu={openCanvasContextMenu}
         onObjectContextMenu={openObjectContextMenu}
         onConnectionDoubleClick={openConnectionLabelEditor}
         onStagePointerEvent={handleStagePointerDown}
+        onStagePointerMove={handleStagePointerMove}
+        onStagePointerLeave={handleStagePointerLeave}
         onStageDoubleClick={handleStageDoubleClick}
         interactionOverlay={interactionOverlay}
         editingLabelObjectId={objectLabelEditId}
@@ -311,7 +383,6 @@ export function InteractiveCanvasEditor({
           lastChange={state.lastChange}
           selectedObject={selectedObject}
           selectedConnection={selectedConnection}
-          selectedLinks={selectedLinks}
           selectionContext={selectionContext}
           dispatch={dispatch}
           applyPaletteTokenToSelection={applyPaletteTokenToSelection}
@@ -324,12 +395,16 @@ export function InteractiveCanvasEditor({
         dispatch={dispatch}
       />
 
-      {shapesPanelOpen && (
-        <div className="pointer-events-auto absolute bottom-4 left-4 top-20 z-30">
+      {shapesPanelVisible && (
+        <div className={`${shapesPanelClosing ? "pointer-events-none" : "pointer-events-auto"} absolute bottom-4 left-4 top-20 z-30`}>
           <ShapesPanel
             className="h-full"
+            exiting={shapesPanelClosing}
+            selectedEntryId={selectedShapeEntryId}
             onPick={handleShapePick}
+            onPickEntry={handleShapePickEntry}
             onClose={closeShapesPanel}
+            onExitComplete={finishClosingShapesPanel}
           />
         </div>
       )}
@@ -337,7 +412,7 @@ export function InteractiveCanvasEditor({
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center px-4">
         <CanvasDock
           className="pointer-events-auto"
-          activeTool={shapesPanelOpen ? null : dockToolForCanvasTool(state.tool)}
+          activeTool={shapesPanelOpen ? "shapes" : dockToolForCanvasTool(state.tool)}
           onSelectTool={handleDockSelectTool}
           onOpenShapes={openShapesPanel}
         />

@@ -62,7 +62,7 @@ interface ResolvedSelectionToolbar {
   flyouts: ToolbarFlyoutTable | undefined;
 }
 
-const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky", "text"]);
+const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky"]);
 
 /**
  * Derives the toolbar for the current selection by def resolution (step 5):

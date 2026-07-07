@@ -1044,13 +1044,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/section/def.tsx",
               "symbol": "SECTION_GEOMETRY"
             }
           }
         },
         {
-          "insert": ", not flowed inside the section body. "
+          "insert": ", not flowed inside the section body — and counter-scaled sub-linearly when zoomed out so section titles stay legible from afar (see the model doc's section entry). "
         },
         {
           "insert": "sticky",

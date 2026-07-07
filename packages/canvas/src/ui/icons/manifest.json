@@ -38,7 +38,7 @@
     { "export": "RenameIcon", "source": "nucleo_ui/outline/editing/18px_rename.svg" },
     { "export": "RotateCcwIcon", "source": "nucleo_ui/outline/arrows/18px_arrow-rotate-anticlockwise.svg" },
     { "export": "RoutingIcon", "source": "nucleo_ui/outline/arrows/18px_arrow-from-corner-up-right.svg" },
-    { "export": "SectionIcon", "source": "nucleo_ui/outline/ui-layout/18px_section.svg" },
+    { "export": "SectionIcon", "custom": true },
     { "export": "ShapesIcon", "source": "nucleo_ui/outline/design-development/18px_shapes.svg" },
     { "export": "ShapeSwapIcon", "source": "nucleo_ui/outline/arrows/18px_replace-objs.svg" },
     { "export": "SizeIcon", "source": "nucleo_ui/outline/editing/18px_type-scale.svg" },

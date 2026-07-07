@@ -5,7 +5,10 @@
  * correction, spacing hints, and section drop-target tracking. Also owns the
  * drag-start "expansion" rule — section descendants ride along with the
  * pressed set (core.ts's press-pending router calls createMoveGesture when
- * the drag threshold is crossed).
+ * the drag threshold is crossed). On release, only the drag ROOTS are
+ * reparented onto the drop target: carried descendants keep their recorded
+ * parentIds, so a dragged section's subtree moves as a unit instead of
+ * flattening onto the target.
  */
 import type { CanvasAction } from "../../state/actions";
 import { boundsForGeometries, type CanvasPoint } from "../../state/geometry";
@@ -75,7 +78,7 @@ export function createMoveGesture(
 }
 
 /**
- * The single shared parentId of the dragged set, or null if they don't share
+ * The single shared parentId of the drag roots, or null if they don't share
  * one (mixed parents never happens today since multi-drag only groups an
  * existing selection, but guard defensively): returns null when there's no
  * single common parent, matching "drop on open canvas" semantics.
@@ -112,10 +115,24 @@ export function stepFromMove(
   }
 
   if (event.type === "up") {
-    const parentId = currentParentId(ctx.document, state.objectIds);
+    // state.objectIds is the EXPANDED set (pressed objects plus their
+    // transitive descendants, see expandMoveObjectIds). Only the drag ROOTS —
+    // objects whose current parent is null or is not itself being dragged —
+    // get reparented onto the drop target; a carried descendant's parent is
+    // also in the drag, so it must keep that parent or the dragged section's
+    // nesting would flatten onto the target. Comparing against the roots'
+    // shared parent (not the mixed expanded set's) also keeps a no-op section
+    // drag from dispatching a spurious setParent.
+    const draggedSet = new Set(state.objectIds);
+    const rootIds = state.objectIds.filter((objectId) => {
+      const object = ctx.document.objects.find((candidate) => candidate.id === objectId);
+      const objectParentId = object?.parentId ?? null;
+      return objectParentId === null || !draggedSet.has(objectParentId);
+    });
+    const parentId = currentParentId(ctx.document, rootIds);
     const dispatch: CanvasAction[] =
       state.dropTargetId !== parentId
-        ? [{ type: "canvas.setParent", objectIds: state.objectIds, parentId: state.dropTargetId }]
+        ? [{ type: "canvas.setParent", objectIds: rootIds, parentId: state.dropTargetId }]
         : [];
     return { state: IDLE_INTERACTION_STATE, dispatch, overlay: emptyOverlay() };
   }

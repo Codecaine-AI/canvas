@@ -7,7 +7,7 @@ import type { IconProps } from "../icon-props";
 export function DiamondIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <path d="M9,16.25c.657-1.132,1.51-2.415,2.615-3.759,1.154-1.404,2.326-2.56,3.385-3.491-1.059-.93-2.23-2.087-3.385-3.491-1.105-1.344-1.958-2.627-2.615-3.759-.657,1.132-1.51,2.415-2.615,3.759-1.154,1.404-2.326,2.56-3.385,3.491,1.059,.93,2.23,2.087,3.385,3.491,1.105,1.344,1.958,2.627,2.615,3.759Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <path d="M9,16.25c.657-1.132,1.51-2.415,2.615-3.759,1.154-1.404,2.326-2.56,3.385-3.491-1.059-.93-2.23-2.087-3.385-3.491-1.105-1.344-1.958-2.627-2.615-3.759-.657,1.132-1.51,2.415-2.615,3.759-1.154,1.404-2.326,2.56-3.385,3.491,1.059,.93,2.23,2.087,3.385,3.491,1.105,1.344,1.958,2.627,2.615,3.759Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

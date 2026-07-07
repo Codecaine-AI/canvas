@@ -27,16 +27,16 @@ describe("gridBackground", () => {
     expect(sizePx).toBeLessThanOrEqual(MAX_SCREEN_STEP_PX + 1e-6);
   });
 
-  it("halves the effective step when zoomed in past the max screen threshold", () => {
-    const scale = (MAX_SCREEN_STEP_PX / BASE_GRID_STEP) * 2; // forces one step halving
+  it("keeps the base world step when zoomed in past the old max screen threshold", () => {
+    const scale = (MAX_SCREEN_STEP_PX / BASE_GRID_STEP) * 2;
     const result = gridBackground(scale, { x: 0, y: 0 });
     const sizePx = parseFloat(result.backgroundSize);
-    expect(sizePx).toBeGreaterThanOrEqual(MIN_SCREEN_STEP_PX - 1e-6);
-    expect(sizePx).toBeLessThanOrEqual(MAX_SCREEN_STEP_PX + 1e-6);
+    expect(sizePx).toBe(BASE_GRID_STEP * scale);
+    expect(sizePx).toBeGreaterThan(MAX_SCREEN_STEP_PX);
   });
 
-  it("stays within the screen-space band across a wide range of zoom levels", () => {
-    for (const scale of [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 8]) {
+  it("keeps zoomed-out spacing inside the legible screen-space band", () => {
+    for (const scale of [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5]) {
       const result = gridBackground(scale, { x: 0, y: 0 });
       const sizePx = parseFloat(result.backgroundSize);
       expect(sizePx).toBeGreaterThanOrEqual(MIN_SCREEN_STEP_PX - 1e-6);
@@ -46,12 +46,22 @@ describe("gridBackground", () => {
     }
   });
 
+  it("lets high-zoom spacing grow with zoom instead of subdividing densely", () => {
+    for (const scale of [2, 3, 4, 8]) {
+      const result = gridBackground(scale, { x: 0, y: 0 });
+      const sizePx = parseFloat(result.backgroundSize);
+      expect(sizePx).toBe(BASE_GRID_STEP * scale);
+      expect(sizePx).toBeGreaterThan(MAX_SCREEN_STEP_PX);
+      expect(result.dotRadius).toBeGreaterThanOrEqual(MIN_DOT_RADIUS_PX - 1e-6);
+      expect(result.dotRadius).toBeLessThanOrEqual(MAX_DOT_RADIUS_PX + 1e-6);
+    }
+  });
+
   it("keeps high-zoom grid dots nonempty and smaller than the pitch", () => {
     for (const scale of [4, 8]) {
       const result = gridBackground(scale, { x: 0, y: 0 });
       const sizePx = parseFloat(result.backgroundSize);
-      expect(sizePx).toBeGreaterThanOrEqual(MIN_SCREEN_STEP_PX - 1e-6);
-      expect(sizePx).toBeLessThanOrEqual(MAX_SCREEN_STEP_PX + 1e-6);
+      expect(sizePx).toBe(BASE_GRID_STEP * scale);
       expect(result.dotRadius).toBeGreaterThan(0);
       expect(result.dotRadius * 2).toBeLessThan(sizePx);
     }

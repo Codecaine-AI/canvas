@@ -2,7 +2,6 @@
 
 import type { InteractiveCanvasAnnotation } from "./annotations";
 import type { InteractiveCanvasConnection } from "./connections";
-import type { InteractiveCanvasLink } from "./links";
 import type { InteractiveCanvasObject } from "./objects";
 
 export type InteractiveCanvasMode = "diagram";
@@ -25,6 +24,5 @@ export type InteractiveCanvasDocument = {
   };
   objects: InteractiveCanvasObject[];
   connections: InteractiveCanvasConnection[];
-  links?: InteractiveCanvasLink[];
   annotations?: InteractiveCanvasAnnotation[];
 };

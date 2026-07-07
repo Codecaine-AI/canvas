@@ -6,9 +6,7 @@ export type InteractiveCanvasObjectType =
   | "rectangle"
   | "process"
   | "decision"
-  | "text"
   | "sticky"
-  | "source-node"
   | "annotation-marker"
   // D16 — expanded vocabulary for the reference diagrams (checkpoint 5):
   | "document"

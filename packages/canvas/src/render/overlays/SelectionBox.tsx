@@ -7,9 +7,12 @@ import {
 } from "../../interaction/interaction";
 import { worldToScreen, type ViewportState } from "../viewport";
 import type { InteractiveCanvasDocument } from "../../state/schema";
-import { objectDefForType } from "../../objects/object-def";
 
-const HANDLE_SIZE = 10;
+const HANDLE_SIZE = 12;
+const SELECTION_BLUE = "#0D99FF";
+
+/** Corner handles are the two-letter compass directions (nw/ne/se/sw). */
+const CORNER_HANDLES = RESIZE_HANDLES.filter((handle) => handle.length === 2);
 
 /** Handle position expressed as fractional offsets (0/0.5/1) within the bounds. */
 const HANDLE_POSITIONS: Record<ResizeHandle, { fx: number; fy: number }> = {
@@ -61,15 +64,11 @@ export function SelectionBox({
 
   const isSingle = objects.length === 1;
   const objectId = objects[0]!.id;
-  // W2 — sections show corner handles only (no edge midpoints); resizing a
-  // section never moves its captured members (that's a drag-gesture-only
-  // behavior, handled entirely in interaction.ts and orthogonal to resize).
-  // The handle set comes from the object def: "corners" keeps only the
-  // two-letter compass handles (nw/ne/se/sw); everything else ("all", and any
-  // unregistered kind) gets the full 8-handle set, exactly as before.
-  const handleMode = isSingle ? objectDefForType(objects[0]!.type)?.handles : undefined;
-  const handles =
-    handleMode === "corners" ? RESIZE_HANDLES.filter((handle) => handle.length === 2) : RESIZE_HANDLES;
+  // FigJam-style chrome: every object gets corner-only handles (no edge
+  // midpoints). Handle hit-testing reads the rendered DOM attributes, so
+  // corners-only rendering is corners-only resizing — applyResizeHandle still
+  // understands edge handles, it just never receives one.
+  const handles = CORNER_HANDLES;
 
   return (
     <div
@@ -81,7 +80,7 @@ export function SelectionBox({
         top: `${screenBounds.top}px`,
         width: `${screenBounds.width}px`,
         height: `${screenBounds.height}px`,
-        border: "1.5px solid var(--primary)",
+        border: `2px solid ${SELECTION_BLUE}`,
         boxSizing: "border-box",
         pointerEvents: "none",
       }}
@@ -102,8 +101,8 @@ export function SelectionBox({
                 height: `${HANDLE_SIZE}px`,
                 transform: "translate(-50%, -50%)",
                 background: "var(--background)",
-                border: "1.5px solid var(--primary)",
-                borderRadius: "2px",
+                border: `2px solid ${SELECTION_BLUE}`,
+                borderRadius: "4px",
                 cursor: resizeCursorFor(handle),
                 pointerEvents: interactiveHandles ? "auto" : "none",
                 touchAction: "none",

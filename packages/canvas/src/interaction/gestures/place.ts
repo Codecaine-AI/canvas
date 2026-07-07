@@ -5,7 +5,12 @@
  * mapping, the default-size placement geometry shared with double-click
  * creation (4.2.1), and the ghost-preview sizing for click-vs-drag placement.
  */
-import { defaultGeometryFor, type CanvasTool } from "../../state/actions";
+import {
+  defaultGeometryFor,
+  draftPlacedObject,
+  type CanvasAction,
+  type CanvasTool,
+} from "../../state/actions";
 import { normalizeBounds, type CanvasPoint } from "../../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
 import { hitTestDropTarget } from "../hit-testing";
@@ -14,11 +19,36 @@ import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
   worldDistance,
+  type ArmedShapeVariant,
   type CanvasPointerEvent,
   type InteractionContext,
+  type InteractionOverlay,
   type InteractionResult,
   type PlaceGesture,
 } from "../types";
+
+/** Synthetic id carried by the ghost-preview draft object — never enters the document. */
+export const PLACE_PREVIEW_GHOST_ID = "__place-preview-ghost__";
+
+/**
+ * Ghost-preview overlay for an armed-tool placement: the geometry bounds plus
+ * a full draft of the object the placement will create (same draftPlacedObject
+ * builder canvas.addObject uses), so the stage renders the real shape —
+ * glyph, direction, label — semi-transparent under the cursor.
+ */
+export function placePreviewOverlayFor(
+  objectType: InteractiveCanvasObjectType,
+  geometry: CanvasGeometry,
+  variant?: ArmedShapeVariant,
+): InteractionOverlay {
+  return {
+    placePreview: geometry,
+    placePreviewObject: draftPlacedObject(objectType, geometry, {
+      id: PLACE_PREVIEW_GHOST_ID,
+      ...variant,
+    }),
+  };
+}
 
 /**
  * Default-size geometry for a newly created object of `type`, centered at
@@ -41,9 +71,7 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "rectangle":
     case "process":
     case "decision":
-    case "text":
     case "sticky":
-    case "source-node":
     case "annotation-marker":
     // D16 — these were previously missing from this switch, meaning an
     // armed document/person/database/chat tool silently failed to start a
@@ -60,6 +88,30 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "predefined-process":
     case "code-block":
     case "chip-icon":
+    // W5 — FigJam parity shape set (Wave A added the tools; the Shapes-panel
+    // creation-flow work wires them here). Same 1:1 tool<->type pattern as
+    // every case above; without these an armed ellipse/triangle/… tool
+    // silently failed to start a PlaceGesture.
+    case "ellipse":
+    case "triangle":
+    case "parallelogram":
+    case "pentagon":
+    case "octagon":
+    case "star":
+    case "plus":
+    case "chevron":
+    case "folder":
+    case "document-stack":
+    case "off-page-connector":
+    case "trapezoid":
+    case "manual-input":
+    case "hexagon":
+    case "internal-storage":
+    case "or-junction":
+    case "summing-junction":
+    case "cylinder-horizontal":
+    case "page-corner":
+    case "icon":
       return tool;
     default:
       return null;
@@ -102,7 +154,8 @@ export function placeGeometryFor(state: PlaceGesture): CanvasGeometry {
  * rect), assigns parentId via the same full-bounds drop-target hit-test used
  * by drag-and-drop-into-section moves, dispatches the creation, reverts the
  * tool to "select" (canvas.addObject's reducer already selects the new
- * object), and returns to idle.
+ * object) unless ctx.stickyPlacement keeps it armed for repeat placement,
+ * and returns to idle.
  */
 export function stepFromPlace(
   state: PlaceGesture,
@@ -128,17 +181,36 @@ export function stepFromPlace(
           objectType: state.objectType,
           parentId: dropTarget?.id ?? null,
           geometry,
+          // Catalog-entry variant (Shapes panel pick): orientation, Advanced
+          // glyph, and glyph-name label ride along so the created object
+          // matches the picked entry, not just its bare type.
+          ...(state.variant?.direction ? { direction: state.variant.direction } : null),
+          ...(state.variant?.icon ? { icon: state.variant.icon } : null),
+          ...(state.variant?.label ? { label: state.variant.label } : null),
         },
-        { type: "canvas.setTool", tool: "select" },
+        // Repeat-placement mode (ctx.stickyPlacement — Shapes panel flow)
+        // keeps the tool armed so the next click places another one; the
+        // default single-shot mode reverts to "select" as before.
+        ...(ctx.stickyPlacement
+          ? []
+          : ([{ type: "canvas.setTool", tool: "select" }] as CanvasAction[])),
       ],
       overlay: emptyOverlay(),
     };
   }
 
   if (event.type !== "move") {
-    return { state, dispatch: [], overlay: { placePreview: placeGeometryFor(state) } };
+    return {
+      state,
+      dispatch: [],
+      overlay: placePreviewOverlayFor(state.objectType, placeGeometryFor(state), state.variant),
+    };
   }
 
   const nextState: PlaceGesture = { ...state, currentWorld: event.world };
-  return { state: nextState, dispatch: [], overlay: { placePreview: placeGeometryFor(nextState) } };
+  return {
+    state: nextState,
+    dispatch: [],
+    overlay: placePreviewOverlayFor(nextState.objectType, placeGeometryFor(nextState), nextState.variant),
+  };
 }

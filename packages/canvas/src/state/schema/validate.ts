@@ -8,7 +8,6 @@ import type {
   InteractiveCanvasConnection,
 } from "./connections";
 import type { InteractiveCanvasDocument } from "./document";
-import type { InteractiveCanvasLink } from "./links";
 import type {
   CanvasIconGlyph,
   CanvasPaletteToken,
@@ -52,9 +51,7 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "rectangle" ||
     value === "process" ||
     value === "decision" ||
-    value === "text" ||
     value === "sticky" ||
-    value === "source-node" ||
     value === "annotation-marker" ||
     value === "document" ||
     value === "person" ||
@@ -474,15 +471,6 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
             gap: isFiniteNumber(rawObject.layout.gap) ? rawObject.layout.gap : undefined,
           }
         : undefined,
-      source: isRecord(rawObject.source)
-        ? {
-            path: typeof rawObject.source.path === "string" ? rawObject.source.path : undefined,
-            symbol:
-              typeof rawObject.source.symbol === "string" ? rawObject.source.symbol : undefined,
-            section:
-              typeof rawObject.source.section === "string" ? rawObject.source.section : undefined,
-          }
-        : undefined,
       title,
       tint,
       locked: typeof rawObject.locked === "boolean" ? rawObject.locked : undefined,
@@ -578,45 +566,6 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     });
   }
 
-  const links: InteractiveCanvasLink[] = [];
-  if (Array.isArray(value.links)) {
-    for (const [index, rawLink] of value.links.entries()) {
-      const path = `$.links[${index}]`;
-      if (!isRecord(rawLink) || !isId(rawLink.id) || typeof rawLink.objectId !== "string") {
-        issues.push({ path, message: "Link requires id and objectId." });
-        continue;
-      }
-      if (!objectIds.has(rawLink.objectId)) {
-        issues.push({ path, message: `Unknown linked object: ${rawLink.objectId}` });
-        continue;
-      }
-      const target = rawLink.target;
-      if (!isRecord(target) || typeof target.path !== "string") {
-        issues.push({ path: `${path}.target`, message: "Link target requires a path." });
-        continue;
-      }
-      links.push({
-        id: rawLink.id,
-        objectId: rawLink.objectId,
-        target: {
-          kind: target.kind === "doc" ? "doc" : "source",
-          path: target.path,
-          symbol: typeof target.symbol === "string" ? target.symbol : undefined,
-          line: isFiniteNumber(target.line) ? target.line : undefined,
-          section: typeof target.section === "string" ? target.section : undefined,
-          label: typeof target.label === "string" ? target.label : undefined,
-        },
-        status:
-          rawLink.status === "resolved" ||
-          rawLink.status === "stale" ||
-          rawLink.status === "missing"
-            ? rawLink.status
-            : "unresolved",
-        checkedAt: typeof rawLink.checkedAt === "string" ? rawLink.checkedAt : undefined,
-      });
-    }
-  }
-
   const annotations: InteractiveCanvasAnnotation[] = [];
   if (Array.isArray(value.annotations)) {
     for (const [index, rawAnnotation] of value.annotations.entries()) {
@@ -695,7 +644,6 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         : undefined,
       objects,
       connections,
-      links,
       annotations,
     },
     warnings: warnings.length > 0 ? warnings : undefined,

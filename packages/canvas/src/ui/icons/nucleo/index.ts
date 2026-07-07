@@ -39,7 +39,6 @@ export { PlusIcon } from "./plus-icon";
 export { RenameIcon } from "./rename-icon";
 export { RotateCcwIcon } from "./rotate-ccw-icon";
 export { RoutingIcon } from "./routing-icon";
-export { SectionIcon } from "./section-icon";
 export { ShapeSwapIcon } from "./shape-swap-icon";
 export { ShapesIcon } from "./shapes-icon";
 export { SizeIcon } from "./size-icon";

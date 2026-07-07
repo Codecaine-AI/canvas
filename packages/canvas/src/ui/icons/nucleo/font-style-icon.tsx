@@ -7,8 +7,8 @@ import type { IconProps } from "../icon-props";
 export function FontStyleIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <line x1="5.108" y1="11.75" x2="12.892" y2="11.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <polyline points="14.25 15.25 9.401 2.75 8.599 2.75 3.75 15.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <line x1="5.108" y1="11.75" x2="12.892" y2="11.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <polyline points="14.25 15.25 9.401 2.75 8.599 2.75 3.75 15.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

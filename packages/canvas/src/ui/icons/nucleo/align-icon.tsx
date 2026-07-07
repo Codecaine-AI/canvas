@@ -7,9 +7,9 @@ import type { IconProps } from "../icon-props";
 export function AlignIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <line x1="2.75" y1="1.75" x2="2.75" y2="16.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="15.25" y1="1.75" x2="15.25" y2="16.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <rect x="7.25" y="3.75" width="3.5" height="10.5" rx="1" ry="1" transform="translate(18 18) rotate(-180)" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <line x1="2.75" y1="1.75" x2="2.75" y2="16.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="15.25" y1="1.75" x2="15.25" y2="16.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <rect x="7.25" y="3.75" width="3.5" height="10.5" rx="1" ry="1" transform="translate(18 18) rotate(-180)" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

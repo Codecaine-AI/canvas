@@ -8,13 +8,40 @@ afterEach(() => {
 });
 
 describe("ShapesPanel geometry", () => {
-  it("renders a full-height white panel at the measured ~197px width", () => {
+  it("renders a full-height white panel at the expanded picker width", () => {
     const { container } = render(<ShapesPanel />);
     const panel = container.querySelector("[data-shapes-panel]") as HTMLElement;
     expect(panel).toBeTruthy();
+    expect(SHAPES_PANEL_WIDTH_PX).toBe(252);
     expect(panel.style.width).toBe(`${SHAPES_PANEL_WIDTH_PX}px`);
     expect(panel.style.height).toBe("100%");
     expect(panel.style.background).toBe("#FFFFFF");
+    expect(panel.style.borderRadius).toBe("12px");
+    expect(panel.style.border).toBe("1px solid rgba(0, 0, 0, 0.08)");
+    expect(panel.style.boxShadow).toContain("rgba(0,0,0,0.16)");
+  });
+
+  it("animates in from the left when mounted", () => {
+    const { container } = render(<ShapesPanel />);
+    const panel = container.querySelector("[data-shapes-panel]") as HTMLElement;
+    expect(panel.getAttribute("data-state")).toBe("open");
+    expect(panel.style.animation).toContain("canvas-shapes-panel-enter");
+    expect(panel.style.willChange).toBe("transform, opacity");
+  });
+
+  it("animates out to the left before reporting exit completion", () => {
+    const onExitComplete = mock(() => {});
+    const { container } = render(<ShapesPanel exiting onExitComplete={onExitComplete} />);
+    const panel = container.querySelector("[data-shapes-panel]") as HTMLElement;
+
+    expect(panel.getAttribute("data-state")).toBe("closing");
+    expect(panel.style.animation).toContain("canvas-shapes-panel-exit");
+
+    fireEvent.animationEnd(panel, { animationName: "canvas-shapes-panel-enter" });
+    expect(onExitComplete).not.toHaveBeenCalled();
+
+    fireEvent.animationEnd(panel, { animationName: "canvas-shapes-panel-exit" });
+    expect(onExitComplete).toHaveBeenCalledTimes(1);
   });
 
   it("renders the Shapes header and a close button", () => {
@@ -67,6 +94,9 @@ describe("ShapesPanel sections", () => {
     const { container } = render(<ShapesPanel />);
     for (const category of SHAPE_CATALOG) {
       const grid = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe("repeat(4, 46px)");
+      expect(grid.style.justifyContent).toBe("space-between");
+      expect(grid.style.rowGap).toBe("6px");
       expect(grid.querySelectorAll("[data-shape-entry]").length).toBe(category.entries.length);
     }
     const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
@@ -90,6 +120,55 @@ describe("ShapesPanel search", () => {
 });
 
 describe("ShapesPanel interaction", () => {
+  it("renders larger shape targets and zooms the icon on hover", () => {
+    const { container } = render(<ShapesPanel />);
+    const entry = SHAPE_CATALOG.flatMap((c) => c.entries)[0];
+    const button = container.querySelector(`[data-shape-entry="${entry.id}"]`) as HTMLElement;
+    const iconWrap = container.querySelector(`[data-shape-icon="${entry.id}"]`) as HTMLElement;
+    const icon = iconWrap.querySelector("svg") as SVGElement;
+
+    expect(button.style.width).toBe("46px");
+    expect(button.style.height).toBe("46px");
+    expect(icon.getAttribute("class")).toBe("h-6 w-6");
+    expect(iconWrap.style.transform).toBe("scale(1)");
+
+    fireEvent.pointerEnter(button);
+
+    expect(button.style.background).toBe("rgba(0, 0, 0, 0.08)");
+    expect(iconWrap.style.transform).toBe("scale(1.14)");
+  });
+
+  it("shows shape tooltips below icons and aligns edge-column labels inside the panel", () => {
+    const { container } = render(<ShapesPanel />);
+    const basicEntries = SHAPE_CATALOG.find((c) => c.id === "basic")!.entries;
+    const firstColumnButton = container.querySelector(`[data-shape-entry="${basicEntries[0].id}"]`) as HTMLElement;
+    const lastColumnButton = container.querySelector(`[data-shape-entry="${basicEntries[3].id}"]`) as HTMLElement;
+
+    fireEvent.pointerEnter(firstColumnButton);
+
+    let tooltip = container.querySelector('[role="tooltip"]') as HTMLElement;
+    let caret = tooltip.querySelector("[data-chrome-tooltip-caret]") as HTMLElement;
+    expect(tooltip.getAttribute("data-placement")).toBe("bottom");
+    expect(tooltip.getAttribute("data-align")).toBe("start");
+    expect(tooltip.style.left).toBe("0px");
+    expect(tooltip.style.transform).toBe("none");
+    expect(caret).toBeTruthy();
+    expect(caret.style.left).toBe("23px");
+    expect(caret.style.top).toBe("-6px");
+
+    fireEvent.pointerLeave(firstColumnButton);
+    fireEvent.pointerEnter(lastColumnButton);
+
+    tooltip = container.querySelector('[role="tooltip"]') as HTMLElement;
+    caret = tooltip.querySelector("[data-chrome-tooltip-caret]") as HTMLElement;
+    expect(tooltip.getAttribute("data-placement")).toBe("bottom");
+    expect(tooltip.getAttribute("data-align")).toBe("end");
+    expect(tooltip.style.right).toBe("0px");
+    expect(tooltip.style.transform).toBe("none");
+    expect(caret.style.left).toBe("calc(100% - 23px)");
+    expect(caret.style.top).toBe("-6px");
+  });
+
   it("fires onPick with the objectType of a clicked entry", () => {
     const onPick = mock((_type: string) => {});
     const { container } = render(<ShapesPanel onPick={onPick} />);
@@ -133,5 +212,42 @@ describe("ShapesPanel interaction", () => {
     const { getByLabelText } = render(<ShapesPanel onClose={onClose} />);
     fireEvent.click(getByLabelText("Close shapes panel"));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("clicking a shape entry never fires onClose — the panel stays open in placement mode", () => {
+    const onClose = mock(() => {});
+    const onPick = mock((_type: string) => {});
+    const { container } = render(<ShapesPanel onPick={onPick} onClose={onClose} />);
+    fireEvent.click(container.querySelector('[data-shape-entry="basic-square"]')!);
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+});
+
+describe("ShapesPanel selected-entry highlight", () => {
+  it("renders the violet selected state on the entry matching selectedEntryId only", () => {
+    const { container } = render(<ShapesPanel selectedEntryId="basic-square" />);
+    const selected = container.querySelector('[data-shape-entry="basic-square"]') as HTMLElement;
+    const other = container.querySelector('[data-shape-entry="basic-ellipse"]') as HTMLElement;
+
+    expect(selected.getAttribute("data-selected")).toBe("true");
+    expect(selected.getAttribute("aria-pressed")).toBe("true");
+    expect(selected.style.background).toBe("rgba(140, 46, 242, 0.12)");
+
+    expect(other.getAttribute("data-selected")).toBeNull();
+    expect(other.getAttribute("aria-pressed")).toBe("false");
+    expect(other.style.background).toBe("transparent");
+  });
+
+  it("selected state beats the hover wash so the armed shape stays visibly violet", () => {
+    const { container } = render(<ShapesPanel selectedEntryId="basic-square" />);
+    const selected = container.querySelector('[data-shape-entry="basic-square"]') as HTMLElement;
+    fireEvent.pointerEnter(selected);
+    expect(selected.style.background).toBe("rgba(140, 46, 242, 0.12)");
+  });
+
+  it("renders no selected state when selectedEntryId is null", () => {
+    const { container } = render(<ShapesPanel selectedEntryId={null} />);
+    expect(container.querySelector('[data-selected="true"]')).toBeNull();
   });
 });

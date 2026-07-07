@@ -14,11 +14,47 @@ export const SECTION_GEOMETRY = {
     borderWidthPx: 2,
     textColor: "#000000",
     fontSizePx: 16,
-    fontWeight: 500,
+    fontWeight: 700,
     paddingXPx: 10,
     insetFromSectionCornerPx: 3,
+    maxZoomOutScale: 6,
+    // Sub-linear zoom-out growth: 1 = constant screen size (full 1/zoom
+    // compensation, reads oversized next to the shrunken content), 0 = no
+    // growth. 0.6 keeps titles readable from afar without dwarfing the board.
+    zoomOutGrowth: 0.6,
   },
 } as const;
+
+/** Heuristic screen width of the title chip at zoom 1 — mirrors the label editor's input sizing. */
+export function estimateSectionTitleChipWidthPx(title: string): number {
+  const { fontSizePx, paddingXPx, borderWidthPx } = SECTION_GEOMETRY.titleChip;
+  return Math.max(72, title.length * fontSizePx * 0.62 + paddingXPx * 2 + borderWidthPx * 2);
+}
+
+/**
+ * FigJam-style counter-scale for the section title chip: when zoomed out the
+ * chip grows by (1/zoom)^zoomOutGrowth — sub-linear, so titles read from afar
+ * yet still shrink somewhat with the board instead of staying full-size on
+ * screen. Uniform across all sections regardless of their width (a long
+ * title truncates to its section via `sectionTitleMaxWidthPx` rather than
+ * shrinking, so labels never come out in mismatched sizes). At zoom >= 1 the
+ * scale is 1 (the chip renders at its natural document size).
+ */
+export function sectionTitleScale(zoom: number): number {
+  const { maxZoomOutScale, zoomOutGrowth } = SECTION_GEOMETRY.titleChip;
+  return Math.min(Math.max((1 / zoom) ** zoomOutGrowth, 1), maxZoomOutScale);
+}
+
+/**
+ * Pre-transform width budget for a scaled chip: the scaled chip may span up
+ * to its section's inner width but never spill past it — overflow renders as
+ * an ellipsis instead of a mid-letter clip at the section's overflow:hidden
+ * edge.
+ */
+export function sectionTitleMaxWidthPx(sectionWidthPx: number, scale: number): number {
+  const inner = sectionWidthPx - SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx * 2;
+  return Math.max(0, inner / scale);
+}
 
 /**
  * FigJam section (W2) — a large tinted backdrop with a floating title chip
@@ -37,6 +73,7 @@ function SectionObjectView({
   bounds,
   editable,
   hideLabel,
+  zoom = 1,
   onObjectSelect,
   onObjectContextMenu,
 }: ObjectRenderProps) {
@@ -49,6 +86,7 @@ function SectionObjectView({
       : (object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx);
   const renderedStrokeWidth = object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx;
   const title = object.title ?? object.label;
+  const titleScale = sectionTitleScale(zoom);
   return (
     <button
       type="button"
@@ -121,9 +159,15 @@ function SectionObjectView({
           style={{
             background: family.chipFill ?? "transparent",
             borderColor: family.chipBorder ?? "transparent",
+            ...(titleScale !== 1
+              ? {
+                  transform: `scale(${titleScale})`,
+                  maxWidth: `${sectionTitleMaxWidthPx(object.geometry.width, titleScale)}px`,
+                }
+              : {}),
           }}
         >
-          {title}
+          <span>{title}</span>
         </span>
       )}
     </button>
@@ -172,7 +216,18 @@ export const sectionDef: ObjectDef = {
           padding: 0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px;
           font-size: ${SECTION_GEOMETRY.titleChip.fontSizePx}px;
           font-weight: ${SECTION_GEOMETRY.titleChip.fontWeight};
+          transform-origin: top left;
           color: ${SECTION_GEOMETRY.titleChip.textColor};
+          white-space: nowrap;
+          overflow: hidden;
+        }
+        /* Zoomed-out truncation: the chip's max-width caps the scaled chip to
+           its section's inner width; the flex-item inner span turns the
+           overflow into an ellipsis instead of a mid-letter clip. */
+        .interactive-canvas-section-title-chip > span {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
           white-space: nowrap;
         }
 `,

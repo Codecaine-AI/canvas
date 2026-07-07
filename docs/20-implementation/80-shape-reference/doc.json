@@ -1874,13 +1874,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/section/def.tsx",
               "symbol": "SECTION_GEOMETRY"
             }
           }
         },
         {
-          "insert": ": 27px tall, 16px/500 text, 3px inset), and the section's visible border color IS the chip family's border color ("
+          "insert": ": 27px tall, 16px/700 bold text, 3px inset), and the section's visible border color IS the chip family's border color ("
         },
         {
           "insert": "SECTION_FAMILIES",
@@ -1913,6 +1913,23 @@
         },
         {
           "insert": " tint."
+        },
+        {
+          "insert": " When zoomed out the chip counter-scales sub-linearly ("
+        },
+        {
+          "insert": "sectionTitleScale",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "sectionTitleScale"
+            }
+          }
+        },
+        {
+          "insert": ": (1/zoom)^0.6, capped at 6×) and truncates to its section's inner width with an ellipsis, so section names stay readable from afar without dwarfing the board."
         }
       ]
     },

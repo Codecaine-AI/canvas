@@ -13,26 +13,19 @@ export const STICKY_GEOMETRY = {
   bodyFontSizePx: 24,
   bodyLineHeightPx: 36,
   bodyTextColor: "rgba(0, 0, 0, 0.8)",
-  author: {
-    fontSizePx: 12,
-    color: "rgba(0, 0, 0, 0.4)",
-    insetLeftPx: 20,
-    baselineFromBottomPx: 24,
-  },
   /** Down-biased falloff shadow. */
   shadow: "0 3px 12px rgba(0, 0, 0, 0.15)",
 } as const;
 
 /**
  * FigJam sticky note (W2 upgrade) — the generic button chrome plus sticky-
- * specific body rendering: "- " prefixed body lines become bullets, and the
- * optional `author` renders as a fixed bottom-left chip. Dispatched on the
- * effective render shape "note" (a sticky-typed object without
+ * specific body rendering: "- " prefixed body lines become bullets. Dispatched
+ * on the effective render shape "note" (a sticky-typed object without
  * `style.shape` keeps falling through to the rounded-rect path, as before).
  */
 function StickyObjectView(props: ObjectRenderProps) {
   const { object, showPorts, zoom = 1, hideLabel } = props;
-  // W2 — sticky upgrade: author chip + "- " bullet rendering in the body text.
+  // W2 — sticky upgrade: "- " bullet rendering in the body text.
   const bodyLines = (object.body ?? "").split("\n");
   return (
     <ObjectButtonChrome
@@ -59,9 +52,6 @@ function StickyObjectView(props: ObjectRenderProps) {
           );
         })}
       </span>
-      {object.author && (
-        <span className="interactive-canvas-sticky-author">{object.author}</span>
-      )}
       {showPorts && <EdgePorts object={object} zoom={zoom} />}
     </ObjectButtonChrome>
   );
@@ -75,7 +65,7 @@ export const stickyDef: ObjectDef = {
          * W2 — sticky is the ONLY object type with a shadow (per spec, every
          * other shape is flat/shadowless). Square corners (STICKY_GEOMETRY.
          * cornerRadiusPx = 0), the measured down-biased shadow, and
-         * body/author typography all live here.
+         * body typography all live here.
          */
         .interactive-canvas-object-note {
           justify-content: flex-start;
@@ -95,13 +85,6 @@ export const stickyDef: ObjectDef = {
           content: "•";
           position: absolute;
           left: 0;
-        }
-        .interactive-canvas-sticky-author {
-          position: absolute;
-          left: ${STICKY_GEOMETRY.author.insetLeftPx}px;
-          bottom: ${STICKY_GEOMETRY.author.baselineFromBottomPx - STICKY_GEOMETRY.author.fontSizePx}px;
-          font-size: ${STICKY_GEOMETRY.author.fontSizePx}px;
-          color: ${STICKY_GEOMETRY.author.color};
         }
 `,
   /*

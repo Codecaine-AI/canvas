@@ -4,6 +4,8 @@ import type { Anchor } from "../../routing/routing";
 import type {
   CanvasAnnotationTarget,
   CanvasArrowDirection,
+  CanvasIconGlyph,
+  CanvasShapeDirection,
   CanvasConnectionStyle,
   CanvasGeometry,
   InteractiveCanvasAnnotation,
@@ -20,9 +22,7 @@ export type CanvasTool =
   | "rectangle"
   | "process"
   | "decision"
-  | "text"
   | "sticky"
-  | "source-node"
   | "annotation-marker"
   | "annotation"
   // D16 — expanded vocabulary (checkpoint 5):
@@ -108,6 +108,10 @@ export type CanvasAction =
       parentId?: string | null;
       geometry?: CanvasGeometry;
       tone?: InteractiveCanvasTone;
+      /** Shapes-panel catalog-entry variant: orientation for direction-aware shapes (triangle up/down, arrow left/right). */
+      direction?: CanvasShapeDirection;
+      /** Shapes-panel catalog-entry variant: Advanced-tier glyph for `objectType: "icon"` — without it an icon object renders blank. */
+      icon?: CanvasIconGlyph;
     }
   | { type: "canvas.duplicateSelection" }
   | {
@@ -203,12 +207,6 @@ export type CanvasAction =
   // parentId = sectionId for objects sectionCaptureMembers() finds whose
   // current parentId is null.
   | { type: "canvas.captureSectionContents"; sectionId: string }
-  | {
-      type: "canvas.resolveLinkStatuses";
-      knownPaths: string[];
-      stalePaths?: string[];
-      checkedAt?: string;
-    }
   | { type: "canvas.undo" }
   | { type: "canvas.redo" }
   | { type: "canvas.reset"; document: InteractiveCanvasDocument };

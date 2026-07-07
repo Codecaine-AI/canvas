@@ -13,9 +13,13 @@ import { computeEdgePan } from "../../../interaction/edge-pan";
 import {
   cancelInteraction,
   createFrameCoalescer,
+  defaultGeometryForPlacement,
   hitTestObjects,
   IDLE_INTERACTION_STATE,
+  objectTypeForTool,
+  placePreviewOverlayFor,
   stepInteraction,
+  type ArmedShapeVariant,
   type CanvasHit,
   type CanvasPointerEvent,
   type FrameCoalescer,
@@ -129,6 +133,10 @@ export interface UseInteractionPipelineArgs {
   document: InteractiveCanvasDocument;
   selection: CanvasSelection;
   tool: CanvasTool;
+  /** Repeat-placement mode (Shapes panel open): completing a place gesture keeps the tool armed — see InteractionContext.stickyPlacement. */
+  stickyPlacement?: boolean;
+  /** Catalog-entry variant of the armed tool (Shapes panel pick) — flows into placements and the ghost preview. */
+  armedShape?: ArmedShapeVariant;
   viewport: ViewportState;
   dispatch: (action: CanvasAction) => void;
   setViewport: (updater: ViewportState | ((viewport: ViewportState) => ViewportState)) => void;
@@ -152,6 +160,9 @@ export interface InteractionPipelineApi {
   /** Current machine state — read (not subscribed) by useCanvasHotkeys' Escape handling. */
   interactionStateRef: RefObject<InteractionState>;
   handleStagePointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
+  /** Hover ghost for an armed creation tool: idle-only, no-op during gestures. */
+  handleStagePointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  handleStagePointerLeave: (event: ReactPointerEvent<HTMLElement>) => void;
   handleStageDoubleClick: (event: ReactMouseEvent<HTMLElement>) => void;
   applyCancelInteraction: (result: ReturnType<typeof cancelInteraction>) => void;
 }
@@ -170,6 +181,8 @@ export function useInteractionPipeline({
   document,
   selection,
   tool,
+  stickyPlacement = false,
+  armedShape,
   viewport,
   dispatch,
   setViewport,
@@ -183,8 +196,8 @@ export function useInteractionPipeline({
   // overlay is mirrored into useState so CanvasStage's overlay slot re-renders.
   const interactionStateRef = useRef<InteractionState>(IDLE_INTERACTION_STATE);
   const [interactionOverlay, setInteractionOverlay] = useState<InteractionOverlay>({});
-  const stateRef = useRef({ document, selection, tool });
-  stateRef.current = { document, selection, tool };
+  const stateRef = useRef({ document, selection, tool, stickyPlacement, armedShape });
+  stateRef.current = { document, selection, tool, stickyPlacement, armedShape };
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
 
@@ -226,6 +239,8 @@ export function useInteractionPipeline({
         document: stateRef.current.document,
         selection: stateRef.current.selection,
         tool: stateRef.current.tool,
+        stickyPlacement: stateRef.current.stickyPlacement,
+        armedShape: stateRef.current.armedShape,
         viewport: viewportRef.current,
       };
       const result = stepInteraction(interactionStateRef.current, canvasEvent, ctx);
@@ -420,6 +435,47 @@ export function useInteractionPipeline({
     [buildPointerEvent, closeContextMenu, runInteraction, startEdgePanLoop],
   );
 
+  // ——— Armed-tool hover ghost (Shapes panel creation flow) ————————————————
+  //
+  // While a creation tool is armed and NO gesture is in progress, the ghost
+  // preview follows the bare cursor so the user can see what a click will
+  // place. Gesture-time ghosts stay on the interaction machine's overlay path
+  // (stepFromPlace), so both handlers hard-gate on the machine being idle —
+  // a stage pointermove firing mid-gesture must never clobber the gesture
+  // overlay. Cheap math (no hit-testing/snapping), so no rAF coalescing.
+  const handleStagePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (interactionStateRef.current.kind !== "idle") return;
+      const armedType = objectTypeForTool(stateRef.current.tool);
+      if (!armedType) return;
+      const stage = event.currentTarget;
+      const screen = stageScreenPointFromClient(event.nativeEvent, stage);
+      const world = screenToWorld(screen);
+      setInteractionOverlay(
+        placePreviewOverlayFor(
+          armedType,
+          defaultGeometryForPlacement(armedType, world),
+          stateRef.current.armedShape,
+        ),
+      );
+    },
+    [screenToWorld],
+  );
+
+  const handleStagePointerLeave = useCallback((_event: ReactPointerEvent<HTMLElement>) => {
+    if (interactionStateRef.current.kind !== "idle") return;
+    setInteractionOverlay((previous) => (previous.placePreview ? {} : previous));
+  }, []);
+
+  // Disarming the tool (Escape, dock tool pick, panel close) while idle must
+  // drop any lingering hover ghost — the pointermove that painted it won't
+  // re-fire until the cursor moves again.
+  useEffect(() => {
+    if (objectTypeForTool(tool)) return;
+    if (interactionStateRef.current.kind !== "idle") return;
+    setInteractionOverlay((previous) => (previous.placePreview ? {} : previous));
+  }, [tool]);
+
   const applyCancelInteraction = useCallback((result: ReturnType<typeof cancelInteraction>) => {
     // Drop any coalesced-but-uncommitted move and stop edge-panning first: a
     // queued move committing one frame AFTER Escape restored the pre-drag
@@ -439,6 +495,8 @@ export function useInteractionPipeline({
     interactionOverlay,
     interactionStateRef,
     handleStagePointerDown,
+    handleStagePointerMove,
+    handleStagePointerLeave,
     handleStageDoubleClick,
     applyCancelInteraction,
   };

@@ -77,10 +77,6 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
   className,
 }: InteractiveCanvasViewerProps) {
   const [measureRef, measuredSize] = useMeasuredSize();
-  const linksByObject = new Map(
-    (document.links ?? []).map((link) => [link.objectId, link.status] as const),
-  );
-
   const viewNotFound = Boolean(view) && !containerViewBounds(document, view!);
 
   const viewport: ViewportState = useMemo(() => {
@@ -151,18 +147,8 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
           <span className="font-mono text-[11px] text-muted-foreground">{document.id}</span>
         </div>
         <div className="p-3">{stage}</div>
-        {((document.links?.length ?? 0) > 0 || (document.annotations?.length ?? 0) > 0) && (
+        {(document.annotations?.length ?? 0) > 0 && (
           <div className="grid gap-2 border-t bg-background p-3 text-xs text-muted-foreground sm:grid-cols-2">
-            {(document.links ?? []).map((link) => (
-              <div key={link.id} className="rounded-md border bg-background p-2">
-                <span className="font-medium text-foreground">
-                  {document.objects.find((object) => object.id === link.objectId)?.label ??
-                    link.objectId}
-                </span>
-                <span>{" -> "}{link.target.label ?? link.target.path}</span>
-                <span className="ml-2 font-mono">{linksByObject.get(link.objectId)}</span>
-              </div>
-            ))}
             {(document.annotations ?? []).map((annotation) => (
               <div key={annotation.id} className="rounded-md border bg-background p-2">
                 <span className="font-medium text-foreground">

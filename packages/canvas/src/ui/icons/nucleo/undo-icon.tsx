@@ -7,8 +7,8 @@ import type { IconProps } from "../icon-props";
 export function UndoIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <path d="m2.9998,12.0949c1.1221,2.171,3.3878,3.6551,6.0002,3.6551,3.728,0,6.75-3.0221,6.75-6.75s-3.022-6.75-6.75-6.75c-1.864,0-3.5515.7555-4.773,1.977" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <polygon points="6.386 5.6341 2.4264 6.2422 2.9241 2.4461 6.386 5.6341" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" fill="currentColor" />
+      <path d="m2.9998,12.0949c1.1221,2.171,3.3878,3.6551,6.0002,3.6551,3.728,0,6.75-3.0221,6.75-6.75s-3.022-6.75-6.75-6.75c-1.864,0-3.5515.7555-4.773,1.977" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <polygon points="6.386 5.6341 2.4264 6.2422 2.9241 2.4461 6.386 5.6341" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" fill="currentColor" />
     </svg>
   );
 }

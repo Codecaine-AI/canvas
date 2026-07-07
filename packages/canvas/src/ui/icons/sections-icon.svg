@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112" fill="none">
+  <title>FigJam sections icon</title>
+  <rect x="4" y="4" width="56" height="24" rx="4" stroke="#191919" stroke-width="8"/>
+  <path d="M76 4H97C103.075 4 108 8.925 108 15V97C108 103.075 103.075 108 97 108H15C8.925 108 4 103.075 4 97V44" stroke="#191919" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round"/>
+</svg>

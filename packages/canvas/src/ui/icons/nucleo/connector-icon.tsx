@@ -7,8 +7,8 @@ import type { IconProps } from "../icon-props";
 export function ConnectorIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <path d="M15.25,8.25H4.75c-1.105,0-2,.895-2,2v4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <polyline points="11 12.5 15.25 8.25 11 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <path d="M15.25,8.25H4.75c-1.105,0-2,.895-2,2v4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <polyline points="11 12.5 15.25 8.25 11 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

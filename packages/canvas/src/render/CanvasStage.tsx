@@ -38,8 +38,8 @@ import { STICKY_GEOMETRY } from "../objects/sticky/def";
 
 /** Board background. */
 const CANVAS_BG = "#F5F5F5";
-/** Dot color; this alpha reads as ~#DDDDDD over the board background. */
-const GRID_DOT_COLOR = "rgba(0, 0, 0, 0.13)";
+/** Dot color; this alpha reads as #B8B8B8 over the board background. */
+const GRID_DOT_COLOR = "rgba(0, 0, 0, 0.25)";
 /**
  * Canvas content font. Applied to canvas OBJECTS/labels/stickies via the
  * stage's content root class — never to app chrome (toolbars, panels, etc.
@@ -100,13 +100,21 @@ export interface CanvasStageProps {
    */
   onStagePointerEvent?: (event: ReactPointerEvent<HTMLElement>) => void;
   /**
+   * Fired on pointermove over the stage while NO gesture is active — the
+   * editor uses it to render the hover ghost (PlacePreview) that follows the
+   * cursor while a creation tool is armed via the Shapes panel, before any
+   * pointerdown. Gesture moves stay on the window-level listener path.
+   */
+  onStagePointerMove?: (event: ReactPointerEvent<HTMLElement>) => void;
+  /** Fired when the pointer leaves the stage — clears the armed-tool hover ghost. */
+  onStagePointerLeave?: (event: ReactPointerEvent<HTMLElement>) => void;
+  /**
    * Fired on native dblclick anywhere on the stage (4.2.1) — the editor's
    * adapter builds a "double" CanvasPointerEvent (same resolveHit pipeline as
    * onStagePointerEvent) and feeds it into stepInteraction, which resolves it
-   * to either "start editing this object's label" or "create + edit a new
-   * text object here". Connector double-click keeps its own dedicated
-   * onConnectionDoubleClick path (stopPropagation there prevents this handler
-   * from double-firing for that case).
+   * to "start editing this object's label". Connector double-click keeps its
+   * own dedicated onConnectionDoubleClick path (stopPropagation there prevents
+   * this handler from double-firing for that case).
    */
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
   /** Ephemeral interaction overlay (marquee, guides, spacing, drop target, connector drag preview). */
@@ -237,6 +245,8 @@ export function CanvasStage({
   onObjectContextMenu,
   onConnectionDoubleClick,
   onStagePointerEvent,
+  onStagePointerMove,
+  onStagePointerLeave,
   onStageDoubleClick,
   interactionOverlay,
   editingLabelObjectId = null,
@@ -291,6 +301,8 @@ export function CanvasStage({
         cursor: stageCursor,
       }}
       onPointerDown={onStagePointerEvent}
+      onPointerMove={onStagePointerMove}
+      onPointerLeave={onStagePointerLeave}
       onDoubleClick={onStageDoubleClick}
     >
       <style>{`
@@ -314,11 +326,6 @@ export function CanvasStage({
           text-align: left;
           font: inherit;
           transform-origin: center;
-        }
-        .interactive-canvas-object:hover,
-        .interactive-canvas-object[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 3px;
         }
         .interactive-canvas-object[data-editable="true"] {
           cursor: inherit;
@@ -396,17 +403,14 @@ export function CanvasStage({
           transition: opacity 120ms ease;
           z-index: 1;
         }
-        .interactive-canvas-object:hover .interactive-canvas-edge-port {
+        .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
           opacity: 1;
           pointer-events: auto;
         }
         .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object {
           cursor: inherit;
         }
-        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object:hover:not([data-selected="true"]) {
-          outline: none;
-        }
-        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object:hover .interactive-canvas-edge-port {
+        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
           opacity: 0;
           pointer-events: none;
         }
@@ -546,6 +550,29 @@ export function CanvasStage({
           data-canvas-world-overlay-layer="true"
           style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 3 }}
         >
+          {/*
+            Armed-tool ghost preview: the full draft object the placement will
+            create (overlay.placePreviewObject, built by the same
+            draftPlacedObject the canvas.addObject reducer uses), rendered
+            through the real ObjectShape registry semi-transparent — so the
+            cursor ghost IS the shape (glyph, direction, label), not a generic
+            box. Lives in this pointer-events-none world layer so it pans/zooms
+            with the canvas and can never intercept the placement click.
+          */}
+          {interactionOverlay?.placePreviewObject && (
+            <div data-canvas-place-ghost="true" style={{ opacity: 0.55 }}>
+              <ObjectShape
+                object={interactionOverlay.placePreviewObject}
+                selected={false}
+                changed={false}
+                compact={compact}
+                bounds={bounds}
+                editable={false}
+                showPorts={false}
+                zoom={zoom}
+              />
+            </div>
+          )}
           {document.connections.map((connection) => {
             const fromObject = objectById(document, connection.from.objectId);
             const toObject = objectById(document, connection.to.objectId);
@@ -581,7 +608,9 @@ export function CanvasStage({
         {interactionOverlay?.marquee && (
           <Marquee viewport={viewport} bounds={interactionOverlay.marquee} />
         )}
-        {interactionOverlay?.placePreview && (
+        {/* Dashed-box fallback only when no full draft object accompanies the
+            bounds (all armed-tool paths now provide one — see placePreviewObject). */}
+        {interactionOverlay?.placePreview && !interactionOverlay.placePreviewObject && (
           <PlacePreview viewport={viewport} bounds={interactionOverlay.placePreview} />
         )}
         {interactionOverlay?.guides?.map((guide, index) => (

@@ -15,7 +15,7 @@
  *  - ./actions/objects      — add/update/duplicate/delete/set-type handlers
  *  - ./actions/geometry-ops — move/resize/geometries/parent/fit/align/distribute
  *  - ./actions/connections  — connector handlers + endpoint validators
- *  - ./actions/annotations  — annotation + link-status handlers
+ *  - ./actions/annotations  — annotation handlers
  *  - ./actions/reducer      — state factory, thin action switch, entry point
  *  - ./actions/helpers      — nextId/selectedObjectIds shared across domains
  */
@@ -27,8 +27,7 @@ export type {
   CanvasTool,
   InteractiveCanvasState,
 } from "./actions/types";
-export { defaultGeometryFor, objectTypeLabel } from "./actions/defaults";
-export { resolveCanvasLinkStatuses } from "./actions/annotations";
+export { defaultGeometryFor, draftPlacedObject, objectTypeLabel } from "./actions/defaults";
 export {
   buildSelectionContext,
   createInteractiveCanvasState,

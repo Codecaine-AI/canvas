@@ -12,9 +12,7 @@ import type {
 import { codeBlockDef } from "./code-block/def";
 import { connectorDef } from "./connector/def";
 import { sectionDef } from "./section/def";
-import { sourceNodeDef } from "./source-node/def";
 import { stickyDef } from "./sticky/def";
-import { textDef } from "./text/def";
 import { arrowShapeDef } from "./shapes/basic/arrow-shape";
 import { chatDef } from "./shapes/basic/chat";
 import { chevronDef } from "./shapes/basic/chevron";
@@ -52,7 +50,7 @@ import { pillDef } from "./shapes/misc/pill";
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
  * registry"). An ObjectDef is the behavior contract for one KIND of thing
  * that behaves differently on the canvas — specials (section, sticky,
- * code-block, connector, text) are first-class; the ~40 uniform
+ * code-block, connector) are first-class; the ~40 uniform
  * shapes share ONE behavior and get their ObjectDef generated from a
  * ShapeDef via `objects/shapes/base.tsx`.
  *
@@ -169,13 +167,12 @@ export interface ObjectDef {
 
 /**
  * The effective render shape ObjectShape dispatches on: `style.shape`, with
- * the W2 fallbacks (standalone `text` objects render as a borderless label;
- * everything else defaults to the rounded-rect chrome).
+ * objects without an explicit shape defaulting to the rounded-rect chrome.
  */
-export type RenderObjectShape = NonNullable<CanvasObjectStyle["shape"]> | "label";
+export type RenderObjectShape = NonNullable<CanvasObjectStyle["shape"]>;
 
 export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectShape {
-  return object.style?.shape ?? (object.type === "text" ? "label" : "rounded-rect");
+  return object.style?.shape ?? "rounded-rect";
 }
 
 /**
@@ -188,13 +185,13 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
  *  - `section` is dispatched on `object.type` (the ONLY type the legacy
- *    renderer checked before style.shape). `rectangle` and `source-node`
- *    deliberately are NOT type-keyed for RENDER dispatch: their rendering is
- *    purely style.shape-driven (an explicit non-default style.shape wins),
- *    so their objects flow through the render-shape table — typically to the
- *    rounded-rect def. Their ObjectDefs still register in OBJECT_DEFS to
- *    carry defaults (step 6) and behavioral flags (step 4, which needs a
- *    type-keyed BEHAVIOR lookup, distinct from render dispatch).
+ *    renderer checked before style.shape). `rectangle` deliberately is NOT
+ *    type-keyed for RENDER dispatch: its rendering is purely style.shape-driven
+ *    (an explicit non-default style.shape wins), so it flows through the
+ *    render-shape table — typically to the rounded-rect def. Its ObjectDef
+ *    still registers in OBJECT_DEFS to carry defaults (step 6) and behavioral
+ *    flags (step 4, which needs a type-keyed BEHAVIOR lookup, distinct from
+ *    render dispatch).
  *  - everything else is dispatched on the effective render shape, so e.g. a
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
@@ -204,7 +201,6 @@ const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {
 };
 
 const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
-  label: textDef,
   note: stickyDef,
   "code-block": codeBlockDef,
   "rounded-rect": processDef,
@@ -253,8 +249,6 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   ellipseDef,
   personDef,
   rectangleDef,
-  textDef,
-  sourceNodeDef,
   decisionDef,
   annotationMarkerDef,
   documentDef,

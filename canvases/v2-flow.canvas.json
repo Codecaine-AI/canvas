@@ -19,8 +19,8 @@
       "label": "Interview Agent",
       "parentId": null,
       "geometry": {
-        "x": 694.3375667219411,
-        "y": 433.49974877524846,
+        "x": 687.1046422441693,
+        "y": 433.5017998570172,
         "width": 4895.5,
         "height": 2031.5
       },
@@ -37,8 +37,8 @@
       "body": "Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n• Who the client is, etc\n• EX “We are doing this interview to understand why someone would change pharmacies”",
       "parentId": "page-frame",
       "geometry": {
-        "x": 805.2012759331355,
-        "y": 497.9402433488399,
+        "x": 797.9683514553637,
+        "y": 497.9422944306086,
         "width": 414,
         "height": 418.5
       },
@@ -72,8 +72,8 @@
       "label": "Interview Inputs",
       "parentId": "page-frame",
       "geometry": {
-        "x": 1286.7012759331355,
-        "y": 492.9402433488399,
+        "x": 1279.4683514553637,
+        "y": 492.9422944306086,
         "width": 570,
         "height": 1690
       },
@@ -89,8 +89,8 @@
       "label": "General",
       "parentId": "section-interview-inputs",
       "geometry": {
-        "x": 1366.7039046476234,
-        "y": 582.1429126701696,
+        "x": 1359.4709801698516,
+        "y": 582.1449637519383,
         "width": 430,
         "height": 346
       },
@@ -106,8 +106,8 @@
       "label": "Overall Context / Interview Purpose",
       "parentId": "card-general",
       "geometry": {
-        "x": 1401.2039046476234,
-        "y": 646.1429126701696,
+        "x": 1393.9709801698516,
+        "y": 646.1449637519383,
         "width": 363,
         "height": 57
       },
@@ -123,8 +123,8 @@
       "label": "Questions",
       "parentId": "section-interview-inputs",
       "geometry": {
-        "x": 1366.7074723397361,
-        "y": 1012.2451621074963,
+        "x": 1359.4745478619643,
+        "y": 1012.247213189265,
         "width": 430,
         "height": 1134
       },
@@ -140,8 +140,8 @@
       "label": "Question 1",
       "parentId": "card-questions",
       "geometry": {
-        "x": 1414.7074723397361,
-        "y": 1076.2451621074963,
+        "x": 1407.4745478619643,
+        "y": 1076.247213189265,
         "width": 334,
         "height": 222
       },
@@ -157,8 +157,8 @@
       "label": "Base Question Text",
       "parentId": "card-question-1",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1126.2451621074963,
+        "x": 1458.4745478619643,
+        "y": 1126.247213189265,
         "width": 234,
         "height": 40
       },
@@ -174,8 +174,8 @@
       "label": "Research Objective",
       "parentId": "card-question-1",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1212.2451621074963,
+        "x": 1458.4745478619643,
+        "y": 1212.247213189265,
         "width": 234,
         "height": 60
       },
@@ -191,8 +191,8 @@
       "label": "Question 2",
       "parentId": "card-questions",
       "geometry": {
-        "x": 1414.7074723397361,
-        "y": 1300.2451621074963,
+        "x": 1407.4745478619643,
+        "y": 1300.247213189265,
         "width": 334,
         "height": 298
       },
@@ -208,8 +208,8 @@
       "label": "Base Question Text",
       "parentId": "card-question-2",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1350.2451621074963,
+        "x": 1458.4745478619643,
+        "y": 1350.247213189265,
         "width": 234,
         "height": 60
       },
@@ -225,8 +225,8 @@
       "label": "Research Objective",
       "parentId": "card-question-2",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1460.2451621074963,
+        "x": 1458.4745478619643,
+        "y": 1460.247213189265,
         "width": 234,
         "height": 60
       },
@@ -242,8 +242,8 @@
       "label": "Question N",
       "parentId": "card-questions",
       "geometry": {
-        "x": 1414.7074723397361,
-        "y": 1844.2451621074965,
+        "x": 1407.4745478619643,
+        "y": 1844.2472131892653,
         "width": 334,
         "height": 204
       },
@@ -259,8 +259,8 @@
       "label": "Base Question Text",
       "parentId": "card-question-n",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1893.2451621074954,
+        "x": 1458.4745478619643,
+        "y": 1893.2472131892641,
         "width": 234,
         "height": 46.5
       },
@@ -276,8 +276,8 @@
       "label": "Research Objective",
       "parentId": "card-question-n",
       "geometry": {
-        "x": 1465.7074723397361,
-        "y": 1969.745162107495,
+        "x": 1458.4745478619643,
+        "y": 1969.7472131892637,
         "width": 234,
         "height": 60
       },
@@ -288,30 +288,13 @@
       }
     },
     {
-      "id": "section-interview-flow",
-      "type": "section",
-      "label": "Interview Flow",
-      "parentId": "page-frame",
-      "geometry": {
-        "x": 2123.2805614354565,
-        "y": 509.6358922226882,
-        "width": 3380.0604391982088,
-        "height": 1898.0000000000002
-      },
-      "style": {
-        "shape": "section"
-      },
-      "title": "Interview Flow",
-      "tint": "purple"
-    },
-    {
       "id": "chip-generate-transition-response",
       "type": "chip-icon",
       "label": "Generate Transition Response",
       "parentId": "page-frame",
       "geometry": {
-        "x": 2226.760830724113,
-        "y": 917.6289990491098,
+        "x": 2219.5279062463414,
+        "y": 917.6310501308785,
         "width": 96,
         "height": 96
       },
@@ -340,8 +323,8 @@
       "label": "AI Asks Question",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3257.760830724113,
-        "y": 568.6289990491098,
+        "x": 3250.5279062463414,
+        "y": 568.6310501308785,
         "width": 114,
         "height": 114
       },
@@ -385,8 +368,8 @@
       "label": "Memory Bank",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3854.368734507008,
-        "y": 689.6337527981038,
+        "x": 3847.1358100292364,
+        "y": 689.6358038798726,
         "width": 1129.5,
         "height": 906
       },
@@ -403,8 +386,8 @@
       "body": "Memory Bank\n• Memory of the current interview across all questions\n• Provides consistency without needing to pass the whole conversation each message\n• Ensure’s we do not ask the same question twice",
       "parentId": "page-frame",
       "geometry": {
-        "x": 4187.368734507007,
-        "y": 758.6337527981038,
+        "x": 4180.135810029235,
+        "y": 758.6358038798726,
         "width": 414,
         "height": 223.5
       },
@@ -420,8 +403,8 @@
       "label": "Memory Actions",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3901.368734507008,
-        "y": 1033.6337527981038,
+        "x": 3894.1358100292364,
+        "y": 1033.6358038798726,
         "width": 308,
         "height": 508
       },
@@ -437,8 +420,8 @@
       "label": "New Memory",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3921.368734507008,
-        "y": 1083.6337527981038,
+        "x": 3914.1358100292364,
+        "y": 1083.6358038798726,
         "width": 268,
         "height": 66
       },
@@ -454,8 +437,8 @@
       "label": "Update Memory",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3921.368734507008,
-        "y": 1208.6337527981038,
+        "x": 3914.1358100292364,
+        "y": 1208.6358038798726,
         "width": 268,
         "height": 66
       },
@@ -471,8 +454,8 @@
       "label": "Delete Memory",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3921.368734507008,
-        "y": 1333.6337527981038,
+        "x": 3914.1358100292364,
+        "y": 1333.6358038798726,
         "width": 268,
         "height": 66
       },
@@ -488,8 +471,8 @@
       "label": "No Change",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3921.368734507008,
-        "y": 1458.6337527981038,
+        "x": 3914.1358100292364,
+        "y": 1458.6358038798726,
         "width": 268,
         "height": 66
       },
@@ -505,8 +488,8 @@
       "label": "Structure",
       "parentId": "page-frame",
       "geometry": {
-        "x": 4269.368734507007,
-        "y": 1033.6337527981038,
+        "x": 4262.135810029235,
+        "y": 1033.6358038798726,
         "width": 666,
         "height": 514
       },
@@ -523,8 +506,8 @@
       "body": "class Memory(BaseModel):\n    id: str = Field(description=\"mem_0, mem_1, mem_n\")\n    content: str = Field(description=\"text of the memory\")",
       "parentId": "page-frame",
       "geometry": {
-        "x": 4289.368734507007,
-        "y": 1073.6337527981038,
+        "x": 4282.135810029235,
+        "y": 1073.6358038798726,
         "width": 626,
         "height": 170
       },
@@ -540,8 +523,8 @@
       "body": "{\n  \"id\": \"mem_0\",\n  \"content\": \"Likes pizza\"\n},\n{\n  \"id\": \"mem_1\",\n  \"content\": \"Doesn't like the cold\"\n},",
       "parentId": "page-frame",
       "geometry": {
-        "x": 4289.368734507007,
-        "y": 1263.6337527981038,
+        "x": 4282.135810029235,
+        "y": 1263.6358038798726,
         "width": 626,
         "height": 260
       },
@@ -568,30 +551,13 @@
       }
     },
     {
-      "id": "card-next-question-response",
-      "type": "section",
-      "label": "Next Question Response",
-      "parentId": "section-interview-flow",
-      "geometry": {
-        "x": 2572.73320428763,
-        "y": 1812.6290565583122,
-        "width": 446,
-        "height": 530
-      },
-      "style": {
-        "shape": "section"
-      },
-      "title": "Next Question Response",
-      "tint": "white"
-    },
-    {
       "id": "chevron-enough-context",
       "type": "arrow-shape",
       "label": "Enough Context",
       "parentId": "page-frame",
       "geometry": {
-        "x": 2604.758625659408,
-        "y": 1860.6338613323173,
+        "x": 2597.5257011816366,
+        "y": 1860.635912414086,
         "width": 348,
         "height": 100
       },
@@ -608,8 +574,8 @@
       "label": "Null Response",
       "parentId": "page-frame",
       "geometry": {
-        "x": 2604.760830724113,
-        "y": 2010.6289990491084,
+        "x": 2597.5279062463414,
+        "y": 2010.6310501308772,
         "width": 348,
         "height": 100
       },
@@ -626,8 +592,8 @@
       "label": "User Safety Refusal",
       "parentId": "page-frame",
       "geometry": {
-        "x": 2604.760830724113,
-        "y": 2160.628999049109,
+        "x": 2597.5279062463414,
+        "y": 2160.631050130878,
         "width": 348,
         "height": 100
       },
@@ -644,8 +610,8 @@
       "label": "Does Response Provide Enough Context to Answer the Research Objective",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3127.260830724113,
-        "y": 1993.6289990491084,
+        "x": 3120.0279062463414,
+        "y": 1993.6310501308772,
         "width": 459,
         "height": 171
       },
@@ -662,8 +628,8 @@
       "label": "Probing Response",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3697.760830724113,
-        "y": 1813.62899904911,
+        "x": 3690.5279062463414,
+        "y": 1813.6310501308787,
         "width": 430,
         "height": 528
       },
@@ -679,8 +645,8 @@
       "label": "Not Enough Context",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3734.760830724113,
-        "y": 1860.628999049109,
+        "x": 3727.5279062463414,
+        "y": 1860.6310501308778,
         "width": 331,
         "height": 100
       },
@@ -697,8 +663,8 @@
       "label": "Unclear Message",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3734.760830724113,
-        "y": 2010.6289990491084,
+        "x": 3727.5279062463414,
+        "y": 2010.6310501308772,
         "width": 331,
         "height": 100
       },
@@ -715,8 +681,8 @@
       "label": "Possible User Refusal",
       "parentId": "page-frame",
       "geometry": {
-        "x": 3734.760830724113,
-        "y": 2160.628999049109,
+        "x": 3727.5279062463414,
+        "y": 2160.631050130878,
         "width": 331,
         "height": 100
       },
@@ -726,6 +692,24 @@
         "stroke": "#FFC943"
       },
       "direction": "right"
+    },
+    {
+      "id": "section",
+      "type": "section",
+      "label": "Section",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1926.160693652297,
+        "y": 494.8380532478863,
+        "width": 3528.726361070256,
+        "height": 1908.8122654765853
+      },
+      "style": {
+        "tone": "neutral",
+        "shape": "section"
+      },
+      "title": "Section",
+      "tint": "gray"
     }
   ],
   "connections": [
@@ -978,12 +962,12 @@
       "color": "#F24822",
       "waypoints": [
         [
-          3054.763756761637,
-          2079.1536097986573
+          3047.5324396419264,
+          2079.151937997548
         ],
         [
-          3054.763756761637,
-          2060.6536097986555
+          3047.5324396419264,
+          2060.651937997546
         ]
       ]
     },
@@ -1003,12 +987,12 @@
       "color": "#F24822",
       "waypoints": [
         [
-          3054.763756761637,
-          2079.1536097986573
+          3047.5324396419264,
+          2079.151937997548
         ],
         [
-          3054.763756761637,
-          2210.6536097986573
+          3047.5324396419264,
+          2210.651937997548
         ]
       ]
     },
@@ -1028,12 +1012,12 @@
       "color": "#F24822",
       "waypoints": [
         [
-          3654.763756761636,
-          2079.1536097986573
+          3647.5324396419255,
+          2079.151937997548
         ],
         [
-          3654.763756761636,
-          1910.6536097986573
+          3647.5324396419255,
+          1910.6519379975489
         ]
       ]
     },
@@ -1053,12 +1037,12 @@
       "color": "#F24822",
       "waypoints": [
         [
-          3654.763756761636,
-          2079.1536097986573
+          3647.5324396419255,
+          2079.151937997548
         ],
         [
-          3654.763756761636,
-          2060.6536097986555
+          3647.5324396419255,
+          2060.651937997546
         ]
       ]
     },
@@ -1078,12 +1062,12 @@
       "color": "#F24822",
       "waypoints": [
         [
-          3654.763756761636,
-          2079.1536097986573
+          3647.5324396419255,
+          2079.151937997548
         ],
         [
-          3654.763756761636,
-          2210.6536097986573
+          3647.5324396419255,
+          2210.651937997548
         ]
       ]
     },

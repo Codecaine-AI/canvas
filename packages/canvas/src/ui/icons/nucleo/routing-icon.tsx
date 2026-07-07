@@ -7,9 +7,9 @@ import type { IconProps } from "../icon-props";
 export function RoutingIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
-      <path d="M14.25,15.25H4.75c-1.105,0-2-.895-2-2V3.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <polyline points="9.74 2.75 15.25 2.75 15.25 8.26" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <line x1="15.25" y1="2.75" x2="7.75" y2="10.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      <path d="M14.25,15.25H4.75c-1.105,0-2-.895-2-2V3.75" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <polyline points="9.74 2.75 15.25 2.75 15.25 8.26" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+      <line x1="15.25" y1="2.75" x2="7.75" y2="10.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
     </svg>
   );
 }

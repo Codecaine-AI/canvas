@@ -225,11 +225,22 @@ export function handleCaptureSectionContents(
     ancestorIds.add(ancestorId);
     ancestorId = objectById.get(ancestorId)?.parentId ?? null;
   }
-  // Only unparented objects are adopted — objects already inside another
-  // section (or this one) keep their recorded membership.
+  // A geometrically-captured object is adopted when it's unparented OR
+  // parented to a STRICT ANCESTOR of this section — the latter repairs legacy
+  // flat docs where every object hangs off an outer ancestor section. Never
+  // adopted: the section's own ancestors (the cycle guard above), objects
+  // parented to any non-ancestor section (no stealing laterally from sibling
+  // or unrelated sections), objects parented to this section's own
+  // descendants (already transitively inside; reparenting would flatten), and
+  // the section itself (recursive geometric capture can claim it back through
+  // a large child section, and adopting it would self-cycle).
   const changedObjectIds = state.document.objects
     .filter(
-      (object) => captured.has(object.id) && !object.parentId && !ancestorIds.has(object.id),
+      (object) =>
+        object.id !== action.sectionId &&
+        captured.has(object.id) &&
+        !ancestorIds.has(object.id) &&
+        (!object.parentId || ancestorIds.has(object.parentId)),
     )
     .map((object) => object.id);
   if (changedObjectIds.length === 0) return state;

@@ -104,23 +104,55 @@ export function gatherSnapCandidates(
  * Hit-tests world point against section objects only (used for drop targeting
  * during a move gesture), excluding `excludeIds` (the dragged objects and
  * their descendants) so a section can't be dropped into itself or into one of
- * its own children. Topmost-first, matching hitTestObjects ordering.
+ * its own children. Sections don't stack in plain array order: they paint
+ * depth-then-index (renderOrderedObjects in CanvasStage) — a nested section
+ * renders above its ancestors, stable by array index among equal depths — so
+ * among containing sections the one with the greatest parentId-ancestor-chain
+ * depth wins here, tiebroken by later array index. That matches what the user
+ * sees painted on top under the probe point.
  */
 export function hitTestDropTarget(
   document: InteractiveCanvasDocument,
   worldPoint: CanvasPoint,
   excludeIds: Set<string>,
 ): InteractiveCanvasObject | null {
-  for (let index = document.objects.length - 1; index >= 0; index -= 1) {
-    const object = document.objects[index]!;
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+
+  // Length of the section's parentId ancestor chain (root sections are depth
+  // 0), guarding against dangling parentIds and (invalid) cycles — mirrors
+  // renderOrderedObjects' sectionDepth in CanvasStage.
+  function sectionDepth(section: InteractiveCanvasObject): number {
+    let depth = 0;
+    const visited = new Set<string>([section.id]);
+    let parentId = section.parentId ?? null;
+    while (parentId && !visited.has(parentId)) {
+      const parent = byId.get(parentId);
+      if (!parent) break;
+      visited.add(parent.id);
+      depth += 1;
+      parentId = parent.parentId ?? null;
+    }
+    return depth;
+  }
+
+  let best: InteractiveCanvasObject | null = null;
+  let bestDepth = -1;
+  for (const object of document.objects) {
     if (object.type !== "section") continue;
     if (excludeIds.has(object.id)) continue;
     const { x, y, width, height } = object.geometry;
     const inside =
       worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
-    if (inside) return object;
+    if (!inside) continue;
+    const depth = sectionDepth(object);
+    // >= so an equal-depth section later in the array wins, matching the
+    // render sort's stable index tiebreak.
+    if (depth >= bestDepth) {
+      best = object;
+      bestDepth = depth;
+    }
   }
-  return null;
+  return best;
 }
 
 export function objectsIntersectingBounds(

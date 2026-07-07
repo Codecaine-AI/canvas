@@ -14,13 +14,11 @@ export type StickyColorStyle = {
   bg: string;
   /** Body text = black @ 80% over fill; pre-computed exact blend. */
   text80: string;
-  /** Author text = black @ 40% over fill; only defined for yellow. */
-  author40?: string;
 };
 
 /** Sticky note fill + derived text colors. */
 export const STICKY_COLORS: Record<StickyColorName, StickyColorStyle> = {
-  yellow: { bg: "#FFE299", text80: "#332D1F", author40: "#99885C" },
+  yellow: { bg: "#FFE299", text80: "#332D1F" },
   red: { bg: "#FFAFA3", text80: "#332321" },
   pink: { bg: "#FFA8DB", text80: "#33222C" },
   blue: { bg: "#80CAFF", text80: "#1A2833" },

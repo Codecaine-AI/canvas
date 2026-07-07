@@ -204,17 +204,6 @@
       }
     },
     {
-      "id": "standalone-label",
-      "type": "text",
-      "label": "Section header label",
-      "geometry": {
-        "x": 900,
-        "y": 520,
-        "width": 260,
-        "height": 40
-      }
-    },
-    {
       "id": "json-code-block",
       "type": "code-block",
       "label": "Config",

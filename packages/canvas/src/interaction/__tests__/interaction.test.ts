@@ -3,6 +3,7 @@ import type { CanvasAction, CanvasSelection } from "../../state/actions";
 import {
   applyResizeHandle,
   cancelInteraction,
+  hitTestDropTarget,
   hitTestObjects,
   IDLE_INTERACTION_STATE,
   MIN_DIRECT_RESIZE_SIZE,
@@ -866,6 +867,49 @@ describe("interaction: section drop-in/out during move", () => {
     expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
   });
 
+  it("reparents only the dragged section on release — carried descendants keep their parentIds", () => {
+    const document = makeDocument([
+      makeSection({ id: "target", geometry: { x: 600, y: 0, width: 500, height: 500 } }),
+      makeSection({ id: "dragged", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
+      makeSection({ id: "nested", parentId: "dragged", geometry: { x: 20, y: 20, width: 100, height: 100 } }),
+      makeObject({ id: "leaf", parentId: "nested", geometry: { x: 40, y: 40, width: 40, height: 40 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "dragged" };
+
+    // Drag "dragged" (which carries "nested" and "leaf") so its center lands
+    // inside "target". Only the drag root changes parent — reparenting the
+    // whole expanded set would flatten the subtree onto "target".
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 700, y: 100 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("target");
+
+    result = stepInteraction(result.state, up({ x: 700, y: 100 }, hit), ctx);
+    expect(result.dispatch).toEqual([
+      { type: "canvas.setParent", objectIds: ["dragged"], parentId: "target" },
+    ]);
+  });
+
+  it("does not dispatch canvas.setParent for a no-op section drag within its existing parent", () => {
+    const document = makeDocument([
+      makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
+      makeSection({ id: "inner", parentId: "outer", geometry: { x: 20, y: 20, width: 200, height: 200 } }),
+      makeObject({ id: "child", parentId: "inner", geometry: { x: 40, y: 40, width: 30, height: 30 } }),
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "inner" };
+
+    // The expanded drag set has mixed parents ("inner" → outer, "child" →
+    // inner); the release comparison must use the drag root's parent only, or
+    // this stay-inside-"outer" drag would dispatch a spurious setParent.
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 30, y: 30 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 60, y: 60 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("outer");
+
+    result = stepInteraction(result.state, up({ x: 60, y: 60 }, hit), ctx);
+    expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
+  });
+
   it("excludes the dragged section and its descendants from drop-target hit-testing", () => {
     const document = makeDocument([
       makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
@@ -886,6 +930,42 @@ describe("interaction: section drop-in/out during move", () => {
     result = stepInteraction(result.state, move({ x: 300, y: 300 }, hit), ctx);
     expect(result.state.kind).toBe("move");
     expect(result.overlay.dropTargetId).toBe("outer");
+  });
+});
+
+describe("interaction: hitTestDropTarget picks the deepest containing section", () => {
+  function makeSection(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
+    return makeObject({ type: "section", title: overrides.id, tint: "gray", ...overrides });
+  }
+
+  it("returns the nested section even when it precedes its ancestor in the array", () => {
+    // Sections paint depth-then-index (renderOrderedObjects), so the nested
+    // section is visibly on top of "outer" regardless of array order — the
+    // drop target must match what's painted under the probe point.
+    const document = makeDocument([
+      makeSection({ id: "inner", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
+      makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+    ]);
+    const hit = hitTestDropTarget(document, { x: 100, y: 100 }, new Set());
+    expect(hit?.id).toBe("inner");
+  });
+
+  it("breaks equal-depth ties by later array index (the render sort's stable tiebreak)", () => {
+    const document = makeDocument([
+      makeSection({ id: "first", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeSection({ id: "second", geometry: { x: 100, y: 100, width: 300, height: 300 } }),
+    ]);
+    const hit = hitTestDropTarget(document, { x: 150, y: 150 }, new Set());
+    expect(hit?.id).toBe("second");
+  });
+
+  it("still respects excludeIds, falling back to the next-deepest containing section", () => {
+    const document = makeDocument([
+      makeSection({ id: "inner", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
+      makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+    ]);
+    const hit = hitTestDropTarget(document, { x: 100, y: 100 }, new Set(["inner"]));
+    expect(hit?.id).toBe("outer");
   });
 });
 
@@ -1130,14 +1210,14 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     const document = makeDocument([
       makeObject({ id: "group", type: "section", title: "Group", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
     ]);
-    const ctx = makeContext(document, { tool: "text" });
+    const ctx = makeContext(document, { tool: "sticky" });
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 200, y: 200 }, { kind: "canvas" }), ctx);
     result = stepInteraction(result.state, up({ x: 200, y: 200 }), ctx);
     expect(result.dispatch).toEqual([
       {
         type: "canvas.addObject",
-        objectType: "text",
+        objectType: "sticky",
         parentId: "group",
         geometry: expect.any(Object),
       },
@@ -1163,5 +1243,83 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     const cancelled = cancelInteraction(placing.state);
     expect(cancelled.state.kind).toBe("idle");
     expect(cancelled.dispatch).toEqual([]);
+  });
+
+  it("stickyPlacement (Shapes panel repeat mode) keeps the tool armed after placing instead of reverting to select", () => {
+    const document = makeDocument([]);
+    const ctx = makeContext(document, { tool: "process", stickyPlacement: true });
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 500, y: 500 }, { kind: "canvas" }), ctx);
+    result = stepInteraction(result.state, up({ x: 500, y: 500 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.addObject",
+        objectType: "process",
+        parentId: null,
+        geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
+      },
+      // No canvas.setTool — the armed tool survives so the next click places another.
+    ]);
+
+    // The very next pointer-down starts a fresh place gesture with the same tool.
+    const again = stepInteraction(result.state, down({ x: 700, y: 300 }, { kind: "canvas" }), ctx);
+    expect(again.state.kind).toBe("place");
+  });
+
+  it("W5 shape tools (ellipse/triangle/star/…) start a place gesture — the panel's full vocabulary is placeable", () => {
+    const document = makeDocument([]);
+    for (const tool of ["ellipse", "triangle", "pentagon", "star", "chevron", "icon"] as const) {
+      const ctx = makeContext(document, { tool });
+      const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 100 }, { kind: "canvas" }), ctx);
+      expect(result.state.kind).toBe("place");
+    }
+  });
+
+  it("ctx.armedShape (catalog-entry variant) rides through the ghost draft and into canvas.addObject", () => {
+    const document = makeDocument([]);
+    const ctx = makeContext(document, {
+      tool: "icon",
+      armedShape: { icon: "database", label: "Database" },
+    });
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 300 }, { kind: "canvas" }), ctx);
+    // The ghost overlay carries the FULL draft object (type + glyph + label),
+    // so the stage can render the real shape instead of a dashed box.
+    expect(result.overlay.placePreviewObject).toMatchObject({
+      type: "icon",
+      icon: "database",
+      label: "Database",
+    });
+
+    result = stepInteraction(result.state, up({ x: 300, y: 300 }), ctx);
+    const addAction = result.dispatch.find((action) => action.type === "canvas.addObject");
+    expect(addAction).toMatchObject({ objectType: "icon", icon: "database", label: "Database" });
+  });
+
+  it("a direction variant (triangle down) rides through the same path", () => {
+    const document = makeDocument([]);
+    const ctx = makeContext(document, { tool: "triangle", armedShape: { direction: "down" } });
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 300 }, { kind: "canvas" }), ctx);
+    expect(result.overlay.placePreviewObject).toMatchObject({ type: "triangle", direction: "down" });
+
+    result = stepInteraction(result.state, up({ x: 300, y: 300 }), ctx);
+    const addAction = result.dispatch.find((action) => action.type === "canvas.addObject");
+    expect(addAction).toMatchObject({ objectType: "triangle", direction: "down" });
+  });
+
+  it("without an armed variant the addObject action stays byte-identical to the legacy shape (no stray keys)", () => {
+    const document = makeDocument([]);
+    const ctx = makeContext(document, { tool: "process" });
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 500, y: 500 }, { kind: "canvas" }), ctx);
+    result = stepInteraction(result.state, up({ x: 500, y: 500 }), ctx);
+    expect(result.dispatch[0]).toEqual({
+      type: "canvas.addObject",
+      objectType: "process",
+      parentId: null,
+      geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
+    });
   });
 });

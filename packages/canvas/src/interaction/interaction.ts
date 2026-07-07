@@ -26,6 +26,7 @@ export { cancelInteraction, stepInteraction } from "./core";
 export {
   IDLE_INTERACTION_STATE,
   RESIZE_HANDLES,
+  type ArmedShapeVariant,
   type CanvasHit,
   type CanvasPointerEvent,
   type CanvasPointerEventType,
@@ -39,7 +40,12 @@ export {
 } from "./types";
 export { hitTestDropTarget, hitTestObjects, selectionBounds } from "./hit-testing";
 export { MIN_DIRECT_RESIZE_SIZE, applyResizeHandle, resizeCursorFor } from "./gestures/resize";
-export { defaultGeometryForPlacement } from "./gestures/place";
+export {
+  defaultGeometryForPlacement,
+  objectTypeForTool,
+  placePreviewOverlayFor,
+  PLACE_PREVIEW_GHOST_ID,
+} from "./gestures/place";
 export { createFrameCoalescer, type FrameCoalescer, type FrameScheduler } from "./frame-coalescer";
 // SnapGuide/SpacingHint are defined in snapping.ts (the pure computation module);
 // re-exported here so callers of the interaction machine don't need a second import.

@@ -25,7 +25,6 @@ import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../../../theme";
 import type {
   CanvasPaletteToken,
   InteractiveCanvasConnection,
-  InteractiveCanvasLink,
   InteractiveCanvasObject,
 } from "../../../state/schema";
 
@@ -33,7 +32,6 @@ export interface InspectorProps {
   lastChange: CanvasChangeSummary | undefined;
   selectedObject: InteractiveCanvasObject | undefined;
   selectedConnection: InteractiveCanvasConnection | undefined;
-  selectedLinks: InteractiveCanvasLink[];
   selectionContext: ReturnType<typeof buildSelectionContext>;
   dispatch: (action: CanvasAction) => void;
   applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
@@ -43,7 +41,6 @@ export function Inspector({
   lastChange,
   selectedObject,
   selectedConnection,
-  selectedLinks,
   selectionContext,
   dispatch,
   applyPaletteTokenToSelection,
@@ -232,30 +229,6 @@ export function Inspector({
           </Button>
         )}
         <div className="rounded-md border border-border/70 p-2">
-          <div className="mb-2 text-xs font-medium text-muted-foreground">Links</div>
-          {selectedLinks.length > 0 ? (
-            <div className="grid gap-1.5">
-              {selectedLinks.map((link) => (
-                <div
-                  key={link.id}
-                  className="rounded-md border border-border/70 bg-background px-2 py-1.5 text-xs"
-                >
-                  <div className="truncate font-medium">
-                    {link.target.label ?? link.target.path}
-                  </div>
-                  <div className="font-mono text-[10px] text-muted-foreground">
-                    {link.status} / {link.target.kind}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-xs text-muted-foreground">
-              No source or doc links on this object.
-            </div>
-          )}
-        </div>
-        <div className="rounded-md border border-border/70 p-2">
           <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <MessageSquareIcon className="h-3.5 w-3.5" />
             Annotation
@@ -358,8 +331,7 @@ export function Inspector({
       </div>
     ) : (
       <div className="rounded-md border border-border/70 p-3 text-sm text-muted-foreground">
-        Select a canvas object to inspect links, geometry, annotations, and agent
-        context.
+        Select a canvas object to inspect geometry, annotations, and agent context.
       </div>
     )}
 

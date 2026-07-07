@@ -15,17 +15,42 @@ afterEach(() => {
 describe("CanvasDock geometry", () => {
   it("renders at the professional rounded dock dimensions", () => {
     expect(FIGJAM_DOCK_WIDTH_PX).toBe("fit-content");
-    expect(FIGJAM_DOCK_HEIGHT_PX).toBe(48);
-    expect(FIGJAM_DOCK_RADIUS_PX).toBe(13);
+    expect(FIGJAM_DOCK_HEIGHT_PX).toBe(53);
+    expect(FIGJAM_DOCK_RADIUS_PX).toBe(15);
 
     const { container } = render(<CanvasDock />);
     const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
     expect(dock).toBeTruthy();
     expect(dock.style.width).toBe("fit-content");
-    expect(dock.style.height).toBe("48px");
-    expect(dock.style.borderRadius).toBe("13px");
+    expect(dock.style.height).toBe("53px");
+    expect(dock.style.borderRadius).toBe("15px");
     expect(dock.style.background).toBe("#FFFFFF");
-    expect(dock.style.padding).toBe("0px 8px");
+    expect(dock.style.padding).toBe("0px 10px");
+  });
+
+  it("uses consistent enlarged button and icon sizing for every dock tool", () => {
+    const { container } = render(<CanvasDock />);
+    const buttons = container.querySelectorAll("[data-dock-tool]");
+    for (const button of buttons) {
+      const buttonEl = button as HTMLElement;
+      const icon = buttonEl.querySelector("svg") as SVGElement;
+      const tool = buttonEl.getAttribute("data-dock-tool");
+      expect(buttonEl.style.width).toBe("40px");
+      expect(buttonEl.style.height).toBe("40px");
+      expect(buttonEl.style.borderRadius).toBe("11px");
+      expect(icon.style.width).toBe(tool === "sticky" ? "28px" : "24px");
+      expect(icon.style.height).toBe(tool === "sticky" ? "28px" : "24px");
+      expect(icon.getAttribute("class")).toContain(`canvas-dock-icon--${tool}`);
+    }
+  });
+
+  it("uses lighter dock icon stroke weights without changing generated icons", () => {
+    const { container } = render(<CanvasDock />);
+    const styles = container.querySelector("[data-dock-icon-styles]") as HTMLStyleElement;
+    expect(styles).toBeTruthy();
+    expect(styles.textContent).toContain("stroke-width: 1.1");
+    expect(styles.textContent).toContain("stroke-width: 0.95");
+    expect(styles.textContent).toContain("stroke-width: 7");
   });
 
   it("has a soft box-shadow (not flat, not none)", () => {
@@ -38,10 +63,10 @@ describe("CanvasDock geometry", () => {
 });
 
 describe("CanvasDock button inventory", () => {
-  it("renders exactly 7 tool buttons and no overflow button", () => {
+  it("renders exactly 6 tool buttons and no overflow button", () => {
     const { container } = render(<CanvasDock />);
     const buttons = container.querySelectorAll("[data-dock-tool]");
-    expect(buttons.length).toBe(7);
+    expect(buttons.length).toBe(6);
     expect(container.querySelector('[data-dock-tool="overflow"]')).toBeNull();
   });
 
@@ -55,7 +80,6 @@ describe("CanvasDock button inventory", () => {
       "hand",
       "shapes",
       "connector",
-      "text",
       "section",
       "sticky",
     ]);
@@ -64,15 +88,16 @@ describe("CanvasDock button inventory", () => {
   it("groups buttons into 3 clusters separated by 2 vertical dividers", () => {
     const { container } = render(<CanvasDock />);
     const groups = container.querySelectorAll("[data-dock-group]");
-    // A(2) + B(2) + C(3) = 3 grouped clusters.
+    // A(2) + B(2) + C(2) = 3 grouped clusters.
     expect(groups.length).toBe(3);
     const dividers = container.querySelectorAll("[data-divider]");
     expect(dividers.length).toBe(2);
     for (const divider of dividers) {
       const dividerEl = divider as HTMLElement;
-      expect(dividerEl.style.width).toBe("1px");
-      expect(dividerEl.style.height).toBe("24px");
-      expect(dividerEl.style.margin).toBe("0px 8px");
+      expect(dividerEl.style.width).toBe("1.5px");
+      expect(dividerEl.style.height).toBe("32px");
+      expect(dividerEl.style.margin).toBe("0px 10px");
+      expect(dividerEl.style.background).toBe("rgba(0, 0, 0, 0.18)");
     }
     expect(container.textContent).not.toContain("|");
   });
@@ -86,7 +111,7 @@ describe("CanvasDock button inventory", () => {
 });
 
 describe("CanvasDock state rules", () => {
-  it("shows no active (violet) button when activeTool is null (modal rule)", () => {
+  it("shows no active (violet) button when activeTool is null", () => {
     const { container } = render(<CanvasDock activeTool={null} />);
     const activeButtons = container.querySelectorAll('[data-active="true"]');
     expect(activeButtons.length).toBe(0);

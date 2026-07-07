@@ -13,7 +13,6 @@ import {
   MessageSquareIcon,
   StickyIcon,
   TrashIcon,
-  TypeIcon,
   UnlockIcon,
 } from "../../../ui/icons";
 import type { CanvasContextMenuApi } from "./use-canvas-context-menu";
@@ -155,15 +154,6 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
           >
             <StickyIcon className="h-4 w-4 text-muted-foreground" />
             Add sticky
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-            onClick={() => addObjectFromContextMenu("text")}
-          >
-            <TypeIcon className="h-4 w-4 text-muted-foreground" />
-            Add text
           </button>
           <button
             type="button"

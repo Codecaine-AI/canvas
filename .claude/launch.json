@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "studio",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4000"],
+      "port": 4000
+    },
+    {
+      "name": "studio-alt",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4100"],
+      "port": 4100
+    },
+    {
+      "name": "studio-alt2",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4200"],
+      "port": 4200
+    },
+    {
+      "name": "studio-alt3",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4300"],
+      "port": 4300
+    }
+  ]
+}

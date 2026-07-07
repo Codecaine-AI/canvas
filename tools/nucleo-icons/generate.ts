@@ -346,6 +346,14 @@ function isPaintReference(value: string): boolean {
 // Output 1: chrome icon components (nucleo/<kebab>.tsx)
 // ---------------------------------------------------------------------------
 
+/**
+ * Chrome icons render with a thinner stroke than Nucleo's native 1.5 so the
+ * whole set matches the weight of the hand-authored FigJam section icon
+ * (8/112 ≈ 1.29 at 18px). Applied at emit time only — vendored SVGs stay
+ * byte-verbatim, and glyph data (geometry only) is unaffected.
+ */
+const CHROME_STROKE_SCALE = 1.25 / 1.5;
+
 /** AlertTriangleIcon → alert-triangle-icon */
 function kebabCase(exportName: string): string {
   return exportName
@@ -377,6 +385,9 @@ function emitTsxElement(el: SvgElement, source: string): string | null {
     }
     if (name === "stroke" && value !== "none") outValue = "currentColor";
     if (name === "fill" && value !== "none") outValue = "currentColor";
+    if (name === "stroke-width" && Number.isFinite(Number(value))) {
+      outValue = fmtNum(Number(value) * CHROME_STROKE_SCALE);
+    }
     parts.push(`${outName}="${outValue}"`);
   }
   if (!ok) return null;

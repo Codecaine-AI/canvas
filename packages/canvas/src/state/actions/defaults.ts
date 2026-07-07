@@ -2,7 +2,10 @@
 
 import type {
   CanvasGeometry,
+  CanvasIconGlyph,
   CanvasObjectStyle,
+  CanvasShapeDirection,
+  InteractiveCanvasObject,
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
 } from "../schema";
@@ -56,9 +59,7 @@ export function objectTypeLabel(type: InteractiveCanvasObjectType): string {
   if (type === "rectangle") return "Rectangle";
   if (type === "process") return "Process";
   if (type === "decision") return "Decision";
-  if (type === "text") return "Text";
   if (type === "sticky") return "Sticky";
-  if (type === "source-node") return "Source Node";
   if (type === "document") return "Document";
   if (type === "person") return "Person";
   if (type === "database") return "Database";
@@ -97,7 +98,6 @@ export function toneForType(type: InteractiveCanvasObjectType): InteractiveCanva
   if (type === "rectangle") return "neutral";
   if (type === "decision") return "decision";
   if (type === "sticky") return "warning";
-  if (type === "source-node") return "agent";
   if (type === "annotation-marker") return "annotation";
   if (type === "document") return "memory";
   if (type === "person") return "input";
@@ -140,6 +140,48 @@ export function toneForType(type: InteractiveCanvasObjectType): InteractiveCanva
     return "neutral";
   }
   return "process";
+}
+
+/**
+ * Builds the complete object a creation flow will produce for `objectType` at
+ * `geometry` — the single source of truth shared by the canvas.addObject
+ * reducer (which adds a real id/parentId and snapped geometry) and the
+ * armed-tool ghost preview (which renders this draft verbatim so what the
+ * user sees under the cursor is exactly what a click creates). `direction`
+ * and `icon` carry the Shapes-panel catalog-entry variant (triangle up/down,
+ * Advanced-tier glyph); `label` overrides the per-type default (e.g. an icon
+ * entry's glyph name instead of the generic "Icon").
+ */
+export function draftPlacedObject(
+  objectType: InteractiveCanvasObjectType,
+  geometry: CanvasGeometry,
+  options?: {
+    id?: string;
+    label?: string;
+    parentId?: string | null;
+    tone?: InteractiveCanvasTone;
+    direction?: CanvasShapeDirection;
+    icon?: CanvasIconGlyph;
+  },
+): InteractiveCanvasObject {
+  const label = options?.label ?? objectTypeLabel(objectType);
+  return {
+    id: options?.id ?? "",
+    type: objectType,
+    label,
+    parentId: options?.parentId ?? null,
+    geometry,
+    style: {
+      tone: options?.tone ?? toneForType(objectType),
+      shape: shapeForType(objectType),
+    },
+    ...(options?.direction ? { direction: options.direction } : null),
+    ...(options?.icon ? { icon: options.icon } : null),
+    // W2 — sections carry their visible title in `title`/`tint`, not the
+    // generic tone/shape style bag; default to a neutral "gray" family so a
+    // freshly-placed section is immediately valid per validateInteractiveCanvasDocument.
+    ...(objectType === "section" ? { title: label, tint: "gray" as const } : null),
+  };
 }
 
 /** Shape name for a given object type, used by canvas.addObject to set style.shape. */

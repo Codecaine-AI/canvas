@@ -167,7 +167,7 @@
     },
     {
       "id": "generate-transition-response",
-      "type": "source-node",
+      "type": "rectangle",
       "label": "Generate transition response",
       "parentId": null,
       "geometry": {
@@ -183,7 +183,7 @@
     },
     {
       "id": "adapt-question",
-      "type": "source-node",
+      "type": "rectangle",
       "label": "Adapt question based on history",
       "parentId": null,
       "geometry": {
@@ -398,7 +398,7 @@
     },
     {
       "id": "generate-probing-question",
-      "type": "source-node",
+      "type": "rectangle",
       "label": "Generate probing question",
       "parentId": null,
       "geometry": {
@@ -696,19 +696,6 @@
       "style": "elbow",
       "arrow": "forward",
       "role": "next-question"
-    }
-  ],
-  "links": [
-    {
-      "id": "memory-structure-link",
-      "objectId": "memory-structure",
-      "target": {
-        "kind": "source",
-        "path": "packages/canvas/src/schema.ts",
-        "symbol": "InteractiveCanvasDocument",
-        "label": "Canvas schema"
-      },
-      "status": "unresolved"
     }
   ],
   "annotations": [
