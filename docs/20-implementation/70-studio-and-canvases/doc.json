@@ -231,11 +231,7 @@
         {
           "insert": "board-store.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/board-store.ts"
-            }
+            "code": true
           }
         },
         {
@@ -345,7 +341,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "canvases/synthetic.canvas.json",
+              "path": "packages/studio/src/App.tsx",
               "symbol": "createStarterCanvasDocument"
             }
           }
@@ -364,11 +360,7 @@
         {
           "insert": "board-store.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/board-store.ts"
-            }
+            "code": true
           }
         },
         {
@@ -380,7 +372,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/document.ts",
               "symbol": "InteractiveCanvasDocument"
             }
           }
@@ -391,12 +383,7 @@
         {
           "insert": "StudioDraft",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/board-store.ts",
-              "symbol": "StudioDraft"
-            }
+            "code": true
           }
         },
         {
@@ -728,7 +715,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/__tests__/v2-flow-figjam-canvas.test.ts"
+              "path": "packages/canvas/src/state/__tests__/v2-flow-figjam-canvas.test.ts"
             }
           }
         },
@@ -806,7 +793,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/__tests__"
+              "path": "packages/canvas/src/state/__tests__"
             }
           }
         },
@@ -819,7 +806,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/__tests__/v2-flow-figjam-canvas.test.ts"
+              "path": "packages/canvas/src/state/__tests__/v2-flow-figjam-canvas.test.ts"
             }
           }
         },
@@ -841,7 +828,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/validate.ts",
               "symbol": "validateInteractiveCanvasDocument"
             }
           }
@@ -873,7 +860,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "SECTION_FAMILIES"
             }
           }
@@ -953,7 +940,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/document.ts",
               "symbol": "InteractiveCanvasDocument"
             }
           }

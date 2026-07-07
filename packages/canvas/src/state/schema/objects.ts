@@ -33,12 +33,14 @@ export type InteractiveCanvasObject = {
    * floating title chip (distinct from `label`, which every object still
    * carries for a11y/docs-targeting/consistency but is not separately
    * rendered on sections — the chip IS the visible title). `tint` selects the
-   * fill/chip family from theme.ts's SECTION_FAMILIES. `locked`
-   * reserved for a later wave (no enforcement yet — see actions.ts).
+   * fill/chip family from theme.ts's SECTION_FAMILIES. `locked` is now a
+   * two-mode section lock, enforced in interaction/core.ts — `"background"`
+   * locks the section frame only (children stay movable); `"all"` also locks
+   * every descendant object against drag/resize.
    */
   title?: string;
   tint?: CanvasSectionTint;
-  locked?: boolean;
+  locked?: "all" | "background";
   contentHidden?: boolean;
   /**
    * Pointing/skew direction for direction-aware shapes (W2, generalized W5):

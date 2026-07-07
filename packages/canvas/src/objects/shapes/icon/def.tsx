@@ -76,11 +76,6 @@ export const iconDef: ObjectDef = {
           box-shadow: none;
           padding: 8px;
         }
-        .interactive-canvas-object-icon:hover,
-        .interactive-canvas-object-icon[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
 `,
   defaults: {
     geometry: { x: 160, y: 160, width: 120, height: 120 },

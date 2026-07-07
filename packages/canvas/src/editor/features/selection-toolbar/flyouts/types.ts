@@ -25,11 +25,9 @@ export interface ToolbarFlyoutProps {
   dispatch: (action: CanvasAction) => void;
   close: () => void;
   applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
-  applySectionFillToSelection: (fill: string) => void;
-  applySectionStrokeToSelection: (stroke: string) => void;
   applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
   applyTintToSelection: (tint: CanvasSectionTint) => void;
-  toggleLockForSelection: () => void;
+  setLockForSelection: (mode: "all" | "background" | undefined) => void;
   swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
 }
 

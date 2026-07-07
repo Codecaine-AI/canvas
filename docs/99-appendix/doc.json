@@ -567,11 +567,7 @@
         {
           "insert": "packages/canvas/src/model/spectre-ref.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/spectre-ref.ts"
-            }
+            "code": true
           }
         },
         {
@@ -826,7 +822,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -839,7 +835,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome"
+              "path": "packages/canvas/src/editor/components"
             }
           }
         },

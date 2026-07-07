@@ -193,23 +193,43 @@ describe("schema: W2 object types round-trip", () => {
   });
 
   it("preserves section visibility and lock flags through validation", () => {
-    const doc = makeDocument([
-      {
-        ...makeObject({ id: "section-a" }),
-        type: "section",
-        title: "A",
-        tint: "gray",
-        locked: true,
-        contentHidden: true,
-        style: { shape: "section" },
-      },
-    ]);
+    const doc = {
+      schemaVersion: 1,
+      id: "w2-test-doc",
+      mode: "diagram",
+      objects: [
+        {
+          ...makeObject({ id: "section-a" }),
+          type: "section",
+          title: "A",
+          tint: "gray",
+          locked: true,
+          contentHidden: true,
+          style: { shape: "section" },
+        },
+      ],
+      connections: [],
+    };
 
     const validation = validateInteractiveCanvasDocument(doc);
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
-    expect(validation.document.objects[0]?.locked).toBe(true);
+    expect(validation.document.objects[0]?.locked).toBe("background");
     expect(validation.document.objects[0]?.contentHidden).toBe(true);
+
+    const validateLock = (locked: unknown) => {
+      const lockValidation = validateInteractiveCanvasDocument({
+        ...doc,
+        objects: [{ ...doc.objects[0]!, locked }],
+      });
+      expect(lockValidation.ok).toBe(true);
+      if (!lockValidation.ok) return undefined;
+      return lockValidation.document.objects[0]?.locked;
+    };
+    expect(validateLock("all")).toBe("all");
+    expect(validateLock("background")).toBe("background");
+    expect(validateLock(false)).toBeUndefined();
+    expect(validateLock("nope")).toBeUndefined();
   });
 
   it("updates a section fill through the undoable object reducer path", () => {

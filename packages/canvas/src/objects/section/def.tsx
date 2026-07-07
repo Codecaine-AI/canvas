@@ -190,11 +190,6 @@ export const sectionDef: ObjectDef = {
           align-items: stretch;
           justify-content: flex-start;
         }
-        .interactive-canvas-object-section:hover,
-        .interactive-canvas-object-section[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 2px;
-        }
         /* Drop-target state while a drag hovers this section: keep the section's
            2px outline weight (softer than the generic shape drop glow) with a
            faint primary wash so the capture area reads without shouting. */

@@ -13,10 +13,10 @@ import type { InteractiveCanvasObjectType } from "../../state/schema";
  * object's shape-swap control (NOT the bottom dock — that opens the larger
  * ShapesPanel instead).
  *
- * Ground truth (fj-032-041): floats centered, ~161x180px bounding box, dark
- * background matching the color-popover family, 5-column icon grid,
- * scrollable. Icons are monochrome technical/object glyphs (chip, database,
- * monitor, envelope, ...) — NOT basic geometric shapes.
+ * Ground truth (fj-032-041), FigJam-scale restyle: floats centered as a
+ * 232px dark panel matching the color-popover family, with a 5-column,
+ * scrollable 36px icon grid. Icons are monochrome technical/object glyphs
+ * (chip, database, monitor, envelope, ...) — NOT basic geometric shapes.
  */
 
 export type ShapeSearchPopoverProps = {
@@ -25,7 +25,7 @@ export type ShapeSearchPopoverProps = {
   style?: React.CSSProperties;
 };
 
-const POPOVER_WIDTH_PX = 161;
+const POPOVER_WIDTH_PX = 232;
 const POPOVER_BG = "#1D1D1D";
 
 export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopoverProps) {
@@ -47,8 +47,8 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
       style={{
         width: POPOVER_WIDTH_PX,
         background: POPOVER_BG,
-        borderRadius: 18,
-        padding: 10,
+        borderRadius: EDITOR_STYLE.flyoutRadiusPx,
+        padding: EDITOR_STYLE.flyoutPaddingPx,
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
@@ -80,7 +80,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
             border: "none",
             outline: "none",
             color: "#FFFFFF",
-            fontSize: 12,
+            fontSize: 13,
             flex: 1,
             minWidth: 0,
           }}
@@ -93,7 +93,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
           gap: 4,
-          maxHeight: 180,
+          maxHeight: 220,
           overflowY: "auto",
         }}
       >
@@ -111,19 +111,19 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => onPick?.(entry.objectType)}
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 36,
+                  height: 36,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  borderRadius: 6,
+                  borderRadius: EDITOR_STYLE.flyoutItemRadiusPx,
                   border: "none",
                   background: hovered ? "rgba(255,255,255,0.14)" : "transparent",
                   color: "#FFFFFF",
                   cursor: "pointer",
                 }}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
               </button>
               <Tooltip label={entry.label} visible={hovered} placement="top" />
             </div>

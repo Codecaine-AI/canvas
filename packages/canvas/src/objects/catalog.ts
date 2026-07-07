@@ -111,19 +111,8 @@ export const SHAPE_CATALOG: ShapeCatalogCategory[] = [
 /** Flattened list of every entry across all categories, for search. */
 export const SHAPE_CATALOG_ENTRIES: ShapeCatalogEntry[] = SHAPE_CATALOG.flatMap((c) => c.entries);
 
-/** Panel A's compact "Search for a shape" set (ShapeSearchPopover) — technical/object glyphs for swapping an already-selected object's shape. Reuses a representative slice of the Advanced tier plus a few Basic/Flowchart entries, now that both are real schema types. */
-export const SHAPE_SEARCH_ENTRIES: ShapeCatalogEntry[] = [
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-cpu"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "flow-database"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-display"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-mail"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "flow-document"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-code"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-bolt"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-terminal"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-person"),
-  SHAPE_CATALOG_ENTRIES.find((e) => e.id === "adv-globe"),
-].filter((entry): entry is ShapeCatalogEntry => entry !== undefined);
+/** ShapeSearchPopover's shape-swap entry set: swappable geometric Basic + Flowchart shapes, in catalog order. Icon glyphs are excluded because swap changes an existing object's type. */
+export const SHAPE_SEARCH_ENTRIES: ShapeCatalogEntry[] = SHAPE_CATALOG_ENTRIES.filter((e) => e.objectType !== "icon");
 
 /** Every entry in this catalog maps to a live schema type — there is no more "coming soon" disabled state (Wave C: all 19 W5 native types + "icon" are real). Kept as a function (not a boolean literal) so call sites don't need to change. */
 export function isShapeEntryEnabled(_entry: ShapeCatalogEntry): boolean {

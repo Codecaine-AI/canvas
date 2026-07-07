@@ -197,7 +197,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
               "symbol": "CANVAS_BG"
             }
           }
@@ -210,7 +210,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -222,7 +222,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -248,7 +248,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -301,7 +301,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
               "symbol": "reduceInteractiveCanvasState"
             }
           }
@@ -337,7 +337,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/validate.ts",
               "symbol": "validateInteractiveCanvasDocument"
             }
           }

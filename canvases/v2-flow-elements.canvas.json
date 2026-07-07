@@ -3,22 +3,21 @@
   "id": "v2-flow-elements",
   "title": "V2 Flow — element vocabulary reference",
   "mode": "diagram",
-  "size": {
-    "width": 1600,
-    "height": 900
-  },
   "viewport": {
     "x": 0,
     "y": 0,
     "zoom": 1
+  },
+  "size": {
+    "width": 1600,
+    "height": 900
   },
   "objects": [
     {
       "id": "outer-section",
       "type": "section",
       "label": "Outer section",
-      "title": "Memory pipeline",
-      "tint": "gray",
+      "parentId": null,
       "geometry": {
         "x": 40,
         "y": 40,
@@ -27,14 +26,14 @@
       },
       "style": {
         "shape": "section"
-      }
+      },
+      "title": "Memory pipeline",
+      "tint": "gray"
     },
     {
       "id": "inner-section",
       "type": "section",
       "label": "Inner section",
-      "title": "New memory",
-      "tint": "blue",
       "parentId": "outer-section",
       "geometry": {
         "x": 80,
@@ -44,7 +43,9 @@
       },
       "style": {
         "shape": "section"
-      }
+      },
+      "title": "New memory",
+      "tint": "blue"
     },
     {
       "id": "captured-pill",
@@ -67,7 +68,6 @@
       "type": "code-block",
       "label": "Agent definition",
       "body": "class Agent(BaseModel):\n    name: str\n    # created per session\n    def run(self):\n        return None",
-      "language": "python",
       "parentId": "inner-section",
       "geometry": {
         "x": 100,
@@ -77,14 +77,15 @@
       },
       "style": {
         "shape": "code-block"
-      }
+      },
+      "language": "python"
     },
     {
       "id": "partial-overlap-note",
       "type": "sticky",
       "label": "Partial overlap sticky",
       "body": "Only a corner of this note overlaps outer-section — must not be captured on drag.\n- bullet one\n- bullet two",
-      "author": "Ford",
+      "parentId": null,
       "geometry": {
         "x": 690,
         "y": 480,
@@ -94,13 +95,14 @@
       "style": {
         "tone": "warning",
         "shape": "note"
-      }
+      },
+      "author": "Ford"
     },
     {
       "id": "outside-arrow",
       "type": "arrow-shape",
       "label": "Then",
-      "direction": "right",
+      "parentId": null,
       "geometry": {
         "x": 900,
         "y": 60,
@@ -110,13 +112,14 @@
       "style": {
         "shape": "arrow-shape",
         "paletteToken": "process"
-      }
+      },
+      "direction": "right"
     },
     {
       "id": "outside-arrow-left",
       "type": "arrow-shape",
       "label": "Back",
-      "direction": "left",
+      "parentId": null,
       "geometry": {
         "x": 900,
         "y": 200,
@@ -126,12 +129,14 @@
       "style": {
         "shape": "arrow-shape",
         "paletteToken": "hot"
-      }
+      },
+      "direction": "left"
     },
     {
       "id": "predefined-process-node",
       "type": "predefined-process",
       "label": "New Memory",
+      "parentId": null,
       "geometry": {
         "x": 900,
         "y": 340,
@@ -147,6 +152,7 @@
       "id": "chip-icon-node",
       "type": "chip-icon",
       "label": "Model",
+      "parentId": null,
       "geometry": {
         "x": 1160,
         "y": 60,
@@ -161,6 +167,7 @@
       "id": "restyled-person",
       "type": "person",
       "label": "Interviewee",
+      "parentId": null,
       "geometry": {
         "x": 1160,
         "y": 240,
@@ -177,6 +184,7 @@
       "type": "chat",
       "label": "Live Q&A",
       "body": "Realtime exchange between interviewer and interviewee.",
+      "parentId": null,
       "geometry": {
         "x": 1330,
         "y": 240,
@@ -192,6 +200,7 @@
       "id": "compact-person",
       "type": "person",
       "label": "Compact person",
+      "parentId": null,
       "geometry": {
         "x": 1160,
         "y": 420,
@@ -208,7 +217,7 @@
       "type": "code-block",
       "label": "Config",
       "body": "{\n  \"name\": \"spectre\",\n  \"active\": true,\n  \"deleted\": null\n}",
-      "language": "json",
+      "parentId": null,
       "geometry": {
         "x": 1160,
         "y": 560,
@@ -217,7 +226,8 @@
       },
       "style": {
         "shape": "code-block"
-      }
+      },
+      "language": "json"
     }
   ],
   "connections": [
@@ -234,6 +244,20 @@
       "style": "solid",
       "arrow": "forward",
       "role": "response"
+    },
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "captured-pill",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "outer-section",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward"
     }
-  ]
+  ],
+  "annotations": []
 }

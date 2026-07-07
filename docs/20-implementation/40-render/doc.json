@@ -66,7 +66,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/document.ts",
               "symbol": "InteractiveCanvasDocument"
             },
             "code": true
@@ -185,8 +185,8 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "SectionShape"
+              "path": "packages/canvas/src/objects/section/def.tsx",
+              "symbol": "SectionObjectView"
             },
             "code": true
           }
@@ -364,7 +364,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "resolveObjectColors"
             },
             "code": true
@@ -378,7 +378,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "resolveObjectStrokeWidth"
             },
             "code": true
@@ -392,7 +392,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "resolveSectionColors"
             },
             "code": true
@@ -424,7 +424,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
               "symbol": "CANVAS_BG"
             },
             "code": true
@@ -532,7 +532,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/grid.ts",
               "symbol": "GRID_BASE_STEP_PX"
             },
             "code": true
@@ -621,7 +621,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/grid.ts",
               "symbol": "GRID_MIN_SCREEN_STEP_PX"
             },
             "code": true
@@ -733,7 +733,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "canvasToneStyle"
             },
             "code": true
@@ -783,7 +783,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "paletteTokenStyle"
             },
             "code": true
@@ -797,7 +797,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "resolveObjectColors"
             },
             "code": true
@@ -856,7 +856,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "resolveSectionColors"
             },
             "code": true
@@ -887,7 +887,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
               "symbol": "CANVAS_BG"
             },
             "code": true

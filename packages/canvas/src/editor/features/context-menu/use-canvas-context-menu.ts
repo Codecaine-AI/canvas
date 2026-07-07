@@ -62,7 +62,7 @@ export interface CanvasContextMenuApi {
   pasteFromContextMenu: () => void;
   canPasteFromContextMenu: boolean;
   copyFromContextMenu: () => void;
-  toggleLockFromContextMenu: () => void;
+  setLockFromContextMenu: (mode: "all" | "background" | undefined) => void;
   addContextAnnotation: () => void;
   fitContextObject: () => void;
   captureContextSectionContents: () => void;
@@ -180,7 +180,7 @@ export function useCanvasContextMenu({
    * "Copy" context-menu entry — pairs with "Paste" above using the same
    * clipboard.ts mechanism as the Cmd/Ctrl-C hotkey. Right-clicking an
    * object doesn't necessarily change state.selection (see
-   * toggleLockFromContextMenu, which also reads contextMenu.objectId
+   * setLockFromContextMenu, which also reads contextMenu.objectId
    * directly), so this builds a one-off selection over just the
    * right-clicked object rather than assuming it's already selected.
    */
@@ -195,14 +195,14 @@ export function useCanvasContextMenu({
     setContextMenu(null);
   };
 
-  const toggleLockFromContextMenu = () => {
+  const setLockFromContextMenu = (mode: "all" | "background" | undefined) => {
     if (contextMenu?.kind !== "object") return;
     const object = document.objects.find((item) => item.id === contextMenu.objectId);
     if (!object) return;
     dispatch({
       type: "canvas.updateObject",
       objectId: object.id,
-      patch: { locked: !object.locked },
+      patch: { locked: mode },
     });
     setContextMenu(null);
   };
@@ -261,7 +261,7 @@ export function useCanvasContextMenu({
     pasteFromContextMenu,
     canPasteFromContextMenu,
     copyFromContextMenu,
-    toggleLockFromContextMenu,
+    setLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
     captureContextSectionContents,

@@ -80,7 +80,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome"
+              "path": "packages/canvas/src/editor/components"
             }
           }
         },
@@ -138,7 +138,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/README.md"
+              "path": "packages/canvas/src/editor/components/README.md"
             }
           }
         },
@@ -178,7 +178,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome"
+              "path": "packages/canvas/src/editor/components"
             }
           }
         },
@@ -250,8 +250,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ChromeTooltip.tsx",
-              "symbol": "ChromeTooltip"
+              "path": "packages/canvas/src/ui/Tooltip.tsx",
+              "symbol": "Tooltip"
             }
           }
         },
@@ -274,7 +274,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/dock-icons.tsx"
+              "path": "packages/canvas/src/ui/icons"
             }
           }
         },
@@ -297,8 +297,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
-              "symbol": "FigJamDock"
+              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
             }
           }
         },
@@ -321,7 +321,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/toolbar-icons.tsx"
+              "path": "packages/canvas/src/ui/icons"
             }
           }
         },
@@ -353,8 +353,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/context-toolbar-position.ts",
-              "symbol": "positionContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/position.ts",
+              "symbol": "positionSelectionToolbar"
             }
           }
         },
@@ -386,8 +386,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "ContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
             }
           }
         },
@@ -406,12 +406,7 @@
         {
           "insert": "CONTEXT_TOOLBAR_REGISTRY",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "CONTEXT_TOOLBAR_REGISTRY"
-            }
+            "code": true
           }
         },
         {
@@ -433,7 +428,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
               "symbol": "ColorPalettePopover"
             }
           }
@@ -457,7 +452,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/shape-catalog.tsx"
+              "path": "packages/canvas/src/objects/catalog.ts"
             }
           }
         },
@@ -498,7 +493,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ShapeSearchPopover.tsx",
+              "path": "packages/canvas/src/editor/components/ShapeSearchPopover.tsx",
               "symbol": "ShapeSearchPopover"
             }
           }
@@ -522,7 +517,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
               "symbol": "ShapesPanel"
             }
           }
@@ -546,7 +541,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
               "symbol": "ZoomControls"
             }
           }
@@ -581,8 +576,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
-              "symbol": "FigJamDock"
+              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
             }
           }
         },
@@ -724,8 +719,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "ContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
             }
           }
         },
@@ -792,8 +787,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/context-toolbar-position.ts",
-              "symbol": "positionContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/position.ts",
+              "symbol": "positionSelectionToolbar"
             }
           }
         },
@@ -866,12 +861,7 @@
         {
           "insert": "CONNECTOR_ADD_LABEL_ICON",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "CONNECTOR_ADD_LABEL_ICON"
-            }
+            "code": true
           }
         },
         {
@@ -915,8 +905,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "ContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
             }
           }
         },
@@ -950,7 +940,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
               "symbol": "ColorPalettePopover"
             }
           }
@@ -1075,7 +1065,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ShapeSearchPopover.tsx",
+              "path": "packages/canvas/src/editor/components/ShapeSearchPopover.tsx",
               "symbol": "ShapeSearchPopover"
             }
           }
@@ -1089,7 +1079,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
               "symbol": "ShapesPanel"
             }
           }
@@ -1121,7 +1111,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/shape-catalog.tsx"
+              "path": "packages/canvas/src/objects/catalog.ts"
             }
           }
         },
@@ -1248,7 +1238,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
               "symbol": "ZoomControls"
             }
           }
@@ -1293,7 +1283,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/__tests__"
+              "path": "packages/canvas/src/editor/components/__tests__"
             }
           }
         },

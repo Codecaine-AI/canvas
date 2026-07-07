@@ -27,19 +27,17 @@ export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
  * connections aren't objects, so `objectDefForType` never resolves to it and
  * its `render` is never dispatched (connections draw through
  * render/connectors/*). It exists to carry the connector selection toolbar:
- * control list moved verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY
- * ["connector"] (minus the Icon field). DATA-ONLY since the co-location
- * alignment: the flyout components live in editor/features/selection-toolbar/
- * flyouts/connector-flyouts.tsx (keyed by def kind + action id).
+ * stroke and label-align were dropped as inert controls with no registered
+ * flyout or schema backing. DATA-ONLY since the co-location alignment: the
+ * flyout components live in editor/features/selection-toolbar/flyouts/
+ * connector-flyouts.tsx (keyed by def kind + action id).
  */
 const CONNECTOR_TOOLBAR: ToolbarSpec = {
   controls: [
     { action: "color", label: "Line color", hasFlyout: true },
-    { action: "stroke", label: "Stroke", hasFlyout: true },
     { action: "dash", label: "Line style", hasFlyout: true },
     { action: "routing", label: "Corner style", hasFlyout: true },
     { action: "arrowhead", label: "Arrowhead style", hasFlyout: true },
-    { action: "label-align", label: "Label alignment", hasFlyout: true },
   ],
 };
 

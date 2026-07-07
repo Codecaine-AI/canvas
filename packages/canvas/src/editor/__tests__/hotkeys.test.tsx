@@ -773,7 +773,7 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     }
   });
 
-  it("keeps only one section toolbar popover mounted when switching fill and border", () => {
+  it("keeps only one section toolbar flyout mounted when switching color and border style", () => {
     const restoreRect = stubStageRect();
     try {
       const { container } = render(
@@ -786,22 +786,22 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       selectSection();
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelectorAll("[data-section-tint]").length).toBe(10);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
 
       fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
-      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelectorAll("[data-section-tint]").length).toBe(0);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeTruthy();
 
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      expect(container.querySelectorAll("[data-color-palette-popover]").length).toBe(1);
+      expect(container.querySelectorAll("[data-section-tint]").length).toBe(10);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
     } finally {
       restoreRect();
     }
   });
 
-  it("section fill palette updates style.fill without changing style.stroke", () => {
+  it("section tint pick updates fill and border together, clearing style overrides", () => {
     const restoreRect = stubStageRect();
     try {
       const { container } = render(
@@ -814,16 +814,18 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       const section = selectSection();
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      fireEvent.click(container.querySelector('[data-color="#F24822"]')!);
+      fireEvent.click(container.querySelector('[data-section-tint="green"]')!);
 
-      expect(section.style.background).toBe("#F24822");
-      expect(section.style.borderColor).toBe("#3DADFF");
+      // One pick drives both colors: the green family's tint + chipBorder win
+      // over the fixture's explicit fill/stroke overrides (which are cleared).
+      expect(section.style.background).toBe("#EBFFEE");
+      expect(section.style.borderColor).toBe("#66D575");
     } finally {
       restoreRect();
     }
   });
 
-  it("section border palette updates style.stroke without changing style.fill", () => {
+  it("section border-style flyout sets the stroke style without touching colors", () => {
     const restoreRect = stubStageRect();
     try {
       const { container } = render(
@@ -836,10 +838,11 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       const section = selectSection();
       fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
-      fireEvent.click(container.querySelector('[data-color="#14AE5C"]')!);
+      fireEvent.click(container.querySelector('[data-section-border-style="dashed"]')!);
 
+      expect(section.style.borderStyle).toBe("dashed");
       expect(section.style.background).toBe("#C2E5FF");
-      expect(section.style.borderColor).toBe("#14AE5C");
+      expect(section.style.borderColor).toBe("#3DADFF");
     } finally {
       restoreRect();
     }

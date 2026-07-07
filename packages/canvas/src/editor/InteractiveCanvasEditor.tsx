@@ -189,9 +189,7 @@ export function InteractiveCanvasEditor({
     selectedConnectionId,
     viewport,
     stageRef,
-    controls,
-    setObjectLabelEditId,
-    setObjectLabelEditValue,
+    openObjectLabelEditor,
   });
   const { applyPaletteTokenToSelection } = selectionToolbar;
   const selectionContext = useMemo(
@@ -210,15 +208,20 @@ export function InteractiveCanvasEditor({
   }, [onDocumentChange, state.document]);
 
   // One-shot signal sink for the interaction machine's double-click
-  // label-edit intent — seeds the inline object label editor via the raw
-  // setters with the value the pipeline computed, keeping the pre-extraction
-  // wiring byte-identical.
+  // label-edit intent. Existing objects open through the target-aware
+  // useLabelEditing opener; freshly created objects may not be present in
+  // state.document yet, so that path keeps the pipeline's seed value.
   const handleOpenObjectLabelEditorFromInteraction = useCallback(
     (objectId: string, value: string) => {
+      const existing = state.document.objects.find((object) => object.id === objectId);
+      if (existing) {
+        openObjectLabelEditor(objectId);
+        return;
+      }
       setObjectLabelEditId(objectId);
       setObjectLabelEditValue(value);
     },
-    [setObjectLabelEditId, setObjectLabelEditValue],
+    [openObjectLabelEditor, setObjectLabelEditId, setObjectLabelEditValue, state.document.objects],
   );
 
   // Pointer-interaction / rAF drag pipeline (hit resolution, interaction

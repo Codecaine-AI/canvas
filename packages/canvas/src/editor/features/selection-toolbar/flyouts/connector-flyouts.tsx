@@ -2,6 +2,7 @@
 
 import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
 import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../../../objects/connector/def";
+import { FlyoutMenuButton, FlyoutPanel } from "./FlyoutPanel";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 
 /**
@@ -18,7 +19,7 @@ import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 function ConnectorColorFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {
   if (!selectedConnection) return null;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2">
+    <div className="absolute bottom-full left-0 z-50 mb-2">
       <ColorPalettePopover
         currentColor={selectedConnection.color ?? CONNECTOR_DEFAULT_COLOR}
         swatches={[Object.values(CONNECTOR_COLORS)]}
@@ -38,25 +39,25 @@ function ConnectorColorFlyout({ selectedConnection, dispatch, close }: ToolbarFl
 function ConnectorDashFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {
   if (!selectedConnection) return null;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2 grid gap-1 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-      {(["solid", "dotted"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          role="menuitem"
-          className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-          onClick={() => {
-            dispatch({
-              type: "canvas.updateConnection",
-              connectionId: selectedConnection.id,
-              patch: { style: value },
-            });
-            close();
-          }}
-        >
-          {value}
-        </button>
-      ))}
+    <div className="absolute bottom-full left-0 z-50 mb-2">
+      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+        {(["solid", "dotted"] as const).map((value) => (
+          <FlyoutMenuButton
+            key={value}
+            active={selectedConnection.style === value}
+            onClick={() => {
+              dispatch({
+                type: "canvas.updateConnection",
+                connectionId: selectedConnection.id,
+                patch: { style: value },
+              });
+              close();
+            }}
+          >
+            {capitalize(value)}
+          </FlyoutMenuButton>
+        ))}
+      </FlyoutPanel>
     </div>
   );
 }
@@ -64,25 +65,25 @@ function ConnectorDashFlyout({ selectedConnection, dispatch, close }: ToolbarFly
 function ConnectorRoutingFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {
   if (!selectedConnection) return null;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2 grid gap-1 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-      {(["elbow", "smooth"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          role="menuitem"
-          className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-          onClick={() => {
-            dispatch({
-              type: "canvas.updateConnection",
-              connectionId: selectedConnection.id,
-              patch: { style: value },
-            });
-            close();
-          }}
-        >
-          {value}
-        </button>
-      ))}
+    <div className="absolute bottom-full left-0 z-50 mb-2">
+      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+        {(["elbow", "smooth"] as const).map((value) => (
+          <FlyoutMenuButton
+            key={value}
+            active={selectedConnection.style === value}
+            onClick={() => {
+              dispatch({
+                type: "canvas.updateConnection",
+                connectionId: selectedConnection.id,
+                patch: { style: value },
+              });
+              close();
+            }}
+          >
+            {capitalize(value)}
+          </FlyoutMenuButton>
+        ))}
+      </FlyoutPanel>
     </div>
   );
 }
@@ -90,27 +91,31 @@ function ConnectorRoutingFlyout({ selectedConnection, dispatch, close }: Toolbar
 function ConnectorArrowheadFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {
   if (!selectedConnection) return null;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2 grid gap-1 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-      {(["none", "forward", "back", "both"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          role="menuitem"
-          className="rounded px-2 py-1.5 text-left text-sm capitalize text-white hover:bg-white/10"
-          onClick={() => {
-            dispatch({
-              type: "canvas.updateConnection",
-              connectionId: selectedConnection.id,
-              patch: { arrow: value },
-            });
-            close();
-          }}
-        >
-          {value}
-        </button>
-      ))}
+    <div className="absolute bottom-full left-0 z-50 mb-2">
+      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+        {(["none", "forward", "back", "both"] as const).map((value) => (
+          <FlyoutMenuButton
+            key={value}
+            active={(selectedConnection.arrow ?? "forward") === value}
+            onClick={() => {
+              dispatch({
+                type: "canvas.updateConnection",
+                connectionId: selectedConnection.id,
+                patch: { arrow: value },
+              });
+              close();
+            }}
+          >
+            {capitalize(value)}
+          </FlyoutMenuButton>
+        ))}
+      </FlyoutPanel>
     </div>
   );
+}
+
+function capitalize(value: string): string {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
 
 export const CONNECTOR_FLYOUTS: ToolbarFlyoutTable = {

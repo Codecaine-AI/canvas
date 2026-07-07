@@ -80,11 +80,6 @@ export const personShapeDef: ShapeDef = {
           text-align: center;
           padding-bottom: 10%;
         }
-        .interactive-canvas-object-person:hover,
-        .interactive-canvas-object-person[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
 `,
   catalog: { label: "Person", keywords: ["person", "user", "actor", "people"] },
 };

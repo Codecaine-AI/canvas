@@ -26,8 +26,6 @@ import {
   type ToolbarControlSpec,
 } from "../../../objects/object-def";
 import { nearestPaletteToken } from "../../../objects/palette";
-import { paletteTokenStyle } from "../../../theme";
-import type { CanvasViewportControls } from "../../use-canvas-viewport";
 import { worldToScreen, type ViewportState } from "../../../render/viewport";
 import type {
   CanvasPaletteToken,
@@ -63,6 +61,14 @@ interface ResolvedSelectionToolbar {
 }
 
 const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky"]);
+
+const PALETTE_TOKEN_SECTION_TINT: Record<CanvasPaletteToken, CanvasSectionTint> = {
+  process: "blue",
+  input: "green",
+  hot: "orange",
+  memory: "purple",
+  note: "yellow",
+};
 
 /**
  * Derives the toolbar for the current selection by def resolution (step 5):
@@ -123,14 +129,10 @@ export interface UseSelectionToolbarArgs {
   selectedConnectionId: string | null;
   viewport: ViewportState;
   stageRef: RefObject<HTMLDivElement | null>;
-  /** Viewport controls — the "expand" toolbar action calls controls.fit(). */
-  controls: CanvasViewportControls;
   /**
-   * Raw object-label-editor setters (use-label-editing.ts) — the "rename"
-   * action seeds the inline editor with values computed here.
+   * Target-aware inline text editor opener from useLabelEditing.
    */
-  setObjectLabelEditId: Dispatch<SetStateAction<string | null>>;
-  setObjectLabelEditValue: Dispatch<SetStateAction<string>>;
+  openObjectLabelEditor: (objectId: string) => void;
 }
 
 export interface SelectionToolbarApi {
@@ -152,9 +154,7 @@ export interface SelectionToolbarApi {
   handleSelectionToolbarAction: (action: SelectionToolbarActionId, value?: unknown) => void;
   /** Also wired into the Inspector's "Color" swatches (checkpoint 5, D16). */
   applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
-  applySectionFillToSelection: (fill: string) => void;
-  applySectionStrokeToSelection: (stroke: string) => void;
-  toggleLockForSelection: () => void;
+  setLockForSelection: (mode: "all" | "background" | undefined) => void;
   applyTintToSelection: (tint: CanvasSectionTint) => void;
   applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
   swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
@@ -179,16 +179,14 @@ export function useSelectionToolbar({
   selectedConnectionId,
   viewport,
   stageRef,
-  controls,
-  setObjectLabelEditId,
-  setObjectLabelEditValue,
+  openObjectLabelEditor,
 }: UseSelectionToolbarArgs): SelectionToolbarApi {
   // Which SelectionToolbar flyout (if any) is currently open, tracked by action
   // id since SelectionToolbar's buttons only report `onAction(action)` without
   // exposing their own open/closed state to the parent.
   const [openFlyout, setOpenFlyout] = useState<SelectionToolbarActionId | null>(null);
   const selectionToolbarRef = useRef<HTMLDivElement | null>(null);
-  const [selectionToolbarSize, setSelectionToolbarSize] = useState({ width: 220, height: 29 });
+  const [selectionToolbarSize, setSelectionToolbarSize] = useState({ width: 220, height: 48 });
   // IN SELECTION ORDER (selection.objectIds click order), not document order:
   // step 5's multi-select capability intersection makes the FIRST SELECTED
   // object the order donor, and its def donates the flyout table.
@@ -243,19 +241,21 @@ export function useSelectionToolbar({
    * Inspector "Color" swatches (checkpoint 5, D16) apply to every selected
    * object, not just the primary one — canvas.updateObject only patches a
    * single objectId, so dispatch once per id. Its style merge
-   * (`{ ...object.style, ...patch.style }`) only overwrites `paletteToken`,
-   * leaving `shape`/`tone` untouched.
+   * (`{ ...object.style, ...patch.style }`) overwrites the keys being changed
+   * while leaving `shape`/`tone` untouched.
    */
   const applyPaletteTokenToSelection = useCallback(
     (token: CanvasPaletteToken | undefined) => {
-      const tokenStyle = token ? paletteTokenStyle(token) : undefined;
       for (const objectId of selectedIds) {
         const object = document.objects.find((item) => item.id === objectId);
         if (object?.type === "section") {
           dispatch({
             type: "canvas.updateObject",
             objectId,
-            patch: { style: { fill: tokenStyle?.fill, stroke: tokenStyle?.border } },
+            patch: {
+              tint: token ? PALETTE_TOKEN_SECTION_TINT[token] : "gray",
+              style: { fill: undefined, stroke: undefined },
+            },
           });
           continue;
         }
@@ -267,34 +267,6 @@ export function useSelectionToolbar({
       }
     },
     [dispatch, selectedIds, document.objects],
-  );
-
-  const applySectionFillToSelection = useCallback(
-    (fill: string) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { style: { fill } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
-  const applySectionStrokeToSelection = useCallback(
-    (stroke: string) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { style: { stroke } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
   );
 
   // Measure the SelectionToolbar's actual rendered size so positioning is exact
@@ -323,23 +295,14 @@ export function useSelectionToolbar({
   }, [selectionToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
 
   const primarySelectedObject = selectedObjectsForToolbar[0];
-  const primaryDefKind = primarySelectedObject
-    ? objectDefForType(primarySelectedObject.type)?.kind
-    : undefined;
   const selectionToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
 
-  /**
-   * Section lock toggle (Wave 3a scope item 2's "lock" action + scope item
-   * 5's context-menu Lock/Unlock entry) — `locked` is a real schema.ts field
-   * on every object (reserved primarily for sections, "no enforcement yet"),
-   * so this just flips it via the existing canvas.updateObject action.
-   */
-  const toggleLockForSelection = useCallback(() => {
+  const setLockForSelection = useCallback((mode: "all" | "background" | undefined) => {
     for (const object of selectedObjectsForToolbar) {
       dispatch({
         type: "canvas.updateObject",
         objectId: object.id,
-        patch: { locked: !object.locked },
+        patch: { locked: mode },
       });
     }
   }, [dispatch, selectedObjectsForToolbar]);
@@ -359,7 +322,11 @@ export function useSelectionToolbar({
     (tint: CanvasSectionTint) => {
       for (const object of selectedObjectsForToolbar) {
         if (object.type !== "section") continue;
-        dispatch({ type: "canvas.updateObject", objectId: object.id, patch: { tint } });
+        dispatch({
+          type: "canvas.updateObject",
+          objectId: object.id,
+          patch: { tint, style: { fill: undefined, stroke: undefined } },
+        });
       }
     },
     [dispatch, selectedObjectsForToolbar],
@@ -388,14 +355,7 @@ export function useSelectionToolbar({
     [dispatch, primarySelectedObject],
   );
 
-  /**
-   * SelectionToolbar onAction dispatch table (Wave 3a scope item 2). Actions
-   * with a real backing schema field dispatch immediately on click (bold-ish
-   * toggle actions have none to toggle, so those are effectively disabled —
-   * see the report's disabled-with-tooltip list); actions that need a value
-   * picker (color/tint/dash/routing/arrowhead/shape-swap/lock) instead toggle
-   * a flyout, rendered just below the toolbar in the overlay.
-   */
+  /** SelectionToolbar onAction dispatch table. */
   const handleSelectionToolbarAction = useCallback(
     (action: SelectionToolbarActionId, value?: unknown) => {
       if (action === "section-border-style" && (value === "solid" || value === "dashed" || value === "none")) {
@@ -403,20 +363,11 @@ export function useSelectionToolbar({
         return;
       }
       if (action === "color" && typeof value === "string") {
-        if (primaryDefKind === "section") {
-          applySectionFillToSelection(value);
-        } else {
-          applyPaletteTokenToSelection(nearestPaletteToken(value));
-        }
+        applyPaletteTokenToSelection(nearestPaletteToken(value));
         return;
       }
-      if (action === "rename" && primarySelectedObject) {
-        setObjectLabelEditId(primarySelectedObject.id);
-        setObjectLabelEditValue(
-          primarySelectedObject.type === "section"
-            ? (primarySelectedObject.title ?? primarySelectedObject.label)
-            : primarySelectedObject.label,
-        );
+      if ((action === "rename" || action === "text") && primarySelectedObject) {
+        openObjectLabelEditor(primarySelectedObject.id);
         return;
       }
       if (action === "visibility") {
@@ -425,38 +376,19 @@ export function useSelectionToolbar({
       }
       // An action opens a flyout iff the editor-side flyout registry
       // (./flyouts) declares a component for the resolved def kind + action
-      // id (replaces the static FLYOUT_ACTIONS set) — e.g.
-      // section: color/section-border-style/tint/lock; connector: color/dash/
-      // routing/arrowhead; shape: shape-swap/color; sticky/text: color.
+      // id.
       if (selectionToolbarFlyouts && action in selectionToolbarFlyouts) {
         setOpenFlyout((current) => (current === action ? null : action));
         return;
       }
-      if (action === "expand") {
-        controls.fit();
-        return;
-      }
-      // align/font-style/size/bold/strikethrough/link/bullets/paragraph-align/
-      // list/frame/visibility/label-align/add-label: no supporting schema
-      // field exists yet (object/connection style is limited to
-      // paletteToken/tone + shape, and connections to style/arrow) — these
-      // render but are no-ops beyond SelectionToolbar's own local
-      // aria-expanded toggle. Documented in the wave-3a report as
-      // disabled-with-tooltip (SelectionToolbar doesn't support a disabled prop
-      // per-control today, so the tooltip still shows via Tooltip's
-      // hover label; clicking is inert).
     },
     [
       applyPaletteTokenToSelection,
-      applySectionFillToSelection,
       applySectionBorderStyleToSelection,
-      controls,
       selectionToolbarFlyouts,
-      primaryDefKind,
       primarySelectedObject,
       toggleSectionContentHiddenForSelection,
-      setObjectLabelEditId,
-      setObjectLabelEditValue,
+      openObjectLabelEditor,
     ],
   );
 
@@ -473,9 +405,7 @@ export function useSelectionToolbar({
     primarySelectedObject,
     handleSelectionToolbarAction,
     applyPaletteTokenToSelection,
-    applySectionFillToSelection,
-    applySectionStrokeToSelection,
-    toggleLockForSelection,
+    setLockForSelection,
     applyTintToSelection,
     applySectionBorderStyleToSelection,
     swapSelectedShape,

@@ -422,7 +422,7 @@ describe("interaction: drag/move gesture", () => {
         type: "section",
         title: "A",
         tint: "gray",
-        locked: true,
+        locked: "background",
         geometry: { x: 0, y: 0, width: 200, height: 120 },
       }),
     ]);
@@ -434,6 +434,60 @@ describe("interaction: drag/move gesture", () => {
 
     expect(result.state.kind).toBe("idle");
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+  });
+
+  it("does not move a child of an all-locked section", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "section-a",
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: "all",
+        geometry: { x: 0, y: 0, width: 240, height: 180 },
+      }),
+      makeObject({
+        id: "child",
+        parentId: "section-a",
+        geometry: { x: 50, y: 50, width: 80, height: 60 },
+      }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["child"] } });
+    const hit = { kind: "object" as const, objectId: "child" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 60, y: 60 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 100, y: 90 }, hit), ctx);
+
+    expect(result.state.kind).toBe("idle");
+    expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+  });
+
+  it("moves a child of a background-locked section", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "section-a",
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: "background",
+        geometry: { x: 0, y: 0, width: 240, height: 180 },
+      }),
+      makeObject({
+        id: "child",
+        parentId: "section-a",
+        geometry: { x: 50, y: 50, width: 80, height: 60 },
+      }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["child"] } });
+    const hit = { kind: "object" as const, objectId: "child" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 60, y: 60 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 100, y: 90 }, hit), ctx);
+
+    expect(result.state.kind).toBe("move");
+    const geometryActions = updateGeometriesActions(result.dispatch);
+    expect(geometryActions).toHaveLength(1);
+    expect(geometryActions[0]!.geometries.child).toEqual({ x: 90, y: 80, width: 80, height: 60 });
   });
 
   it("restores start geometries (recordHistory: false) when the gesture is cancelled via Escape", () => {
@@ -659,7 +713,7 @@ describe("interaction: resize gesture via stepInteraction", () => {
         type: "section",
         title: "A",
         tint: "gray",
-        locked: true,
+        locked: "background",
         geometry: { x: 100, y: 100, width: 200, height: 150 },
       }),
     ]);
@@ -667,6 +721,31 @@ describe("interaction: resize gesture via stepInteraction", () => {
     const handleHit = { kind: "handle" as const, objectId: "section-a", handle: "se" as ResizeHandle };
 
     const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 250 }, handleHit), ctx);
+
+    expect(result.state.kind).toBe("idle");
+    expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+  });
+
+  it("does not resize a child of an all-locked section", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "section-a",
+        type: "section",
+        title: "A",
+        tint: "gray",
+        locked: "all",
+        geometry: { x: 0, y: 0, width: 260, height: 220 },
+      }),
+      makeObject({
+        id: "child",
+        parentId: "section-a",
+        geometry: { x: 50, y: 50, width: 100, height: 80 },
+      }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["child"] } });
+    const handleHit = { kind: "handle" as const, objectId: "child", handle: "se" as ResizeHandle };
+
+    const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 150, y: 130 }, handleHit), ctx);
 
     expect(result.state.kind).toBe("idle");
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);

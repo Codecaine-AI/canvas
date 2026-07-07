@@ -84,11 +84,6 @@ export const chipIconShapeDef: ShapeDef = {
           text-align: center;
           padding-bottom: 10%;
         }
-        .interactive-canvas-object-chip-icon:hover,
-        .interactive-canvas-object-chip-icon[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
 `,
   catalog: { label: "Chip", keywords: ["chip", "cpu", "processor", "microchip"] },
 };

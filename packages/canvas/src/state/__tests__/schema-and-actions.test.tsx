@@ -477,7 +477,8 @@ describe("interactive canvas schema and actions", () => {
       expect(screen.getByRole("menu", { name: "Canvas context menu" })).toBeTruthy();
       fireEvent.click(screen.getByRole("menuitem", { name: "Add sticky" }));
       expect(screen.queryByRole("menu", { name: "Canvas context menu" })).toBeNull();
-      expect(screen.getAllByText("Sticky").length).toBeGreaterThan(0);
+      const sticky = screen.getByRole("button", { name: "Sticky" });
+      expect(sticky.querySelector(".interactive-canvas-object-label")).toBeNull();
 
       const object = screen.getByRole("button", { name: /Agent summarizes/i });
       fireEvent.contextMenu(object, {

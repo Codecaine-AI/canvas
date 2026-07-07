@@ -40,18 +40,20 @@ function StickyObjectView(props: ObjectRenderProps) {
       onObjectSelect={props.onObjectSelect}
       onObjectContextMenu={props.onObjectContextMenu}
     >
-      {!hideLabel && <span className="interactive-canvas-object-label">{object.label}</span>}
-      <span className="interactive-canvas-object-body interactive-canvas-sticky-body">
-        {bodyLines.map((line, index) => {
-          const isBullet = line.startsWith("- ");
-          return (
-            // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
-            <span key={index} className="interactive-canvas-sticky-line" data-bullet={isBullet ? "true" : undefined}>
-              {isBullet ? line.slice(2) : line}
-            </span>
-          );
-        })}
-      </span>
+      {!hideLabel && (
+        // hideLabel means this object's inline editor is open — for sticky, the editor replaces the body.
+        <span className="interactive-canvas-object-body interactive-canvas-sticky-body">
+          {bodyLines.map((line, index) => {
+            const isBullet = line.startsWith("- ");
+            return (
+              // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
+              <span key={index} className="interactive-canvas-sticky-line" data-bullet={isBullet ? "true" : undefined}>
+                {isBullet ? line.slice(2) : line}
+              </span>
+            );
+          })}
+        </span>
+      )}
       {showPorts && <EdgePorts object={object} zoom={zoom} />}
     </ObjectButtonChrome>
   );
@@ -106,15 +108,11 @@ export const stickyDef: ObjectDef = {
   hitTest: "solid",
   dragCapture: "none",
   toolbar: {
-    // Control list moved verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY
-    // ["sticky"] (minus the Icon field — the chrome host resolves icons).
+    // Sticky toolbar has one color pick plus a text button for the body editor.
     controls: [
       { action: "color", label: "Sticky color", hasFlyout: true },
-      { action: "font-style", label: "Font style", hasFlyout: true },
-      { action: "size", label: "Text size", hasFlyout: true, text: "Medium" },
-      { action: "bold", label: "Bold" },
-      { action: "bullets", label: "Bullet list" },
+      { action: "text", label: "Edit text" },
     ],
   },
-  labelEditing: { target: "label" },
+  labelEditing: { target: "body" },
 };

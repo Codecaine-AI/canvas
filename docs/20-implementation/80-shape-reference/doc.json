@@ -205,7 +205,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "InteractiveCanvasObjectType"
             }
           }
@@ -353,7 +353,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -450,7 +450,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -573,7 +573,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "shapeForType"
             }
           }
@@ -587,7 +587,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "toneForType"
             }
           }
@@ -601,7 +601,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -624,7 +624,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "TEXT_SIZES_PX"
             }
           }
@@ -725,7 +725,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -881,7 +881,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -895,7 +895,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "shapeForType"
             }
           }
@@ -932,7 +932,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "TEXT_SIZES_PX"
             }
           }
@@ -1033,7 +1033,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1047,7 +1047,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/sticky/def.tsx",
               "symbol": "STICKY_GEOMETRY"
             }
           }
@@ -1070,7 +1070,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/objects.ts",
               "symbol": "InteractiveCanvasObject"
             }
           }
@@ -1084,7 +1084,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/sticky/def.tsx",
               "symbol": "STICKY_GEOMETRY"
             }
           }
@@ -1203,7 +1203,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1217,7 +1217,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "shapeForType"
             }
           }
@@ -1327,7 +1327,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1427,7 +1427,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1441,7 +1441,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
               "symbol": "documentWavyPath"
             }
           }
@@ -1455,7 +1455,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
               "symbol": "DOCUMENT_GEOMETRY"
             }
           }
@@ -1469,7 +1469,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "InteractiveCanvasObjectType"
             }
           }
@@ -1530,7 +1530,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1541,12 +1541,7 @@
         {
           "insert": "ShapeSilhouette",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ShapeSilhouette"
-            }
+            "code": true
           }
         },
         {
@@ -1558,7 +1553,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/misc/person.tsx",
               "symbol": "PERSON_ICON_COLORS"
             }
           }
@@ -1645,7 +1640,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1732,7 +1727,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1746,7 +1741,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/basic/chat.tsx",
               "symbol": "CHAT_ICON_COLORS"
             }
           }
@@ -1842,7 +1837,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1888,7 +1883,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/theme.ts",
               "symbol": "SECTION_FAMILIES"
             }
           }
@@ -2024,7 +2019,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2048,12 +2043,7 @@
         {
           "insert": "SHAPE_CORNER_RADII_PX",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
-              "symbol": "SHAPE_CORNER_RADII_PX"
-            }
+            "code": true
           }
         },
         {
@@ -2162,7 +2152,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "CanvasArrowShapeDirection"
             }
           }
@@ -2185,7 +2175,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2213,7 +2203,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/routing/connection-overlay.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -2299,7 +2289,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2313,7 +2303,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/flowchart/predefined-process.tsx",
               "symbol": "PREDEFINED_PROCESS_GEOMETRY"
             }
           }
@@ -2414,7 +2404,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2473,7 +2463,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/code-block/style.ts",
               "symbol": "CODE_BLOCK"
             }
           }
@@ -2610,7 +2600,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2621,12 +2611,7 @@
         {
           "insert": "ShapeSilhouette",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ShapeSilhouette"
-            }
+            "code": true
           }
         },
         {
@@ -2638,7 +2623,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/misc/chip-icon.tsx",
               "symbol": "CHIP_ICON_COLORS"
             }
           }
@@ -2652,7 +2637,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/objects/shapes/icon/IconShapeBody.tsx",
               "symbol": "ICON_APPROX_SIZE_PX"
             }
           }
@@ -2739,7 +2724,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2797,7 +2782,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "CanvasShapeDirection"
             }
           }
@@ -2811,7 +2796,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2869,7 +2854,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "CanvasShapeDirection"
             }
           }
@@ -2883,7 +2868,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2941,7 +2926,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -2999,7 +2984,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3057,7 +3042,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3115,7 +3100,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3173,7 +3158,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "CanvasShapeDirection"
             }
           }
@@ -3187,7 +3172,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3245,7 +3230,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3303,7 +3288,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3361,7 +3346,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3419,7 +3404,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3477,7 +3462,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3535,7 +3520,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3593,7 +3578,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3651,7 +3636,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3709,7 +3694,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3767,7 +3752,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3825,7 +3810,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -3883,7 +3868,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "CanvasIconGlyph"
             }
           }
@@ -3897,7 +3882,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }

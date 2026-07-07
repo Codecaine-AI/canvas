@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
+import { objectDefForType } from "../../../objects/object-def";
 import type { CanvasAction } from "../../../state/actions";
 import type { CanvasPoint } from "../../../state/geometry";
 import { routeConnection } from "../../../routing/routing";
@@ -37,12 +38,13 @@ export interface LabelEditingApi {
 }
 
 /**
- * Inline label editing (connector labels + object labels/section titles),
+ * Inline label editing (connector labels + object labels/section titles/bodies),
  * extracted verbatim from InteractiveCanvasEditor.tsx. Owns the two editor
  * states and their open/commit/cancel callbacks; the raw setters are exposed
  * because the editor's one-shot interaction signal (overlay.editObjectLabelId)
- * and the SelectionToolbar "rename" action seed the editor with values computed
- * at the call site.
+ * can target a freshly created object before it exists in the rendered
+ * document. Existing objects should open through openObjectLabelEditor so the
+ * ObjectDef labelEditing target controls the seeded field.
  */
 export function useLabelEditing({ document, dispatch }: UseLabelEditingArgs): LabelEditingApi {
   const [labelEditConnectionId, setLabelEditConnectionId] = useState<string | null>(null);
@@ -100,8 +102,15 @@ export function useLabelEditing({ document, dispatch }: UseLabelEditingArgs): La
   const openObjectLabelEditor = useCallback(
     (objectId: string) => {
       const object = document.objects.find((item) => item.id === objectId);
+      const target = object ? objectDefForType(object.type)?.labelEditing.target : undefined;
       setObjectLabelEditId(objectId);
-      setObjectLabelEditValue(object?.type === "section" ? (object.title ?? object.label) : (object?.label ?? ""));
+      setObjectLabelEditValue(
+        target === "body"
+          ? (object?.body ?? "")
+          : target === "section-title"
+            ? (object?.title ?? object?.label ?? "")
+            : (object?.label ?? ""),
+      );
     },
     [document.objects],
   );
@@ -109,13 +118,16 @@ export function useLabelEditing({ document, dispatch }: UseLabelEditingArgs): La
   const commitObjectLabel = useCallback(() => {
     if (!objectLabelEditId) return;
     const target = document.objects.find((object) => object.id === objectLabelEditId);
+    const labelEditingTarget = target ? objectDefForType(target.type)?.labelEditing.target : undefined;
     dispatch({
       type: "canvas.updateObject",
       objectId: objectLabelEditId,
       patch:
-        target?.type === "section"
-          ? { title: objectLabelEditValue.trim() || target.title || target.label, label: objectLabelEditValue.trim() || target.label }
-          : { label: objectLabelEditValue },
+        labelEditingTarget === "body"
+          ? { body: objectLabelEditValue }
+          : labelEditingTarget === "section-title" && target
+            ? { title: objectLabelEditValue.trim() || target.title || target.label, label: objectLabelEditValue.trim() || target.label }
+            : { label: objectLabelEditValue },
     });
     setObjectLabelEditId(null);
     setObjectLabelEditValue("");

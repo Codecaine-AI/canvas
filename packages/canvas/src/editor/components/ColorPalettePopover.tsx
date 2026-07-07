@@ -78,7 +78,6 @@ export type ColorPalettePopoverProps = {
    * ringed current-color swatch is still appended to the last row.
    */
   swatches?: string[][];
-  header?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -135,7 +134,7 @@ function Swatch({
   );
 }
 
-export function ColorPalettePopover({ currentColor, onPick, swatches, header, className, style }: ColorPalettePopoverProps) {
+export function ColorPalettePopover({ currentColor, onPick, swatches, className, style }: ColorPalettePopoverProps) {
   const [row1, row2Base] = PALETTE_POPOVER_SWATCHES;
   // theme/tokens.ts ships row 2 as 9 entries (8 saturated + pink); the
   // catalog's measured layout wants 10 direct swatches + 1 rainbow-current
@@ -164,7 +163,6 @@ export function ColorPalettePopover({ currentColor, onPick, swatches, header, cl
         ...style,
       }}
     >
-      {header}
       {rows.map((row, rowIndex) => (
         <div key={`row-${rowIndex}`} style={{ display: "flex", gap: SWATCH_GAP_PX }} data-swatch-row={rowIndex + 1}>
           {row.map((color, i) => (

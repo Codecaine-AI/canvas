@@ -164,6 +164,12 @@ function isSectionStrokeStyle(value: unknown): value is CanvasSectionStrokeStyle
   return value === "solid" || value === "dashed" || value === "none";
 }
 
+function parseSectionLockMode(value: unknown): InteractiveCanvasObject["locked"] {
+  if (value === "all" || value === "background") return value;
+  if (value === true) return "background";
+  return undefined;
+}
+
 function isArrow(value: unknown): value is CanvasArrowDirection {
   return value === "none" || value === "forward" || value === "back" || value === "both";
 }
@@ -473,7 +479,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         : undefined,
       title,
       tint,
-      locked: typeof rawObject.locked === "boolean" ? rawObject.locked : undefined,
+      locked: parseSectionLockMode(rawObject.locked),
       contentHidden: typeof rawObject.contentHidden === "boolean" ? rawObject.contentHidden : undefined,
       direction,
       language: typeof rawObject.language === "string" ? rawObject.language : undefined,

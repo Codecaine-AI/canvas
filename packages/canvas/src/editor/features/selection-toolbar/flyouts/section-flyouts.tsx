@@ -1,159 +1,169 @@
 "use client";
 
-import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
+import { EDITOR_STYLE } from "../../../components/editor-style";
 import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../../../ui/icons";
 import { resolveSectionColors } from "../../../../theme";
 import type { CanvasSectionTint } from "../../../../state/schema";
+import { FlyoutMenuButton, FlyoutPanel } from "./FlyoutPanel";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 
+const SECTION_TINTS: readonly CanvasSectionTint[] = [
+  "green",
+  "purple",
+  "orange",
+  "yellow",
+  "gray",
+  "white",
+  "pink",
+  "red",
+  "blue",
+  "teal",
+];
+
 /**
- * Section toolbar flyouts, moved verbatim from objects/section/toolbar.tsx
- * (co-location alignment): flyouts are editor interface JSX, resolved by def
- * kind + action id (see ./index.ts). The "tint" flyout has no toolbar control
- * — it is opened via the editor's context menu — but lives here so the flyout
- * table stays complete.
+ * Section toolbar flyouts: editor interface JSX resolved by def kind + action
+ * id (see ./index.ts). Section color is tint-based so one pick updates the
+ * fill and border family together.
  */
 
-/** Section fill palette — the section variant's "color" control. */
-function SectionFillFlyout({ primaryObject, applySectionFillToSelection, close }: ToolbarFlyoutProps) {
+function SectionColorFlyout({ primaryObject, applyTintToSelection, close }: ToolbarFlyoutProps) {
   if (primaryObject?.type !== "section") return null;
+  const currentTint = primaryObject.tint ?? "gray";
   return (
-    <div className="absolute left-0 top-full z-50 mt-2">
-      <ColorPalettePopover
-        currentColor={primaryObject.style?.fill ?? resolveSectionColors(primaryObject.tint).tint}
-        onPick={(color: string) => {
-          applySectionFillToSelection(color);
-          close();
-        }}
-      />
+    <div className="absolute bottom-full left-0 z-50 mb-2">
+      <FlyoutPanel style={{ display: "flex", gap: 10 }}>
+        {SECTION_TINTS.map((tint) => {
+          const colors = resolveSectionColors(tint);
+          const active = currentTint === tint;
+          return (
+            <button
+              key={tint}
+              type="button"
+              aria-label={`Section color ${tint}`}
+              data-section-tint={tint}
+              onClick={() => {
+                applyTintToSelection(tint);
+                close();
+              }}
+              style={{
+                width: EDITOR_STYLE.colorPopoverSwatchPx,
+                height: EDITOR_STYLE.colorPopoverSwatchPx,
+                borderRadius: "50%",
+                border: active ? "none" : "1px solid rgba(255,255,255,0.2)",
+                background: active ? EDITOR_STYLE.rainbowRingGradient : colors.tint,
+                padding: active ? 2 : 0,
+                cursor: "pointer",
+                boxSizing: "border-box",
+              }}
+            >
+              {active ? (
+                <span
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: colors.tint,
+                    boxSizing: "border-box",
+                  }}
+                />
+              ) : null}
+            </button>
+          );
+        })}
+      </FlyoutPanel>
     </div>
   );
 }
 
-/** Border palette + solid/dashed/none border-style header row. */
 function SectionBorderStyleFlyout({
   primaryObject,
-  applySectionStrokeToSelection,
   applySectionBorderStyleToSelection,
   close,
 }: ToolbarFlyoutProps) {
   if (primaryObject?.type !== "section") return null;
+  const currentStyle = primaryObject.style?.strokeStyle ?? "solid";
   return (
-    <div className="absolute left-0 top-full z-50 mt-2">
-      <ColorPalettePopover
-        currentColor={
-          primaryObject.style?.stroke ?? resolveSectionColors(primaryObject.tint).chipBorder ?? "transparent"
-        }
-        onPick={(color: string) => {
-          applySectionStrokeToSelection(color);
-          close();
-        }}
-        header={
-          <div data-toolbar-flyout="section-border" style={{ display: "grid", gap: 12 }}>
-            <div role="menu" aria-label="Border style" style={{ display: "flex", gap: 8 }}>
-              {(
-                [
-                  ["solid", "Solid", StrokeIcon],
-                  ["dashed", "Dashed", DashIcon],
-                  ["none", "None", NoStrokeIcon],
-                ] as const
-              ).map(([value, label, Icon]) => {
-                const active = (primaryObject.style?.strokeStyle ?? "solid") === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    role="menuitem"
-                    aria-label={label}
-                    data-section-border-style={value}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      applySectionBorderStyleToSelection(value);
-                    }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                      height: 30,
-                      padding: "0 10px",
-                      border: "none",
-                      borderRadius: 8,
-                      background: active ? "#8C2EF2" : "rgba(255,255,255,0.08)",
-                      color: "#FFFFFF",
-                      cursor: "pointer",
-                      fontSize: 12,
-                    }}
-                    title={label}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <div style={{ height: 1, background: "rgba(255,255,255,0.14)" }} />
-          </div>
-        }
-      />
+    <div className="absolute bottom-full left-0 z-50 mb-2" data-toolbar-flyout="section-border">
+      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+        {(
+          [
+            ["solid", "Solid", StrokeIcon],
+            ["dashed", "Dashed", DashIcon],
+            ["none", "None", NoStrokeIcon],
+          ] as const
+        ).map(([value, label, Icon]) => (
+          <FlyoutMenuButton
+            key={value}
+            active={currentStyle === value}
+            aria-label={label}
+            data-section-border-style={value}
+            leadingIcon={<Icon className="h-5 w-5" />}
+            onClick={() => {
+              applySectionBorderStyleToSelection(value);
+              close();
+            }}
+            style={{ width: "100%" }}
+          >
+            {label}
+          </FlyoutMenuButton>
+        ))}
+      </FlyoutPanel>
     </div>
   );
 }
 
-/** The 10-chip section tint row (context-menu-opened; no toolbar control). */
-function SectionTintFlyout({ applyTintToSelection, close }: ToolbarFlyoutProps) {
+function SectionLockFlyout({ primaryObject, setLockForSelection, close }: ToolbarFlyoutProps) {
+  const locked = primaryObject?.locked;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2 flex gap-1 rounded-full bg-[#1D1D1D] p-2 shadow-xl">
-      {(
-        [
-          "green", "purple", "orange", "yellow", "gray",
-          "white", "pink", "red", "blue", "teal",
-        ] as CanvasSectionTint[]
-      ).map((tint) => (
-        <button
-          key={tint}
-          type="button"
-          aria-label={`Section color ${tint}`}
-          data-section-tint={tint}
-          className="h-5 w-5 rounded-full border border-white/20"
-          style={{ background: `var(--canvas-section-${tint}, ${tint})` }}
-          onClick={() => {
-            applyTintToSelection(tint);
-            close();
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/** Lock/unlock single-item menu. */
-function SectionLockFlyout({ primaryObject, toggleLockForSelection, close }: ToolbarFlyoutProps) {
-  return (
-    <div className="absolute left-0 top-full z-50 mt-2 rounded-md bg-[#1D1D1D] p-1 shadow-xl">
-      <button
-        type="button"
-        role="menuitem"
-        className="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white hover:bg-white/10"
-        onClick={() => {
-          toggleLockForSelection();
-          close();
-        }}
-      >
-        {primaryObject?.locked ? (
-          <UnlockIcon className="h-4 w-4" />
+    <div className="absolute bottom-full left-0 z-50 mb-2">
+      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+        {locked ? (
+          <FlyoutMenuButton
+            aria-label="Unlock"
+            leadingIcon={<UnlockIcon className="h-5 w-5" />}
+            onClick={() => {
+              setLockForSelection(undefined);
+              close();
+            }}
+            style={{ width: "100%" }}
+          >
+            Unlock
+          </FlyoutMenuButton>
         ) : (
-          <LockIcon className="h-4 w-4" />
+          <>
+            <FlyoutMenuButton
+              aria-label="Lock all"
+              leadingIcon={<LockIcon className="h-5 w-5" />}
+              onClick={() => {
+                setLockForSelection("all");
+                close();
+              }}
+              style={{ width: "100%" }}
+            >
+              Lock all
+            </FlyoutMenuButton>
+            <FlyoutMenuButton
+              aria-label="Lock background only"
+              leadingIcon={<LockIcon className="h-5 w-5" />}
+              onClick={() => {
+                setLockForSelection("background");
+                close();
+              }}
+              style={{ width: "100%" }}
+            >
+              Lock background only
+            </FlyoutMenuButton>
+          </>
         )}
-        {primaryObject?.locked ? "Unlock section" : "Lock section"}
-      </button>
+      </FlyoutPanel>
     </div>
   );
 }
 
 export const SECTION_FLYOUTS: ToolbarFlyoutTable = {
-  color: SectionFillFlyout,
+  color: SectionColorFlyout,
   "section-border-style": SectionBorderStyleFlyout,
-  tint: SectionTintFlyout,
   lock: SectionLockFlyout,
 };

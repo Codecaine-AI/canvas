@@ -218,7 +218,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/document.ts",
               "symbol": "InteractiveCanvasDocument"
             }
           }
@@ -232,7 +232,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/schema.ts",
+              "path": "packages/canvas/src/state/schema/document.ts",
               "symbol": "InteractiveCanvasDocument"
             }
           }
@@ -246,7 +246,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
               "symbol": "reduceInteractiveCanvasState"
             }
           }
@@ -269,7 +269,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
               "symbol": "reduceInteractiveCanvasState"
             }
           }
@@ -283,7 +283,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/geometry.ts"
+              "path": "packages/canvas/src/state/geometry.ts"
             }
           }
         },
@@ -317,7 +317,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts"
+              "path": "packages/canvas/src/render/viewport.ts"
             }
           }
         },
@@ -391,7 +391,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/theme.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -404,7 +404,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx"
             }
           }
         },
@@ -434,7 +434,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome"
+              "path": "packages/canvas/src/editor/components"
             }
           }
         },
@@ -461,7 +461,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
               "symbol": "reduceInteractiveCanvasState"
             }
           }
@@ -559,12 +559,7 @@
         {
           "insert": "SpectreRef",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/spectre-ref.ts",
-              "symbol": "SpectreRef"
-            }
+            "code": true
           }
         },
         {
@@ -573,11 +568,7 @@
         {
           "insert": "spectre-ref.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/model/spectre-ref.ts"
-            }
+            "code": true
           }
         },
         {
@@ -827,7 +818,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/figjam-tokens.ts",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
               "symbol": "CANVAS_BG"
             }
           }

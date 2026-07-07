@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectionToolbar } from "./SelectionToolbar";
+import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
 import type { CanvasAction } from "../../../state/actions";
 import { CONNECTOR_DEFAULT_COLOR } from "../../../objects/connector/def";
 import { paletteTokenStyle, resolveSectionColors } from "../../../theme";
@@ -39,15 +39,40 @@ export function SelectionToolbarLayer({
     primarySelectedObject,
     handleSelectionToolbarAction,
     applyPaletteTokenToSelection,
-    applySectionFillToSelection,
-    applySectionStrokeToSelection,
-    toggleLockForSelection,
+    setLockForSelection,
     applyTintToSelection,
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   } = toolbar;
   if (!selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
   const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
+  const controlState: Partial<Record<SelectionToolbarActionId, ToolbarControlState>> = {};
+  if (primarySelectedObject?.type === "section") {
+    const sectionColors = resolveSectionColors(primarySelectedObject.tint);
+    controlState.color = {
+      color: primarySelectedObject.style?.fill ?? sectionColors.tint,
+    };
+    controlState["section-border-style"] = {
+      variant: primarySelectedObject.style?.strokeStyle ?? "solid",
+      color: primarySelectedObject.style?.stroke ?? sectionColors.chipBorder ?? "transparent",
+    };
+    controlState.visibility = primarySelectedObject.contentHidden
+      ? { variant: "hidden", label: "Show contents" }
+      : { label: "Hide contents" };
+  } else if (primarySelectedObject) {
+    controlState.color = {
+      color: paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent,
+    };
+  } else if (selectedConnection) {
+    controlState.color = {
+      color: selectedConnection.color ?? CONNECTOR_DEFAULT_COLOR,
+    };
+  }
+  if (primarySelectedObject) {
+    controlState.lock = primarySelectedObject.locked
+      ? { active: true, label: "Unlock" }
+      : { label: "Lock" };
+  }
   return (
     <div
       ref={selectionToolbarRef}
@@ -58,24 +83,8 @@ export function SelectionToolbarLayer({
         controls={selectionToolbarControls}
         variantLabel={selectionToolbarVariantLabel ?? selectionToolbarVariant}
         onAction={handleSelectionToolbarAction}
-        currentColor={
-          primarySelectedObject?.type === "section"
-            ? primarySelectedObject.style?.fill ?? resolveSectionColors(primarySelectedObject.tint).tint
-            : primarySelectedObject
-              ? paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent
-              : selectedConnection?.color ?? CONNECTOR_DEFAULT_COLOR
-        }
-        currentSectionBorderStyle={
-          primarySelectedObject?.type === "section" ? (primarySelectedObject.style?.strokeStyle ?? "solid") : undefined
-        }
-        currentSectionStroke={
-          primarySelectedObject?.type === "section"
-            ? primarySelectedObject.style?.stroke ?? resolveSectionColors(primarySelectedObject.tint).chipBorder ?? "transparent"
-            : undefined
-        }
+        controlState={controlState}
         activeFlyout={openFlyout}
-        sectionContentHidden={primarySelectedObject?.type === "section" ? primarySelectedObject.contentHidden : undefined}
-        sectionLocked={primarySelectedObject?.type === "section" ? primarySelectedObject.locked : undefined}
       />
       {FlyoutComponent ? (
         <FlyoutComponent
@@ -84,11 +93,9 @@ export function SelectionToolbarLayer({
           dispatch={dispatch}
           close={() => setOpenFlyout(null)}
           applyPaletteTokenToSelection={applyPaletteTokenToSelection}
-          applySectionFillToSelection={applySectionFillToSelection}
-          applySectionStrokeToSelection={applySectionStrokeToSelection}
           applySectionBorderStyleToSelection={applySectionBorderStyleToSelection}
           applyTintToSelection={applyTintToSelection}
-          toggleLockForSelection={toggleLockForSelection}
+          setLockForSelection={setLockForSelection}
           swapSelectedShape={swapSelectedShape}
         />
       ) : null}

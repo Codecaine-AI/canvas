@@ -59,6 +59,9 @@ const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
 // maps-location/pointer), filled for cursor use — the tool icon and the
 // on-canvas cursor are literally the same form. Inlined from the old
 // CHROME.selectCursor (render must not import editor/components/editor-style).
+/** FigJam selection blue — matches SelectionBox and the connector chrome. */
+const SELECTION_BLUE = "#0D99FF";
+
 const SELECT_CURSOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
 const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 3 3, default`;
@@ -393,7 +396,7 @@ export function CanvasStage({
           width: 14px;
           height: 14px;
           border-radius: 999px;
-          background: var(--primary);
+          background: ${SELECTION_BLUE};
           border: 1.5px solid var(--background);
           box-shadow: 0 1px 4px color-mix(in oklab, var(--foreground) 20%, transparent);
           cursor: crosshair;
@@ -403,15 +406,17 @@ export function CanvasStage({
           transition: opacity 120ms ease;
           z-index: 1;
         }
+        /* Ports stay invisible (FigJam-style — no circles on the selection
+           chrome) but remain draggable on the selected object: quick-connect
+           is the only way to start a connector, and the crosshair cursor
+           still advertises it at the edge midpoints. */
         .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
-          opacity: 1;
           pointer-events: auto;
         }
         .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object {
           cursor: inherit;
         }
         .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
-          opacity: 0;
           pointer-events: none;
         }
       ${

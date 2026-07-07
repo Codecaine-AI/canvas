@@ -75,7 +75,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/types.ts",
               "symbol": "CanvasAction"
             }
           }
@@ -169,7 +169,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
               "symbol": "reduceInteractiveCanvasState"
             }
           }
@@ -259,8 +259,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/FigJamDock.tsx",
-              "symbol": "FigJamDock"
+              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
             }
           }
         },
@@ -273,8 +273,8 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ContextToolbar.tsx",
-              "symbol": "ContextToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
             }
           }
         },
@@ -287,7 +287,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ShapesPanel.tsx",
+              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
               "symbol": "ShapesPanel"
             }
           }
@@ -301,7 +301,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ColorPalettePopover.tsx",
+              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
               "symbol": "ColorPalettePopover"
             }
           }
@@ -315,7 +315,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/chrome/ZoomControls.tsx",
+              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
               "symbol": "ZoomControls"
             }
           }
@@ -347,7 +347,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/types.ts",
               "symbol": "CanvasTool"
             }
           }
@@ -428,7 +428,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts",
+              "path": "packages/canvas/src/render/viewport.ts",
               "symbol": "containerViewBounds"
             }
           }
@@ -609,7 +609,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts"
+              "path": "packages/canvas/src/render/viewport.ts"
             }
           }
         },
@@ -622,7 +622,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts",
+              "path": "packages/canvas/src/render/viewport.ts",
               "symbol": "ViewportState"
             }
           }

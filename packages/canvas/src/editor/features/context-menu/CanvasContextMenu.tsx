@@ -33,7 +33,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
     pasteFromContextMenu,
     canPasteFromContextMenu,
     copyFromContextMenu,
-    toggleLockFromContextMenu,
+    setLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
     captureContextSectionContents,
@@ -96,19 +96,38 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
             <CopyIcon className="h-4 w-4 text-muted-foreground" />
             Copy
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-            onClick={toggleLockFromContextMenu}
-          >
-            {contextObject.locked ? (
+          {contextObject.locked ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+              onClick={() => setLockFromContextMenu(undefined)}
+            >
               <UnlockIcon className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <LockIcon className="h-4 w-4 text-muted-foreground" />
-            )}
-            {contextObject.locked ? "Unlock" : "Lock"}
-          </button>
+              Unlock
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                onClick={() => setLockFromContextMenu("all")}
+              >
+                <LockIcon className="h-4 w-4 text-muted-foreground" />
+                Lock all
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                onClick={() => setLockFromContextMenu("background")}
+              >
+                <LockIcon className="h-4 w-4 text-muted-foreground" />
+                Lock background only
+              </button>
+            </>
+          )}
           <div className="my-1 border-t border-border/60" />
           <button
             type="button"

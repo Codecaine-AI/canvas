@@ -69,11 +69,6 @@ export const databaseShapeDef: ShapeDef = {
           text-align: center;
           padding-top: 14%;
         }
-        .interactive-canvas-object-database:hover,
-        .interactive-canvas-object-database[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
 `,
   catalog: { label: "Database", keywords: ["database", "storage", "data", "cylinder"] },
 };

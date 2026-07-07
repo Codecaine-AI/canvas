@@ -8,11 +8,11 @@ afterEach(() => {
 });
 
 describe("ShapeSearchPopover geometry", () => {
-  it("renders a dark popover matching the measured ~161px width", () => {
+  it("renders a dark popover at the enlarged 232px width", () => {
     const { container } = render(<ShapeSearchPopover />);
     const popover = container.querySelector("[data-shape-search-popover]") as HTMLElement;
     expect(popover).toBeTruthy();
-    expect(popover.style.width).toBe("161px");
+    expect(popover.style.width).toBe("232px");
     expect(popover.style.background).toBe("#1D1D1D");
   });
 
@@ -33,10 +33,10 @@ describe("ShapeSearchPopover search filtering", () => {
   it("filters entries as the user types, case-insensitively", () => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "cpu" } });
+    fireEvent.change(input, { target: { value: "database" } });
     const buttons = container.querySelectorAll("[data-shape-entry]");
     expect(buttons.length).toBe(1);
-    expect(buttons[0].getAttribute("aria-label")?.toLowerCase()).toContain("cpu");
+    expect(buttons[0].getAttribute("aria-label")?.toLowerCase()).toContain("database");
   });
 
   it("shows a no-results message when nothing matches", () => {

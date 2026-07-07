@@ -8,7 +8,6 @@
  * ./types. Consumers import everything through ./interaction (the barrel).
  */
 import type { CanvasAction, CanvasSelection } from "../state/actions";
-import { objectDefForType } from "../objects/object-def";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";
 import { stepFromMarquee } from "./gestures/marquee";
@@ -48,6 +47,30 @@ function toggleSelection(selection: CanvasSelection, objectId: string): CanvasSe
     ? current.filter((id) => id !== objectId)
     : [...current, objectId];
   return { kind: "objects", objectIds: next };
+}
+
+export function isLockedForManipulation(
+  objectId: string,
+  document: InteractionContext["document"],
+): boolean {
+  const objectById = new Map(document.objects.map((object) => [object.id, object]));
+  const object = objectById.get(objectId);
+  if (!object) return false;
+  if (object.locked) return true;
+
+  const visited = new Set<string>([objectId]);
+  let parentId = object.parentId;
+  let remaining = document.objects.length;
+  while (parentId && remaining > 0) {
+    if (visited.has(parentId)) return false;
+    visited.add(parentId);
+    const parent = objectById.get(parentId);
+    if (!parent) return false;
+    if (parent.locked === "all") return true;
+    parentId = parent.parentId;
+    remaining -= 1;
+  }
+  return false;
 }
 
 /**
@@ -111,10 +134,9 @@ function stepFromIdle(
     const hit = event.hit;
     const object = ctx.document.objects.find((candidate) => candidate.id === hit.objectId);
     if (!object) return toIdle();
-    // Locked sections refuse resize (W2). Section-ness is expressed through
-    // the def's handle set — "corners" is the section-only handle behavior —
-    // while `locked` stays a plain object property.
-    if (objectDefForType(object.type)?.handles === "corners" && object.locked) return toIdle();
+    // Section locks are two-mode: "background" blocks the section frame
+    // itself; "all" also blocks descendant objects from resize.
+    if (isLockedForManipulation(object.id, ctx.document)) return toIdle();
     const pending: ResizeGesture = {
       kind: "resize",
       startWorld: event.world,
@@ -319,10 +341,9 @@ function stepFromPressing(
         : [state.hit.objectId];
     if (
       dragObjectIds.some((id) => {
-        const object = ctx.document.objects.find((candidate) => candidate.id === id);
-        // Locked sections refuse drag (W2); `locked` stays a plain object
-        // property.
-        return object && object.type === "section" && object.locked;
+        // "background" blocks the section itself; "all" also blocks
+        // descendants from drag.
+        return isLockedForManipulation(id, ctx.document);
       })
     ) {
       return toIdle();

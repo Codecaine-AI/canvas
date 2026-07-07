@@ -1,7 +1,7 @@
 "use client";
 
 import { createObjectId, sectionDescendantIds, snapGeometry } from "../geometry";
-import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../schema";
+import type { CanvasObjectStyle, InteractiveCanvasConnection, InteractiveCanvasObject } from "../schema";
 import { removeConnection } from "./connections";
 import { defaultGeometryFor, draftPlacedObject, objectTypeLabel, shapeForType } from "./defaults";
 import { nextId, selectedObjectIds } from "./helpers";
@@ -223,7 +223,12 @@ export function handleUpdateObject(
             geometry: action.patch.geometry
               ? snapGeometry(action.patch.geometry)
               : object.geometry,
-            style: action.patch.style ? { ...object.style, ...action.patch.style } : object.style,
+            // undefined in a style patch deletes the key.
+            style: action.patch.style
+              ? (Object.fromEntries(
+                  Object.entries({ ...object.style, ...action.patch.style }).filter(([, value]) => value !== undefined),
+                ) as CanvasObjectStyle)
+              : object.style,
           }
         : object,
     ),

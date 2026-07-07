@@ -20,34 +20,31 @@ afterEach(() => {
 });
 
 describe("SelectionToolbar geometry / styling", () => {
-  it("renders the dark #1D1D1D pill at the measured 29px height with full-pill radius", () => {
+  it("renders the dark #1D1D1D bar at the 48px height with rounded-rect radius", () => {
     const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
     const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
     expect(bar).toBeTruthy();
     expect(bar.style.background).toBe("#1D1D1D");
-    expect(bar.style.height).toBe("29px");
-    expect(bar.style.borderRadius).toBe("14.5px");
+    expect(bar.style.height).toBe("48px");
+    expect(bar.style.borderRadius).toBe("14px");
   });
 });
 
 describe("SelectionToolbar registry-driven control sets", () => {
-  it("shape controls render exactly the 10 measured controls in order", () => {
+  it("shape controls render exactly the 3 measured controls in order", () => {
     const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual([
-      "shape-swap",
-      "color",
-      "align",
-      "font-style",
-      "size",
-      "bold",
-      "strikethrough",
-      "link",
-      "bullets",
-      "paragraph-align",
-    ]);
+    expect(actions).toEqual(["shape-swap", "color", "text"]);
+  });
+
+  it("sticky controls render color and text in registry order", () => {
+    const { container } = render(<SelectionToolbar controls={STICKY_CONTROLS} variantLabel="sticky" />);
+    const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
+      el.getAttribute("data-toolbar-action"),
+    );
+    expect(actions).toEqual(["color", "text"]);
   });
 
   it("section controls render the FigJam v2 controls in order with one divider", () => {
@@ -59,12 +56,12 @@ describe("SelectionToolbar registry-driven control sets", () => {
     expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
-  it("connector controls render exactly the 6 measured controls", () => {
+  it("connector controls render exactly the 4 measured controls", () => {
     const { container } = render(<SelectionToolbar controls={CONNECTOR_CONTROLS} variantLabel="connector" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "stroke", "dash", "routing", "arrowhead", "label-align"]);
+    expect(actions).toEqual(["color", "dash", "routing", "arrowhead"]);
   });
 
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
@@ -93,15 +90,29 @@ describe("SelectionToolbar interaction", () => {
     const { container } = render(
       <SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" onAction={onAction} />,
     );
-    fireEvent.click(container.querySelector('[data-toolbar-action="bold"]')!);
+    fireEvent.click(container.querySelector('[data-toolbar-action="shape-swap"]')!);
     expect(onAction).toHaveBeenCalledTimes(1);
-    expect(onAction.mock.calls[0][0]).toBe("bold");
+    expect(onAction.mock.calls[0][0]).toBe("shape-swap");
+  });
+
+  it("text is a plain Edit text button that fires the text action", () => {
+    const onAction = mock((_action: string, _value?: unknown) => {});
+    const { container } = render(
+      <SelectionToolbar controls={STICKY_CONTROLS} variantLabel="sticky" onAction={onAction} />,
+    );
+    const textButton = container.querySelector('[data-toolbar-action="text"]') as HTMLElement;
+    expect(textButton.getAttribute("aria-label")).toBe("Edit text");
+    expect(textButton.getAttribute("aria-expanded")).toBeNull();
+
+    fireEvent.click(textButton);
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(onAction.mock.calls[0][0]).toBe("text");
   });
 
   it("toggles aria-expanded on flyout controls but not on plain buttons", () => {
-    const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
-    const boldButton = container.querySelector('[data-toolbar-action="bold"]') as HTMLElement;
-    expect(boldButton.getAttribute("aria-expanded")).toBeNull();
+    const { container } = render(<SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" />);
+    const renameButton = container.querySelector('[data-toolbar-action="rename"]') as HTMLElement;
+    expect(renameButton.getAttribute("aria-expanded")).toBeNull();
 
     const colorButton = container.querySelector('[data-toolbar-action="color"]') as HTMLElement;
     expect(colorButton.getAttribute("aria-expanded")).toBe("false");
@@ -121,13 +132,7 @@ describe("SelectionToolbar interaction", () => {
   it("section style controls are editor-owned flyouts", () => {
     const onAction = mock((_action: string, _value?: unknown) => {});
     const { container } = render(
-      <SelectionToolbar
-        controls={SECTION_CONTROLS}
-        variantLabel="section"
-        onAction={onAction}
-        currentColor="#C2E5FF"
-        currentSectionBorderStyle="solid"
-      />,
+      <SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" onAction={onAction} />,
     );
     const fill = container.querySelector('[data-toolbar-action="color"]')!;
     const border = container.querySelector('[data-toolbar-action="section-border-style"]')!;

@@ -104,7 +104,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/types.ts",
               "symbol": "CanvasAction",
               "label": "CanvasAction"
             }
@@ -289,7 +289,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/core.ts",
               "symbol": "stepFromIdle",
               "label": "stepFromIdle"
             }
@@ -304,7 +304,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/geometry.ts",
+              "path": "packages/canvas/src/state/geometry.ts",
               "symbol": "createObjectId",
               "label": "createObjectId"
             }
@@ -347,7 +347,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "PressPending",
               "label": "PressPending"
             }
@@ -362,7 +362,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "DRAG_THRESHOLD",
               "label": "DRAG_THRESHOLD"
             }
@@ -377,7 +377,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/core.ts",
               "symbol": "stepFromPressing",
               "label": "stepFromPressing"
             }
@@ -444,7 +444,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "MoveGesture",
               "label": "MoveGesture"
             }
@@ -459,7 +459,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/move.ts",
               "symbol": "stepFromMove",
               "label": "stepFromMove"
             }
@@ -544,7 +544,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "ResizeGesture",
               "label": "ResizeGesture"
             }
@@ -574,7 +574,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/resize.ts",
               "symbol": "stepFromResize",
               "label": "stepFromResize"
             }
@@ -647,7 +647,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "MarqueeGesture",
               "label": "MarqueeGesture"
             }
@@ -662,7 +662,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/marquee.ts",
               "symbol": "stepFromMarquee",
               "label": "stepFromMarquee"
             }
@@ -696,7 +696,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "PlaceGesture",
               "label": "PlaceGesture"
             }
@@ -711,7 +711,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/place.ts",
               "symbol": "stepFromPlace",
               "label": "stepFromPlace"
             }
@@ -726,7 +726,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/place.ts",
               "symbol": "MIN_PLACE_DRAG_SIZE",
               "label": "MIN_PLACE_DRAG_SIZE"
             }
@@ -778,7 +778,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "ConnectorEndpointDragGesture",
               "label": "ConnectorEndpointDragGesture"
             }
@@ -793,7 +793,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "ConnectorCreateGesture",
               "label": "ConnectorCreateGesture"
             }
@@ -808,7 +808,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/gestures/connectors.ts",
               "symbol": "connectorCandidateAt",
               "label": "connectorCandidateAt"
             }
@@ -1122,7 +1122,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/types.ts",
               "symbol": "SNAP_THRESHOLD_SCREEN_PX",
               "label": "SNAP_THRESHOLD_SCREEN_PX"
             }
@@ -1428,7 +1428,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/model/actions.ts",
+              "path": "packages/canvas/src/state/actions/objects.ts",
               "symbol": "canvas.addObjects",
               "label": "canvas.addObjects"
             }
@@ -1511,7 +1511,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts",
+              "path": "packages/canvas/src/render/viewport.ts",
               "symbol": "panBy",
               "label": "panBy"
             }
@@ -1526,7 +1526,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/viewport.ts",
+              "path": "packages/canvas/src/render/viewport.ts",
               "label": "viewport.ts"
             }
           }

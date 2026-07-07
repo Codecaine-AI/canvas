@@ -83,11 +83,6 @@ export const chatShapeDef: ShapeDef = {
           text-align: center;
           padding-bottom: 10%;
         }
-        .interactive-canvas-object-chat:hover,
-        .interactive-canvas-object-chat[data-selected="true"] {
-          outline: 2px solid var(--primary);
-          outline-offset: 1px;
-        }
 `,
   catalog: { label: "Chat", keywords: ["chat", "speech", "bubble", "message"] },
 };

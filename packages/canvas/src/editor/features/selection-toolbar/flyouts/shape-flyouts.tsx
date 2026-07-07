@@ -26,13 +26,9 @@ export function PaletteColorFlyout({
 }: ToolbarFlyoutProps) {
   if (!primaryObject) return null;
   return (
-    <div className="absolute left-0 top-full z-50 mt-2">
+    <div className="absolute bottom-full left-0 z-50 mb-2">
       <ColorPalettePopover
-        currentColor={
-          primaryObject.type === "section"
-            ? primaryObject.style?.fill ?? paletteTokenStyle("note").fill
-            : paletteTokenStyle(primaryObject.style?.paletteToken ?? "note").accent
-        }
+        currentColor={paletteTokenStyle(primaryObject.style?.paletteToken ?? "note").accent}
         onPick={(color: string) => {
           applyPaletteTokenToSelection(nearestPaletteToken(color));
           close();
@@ -44,7 +40,7 @@ export function PaletteColorFlyout({
 
 function ShapeSwapFlyout({ swapSelectedShape }: ToolbarFlyoutProps) {
   return (
-    <div className="absolute left-0 top-full z-50 mt-2">
+    <div className="absolute bottom-full left-0 z-50 mb-2">
       <ShapeSearchPopover onPick={swapSelectedShape} />
     </div>
   );

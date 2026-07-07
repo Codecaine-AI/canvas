@@ -238,6 +238,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
       const author = sticky!.querySelector(".interactive-canvas-sticky-author");
       expect(author).toBeNull();
+      expect(sticky!.querySelector(".interactive-canvas-object-label")).toBeNull();
 
       const bulletLines = sticky!.querySelectorAll('.interactive-canvas-sticky-line[data-bullet="true"]');
       expect(bulletLines.length).toBe(2);
@@ -302,15 +303,20 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("gives a selected non-section object corner-only handles (FigJam-style, no edge midpoints)", () => {
+  it("gives a selected non-section object corner squares plus invisible full-edge resize strips", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
         <InteractiveCanvasViewer document={v2FlowElementsDocument} selectedObjectIds={["captured-pill"]} />,
       );
       const handles = Array.from(container.querySelectorAll("[data-canvas-handle]"));
       const handleNames = handles.map((node) => node.getAttribute("data-canvas-handle"));
-      expect(handleNames).not.toContain("n");
-      expect(handleNames.sort()).toEqual(["ne", "nw", "se", "sw"]);
+      expect(handleNames.sort()).toEqual(["e", "n", "ne", "nw", "s", "se", "sw", "w"]);
+      // Edge handles are grab strips, not visible squares: no background/border.
+      const north = handles.find((node) => node.getAttribute("data-canvas-handle") === "n") as HTMLElement;
+      expect(north.style.background).toBe("");
+      expect(north.style.border).toBe("");
+      const corner = handles.find((node) => node.getAttribute("data-canvas-handle") === "nw") as HTMLElement;
+      expect(corner.style.background).not.toBe("");
     });
   });
 });

@@ -7,12 +7,12 @@ afterEach(() => {
 });
 
 describe("ColorPalettePopover geometry", () => {
-  it("renders a dark panel with pill-rounded corners", () => {
+  it("renders a dark panel with the shared 16px flyout radius", () => {
     const { container } = render(<ColorPalettePopover currentColor="#F24822" />);
     const panel = container.querySelector("[data-color-palette-popover]") as HTMLElement;
     expect(panel).toBeTruthy();
     expect(panel.style.background).toBe("#1D1D1D");
-    expect(parseFloat(panel.style.borderRadius)).toBeGreaterThanOrEqual(20);
+    expect(parseFloat(panel.style.borderRadius)).toBe(16);
   });
 
   it("renders exactly 2 rows of 11 swatches each (22 total)", () => {

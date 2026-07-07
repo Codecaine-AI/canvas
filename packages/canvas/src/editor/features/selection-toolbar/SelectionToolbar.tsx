@@ -7,26 +7,17 @@ import type { ToolbarControlSpec } from "../../../objects/object-def";
 import { EDITOR_STYLE } from "../../components/editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
-  AlignIcon,
   ArrowRightIcon,
-  BoldIcon,
-  BulletsIcon,
   ChevronDownIcon,
   ColorSwatchIcon,
   DashIcon,
   EyeIcon,
   EyeOffIcon,
-  FontStyleIcon,
-  LabelAlignIcon,
-  LinkIcon,
   LockIcon,
   NoStrokeIcon,
-  ParagraphAlignIcon,
   RenameIcon,
   RoutingIcon,
   ShapeSwapIcon,
-  SizeIcon,
-  StrikethroughIcon,
   StrokeIcon,
   TypeIcon,
 } from "../../../ui/icons";
@@ -35,11 +26,10 @@ import {
  * SelectionToolbar — the dark floating pill shown above a selection.
  *
  * Ground truth: board-design-reference/analysis/figjam-chrome-catalog.md
- * section 2 (control sets per selection type, measured via fj-007/fj-012/
- * fj-030 etc.) + figjam-style-tokens.json `chrome` key (historically named
- * "contextToolbarBg" there, #1D1D1D). Height 29-30px matches the catalog's
- * dark-pill family (same family as the color popover, ~28-30px radius scaled
- * to pill height).
+ * section 2 (selection-specific control sets) + figjam-style-tokens.json
+ * `chrome` key (historically named "contextToolbarBg" there, #1D1D1D).
+ * The host is FigJam-scale chrome: a 48px dark rounded rectangle with 36px
+ * controls and action-specific presentation supplied by the layer.
  *
  * Since RESTRUCTURE.md step 5 this is a DUMB HOST: callers pass the icon-free
  * `controls` spec list resolved from the object registry (objects/ defs are
@@ -52,36 +42,23 @@ import {
  */
 
 export type SelectionToolbarActionId =
-  // shape-swap / connector routing etc.
   | "shape-swap"
   | "color"
-  | "align"
-  | "font-style"
-  | "size"
-  | "bold"
-  | "strikethrough"
-  | "link"
-  | "bullets"
-  | "paragraph-align"
-  // section
-  | "tint"
+  | "text"
   | "section-border-style"
   | "rename"
   | "visibility"
   | "lock"
-  | "expand"
-  // connector
-  | "stroke"
   | "dash"
   | "routing"
-  | "arrowhead"
-  | "label-align"
-  | "add-label";
+  | "arrowhead";
+
+type Icon = (props: { className?: string; color?: string }) => React.JSX.Element;
 
 export type SelectionToolbarControl = {
   action: SelectionToolbarActionId;
   label: string;
-  Icon: (props: { className?: string; color?: string }) => React.JSX.Element;
+  Icon: Icon;
   /** Whether this control opens a flyout (renders a chevron affordance). */
   hasFlyout?: boolean;
   /** Rendered as literal text instead of an icon (e.g. "Medium", "B"). */
@@ -90,7 +67,16 @@ export type SelectionToolbarControl = {
   dividerAfter?: boolean;
 };
 
-export type SectionBorderStyleValue = "solid" | "dashed" | "none";
+export type ToolbarControlState = {
+  /** Highlighted control state (for example, locked). */
+  active?: boolean;
+  /** "color" action swatch color; other actions use it as icon color. */
+  color?: string;
+  /** Per-action icon variant key resolved through ACTION_ICON_VARIANTS. */
+  variant?: string;
+  /** Tooltip and aria-label override. */
+  label?: string;
+};
 
 /**
  * Icon resolution for registry-driven (icon-free) control specs: each action
@@ -101,24 +87,19 @@ export type SectionBorderStyleValue = "solid" | "dashed" | "none";
 const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
   "shape-swap": ShapeSwapIcon,
   color: ColorSwatchIcon,
-  align: AlignIcon,
-  "font-style": FontStyleIcon,
-  size: SizeIcon,
-  bold: BoldIcon,
-  strikethrough: StrikethroughIcon,
-  link: LinkIcon,
-  bullets: BulletsIcon,
-  "paragraph-align": ParagraphAlignIcon,
+  text: TypeIcon,
   "section-border-style": StrokeIcon,
   rename: RenameIcon,
   visibility: EyeIcon,
   lock: LockIcon,
-  stroke: StrokeIcon,
   dash: DashIcon,
   routing: RoutingIcon,
   arrowhead: ArrowRightIcon,
-  "label-align": LabelAlignIcon,
-  "add-label": TypeIcon,
+};
+
+const ACTION_ICON_VARIANTS: Partial<Record<SelectionToolbarActionId, Record<string, Icon>>> = {
+  "section-border-style": { solid: StrokeIcon, dashed: DashIcon, none: NoStrokeIcon },
+  visibility: { hidden: EyeOffIcon },
 };
 
 /** Fallback for out-of-vocabulary action ids in a registry-supplied spec. */
@@ -135,57 +116,34 @@ export type SelectionToolbarProps = {
   /** Feeds `data-variant` and the toolbar's aria label. */
   variantLabel?: string;
   onAction?: (action: SelectionToolbarActionId, value?: unknown) => void;
-  /** Optional style overrides for positioning; consumer supplies via wrapper. Height is fixed to the measured 29px per spec. */
+  /** Optional style overrides for positioning; consumer supplies via wrapper. */
   style?: React.CSSProperties;
   className?: string;
-  currentColor?: string;
-  currentSectionStroke?: string;
-  currentSectionBorderStyle?: SectionBorderStyleValue;
+  controlState?: Readonly<Partial<Record<SelectionToolbarActionId, ToolbarControlState>>>;
   activeFlyout?: SelectionToolbarActionId | null;
-  sectionContentHidden?: boolean;
-  sectionLocked?: boolean;
 };
 
-const TOOLBAR_HEIGHT_PX = 29;
+const TOOLBAR_HEIGHT_PX = EDITOR_STYLE.selectionToolbarHeightPx;
 const TOOLBAR_BG = EDITOR_STYLE.selectionToolbarBg; // #1D1D1D
 
 function ToolbarButton({
   control,
   onAction,
-  currentColor,
-  currentSectionStroke,
-  currentSectionBorderStyle,
+  controlState,
   activeFlyout,
-  sectionContentHidden,
-  sectionLocked,
 }: {
   control: SelectionToolbarControl;
   onAction?: (action: SelectionToolbarActionId, value?: unknown) => void;
-  currentColor?: string;
-  currentSectionStroke?: string;
-  currentSectionBorderStyle?: SectionBorderStyleValue;
+  controlState?: Readonly<Partial<Record<SelectionToolbarActionId, ToolbarControlState>>>;
   activeFlyout?: SelectionToolbarActionId | null;
-  sectionContentHidden?: boolean;
-  sectionLocked?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
   const { Icon, action, hasFlyout, text } = control;
-  const label =
-    action === "visibility"
-      ? sectionContentHidden ? "Show contents" : "Hide contents"
-      : action === "lock"
-        ? sectionLocked ? "Unlock" : "Lock"
-        : control.label;
+  const state = controlState?.[action];
+  const label = state?.label ?? control.label;
   const clearHover = () => setHovered(false);
-  const BorderIcon =
-    currentSectionBorderStyle === "dashed" ? DashIcon : currentSectionBorderStyle === "none" ? NoStrokeIcon : StrokeIcon;
-  const EffectiveIcon =
-    action === "section-border-style"
-      ? BorderIcon
-      : action === "visibility" && sectionContentHidden
-        ? EyeOffIcon
-        : Icon;
+  const EffectiveIcon = (state?.variant ? ACTION_ICON_VARIANTS[action]?.[state.variant] : undefined) ?? Icon;
   const expanded = activeFlyout !== undefined ? activeFlyout === action : open;
   return (
     <div style={{ position: "relative", display: "inline-flex" }}>
@@ -208,17 +166,16 @@ function ToolbarButton({
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: 4,
-          height: TOOLBAR_HEIGHT_PX - 6,
-          padding: "0 6px",
-          borderRadius: 6,
+          gap: EDITOR_STYLE.selectionToolbarGapPx,
+          height: EDITOR_STYLE.selectionToolbarButtonHeightPx,
+          padding: "0 8px",
+          borderRadius: EDITOR_STYLE.selectionToolbarButtonRadiusPx,
           border: "none",
-          background:
-            action === "lock" && sectionLocked
-              ? EDITOR_STYLE.accentPurple
-              : hovered
-                ? "rgba(255,255,255,0.12)"
-                : "transparent",
+          background: state?.active
+            ? EDITOR_STYLE.accentPurple
+            : hovered
+              ? "rgba(255,255,255,0.12)"
+              : "transparent",
           color: "#FFFFFF",
           cursor: "pointer",
         }}
@@ -231,15 +188,15 @@ function ToolbarButton({
               height: EDITOR_STYLE.selectionToolbarSwatchPx,
             }}
           >
-            <ColorSwatchIcon color={currentColor} style={{ width: "100%", height: "100%" }} />
+            <ColorSwatchIcon color={state?.color} style={{ width: "100%", height: "100%" }} />
           </span>
         ) : (
-          <span style={{ color: action === "section-border-style" ? currentSectionStroke : undefined }}>
-            <EffectiveIcon className="h-4 w-4" />
+          <span style={{ color: state?.color }}>
+            <EffectiveIcon className="h-5 w-5" />
           </span>
         )}
-        {text ? <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>{text}</span> : null}
-        {hasFlyout ? <ChevronDownIcon className="h-2.5 w-2.5" /> : null}
+        {text ? <span style={{ fontSize: 13, whiteSpace: "nowrap" }}>{text}</span> : null}
+        {hasFlyout ? <ChevronDownIcon className="h-3 w-3" /> : null}
       </button>
       <Tooltip label={label} visible={hovered} placement="top" />
     </div>
@@ -252,12 +209,8 @@ function SelectionToolbarComponent({
   onAction,
   style,
   className,
-  currentColor,
-  currentSectionStroke,
-  currentSectionBorderStyle,
+  controlState,
   activeFlyout,
-  sectionContentHidden,
-  sectionLocked,
 }: SelectionToolbarProps) {
   const controls: readonly SelectionToolbarControl[] = controlSpecs.map((spec) => ({
     action: spec.action as SelectionToolbarActionId,
@@ -280,10 +233,10 @@ function SelectionToolbarComponent({
         display: "inline-flex",
         alignItems: "center",
         height: TOOLBAR_HEIGHT_PX,
-        borderRadius: TOOLBAR_HEIGHT_PX / 2,
+        borderRadius: EDITOR_STYLE.selectionToolbarRadiusPx,
         background: TOOLBAR_BG,
-        padding: "0 6px",
-        gap: 2,
+        padding: `0 ${EDITOR_STYLE.selectionToolbarPaddingXPx}px`,
+        gap: EDITOR_STYLE.selectionToolbarGapPx,
         boxSizing: "border-box",
         ...style,
       }}
@@ -293,21 +246,17 @@ function SelectionToolbarComponent({
           <ToolbarButton
             control={control}
             onAction={onAction}
-            currentColor={currentColor}
-            currentSectionStroke={currentSectionStroke}
-            currentSectionBorderStyle={currentSectionBorderStyle}
+            controlState={controlState}
             activeFlyout={activeFlyout}
-            sectionContentHidden={sectionContentHidden}
-            sectionLocked={sectionLocked}
           />
           {control.dividerAfter && i < controls.length - 1 ? (
             <span
               data-divider=""
               style={{
                 width: 1,
-                height: 16,
+                height: 24,
                 background: "rgba(255,255,255,0.2)",
-                margin: "0 4px",
+                margin: "0 6px",
               }}
             />
           ) : null}
