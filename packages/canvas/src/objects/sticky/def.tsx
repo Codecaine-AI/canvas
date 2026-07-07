@@ -3,7 +3,6 @@
 import { STICKY_GEOMETRY } from "../../theme/tokens";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
-import { PaletteColorFlyout } from "../shapes/toolbar";
 
 /**
  * FigJam sticky note (W2 upgrade) — the generic button chrome plus sticky-
@@ -114,7 +113,6 @@ export const stickyDef: ObjectDef = {
       { action: "bold", label: "Bold" },
       { action: "bullets", label: "Bullet list" },
     ],
-    flyouts: { color: PaletteColorFlyout },
   },
   labelEditing: { target: "label" },
 };

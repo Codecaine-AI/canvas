@@ -1,23 +1,19 @@
 "use client";
 
-import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
-import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../theme/tokens";
-import type { ObjectDef, ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
+import { ColorPalettePopover } from "../../../../ui/ColorPalettePopover";
+import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../../../theme/tokens";
+import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 
 /**
- * Connector def (step 5) — a SELECTION-KIND def, not an object type:
- * connections aren't objects, so `objectDefForType` never resolves to it and
- * its `render` is never dispatched (connections draw through
- * render/connectors/*). It exists to carry the connector selection toolbar:
- * control list moved verbatim from chrome's CONTEXT_TOOLBAR_REGISTRY
- * ["connector"] (minus the Icon field), flyout JSX moved verbatim from
- * editor/features/selection-toolbar/SelectionToolbarLayer.tsx.
+ * Connector toolbar flyouts, moved verbatim from objects/connector/def.tsx
+ * (co-location alignment): flyouts are editor interface JSX, resolved by def
+ * kind + action id (see ./index.ts). The connector def keeps only the
+ * data-only control list.
  */
 
 /**
  * Connector color flyout (W3b/W4): the sampled FigJam connector stroke set
- * (theme/tokens.ts CONNECTOR_COLORS), patched onto the selected connection
- * as `color`.
+ * (CONNECTOR_COLORS), patched onto the selected connection as `color`.
  */
 function ConnectorColorFlyout({ selectedConnection, dispatch, close }: ToolbarFlyoutProps) {
   if (!selectedConnection) return null;
@@ -117,39 +113,9 @@ function ConnectorArrowheadFlyout({ selectedConnection, dispatch, close }: Toolb
   );
 }
 
-const CONNECTOR_TOOLBAR: ToolbarSpec = {
-  controls: [
-    { action: "color", label: "Line color", hasFlyout: true },
-    { action: "stroke", label: "Stroke", hasFlyout: true },
-    { action: "dash", label: "Line style", hasFlyout: true },
-    { action: "routing", label: "Corner style", hasFlyout: true },
-    { action: "arrowhead", label: "Arrowhead style", hasFlyout: true },
-    { action: "label-align", label: "Label alignment", hasFlyout: true },
-  ],
-  flyouts: {
-    color: ConnectorColorFlyout,
-    dash: ConnectorDashFlyout,
-    routing: ConnectorRoutingFlyout,
-    arrowhead: ConnectorArrowheadFlyout,
-  },
-};
-
-export const connectorDef: ObjectDef = {
-  kind: "connector",
-  // Never dispatched: connections render via render/connectors, not through
-  // the object registry's render path.
-  render: () => null,
-  css: "",
-  // Placeholder defaults — connections have no object geometry/tone; nothing
-  // reads these (defaults lookups key on InteractiveCanvasObjectType).
-  defaults: {
-    geometry: { x: 0, y: 0, width: 0, height: 0 },
-    tone: "neutral",
-    label: "Connector",
-  },
-  handles: "none",
-  hitTest: "solid",
-  dragCapture: "none",
-  labelEditing: { target: "none" },
-  toolbar: CONNECTOR_TOOLBAR,
+export const CONNECTOR_FLYOUTS: ToolbarFlyoutTable = {
+  color: ConnectorColorFlyout,
+  dash: ConnectorDashFlyout,
+  routing: ConnectorRoutingFlyout,
+  arrowhead: ConnectorArrowheadFlyout,
 };

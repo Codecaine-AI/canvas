@@ -3,7 +3,6 @@
 import { TEXT_SIZES_PX } from "../../theme/tokens";
 import { EdgePorts, ObjectButtonChrome } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
-import { PaletteColorFlyout } from "../shapes/toolbar";
 
 /**
  * Text objects are the W2 borderless bold label special. They are dispatched
@@ -80,7 +79,6 @@ export const textDef: ObjectDef = {
       { action: "bold", label: "Bold" },
       { action: "strikethrough", label: "Strikethrough / clear formatting" },
     ],
-    flyouts: { color: PaletteColorFlyout },
   },
   labelEditing: { target: "label" },
 };

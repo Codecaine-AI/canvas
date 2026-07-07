@@ -1,15 +1,10 @@
 "use client";
 
 import type { ComponentType, MouseEvent as ReactMouseEvent } from "react";
-import type { CanvasAction } from "../state/actions";
 import type { CanvasBounds } from "../state/geometry";
 import type {
   CanvasGeometry,
   CanvasObjectStyle,
-  CanvasPaletteToken,
-  CanvasSectionStrokeStyle,
-  CanvasSectionTint,
-  InteractiveCanvasConnection,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
   InteractiveCanvasTone,
@@ -119,10 +114,12 @@ export interface LabelEditingSpec {
 }
 
 /**
- * Selection-toolbar contract (step 5): each def owns its ordered control list
- * and the flyout components those controls open. Specs are ICON-FREE — the
- * chrome SelectionToolbar host resolves each action id to its icon via an
- * internal map, so objects/ never depends on chrome's icon set.
+ * Selection-toolbar contract (step 5, made DATA-ONLY by the co-location
+ * alignment): each def owns its ordered control list and nothing else. Specs
+ * are ICON-FREE and COMPONENT-FREE — the editor's SelectionToolbar host
+ * resolves each action id to its icon, and the flyout components those
+ * controls open live in editor/features/selection-toolbar/flyouts/ (keyed by
+ * def kind + action id), so objects/ never imports interface JSX.
  */
 export interface ToolbarControlSpec {
   action: string;
@@ -135,34 +132,8 @@ export interface ToolbarControlSpec {
   dividerAfter?: boolean;
 }
 
-/**
- * Props every toolbar flyout component receives from the editor's
- * SelectionToolbarLayer host: the primary selection, the dispatcher, a
- * `close` callback, and the selection-wide style-apply helpers from
- * use-selection-toolbar. Flyouts pick the subset they need.
- */
-export interface ToolbarFlyoutProps {
-  primaryObject?: InteractiveCanvasObject;
-  selectedConnection?: InteractiveCanvasConnection;
-  dispatch: (action: CanvasAction) => void;
-  close: () => void;
-  applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
-  applySectionFillToSelection: (fill: string) => void;
-  applySectionStrokeToSelection: (stroke: string) => void;
-  applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
-  applyTintToSelection: (tint: CanvasSectionTint) => void;
-  toggleLockForSelection: () => void;
-  swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
-}
-
 export interface ToolbarSpec {
   controls: readonly ToolbarControlSpec[];
-  /**
-   * Flyout components keyed by the action id that opens them. May include
-   * flyouts with no backing control (section's "tint" is opened from the
-   * context menu, not a toolbar button).
-   */
-  flyouts?: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>>;
 }
 
 /** Type-level defaults, the registry-side replacement for state/actions/defaults.ts (wired in step 6). */
@@ -192,7 +163,7 @@ export interface ObjectDef {
   hitTest: ObjectHitTest;
   dragCapture: ObjectDragCapture;
   labelEditing: LabelEditingSpec;
-  /** This kind's selection toolbar (step 5): control list + flyout components. */
+  /** This kind's selection toolbar (step 5): data-only control list. */
   toolbar?: ToolbarSpec;
 }
 

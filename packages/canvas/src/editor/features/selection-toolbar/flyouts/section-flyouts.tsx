@@ -1,17 +1,17 @@
 "use client";
 
-import { ColorPalettePopover } from "../../ui/ColorPalettePopover";
-import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../ui/icons";
-import { resolveSectionColors } from "../../theme/resolve";
-import type { ToolbarFlyoutProps, ToolbarSpec } from "../object-def";
-import type { CanvasSectionTint } from "../../state/schema";
+import { ColorPalettePopover } from "../../../../ui/ColorPalettePopover";
+import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../../../ui/icons";
+import { resolveSectionColors } from "../../../../theme/resolve";
+import type { CanvasSectionTint } from "../../../../state/schema";
+import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 
 /**
- * Section selection toolbar (step 5): control list moved verbatim from chrome's
- * CONTEXT_TOOLBAR_REGISTRY["section"] (minus the Icon field), flyout JSX
- * moved verbatim from editor/features/selection-toolbar/SelectionToolbarLayer.tsx.
- * The "tint" flyout has no toolbar control — it is opened via the editor's
- * context menu — but lives here so the flyout table stays complete.
+ * Section toolbar flyouts, moved verbatim from objects/section/toolbar.tsx
+ * (co-location alignment): flyouts are editor interface JSX, resolved by def
+ * kind + action id (see ./index.ts). The "tint" flyout has no toolbar control
+ * — it is opened via the editor's context menu — but lives here so the flyout
+ * table stays complete.
  */
 
 /** Section fill palette — the section variant's "color" control. */
@@ -151,18 +151,9 @@ function SectionLockFlyout({ primaryObject, toggleLockForSelection, close }: Too
   );
 }
 
-export const SECTION_TOOLBAR: ToolbarSpec = {
-  controls: [
-    { action: "color", label: "Color", hasFlyout: true },
-    { action: "section-border-style", label: "Border style", hasFlyout: true },
-    { action: "rename", label: "Rename", dividerAfter: true },
-    { action: "visibility", label: "Hide contents" },
-    { action: "lock", label: "Lock", hasFlyout: true },
-  ],
-  flyouts: {
-    color: SectionFillFlyout,
-    "section-border-style": SectionBorderStyleFlyout,
-    tint: SectionTintFlyout,
-    lock: SectionLockFlyout,
-  },
+export const SECTION_FLYOUTS: ToolbarFlyoutTable = {
+  color: SectionFillFlyout,
+  "section-border-style": SectionBorderStyleFlyout,
+  tint: SectionTintFlyout,
+  lock: SectionLockFlyout,
 };

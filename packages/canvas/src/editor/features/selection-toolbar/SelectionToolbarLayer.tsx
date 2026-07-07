@@ -16,12 +16,11 @@ export interface SelectionToolbarLayerProps {
 /**
  * Floating SelectionToolbar host (RESTRUCTURE.md step 5): renders the chrome
  * pill with the registry-resolved control specs, plus whichever flyout
- * component the resolved def declares for the currently open action. The
- * flyout JSX itself lives on the ObjectDefs (objects/section/toolbar.tsx,
- * objects/shapes/toolbar.tsx, objects/connector/def.tsx, ...); only the
- * presentational current-color/section-state plumbing stays here. Renders
- * nothing until the selection resolves a toolbar and the measured position
- * resolves.
+ * component the editor-side flyout registry (./flyouts, keyed by def kind +
+ * action id) declares for the currently open action. ObjectDefs carry only
+ * data-only control lists; the presentational current-color/section-state
+ * plumbing stays here. Renders nothing until the selection resolves a toolbar
+ * and the measured position resolves.
  */
 export function SelectionToolbarLayer({
   toolbar,

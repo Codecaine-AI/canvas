@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ComponentType,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -16,6 +15,7 @@ import {
   positionSelectionToolbar,
   type PositionSelectionToolbarResult,
 } from "./position";
+import { toolbarFlyoutsForKind, type ToolbarFlyoutTable } from "./flyouts";
 import type { CanvasAction, CanvasSelection } from "../../../state/actions";
 import { boundsForGeometries, type CanvasBounds } from "../../../state/geometry";
 import {
@@ -24,7 +24,6 @@ import {
   objectDefForType,
   type ObjectDef,
   type ToolbarControlSpec,
-  type ToolbarFlyoutProps,
 } from "../../../objects/object-def";
 import { nearestPaletteToken } from "../../../objects/palette";
 import { paletteTokenStyle } from "../../../theme/resolve";
@@ -55,8 +54,12 @@ interface ResolvedSelectionToolbar {
    */
   variantLabel: string;
   controls: readonly ToolbarControlSpec[];
-  /** Flyout components of the PRIMARY selection's def (order donor for multi). */
-  flyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | undefined;
+  /**
+   * Flyout components for the PRIMARY selection's def kind (order donor for
+   * multi), resolved from the EDITOR-side flyout registry (./flyouts) — defs
+   * carry data-only control lists since the co-location alignment.
+   */
+  flyouts: ToolbarFlyoutTable | undefined;
 }
 
 const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky", "text"]);
@@ -78,7 +81,7 @@ function resolveSelectionToolbarForSelection(args: {
       kind: "connector",
       variantLabel: "connector",
       controls: connectorDef.toolbar?.controls ?? [],
-      flyouts: connectorDef.toolbar?.flyouts,
+      flyouts: toolbarFlyoutsForKind("connector"),
     };
   }
   if (selection.kind === "objects" && selectedObjects.length > 0) {
@@ -96,7 +99,7 @@ function resolveSelectionToolbarForSelection(args: {
         kind: "multi",
         variantLabel: "multi",
         controls,
-        flyouts: primaryDef?.toolbar?.flyouts,
+        flyouts: primaryDef ? toolbarFlyoutsForKind(primaryDef.kind) : undefined,
       };
     }
     if (!primaryDef?.toolbar) return null;
@@ -104,7 +107,7 @@ function resolveSelectionToolbarForSelection(args: {
       kind: primaryDef.kind,
       variantLabel: SPECIAL_SINGLE_VARIANT_LABELS.has(primaryDef.kind) ? primaryDef.kind : "shape",
       controls: primaryDef.toolbar.controls,
-      flyouts: primaryDef.toolbar.flyouts,
+      flyouts: toolbarFlyoutsForKind(primaryDef.kind),
     };
   }
   return null;
@@ -140,7 +143,7 @@ export interface SelectionToolbarApi {
   /** Registry-resolved control specs for the chrome SelectionToolbar host. */
   selectionToolbarControls: readonly ToolbarControlSpec[] | null;
   /** The primary selection's flyout components, keyed by opening action id. */
-  selectionToolbarFlyouts: Readonly<Record<string, ComponentType<ToolbarFlyoutProps>>> | null;
+  selectionToolbarFlyouts: ToolbarFlyoutTable | null;
   selectionToolbarPosition: PositionSelectionToolbarResult | null;
   openFlyout: SelectionToolbarActionId | null;
   setOpenFlyout: Dispatch<SetStateAction<SelectionToolbarActionId | null>>;
@@ -162,8 +165,10 @@ export interface SelectionToolbarApi {
  * resolution (registry-driven since RESTRUCTURE.md step 5), anchor-rect/
  * position memos, the measured toolbar size (ResizeObserver), the open-flyout
  * state, every style-apply callback, and the onAction dispatch table. Control
- * lists and flyout components live on the ObjectDefs (objects/); this hook
- * resolves them per selection and hands them to SelectionToolbarLayer.
+ * lists live on the ObjectDefs (objects/, data-only); flyout components live
+ * in the editor-side registry (./flyouts, keyed by def kind + action id);
+ * this hook resolves both per selection and hands them to
+ * SelectionToolbarLayer.
  */
 export function useSelectionToolbar({
   document,
@@ -418,8 +423,9 @@ export function useSelectionToolbar({
         toggleSectionContentHiddenForSelection();
         return;
       }
-      // An action opens a flyout iff the resolved def's flyout table declares
-      // a component for it (replaces the static FLYOUT_ACTIONS set) — e.g.
+      // An action opens a flyout iff the editor-side flyout registry
+      // (./flyouts) declares a component for the resolved def kind + action
+      // id (replaces the static FLYOUT_ACTIONS set) — e.g.
       // section: color/section-border-style/tint/lock; connector: color/dash/
       // routing/arrowhead; shape: shape-swap/color; sticky/text: color.
       if (selectionToolbarFlyouts && action in selectionToolbarFlyouts) {
