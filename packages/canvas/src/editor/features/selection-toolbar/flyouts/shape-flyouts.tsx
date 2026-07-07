@@ -1,7 +1,7 @@
 "use client";
 
-import { ColorPalettePopover } from "../../../../ui/ColorPalettePopover";
-import { ShapeSearchPopover } from "../../../../objects/catalog/ShapeSearchPopover";
+import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
+import { ShapeSearchPopover } from "../../../components/ShapeSearchPopover";
 import { paletteTokenStyle } from "../../../../theme/resolve";
 import { nearestPaletteToken } from "../../../../objects/palette";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";

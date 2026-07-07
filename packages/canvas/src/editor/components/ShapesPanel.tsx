@@ -1,7 +1,8 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
-import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../objects/catalog/shape-catalog";
+import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../objects/catalog";
+import { shapeCatalogPreview } from "./shape-previews";
 import { Tooltip } from "../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../state/schema";
 
@@ -104,7 +105,7 @@ function ShapeGridButton({
   onPickEntry?: (entry: ShapeCatalogEntry) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const Icon = entry.Icon;
+  const Icon = shapeCatalogPreview(entry);
   const clearHover = () => setHovered(false);
 
   return (

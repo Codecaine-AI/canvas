@@ -80,7 +80,7 @@ export interface AnchorSpec {
   points: (bounds: CanvasBounds) => ReadonlyArray<{ anchor: Anchor; point: CanvasPoint }>;
 }
 
-/** Shape-catalog metadata (objects/catalog/shape-catalog.tsx migrates onto this in a later chunk). Declared, unconsumed. */
+/** Shape-catalog metadata (objects/catalog.ts migrates onto this in a later chunk). Declared, unconsumed. */
 export interface ShapeCatalogMeta {
   label: string;
   /** Catalog preview glyph. */

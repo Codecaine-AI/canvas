@@ -1,6 +1,6 @@
 "use client";
 
-import { ColorPalettePopover } from "../../../../ui/ColorPalettePopover";
+import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
 import { CONNECTOR_COLORS, CONNECTOR_DEFAULT_COLOR } from "../../../../theme/tokens";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
 

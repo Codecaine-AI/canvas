@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapeSearchPopover } from "../ShapeSearchPopover";
-import { SHAPE_SEARCH_ENTRIES } from "../shape-catalog";
+import { SHAPE_SEARCH_ENTRIES } from "../../../objects/catalog";
 
 afterEach(() => {
   cleanup();

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { ICON_GLYPH_IDS } from "../../../ui/icons/icon-glyphs";
+import { ICON_GLYPH_IDS } from "../../ui/icons/icon-glyphs";
 import {
   isShapeEntryEnabled,
   SHAPE_CATALOG,
   SHAPE_CATALOG_ENTRIES,
   SHAPE_SEARCH_ENTRIES,
-} from "../shape-catalog";
+} from "../catalog";
 
 // Wave C: restructured to exactly 3 sections (Basic/Flowchart/Advanced),
 // mirroring FigJam's actual picker model — see docs/10-system-design/
@@ -32,9 +32,12 @@ describe("shape-catalog data shape", () => {
     expect(SHAPE_CATALOG_ENTRIES.length).toBe(total);
   });
 
-  it("every entry has a callable Icon component and a non-empty label", () => {
+  // Entries are pure data since the co-location alignment — the preview
+  // components live editor-side; their coverage is asserted in
+  // editor/components/__tests__/shape-previews.test.tsx.
+  it("every entry is component-free data with a non-empty label", () => {
     for (const entry of SHAPE_CATALOG_ENTRIES) {
-      expect(typeof entry.Icon).toBe("function");
+      expect("Icon" in entry).toBe(false);
       expect(entry.label.length).toBeGreaterThan(0);
     }
   });

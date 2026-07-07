@@ -1,6 +1,6 @@
 "use client";
 
-import { ColorPalettePopover } from "../../../../ui/ColorPalettePopover";
+import { ColorPalettePopover } from "../../../components/ColorPalettePopover";
 import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../../../ui/icons";
 import { resolveSectionColors } from "../../../../theme/resolve";
 import type { CanvasSectionTint } from "../../../../state/schema";

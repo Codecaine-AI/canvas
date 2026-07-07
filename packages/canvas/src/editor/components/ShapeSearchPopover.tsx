@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { CHROME } from "../../theme/tokens";
-import { SHAPE_SEARCH_ENTRIES, type ShapeCatalogEntry } from "./shape-catalog";
+import { SHAPE_SEARCH_ENTRIES } from "../../objects/catalog";
+import { shapeCatalogPreview } from "./shape-previews";
 import { Tooltip } from "../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../state/schema";
 
@@ -97,7 +98,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
         }}
       >
         {filtered.map((entry) => {
-          const Icon = entry.Icon;
+          const Icon = shapeCatalogPreview(entry);
           const hovered = hoveredId === entry.id;
           return (
             <div key={entry.id} style={{ position: "relative", display: "inline-flex" }}>
