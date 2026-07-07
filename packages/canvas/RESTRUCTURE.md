@@ -43,7 +43,9 @@ defs** (see `dragCapture`, `hitTest`, `handles` below).
 interface ObjectDef {
   kind: string
   render: Component
-  toolbar: ToolbarSpec        // its context menu: action ids + flyout components
+  toolbar: ToolbarSpec        // DATA-ONLY control list; flyout JSX lives in
+                              // editor/features/selection-toolbar/flyouts/
+                              // (keyed by def kind + action id)
   handles: "all" | "corners" | "none"
   hitTest: "solid"              // border-band died with the container type
   dragCapture: "descendants" | "none"
@@ -90,58 +92,97 @@ deliberately reversed them):
 
 ## Target tree
 
-Amended 2026-07-06 (Ford + Claude), after the registry/toolbar migration
-landed: layers are named by their role in the pipeline, design tokens get
-their own foundation layer, "chrome" is dissolved into `editor/components`
-(what shows up on the page) + `ui` (shared dumb primitives), and objects/
-absorbs the icon glyphs and the shape catalog. NO compatibility barrels:
-package.json subpath exports are repointed where a consumer exists and
-deleted where none does (./chrome had no real external consumer).
+Amended 2026-07-07 (Ford + Claude), after the co-location alignment landed:
+theme is ONE global file (semantic palette tokens, tone→color map, resolve*
+functions, typography sizes — everything else co-locates with its consumer),
+objects/ holds ONLY definitions and DATA (zero page-UI components), editor/
+owns ALL interface JSX (toolbar flyouts, catalog previews, popovers), and
+ui/ is app-agnostic primitives + INTERFACE icons only (the canvas glyph
+registry lives with the icon def). NO compatibility barrels: package.json
+subpath exports are repointed where a consumer exists and deleted where none
+does.
 
 ```
 src/
-  theme/                 LAYER 0 — design constants; imports nothing
-                         (renamed from tokens/, de-FigJam-ified 2026-07-06)
-    tokens.ts              design constants: colors, text sizes, geometry ratios
-    resolve.ts             style resolution: tone/palette → fill/border/text
+  theme.ts               LAYER 0 — ONE file; imports nothing (type-only
+                         state/schema unions): semantic palette tokens
+                         (CANVAS_PALETTE_TOKENS + paletteTokenStyle anchors),
+                         tone→color map (canvasToneStyle), SECTION_FAMILIES
+                         (resolveSectionColors' data), the resolve* functions,
+                         canvasSurfaceStyle, SHAPE_STROKE_WIDTH_PX,
+                         TEXT_SIZES_PX. Everything else lives by consumer.
   state/                 LAYER 1 — the document (renamed from model/ 2026-07-06)
     schema.ts → schema/    what a canvas JSON is (path kept: exports target)
     actions.ts → actions/  reducer — the only way the document changes
-    geometry.ts
-  objects/               LAYER 2 — one def per kind of thing on the canvas
-    object-def.ts          registry + render/behavior dispatch + intersection
+    geometry.ts            incl. SECTION_CAPTURE_OVERLAP_THRESHOLD (the theme
+                           re-export is gone)
+  routing/               connector routing (MPL boundary untouched); owns
+                         CONNECTOR_ELBOW_CORNER_RADIUS_PX / CONNECTOR_END_GAP_PX
+                         (routing.ts) and ARROW_SHAPE_GEOMETRY
+                         (connection-overlay.ts; the arrow-shape def imports it
+                         — objects→routing is a legal downward edge; routing
+                         never imports objects)
+  objects/               LAYER 2 — one def per kind; DEFINITIONS + DATA ONLY:
+                         def render views (canvas content), per-kind geometry
+                         constants, behavior flags, defaults, toolbar DATA
+                         (control lists), catalog DATA. Zero page-UI components.
+    object-def.ts          registry + render/behavior dispatch + intersection;
+                           ToolbarSpec is data-only ({ controls })
     palette.ts
+    catalog.ts             pure data entries (id, label, objectType,
+                           direction?, icon?, keywords?) — previews editor-side
     section/  sticky/  text/  connector/  code-block/  source-node/
-    shapes/                one file per shape; base.tsx adapter; toolbar.tsx
-      icon/                def + IconShapeBody (glyph data lives in ui/icons/)
-    catalog/               SHAPE_CATALOG + ShapeSearchPopover (registry-driven)
+                           each owns its constants: SECTION_GEOMETRY (section/
+                           def), STICKY_GEOMETRY + sticky/colors.ts,
+                           CONNECTOR_COLORS/_DEFAULT_COLOR/_DASH_PATTERN_PX
+                           (connector/def.ts), code-block/style.ts (CODE_BLOCK)
+    shapes/                one file per shape under basic/ flowchart/ misc/,
+                           each carrying its own geometry/color constants
+                           (PREDEFINED_PROCESS_GEOMETRY shared: internal-storage
+                           imports it from predefined-process); base.tsx
+                           adapter; toolbar.ts (data-only control list);
+                           pastels.ts (shared PASTEL_PAIRS)
+      icon/                def + IconShapeBody + icon-glyphs.ts +
+                           icon-glyph-data.generated.ts (canvas CONTENT —
+                           tools/nucleo-icons/generate.ts emits here)
   render/                LAYER 3a — document → pixels; stateless; shared by
-    CanvasStage.tsx        the editor AND the read-only viewer/embeds
+    CanvasStage.tsx        the editor AND the read-only viewer/embeds; owns its
+                           surface constants (CANVAS_BG, grid dot color, canvas
+                           font, arrowhead ratios, select cursor — inlined,
+                           never imported from editor)
     ObjectShape.tsx        pure registry delegate
     viewport.ts            ViewportState + world/screen transforms (from editor/)
-    connectors/  overlays/  grid.ts
+    connectors/  overlays/  grid.ts (owns the GRID_* constants)
   interaction/           LAYER 3b — pointer input → actions; pure TS, no React
     interaction.ts barrel; core.ts; gestures/; hit-testing; snapping; clipboard
-  ui/                    shared dumb primitives, importable from objects up:
-    button/input/… plus Tooltip, ColorPalettePopover
-    icons/               ALL icon modules (amended 2026-07-06): toolbar-icons,
-                         dock-icons, icon-glyphs, nucleo/ (reference SVGs)
-  editor/                LAYER 4 — the app; nothing below imports it
+  ui/                    app-agnostic primitives + INTERFACE icons ONLY;
+    button/input/… Tooltip  imports nothing from the rest of src
+    icons/               custom-icons, icon-props, manifest.json, nucleo/
+                         (generated chrome components + vendored SVGs)
+  editor/                LAYER 4 — the app; owns ALL interface JSX;
     InteractiveCanvasEditor.tsx   composition root
     InteractiveCanvasViewer.tsx   read-only variant
     components/            what shows up on the page: TopBar, CanvasDock,
-                           ShapesPanel, ZoomControls
+                           ShapesPanel, ZoomControls, ShapeSearchPopover,
+                           ColorPalettePopover, shape-previews.tsx (catalog
+                           entry → preview SVG), editor-style.ts (EDITOR_STYLE,
+                           né CHROME)
     features/              the state + wiring behind them: selection-toolbar/
-                           (the WHOLE selection-toolbar feature: pill view,
-                           position math, state hook, flyout host — amended
-                           2026-07-06), label-editing/, context-menu/,
+                           (pill view, position math, state hook, flyout host,
+                           and flyouts/ — the flyout components + the def-kind
+                           × action-id registry deciding which actions open
+                           flyouts), label-editing/, context-menu/,
                            drag-pipeline/, inspector/
-  routing/  vendor/  fixtures/   unchanged (MPL boundary untouched)
+  vendor/  fixtures/     unchanged (MPL boundary untouched)
 ```
 
-Import rule (boundary-tested): theme ← state ← objects ← render|interaction
-← editor; `ui` sits beside theme (importable from objects up); nothing
-outside `editor/` imports `editor/`.
+Import rule (boundary-tested in src/__tests__/import-boundaries.test.ts):
+theme.ts ← state ← routing ← objects ← render|interaction ← editor; `ui`
+stands alone (only editor/ imports it; objects ↛ ui holds); routing never
+imports objects; render never imports editor; nothing outside `editor/`
+imports `editor/`. Documented exceptions: interaction/types.ts and
+state/actions/types.ts type-only edges, and objects/code-block/def.tsx →
+render/code-tokenizer (the one straggler).
 
 ## Invariants (hold at every step)
 

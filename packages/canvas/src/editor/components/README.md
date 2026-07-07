@@ -3,26 +3,22 @@
 Built per `board-design-reference/analysis/figjam-bottom-dock-spec.md`,
 `figjam-chrome-catalog.md`, `figjam-style-tokens.json`/`figjam-style-spec.md`.
 This directory holds what shows up on the page around the canvas — the
-top bar, the bottom dock, the shapes panel, and the zoom pill. It started as
-a standalone component library (W2-chrome, the old `src/chrome/`); since W3
-it **is** wired in: `editor/InteractiveCanvasEditor.tsx` composes these
-components directly.
+top bar, the bottom dock, the shapes panel, the zoom pill, the picker
+popovers, the catalog preview SVGs, and the editor style constants. It
+started as a standalone component library (W2-chrome, the old `src/chrome/`);
+since W3 it **is** wired in: `editor/InteractiveCanvasEditor.tsx` composes
+these components directly.
 
 The floating selection toolbar is NOT here: the whole feature — pill view
-(`SelectionToolbar.tsx`), positioning math (`position.ts`), state hook, and
-flyout host — lives together in `editor/features/selection-toolbar/`.
+(`SelectionToolbar.tsx`), positioning math (`position.ts`), state hook,
+flyout host, and the flyout components themselves
+(`flyouts/`) — lives together in `editor/features/selection-toolbar/`.
 
-Per RESTRUCTURE.md's amended target tree, the old `chrome/` directory was
-dissolved into two homes:
-
-- `editor/components/` (this directory) — editor-only page furniture.
-- `src/ui/` — shared dumb primitives importable from `objects/` up:
-  `Tooltip` (was `ChromeTooltip`), `ColorPalettePopover`, and `ui/icons/`
-  (all icon modules: `toolbar-icons`, `dock-icons`, `icon-glyphs`, and the
-  `nucleo/` reference SVGs).
-
-The shape catalog (`shape-catalog.tsx`) and `ShapeSearchPopover` moved to
-`src/objects/catalog/` — catalog data is objects-layer knowledge.
+Per RESTRUCTURE.md's target tree (amended 2026-07-07, co-location
+alignment): the editor owns ALL interface JSX. `objects/` holds only
+definitions and DATA (def render views, per-kind constants, behavior flags,
+toolbar control lists, catalog entries); `ui/` is app-agnostic primitives +
+INTERFACE icons only.
 
 ## Inventory
 
@@ -30,36 +26,45 @@ The shape catalog (`shape-catalog.tsx`) and `ShapeSearchPopover` moved to
 |---|---|---|
 | `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
 | `ShapesPanel.tsx` | `ShapesPanel` | Full-height left-docked white Shapes sidebar (Panel B). |
+| `ShapeSearchPopover.tsx` | `ShapeSearchPopover` | Compact dark "Search for a shape" popover (Panel A), opened by the shape-swap flyout. |
+| `ColorPalettePopover.tsx` | `ColorPalettePopover` | 2x11 swatch grid flyout (owns `PALETTE_POPOVER_SWATCHES`). |
+| `shape-previews.tsx` | `shapeCatalogPreview()` | Maps `objects/catalog.ts` entries → 20x20 preview SVGs (polygon generators / hand-drawn minis / glyph data). |
+| `editor-style.ts` | `EDITOR_STYLE` | Editor interface style constants (né theme/tokens' `CHROME`). |
 | `TopBar.tsx` | `TopBar` | Top bar: board title (optionally inline-editable), undo/reset history controls, save/cancel, host-provided leading/action slots. |
 | `ZoomControls.tsx` | `ZoomControls` | Bottom-right zoom pill. |
 
 Shared primitives these components draw on live in `src/ui/`:
-`ui/Tooltip.tsx` (dark hover-label used by every component above),
-`ui/ColorPalettePopover.tsx` (2x11 swatch grid flyout, also assembled into
-`ToolbarSpec`s by object defs), and `ui/icons/` — `toolbar-icons.tsx`
-(~20 glyphs for `SelectionToolbar` controls), `dock-icons.tsx` (dock + zoom
-glyphs), and `nucleo/` (reference SVG sources for the dock/toolbar glyphs).
+`ui/Tooltip.tsx` (dark hover-label used by every component above) and
+`ui/icons/` — interface icons only: `custom-icons`, and the generated
+`nucleo/` chrome components (+ vendored SVG sources). The canvas-object
+glyph registry is NOT interface iconography; it lives with the icon def at
+`objects/shapes/icon/icon-glyphs.ts`.
 
 ## SelectionToolbar is a dumb host
 
-Since the RESTRUCTURE.md step-5 toolbar migration, `SelectionToolbar`
-(`editor/features/selection-toolbar/SelectionToolbar.tsx`) no longer
-owns *what* controls appear for a given selection. Per-kind control lists and
-their flyout components live on the object defs in `src/objects/` as each
-def's `toolbar: ToolbarSpec` (see `objects/object-def.ts`):
+Since the RESTRUCTURE.md step-5 toolbar migration (revised by the
+co-location alignment), `SelectionToolbar`
+(`editor/features/selection-toolbar/SelectionToolbar.tsx`) no longer owns
+*what* controls appear for a given selection. Per-kind control lists live on
+the object defs in `src/objects/` as each def's DATA-ONLY
+`toolbar: ToolbarSpec` (see `objects/object-def.ts`):
 
 ```ts
 interface ToolbarSpec {
   controls: readonly ToolbarControlSpec[];   // ordered, icon-free action specs
-  flyouts?: Record<string, ComponentType<ToolbarFlyoutProps>>;
 }
 ```
+
+The flyout components those controls open are EDITOR-side:
+`editor/features/selection-toolbar/flyouts/` holds the JSX plus a registry
+keyed by def kind + action id (`toolbarFlyoutsForKind`). Whether an action
+opens a flyout is decided by that registry, not by the defs.
 
 `editor/features/selection-toolbar/SelectionToolbarLayer.tsx` resolves the
 current selection's def(s) (capability-intersection over defs for
 multi-select — `intersectToolbarControls` in `objects/object-def.ts`), passes
 the resulting `controls` list to `<SelectionToolbar controls={...} />`, and
-renders whichever flyout component the resolved def declares for the
+renders whichever flyout component the flyout registry declares for the
 currently open action. `SelectionToolbar` itself only resolves each action id
 to an icon (`ACTION_ICONS`) and renders the pill/buttons/dividers — it has no
 knowledge of which selection kind produced the controls it's given.
@@ -72,18 +77,13 @@ an `ObjectDef.toolbar`.
 
 ## Import direction
 
-- `objects/` may import `ui/` primitives at runtime for flyout JSX (e.g.
-  `objects/shapes/toolbar.tsx` and `objects/section/toolbar.tsx` import
-  `ColorPalettePopover`/`ui/icons/toolbar-icons`;
-  `objects/catalog/ShapeSearchPopover.tsx` imports `Tooltip`). This is
-  expected: flyouts are dumb UI, and defs assemble them into their
-  `ToolbarSpec`.
+- `objects/` imports NOTHING from `ui/` or `editor/` — defs are definitions
+  + data + canvas-content rendering only.
 - `editor/components/` sits in layer 4: it may import `objects/`, `render/`,
-  `ui/`, `theme/`, and `state/`, but nothing outside `editor/` may import it.
-- `ui/` must **not** import `objects/`, `render/`, `interaction/`, or
-  `editor/` — primitives stay dumb. A type-only import from `objects/` in an
-  editor component (e.g. `SelectionToolbar.tsx`'s `ToolbarControlSpec`) is an
-  ordinary editor→objects import and is fine.
+  `routing/`, `ui/`, `theme.ts`, and `state/`, but nothing outside `editor/`
+  may import it (render inlines its own copies of the two style values it
+  shares visually with the editor — the select cursor and selection blue).
+- `ui/` imports nothing from the rest of src — primitives stay dumb.
 
 These rules are encoded in `src/__tests__/import-boundaries.test.ts`.
 
@@ -95,5 +95,5 @@ counts, group/divider structure) as style/DOM assertions rather than visual
 screenshots (per the task's "no routes" constraint). Run:
 
 ```
-bun test src/editor/components src/ui src/objects/catalog
+bun test src/editor/components src/ui src/objects/__tests__
 ```
