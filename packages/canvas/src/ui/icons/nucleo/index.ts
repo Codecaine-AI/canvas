@@ -42,7 +42,6 @@ export { RoutingIcon } from "./routing-icon";
 export { ShapeSwapIcon } from "./shape-swap-icon";
 export { ShapesIcon } from "./shapes-icon";
 export { SizeIcon } from "./size-icon";
-export { StickyIcon } from "./sticky-icon";
 export { StrikethroughIcon } from "./strikethrough-icon";
 export { StrokeIcon } from "./stroke-icon";
 export { TextIcon } from "./text-icon";

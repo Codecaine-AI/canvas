@@ -85,7 +85,7 @@ const DOCK_ICON_STYLES = `
   stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx} !important;
 }
 
-.canvas-dock-icon--sticky :is(path, line) {
+.canvas-dock-icon.canvas-dock-icon--sticky :is(path, line) {
   stroke-width: ${EDITOR_STYLE.dockStickyIconStrokeWidthPx} !important;
 }
 

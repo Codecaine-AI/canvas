@@ -38,8 +38,11 @@ describe("CanvasDock geometry", () => {
       expect(buttonEl.style.width).toBe("40px");
       expect(buttonEl.style.height).toBe("40px");
       expect(buttonEl.style.borderRadius).toBe("11px");
-      expect(icon.style.width).toBe(tool === "sticky" ? "28px" : "24px");
-      expect(icon.style.height).toBe(tool === "sticky" ? "28px" : "24px");
+      const expectedIconPx = tool === "sticky"
+        ? `${EDITOR_STYLE.dockStickyIconSizePx}px`
+        : `${EDITOR_STYLE.dockIconSizePx}px`;
+      expect(icon.style.width).toBe(expectedIconPx);
+      expect(icon.style.height).toBe(expectedIconPx);
       expect(icon.getAttribute("class")).toContain(`canvas-dock-icon--${tool}`);
     }
   });
@@ -48,9 +51,11 @@ describe("CanvasDock geometry", () => {
     const { container } = render(<CanvasDock />);
     const styles = container.querySelector("[data-dock-icon-styles]") as HTMLStyleElement;
     expect(styles).toBeTruthy();
-    expect(styles.textContent).toContain("stroke-width: 1.1");
-    expect(styles.textContent).toContain("stroke-width: 0.95");
-    expect(styles.textContent).toContain("stroke-width: 7");
+    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx}`);
+    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockStickyIconStrokeWidthPx}`);
+    expect(styles.textContent).toContain(`stroke-width: ${EDITOR_STYLE.dockSectionIconStrokeWidthPx}`);
+    // The sticky override must out-specify the generic dock rule above it.
+    expect(styles.textContent).toContain(".canvas-dock-icon.canvas-dock-icon--sticky");
   });
 
   it("has a soft box-shadow (not flat, not none)", () => {

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Sticky note with top-left peel</title>
+  <desc id="desc">A clean line icon of a sticky note with the top-left corner peeled downward.</desc>
+  <g
+    transform="matrix(1 0 0 -1 0 1054)"
+    fill="none"
+    stroke="#2d2d2b"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M267 569V282H753V773H498" />
+    <path d="M267 569C301 646 422 773 498 773" />
+    <path d="M267 569C292 607 351 628 418 611" />
+    <path d="M418 611C410 681 444 746 498 773" />
+  </g>
+</svg>
