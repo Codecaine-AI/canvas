@@ -15,6 +15,7 @@ import {
   TrashIcon,
   UnlockIcon,
 } from "../../../ui/icons";
+import { objectTypeLabel } from "../../../state/actions";
 import type { CanvasContextMenuApi } from "./use-canvas-context-menu";
 
 export interface CanvasContextMenuProps {
@@ -36,7 +37,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
     setLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
-    captureContextSectionContents,
+    tidySectionMembership,
     deleteContextSelection,
   } = menu;
   if (!contextMenu) return null;
@@ -54,7 +55,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
       {contextMenu.kind === "object" && contextObject ? (
         <>
           <div className="truncate border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
-            {contextObject.label}
+            {contextObject.text.trim() || objectTypeLabel(contextObject.type)}
           </div>
           <button
             type="button"
@@ -80,10 +81,10 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
                 type="button"
                 role="menuitem"
                 className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={captureContextSectionContents}
+                onClick={tidySectionMembership}
               >
                 <LayersIcon className="h-4 w-4 text-muted-foreground" />
-                Capture contents
+                Tidy section membership
               </button>
             </>
           )}

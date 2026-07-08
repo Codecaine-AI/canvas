@@ -6,14 +6,14 @@
  * creation (4.2.1), and the ghost-preview sizing for click-vs-drag placement.
  */
 import {
+  colorKindForType,
   defaultGeometryFor,
   draftPlacedObject,
   type CanvasAction,
   type CanvasTool,
 } from "../../state/actions";
 import { normalizeBounds, type CanvasPoint } from "../../state/geometry";
-import type { CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
-import { hitTestDropTarget } from "../hit-testing";
+import type { CanvasColor, CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
 import {
   DRAG_THRESHOLD,
   IDLE_INTERACTION_STATE,
@@ -40,14 +40,25 @@ export function placePreviewOverlayFor(
   objectType: InteractiveCanvasObjectType,
   geometry: CanvasGeometry,
   variant?: ArmedShapeVariant,
+  /** Last-picked color for the type's kind (D17) so the ghost matches the object the click will create. */
+  color?: CanvasColor,
 ): InteractionOverlay {
   return {
     placePreview: geometry,
     placePreviewObject: draftPlacedObject(objectType, geometry, {
       id: PLACE_PREVIEW_GHOST_ID,
+      color,
       ...variant,
     }),
   };
+}
+
+/** The ghost color for an armed type: the context's last-picked memory for its kind (D17). */
+export function placePreviewColorFor(
+  objectType: InteractiveCanvasObjectType,
+  ctx: Pick<InteractionContext, "lastPickedColor">,
+): CanvasColor | undefined {
+  return ctx.lastPickedColor?.[colorKindForType(objectType)];
 }
 
 /**
@@ -151,11 +162,10 @@ export function placeGeometryFor(state: PlaceGesture): CanvasGeometry {
  * down through move/up, always exposing a live `placePreview` ghost so the
  * editor can render an outline of what will be created. On release, finalizes
  * the object (click -> default size at point; drag -> normalized/clamped
- * rect), assigns parentId via the same full-bounds drop-target hit-test used
- * by drag-and-drop-into-section moves, dispatches the creation, reverts the
- * tool to "select" (canvas.addObject's reducer already selects the new
- * object) unless ctx.stickyPlacement keeps it armed for repeat placement,
- * and returns to idle.
+ * rect), dispatches the creation, reverts the tool to "select"
+ * (canvas.addObject's reducer already selects the new object) unless
+ * ctx.stickyPlacement keeps it armed for repeat placement, and returns to
+ * idle. The reducer assigns section membership from the final geometry.
  */
 export function stepFromPlace(
   state: PlaceGesture,
@@ -168,25 +178,19 @@ export function stepFromPlace(
 
   if (event.type === "up") {
     const geometry = placeGeometryFor(state);
-    const center: CanvasPoint = {
-      x: geometry.x + geometry.width / 2,
-      y: geometry.y + geometry.height / 2,
-    };
-    const dropTarget = hitTestDropTarget(ctx.document, center, new Set());
     return {
       state: IDLE_INTERACTION_STATE,
       dispatch: [
         {
           type: "canvas.addObject",
           objectType: state.objectType,
-          parentId: dropTarget?.id ?? null,
           geometry,
           // Catalog-entry variant (Shapes panel pick): orientation, Advanced
-          // glyph, and glyph-name label ride along so the created object
+          // glyph, and glyph-name text ride along so the created object
           // matches the picked entry, not just its bare type.
           ...(state.variant?.direction ? { direction: state.variant.direction } : null),
           ...(state.variant?.icon ? { icon: state.variant.icon } : null),
-          ...(state.variant?.label ? { label: state.variant.label } : null),
+          ...(state.variant?.text ? { text: state.variant.text } : null),
         },
         // Repeat-placement mode (ctx.stickyPlacement — Shapes panel flow)
         // keeps the tool armed so the next click places another one; the
@@ -203,7 +207,12 @@ export function stepFromPlace(
     return {
       state,
       dispatch: [],
-      overlay: placePreviewOverlayFor(state.objectType, placeGeometryFor(state), state.variant),
+      overlay: placePreviewOverlayFor(
+        state.objectType,
+        placeGeometryFor(state),
+        state.variant,
+        placePreviewColorFor(state.objectType, ctx),
+      ),
     };
   }
 
@@ -211,6 +220,11 @@ export function stepFromPlace(
   return {
     state: nextState,
     dispatch: [],
-    overlay: placePreviewOverlayFor(nextState.objectType, placeGeometryFor(nextState), nextState.variant),
+    overlay: placePreviewOverlayFor(
+      nextState.objectType,
+      placeGeometryFor(nextState),
+      nextState.variant,
+      placePreviewColorFor(nextState.objectType, ctx),
+    ),
   };
 }

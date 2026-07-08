@@ -8,6 +8,7 @@ import {
   sectionCaptureMembers,
   snapGeometry,
 } from "../geometry";
+import { reconcileSectionMembership } from "../section-membership";
 import { selectedObjectIds } from "./helpers";
 import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
@@ -113,6 +114,38 @@ export function handleUpdateObjectGeometries(
   return withHistory(state, document, lastChange);
 }
 
+export function handleReconcileSectionMembership(
+  state: InteractiveCanvasState,
+  action: Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }>,
+): InteractiveCanvasState {
+  const document = reconcileSectionMembership(state.document);
+  if (document === state.document) return state;
+
+  const previousParentById = new Map(
+    state.document.objects.map((object) => [object.id, object.parentId ?? null]),
+  );
+  const changedObjectIds = document.objects
+    .filter((object) => (previousParentById.get(object.id) ?? null) !== (object.parentId ?? null))
+    .map((object) => object.id);
+  const lastChange = {
+    source: "human" as const,
+    summary: "Reconciled section membership",
+    changedObjectIds,
+    changedConnectionIds: [],
+    changedAnnotationIds: [],
+  };
+
+  if (action.recordHistory === false) {
+    return {
+      ...state,
+      document,
+      lastChange,
+    };
+  }
+
+  return withHistory(state, document, lastChange);
+}
+
 export function handleSetParent(
   state: InteractiveCanvasState,
   action: Extract<CanvasAction, { type: "canvas.setParent" }>,
@@ -150,7 +183,7 @@ export function handleSetParent(
   };
   return withHistory(state, document, {
     source: "human",
-    summary: parent ? `Moved into ${parent.label}` : "Moved out of section",
+    summary: parent ? `Moved into ${parent.text}` : "Moved out of section",
     changedObjectIds,
     changedConnectionIds: [],
     changedAnnotationIds: [],
@@ -253,7 +286,7 @@ export function handleCaptureSectionContents(
   };
   return withHistory(state, document, {
     source: "human",
-    summary: `Captured into ${section.label}`,
+    summary: `Captured into ${section.text}`,
     changedObjectIds,
     changedConnectionIds: [],
     changedAnnotationIds: [],

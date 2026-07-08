@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../../../interaction/clipboard";
+import { hitTestObjects } from "../../../interaction/hit-testing";
+import { outlineContainsPoint } from "../../../objects/geometry";
 import { defaultGeometryFor, type CanvasAction } from "../../../state/actions";
 import type { CanvasBounds, CanvasPoint } from "../../../state/geometry";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
@@ -26,6 +28,22 @@ export type CanvasContextMenuState =
       objectId: string;
       canvasPoint: CanvasPoint;
     };
+
+/**
+ * D16 (P3) context-menu retargeting: the right-clicked BUTTON covers the full
+ * bbox, but the menu must respect the def-declared outline. Returns the
+ * object whose menu should open — the clicked one when the point is inside
+ * its outline, else the topmost outline-containing object behind it, else
+ * null (open the canvas menu instead). Exported for unit tests.
+ */
+export function resolveContextMenuTarget(
+  document: InteractiveCanvasDocument,
+  clicked: InteractiveCanvasObject,
+  world: CanvasPoint,
+): InteractiveCanvasObject | null {
+  if (outlineContainsPoint(clicked, world)) return clicked;
+  return hitTestObjects(document, world);
+}
 
 function geometryForContextObject(
   objectType: InteractiveCanvasObjectType,
@@ -65,7 +83,7 @@ export interface CanvasContextMenuApi {
   setLockFromContextMenu: (mode: "all" | "background" | undefined) => void;
   addContextAnnotation: () => void;
   fitContextObject: () => void;
-  captureContextSectionContents: () => void;
+  tidySectionMembership: () => void;
   deleteContextSelection: () => void;
 }
 
@@ -117,23 +135,31 @@ export function useCanvasContextMenu({
     (
       event: ReactMouseEvent<HTMLElement>,
       object: InteractiveCanvasObject,
-      _bounds: CanvasBounds,
+      bounds: CanvasBounds,
     ) => {
+      const canvasPoint = canvasPointFromContextMenu(event);
+      // D16: a right-click in a true-outline shape's empty bbox corner
+      // retargets to the object behind it, or to the canvas menu.
+      const target = resolveContextMenuTarget(document, object, canvasPoint);
+      if (!target) {
+        openCanvasContextMenu(event, bounds);
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
       dispatch({
         type: "canvas.select",
-        selection: { kind: "objects", objectIds: [object.id] },
+        selection: { kind: "objects", objectIds: [target.id] },
       });
       setContextMenu({
         kind: "object",
         x: event.clientX,
         y: event.clientY,
-        objectId: object.id,
-        canvasPoint: canvasPointFromContextMenu(event),
+        objectId: target.id,
+        canvasPoint,
       });
     },
-    [canvasPointFromContextMenu, dispatch],
+    [canvasPointFromContextMenu, dispatch, document, openCanvasContextMenu],
   );
 
   const addObjectFromContextMenu = (objectType: InteractiveCanvasObjectType) => {
@@ -229,13 +255,12 @@ export function useCanvasContextMenu({
     setContextMenu(null);
   };
 
-  const captureContextSectionContents = () => {
+  const tidySectionMembership = () => {
     if (contextMenu?.kind !== "object") return;
     const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
     if (contextObject?.type !== "section") return;
     dispatch({
-      type: "canvas.captureSectionContents",
-      sectionId: contextObject.id,
+      type: "canvas.reconcileSectionMembership",
     });
     setContextMenu(null);
   };
@@ -264,7 +289,7 @@ export function useCanvasContextMenu({
     setLockFromContextMenu,
     addContextAnnotation,
     fitContextObject,
-    captureContextSectionContents,
+    tidySectionMembership,
     deleteContextSelection,
   };
 }

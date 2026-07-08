@@ -15,20 +15,20 @@ import {
 } from "../state/geometry";
 import { gridBackground } from "./grid";
 import type { InteractionOverlay } from "../interaction/interaction";
-import { canvasSurfaceStyle, TEXT_SIZES_PX } from "../theme";
+import { canvasSurfaceStyle } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
 import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
+import { AnchorDots } from "./overlays/AnchorDots";
 import { Marquee } from "./overlays/Marquee";
 import { PlacePreview } from "./overlays/PlacePreview";
 import { SnapGuideLine } from "./overlays/SnapGuideLine";
 import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
 import type { CanvasTool } from "../state/actions";
-import { STICKY_GEOMETRY } from "../objects/sticky/def";
 
 // ---------------------------------------------------------------------------
 // Stage surface constants (moved from theme/tokens.ts in the theme dispersal
@@ -71,6 +71,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
+import { paintOrderedObjects } from "../state/z-order";
 
 /** Arrowhead marker geometry, expressed in units of the connector's own stroke width (see marker `<defs>` below). */
 const ARROW_LENGTH_RATIO = CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO;
@@ -122,8 +123,8 @@ export interface CanvasStageProps {
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
   /** Ephemeral interaction overlay (marquee, guides, spacing, drop target, connector drag preview). */
   interactionOverlay?: InteractionOverlay;
-  /** Object whose label is currently being edited inline (4.2.1) — its static label span is hidden. */
-  editingLabelObjectId?: string | null;
+  /** Object whose text is currently being edited in place (D14) — its at-rest text is hidden while the slot editor is the visible copy. */
+  editingTextObjectId?: string | null;
   /** Untransformed screen-space overlay (marquee, guides, handles). */
   overlay?: ReactNode;
   /**
@@ -147,49 +148,17 @@ export interface CanvasStageProps {
  * themselves, nesting wins: a section nested inside another (sections nest
  * via the same persisted, auto-managed `parentId` membership as every other
  * section child) renders above its ancestors, so the nested section's tint
- * is visibly layered on top rather than blended underneath. Stable otherwise
- * (schema order is preserved as the tiebreaker), so
- * non-section-vs-non-section and sibling-section-vs-sibling-section order
- * never changes from the document's natural order.
+ * is visibly layered on top rather than blended underneath. Equal-depth
+ * sections paint by area descending (larger further back), then schema order,
+ * while non-section-vs-non-section order never changes from the document's
+ * natural order.
  *
  * Depth is the length of a section's `parentId` ancestor chain (root
  * sections are depth 0). Sections are the only legal parent type, so every
  * ancestor on the chain is a section.
  */
 function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCanvasObject[] {
-  const sections = objects.filter((object) => object.type === "section");
-  if (sections.length === 0) return objects;
-
-  const byId = new Map(objects.map((object) => [object.id, object]));
-
-  function sectionDepth(section: InteractiveCanvasObject): number {
-    let depth = 0;
-    // Guard against dangling parentIds and (invalid) cycles.
-    const visited = new Set<string>([section.id]);
-    let parentId = section.parentId ?? null;
-    while (parentId && !visited.has(parentId)) {
-      const parent = byId.get(parentId);
-      if (!parent) break;
-      visited.add(parent.id);
-      depth += 1;
-      parentId = parent.parentId ?? null;
-    }
-    return depth;
-  }
-
-  const indexOf = new Map(objects.map((object, index) => [object.id, index]));
-  const sectionDepths = new Map(sections.map((section) => [section.id, sectionDepth(section)]));
-
-  return [...objects].sort((a, b) => {
-    const aIsSection = a.type === "section";
-    const bIsSection = b.type === "section";
-    if (aIsSection !== bIsSection) return aIsSection ? -1 : 1;
-    if (aIsSection && bIsSection) {
-      const depthDelta = (sectionDepths.get(a.id) ?? 0) - (sectionDepths.get(b.id) ?? 0);
-      if (depthDelta !== 0) return depthDelta;
-    }
-    return (indexOf.get(a.id) ?? 0) - (indexOf.get(b.id) ?? 0);
-  });
+  return paintOrderedObjects(objects);
 }
 
 /** contentHidden hides a section's RECORDED members — its transitive parentId descendants — while nested section backdrops stay visible. */
@@ -252,7 +221,7 @@ export function CanvasStage({
   onStagePointerLeave,
   onStageDoubleClick,
   interactionOverlay,
-  editingLabelObjectId = null,
+  editingTextObjectId = null,
   overlay,
   worldOverlay,
   activeTool,
@@ -345,79 +314,13 @@ export function CanvasStage({
           outline-offset: 2px;
           box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 22%, transparent);
         }
-        /* Sticky rules live on the sticky def (objects/sticky/def.tsx) — except
-           this one: the sticky body span carries BOTH .interactive-canvas-object-body
-           and .interactive-canvas-sticky-body (same specificity), and this rule's
-           non-!important declarations must keep LOSING to .interactive-canvas-object-body
-           below by source order. It cannot move into the appended def CSS without
-           flipping the color/font-size/line-height winners. */
-        .interactive-canvas-sticky-body {
-          display: flex !important;
-          flex-direction: column;
-          -webkit-line-clamp: unset !important;
-          color: ${STICKY_GEOMETRY.bodyTextColor};
-          font-size: ${STICKY_GEOMETRY.bodyFontSizePx}px;
-          line-height: ${STICKY_GEOMETRY.bodyLineHeightPx}px;
-        }
         /* Shared z-plumbing for every def-rendered true-outline SVG silhouette
            (polygon shapes, junctions) — infrastructure, not per-shape CSS. */
         .interactive-canvas-true-outline-silhouette {
           z-index: 0;
         }
-        .interactive-canvas-label-below-icon {
-          position: relative;
-          z-index: 1;
-          font-weight: 700;
-          color: #000000;
-        }
-        .interactive-canvas-object-label {
-          position: relative;
-          z-index: 1;
-          display: block;
-          max-width: 100%;
-          overflow-wrap: anywhere;
-          font-weight: 650;
-          font-size: ${TEXT_SIZES_PX.shapeText}px;
-          line-height: 1.2;
-        }
-        .interactive-canvas-object-body {
-          position: relative;
-          z-index: 1;
-          display: -webkit-box;
-          max-width: 100%;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          color: var(--muted-foreground);
-          font-size: ${TEXT_SIZES_PX.stickyAuthor}px;
-          line-height: 1.35;
-        }
-        .interactive-canvas-edge-port {
-          width: 14px;
-          height: 14px;
-          border-radius: 999px;
-          background: ${SELECTION_BLUE};
-          border: 1.5px solid var(--background);
-          box-shadow: 0 1px 4px color-mix(in oklab, var(--foreground) 20%, transparent);
-          cursor: crosshair;
-          opacity: 0;
-          pointer-events: none;
-          touch-action: none;
-          transition: opacity 120ms ease;
-          z-index: 1;
-        }
-        /* Ports stay invisible (FigJam-style — no circles on the selection
-           chrome) but remain draggable on the selected object: quick-connect
-           is the only way to start a connector, and the crosshair cursor
-           still advertises it at the edge midpoints. */
-        .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
-          pointer-events: auto;
-        }
         .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object {
           cursor: inherit;
-        }
-        .interactive-canvas-stage[data-canvas-hand-tool="true"] .interactive-canvas-object[data-selected="true"] .interactive-canvas-edge-port {
-          pointer-events: none;
         }
       ${
         /* Two-tier registry (RESTRUCTURE.md step 4): per-kind CSS lives on the
@@ -542,9 +445,8 @@ export function CanvasStage({
               compact={compact}
               bounds={bounds}
               editable={Boolean(onObjectSelect || onStagePointerEvent)}
-              showPorts={Boolean(onStagePointerEvent) && !handToolActive}
               zoom={zoom}
-              hideLabel={editingLabelObjectId === object.id}
+              hideText={editingTextObjectId === object.id}
               onObjectSelect={onObjectSelect}
               onObjectContextMenu={onObjectContextMenu}
             />
@@ -573,7 +475,6 @@ export function CanvasStage({
                 compact={compact}
                 bounds={bounds}
                 editable={false}
-                showPorts={false}
                 zoom={zoom}
               />
             </div>
@@ -610,6 +511,19 @@ export function CanvasStage({
           selectedObjectIds={selectedObjectIds}
           interactiveHandles={!handToolActive}
         />
+        {/* Anchor dots (D5/D15): def-derived connection anchors on every
+            selected object — editor-only (same gate as the old edge ports:
+            pointer events wired + not the hand tool). Rendered in this
+            screen-space overlay, NOT in object chrome: the object button
+            clips overflow, and true-outline anchors sit off the bbox edge. */}
+        {Boolean(onStagePointerEvent) && !handToolActive && (
+          <AnchorDots
+            document={document}
+            viewport={viewport}
+            selectedObjectIds={selectedObjectIds}
+            interactive
+          />
+        )}
         {interactionOverlay?.marquee && (
           <Marquee viewport={viewport} bounds={interactionOverlay.marquee} />
         )}

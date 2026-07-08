@@ -3,7 +3,6 @@ import type { CanvasAction, CanvasSelection } from "../../state/actions";
 import {
   applyResizeHandle,
   cancelInteraction,
-  hitTestDropTarget,
   hitTestObjects,
   IDLE_INTERACTION_STATE,
   MIN_DIRECT_RESIZE_SIZE,
@@ -24,7 +23,7 @@ import type {
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 100 },
     ...overrides,
   };
@@ -94,6 +93,13 @@ function updateGeometriesActions(actions: CanvasAction[]) {
   );
 }
 
+function reconcileSectionActions(actions: CanvasAction[]) {
+  return actions.filter(
+    (action): action is Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }> =>
+      action.type === "canvas.reconcileSectionMembership",
+  );
+}
+
 describe("interaction: hitTestObjects", () => {
   it("hits the topmost object at a point when objects overlap", () => {
     const document = makeDocument([
@@ -111,7 +117,7 @@ describe("interaction: hitTestObjects", () => {
 
   it("hits a member object rendered above its section", () => {
     const document = makeDocument([
-      makeObject({ id: "section", type: "section", title: "S", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
     ]);
     // Point is inside both the section and the child; the child renders on
@@ -120,9 +126,27 @@ describe("interaction: hitTestObjects", () => {
     expect(hit?.id).toBe("child");
   });
 
+  it("hits a shape above a section even when the section is later in the raw array", () => {
+    const document = makeDocument([
+      makeObject({ id: "shape", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
+      makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+    ]);
+    const hit = hitTestObjects(document, { x: 120, y: 120 });
+    expect(hit?.id).toBe("shape");
+  });
+
+  it("hits the smaller top-painted section when equal-depth sections overlap", () => {
+    const document = makeDocument([
+      makeObject({ id: "small", type: "section", text: "Small", color: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
+      makeObject({ id: "large", type: "section", text: "Large", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+    ]);
+    const hit = hitTestObjects(document, { x: 75, y: 75 });
+    expect(hit?.id).toBe("small");
+  });
+
   it("hits the section itself when the point is inside it but outside its members", () => {
     const document = makeDocument([
-      makeObject({ id: "section", type: "section", title: "S", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeObject({ id: "section", type: "section", text: "S", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "child", parentId: "section", geometry: { x: 100, y: 100, width: 50, height: 50 } }),
     ]);
     const hit = hitTestObjects(document, { x: 5, y: 5 });
@@ -334,10 +358,14 @@ describe("interaction: drag/move gesture", () => {
     expect(geometryActions[0]!.recordHistory).toBe(false);
     expect(geometryActions[0]!.geometries.a).toEqual({ x: 15, y: 20, width: 100, height: 100 });
 
-    // Release ends the gesture without further geometry dispatch.
+    // Release ends the gesture without further geometry dispatch, then asks
+    // the reducer to reconcile membership inside the same undo entry.
     result = stepInteraction(state, up({ x: 25, y: 30 }, hit), ctx);
     expect(result.state.kind).toBe("idle");
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+    expect(reconcileSectionActions(result.dispatch)).toEqual([
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
+    ]);
   });
 
   it("moves a dragged section and its recorded parentId descendants exactly once", () => {
@@ -348,15 +376,15 @@ describe("interaction: drag/move gesture", () => {
       makeObject({
         id: "outer",
         type: "section",
-        title: "Outer",
-        tint: "gray",
+        text: "Outer",
+        color: "gray",
         geometry: { x: 80, y: 80, width: 320, height: 220 },
       }),
       makeObject({
         id: "inner",
         type: "section",
-        title: "Inner",
-        tint: "gray",
+        text: "Inner",
+        color: "gray",
         parentId: "outer",
         geometry: { x: 120, y: 120, width: 120, height: 80 },
       }),
@@ -420,8 +448,8 @@ describe("interaction: drag/move gesture", () => {
       makeObject({
         id: "section-a",
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         locked: "background",
         geometry: { x: 0, y: 0, width: 200, height: 120 },
       }),
@@ -441,8 +469,8 @@ describe("interaction: drag/move gesture", () => {
       makeObject({
         id: "section-a",
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         locked: "all",
         geometry: { x: 0, y: 0, width: 240, height: 180 },
       }),
@@ -467,8 +495,8 @@ describe("interaction: drag/move gesture", () => {
       makeObject({
         id: "section-a",
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         locked: "background",
         geometry: { x: 0, y: 0, width: 240, height: 180 },
       }),
@@ -552,6 +580,25 @@ describe("interaction: marquee selection", () => {
     expect(result.dispatch).toEqual([
       { type: "canvas.select", selection: { kind: "objects", objectIds: ["inside"] } },
     ]);
+  });
+
+  it("keeps below-slot external text out of marquee membership", () => {
+    const document = makeDocument([
+      makeObject({
+        id: "person",
+        type: "person",
+        text: "Adapt Question Based on Interview History",
+        geometry: { x: 100, y: 100, width: 120, height: 140 },
+        style: { shape: "person" },
+      }),
+    ]);
+    const ctx = makeContext(document);
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 80, y: 246 }, { kind: "canvas" }), ctx);
+    result = stepInteraction(result.state, move({ x: 240, y: 286 }, { kind: "canvas" }), ctx);
+    result = stepInteraction(result.state, up({ x: 240, y: 286 }, { kind: "canvas" }), ctx);
+
+    expect(result.dispatch).toEqual([{ type: "canvas.select", selection: { kind: "none" } }]);
   });
 
   it("is additive with shift held, unioning with the existing selection", () => {
@@ -688,6 +735,9 @@ describe("interaction: resize gesture via stepInteraction", () => {
 
     result = stepInteraction(result.state, up({ x: 360, y: 290 }, handleHit), ctx);
     expect(result.state.kind).toBe("idle");
+    expect(reconcileSectionActions(result.dispatch)).toEqual([
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
+    ]);
   });
 
   it("restores the start geometry on Escape/cancel mid-resize", () => {
@@ -711,8 +761,8 @@ describe("interaction: resize gesture via stepInteraction", () => {
       makeObject({
         id: "section-a",
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         locked: "background",
         geometry: { x: 100, y: 100, width: 200, height: 150 },
       }),
@@ -731,8 +781,8 @@ describe("interaction: resize gesture via stepInteraction", () => {
       makeObject({
         id: "section-a",
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         locked: "all",
         geometry: { x: 0, y: 0, width: 260, height: 220 },
       }),
@@ -833,10 +883,10 @@ describe("interaction: live snap guides during move", () => {
 
 describe("interaction: section drop-in/out during move", () => {
   function makeSection(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
-    return makeObject({ type: "section", title: overrides.id, tint: "gray", ...overrides });
+    return makeObject({ type: "section", text: overrides.id, color: "gray", ...overrides });
   }
 
-  it("sets overlay.dropTargetId when the dragged object's bounds-center lands inside a section", () => {
+  it("sets overlay.dropTargetId when the dragged object has enough projected overlap with a section", () => {
     const document = makeDocument([
       makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
@@ -845,13 +895,13 @@ describe("interaction: section drop-in/out during move", () => {
     const hit = { kind: "object" as const, objectId: "a" };
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
-    // Drag "a" so its center lands deep in the section's interior.
+    // Drag "a" so its projected bounds are fully inside the section.
     result = stepInteraction(result.state, move({ x: 460, y: 150 }, hit), ctx);
     expect(result.state.kind).toBe("move");
     expect(result.overlay.dropTargetId).toBe("section");
   });
 
-  it("probes with the dragged object's bounds-center, not the pointer position", () => {
+  it("requires 60 percent projected overlap even when the pointer and center are inside", () => {
     const document = makeDocument([
       makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
@@ -859,22 +909,18 @@ describe("interaction: section drop-in/out during move", () => {
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "a" };
 
-    // Grab "a" near its top-left corner: pointer at (280,150) is OUTSIDE the
-    // section (x < 300), but "a" has moved to (275,145) so its center
-    // (325,195) is inside — the section must still register.
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 5, y: 5 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 280, y: 150 }, hit), ctx);
-    expect(result.overlay.dropTargetId).toBe("section");
-
-    // Converse: grab near the bottom-right corner so the pointer at (310,180)
-    // is INSIDE the section but "a" sits at (215,85) with its center (265,135)
-    // outside — no drop target.
-    result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 95, y: 95 }, hit), ctx);
-    result = stepInteraction(result.state, move({ x: 310, y: 180 }, hit), ctx);
+    // Pointer and center are inside the section, but only 55% of the object
+    // overlaps it, below the authoritative section-membership threshold.
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 95, y: 50 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 350, y: 50 }, hit), ctx);
     expect(result.overlay.dropTargetId).toBeNull();
+
+    result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 95, y: 50 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 360, y: 50 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("section");
   });
 
-  it("dispatches canvas.setParent on release when the drop target differs from the current parent", () => {
+  it("dispatches a no-history section reconcile on release", () => {
     const document = makeDocument([
       makeSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", geometry: { x: 0, y: 0, width: 50, height: 50 } }),
@@ -888,11 +934,11 @@ describe("interaction: section drop-in/out during move", () => {
 
     result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
     expect(result.dispatch).toEqual([
-      { type: "canvas.setParent", objectIds: ["a"], parentId: "section" },
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
     ]);
   });
 
-  it("does not dispatch canvas.setParent when the drop target matches the current parent", () => {
+  it("still commits through section reconcile when the drop target matches the current parent", () => {
     const document = makeDocument([
       makeSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
       makeObject({ id: "a", parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
@@ -907,10 +953,12 @@ describe("interaction: section drop-in/out during move", () => {
 
     result = stepInteraction(result.state, up({ x: 60, y: 60 }, hit), ctx);
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
-    expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
+    expect(result.dispatch).toEqual([
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
+    ]);
   });
 
-  it("dispatches canvas.setParent with parentId null when dropped on open canvas from inside a section", () => {
+  it("commits through section reconcile when dropped on open canvas from inside a section", () => {
     const document = makeDocument([
       makeSection({ id: "section", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
       makeObject({ id: "a", parentId: "section", geometry: { x: 20, y: 20, width: 50, height: 50 } }),
@@ -925,7 +973,7 @@ describe("interaction: section drop-in/out during move", () => {
 
     result = stepInteraction(result.state, up({ x: 1000, y: 1000 }, hit), ctx);
     expect(result.dispatch).toEqual([
-      { type: "canvas.setParent", objectIds: ["a"], parentId: null },
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
     ]);
   });
 
@@ -944,9 +992,10 @@ describe("interaction: section drop-in/out during move", () => {
 
     result = stepInteraction(result.state, up({ x: 460, y: 150 }, hit), ctx);
     expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
+    expect(reconcileSectionActions(result.dispatch)).toHaveLength(1);
   });
 
-  it("reparents only the dragged section on release — carried descendants keep their parentIds", () => {
+  it("previews the dragged section's geometric parent while carried descendants keep their own candidates excluded", () => {
     const document = makeDocument([
       makeSection({ id: "target", geometry: { x: 600, y: 0, width: 500, height: 500 } }),
       makeSection({ id: "dragged", geometry: { x: 0, y: 0, width: 200, height: 200 } }),
@@ -956,20 +1005,19 @@ describe("interaction: section drop-in/out during move", () => {
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "dragged" };
 
-    // Drag "dragged" (which carries "nested" and "leaf") so its center lands
-    // inside "target". Only the drag root changes parent — reparenting the
-    // whole expanded set would flatten the subtree onto "target".
+    // Drag "dragged" (which carries "nested" and "leaf") so its bounds land
+    // inside "target"; the commit is a doc-wide reducer reconcile.
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 10, y: 10 }, hit), ctx);
     result = stepInteraction(result.state, move({ x: 700, y: 100 }, hit), ctx);
     expect(result.overlay.dropTargetId).toBe("target");
 
     result = stepInteraction(result.state, up({ x: 700, y: 100 }, hit), ctx);
     expect(result.dispatch).toEqual([
-      { type: "canvas.setParent", objectIds: ["dragged"], parentId: "target" },
+      { type: "canvas.reconcileSectionMembership", recordHistory: false },
     ]);
   });
 
-  it("does not dispatch canvas.setParent for a no-op section drag within its existing parent", () => {
+  it("commits through section reconcile for a no-op section drag within its existing parent", () => {
     const document = makeDocument([
       makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
       makeSection({ id: "inner", parentId: "outer", geometry: { x: 20, y: 20, width: 200, height: 200 } }),
@@ -978,15 +1026,15 @@ describe("interaction: section drop-in/out during move", () => {
     const ctx = makeContext(document);
     const hit = { kind: "object" as const, objectId: "inner" };
 
-    // The expanded drag set has mixed parents ("inner" → outer, "child" →
-    // inner); the release comparison must use the drag root's parent only, or
-    // this stay-inside-"outer" drag would dispatch a spurious setParent.
+    // The expanded drag set has mixed parents ("inner" -> outer, "child" ->
+    // inner); the preview should still identify the enclosing parent.
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 30, y: 30 }, hit), ctx);
     result = stepInteraction(result.state, move({ x: 60, y: 60 }, hit), ctx);
     expect(result.overlay.dropTargetId).toBe("outer");
 
     result = stepInteraction(result.state, up({ x: 60, y: 60 }, hit), ctx);
     expect(result.dispatch.some((action) => action.type === "canvas.setParent")).toBe(false);
+    expect(reconcileSectionActions(result.dispatch)).toHaveLength(1);
   });
 
   it("excludes the dragged section and its descendants from drop-target hit-testing", () => {
@@ -1012,39 +1060,37 @@ describe("interaction: section drop-in/out during move", () => {
   });
 });
 
-describe("interaction: hitTestDropTarget picks the deepest containing section", () => {
+describe("interaction: section drop-target preview uses bounds-based membership", () => {
   function makeSection(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
-    return makeObject({ type: "section", title: overrides.id, tint: "gray", ...overrides });
+    return makeObject({ type: "section", text: overrides.id, color: "gray", ...overrides });
   }
 
-  it("returns the nested section even when it precedes its ancestor in the array", () => {
-    // Sections paint depth-then-index (renderOrderedObjects), so the nested
-    // section is visibly on top of "outer" regardless of array order — the
-    // drop target must match what's painted under the probe point.
+  it("returns the smallest qualifying section even when it precedes its ancestor in the array", () => {
     const document = makeDocument([
       makeSection({ id: "inner", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
       makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+      makeObject({ id: "dragged", geometry: { x: 500, y: 500, width: 50, height: 50 } }),
     ]);
-    const hit = hitTestDropTarget(document, { x: 100, y: 100 }, new Set());
-    expect(hit?.id).toBe("inner");
-  });
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "dragged" };
 
-  it("breaks equal-depth ties by later array index (the render sort's stable tiebreak)", () => {
-    const document = makeDocument([
-      makeSection({ id: "first", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
-      makeSection({ id: "second", geometry: { x: 100, y: 100, width: 300, height: 300 } }),
-    ]);
-    const hit = hitTestDropTarget(document, { x: 150, y: 150 }, new Set());
-    expect(hit?.id).toBe("second");
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 510, y: 510 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 85, y: 85 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("inner");
   });
 
   it("still respects excludeIds, falling back to the next-deepest containing section", () => {
     const document = makeDocument([
       makeSection({ id: "inner", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
       makeSection({ id: "outer", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+      makeObject({ id: "leaf", parentId: "inner", geometry: { x: 70, y: 70, width: 20, height: 20 } }),
     ]);
-    const hit = hitTestDropTarget(document, { x: 100, y: 100 }, new Set(["inner"]));
-    expect(hit?.id).toBe("outer");
+    const ctx = makeContext(document);
+    const hit = { kind: "object" as const, objectId: "inner" };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 60, y: 60 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 100, y: 100 }, hit), ctx);
+    expect(result.overlay.dropTargetId).toBe("outer");
   });
 });
 
@@ -1241,7 +1287,6 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
       {
         type: "canvas.addObject",
         objectType: "process",
-        parentId: null,
         geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
       },
       { type: "canvas.setTool", tool: "select" },
@@ -1263,7 +1308,6 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
       {
         type: "canvas.addObject",
         objectType: "rectangle",
-        parentId: null,
         geometry: { x: 100, y: 100, width: 200, height: 120 },
       },
       { type: "canvas.setTool", tool: "select" },
@@ -1285,9 +1329,9 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     }
   });
 
-  it("assigns parentId when the placement point lands inside a section (reusing drop-target hit-testing)", () => {
+  it("lets the reducer assign parentId from the placed object's final geometry", () => {
     const document = makeDocument([
-      makeObject({ id: "group", type: "section", title: "Group", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+      makeObject({ id: "group", type: "section", text: "Group", color: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
     ]);
     const ctx = makeContext(document, { tool: "sticky" });
 
@@ -1297,7 +1341,6 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
       {
         type: "canvas.addObject",
         objectType: "sticky",
-        parentId: "group",
         geometry: expect.any(Object),
       },
       { type: "canvas.setTool", tool: "select" },
@@ -1335,7 +1378,6 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
       {
         type: "canvas.addObject",
         objectType: "process",
-        parentId: null,
         geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
       },
       // No canvas.setTool — the armed tool survives so the next click places another.
@@ -1359,21 +1401,21 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     const document = makeDocument([]);
     const ctx = makeContext(document, {
       tool: "icon",
-      armedShape: { icon: "database", label: "Database" },
+      armedShape: { icon: "database", text: "Database" },
     });
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 300 }, { kind: "canvas" }), ctx);
-    // The ghost overlay carries the FULL draft object (type + glyph + label),
+    // The ghost overlay carries the FULL draft object (type + glyph + text),
     // so the stage can render the real shape instead of a dashed box.
     expect(result.overlay.placePreviewObject).toMatchObject({
       type: "icon",
       icon: "database",
-      label: "Database",
+      text: "Database",
     });
 
     result = stepInteraction(result.state, up({ x: 300, y: 300 }), ctx);
     const addAction = result.dispatch.find((action) => action.type === "canvas.addObject");
-    expect(addAction).toMatchObject({ objectType: "icon", icon: "database", label: "Database" });
+    expect(addAction).toMatchObject({ objectType: "icon", icon: "database", text: "Database" });
   });
 
   it("a direction variant (triangle down) rides through the same path", () => {
@@ -1397,7 +1439,6 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     expect(result.dispatch[0]).toEqual({
       type: "canvas.addObject",
       objectType: "process",
-      parentId: null,
       geometry: { x: 500 - 184 / 2, y: 500 - 96 / 2, width: 184, height: 96 },
     });
   });

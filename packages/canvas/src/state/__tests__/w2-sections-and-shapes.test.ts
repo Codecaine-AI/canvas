@@ -25,7 +25,7 @@ const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDo
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 100 },
     ...overrides,
   };
@@ -112,9 +112,9 @@ describe("schema: W2 object types round-trip", () => {
     if (!validation.ok) return;
     const byId = new Map(validation.document.objects.map((object) => [object.id, object]));
 
-    expect(byId.get("outer-section")?.title).toBe("Memory pipeline");
-    expect(byId.get("outer-section")?.tint).toBe("gray");
-    expect(byId.get("inner-section")?.tint).toBe("blue");
+    expect(byId.get("outer-section")?.text).toBe("Memory pipeline");
+    expect(byId.get("outer-section")?.color).toBe("gray");
+    expect(byId.get("inner-section")?.color).toBe("blue");
     expect(byId.get("outside-arrow")?.direction).toBe("right");
     expect(byId.get("outside-arrow-left")?.direction).toBe("left");
     expect(byId.get("captured-code-block")?.language).toBe("python");
@@ -122,29 +122,70 @@ describe("schema: W2 object types round-trip", () => {
     expect(byId.get("partial-overlap-note")?.author).toBe("Ford");
   });
 
-  it("rejects a section with no title as a hard validation error", () => {
-    const document = makeDocument([
-      { ...makeObject({ id: "s1" }), type: "section", tint: "gray", title: "" } as InteractiveCanvasObject,
-    ]);
-    const validation = validateInteractiveCanvasDocument(document);
-    expect(validation.ok).toBe(false);
-    if (validation.ok) return;
-    expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("title");
-  });
-
-  it("rejects a section with an unknown tint family as a hard validation error", () => {
+  it("rejects an object with missing text as a hard validation error", () => {
     const document = makeDocument([
       {
-        ...makeObject({ id: "s1" }),
+        id: "s1",
         type: "section",
-        title: "Untitled",
-        tint: "chartreuse",
+        color: "gray",
+        geometry: { x: 0, y: 0, width: 100, height: 100 },
       } as unknown as InteractiveCanvasObject,
     ]);
     const validation = validateInteractiveCanvasDocument(document);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
-    expect(validation.issues.map((issue) => issue.message).join(" ")).toContain("tint");
+    expect(validation.issues).toContainEqual({
+      path: "$.objects[0].text",
+      message: "Object text is required (a string; may be empty).",
+    });
+  });
+
+  it("drops a section's unknown color id with a warning (P1 — tint is gone, color is soft-validated)", () => {
+    const document = makeDocument([
+      {
+        ...makeObject({ id: "s1" }),
+        type: "section",
+        text: "Untitled",
+        color: "chartreuse",
+      } as unknown as InteractiveCanvasObject,
+    ]);
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.color).toBeUndefined();
+    expect((validation.warnings ?? []).map((warning) => warning.message).join(" ")).toContain("chartreuse");
+  });
+
+  it("drops legacy soft color ids with the same invalid-color warning path", () => {
+    const document = {
+      ...makeDocument([
+        {
+          ...makeObject({ id: "o1" }),
+          color: "blue-soft",
+        } as unknown as InteractiveCanvasObject,
+      ]),
+      connections: [
+        {
+          id: "c1",
+          from: { objectId: "o1" },
+          to: { objectId: "o1" },
+          color: "orange-soft",
+        },
+      ],
+    };
+    const validation = validateInteractiveCanvasDocument(document);
+    expect(validation.ok).toBe(true);
+    if (!validation.ok) return;
+    expect(validation.document.objects[0]?.color).toBeUndefined();
+    expect(validation.document.connections[0]?.color).toBeUndefined();
+    expect(validation.warnings).toContainEqual({
+      path: "$.objects[0].color",
+      message: 'Unknown color "blue-soft" was dropped.',
+    });
+    expect(validation.warnings).toContainEqual({
+      path: "$.connections[0].color",
+      message: 'Unknown color "orange-soft" was dropped.',
+    });
   });
 
   it("defaults an arrow-shape's direction to right when omitted", () => {
@@ -157,22 +198,21 @@ describe("schema: W2 object types round-trip", () => {
     expect(validation.document.objects[0]?.direction).toBe("right");
   });
 
-  // W4 — explicit fill/stroke/strokeWidth on CanvasObjectStyle.
-  it("preserves valid style.fill/stroke/strokeWidth through validation", () => {
+  // P1 — color pick + strokeWidth on the slimmed style bag.
+  it("preserves valid color/strokeWidth through validation", () => {
     const document = makeDocument([
       makeObject({
         id: "styled",
-        style: { shape: "pill", fill: "#FFFFFF", stroke: "#757575", strokeWidth: 8 },
+        color: "white",
+        style: { shape: "pill", strokeWidth: 8 },
       }),
     ]);
     const validation = validateInteractiveCanvasDocument(document);
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
     expect(validation.warnings).toBeUndefined();
-    const style = validation.document.objects[0]?.style;
-    expect(style?.fill).toBe("#FFFFFF");
-    expect(style?.stroke).toBe("#757575");
-    expect(style?.strokeWidth).toBe(8);
+    expect(validation.document.objects[0]?.color).toBe("white");
+    expect(validation.document.objects[0]?.style?.strokeWidth).toBe(8);
   });
 
   it("preserves section strokeStyle through validation", () => {
@@ -180,8 +220,8 @@ describe("schema: W2 object types round-trip", () => {
       {
         ...makeObject({ id: "section-a" }),
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         style: { shape: "section", strokeStyle: "dashed" },
       },
     ]);
@@ -201,8 +241,8 @@ describe("schema: W2 object types round-trip", () => {
         {
           ...makeObject({ id: "section-a" }),
           type: "section",
-          title: "A",
-          tint: "gray",
+          text: "A",
+          color: "gray",
           locked: true,
           contentHidden: true,
           style: { shape: "section" },
@@ -232,13 +272,13 @@ describe("schema: W2 object types round-trip", () => {
     expect(validateLock("nope")).toBeUndefined();
   });
 
-  it("updates a section fill through the undoable object reducer path", () => {
+  it("updates a section color through the undoable object reducer path", () => {
     const doc = makeDocument([
       {
         ...makeObject({ id: "section-a" }),
         type: "section",
-        title: "A",
-        tint: "gray",
+        text: "A",
+        color: "gray",
         style: { shape: "section" },
       },
     ]);
@@ -247,21 +287,19 @@ describe("schema: W2 object types round-trip", () => {
     const next = reduceInteractiveCanvasState(state, {
       type: "canvas.updateObject",
       objectId: "section-a",
-      patch: { style: { fill: "#C2E5FF", stroke: "#3DADFF" } },
+      patch: { color: "blue" },
     });
 
-    expect(next.document.objects[0]?.style?.fill).toBe("#C2E5FF");
+    expect(next.document.objects[0]?.color).toBe("blue");
     expect(next.history.past.length).toBe(1);
   });
 
-  it("drops invalid style.fill/stroke/strokeWidth with warnings, not hard errors", () => {
+  it("drops an invalid strokeWidth with a warning, not a hard error", () => {
     const document = makeDocument([
       makeObject({
         id: "badly-styled",
         style: {
           shape: "pill",
-          fill: "",
-          stroke: 42,
           strokeWidth: -3,
         } as unknown as InteractiveCanvasObject["style"],
       }),
@@ -270,13 +308,8 @@ describe("schema: W2 object types round-trip", () => {
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
     const warningPaths = (validation.warnings ?? []).map((warning) => warning.path).join(" ");
-    expect(warningPaths).toContain("style.fill");
-    expect(warningPaths).toContain("style.stroke");
     expect(warningPaths).toContain("style.strokeWidth");
-    const style = validation.document.objects[0]?.style;
-    expect(style?.fill).toBeUndefined();
-    expect(style?.stroke).toBeUndefined();
-    expect(style?.strokeWidth).toBeUndefined();
+    expect(validation.document.objects[0]?.style?.strokeWidth).toBeUndefined();
   });
 });
 
@@ -411,7 +444,7 @@ describe("schema: W5 FigJam parity shape set (Wave A)", () => {
     expect(validation.document.objects[0]?.direction).toBeUndefined();
   });
 
-  it("addObject applies the brief's default geometry/tone/shape for each new native type", () => {
+  it("addObject applies the brief's default geometry/color/shape for each new native type", () => {
     const state = createInteractiveCanvasState(makeDocument([makeObject({ id: "seed" })]));
     const cases: Array<{ type: InteractiveCanvasObject["type"]; width: number; height: number }> = [
       { type: "ellipse", width: 160, height: 128 },
@@ -444,7 +477,7 @@ describe("schema: W5 FigJam parity shape set (Wave A)", () => {
       const added = next.document.objects.at(-1);
       expect(added?.type).toBe(testCase.type);
       expect(added?.style?.shape).toBe(testCase.type);
-      expect(added?.style?.tone).toBe("neutral");
+      expect(added?.color).toBe("gray");
       expect(added?.geometry.width).toBe(testCase.width);
       expect(added?.geometry.height).toBe(testCase.height);
     }
@@ -454,7 +487,7 @@ describe("schema: W5 FigJam parity shape set (Wave A)", () => {
 describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
   it("captures an object fully inside a section", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
       makeObject({ id: "inside", geometry: { x: 50, y: 50, width: 100, height: 100 } }),
     ]);
     const members = sectionCaptureMembers(document, "section-a", SECTION_CAPTURE_OVERLAP_THRESHOLD);
@@ -463,7 +496,7 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
 
   it("does not capture an object overlapping just under the 0.6 threshold", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 100, height: 100 } },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 100, height: 100 } },
       // 100x100 object positioned so only ~50% overlaps the section (under threshold).
       makeObject({ id: "half-in", geometry: { x: 50, y: 0, width: 100, height: 100 } }),
     ]);
@@ -473,7 +506,7 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
 
   it("captures an object right at/above the 0.6 threshold", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 100, height: 100 } },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 100, height: 100 } },
       // 100x100 object with 65% overlap (65 of its own width inside the section).
       makeObject({ id: "mostly-in", geometry: { x: 35, y: 0, width: 100, height: 100 } }),
     ]);
@@ -483,8 +516,8 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
 
   it("recursively captures a nested section's own members", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 600, height: 600 } },
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", geometry: { x: 50, y: 50, width: 300, height: 300 } },
+      { ...makeObject({ id: "outer" }), type: "section", text: "Outer", color: "gray", geometry: { x: 0, y: 0, width: 600, height: 600 } },
+      { ...makeObject({ id: "inner" }), type: "section", text: "Inner", color: "blue", geometry: { x: 50, y: 50, width: 300, height: 300 } },
       makeObject({ id: "grandchild", geometry: { x: 80, y: 80, width: 100, height: 100 } }),
     ]);
     const members = sectionCaptureMembers(document, "outer", SECTION_CAPTURE_OVERLAP_THRESHOLD);
@@ -509,7 +542,7 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
 describe("interaction: dragging a section carries its recorded parentId members", () => {
   it("moves the section and every recorded member together, with one history entry", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
       makeObject({ id: "member-a", parentId: "section-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
       // Geometrically inside the section but with no recorded membership —
       // drags no longer recapture by overlap, so it must stay put.
@@ -548,7 +581,7 @@ describe("interaction: dragging a section carries its recorded parentId members"
 
   it("restores the section and all carried members on Escape", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
       makeObject({ id: "member-a", parentId: "section-a", geometry: { x: 40, y: 40, width: 60, height: 60 } }),
     ]);
     const ctx = makeContext(document);
@@ -569,8 +602,8 @@ describe("interaction: dragging a section carries its recorded parentId members"
 
   it("recursively carries a nested section and its own members when dragging the outer section", () => {
     const document = makeDocument([
-      { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 600, height: 600 } },
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 300, height: 300 } },
+      { ...makeObject({ id: "outer" }), type: "section", text: "Outer", color: "gray", geometry: { x: 0, y: 0, width: 600, height: 600 } },
+      { ...makeObject({ id: "inner" }), type: "section", text: "Inner", color: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 300, height: 300 } },
       makeObject({ id: "grandchild", parentId: "inner", geometry: { x: 80, y: 80, width: 100, height: 100 } }),
     ]);
     const ctx = makeContext(document);
@@ -590,7 +623,7 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
   it("renders sections below every non-section object regardless of schema order", () => {
     const objects: InteractiveCanvasObject[] = [
       { ...makeObject({ id: "shape-a" }), type: "process" },
-      { ...makeObject({ id: "section-a" }), type: "section", title: "A", tint: "gray" },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray" },
       { ...makeObject({ id: "shape-b" }), type: "process" },
     ];
     const ordered = renderOrderedObjects(objects);
@@ -603,9 +636,9 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
 
   it("renders a nested section above its parentId ancestor sections", () => {
     const objects: InteractiveCanvasObject[] = [
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } },
-      { ...makeObject({ id: "innermost" }), type: "section", title: "Innermost", tint: "green", parentId: "inner", geometry: { x: 60, y: 60, width: 40, height: 40 } },
-      { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
+      { ...makeObject({ id: "inner" }), type: "section", text: "Inner", color: "blue", parentId: "outer", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "innermost" }), type: "section", text: "Innermost", color: "green", parentId: "inner", geometry: { x: 60, y: 60, width: 40, height: 40 } },
+      { ...makeObject({ id: "outer" }), type: "section", text: "Outer", color: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
     ];
     const ordered = renderOrderedObjects(objects);
     const outerIndex = ordered.findIndex((object) => object.id === "outer");
@@ -615,23 +648,54 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
     expect(innerIndex).toBeLessThan(innermostIndex);
   });
 
-  it("ignores geometric containment for section depth when no parentId is recorded", () => {
-    // "inner" sits geometrically inside "outer" but has no recorded parent,
-    // so document order (the stable-sort tiebreaker) wins.
+  it("orders equal-depth sections by area descending, then stable original index", () => {
     const objects: InteractiveCanvasObject[] = [
-      { ...makeObject({ id: "inner" }), type: "section", title: "Inner", tint: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } },
-      { ...makeObject({ id: "outer" }), type: "section", title: "Outer", tint: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
+      { ...makeObject({ id: "small" }), type: "section", text: "Small", color: "green", geometry: { x: 80, y: 80, width: 100, height: 100 } },
+      { ...makeObject({ id: "medium-a" }), type: "section", text: "Medium A", color: "blue", geometry: { x: 40, y: 40, width: 150, height: 100 } },
+      { ...makeObject({ id: "large" }), type: "section", text: "Large", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 200 } },
+      { ...makeObject({ id: "medium-b" }), type: "section", text: "Medium B", color: "yellow", geometry: { x: 60, y: 60, width: 150, height: 100 } },
     ];
-    const ordered = renderOrderedObjects(objects);
-    expect(ordered.map((object) => object.id)).toEqual(["inner", "outer"]);
+    expect(renderOrderedObjects(objects).map((object) => object.id)).toEqual([
+      "large",
+      "medium-a",
+      "medium-b",
+      "small",
+    ]);
   });
 
-  it("preserves schema order for non-sections and sibling sections (stable sort)", () => {
+  it("buries a later equal-depth section below a smaller section it fully covers", () => {
+    const objects: InteractiveCanvasObject[] = [
+      { ...makeObject({ id: "small" }), type: "section", text: "Small", color: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "large" }), type: "section", text: "Large", color: "gray", geometry: { x: 0, y: 0, width: 300, height: 300 } },
+    ];
+    expect(renderOrderedObjects(objects).map((object) => object.id)).toEqual(["large", "small"]);
+  });
+
+  it("ignores geometric containment for section depth when no parentId is recorded", () => {
+    // "inner" sits geometrically inside "outer" but has no recorded parent,
+    // so both are root sections; area ordering paints the larger one behind
+    // the smaller one rather than treating containment as nesting.
+    const objects: InteractiveCanvasObject[] = [
+      { ...makeObject({ id: "inner" }), type: "section", text: "Inner", color: "blue", geometry: { x: 50, y: 50, width: 100, height: 100 } },
+      { ...makeObject({ id: "outer" }), type: "section", text: "Outer", color: "gray", geometry: { x: 0, y: 0, width: 400, height: 400 } },
+    ];
+    const ordered = renderOrderedObjects(objects);
+    expect(ordered.map((object) => object.id)).toEqual(["outer", "inner"]);
+  });
+
+  it("preserves schema order for non-sections and equal-area sibling sections", () => {
     const objects: InteractiveCanvasObject[] = [
       { ...makeObject({ id: "shape-a" }), type: "process" },
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray", geometry: { x: 0, y: 0, width: 100, height: 100 } },
+      { ...makeObject({ id: "section-b" }), type: "section", text: "B", color: "blue", geometry: { x: 200, y: 0, width: 100, height: 100 } },
       { ...makeObject({ id: "shape-b" }), type: "process" },
     ];
-    expect(renderOrderedObjects(objects).map((object) => object.id)).toEqual(["shape-a", "shape-b"]);
+    expect(renderOrderedObjects(objects).map((object) => object.id)).toEqual([
+      "section-a",
+      "section-b",
+      "shape-a",
+      "shape-b",
+    ]);
   });
 
   it("returns the original array reference-order unchanged when there are no sections", () => {
@@ -640,21 +704,21 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
   });
 });
 
-describe("code-tokenizer: tokenizeCodeBlock integration with the canvas JSON bodies", () => {
-  it("tokenizes the python code-block body from the canvas JSON without dropping characters", () => {
+describe("code-tokenizer: tokenizeCodeBlock integration with the canvas JSON text", () => {
+  it("tokenizes the python code-block text from the canvas JSON without dropping characters", () => {
     const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "captured-code-block");
-    expect(codeBlock?.body).toBeDefined();
-    const lines = tokenizeCodeBlock(codeBlock!.body!, codeBlock!.language);
+    expect(codeBlock?.text).toBeDefined();
+    const lines = tokenizeCodeBlock(codeBlock!.text, codeBlock!.language);
     const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
-    expect(rejoined).toBe(codeBlock!.body);
+    expect(rejoined).toBe(codeBlock!.text);
   });
 
-  it("tokenizes the JSON code-block body from the canvas JSON without dropping characters", () => {
+  it("tokenizes the JSON code-block text from the canvas JSON without dropping characters", () => {
     const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "json-code-block");
-    expect(codeBlock?.body).toBeDefined();
-    const lines = tokenizeCodeBlock(codeBlock!.body!, codeBlock!.language);
+    expect(codeBlock?.text).toBeDefined();
+    const lines = tokenizeCodeBlock(codeBlock!.text, codeBlock!.language);
     const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
-    expect(rejoined).toBe(codeBlock!.body);
+    expect(rejoined).toBe(codeBlock!.text);
   });
 
   it("colors the canvas JSON's python class/def line as expected", () => {

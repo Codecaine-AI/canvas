@@ -6,18 +6,17 @@ import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
 import v2FlowSampleDocumentJson from "../../../../../canvases/v2-flow-interactive.canvas.json";
 import {
   buildPastePayload,
-  CANVAS_PALETTE_TOKENS,
-  canvasToneStyle,
   copySelection,
   createInteractiveCanvasState,
   InteractiveCanvasEditor,
-  paletteTokenStyle,
   reduceInteractiveCanvasState,
-  resolveObjectColors,
   validateInteractiveCanvasDocument,
+  type CanvasAction,
   type InteractiveCanvasDocument,
+  type InteractiveCanvasObject,
   type InteractiveCanvasObjectType,
 } from "../../index";
+import { reconcileSectionMembership } from "../section-membership";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 const v2FlowSampleDocument = v2FlowSampleDocumentJson as InteractiveCanvasDocument;
@@ -41,32 +40,30 @@ function makeSetParentDocument(): InteractiveCanvasDocument {
       {
         id: "section-a",
         type: "section",
-        label: "Section A",
-        title: "Section A",
-        tint: "gray",
+        text: "Section A",
+        color: "gray",
         geometry: { x: 40, y: 40, width: 320, height: 220 },
       },
       {
         id: "section-b",
         type: "section",
-        label: "Section B",
-        title: "Section B",
-        tint: "blue",
+        text: "Section B",
+        color: "blue",
         parentId: "section-a",
         geometry: { x: 80, y: 80, width: 180, height: 120 },
       },
       {
         id: "process-a",
         type: "process",
-        label: "Process A",
+        text: "Process A",
         geometry: { x: 420, y: 120, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
-        label: "Process B",
+        text: "Process B",
         parentId: "section-a",
-        geometry: { x: 460, y: 260, width: 160, height: 96 },
+        geometry: { x: 190, y: 160, width: 160, height: 96 },
       },
     ],
     connections: [],
@@ -82,19 +79,19 @@ function makeConnectionDocument(): InteractiveCanvasDocument {
       {
         id: "process-a",
         type: "process",
-        label: "Process A",
+        text: "Process A",
         geometry: { x: 40, y: 40, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
-        label: "Process B",
+        text: "Process B",
         geometry: { x: 260, y: 40, width: 160, height: 96 },
       },
       {
         id: "process-c",
         type: "process",
-        label: "Process C",
+        text: "Process C",
         geometry: { x: 480, y: 40, width: 160, height: 96 },
       },
     ],
@@ -111,7 +108,7 @@ function makeConnectionDocument(): InteractiveCanvasDocument {
         id: "connection-b",
         from: { objectId: "process-b", anchor: "right" },
         to: { objectId: "process-c", anchor: "left" },
-        style: "dotted",
+        style: "dashed",
       },
     ],
     annotations: [
@@ -144,29 +141,28 @@ function makeClipboardDocument(): InteractiveCanvasDocument {
       {
         id: "section-a",
         type: "section",
-        label: "Section A",
-        title: "Section A",
-        tint: "gray",
+        text: "Section A",
+        color: "gray",
         geometry: { x: 40, y: 40, width: 360, height: 240 },
       },
       {
         id: "process-a",
         type: "process",
-        label: "Process A",
+        text: "Process A",
         parentId: "section-a",
         geometry: { x: 80, y: 96, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
-        label: "Process B",
+        text: "Process B",
         parentId: "section-a",
         geometry: { x: 280, y: 112, width: 160, height: 96 },
       },
       {
         id: "process-c",
         type: "process",
-        label: "Process C",
+        text: "Process C",
         geometry: { x: 520, y: 120, width: 160, height: 96 },
       },
     ],
@@ -181,7 +177,7 @@ function makeClipboardDocument(): InteractiveCanvasDocument {
         id: "connection-b",
         from: { objectId: "process-b", anchor: "right" },
         to: { objectId: "process-c", anchor: "left" },
-        style: "dotted",
+        style: "dashed",
       },
     ],
   };
@@ -196,6 +192,47 @@ function boundsCenter(document: InteractiveCanvasDocument, ids: string[]): { x: 
   return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
 }
 
+function makeMembershipObject(
+  overrides: Partial<InteractiveCanvasObject> & { id: string },
+): InteractiveCanvasObject {
+  return {
+    id: overrides.id,
+    type: "process",
+    text: overrides.id,
+    geometry: { x: 0, y: 0, width: 100, height: 100 },
+    ...overrides,
+  };
+}
+
+function makeMembershipSection(
+  overrides: Partial<InteractiveCanvasObject> & { id: string },
+): InteractiveCanvasObject {
+  return makeMembershipObject({
+    type: "section",
+    text: overrides.id,
+    color: "gray",
+    ...overrides,
+  });
+}
+
+function makeMembershipDocument(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
+  return {
+    schemaVersion: 1,
+    id: "section-membership-actions-doc",
+    mode: "diagram",
+    objects,
+    connections: [],
+  };
+}
+
+function parentId(document: InteractiveCanvasDocument, objectId: string): string | null | undefined {
+  return document.objects.find((object) => object.id === objectId)?.parentId;
+}
+
+function expectSectionMembershipReconciled(document: InteractiveCanvasDocument) {
+  expect(reconcileSectionMembership(document)).toBe(document);
+}
+
 describe("interactive canvas schema and actions", () => {
   it("validates the synthetic canvas JSON", () => {
     const validation = validateInteractiveCanvasDocument(syntheticCanvasDocument);
@@ -203,7 +240,7 @@ describe("interactive canvas schema and actions", () => {
     expect(validation.ok).toBe(true);
     if (validation.ok) {
       expect(validation.document.objects.some((object) => object.type === "decision")).toBe(true);
-      expect(validation.document.connections.some((connection) => connection.style === "dotted")).toBe(true);
+      expect(validation.document.connections.some((connection) => connection.style === "dashed")).toBe(true);
       expect(validation.document.annotations?.length).toBeGreaterThan(0);
     }
   });
@@ -263,18 +300,16 @@ describe("interactive canvas schema and actions", () => {
         {
           id: "section-a",
           type: "section",
-          label: "Section A",
-          title: "Section A",
-          tint: "gray",
+          text: "Section A",
+          color: "gray",
           parentId: "section-b",
           geometry: { x: 0, y: 0, width: 200, height: 160 },
         },
         {
           id: "section-b",
           type: "section",
-          label: "Section B",
-          title: "Section B",
-          tint: "blue",
+          text: "Section B",
+          color: "blue",
           parentId: "section-a",
           geometry: { x: 20, y: 20, width: 120, height: 80 },
         },
@@ -295,13 +330,13 @@ describe("interactive canvas schema and actions", () => {
         {
           id: "process-a",
           type: "process",
-          label: "Process A",
+          text: "Process A",
           geometry: { x: 0, y: 0, width: 160, height: 96 },
         },
         {
           id: "process-b",
           type: "process",
-          label: "Process B",
+          text: "Process B",
           parentId: "process-a",
           geometry: { x: 220, y: 0, width: 160, height: 96 },
         },
@@ -321,7 +356,7 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("accepts the expanded object vocabulary (document/person/database/chat) with paletteToken", () => {
+  it("accepts the expanded object vocabulary (document/person/database/chat) with color picks", () => {
     const document: InteractiveCanvasDocument = {
       schemaVersion: 1,
       id: "expanded-vocab-doc",
@@ -330,30 +365,30 @@ describe("interactive canvas schema and actions", () => {
         {
           id: "doc-a",
           type: "document",
-          label: "Doc A",
+          text: "Doc A",
           geometry: { x: 0, y: 0, width: 160, height: 120 },
-          style: { paletteToken: "memory" },
+          color: "violet",
         },
         {
           id: "person-a",
           type: "person",
-          label: "Person A",
+          text: "Person A",
           geometry: { x: 200, y: 0, width: 120, height: 140 },
-          style: { paletteToken: "input" },
+          color: "green",
         },
         {
           id: "database-a",
           type: "database",
-          label: "Database A",
+          text: "Database A",
           geometry: { x: 400, y: 0, width: 140, height: 120 },
-          style: { paletteToken: "memory" },
+          color: "violet",
         },
         {
           id: "chat-a",
           type: "chat",
-          label: "Chat A",
+          text: "Chat A",
           geometry: { x: 600, y: 0, width: 180, height: 110 },
-          style: { paletteToken: "process" },
+          color: "blue",
         },
       ],
       connections: [],
@@ -364,28 +399,28 @@ describe("interactive canvas schema and actions", () => {
     if (validation.ok) {
       const types = validation.document.objects.map((object) => object.type);
       expect(types).toEqual(["document", "person", "database", "chat"]);
-      expect(validation.document.objects.map((object) => object.style?.paletteToken)).toEqual([
-        "memory",
-        "input",
-        "memory",
-        "process",
+      expect(validation.document.objects.map((object) => object.color)).toEqual([
+        "violet",
+        "green",
+        "violet",
+        "blue",
       ]);
       expect(validation.warnings).toBeUndefined();
     }
   });
 
-  it("drops an unknown paletteToken with a non-fatal validation warning", () => {
+  it("drops an unknown color id with a non-fatal validation warning", () => {
     const document = {
       schemaVersion: 1,
-      id: "bad-token-doc",
+      id: "bad-color-doc",
       mode: "diagram",
       objects: [
         {
           id: "doc-a",
           type: "document",
-          label: "Doc A",
+          text: "Doc A",
           geometry: { x: 0, y: 0, width: 160, height: 120 },
-          style: { paletteToken: "not-a-real-token" },
+          color: "not-a-real-color",
         },
       ],
       connections: [],
@@ -394,13 +429,13 @@ describe("interactive canvas schema and actions", () => {
     const validation = validateInteractiveCanvasDocument(document);
     expect(validation.ok).toBe(true);
     if (validation.ok) {
-      expect(validation.document.objects[0]?.style?.paletteToken).toBeUndefined();
+      expect(validation.document.objects[0]?.color).toBeUndefined();
       expect(validation.warnings?.length).toBe(1);
-      expect(validation.warnings?.[0]?.message).toContain("not-a-real-token");
+      expect(validation.warnings?.[0]?.message).toContain("not-a-real-color");
     }
   });
 
-  it("addObject applies defaults (geometry/label/tone/shape) for each new object type", () => {
+  it("addObject applies defaults (geometry/text/color/shape) for each new object type", () => {
     // canvas.addObject runs the default geometry through snapGeometry (16px
     // grid), so expected sizes here are the *snapped* values, matching how
     // e.g. the pre-existing rectangle default (360) already snaps to 368.
@@ -426,7 +461,8 @@ describe("interactive canvas schema and actions", () => {
       expect(added?.style?.shape).toBe(testCase.expectedShape);
       expect(added?.geometry.width).toBe(testCase.expectedSize.width);
       expect(added?.geometry.height).toBe(testCase.expectedSize.height);
-      expect(added?.style?.tone).toBeTruthy();
+      // D17 — new objects take the per-kind first-use color (no pick made yet).
+      expect(added?.color).toBe("gray");
     }
   });
 
@@ -477,8 +513,8 @@ describe("interactive canvas schema and actions", () => {
       expect(screen.getByRole("menu", { name: "Canvas context menu" })).toBeTruthy();
       fireEvent.click(screen.getByRole("menuitem", { name: "Add sticky" }));
       expect(screen.queryByRole("menu", { name: "Canvas context menu" })).toBeNull();
-      const sticky = screen.getByRole("button", { name: "Sticky" });
-      expect(sticky.querySelector(".interactive-canvas-object-label")).toBeNull();
+      const sticky = screen.getByRole("button", { name: "sticky" });
+      expect(sticky.querySelector(".interactive-canvas-sticky-body")?.textContent?.trim()).toBe("");
 
       const object = screen.getByRole("button", { name: /Agent summarizes/i });
       fireEvent.contextMenu(object, {
@@ -630,32 +666,6 @@ describe("interactive canvas schema and actions", () => {
   });
 });
 
-describe("interactive canvas theme: resolveObjectColors precedence (PD4)", () => {
-  it("uses the palette token colors when paletteToken is set, ignoring tone", () => {
-    const withToken = resolveObjectColors({ tone: "warning", paletteToken: "memory" });
-    const memoryOnly = paletteTokenStyle("memory");
-    expect(withToken).toEqual(memoryOnly);
-    expect(withToken).not.toEqual(canvasToneStyle("warning"));
-  });
-
-  it("falls back to tone-based colors when no paletteToken is set", () => {
-    const toneOnly = resolveObjectColors({ tone: "agent" });
-    expect(toneOnly).toEqual(canvasToneStyle("agent"));
-  });
-
-  it("falls back to neutral colors when neither paletteToken nor tone is set", () => {
-    expect(resolveObjectColors(undefined)).toEqual(canvasToneStyle(undefined));
-    expect(resolveObjectColors({})).toEqual(canvasToneStyle("neutral"));
-  });
-
-  it("gives each palette token a distinct fill/border/accent", () => {
-    const tokens = CANVAS_PALETTE_TOKENS.map((entry) => entry.token);
-    const styles = tokens.map((token) => paletteTokenStyle(token));
-    const fills = new Set(styles.map((style) => style.fill));
-    expect(fills.size).toBe(tokens.length);
-  });
-});
-
 describe("interactive canvas: canvas.setParent action", () => {
   it("reparents an object into a section", () => {
     const initialState = createInteractiveCanvasState(makeSetParentDocument());
@@ -714,7 +724,7 @@ describe("interactive canvas: canvas.setParent action", () => {
 
     expect(state).toBe(initialState);
     expect(state.document.objects.find((object) => object.id === "section-a")?.parentId).toBe(
-      undefined,
+      null,
     );
     expect(state.history.past.length).toBe(initialState.history.past.length);
   });
@@ -730,7 +740,7 @@ describe("interactive canvas: canvas.setParent action", () => {
     state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
 
     expect(state.document.objects.find((object) => object.id === "process-a")?.parentId).toBe(
-      undefined,
+      null,
     );
   });
 });
@@ -748,42 +758,38 @@ describe("interactive canvas: canvas.captureSectionContents action", () => {
         {
           id: "grand",
           type: "section",
-          label: "Grand",
-          title: "Grand",
-          tint: "gray",
+          text: "Grand",
+          color: "gray",
           geometry: { x: 0, y: 0, width: 1000, height: 1000 },
         },
         {
           id: "mid",
           type: "section",
-          label: "Mid",
-          title: "Mid",
-          tint: "blue",
+          text: "Mid",
+          color: "blue",
           parentId: "grand",
           geometry: { x: 50, y: 50, width: 600, height: 600 },
         },
         {
           id: "capturing",
           type: "section",
-          label: "Capturing",
-          title: "Capturing",
-          tint: "green",
+          text: "Capturing",
+          color: "green",
           parentId: "mid",
           geometry: { x: 100, y: 100, width: 400, height: 400 },
         },
         {
           id: "child-section",
           type: "section",
-          label: "Child",
-          title: "Child",
-          tint: "gray",
+          text: "Child",
+          color: "gray",
           parentId: "capturing",
           geometry: { x: 120, y: 120, width: 200, height: 200 },
         },
         {
           id: "deep-note",
           type: "process",
-          label: "Deep note",
+          text: "Deep note",
           parentId: "child-section",
           geometry: { x: 140, y: 140, width: 50, height: 50 },
         },
@@ -792,22 +798,21 @@ describe("interactive canvas: canvas.captureSectionContents action", () => {
         {
           id: "legacy-flat",
           type: "process",
-          label: "Legacy flat",
+          text: "Legacy flat",
           parentId: "grand",
           geometry: { x: 360, y: 360, width: 50, height: 50 },
         },
         {
           id: "unparented",
           type: "process",
-          label: "Unparented",
+          text: "Unparented",
           geometry: { x: 420, y: 360, width: 50, height: 50 },
         },
         {
           id: "sibling-section",
           type: "section",
-          label: "Sibling",
-          title: "Sibling",
-          tint: "blue",
+          text: "Sibling",
+          color: "blue",
           geometry: { x: 2000, y: 0, width: 300, height: 300 },
         },
         // Recorded member of the unrelated sibling section, parked inside
@@ -815,7 +820,7 @@ describe("interactive canvas: canvas.captureSectionContents action", () => {
         {
           id: "sibling-member",
           type: "process",
-          label: "Sibling member",
+          text: "Sibling member",
           parentId: "sibling-section",
           geometry: { x: 360, y: 420, width: 50, height: 50 },
         },
@@ -839,15 +844,392 @@ describe("interactive canvas: canvas.captureSectionContents action", () => {
     expect(parents.get("unparented")).toBe("capturing");
   });
 
-  it("does not steal objects parented to an unrelated sibling section", () => {
+  it("repairs stale unrelated parentIds before capture runs", () => {
     const parents = capture();
-    expect(parents.get("sibling-member")).toBe("sibling-section");
+    expect(parents.get("sibling-member")).toBe("capturing");
   });
 
   it("does not flatten objects parented to the capturing section's own descendants", () => {
     const parents = capture();
     expect(parents.get("deep-note")).toBe("child-section");
     expect(parents.get("child-section")).toBe("capturing");
+  });
+});
+
+describe("interactive canvas: section membership reconciliation", () => {
+  it("canvas.reconcileSectionMembership adopts stale live geometry and can record history", () => {
+    const document = makeMembershipDocument([
+      makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+      makeMembershipObject({ id: "card", geometry: { x: 500, y: 0, width: 100, height: 100 } }),
+    ]);
+    let state = createInteractiveCanvasState(document);
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { card: { x: 50, y: 50, width: 100, height: 100 } },
+      recordHistory: false,
+      snap: false,
+    });
+    expect(parentId(state.document, "card")).toBeNull();
+
+    state = reduceInteractiveCanvasState(state, { type: "canvas.reconcileSectionMembership" });
+    expect(parentId(state.document, "card")).toBe("section");
+    expect(state.history.past.length).toBe(1);
+    expect(state.lastChange?.summary).toBe("Reconciled section membership");
+    expectSectionMembershipReconciled(state.document);
+  });
+
+  it("move commit adopts objects with at least 60 percent overlap and rejects smaller overlaps", () => {
+    const document = makeMembershipDocument([
+      makeMembershipSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeMembershipObject({ id: "card", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+    ]);
+
+    let state = createInteractiveCanvasState(document);
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { card: { x: 260, y: 20, width: 100, height: 100 } },
+      recordHistory: true,
+      snap: false,
+      summary: "Dragged selection",
+    });
+    expect(parentId(state.document, "card")).toBeNull();
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.reconcileSectionMembership",
+      recordHistory: false,
+    });
+    expect(parentId(state.document, "card")).toBe("section");
+    expect(state.history.past.length).toBe(1);
+
+    state = createInteractiveCanvasState(document);
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { card: { x: 250, y: 20, width: 100, height: 100 } },
+      recordHistory: true,
+      snap: false,
+      summary: "Dragged selection",
+    });
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.reconcileSectionMembership",
+      recordHistory: false,
+    });
+    expect(parentId(state.document, "card")).toBeNull();
+    expect(state.history.past.length).toBe(1);
+    expectSectionMembershipReconciled(state.document);
+  });
+
+  it("keeps one undo entry for a move gesture across live frames and commit reconcile", () => {
+    const document = makeMembershipDocument([
+      makeMembershipSection({ id: "section", geometry: { x: 300, y: 0, width: 300, height: 300 } }),
+      makeMembershipObject({ id: "card", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+    ]);
+    let state = createInteractiveCanvasState(document);
+    const initialHistoryLength = state.history.past.length;
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { card: { x: 240, y: 20, width: 100, height: 100 } },
+      recordHistory: true,
+      snap: false,
+      summary: "Dragged selection",
+    });
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { card: { x: 260, y: 20, width: 100, height: 100 } },
+      recordHistory: false,
+      snap: false,
+      summary: "Dragged selection",
+    });
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.reconcileSectionMembership",
+      recordHistory: false,
+    });
+
+    expect(parentId(state.document, "card")).toBe("section");
+    expect(state.history.past.length).toBe(initialHistoryLength + 1);
+  });
+
+  it("canvas.resizeObject releases outside children and adopts newly covered objects", () => {
+    let state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+        makeMembershipObject({
+          id: "child",
+          parentId: "section",
+          geometry: { x: 240, y: 20, width: 100, height: 100 },
+        }),
+      ]),
+    );
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.resizeObject",
+      objectId: "section",
+      width: 250,
+      height: 300,
+      snap: false,
+    });
+    expect(parentId(state.document, "child")).toBeNull();
+    expectSectionMembershipReconciled(state.document);
+
+    state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 250, height: 300 } }),
+        makeMembershipObject({ id: "child", geometry: { x: 260, y: 20, width: 100, height: 100 } }),
+      ]),
+    );
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.resizeObject",
+      objectId: "section",
+      width: 400,
+      height: 300,
+      snap: false,
+    });
+    expect(parentId(state.document, "child")).toBe("section");
+    expectSectionMembershipReconciled(state.document);
+  });
+
+  it("resize gesture commit reconciles after live geometry frames without another history entry", () => {
+    let state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 250, height: 300 } }),
+        makeMembershipObject({ id: "child", geometry: { x: 260, y: 20, width: 100, height: 100 } }),
+      ]),
+    );
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { section: { x: 0, y: 0, width: 400, height: 300 } },
+      recordHistory: true,
+      snap: false,
+      summary: "Resized object",
+    });
+    expect(parentId(state.document, "child")).toBeNull();
+    expect(state.history.past.length).toBe(1);
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.reconcileSectionMembership",
+      recordHistory: false,
+    });
+    expect(parentId(state.document, "child")).toBe("section");
+    expect(state.history.past.length).toBe(1);
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { section: { x: 0, y: 0, width: 250, height: 300 } },
+      recordHistory: true,
+      snap: false,
+      summary: "Resized object",
+    });
+    expect(parentId(state.document, "child")).toBe("section");
+    expect(state.history.past.length).toBe(2);
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.reconcileSectionMembership",
+      recordHistory: false,
+    });
+    expect(parentId(state.document, "child")).toBeNull();
+    expect(state.history.past.length).toBe(2);
+    expectSectionMembershipReconciled(state.document);
+  });
+
+  it("canvas.updateObject keeps children when collapsing a section", () => {
+    const state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
+        makeMembershipObject({
+          id: "child",
+          parentId: "section",
+          geometry: { x: 80, y: 80, width: 80, height: 80 },
+        }),
+      ]),
+    );
+
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "section",
+      patch: { contentHidden: true },
+    });
+
+    expect(next.document.objects.find((object) => object.id === "section")?.contentHidden).toBe(true);
+    expect(parentId(next.document, "child")).toBe("section");
+    expectSectionMembershipReconciled(next.document);
+  });
+
+  it("canvas.updateObject geometry patches reparent objects immediately", () => {
+    const state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 320, height: 320 } }),
+        makeMembershipObject({ id: "card", geometry: { x: 500, y: 40, width: 80, height: 80 } }),
+      ]),
+    );
+
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "card",
+      patch: { geometry: { x: 80, y: 80, width: 80, height: 80 } },
+    });
+
+    expect(parentId(next.document, "card")).toBe("section");
+    expectSectionMembershipReconciled(next.document);
+  });
+
+  it("canvas.setObjectType releases children when a section becomes a shape", () => {
+    const state = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "outer", geometry: { x: 0, y: 0, width: 500, height: 500 } }),
+        makeMembershipSection({ id: "inner", geometry: { x: 80, y: 80, width: 240, height: 240 } }),
+        makeMembershipObject({
+          id: "child",
+          parentId: "inner",
+          geometry: { x: 140, y: 140, width: 80, height: 80 },
+        }),
+      ]),
+    );
+
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.setObjectType",
+      objectId: "inner",
+      objectType: "process",
+    });
+
+    const converted = next.document.objects.find((object) => object.id === "inner");
+    expect(converted?.type).toBe("process");
+    expect(parentId(next.document, "inner")).toBe("outer");
+    expect(parentId(next.document, "child")).toBe("outer");
+    expectSectionMembershipReconciled(next.document);
+  });
+
+  it("placement inside a section gets a geometric parent in one undo entry", () => {
+    const initialState = createInteractiveCanvasState(
+      makeMembershipDocument([
+        makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 400, height: 400 } }),
+      ]),
+    );
+
+    const state = reduceInteractiveCanvasState(initialState, {
+      type: "canvas.addObject",
+      objectType: "sticky",
+      geometry: { x: 100, y: 100, width: 120, height: 80 },
+    });
+    const created = state.document.objects.find(
+      (object) => !initialState.document.objects.some((existing) => existing.id === object.id),
+    );
+
+    expect(created?.parentId).toBe("section");
+    expect(state.history.past.length).toBe(1);
+    expectSectionMembershipReconciled(state.document);
+
+    const undone = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
+    expect(undone.document).toEqual(initialState.document);
+  });
+
+  it("leaves section membership reconciled after each covered discrete action", () => {
+    const baseDocument = makeMembershipDocument([
+      makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 420, height: 320 } }),
+      makeMembershipObject({ id: "a", parentId: "section", geometry: { x: 40, y: 40, width: 80, height: 80 } }),
+      makeMembershipObject({ id: "b", parentId: "section", geometry: { x: 160, y: 60, width: 80, height: 80 } }),
+      makeMembershipObject({ id: "c", parentId: "section", geometry: { x: 280, y: 80, width: 80, height: 80 } }),
+    ]);
+    const selectedState = (objectIds: string[]) => ({
+      ...createInteractiveCanvasState(baseDocument),
+      selection: { kind: "objects" as const, objectIds },
+    });
+    const cases: Array<{
+      name: string;
+      state: ReturnType<typeof createInteractiveCanvasState>;
+      action: CanvasAction;
+    }> = [
+      {
+        name: "canvas.addObject",
+        state: createInteractiveCanvasState(baseDocument),
+        action: {
+          type: "canvas.addObject",
+          objectType: "process",
+          geometry: { x: 80, y: 180, width: 80, height: 80 },
+        },
+      },
+      {
+        name: "canvas.addObjects",
+        state: createInteractiveCanvasState(baseDocument),
+        action: {
+          type: "canvas.addObjects",
+          objects: [
+            makeMembershipObject({
+              id: "pasted",
+              geometry: { x: 90, y: 190, width: 80, height: 80 },
+            }),
+          ],
+        },
+      },
+      {
+        name: "canvas.duplicateSelection",
+        state: selectedState(["a"]),
+        action: { type: "canvas.duplicateSelection" },
+      },
+      {
+        name: "canvas.deleteSelection",
+        state: selectedState(["a"]),
+        action: { type: "canvas.deleteSelection" },
+      },
+      {
+        name: "canvas.quickConnect",
+        state: createInteractiveCanvasState(
+          makeMembershipDocument([
+            makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 420, height: 320 } }),
+            makeMembershipObject({ id: "from", geometry: { x: 700, y: 40, width: 80, height: 80 } }),
+          ]),
+        ),
+        action: {
+          type: "canvas.quickConnect",
+          fromObjectId: "from",
+          fromAnchor: "right",
+          drop: { point: { x: 120, y: 120 } },
+        },
+      },
+      {
+        name: "canvas.moveSelection",
+        state: selectedState(["a"]),
+        action: { type: "canvas.moveSelection", dx: 240, dy: 0, snap: false },
+      },
+      {
+        name: "canvas.resizeObject",
+        state: createInteractiveCanvasState(baseDocument),
+        action: { type: "canvas.resizeObject", objectId: "section", width: 240, height: 320, snap: false },
+      },
+      {
+        name: "canvas.alignSelection",
+        state: selectedState(["a", "b", "c"]),
+        action: { type: "canvas.alignSelection", axis: "left" },
+      },
+      {
+        name: "canvas.distributeSelection",
+        state: selectedState(["a", "b", "c"]),
+        action: { type: "canvas.distributeSelection", axis: "horizontal" },
+      },
+      {
+        name: "canvas.fitSectionToChildren",
+        state: createInteractiveCanvasState(baseDocument),
+        action: { type: "canvas.fitSectionToChildren", sectionId: "section", padding: 24 },
+      },
+      {
+        name: "canvas.setObjectType",
+        state: selectedState(["a"]),
+        action: { type: "canvas.setObjectType", objectId: "a", objectType: "decision" },
+      },
+      {
+        name: "canvas.updateObject",
+        state: createInteractiveCanvasState(baseDocument),
+        action: {
+          type: "canvas.updateObject",
+          objectId: "a",
+          patch: { geometry: { x: 500, y: 40, width: 80, height: 80 } },
+        },
+      },
+    ];
+
+    for (const { state, action } of cases) {
+      const next = reduceInteractiveCanvasState(state, action);
+      expectSectionMembershipReconciled(next.document);
+    }
   });
 });
 
@@ -982,13 +1364,13 @@ describe("interactive canvas: canvas.duplicateSelection action", () => {
     const cloneId = state.selection.kind === "objects" ? state.selection.objectIds[0] : "";
     const clone = state.document.objects.find((object) => object.id === cloneId);
     expect(cloneId).not.toBe("process-a");
-    expect(clone?.label).toBe("Process A");
+    expect(clone?.text).toBe("Process A");
     expect(clone?.parentId).toBe("section-a");
     expect(clone?.geometry).toEqual({ x: 104, y: 120, width: 160, height: 96 });
     expect(state.selection).toEqual({ kind: "objects", objectIds: [cloneId] });
   });
 
-  it("remaps a cloned child to the cloned selected section", () => {
+  it("reconciles a cloned child's parent from geometry after duplicating a section", () => {
     let state = createInteractiveCanvasState(makeClipboardDocument());
     state = reduceInteractiveCanvasState(state, {
       type: "canvas.select",
@@ -1002,10 +1384,11 @@ describe("interactive canvas: canvas.duplicateSelection action", () => {
       (object) => cloneIds.includes(object.id) && object.type === "section",
     );
     const clonedChild = state.document.objects.find(
-      (object) => cloneIds.includes(object.id) && object.label === "Process A",
+      (object) => cloneIds.includes(object.id) && object.text === "Process A",
     );
-    expect(clonedChild?.parentId).toBe(clonedSection?.id);
-    expect(clonedChild?.parentId).not.toBe("section-a");
+    expect(clonedSection).toBeTruthy();
+    expect(clonedChild?.parentId).toBe("section-a");
+    expectSectionMembershipReconciled(state.document);
   });
 
   it("duplicates only fully internal selected connections", () => {

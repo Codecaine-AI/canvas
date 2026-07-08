@@ -16,7 +16,8 @@
     {
       "id": "outer-section",
       "type": "section",
-      "label": "Outer section",
+      "text": "Memory pipeline",
+      "color": "gray",
       "parentId": null,
       "geometry": {
         "x": 40,
@@ -26,14 +27,13 @@
       },
       "style": {
         "shape": "section"
-      },
-      "title": "Memory pipeline",
-      "tint": "gray"
+      }
     },
     {
       "id": "inner-section",
       "type": "section",
-      "label": "Inner section",
+      "text": "New memory",
+      "color": "blue",
       "parentId": "outer-section",
       "geometry": {
         "x": 80,
@@ -43,14 +43,13 @@
       },
       "style": {
         "shape": "section"
-      },
-      "title": "New memory",
-      "tint": "blue"
+      }
     },
     {
       "id": "captured-pill",
       "type": "pill",
-      "label": "Base Question Text",
+      "text": "Base Question Text",
+      "color": "green",
       "parentId": "outer-section",
       "geometry": {
         "x": 420,
@@ -59,15 +58,13 @@
         "height": 64
       },
       "style": {
-        "shape": "pill",
-        "paletteToken": "input"
+        "shape": "pill"
       }
     },
     {
       "id": "captured-code-block",
       "type": "code-block",
-      "label": "Agent definition",
-      "body": "class Agent(BaseModel):\n    name: str\n    # created per session\n    def run(self):\n        return None",
+      "text": "class Agent(BaseModel):\n    name: str\n    # created per session\n    def run(self):\n        return None",
       "parentId": "inner-section",
       "geometry": {
         "x": 100,
@@ -83,17 +80,16 @@
     {
       "id": "partial-overlap-note",
       "type": "sticky",
-      "label": "Partial overlap sticky",
-      "body": "Only a corner of this note overlaps outer-section — must not be captured on drag.\n- bullet one\n- bullet two",
+      "text": "Only a corner of this note overlaps outer-section — must not be captured on drag.\n- bullet one\n- bullet two",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
-        "x": 690,
-        "y": 480,
-        "width": 220,
-        "height": 180
+        "x": 564.3243698086404,
+        "y": 369.99918119402247,
+        "width": 389.01660548631605,
+        "height": 340.17157125543145
       },
       "style": {
-        "tone": "warning",
         "shape": "note"
       },
       "author": "Ford"
@@ -101,7 +97,8 @@
     {
       "id": "outside-arrow",
       "type": "arrow-shape",
-      "label": "Then",
+      "text": "Then",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 900,
@@ -110,15 +107,15 @@
         "height": 100
       },
       "style": {
-        "shape": "arrow-shape",
-        "paletteToken": "process"
+        "shape": "arrow-shape"
       },
       "direction": "right"
     },
     {
       "id": "outside-arrow-left",
       "type": "arrow-shape",
-      "label": "Back",
+      "text": "Back",
+      "color": "orange",
       "parentId": null,
       "geometry": {
         "x": 900,
@@ -127,15 +124,15 @@
         "height": 100
       },
       "style": {
-        "shape": "arrow-shape",
-        "paletteToken": "hot"
+        "shape": "arrow-shape"
       },
       "direction": "left"
     },
     {
       "id": "predefined-process-node",
       "type": "predefined-process",
-      "label": "New Memory",
+      "text": "New Memory",
+      "color": "violet",
       "parentId": null,
       "geometry": {
         "x": 900,
@@ -144,14 +141,13 @@
         "height": 100
       },
       "style": {
-        "shape": "predefined-process",
-        "paletteToken": "memory"
+        "shape": "predefined-process"
       }
     },
     {
       "id": "chip-icon-node",
       "type": "chip-icon",
-      "label": "Model",
+      "text": "Model",
       "parentId": null,
       "geometry": {
         "x": 1160,
@@ -166,7 +162,8 @@
     {
       "id": "restyled-person",
       "type": "person",
-      "label": "Interviewee",
+      "text": "Interviewee",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 1160,
@@ -175,15 +172,14 @@
         "height": 144
       },
       "style": {
-        "shape": "person",
-        "paletteToken": "input"
+        "shape": "person"
       }
     },
     {
       "id": "restyled-chat",
       "type": "chat",
-      "label": "Live Q&A",
-      "body": "Realtime exchange between interviewer and interviewee.",
+      "text": "Live Q&A\nRealtime exchange between interviewer and interviewee.",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 1330,
@@ -192,14 +188,14 @@
         "height": 130
       },
       "style": {
-        "shape": "chat",
-        "paletteToken": "process"
+        "shape": "chat"
       }
     },
     {
       "id": "compact-person",
       "type": "person",
-      "label": "Compact person",
+      "text": "Compact person",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 1160,
@@ -208,15 +204,13 @@
         "height": 72
       },
       "style": {
-        "shape": "person",
-        "paletteToken": "input"
+        "shape": "person"
       }
     },
     {
       "id": "json-code-block",
       "type": "code-block",
-      "label": "Config",
-      "body": "{\n  \"name\": \"spectre\",\n  \"active\": true,\n  \"deleted\": null\n}",
+      "text": "{\n  \"name\": \"spectre\",\n  \"active\": true,\n  \"deleted\": null\n}",
       "parentId": null,
       "geometry": {
         "x": 1160,
@@ -256,7 +250,8 @@
         "anchor": "right"
       },
       "style": "solid",
-      "arrow": "forward"
+      "arrow": "forward",
+      "color": "green"
     }
   ],
   "annotations": []

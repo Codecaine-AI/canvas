@@ -38,11 +38,12 @@ export {
   type InteractionState,
   type ResizeHandle,
 } from "./types";
-export { hitTestDropTarget, hitTestObjects, selectionBounds } from "./hit-testing";
+export { hitTestObjects, selectionBounds } from "./hit-testing";
 export { MIN_DIRECT_RESIZE_SIZE, applyResizeHandle, resizeCursorFor } from "./gestures/resize";
 export {
   defaultGeometryForPlacement,
   objectTypeForTool,
+  placePreviewColorFor,
   placePreviewOverlayFor,
   PLACE_PREVIEW_GHOST_ID,
 } from "./gestures/place";

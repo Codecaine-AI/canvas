@@ -4,6 +4,7 @@ import type { Anchor } from "../../routing/routing";
 import type {
   CanvasAnnotationTarget,
   CanvasArrowDirection,
+  CanvasColor,
   CanvasIconGlyph,
   CanvasShapeDirection,
   CanvasConnectionStyle,
@@ -13,8 +14,8 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-  InteractiveCanvasTone,
 } from "../schema";
+import type { CanvasColorKind } from "../schema/object-defaults";
 
 export type CanvasTool =
   | "select"
@@ -104,10 +105,12 @@ export type CanvasAction =
   | {
       type: "canvas.addObject";
       objectType: InteractiveCanvasObjectType;
-      label?: string;
+      /** Seed for the object's unified `text` field; omit for the per-type default (type label for shapes/sections, empty for sticky/code-block). */
+      text?: string;
       parentId?: string | null;
       geometry?: CanvasGeometry;
-      tone?: InteractiveCanvasTone;
+      /** Explicit color pick for the new object; omit to take the last-picked memory for its kind (D17). */
+      color?: CanvasColor;
       /** Shapes-panel catalog-entry variant: orientation for direction-aware shapes (triangle up/down, arrow left/right). */
       direction?: CanvasShapeDirection;
       /** Shapes-panel catalog-entry variant: Advanced-tier glyph for `objectType: "icon"` — without it an icon object renders blank. */
@@ -150,6 +153,10 @@ export type CanvasAction =
       recordHistory?: boolean;
       snap?: boolean;
       summary?: string;
+    }
+  | {
+      type: "canvas.reconcileSectionMembership";
+      recordHistory?: boolean;
     }
   | {
       type: "canvas.setParent";
@@ -228,4 +235,12 @@ export type InteractiveCanvasState = {
     future: InteractiveCanvasDocument[];
   };
   lastChange?: CanvasChangeSummary;
+  /**
+   * Last-picked color memory (P1, D17), per kind: every color pick made
+   * through canvas.updateObject / canvas.updateConnection updates its kind's
+   * bucket, and new objects created via place / quick-connect take the
+   * remembered pick. Seeded with the per-kind first-use fallbacks
+   * (FIRST_USE_COLORS); editor-session state, not history-tracked.
+   */
+  lastPickedColor: Record<CanvasColorKind, CanvasColor>;
 };

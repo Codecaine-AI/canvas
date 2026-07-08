@@ -4,15 +4,14 @@
  * Move gesture: dragging one or more selected objects, with live snap
  * correction, spacing hints, and section drop-target tracking. Also owns the
  * drag-start "expansion" rule — section descendants ride along with the
- * pressed set (core.ts's press-pending router calls createMoveGesture when
- * the drag threshold is crossed). On release, only the drag ROOTS are
- * reparented onto the drop target: carried descendants keep their recorded
- * parentIds, so a dragged section's subtree moves as a unit instead of
- * flattening onto the target.
+ * pressed set (core.ts's press-pending router calls createMoveGesture when the
+ * drag threshold is crossed). On release, section membership is reconciled
+ * from the committed geometry without adding another history entry.
  */
-import type { CanvasAction } from "../../state/actions";
 import { boundsForGeometries, type CanvasPoint } from "../../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../state/schema";
+import { resolveSectionParent } from "../../state/section-membership";
+import { connectionBoundsForObject } from "../../objects/geometry";
 import { objectDefForType } from "../../objects/object-def";
 import {
   computeSnapCorrection,
@@ -20,7 +19,7 @@ import {
   type DistributionGuideSegment,
   type SnapCorrection,
 } from "../snapping";
-import { descendantIds, gatherSnapCandidates, hitTestDropTarget, objectGeometryMap } from "../hit-testing";
+import { gatherSnapCandidates, objectGeometryMap } from "../hit-testing";
 import {
   IDLE_INTERACTION_STATE,
   SNAP_THRESHOLD_SCREEN_PX,
@@ -43,16 +42,40 @@ export function expandMoveObjectIds(
   dragObjectIds: string[],
 ): string[] {
   const expandedObjectIds = new Set(dragObjectIds);
+  const descendantsByParent = buildDescendantsByParent(document);
   for (const id of dragObjectIds) {
     const object = document.objects.find((candidate) => candidate.id === id);
     const dragCapture = object ? objectDefForType(object.type)?.dragCapture : undefined;
     if (dragCapture === "descendants") {
-      for (const memberId of descendantIds(document, id)) {
-        expandedObjectIds.add(memberId);
-      }
+      addDescendantIds(descendantsByParent, id, expandedObjectIds);
     }
   }
   return Array.from(expandedObjectIds);
+}
+
+function buildDescendantsByParent(document: InteractiveCanvasDocument): Map<string, string[]> {
+  const descendantsByParent = new Map<string, string[]>();
+  for (const object of document.objects) {
+    if (!object.parentId) continue;
+    const list = descendantsByParent.get(object.parentId);
+    if (list) list.push(object.id);
+    else descendantsByParent.set(object.parentId, [object.id]);
+  }
+  return descendantsByParent;
+}
+
+function addDescendantIds(
+  descendantsByParent: ReadonlyMap<string, readonly string[]>,
+  parentId: string,
+  result: Set<string>,
+) {
+  const stack = [...(descendantsByParent.get(parentId) ?? [])];
+  while (stack.length > 0) {
+    const descendantId = stack.pop()!;
+    if (descendantId === parentId || result.has(descendantId)) continue;
+    result.add(descendantId);
+    stack.push(...(descendantsByParent.get(descendantId) ?? []));
+  }
 }
 
 /**
@@ -77,22 +100,6 @@ export function createMoveGesture(
   };
 }
 
-/**
- * The single shared parentId of the drag roots, or null if they don't share
- * one (mixed parents never happens today since multi-drag only groups an
- * existing selection, but guard defensively): returns null when there's no
- * single common parent, matching "drop on open canvas" semantics.
- */
-function currentParentId(document: InteractiveCanvasDocument, objectIds: string[]): string | null {
-  const parents = new Set(
-    document.objects
-      .filter((object) => objectIds.includes(object.id))
-      .map((object) => object.parentId ?? null),
-  );
-  if (parents.size !== 1) return null;
-  return parents.values().next().value ?? null;
-}
-
 export function stepFromMove(
   state: MoveGesture,
   event: CanvasPointerEvent,
@@ -115,26 +122,11 @@ export function stepFromMove(
   }
 
   if (event.type === "up") {
-    // state.objectIds is the EXPANDED set (pressed objects plus their
-    // transitive descendants, see expandMoveObjectIds). Only the drag ROOTS —
-    // objects whose current parent is null or is not itself being dragged —
-    // get reparented onto the drop target; a carried descendant's parent is
-    // also in the drag, so it must keep that parent or the dragged section's
-    // nesting would flatten onto the target. Comparing against the roots'
-    // shared parent (not the mixed expanded set's) also keeps a no-op section
-    // drag from dispatching a spurious setParent.
-    const draggedSet = new Set(state.objectIds);
-    const rootIds = state.objectIds.filter((objectId) => {
-      const object = ctx.document.objects.find((candidate) => candidate.id === objectId);
-      const objectParentId = object?.parentId ?? null;
-      return objectParentId === null || !draggedSet.has(objectParentId);
-    });
-    const parentId = currentParentId(ctx.document, rootIds);
-    const dispatch: CanvasAction[] =
-      state.dropTargetId !== parentId
-        ? [{ type: "canvas.setParent", objectIds: rootIds, parentId: state.dropTargetId }]
-        : [];
-    return { state: IDLE_INTERACTION_STATE, dispatch, overlay: emptyOverlay() };
+    return {
+      state: IDLE_INTERACTION_STATE,
+      dispatch: [{ type: "canvas.reconcileSectionMembership", recordHistory: false }],
+      overlay: emptyOverlay(),
+    };
   }
 
   if (event.type !== "move") return { state, dispatch: [], overlay: emptyOverlay() };
@@ -165,7 +157,16 @@ export function stepFromMove(
   // startGeometries (captured before this function ever runs) is what Escape/
   // cancel restores, so a snap correction can never leak into cancelled-drag
   // geometry.
-  const movingBounds = boundsForGeometries(Object.values(rawGeometries));
+  const movingBounds = boundsForGeometries(
+    ctx.document.objects
+      .filter((object) => state.objectIds.includes(object.id))
+      .map((object) =>
+        connectionBoundsForObject({
+          ...object,
+          geometry: rawGeometries[object.id] ?? object.geometry,
+        }),
+      ),
+  );
   const candidates = gatherSnapCandidates(ctx.document, state.objectIds);
   const threshold = SNAP_THRESHOLD_SCREEN_PX / ctx.viewport.zoom;
   const resolverSnap = movingBounds ? ctx.snapResolver?.(movingBounds, ctx.viewport.zoom) : null;
@@ -189,27 +190,29 @@ export function stepFromMove(
       ]
     : [];
 
-  // Drop-target hit-testing: probe with the center of the PRIMARY dragged
-  // object's current (snapped) bounds — not the pointer, and not the union of
-  // a multi-selection — excluding the dragged objects and their own
-  // descendants so a section can't be dropped into itself or a child it
-  // contains. objectIds preserves press order, so [0] is the primary object.
+  // Drop-target preview: run the same bounds-overlap resolver the reducer
+  // uses at commit time against the PRIMARY dragged object's projected
+  // geometry, excluding the dragged roots/descendants as section candidates.
+  // objectIds preserves press order, so [0] is the primary object.
   const excludeIds = new Set(state.objectIds);
+  const descendantsByParent = buildDescendantsByParent(ctx.document);
   for (const objectId of state.objectIds) {
-    for (const descendantId of descendantIds(ctx.document, objectId)) {
-      excludeIds.add(descendantId);
-    }
+    addDescendantIds(descendantsByParent, objectId, excludeIds);
   }
-  const primaryGeometry = state.objectIds[0] ? geometries[state.objectIds[0]] : undefined;
-  const dropTargetCenter = primaryGeometry
-    ? { x: primaryGeometry.x + primaryGeometry.width / 2, y: primaryGeometry.y + primaryGeometry.height / 2 }
-    : event.world;
-  const dropTarget = hitTestDropTarget(ctx.document, dropTargetCenter, excludeIds);
+  const primaryObjectId = state.objectIds[0];
+  const primaryObject = primaryObjectId
+    ? ctx.document.objects.find((object) => object.id === primaryObjectId)
+    : null;
+  const primaryGeometry = primaryObjectId ? geometries[primaryObjectId] : undefined;
+  const dropTargetId =
+    primaryObject && primaryGeometry
+      ? resolveSectionParent({ ...primaryObject, geometry: primaryGeometry }, ctx.document, excludeIds)
+      : null;
 
   const nextState: MoveGesture = {
     ...state,
     hasEmitted: true,
-    dropTargetId: dropTarget?.id ?? null,
+    dropTargetId,
   };
   return {
     state: nextState,
@@ -226,7 +229,7 @@ export function stepFromMove(
       guides: snap.guides,
       distributionGuides: snap.distributionGuides,
       spacing,
-      dropTargetId: dropTarget?.id ?? null,
+      dropTargetId,
     },
   };
 }

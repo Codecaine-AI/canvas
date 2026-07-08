@@ -6,8 +6,10 @@
  * gesture state lives here — everything is a straight function of the
  * document + a world point/bounds, so it's independently unit-testable.
  */
+import { connectionBoundsForObject, outlineContainsPoint } from "../objects/geometry";
 import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
+import { paintOrderedObjects } from "../state/z-order";
 
 export function objectGeometryMap(
   document: InteractiveCanvasDocument,
@@ -45,19 +47,30 @@ export function descendantIds(document: InteractiveCanvasDocument, containerId: 
 }
 
 /**
- * Hit-tests world point against document objects, topmost-first (later objects in
- * the array render on top, mirroring CanvasStage's render order).
+ * Hit-tests world point against document objects, topmost-first by the same
+ * paint order used by CanvasStage.
+ *
+ * D16 (P3): hits respect each object's def-declared outline
+ * (objects/geometry.ts outlineContainsPoint) — a diamond's empty corners fall
+ * through to whatever is behind. The bbox check doubles as the fast reject
+ * AND keeps bbox-outline kinds byte-identical to the pre-D16 behavior (their
+ * outline IS the bbox).
  */
 export function hitTestObjects(
   document: InteractiveCanvasDocument,
   worldPoint: CanvasPoint,
 ): InteractiveCanvasObject | null {
-  for (let index = document.objects.length - 1; index >= 0; index -= 1) {
-    const object = document.objects[index]!;
-    const { x, y, width, height } = object.geometry;
+  const objects = paintOrderedObjects(document);
+  for (let index = objects.length - 1; index >= 0; index -= 1) {
+    const object = objects[index]!;
+    // Below-slot text lives outside stored geometry but remains part of the
+    // clickable object footprint.
+    const { x, y, width, height } = connectionBoundsForObject(object);
     const inside =
       worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
-    if (inside) return object;
+    if (!inside) continue;
+    if (!outlineContainsPoint(object, worldPoint)) continue;
+    return object;
   }
   return null;
 }
@@ -78,6 +91,9 @@ export function selectionBounds(
  * sharing the dragged set's parent, plus every section (sections act as
  * alignment targets regardless of nesting level), excluding the dragged
  * objects themselves.
+ *
+ * Deliberately axis-aligned. Below-slot objects contribute their extended
+ * glyph+text footprint so snap guides account for visible labels.
  */
 export function gatherSnapCandidates(
   document: InteractiveCanvasDocument,
@@ -95,66 +111,12 @@ export function gatherSnapCandidates(
     const isSibling = parentIds.has(object.parentId ?? null);
     const isSection = object.type === "section";
     if (!isSibling && !isSection) continue;
-    candidates.set(object.id, object.geometry);
+    candidates.set(object.id, connectionBoundsForObject(object));
   }
   return Array.from(candidates.values());
 }
 
-/**
- * Hit-tests world point against section objects only (used for drop targeting
- * during a move gesture), excluding `excludeIds` (the dragged objects and
- * their descendants) so a section can't be dropped into itself or into one of
- * its own children. Sections don't stack in plain array order: they paint
- * depth-then-index (renderOrderedObjects in CanvasStage) — a nested section
- * renders above its ancestors, stable by array index among equal depths — so
- * among containing sections the one with the greatest parentId-ancestor-chain
- * depth wins here, tiebroken by later array index. That matches what the user
- * sees painted on top under the probe point.
- */
-export function hitTestDropTarget(
-  document: InteractiveCanvasDocument,
-  worldPoint: CanvasPoint,
-  excludeIds: Set<string>,
-): InteractiveCanvasObject | null {
-  const byId = new Map(document.objects.map((object) => [object.id, object]));
-
-  // Length of the section's parentId ancestor chain (root sections are depth
-  // 0), guarding against dangling parentIds and (invalid) cycles — mirrors
-  // renderOrderedObjects' sectionDepth in CanvasStage.
-  function sectionDepth(section: InteractiveCanvasObject): number {
-    let depth = 0;
-    const visited = new Set<string>([section.id]);
-    let parentId = section.parentId ?? null;
-    while (parentId && !visited.has(parentId)) {
-      const parent = byId.get(parentId);
-      if (!parent) break;
-      visited.add(parent.id);
-      depth += 1;
-      parentId = parent.parentId ?? null;
-    }
-    return depth;
-  }
-
-  let best: InteractiveCanvasObject | null = null;
-  let bestDepth = -1;
-  for (const object of document.objects) {
-    if (object.type !== "section") continue;
-    if (excludeIds.has(object.id)) continue;
-    const { x, y, width, height } = object.geometry;
-    const inside =
-      worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
-    if (!inside) continue;
-    const depth = sectionDepth(object);
-    // >= so an equal-depth section later in the array wins, matching the
-    // render sort's stable index tiebreak.
-    if (depth >= bestDepth) {
-      best = object;
-      bestDepth = depth;
-    }
-  }
-  return best;
-}
-
+/** Marquee membership. Deliberately stored-geometry intersection: the FigJam selection box for below-slot objects wraps the glyph, not the external text band. */
 export function objectsIntersectingBounds(
   document: InteractiveCanvasDocument,
   bounds: CanvasBounds,

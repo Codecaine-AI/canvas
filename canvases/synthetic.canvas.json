@@ -16,8 +16,8 @@
     {
       "id": "interview-flow",
       "type": "rectangle",
-      "label": "Interview Flow",
-      "body": "Validation container for the first interactive canvas slice.",
+      "text": "Interview Flow\nValidation container for the first interactive canvas slice.",
+      "color": "gray",
       "parentId": null,
       "geometry": {
         "x": 72,
@@ -25,20 +25,20 @@
         "width": 1008,
         "height": 584
       },
-      "style": {
-        "tone": "neutral",
-        "shape": "rounded-rect"
-      },
       "layout": {
         "mode": "free",
         "padding": 32,
         "gap": 32
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "input-context",
       "type": "rectangle",
-      "label": "Input Context",
+      "text": "Input Context",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 112,
@@ -46,20 +46,20 @@
         "width": 240,
         "height": 376
       },
-      "style": {
-        "tone": "input",
-        "shape": "rounded-rect"
-      },
       "layout": {
         "mode": "column",
         "padding": 24,
         "gap": 18
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "user-brief",
       "type": "process",
-      "label": "User brief",
+      "text": "User brief",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 144,
@@ -68,15 +68,14 @@
         "height": 72
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "current-docs",
       "type": "rectangle",
-      "label": "Current docs",
-      "body": "Existing MDX docs context.",
+      "text": "Current docs\nExisting MDX docs context.",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 144,
@@ -85,14 +84,14 @@
         "height": 72
       },
       "style": {
-        "tone": "agent",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "agent-summarizes",
       "type": "process",
-      "label": "Agent summarizes",
+      "text": "Agent summarizes",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 440,
@@ -101,14 +100,14 @@
         "height": 88
       },
       "style": {
-        "tone": "process",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "needs-clarification",
       "type": "decision",
-      "label": "Need clarification?",
+      "text": "Need clarification?",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 704,
@@ -117,14 +116,14 @@
         "height": 112
       },
       "style": {
-        "tone": "decision",
         "shape": "diamond"
       }
     },
     {
       "id": "write-spec",
       "type": "process",
-      "label": "Write spec",
+      "text": "Write spec",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 928,
@@ -133,15 +132,14 @@
         "height": 88
       },
       "style": {
-        "tone": "process",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "ask-follow-up",
       "type": "sticky",
-      "label": "Ask follow-up",
-      "body": "Keep the question close to the unresolved decision branch.",
+      "text": "Keep the question close to the unresolved decision branch.",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 680,
@@ -150,14 +148,14 @@
         "height": 128
       },
       "style": {
-        "tone": "warning",
         "shape": "note"
       }
     },
     {
       "id": "annotation-review",
       "type": "annotation-marker",
-      "label": "Review",
+      "text": "Review",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 616,
@@ -166,14 +164,14 @@
         "height": 40
       },
       "style": {
-        "tone": "annotation",
         "shape": "marker"
       }
     },
     {
       "id": "spec-document",
       "type": "document",
-      "label": "Spec document",
+      "text": "Spec document",
+      "color": "violet",
       "parentId": null,
       "geometry": {
         "x": 896,
@@ -182,14 +180,14 @@
         "height": 120
       },
       "style": {
-        "shape": "document",
-        "paletteToken": "memory"
+        "shape": "document"
       }
     },
     {
       "id": "stakeholder",
       "type": "person",
-      "label": "Stakeholder",
+      "text": "Stakeholder",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 144,
@@ -198,14 +196,14 @@
         "height": 88
       },
       "style": {
-        "shape": "person",
-        "paletteToken": "input"
+        "shape": "person"
       }
     },
     {
       "id": "memory-store",
       "type": "database",
-      "label": "Memory store",
+      "text": "Memory store",
+      "color": "violet",
       "parentId": null,
       "geometry": {
         "x": 72,
@@ -214,14 +212,14 @@
         "height": 120
       },
       "style": {
-        "shape": "database",
-        "paletteToken": "memory"
+        "shape": "database"
       }
     },
     {
       "id": "clarify-chat",
       "type": "chat",
-      "label": "Clarify chat",
+      "text": "Clarify chat",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 704,
@@ -230,8 +228,7 @@
         "height": 110
       },
       "style": {
-        "shape": "chat",
-        "paletteToken": "process"
+        "shape": "chat"
       }
     }
   ],
@@ -261,7 +258,7 @@
         "anchor": "left"
       },
       "label": "context",
-      "style": "dotted",
+      "style": "dashed",
       "arrow": "forward"
     },
     {
@@ -302,7 +299,7 @@
         "anchor": "top"
       },
       "label": "yes",
-      "style": "dotted",
+      "style": "dashed",
       "arrow": "forward"
     }
   ],

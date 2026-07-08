@@ -1,7 +1,9 @@
 "use client";
 
 import type { InteractiveCanvasDocument } from "../schema";
+import { reconcileSectionMembership } from "../section-membership";
 import { handleAddAnnotation } from "./annotations";
+import { FIRST_USE_COLORS } from "../schema/object-defaults";
 import {
   handleAddConnection,
   handleDeleteConnection,
@@ -14,6 +16,7 @@ import {
   handleDistributeSelection,
   handleFitSectionToChildren,
   handleMoveSelection,
+  handleReconcileSectionMembership,
   handleResizeObject,
   handleSetParent,
   handleUpdateObjectGeometries,
@@ -34,22 +37,23 @@ import { reconcileConnectionWaypoints } from "./waypoints";
 export function createInteractiveCanvasState(
   document: InteractiveCanvasDocument,
 ): InteractiveCanvasState {
+  const reconciledDocument = reconcileSectionMembership(document);
   return {
-    document,
+    document: reconciledDocument,
     selection: { kind: "none" },
     tool: "select",
     history: { past: [], future: [] },
+    // D17 — per-kind color memory starts at the first-use fallbacks.
+    lastPickedColor: { ...FIRST_USE_COLORS },
   };
 }
 
 /**
  * Reducer entry point. Wraps the action switch (reduceCanvasAction) with the
- * stale-waypoint choke point: every action that commits geometry changes —
- * drag/section-carry commits (canvas.updateObjectGeometries, both the history
- * and live-preview branches), nudges (canvas.moveSelection), resize, align/
- * distribute, fit-section, inspector geometry patches (canvas.updateObject)
- * — flows through here, so waypoints are reconciled exactly once per action.
- * undo/redo/reset restore stored documents verbatim and are exempt.
+ * post-reduce geometry choke points. Waypoints are reconciled for every
+ * document-changing action, while section membership is reconciled for
+ * discrete geometry commits only. undo/redo/reset restore stored documents
+ * verbatim and are exempt.
  */
 export function reduceInteractiveCanvasState(
   state: InteractiveCanvasState,
@@ -61,9 +65,48 @@ export function reduceInteractiveCanvasState(
     return next;
   }
   if (next.document === state.document) return next;
-  const reconciled = reconcileConnectionWaypoints(state.document, next.document);
-  if (reconciled === next.document) return next;
-  return { ...next, document: reconciled };
+  const waypointsReconciledDocument = reconcileConnectionWaypoints(state.document, next.document);
+  const shouldReconcileSections = shouldReconcileSectionMembership(action);
+  const sectionReconciledDocument = shouldReconcileSections
+    ? reconcileSectionMembership(waypointsReconciledDocument)
+    : waypointsReconciledDocument;
+  if (shouldReconcileSections && process.env.NODE_ENV !== "production") {
+    const invariantDocument = reconcileSectionMembership(sectionReconciledDocument);
+    if (invariantDocument !== sectionReconciledDocument) {
+      console.error("Section membership invariant violation after", action.type);
+    }
+  }
+  if (sectionReconciledDocument === next.document) return next;
+  return { ...next, document: sectionReconciledDocument };
+}
+
+function shouldReconcileSectionMembership(action: CanvasAction): boolean {
+  switch (action.type) {
+    case "canvas.addObject":
+    case "canvas.addObjects":
+    case "canvas.duplicateSelection":
+    case "canvas.deleteSelection":
+    case "canvas.quickConnect":
+    case "canvas.moveSelection":
+    case "canvas.resizeObject":
+    case "canvas.alignSelection":
+    case "canvas.distributeSelection":
+    case "canvas.fitSectionToChildren":
+    case "canvas.setObjectType":
+      return true;
+    case "canvas.updateObject":
+      return objectPatchTouchesSectionMembership(action.patch);
+    default:
+      return false;
+  }
+}
+
+function objectPatchTouchesSectionMembership(
+  patch: Extract<CanvasAction, { type: "canvas.updateObject" }>["patch"],
+): boolean {
+  return ["geometry", "type", "locked", "contentHidden", "parentId"].some((key) =>
+    Object.prototype.hasOwnProperty.call(patch, key),
+  );
 }
 
 /**
@@ -133,6 +176,10 @@ function reduceCanvasAction(
 
   if (action.type === "canvas.updateObjectGeometries") {
     return handleUpdateObjectGeometries(state, action);
+  }
+
+  if (action.type === "canvas.reconcileSectionMembership") {
+    return handleReconcileSectionMembership(state, action);
   }
 
   if (action.type === "canvas.setParent") {

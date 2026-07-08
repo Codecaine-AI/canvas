@@ -7,9 +7,11 @@
  * candidate through the ported AFFiNE connection cascade (W3b).
  */
 import { resolveConnectionCascade } from "../../routing/connection-overlay";
-import { nearestAnchor, pointForAnchor } from "../../routing/routing";
+import { nearestObjectAnchor, pointForAnchor, pointForObjectAnchor } from "../../routing/routing";
+import { isBelowTextType } from "../../objects/text-slots";
 import type { CanvasPoint } from "../../state/geometry";
 import type { InteractiveCanvasDocument } from "../../state/schema";
+import { paintOrderedObjects } from "../../state/z-order";
 import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
@@ -26,10 +28,10 @@ import {
  * Resolves the connect-target under the pointer through the ported AFFiNE
  * connection cascade (W3b — connection-overlay.ts): anchor snap within 8 view
  * px, else nearest-outline-point snap within 8 world px, else inside-the-
- * shape, else no candidate. `document.objects` is passed in array order
- * (later = topmost, matching CanvasStage's render order) so an overlapping
- * upper object wins, and `excludeId` (the connector's other endpoint's
- * object) can never candidate-snap into a self-loop.
+ * shape, else no candidate. Candidates are passed topmost-first by shared
+ * paint order, matching hitTestObjects, so an overlapping upper object wins,
+ * and `excludeId` (the connector's other endpoint's object) can never
+ * candidate-snap into a self-loop.
  *
  * The candidate always carries the coarse nearest `anchor` side; `position`
  * is set only when the exact snapped point is not the plain bbox side
@@ -43,9 +45,10 @@ function connectorCandidateAt(
   excludeId: string | null,
   zoom: number,
 ): ConnectorAnchorCandidate | undefined {
+  const candidates = [...paintOrderedObjects(document)].reverse();
   const cascade = resolveConnectionCascade(
     worldPoint,
-    document.objects,
+    candidates,
     zoom,
     new Set(excludeId ? [excludeId] : []),
   );
@@ -57,17 +60,23 @@ function connectorCandidateAt(
   if (cascade.kind === "inside") {
     return {
       objectId: cascade.objectId,
-      anchor: nearestAnchor(object.geometry, worldPoint),
+      anchor: nearestObjectAnchor(object, worldPoint),
       snapKind: "inside",
     };
   }
 
-  const anchor = nearestAnchor(object.geometry, cascade.point);
-  const canonical = pointForAnchor(object.geometry, anchor);
+  const anchor = nearestObjectAnchor(object, cascade.point);
+  const plainBboxCanonical = pointForAnchor(object.geometry, anchor);
+  const objectCanonical = pointForObjectAnchor(object, anchor);
+  const isPlainBboxAnchor =
+    Math.abs(plainBboxCanonical.x - cascade.point.x) < 0.5 &&
+    Math.abs(plainBboxCanonical.y - cascade.point.y) < 0.5;
+  const isBelowSlotAnchor =
+    isBelowTextType(object.type) &&
+    Math.abs(objectCanonical.x - cascade.point.x) < 0.5 &&
+    Math.abs(objectCanonical.y - cascade.point.y) < 0.5;
   const isCanonicalAnchorPoint =
-    cascade.kind === "anchor" &&
-    Math.abs(canonical.x - cascade.point.x) < 0.5 &&
-    Math.abs(canonical.y - cascade.point.y) < 0.5;
+    cascade.kind === "anchor" && (isPlainBboxAnchor || isBelowSlotAnchor);
 
   return {
     objectId: cascade.objectId,

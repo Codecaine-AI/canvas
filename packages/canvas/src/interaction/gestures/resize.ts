@@ -9,6 +9,7 @@
  */
 import { computeSnapGuides } from "../snapping";
 import { gatherSnapCandidates } from "../hit-testing";
+import { connectionBoundsForObject } from "../../objects/geometry";
 import type { CanvasGeometry } from "../../state/schema";
 import {
   IDLE_INTERACTION_STATE,
@@ -110,7 +111,11 @@ export function stepFromResize(
   }
 
   if (event.type === "up") {
-    return { state: IDLE_INTERACTION_STATE, dispatch: [], overlay: emptyOverlay() };
+    return {
+      state: IDLE_INTERACTION_STATE,
+      dispatch: [{ type: "canvas.reconcileSectionMembership", recordHistory: false }],
+      overlay: emptyOverlay(),
+    };
   }
 
   if (event.type !== "move") return { state, dispatch: [], overlay: emptyOverlay() };
@@ -118,13 +123,17 @@ export function stepFromResize(
   const dx = event.world.x - state.startWorld.x;
   const dy = event.world.y - state.startWorld.y;
   const rawGeometry = applyResizeHandle(state.startGeometry, state.handle, dx, dy);
+  const target = ctx.document.objects.find((object) => object.id === state.objectId);
+  const snapBounds = target
+    ? connectionBoundsForObject({ ...target, geometry: rawGeometry })
+    : rawGeometry;
 
   // Live snap guides for resize: snap only the edges the handle actually
   // moves (the anchored opposite edge/corner must not move — applyResizeHandle
   // already clamps it, so we correct just the moving edge(s) toward alignment).
   const candidates = gatherSnapCandidates(ctx.document, [state.objectId]);
   const threshold = SNAP_THRESHOLD_SCREEN_PX / ctx.viewport.zoom;
-  const snap = computeSnapGuides(rawGeometry, candidates, threshold);
+  const snap = computeSnapGuides(snapBounds, candidates, threshold);
 
   const affectsWest = state.handle === "w" || state.handle === "nw" || state.handle === "sw";
   const affectsEast = state.handle === "e" || state.handle === "ne" || state.handle === "se";

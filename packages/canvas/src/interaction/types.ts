@@ -10,9 +10,10 @@
  * viewport module, never from the gesture steppers or core, so gestures/ and
  * core.ts can both depend on it without cycles.
  */
-import type { CanvasAction, CanvasSelection, CanvasTool } from "../state/actions";
+import type { CanvasAction, CanvasColorKind, CanvasSelection, CanvasTool } from "../state/actions";
 import type { CanvasBounds, CanvasPoint } from "../state/geometry";
 import type {
+  CanvasColor,
   CanvasGeometry,
   CanvasIconGlyph,
   CanvasShapeDirection,
@@ -43,7 +44,8 @@ export type ResizeHandle = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 export type ArmedShapeVariant = {
   direction?: CanvasShapeDirection;
   icon?: CanvasIconGlyph;
-  label?: string;
+  /** Seed text for the created object (e.g. an icon entry's glyph name instead of the generic "Icon"). */
+  text?: string;
 };
 
 export const RESIZE_HANDLES: ResizeHandle[] = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
@@ -125,19 +127,19 @@ export type InteractionOverlay = {
   connectorDrag?: ConnectorDragOverlay;
   /**
    * One-shot signal (4.2.1): a double-click resolved to "start editing this
-   * object's label inline". Set for both the existing-object case (id already
-   * known). The editor should open its inline label textarea for this id and
-   * then let the overlay go stale on the next interaction event (this field is
-   * not "current state", just an edge-triggered request).
+   * object's text in place". Set for both the existing-object case (id
+   * already known). The editor should open its in-place text editor for this
+   * id and then let the overlay go stale on the next interaction event (this
+   * field is not "current state", just an edge-triggered request).
    */
-  editObjectLabelId?: string;
+  editObjectTextId?: string;
   /**
-   * Seed label text for editObjectLabelId when the target object won't exist
-   * in the document yet at the time the editor processes this overlay.
+   * Seed text for editObjectTextId when the target object won't exist in the
+   * document yet at the time the editor processes this overlay.
    * Existing-object double-click omits this; the editor reads the current
-   * label from the document instead.
+   * text from the document instead.
    */
-  editObjectLabelSeed?: string;
+  editObjectTextSeed?: string;
   /** Ghost preview rect for an in-progress armed-tool placement drag (4.2.2). */
   placePreview?: CanvasBounds;
   /**
@@ -173,7 +175,7 @@ export type MoveGesture = {
   objectIds: string[];
   startGeometries: Record<string, CanvasGeometry>;
   hasEmitted: boolean;
-  /** Section currently under the drag probe (drop target), tracked for release-time canvas.setParent. */
+  /** Section that the projected primary object would geometrically adopt. */
   dropTargetId: string | null;
 };
 
@@ -258,6 +260,13 @@ export type InteractionContext = {
   stickyPlacement?: boolean;
   /** Catalog-entry variant of the armed tool (Shapes panel pick) — see ArmedShapeVariant. */
   armedShape?: ArmedShapeVariant;
+  /**
+   * Per-kind last-picked color memory (P1, D17 — the reducer's
+   * state.lastPickedColor): lets the place gesture's ghost preview render
+   * the same color the created object will take. The creation itself reads
+   * the memory in the reducer, so this is preview-fidelity plumbing only.
+   */
+  lastPickedColor?: Readonly<Record<CanvasColorKind, CanvasColor>>;
   /**
    * Optional hook (checkpoint 1, T1.2.2) letting the host inject a snap
    * correction into the drag COMMIT itself, not just the overlay guides.

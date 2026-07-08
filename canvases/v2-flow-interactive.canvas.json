@@ -16,8 +16,8 @@
     {
       "id": "overall-context",
       "type": "sticky",
-      "label": "Overall context",
-      "body": "Why we are doing the interview and what outcome we want.",
+      "text": "Why we are doing the interview and what outcome we want.",
+      "color": "yellow",
       "geometry": {
         "x": 40,
         "y": 70,
@@ -25,15 +25,15 @@
         "height": 170
       },
       "style": {
-        "tone": "warning",
         "shape": "note"
-      }
+      },
+      "parentId": null
     },
     {
       "id": "base-question-text",
       "type": "sticky",
-      "label": "Base question text",
-      "body": "Stakeholder question and research objective.",
+      "text": "Stakeholder question and research objective.",
+      "color": "yellow",
       "geometry": {
         "x": 40,
         "y": 410,
@@ -41,34 +41,36 @@
         "height": 220
       },
       "style": {
-        "tone": "warning",
         "shape": "note"
-      }
+      },
+      "parentId": null
     },
     {
       "id": "interview-inputs",
       "type": "rectangle",
-      "label": "Interview Inputs",
+      "text": "Interview Inputs",
+      "color": "green",
       "geometry": {
         "x": 300,
         "y": 68,
         "width": 280,
         "height": 748
       },
-      "style": {
-        "tone": "input",
-        "shape": "rounded-rect"
-      },
       "layout": {
         "mode": "column",
         "padding": 28,
         "gap": 24
-      }
+      },
+      "style": {
+        "shape": "rounded-rect"
+      },
+      "parentId": null
     },
     {
       "id": "interview-purpose",
       "type": "process",
-      "label": "Overall context / purpose",
+      "text": "Overall context / purpose",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 350,
@@ -77,14 +79,14 @@
         "height": 62
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "question-bank",
       "type": "rectangle",
-      "label": "Questions",
+      "text": "Questions",
+      "color": "gray",
       "parentId": null,
       "geometry": {
         "x": 340,
@@ -93,14 +95,14 @@
         "height": 452
       },
       "style": {
-        "tone": "neutral",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "question-one",
       "type": "process",
-      "label": "Question 1",
+      "text": "Question 1",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 365,
@@ -109,14 +111,14 @@
         "height": 78
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "question-two",
       "type": "process",
-      "label": "Question 2",
+      "text": "Question 2",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 365,
@@ -125,14 +127,14 @@
         "height": 78
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "question-n",
       "type": "process",
-      "label": "Question N",
+      "text": "Question N",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 365,
@@ -141,34 +143,35 @@
         "height": 78
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "interview-flow",
       "type": "rectangle",
-      "label": "Interview Flow",
+      "text": "Interview Flow",
+      "color": "gray",
       "geometry": {
         "x": 660,
         "y": 70,
         "width": 1120,
         "height": 750
       },
-      "style": {
-        "tone": "neutral",
-        "shape": "rounded-rect"
-      },
       "layout": {
         "mode": "free",
         "padding": 34,
         "gap": 32
-      }
+      },
+      "style": {
+        "shape": "rounded-rect"
+      },
+      "parentId": null
     },
     {
       "id": "generate-transition-response",
       "type": "rectangle",
-      "label": "Generate transition response",
+      "text": "Generate transition response",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 750,
@@ -177,14 +180,14 @@
         "height": 90
       },
       "style": {
-        "tone": "agent",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "adapt-question",
       "type": "rectangle",
-      "label": "Adapt question based on history",
+      "text": "Adapt question based on history",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 750,
@@ -193,14 +196,14 @@
         "height": 110
       },
       "style": {
-        "tone": "agent",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "get-next-question",
       "type": "process",
-      "label": "Get next question",
+      "text": "Get next question",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 720,
@@ -209,14 +212,14 @@
         "height": 56
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "ai-asks-question",
       "type": "process",
-      "label": "AI asks question",
+      "text": "AI asks question",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 1120,
@@ -225,14 +228,14 @@
         "height": 100
       },
       "style": {
-        "tone": "agent",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "interviewee-response",
       "type": "process",
-      "label": "Interviewee response",
+      "text": "Interviewee response",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 1130,
@@ -241,14 +244,14 @@
         "height": 85
       },
       "style": {
-        "tone": "process",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "memory-bank",
       "type": "rectangle",
-      "label": "Memory Bank",
+      "text": "Memory Bank",
+      "color": "violet",
       "parentId": null,
       "geometry": {
         "x": 1325,
@@ -256,21 +259,20 @@
         "width": 420,
         "height": 300
       },
-      "style": {
-        "tone": "memory",
-        "shape": "rounded-rect"
-      },
       "layout": {
         "mode": "free",
         "padding": 22,
         "gap": 18
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "memory-summary",
       "type": "sticky",
-      "label": "Memory bank",
-      "body": "Memory of the current interview across all questions.",
+      "text": "Memory of the current interview across all questions.",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 1460,
@@ -279,14 +281,14 @@
         "height": 120
       },
       "style": {
-        "tone": "warning",
         "shape": "note"
       }
     },
     {
       "id": "memory-actions",
       "type": "rectangle",
-      "label": "Memory Actions",
+      "text": "Memory Actions",
+      "color": "green",
       "parentId": null,
       "geometry": {
         "x": 1360,
@@ -295,15 +297,14 @@
         "height": 115
       },
       "style": {
-        "tone": "input",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "memory-structure",
       "type": "database",
-      "label": "Memory structure",
-      "body": "Typed memory schema and stored memories.",
+      "text": "Memory structure\nTyped memory schema and stored memories.",
+      "color": "violet",
       "parentId": null,
       "geometry": {
         "x": 1530,
@@ -312,14 +313,14 @@
         "height": 115
       },
       "style": {
-        "shape": "database",
-        "paletteToken": "memory"
+        "shape": "database"
       }
     },
     {
       "id": "enough-context-decision",
       "type": "decision",
-      "label": "Enough context?",
+      "text": "Enough context?",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 980,
@@ -328,14 +329,14 @@
         "height": 95
       },
       "style": {
-        "tone": "decision",
         "shape": "diamond"
       }
     },
     {
       "id": "response-enough-context",
       "type": "decision",
-      "label": "Does response provide enough context?",
+      "text": "Does response provide enough context?",
+      "color": "red",
       "parentId": null,
       "geometry": {
         "x": 1200,
@@ -344,14 +345,14 @@
         "height": 105
       },
       "style": {
-        "tone": "warning",
         "shape": "diamond"
       }
     },
     {
       "id": "probing-response",
       "type": "rectangle",
-      "label": "Probing response",
+      "text": "Probing response",
+      "color": "gray",
       "parentId": null,
       "geometry": {
         "x": 1465,
@@ -360,14 +361,14 @@
         "height": 210
       },
       "style": {
-        "tone": "neutral",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "not-enough-context",
       "type": "decision",
-      "label": "Not enough context",
+      "text": "Not enough context",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 1495,
@@ -376,14 +377,14 @@
         "height": 54
       },
       "style": {
-        "tone": "decision",
         "shape": "diamond"
       }
     },
     {
       "id": "unclear-message",
       "type": "decision",
-      "label": "Unclear message",
+      "text": "Unclear message",
+      "color": "yellow",
       "parentId": null,
       "geometry": {
         "x": 1495,
@@ -392,14 +393,14 @@
         "height": 54
       },
       "style": {
-        "tone": "decision",
         "shape": "diamond"
       }
     },
     {
       "id": "generate-probing-question",
       "type": "rectangle",
-      "label": "Generate probing question",
+      "text": "Generate probing question",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 1695,
@@ -408,14 +409,14 @@
         "height": 100
       },
       "style": {
-        "tone": "agent",
         "shape": "rounded-rect"
       }
     },
     {
       "id": "interviewee",
       "type": "person",
-      "label": "Interviewee",
+      "text": "Interviewee",
+      "color": "green",
       "geometry": {
         "x": 1120,
         "y": 460,
@@ -423,15 +424,15 @@
         "height": 144
       },
       "style": {
-        "shape": "person",
-        "paletteToken": "input"
-      }
+        "shape": "person"
+      },
+      "parentId": null
     },
     {
       "id": "live-qa-exchange",
       "type": "chat",
-      "label": "Live Q&A exchange",
-      "body": "Realtime back-and-forth rendered to the interviewee.",
+      "text": "Live Q&A exchange\nRealtime back-and-forth rendered to the interviewee.",
+      "color": "blue",
       "parentId": null,
       "geometry": {
         "x": 1120,
@@ -440,15 +441,14 @@
         "height": 110
       },
       "style": {
-        "shape": "chat",
-        "paletteToken": "process"
+        "shape": "chat"
       }
     },
     {
       "id": "final-interview-spec",
       "type": "document",
-      "label": "Final interview spec",
-      "body": "Generated spec artifact once enough context is gathered.",
+      "text": "Final interview spec\nGenerated spec artifact once enough context is gathered.",
+      "color": "violet",
       "geometry": {
         "x": 980,
         "y": 850,
@@ -456,9 +456,9 @@
         "height": 120
       },
       "style": {
-        "shape": "document",
-        "paletteToken": "memory"
-      }
+        "shape": "document"
+      },
+      "parentId": null
     }
   ],
   "connections": [
@@ -531,7 +531,7 @@
         "objectId": "ai-asks-question",
         "anchor": "left"
       },
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "agent"
     },
@@ -618,7 +618,7 @@
         "objectId": "generate-probing-question",
         "anchor": "bottom"
       },
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "probe"
     },
@@ -633,7 +633,7 @@
         "anchor": "right"
       },
       "label": "ask again",
-      "style": "dotted",
+      "style": "dashed",
       "arrow": "forward",
       "role": "feedback-loop"
     },
@@ -648,7 +648,7 @@
         "anchor": "top"
       },
       "label": "renders as",
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "response"
     },
@@ -663,7 +663,7 @@
         "anchor": "top"
       },
       "label": "shown to",
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "response"
     },
@@ -678,7 +678,7 @@
         "anchor": "left"
       },
       "label": "answers",
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "response"
     },
@@ -693,7 +693,7 @@
         "anchor": "top"
       },
       "label": "generate spec",
-      "style": "elbow",
+      "style": "solid",
       "arrow": "forward",
       "role": "next-question"
     }
