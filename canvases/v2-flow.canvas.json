@@ -587,8 +587,8 @@
       "color": "red",
       "parentId": "section",
       "geometry": {
-        "x": 3100.773473891233,
-        "y": 1950.2605373072122,
+        "x": 3062.7169451193427,
+        "y": 1930.7306530481078,
         "width": 459,
         "height": 171
       },
@@ -1008,7 +1008,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red"
+      "color": "red",
+      "waypoints": [
+        [
+          2997.3634818156497,
+          2016.23
+        ],
+        [
+          2997.3634818156497,
+          1867.27
+        ]
+      ]
     },
     {
       "id": "conn-emphasis-box-to-null-response",
@@ -1038,17 +1048,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red",
-      "waypoints": [
-        [
-          3028.278007286818,
-          2035.781425173883
-        ],
-        [
-          3028.278007286818,
-          2167.281425173883
-        ]
-      ]
+      "color": "red"
     },
     {
       "id": "conn-emphasis-box-to-not-enough-context",
@@ -1063,17 +1063,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red",
-      "waypoints": [
-        [
-          3628.2780072868177,
-          2035.781425173883
-        ],
-        [
-          3628.2780072868177,
-          1867.281425173884
-        ]
-      ]
+      "color": "red"
     },
     {
       "id": "conn-emphasis-box-to-unclear-message",
@@ -1088,17 +1078,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red",
-      "waypoints": [
-        [
-          3628.2780072868177,
-          2035.781425173883
-        ],
-        [
-          3628.2780072868177,
-          2017.2814251738812
-        ]
-      ]
+      "color": "red"
     },
     {
       "id": "conn-emphasis-box-to-possible-user-refusal",
@@ -1113,17 +1093,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red",
-      "waypoints": [
-        [
-          3628.2780072868177,
-          2035.781425173883
-        ],
-        [
-          3628.2780072868177,
-          2167.281425173883
-        ]
-      ]
+      "color": "red"
     },
     {
       "id": "conn-not-enough-context-to-generate-probing-question",

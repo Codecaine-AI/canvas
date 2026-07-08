@@ -1,13 +1,13 @@
 "use client";
 
 import {
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
   type ClipboardEvent,
-  type FormEvent,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -332,6 +332,7 @@ export function MarkdownSlotTextEditor({
   });
   const selectionRef = useRef(selection);
   const desiredSelectionRef = useRef<StickyMarkdownSelection | null>(null);
+  const beforeInputHandlerRef = useRef<(event: InputEvent) => void>(() => undefined);
   const documentModel = useMemo(() => parseStickyMarkdown(value), [value]);
   const activeLines = useMemo(
     () => activeStickyMarkdownLineIndexes(documentModel, selection),
@@ -358,14 +359,65 @@ export function MarkdownSlotTextEditor({
     // IME/composition support is intentionally defensive rather than clever:
     // during composition we let the browser mutate the contentEditable so it
     // can show the platform candidate UI, then serialize the leaf text back to
-    // source. The caret may return to the end of the composed source in older
-    // DOM implementations, but state stays raw-markdown-correct.
+    // source. If the platform leaves a mappable DOM selection, keep it in raw
+    // source coordinates; otherwise fall back to the end of the composed source.
     const nextSource = serializeMarkdownSourceFromDom(element);
-    const nextSelection = { start: nextSource.length, end: nextSource.length };
+    const unmappedSelection = { start: -1, end: -1 };
+    const mappedSelection = currentDomSelection(element, unmappedSelection);
+    const nextSelection =
+      mappedSelection.start < 0 || mappedSelection.end < 0
+        ? { start: nextSource.length, end: nextSource.length }
+        : {
+            start: clamp(mappedSelection.start, 0, nextSource.length),
+            end: clamp(mappedSelection.end, 0, nextSource.length),
+          };
     desiredSelectionRef.current = nextSelection;
     setSelection(nextSelection);
     setValue(nextSource);
   }
+
+  beforeInputHandlerRef.current = (event: InputEvent): void => {
+    if (composingRef.current || event.isComposing) return;
+
+    let edit: StickyMarkdownEdit | null = null;
+    if (event.inputType === "insertText") {
+      edit = { type: "insertText", text: event.data ?? "" };
+    } else if (
+      event.inputType === "insertParagraph" ||
+      event.inputType === "insertLineBreak"
+    ) {
+      edit = { type: "insertLineBreak" };
+    } else if (event.inputType === "deleteContentBackward") {
+      edit = { type: "deleteContentBackward" };
+    } else if (event.inputType === "deleteContentForward") {
+      edit = { type: "deleteContentForward" };
+    } else if (event.inputType === "insertFromPaste") {
+      edit = {
+        type: "insertText",
+        text: event.dataTransfer?.getData("text/plain") ?? event.data ?? "",
+      };
+    }
+
+    if (!edit) return;
+    event.preventDefault();
+    applyEdit(edit);
+  };
+
+  useEffect(() => {
+    const element = editableRef.current;
+    if (!element) return;
+
+    // React 19's onBeforeInput is still synthesized from keypress/textInput and
+    // does not expose InputEvent.inputType. Register the native event once and
+    // route through a ref so the handler always sees the latest draft state.
+    const handleBeforeInput = (event: InputEvent) => {
+      beforeInputHandlerRef.current(event);
+    };
+    element.addEventListener("beforeinput", handleBeforeInput);
+    return () => {
+      element.removeEventListener("beforeinput", handleBeforeInput);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const element = editableRef.current;
@@ -413,33 +465,6 @@ export function MarkdownSlotTextEditor({
           restoreDomSelection(event.currentTarget, documentModel, nextSelection);
         }}
         onBlur={commit}
-        onBeforeInput={(event: FormEvent<HTMLDivElement>) => {
-          const nativeEvent = event.nativeEvent as InputEvent;
-          if (composingRef.current || nativeEvent.isComposing) return;
-
-          let edit: StickyMarkdownEdit | null = null;
-          if (nativeEvent.inputType === "insertText") {
-            edit = { type: "insertText", text: nativeEvent.data ?? "" };
-          } else if (
-            nativeEvent.inputType === "insertParagraph" ||
-            nativeEvent.inputType === "insertLineBreak"
-          ) {
-            edit = { type: "insertLineBreak" };
-          } else if (nativeEvent.inputType === "deleteContentBackward") {
-            edit = { type: "deleteContentBackward" };
-          } else if (nativeEvent.inputType === "deleteContentForward") {
-            edit = { type: "deleteContentForward" };
-          } else if (nativeEvent.inputType === "insertFromPaste") {
-            edit = {
-              type: "insertText",
-              text: nativeEvent.dataTransfer?.getData("text/plain") ?? nativeEvent.data ?? "",
-            };
-          }
-
-          if (!edit) return;
-          event.preventDefault();
-          applyEdit(edit);
-        }}
         onInput={(event) => {
           if (!composingRef.current) reconcileDomMutation(event.currentTarget);
         }}
@@ -451,6 +476,8 @@ export function MarkdownSlotTextEditor({
           reconcileDomMutation(event.currentTarget);
         }}
         onPaste={(event) => {
+          // Paste fires before beforeinput; preventing it here suppresses the
+          // subsequent paste beforeinput in browsers, avoiding double insertion.
           event.preventDefault();
           applyEdit({ type: "insertText", text: readPlainTextPaste(event) });
         }}
@@ -505,4 +532,3 @@ export function MarkdownSlotTextEditor({
     </div>
   );
 }
-

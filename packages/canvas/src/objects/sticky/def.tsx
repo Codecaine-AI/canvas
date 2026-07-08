@@ -92,6 +92,16 @@ export const stickyDef: ObjectDef = {
           position: absolute;
           left: 0;
         }
+        /*
+         * The live editor shows the active line's raw "- " marker; suppress
+         * the decorative bullet there so the marker is not doubled.
+         */
+        .interactive-canvas-sticky-line[data-bullet="true"][data-sticky-markdown-line-active="true"] {
+          padding-left: 0;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-sticky-markdown-line-active="true"]::before {
+          content: none;
+        }
 `,
   // Stamped from the schema-vocabulary defaults leaf (P4) like every def.
   defaults: objectTypeDefaults("sticky"),
