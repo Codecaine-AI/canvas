@@ -1,0 +1,880 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-30-layering",
+  "title": "The layer cake: geometric section layering",
+  "root": "b-layering-root",
+  "blocks": {
+    "b-layering-root": {
+      "id": "b-layering-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-layering-title-1",
+        "b-layering-intro-2",
+        "b-layering-mental-model-heading-3",
+        "b-layering-mental-model-body-4",
+        "b-layering-derived-decision-5",
+        "b-layering-predicate-heading-6",
+        "b-layering-predicate-body-7",
+        "b-layering-parent-cache-decision-8",
+        "b-layering-retention-constraint-9",
+        "b-layering-acyclic-observation-10",
+        "b-layering-stack-heading-11",
+        "b-layering-stack-body-12",
+        "b-layering-stack-code-13",
+        "b-layering-demo-canvas-14",
+        "b-layering-reconcile-heading-15",
+        "b-layering-reconcile-body-16",
+        "b-layering-reconcile-load-17",
+        "b-layering-reconcile-reducer-18",
+        "b-layering-reconcile-gesture-19",
+        "b-layering-live-divergence-constraint-20",
+        "b-layering-hit-testing-heading-21",
+        "b-layering-hit-testing-body-22",
+        "b-layering-drop-body-23",
+        "b-layering-case-heading-24",
+        "b-layering-case-body-25",
+        "b-layering-case-canvas-26",
+        "b-layering-case-fix-27",
+        "b-layering-edge-heading-28",
+        "b-layering-edge-hidden-29",
+        "b-layering-edge-strict-30",
+        "b-layering-edge-manual-31",
+        "b-layering-edge-set-parent-32",
+        "b-layering-tests-heading-33",
+        "b-layering-tests-body-34"
+      ],
+      "props": {
+        "covers": "The geometric section-layering model: parentId as a reconciled geometry cache, derived section paint order, hit-testing agreement, gesture reconcile points, and the v2-flow bug that motivated the layer cake.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "section membership",
+          "parentId",
+          "SECTION_CAPTURE_OVERLAP_THRESHOLD",
+          "paintOrderedObjects",
+          "hit testing",
+          "migrateSectionMembership"
+        ]
+      }
+    },
+    "b-layering-title-1": {
+      "id": "b-layering-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The layer cake: geometric section layering"
+        }
+      ]
+    },
+    "b-layering-intro-2": {
+      "id": "b-layering-intro-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Section layering is no longer a hand-maintained z-order problem. "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a persisted cache of geometry, reconciled by "
+        },
+        {
+          "insert": "reconcileSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-membership.ts",
+              "symbol": "reconcileSectionMembership"
+            }
+          }
+        },
+        {
+          "insert": ", and the visible stack is derived from that cache by "
+        },
+        {
+          "insert": "paintOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts",
+              "symbol": "paintOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-layering-mental-model-heading-3": {
+      "id": "b-layering-mental-model-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Mental model"
+        }
+      ]
+    },
+    "b-layering-mental-model-body-4": {
+      "id": "b-layering-mental-model-body-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Sections stack like a layer cake. The biggest containing thing is the bottom layer; everything it contains stacks above it. Users do not push section backdrops forward or backward by hand. They move geometry, and geometry decides membership and section depth."
+        }
+      ]
+    },
+    "b-layering-derived-decision-5": {
+      "id": "b-layering-derived-decision-5",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "Layering is derived from geometry"
+      },
+      "text": [
+        {
+          "insert": "The model treats section order as a consequence of containment, not as independent document state. If two documents have the same object geometries and section lock/visibility flags, reconcile should produce the same "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " cache and the same paint order regardless of how the objects arrived there."
+        }
+      ]
+    },
+    "b-layering-predicate-heading-6": {
+      "id": "b-layering-predicate-heading-6",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Membership predicate"
+        }
+      ]
+    },
+    "b-layering-predicate-body-7": {
+      "id": "b-layering-predicate-body-7",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "For any object, "
+        },
+        {
+          "insert": "resolveSectionParent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-membership.ts",
+              "symbol": "resolveSectionParent"
+            }
+          }
+        },
+        {
+          "insert": " chooses the smallest section that is strictly larger in area and covers at least "
+        },
+        {
+          "insert": "SECTION_CAPTURE_OVERLAP_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "SECTION_CAPTURE_OVERLAP_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " of the object's own area. The threshold is 0.6, so exact 60% overlap qualifies and anything below it stays outside."
+        }
+      ]
+    },
+    "b-layering-parent-cache-decision-8": {
+      "id": "b-layering-parent-cache-decision-8",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "parentId is a persisted cache"
+      },
+      "text": [
+        {
+          "insert": "Stored "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exists so drag capture, hidden-content filtering, validation, and persistence have a cheap membership answer. It is not an authoring surface. Geometry-mutating actions reconcile it instead of asking callers to maintain it manually."
+        }
+      ]
+    },
+    "b-layering-retention-constraint-9": {
+      "id": "b-layering-retention-constraint-9",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Collapsed and locked-all sections do not adopt new members"
+      },
+      "text": [
+        {
+          "insert": "A section with "
+        },
+        {
+          "insert": "contentHidden === true",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "locked === \"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " retains existing members so hidden or locked content does not leak out during reconcile. The same section never adopts a new free object; the object must qualify for another visible/unlocked section or remain parentless."
+        }
+      ]
+    },
+    "b-layering-acyclic-observation-10": {
+      "id": "b-layering-acyclic-observation-10",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Strictly-larger sections make cycles impossible"
+      },
+      "text": [
+        {
+          "insert": "Area strictly increases on every parent hop, so the geometric resolver cannot create a cycle. The guard also prevents the pathological case where a huge frame that is 68% covered by a smaller section becomes the smaller section's child."
+        }
+      ]
+    },
+    "b-layering-stack-heading-11": {
+      "id": "b-layering-stack-heading-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Derived stack"
+        }
+      ]
+    },
+    "b-layering-stack-body-12": {
+      "id": "b-layering-stack-body-12",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Paint order lives in "
+        },
+        {
+          "insert": "state/z-order.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Every section paints before every non-section. Among sections, containment depth sorts ascending, then area sorts descending so bigger same-depth sections sink behind smaller ones, then the original schema index is the stable final tie-breaker. Non-sections keep schema order. The CSS tiers stay unchanged: section backdrops at z 0, connectors at z 1, shapes at z 2."
+        }
+      ]
+    },
+    "b-layering-stack-code-13": {
+      "id": "b-layering-stack-code-13",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "sections:\n  depth ascending\n  area descending\n  schema index ascending\nnon-sections:\n  schema order\ncss tiers:\n  section backdrops z 0\n  connectors z 1\n  shapes z 2"
+        }
+      ]
+    },
+    "b-layering-demo-canvas-14": {
+      "id": "b-layering-demo-canvas-14",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "title": "Layer cake visualization",
+        "canvasId": "layer-cake"
+      }
+    },
+    "b-layering-reconcile-heading-15": {
+      "id": "b-layering-reconcile-heading-15",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Reconcile lifecycle"
+        }
+      ]
+    },
+    "b-layering-reconcile-body-16": {
+      "id": "b-layering-reconcile-body-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Reconciliation happens at the points where geometry becomes durable state. The exception is an in-progress drag or resize frame, where geometry may temporarily diverge from the cached "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " until the gesture commits."
+        }
+      ]
+    },
+    "b-layering-reconcile-load-17": {
+      "id": "b-layering-reconcile-load-17",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Document load and reset call "
+        },
+        {
+          "insert": "createInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "symbol": "createInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": ", which reconciles the incoming document before it becomes editor state."
+        }
+      ]
+    },
+    "b-layering-reconcile-reducer-18": {
+      "id": "b-layering-reconcile-reducer-18",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The reducer wraps every document-changing action in a choke point. "
+        },
+        {
+          "insert": "shouldReconcileSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts"
+            }
+          }
+        },
+        {
+          "insert": " selects discrete geometry-mutating actions, and development builds run a second reconcile as an idempotence invariant."
+        }
+      ]
+    },
+    "b-layering-reconcile-gesture-19": {
+      "id": "b-layering-reconcile-gesture-19",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Move and resize gestures dispatch "
+        },
+        {
+          "insert": "canvas.reconcileSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts"
+            }
+          }
+        },
+        {
+          "insert": " on pointer-up with "
+        },
+        {
+          "insert": "recordHistory: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The drag or resize itself owns the undo entry, so one gesture remains one undo step."
+        }
+      ]
+    },
+    "b-layering-live-divergence-constraint-20": {
+      "id": "b-layering-live-divergence-constraint-20",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Only live gesture frames may diverge"
+      },
+      "text": [
+        {
+          "insert": "A stored document outside an active live gesture should be section-membership clean. If a discrete action mutates geometry, type, "
+        },
+        {
+          "insert": "contentHidden",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the reducer is responsible for restoring the cache before the state leaves the action."
+        }
+      ]
+    },
+    "b-layering-hit-testing-heading-21": {
+      "id": "b-layering-hit-testing-heading-21",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Hit testing and drops"
+        }
+      ]
+    },
+    "b-layering-hit-testing-body-22": {
+      "id": "b-layering-hit-testing-body-22",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Clicks agree with pixels. "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "hitTestObjects"
+            }
+          }
+        },
+        {
+          "insert": " walks "
+        },
+        {
+          "insert": "paintOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts",
+              "symbol": "paintOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " topmost-first. Connector endpoint targeting uses the same ordered candidate list in "
+        },
+        {
+          "insert": "connectorCandidateAt",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/gestures/connectors.ts"
+            }
+          }
+        },
+        {
+          "insert": ", so overlapping sections and objects resolve consistently."
+        }
+      ]
+    },
+    "b-layering-drop-body-23": {
+      "id": "b-layering-drop-body-23",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Section drop targeting is not point-based. "
+        },
+        {
+          "insert": "stepFromMove",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/gestures/move.ts",
+              "symbol": "stepFromMove"
+            }
+          }
+        },
+        {
+          "insert": " previews the target by running "
+        },
+        {
+          "insert": "resolveSectionParent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-membership.ts",
+              "symbol": "resolveSectionParent"
+            }
+          }
+        },
+        {
+          "insert": " against the primary dragged object's projected bounds, using the same >= 60% rule as commit-time reconcile. "
+        },
+        {
+          "insert": "hitTestDropTarget",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is gone."
+        }
+      ]
+    },
+    "b-layering-case-heading-24": {
+      "id": "b-layering-case-heading-24",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Case study: v2-flow"
+        }
+      ]
+    },
+    "b-layering-case-body-25": {
+      "id": "b-layering-case-body-25",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The motivating bug was visible in "
+        },
+        {
+          "insert": "canvases/v2-flow.canvas.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/v2-flow.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": ". A large \"Section\" was drawn around existing content, but nothing adopted the sections under it. All six sections stayed depth-1 siblings, and array-order tie-breaking painted the newest large section on top, fully burying Memory Bank, Memory Actions, Structure, and Probing Response."
+        }
+      ]
+    },
+    "b-layering-case-canvas-26": {
+      "id": "b-layering-case-canvas-26",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "title": "V2 Flow section layering case study",
+        "canvasId": "v2-flow"
+      }
+    },
+    "b-layering-case-fix-27": {
+      "id": "b-layering-case-fix-27",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The fix has two halves: geometric reconciliation records the large section as the parent of the sections it actually contains, and the area tie-break makes larger same-depth sections sink even when they appear later in the objects array. The disk repair is "
+        },
+        {
+          "insert": "migrateSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "tools/migrate-canvas-docs/migrate.ts",
+              "symbol": "migrateSectionMembership"
+            }
+          }
+        },
+        {
+          "insert": ", an idempotent transform in the canvas-doc migration tool."
+        }
+      ]
+    },
+    "b-layering-edge-heading-28": {
+      "id": "b-layering-edge-heading-28",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Edge cases and non-goals"
+        }
+      ]
+    },
+    "b-layering-edge-hidden-29": {
+      "id": "b-layering-edge-hidden-29",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Hidden and "
+        },
+        {
+          "insert": "locked: \"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sections retain existing members but never adopt new members. "
+        },
+        {
+          "insert": "locked: \"background\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " still allows geometric adoption because only the section frame is locked."
+        }
+      ]
+    },
+    "b-layering-edge-strict-30": {
+      "id": "b-layering-edge-strict-30",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Strictly-larger is required even when overlap is high. It is both the acyclicity proof and the guard against smaller sections accidentally owning bigger frames."
+        }
+      ]
+    },
+    "b-layering-edge-manual-31": {
+      "id": "b-layering-edge-manual-31",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "There are no manual z-reorder operations for section backdrops in this model. To change the stack, change geometry so a different section qualifies as the smallest containing parent."
+        }
+      ]
+    },
+    "b-layering-edge-set-parent-32": {
+      "id": "b-layering-edge-set-parent-32",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "canvas.setParent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/geometry-ops.ts",
+              "symbol": "handleSetParent"
+            }
+          }
+        },
+        {
+          "insert": " action still exists as a guarded reducer path, but live move/drop no longer commits membership through it. Gesture commit is doc-wide geometric reconcile."
+        }
+      ]
+    },
+    "b-layering-tests-heading-33": {
+      "id": "b-layering-tests-heading-33",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Test pointers"
+        }
+      ]
+    },
+    "b-layering-tests-body-34": {
+      "id": "b-layering-tests-body-34",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The behavior is pinned by "
+        },
+        {
+          "insert": "section-membership.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/__tests__/section-membership.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for the predicate, "
+        },
+        {
+          "insert": "schema-and-actions.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/__tests__/schema-and-actions.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " for reducer reconciliation and undo semantics, "
+        },
+        {
+          "insert": "w2-sections-and-shapes.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/__tests__/w2-sections-and-shapes.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for render ordering, "
+        },
+        {
+          "insert": "interaction.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for drop previews and gesture commits, and "
+        },
+        {
+          "insert": "migrate-canvas-docs.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__/migrate-canvas-docs.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for the on-disk parentId transform."
+        }
+      ]
+    }
+  }
+}

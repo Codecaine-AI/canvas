@@ -169,39 +169,52 @@
         {
           "insert": "ObjectShape",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/render/ObjectShape.tsx",
               "symbol": "ObjectShape"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": " (also exported) renders any non-section object — shape, sticky note, section, text, pill, diamond, marker, document, person/database/chat/chip-icon silhouettes, arrow-shape, predefined-process, and code-block — and delegates to "
+          "insert": " (also exported) is a thin registry dispatcher since the def conversion — it resolves the object's registered ObjectDef via "
         },
         {
-          "insert": "SectionShape",
+          "insert": "objectDefFor",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "SectionObjectView"
-            },
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "objectDefFor"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "section",
+          "attributes": {
             "code": true
           }
         },
         {
-          "insert": " for sections; "
+          "insert": " by type, everything else by effective render shape) and renders "
+        },
+        {
+          "insert": "def.render",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; its generic fallback only fires for a render shape with no registered def. "
         },
         {
           "insert": "Connector",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "Connector"
-            },
             "code": true
           }
         },
@@ -211,11 +224,6 @@
         {
           "insert": "ConnectionLabelChip",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ConnectionLabelChip"
-            },
             "code": true
           }
         },
@@ -225,11 +233,6 @@
         {
           "insert": "ConnectorDragPreview",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ConnectorDragPreview"
-            },
             "code": true
           }
         },
@@ -239,11 +242,6 @@
         {
           "insert": "SelectionBox",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "SelectionBox"
-            },
             "code": true
           }
         },
@@ -251,13 +249,31 @@
           "insert": " (also exported) draws the screen-space selection outline and resize handles; "
         },
         {
-          "insert": "Marquee",
+          "insert": "AnchorDots",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "Marquee"
-            },
+              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "symbol": "AnchorDots"
+            }
+          }
+        },
+        {
+          "insert": " draws the FigJam-style connection anchor dots on selected objects at the def-derived anchor positions, visibility-gated below "
+        },
+        {
+          "insert": "ANCHOR_DOTS_MIN_ZOOM",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (0.5 — the dots stay grabbable at opacity 0); "
+        },
+        {
+          "insert": "Marquee",
+          "attributes": {
             "code": true
           }
         },
@@ -267,11 +283,6 @@
         {
           "insert": "PlacePreview",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "PlacePreview"
-            },
             "code": true
           }
         },
@@ -281,11 +292,6 @@
         {
           "insert": "SnapGuideLine",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "SnapGuideLine"
-            },
             "code": true
           }
         },
@@ -295,11 +301,6 @@
         {
           "insert": "DistributionGuideLine",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "DistributionGuideLine"
-            },
             "code": true
           }
         },
@@ -309,11 +310,6 @@
         {
           "insert": "SpacingChips",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "SpacingChips"
-            },
             "code": true
           }
         },
@@ -323,16 +319,25 @@
         {
           "insert": "renderOrderedObjects",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "renderOrderedObjects"
-            },
             "code": true
           }
         },
         {
-          "insert": " computes FigJam-correct z-layering (sections paint below shapes; nested sections paint above their parent section) before the scene is drawn."
+          "insert": " computes the geometric layer-cake order before the scene is drawn: sections first by containment depth, then area descending, then stable schema index; non-sections keep schema order. See "
+        },
+        {
+          "insert": "canvas-10-system-design-30-layering",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "canvas-10-system-design-30-layering"
+            }
+          }
+        },
+        {
+          "insert": " for the full model."
         }
       ],
       "children": []
@@ -343,127 +348,103 @@
       "props": {},
       "text": [
         {
-          "insert": "CanvasStage composes the other three render-layer modules directly: it calls "
+          "insert": "CanvasStage composes the other render-layer modules directly: it calls "
         },
         {
           "insert": "gridBackground",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
-              "symbol": "gridBackground"
-            },
             "code": true
           }
         },
         {
-          "insert": " once per render to compute the dot-grid CSS background for the stage's root div; it pulls "
+          "insert": " once per render to compute the dot-grid CSS background for the stage's root div, and it pulls "
         },
         {
-          "insert": "resolveObjectColors",
+          "insert": "canvasSurfaceStyle",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme.ts",
-              "symbol": "resolveObjectColors"
-            },
-            "code": true
+              "symbol": "canvasSurfaceStyle"
+            }
           }
         },
         {
-          "insert": ", "
+          "insert": " from theme.ts for the grid/guide/highlight CSS variables. What it deliberately no longer does is resolve object colors or carry per-shape CSS: each object's colors resolve inside its def via "
         },
         {
-          "insert": "resolveObjectStrokeWidth",
+          "insert": "resolveObjectRoleColors",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "resolveObjectStrokeWidth"
-            },
-            "code": true
+              "path": "packages/canvas/src/objects/object-chrome.tsx",
+              "symbol": "resolveObjectRoleColors"
+            }
           }
         },
         {
-          "insert": ", and "
+          "insert": " (palette.ts role tables), and the stage's embedded style tag is composed as a shared base block plus "
         },
         {
-          "insert": "resolveSectionColors",
+          "insert": "OBJECT_DEFS_CSS",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "resolveSectionColors"
-            },
-            "code": true
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "OBJECT_DEFS_CSS"
+            }
           }
         },
         {
-          "insert": " from "
+          "insert": " — the concatenated "
         },
         {
-          "insert": "theme.ts",
+          "insert": "css",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " to resolve fill/border/stroke-width per object and section; it pulls a long list of geometry and color constants from "
+          "insert": " of every registered def. Code blocks tokenize their own "
         },
         {
-          "insert": "figjam-tokens.ts",
+          "insert": "text",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (including "
+          "insert": " inside the code-block def ("
         },
         {
-          "insert": "CANVAS_BG",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "CANVAS_BG"
-            },
-            "code": true
-          }
-        },
-        {
-          "insert": ", set as the root stage div's "
-        },
-        {
-          "insert": "backgroundColor",
+          "insert": "objects/code-block/def.tsx",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " so the board stays a fixed light surface under either app theme); and it calls "
+          "insert": " calling "
         },
         {
           "insert": "tokenizeCodeBlock",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts",
-              "symbol": "tokenizeCodeBlock"
-            },
             "code": true
           }
         },
         {
-          "insert": " for objects with "
+          "insert": " from render/code-tokenizer.ts). The board background stays a fixed light surface ("
         },
         {
-          "insert": "shape === \"code-block\"",
+          "insert": "#F5F5F5",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " to split each line into syntax-highlighted spans."
+          "insert": ", D9) regardless of host app theme."
         }
       ],
       "children": []
@@ -690,7 +671,7 @@
           "insert": " in "
         },
         {
-          "insert": "figjam-tokens.ts",
+          "insert": "grid.ts",
           "attributes": {
             "code": true
           }
@@ -709,7 +690,7 @@
       },
       "text": [
         {
-          "insert": "Theme and FigJam tokens"
+          "insert": "Theme (shrunk) and the token dispersal"
         }
       ],
       "children": []
@@ -722,46 +703,73 @@
         {
           "insert": "theme.ts",
           "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme.ts"
+            }
+          }
+        },
+        {
+          "insert": " shrank to four exports in the P1 color cutover: "
+        },
+        {
+          "insert": "canvasSurfaceStyle",
+          "attributes": {
             "code": true
           }
         },
         {
-          "insert": " resolves an object or section's rendered colors from the document's semantic style fields rather than fixed hexes. "
+          "insert": " (grid/guide/highlight CSS variables), "
         },
         {
-          "insert": "canvasToneStyle",
+          "insert": "SHAPE_STROKE_WIDTH_PX",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme.ts",
-              "symbol": "canvasToneStyle"
-            },
-            "code": true
+              "symbol": "SHAPE_STROKE_WIDTH_PX"
+            }
           }
         },
         {
-          "insert": " maps each "
+          "insert": " (FigJam's universal 4px shape stroke), "
         },
         {
-          "insert": "InteractiveCanvasTone",
+          "insert": "resolveObjectStrokeWidth",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme.ts",
+              "symbol": "resolveObjectStrokeWidth"
+            }
+          }
+        },
+        {
+          "insert": " (explicit "
+        },
+        {
+          "insert": "style.strokeWidth",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (neutral, input, process, decision, memory, agent, warning, annotation) to fill/border/accent colors built by "
+          "insert": " wins, else the universal stroke), and "
         },
         {
-          "insert": "color-mix()",
+          "insert": "TEXT_SIZES_PX",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " blends of the host app's own CSS theme variables ("
+          "insert": ". Everything else it used to own is gone: "
         },
         {
-          "insert": "--primary",
+          "insert": "canvasToneStyle",
           "attributes": {
             "code": true
           }
@@ -770,59 +778,22 @@
           "insert": ", "
         },
         {
-          "insert": "--border",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", etc.), so tones stay legible in both light and dark host themes. "
-        },
-        {
           "insert": "paletteTokenStyle",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "paletteTokenStyle"
-            },
             "code": true
           }
         },
         {
-          "insert": " does the same for the five fixed \"color-as-meaning\" palette tokens (process/input/hot/memory/note), anchored to fixed OKLCH hues rather than theme aliases. "
+          "insert": ", "
         },
         {
           "insert": "resolveObjectColors",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "resolveObjectColors"
-            },
             "code": true
           }
         },
         {
-          "insert": " is the entry point CanvasStage actually calls: it applies the precedence explicit "
-        },
-        {
-          "insert": "fill",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "stroke",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " wins, then sticky-note objects resolve a palette token to an exact "
+          "insert": ", "
         },
         {
           "insert": "STICKY_COLORS",
@@ -831,39 +802,58 @@
           }
         },
         {
-          "insert": " hex (bypassing the desaturated theme mix, since FigJam stickies are saturated), then "
+          "insert": ", and "
         },
         {
-          "insert": "paletteToken",
+          "insert": "SECTION_FAMILIES",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " wins over "
+          "insert": " all died with the legacy tone/paletteToken/tint vocabularies (OBJECT-DEF-OVERHAUL.md D1/D10). Color resolution now lives in "
         },
         {
-          "insert": "tone",
+          "insert": "resolveObjectRoleColors",
           "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", falling back to the neutral tone if nothing is set. "
-        },
-        {
-          "insert": "resolveSectionColors",
-          "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "resolveSectionColors"
-            },
-            "code": true
+              "path": "packages/canvas/src/objects/object-chrome.tsx",
+              "symbol": "resolveObjectRoleColors"
+            }
           }
         },
         {
-          "insert": " does the equivalent lookup for a section's tint family."
+          "insert": " over the canonical 10-pick role table in "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "CANVAS_PALETTE"
+            }
+          }
+        },
+        {
+          "insert": " — see "
+        },
+        {
+          "insert": "canvas-10-system-design-10-shape-api",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "canvas-10-system-design-10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": " for the full role model."
         }
       ],
       "children": []
@@ -874,65 +864,111 @@
       "props": {},
       "text": [
         {
+          "insert": "The old "
+        },
+        {
           "insert": "figjam-tokens.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is the single place FigJam pixel-parity constants live: the board background ("
+          "insert": " constants file no longer exists: the theme dispersal co-located every FigJam pixel-parity constant with its consumer. Grid constants live in "
         },
         {
-          "insert": "CANVAS_BG",
+          "insert": "render/grid.ts",
           "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; the stage surface/background constants in "
+        },
+        {
+          "insert": "render/CanvasStage.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; connector stroke/dash/arrowhead/elbow constants in "
+        },
+        {
+          "insert": "objects/connector/def.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the connector renderers; arrow-shape proportions in "
+        },
+        {
+          "insert": "ARROW_SHAPE_GEOMETRY",
+          "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "CANVAS_BG"
-            },
-            "code": true
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "ARROW_SHAPE_GEOMETRY"
+            }
           }
         },
         {
-          "insert": " = "
+          "insert": "; section title-chip geometry in "
         },
         {
-          "insert": "\"#F5F5F5\"",
+          "insert": "TITLE_CHIP",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "symbol": "TITLE_CHIP"
+            }
+          }
+        },
+        {
+          "insert": "; per-shape geometry constants in each shape's def file; the code-block (Dracula) palette in "
+        },
+        {
+          "insert": "objects/code-block/style.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", fixed regardless of host app theme — see the render-layer decision recorded in the overview doc), grid constants ("
+          "insert": "; and every color hex in "
         },
         {
-          "insert": "GRID_BASE_STEP_PX",
+          "insert": "palette.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts"
+            }
           }
         },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "GRID_MIN_SCREEN_STEP_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "GRID_MAX_SCREEN_STEP_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", dot diameter/color), section tint families and geometry, sticky-note colors and geometry, shape stroke width and per-shape corner radii, the saturated/pastel color palettes, connector stroke width, colors, dash pattern, elbow corner radius, arrowhead ratios, and endpoint gap, arrow-shape and predefined-process geometry, icon stroke width/colors, the code-block (Dracula-theme) palette, canvas content font and text-size hierarchy, and chrome colors (toolbar backgrounds, selection blue, the color-popover rainbow ring gradient)."
+    {
+      "insert": "."
+    },
+    {
+      "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+    },
+    {
+      "insert": "board-design-reference/analysis/palette-sheet.html",
+      "attributes": {
+        "code": true,
+        "reference": {
+          "kind": "source",
+          "path": "board-design-reference/analysis/palette-sheet.html"
         }
-      ],
+      }
+    },
+    {
+      "insert": "."
+    }
+  ],
       "children": []
     },
     "b-render-figjam-tokens-provenance-14": {
@@ -941,20 +977,25 @@
       "props": {},
       "text": [
         {
-          "insert": "These constants are explicitly a hand-written, typed mirror of "
+          "insert": "The provenance discipline survived the dispersal: the constants remain a hand-written, typed mirror of "
         },
         {
           "insert": "board-design-reference/analysis/figjam-style-tokens.json",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "board-design-reference/analysis/figjam-style-tokens.json"
-            },
             "code": true
           }
         },
         {
-          "insert": " — pixel-sampled measurements taken from real FigJam exports — not a runtime codegen output; the file's own header comment says to keep the two in sync by hand whenever the JSON is re-sampled. The file's inline comments distinguish measured ground truth (values traced directly to a sampled observation, e.g. the grid band derivation, the connector dash pattern, sticky colors) from flagged extrapolations the file calls out explicitly — for example the palette-popover swatch order (no dedicated popover array was ever sampled, so it's derived by concatenating existing pastel/saturated swatches), the section capture-overlap threshold (a design decision, not a pixel measurement), the teal section family's chip/border colors (never observed, tint-only), and the code-block comment color (a standard Dracula placeholder, not sampled). Every value in the file is in logical px, already normalized against the source export's 2x scale factor."
+          "insert": " and figjam-style-spec.md — pixel-sampled measurements from real FigJam exports — now annotated at each site instead of in one file. "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the strictest example: every one of its 100 hex cells carries an inline comment tagging it as sampled (citing its source table/spec section) or derived (no FigJam sample exists; synthesized in the same visual spirit and flagged for contact-sheet review). Values are logical px / plain hexes, already normalized against the source export's 2x scale factor."
         }
       ],
       "children": []

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "id": "layer-cake",
+  "title": "Layer cake - geometric section layering",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1600,
+    "height": 820
+  },
+  "objects": [
+    {
+      "id": "cake-large-section",
+      "type": "section",
+      "text": "The cake: largest section sinks",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 80,
+        "width": 640,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "cake-medium-section",
+      "type": "section",
+      "text": "Middle layer",
+      "color": "blue",
+      "parentId": "cake-large-section",
+      "geometry": {
+        "x": 110,
+        "y": 155,
+        "width": 340,
+        "height": 260
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sinks-small-section",
+      "type": "section",
+      "text": "Earlier smaller root: paints above",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 850,
+        "y": 220,
+        "width": 280,
+        "height": 210
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sinks-large-section",
+      "type": "section",
+      "text": "Bigger sinks: later in file, still behind",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 970,
+        "y": 140,
+        "width": 430,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "cake-card-a",
+      "type": "process",
+      "text": "Card A",
+      "color": "green",
+      "parentId": "cake-medium-section",
+      "geometry": {
+        "x": 150,
+        "y": 225,
+        "width": 125,
+        "height": 70
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "cake-card-b",
+      "type": "decision",
+      "text": "Card B",
+      "color": "violet",
+      "parentId": "cake-medium-section",
+      "geometry": {
+        "x": 310,
+        "y": 225,
+        "width": 110,
+        "height": 70
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "cake-direct-sticky",
+      "type": "sticky",
+      "text": "Direct child of the large section",
+      "color": "yellow",
+      "parentId": "cake-large-section",
+      "geometry": {
+        "x": 485,
+        "y": 180,
+        "width": 160,
+        "height": 150
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "Canvas"
+    },
+    {
+      "id": "cake-free-shape",
+      "type": "pill",
+      "text": "Free shape",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 155,
+        "y": 640,
+        "width": 180,
+        "height": 72
+      },
+      "style": {
+        "shape": "pill"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "cake-card-link",
+      "from": {
+        "objectId": "cake-card-a",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "cake-card-b",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    }
+  ],
+  "annotations": []
+}

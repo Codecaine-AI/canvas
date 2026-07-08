@@ -219,7 +219,7 @@
           }
         },
         {
-          "insert": " to render that frame (marquee rect, snap/distribution guides, spacing hints, drop target, connector-drag preview, inline label-edit request, place-tool ghost). No DOM access happens anywhere in this module — it is testable with plain objects."
+          "insert": " to render that frame (marquee rect, snap/distribution guides, spacing hints, drop target, connector-drag preview, in-place text-edit request, place-tool ghost). No DOM access happens anywhere in this module — it is testable with plain objects."
         }
       ],
       "children": []
@@ -297,31 +297,25 @@
           }
         },
         {
-          "insert": ". A pointer-down here branches on hit-test kind into a resize, connector-endpoint-drag, connector-create, place, pressing, or (for a double-click) an immediate inline-label-edit request — including the empty-canvas double-click case, which predicts the new text object's id with the same deterministic "
+          "insert": ". A pointer-down here branches on hit-test kind into a resize, connector-endpoint-drag, connector-create, place, pressing, or (for a double-click on an object) an immediate in-place text-edit request ("
         },
         {
-          "insert": "createObjectId",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/geometry.ts",
-              "symbol": "createObjectId",
-              "label": "createObjectId"
-            }
-          }
-        },
-        {
-          "insert": " call "
-        },
-        {
-          "insert": "canvas.addObject",
+          "insert": "overlay.editObjectTextId",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "'s reducer uses, so the editor can open the label textarea before React has even run the reducer."
+          "insert": ", honored only when the def's "
+        },
+        {
+          "insert": "textEditing.editable",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " allows it — pure glyph shapes refuse the editor); a double-click on empty canvas is a no-op since the free-text object type was retired."
         }
       ],
       "children": []
@@ -514,16 +508,7 @@
           }
         },
         {
-          "insert": "), applies it uniformly across the dragged set, tracks a live drop-target section — probed at the center of the primary dragged object's current bounds — for release-time "
-        },
-        {
-          "insert": "canvas.setParent",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (assigning membership on drop into a section, clearing it on open canvas), and dispatches "
+          "insert": "), applies it uniformly across the dragged set, tracks a live drop-target section by running the same projected-bounds overlap resolver the reducer uses at commit time, and dispatches "
         },
         {
           "insert": "canvas.updateObjectGeometries",
@@ -532,7 +517,39 @@
           }
         },
         {
-          "insert": " every frame. Escape/pointercancel restores "
+          "insert": " every frame. On release it commits membership with "
+        },
+        {
+          "insert": "canvas.reconcileSectionMembership",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " using "
+        },
+        {
+          "insert": "recordHistory: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so bounds-based section adoption or release shares the drag's undo entry. See "
+        },
+        {
+          "insert": "canvas-10-system-design-30-layering",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "canvas-10-system-design-30-layering"
+            }
+          }
+        },
+        {
+          "insert": " for the membership predicate. Escape/pointercancel restores "
         },
         {
           "insert": "startGeometries",
@@ -765,7 +782,16 @@
           }
         },
         {
-          "insert": ". Starts when a creatable tool (rectangle, process, decision, text, sticky, source-node, annotation-marker, document, person, database, chat, section, pill, arrow-shape, predefined-process, code-block, chip-icon) is armed and the pointer goes down. A sub-threshold release creates a default-size object centered at the point; a drag creates an object sized to the normalized, "
+          "insert": ". Starts when a creatable tool (one per placeable object type — rectangle through icon, per "
+        },
+        {
+          "insert": "objectTypeForTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s switch) is armed and the pointer goes down. A sub-threshold release creates a default-size object centered at the point; a drag creates an object sized to the normalized, "
         },
         {
           "insert": "MIN_PLACE_DRAG_SIZE",
@@ -789,7 +815,7 @@
           }
         },
         {
-          "insert": " and the new object becomes the selection, adopting a parentId when placed inside a section."
+          "insert": " and the new object becomes the selection; the reducer resolves its parentId from the final placement geometry."
         }
       ],
       "children": []
@@ -847,7 +873,7 @@
           }
         },
         {
-          "insert": ") — reconnecting an existing connection's endpoint, or dragging a brand-new connector from an object's edge port. Both resolve the live connect-target every move via "
+          "insert": ") — reconnecting an existing connection's endpoint, or dragging a brand-new connector from one of a selected object's anchor dots. Both resolve the live connect-target every move via "
         },
         {
           "insert": "connectorCandidateAt",
