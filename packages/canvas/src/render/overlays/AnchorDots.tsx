@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Anchor } from "../../routing/routing";
 import type { InteractiveCanvasDocument } from "../../state/schema";
+import { connectionBoundsForObject } from "../../objects/geometry";
 import { worldToScreen, type ViewportState } from "../viewport";
 
 /** Selection outline/handle color — matches SelectionBox and the connector chrome (render must not import editor/components/editor-style). */
@@ -27,7 +28,7 @@ const DOT_DIAMETER_PX = 10;
 /** Grab-target diameter around each dot. Also matches the hover button size. */
 const HIT_TARGET_PX = 28;
 
-type ActivePort = {
+export type ActivePort = {
   objectId: string;
   anchor: Anchor;
 };
@@ -37,16 +38,16 @@ function anchorScreenPoint(
   object: InteractiveCanvasDocument["objects"][number],
   anchor: Anchor,
 ) {
-  const { geometry } = object;
-  const top = worldToScreen(viewport, { x: geometry.x + geometry.width / 2, y: geometry.y });
+  const bounds = connectionBoundsForObject(object);
+  const top = worldToScreen(viewport, { x: bounds.x + bounds.width / 2, y: bounds.y });
   const bottom = worldToScreen(viewport, {
-    x: geometry.x + geometry.width / 2,
-    y: geometry.y + geometry.height,
+    x: bounds.x + bounds.width / 2,
+    y: bounds.y + bounds.height,
   });
-  const left = worldToScreen(viewport, { x: geometry.x, y: geometry.y + geometry.height / 2 });
+  const left = worldToScreen(viewport, { x: bounds.x, y: bounds.y + bounds.height / 2 });
   const right = worldToScreen(viewport, {
-    x: geometry.x + geometry.width,
-    y: geometry.y + geometry.height / 2,
+    x: bounds.x + bounds.width,
+    y: bounds.y + bounds.height / 2,
   });
   if (anchor === "top") return { x: top.x, y: top.y - ANCHOR_DOT_OFFSET_PX };
   if (anchor === "bottom") return { x: bottom.x, y: bottom.y + ANCHOR_DOT_OFFSET_PX };
@@ -81,6 +82,7 @@ export function AnchorDots({
   selectedObjectIds,
   activePort,
   interactive,
+  onHoveredAnchorChange,
 }: {
   document: InteractiveCanvasDocument;
   viewport: ViewportState;
@@ -89,6 +91,8 @@ export function AnchorDots({
   activePort?: ActivePort | null;
   /** False renders the dots inert (visual only). */
   interactive: boolean;
+  /** Emits the currently-hovered creation port so preview layers can render outside this overlay. */
+  onHoveredAnchorChange?: (port: ActivePort | null) => void;
 }) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
@@ -96,6 +100,13 @@ export function AnchorDots({
     if (activePort) return;
     setPressedKey(null);
   }, [activePort]);
+  useEffect(() => {
+    if (selectedObjectIds.length === 0) {
+      setHoveredKey(null);
+      onHoveredAnchorChange?.(null);
+    }
+  }, [onHoveredAnchorChange, selectedObjectIds.length]);
+  useEffect(() => () => onHoveredAnchorChange?.(null), [onHoveredAnchorChange]);
   if (selectedObjectIds.length === 0) return null;
   const selected = new Set(selectedObjectIds);
   const visible = viewport.zoom >= ANCHOR_DOTS_MIN_ZOOM;
@@ -116,9 +127,18 @@ export function AnchorDots({
                 key={key}
                 data-canvas-port={name}
                 data-canvas-object-id={object.id}
-                onPointerEnter={() => setHoveredKey(key)}
-                onPointerLeave={() => setHoveredKey((current) => (current === key ? null : current))}
-                onPointerDown={() => setPressedKey(key)}
+                onPointerEnter={() => {
+                  setHoveredKey(key);
+                  onHoveredAnchorChange?.({ objectId: object.id, anchor: name });
+                }}
+                onPointerLeave={() => {
+                  setHoveredKey((current) => (current === key ? null : current));
+                  onHoveredAnchorChange?.(null);
+                }}
+                onPointerDown={() => {
+                  setPressedKey(key);
+                  onHoveredAnchorChange?.(null);
+                }}
                 onPointerUp={() => setPressedKey((current) => (current === key ? null : current))}
                 onPointerCancel={() => setPressedKey((current) => (current === key ? null : current))}
                 style={{
@@ -131,7 +151,7 @@ export function AnchorDots({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: "crosshair",
+                  cursor: "default",
                   touchAction: "none",
                   pointerEvents: interactive ? "auto" : "none",
                   opacity: visible ? 1 : 0,

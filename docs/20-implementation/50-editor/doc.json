@@ -1785,6 +1785,18 @@
         },
         {
           "insert": " so at rest and mid-edit are pixel-identical, caret aside."
+        },
+        {
+          "insert": " All four editing surfaces also set an explicit inline "
+        },
+        {
+          "insert": "user-select: text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": the stage root disables text selection wholesale (see the render-layer decision — board text is chrome, drags must never sweep a native selection across labels), and the active editor is the one place selection is re-enabled."
         }
       ],
       "children": []

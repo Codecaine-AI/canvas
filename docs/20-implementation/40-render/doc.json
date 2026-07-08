@@ -26,6 +26,7 @@
         "b-render-canvasstage-body-4",
         "b-render-canvasstage-helpers-5",
         "b-render-canvasstage-imports-6",
+        "b-render-canvasstage-user-select-decision",
         "b-render-heading-grid-7",
         "b-render-grid-mechanism-8",
         "b-render-grid-band-9",
@@ -949,26 +950,26 @@
             }
           }
         },
-    {
-      "insert": "."
-    },
-    {
-      "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
-    },
-    {
-      "insert": "board-design-reference/analysis/palette-sheet.html",
-      "attributes": {
-        "code": true,
-        "reference": {
-          "kind": "source",
-          "path": "board-design-reference/analysis/palette-sheet.html"
+        {
+          "insert": "."
+        },
+        {
+          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+        },
+        {
+          "insert": "board-design-reference/analysis/palette-sheet.html",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference/analysis/palette-sheet.html"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
-      }
-    },
-    {
-      "insert": "."
-    }
-  ],
+      ],
       "children": []
     },
     "b-render-figjam-tokens-provenance-14": {
@@ -1262,6 +1263,116 @@
         },
         {
           "insert": ", which covers how the editor's React components mount and drive it."
+        }
+      ],
+      "children": []
+    },
+    "b-render-canvasstage-user-select-decision": {
+      "id": "b-render-canvasstage-user-select-decision",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Board text is chrome: user-select is off at the stage root, re-enabled only inside active text editors"
+      },
+      "text": [
+        {
+          "insert": "Shape labels, section titles, and captions are plain DOM text, so before this guard any drag on the board — marquee select, moving a shape, edge-panning mid-gesture — could sweep a native browser text selection across every label it crossed (nothing called "
+        },
+        {
+          "insert": "preventDefault()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on pointerdown, and no rule suppressed selection). The stage root now sets "
+        },
+        {
+          "insert": "user-select: none",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (plus "
+        },
+        {
+          "insert": "-webkit-user-select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for Safari) in "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": ", and every label inherits it: board text behaves like chrome, not like document text. The only places selection must work are the active text editors, so each of the four editing surfaces (the slot textarea, section-title input, and connector-label input in "
+        },
+        {
+          "insert": "TextEditingOverlay",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
+              "symbol": "TextEditingOverlay"
+            }
+          }
+        },
+        {
+          "insert": ", and the contentEditable sticky editor in "
+        },
+        {
+          "insert": "MarkdownSlotTextEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/text-editing/MarkdownSlotTextEditor.tsx",
+              "symbol": "MarkdownSlotTextEditor"
+            }
+          }
+        },
+        {
+          "insert": ") opts back in with an explicit inline "
+        },
+        {
+          "insert": "user-select: text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — required, because contentEditable does NOT exempt itself from an inherited "
+        },
+        {
+          "insert": "user-select: none",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Deliberately NOT part of the guard: a "
+        },
+        {
+          "insert": "preventDefault()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in the stage pointerdown handler. The CSS already covers the bug, and the default mousedown drives focus/blur — clicking the canvas must keep blurring (and thereby committing) an open text editor."
         }
       ],
       "children": []

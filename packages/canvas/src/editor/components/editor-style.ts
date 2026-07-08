@@ -40,9 +40,13 @@ export const EDITOR_STYLE = {
   selectionToolbarButtonHeightPx: 36,
   selectionToolbarButtonRadiusPx: 8,
   selectionToolbarSwatchPx: 28,
+  // FigJam-measured recipe (ring / key / ambient) from to_add/black pop up/figjam-popup-animation.html.
+  selectionToolbarShadow:
+    "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 2px 5px rgba(0, 0, 0, 0.14), 0 6px 18px rgba(0, 0, 0, 0.12)",
   flyoutRadiusPx: 16,
   flyoutPaddingPx: 12,
-  flyoutShadow: "0 8px 24px rgba(0,0,0,0.35)",
+  flyoutShadow:
+    "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.16)",
   flyoutItemHeightPx: 36,
   flyoutItemRadiusPx: 8,
   colorPopoverSwatchPx: 34,

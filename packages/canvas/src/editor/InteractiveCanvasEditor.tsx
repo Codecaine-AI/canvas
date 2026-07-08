@@ -358,9 +358,7 @@ export function InteractiveCanvasEditor({
             ? "grabbing"
             : state.tool === "hand"
               ? "grab"
-              : state.tool !== "select"
-                ? "crosshair"
-                : undefined,
+              : undefined,
         }}
         worldOverlay={<TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />}
       />

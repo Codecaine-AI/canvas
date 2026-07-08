@@ -33,6 +33,7 @@ export function SelectionToolbarLayer({
     selectionToolbarVariantLabel,
     selectionToolbarControls,
     selectionToolbarFlyouts,
+    selectionSignature,
     selectionToolbarPosition,
     openFlyout,
     setOpenFlyout,
@@ -82,6 +83,7 @@ export function SelectionToolbarLayer({
       style={{ left: selectionToolbarPosition.x, top: selectionToolbarPosition.y }}
     >
       <SelectionToolbar
+        key={selectionSignature}
         controls={selectionToolbarControls}
         variantLabel={selectionToolbarVariantLabel ?? selectionToolbarVariant}
         onAction={handleSelectionToolbarAction}

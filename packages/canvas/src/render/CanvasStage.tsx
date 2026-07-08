@@ -6,6 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
   type Ref,
+  useState,
 } from "react";
 import {
   documentBounds,
@@ -21,13 +22,14 @@ import { Connector } from "./connectors/Connector";
 import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
-import { AnchorDots } from "./overlays/AnchorDots";
+import { AnchorDots, type ActivePort } from "./overlays/AnchorDots";
 import { Marquee } from "./overlays/Marquee";
 import { PlacePreview } from "./overlays/PlacePreview";
 import { SnapGuideLine } from "./overlays/SnapGuideLine";
 import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
 import type { CanvasTool } from "../state/actions";
+import { quickConnectClickPoint } from "../interaction/gestures/connectors";
 
 // ---------------------------------------------------------------------------
 // Stage surface constants (moved from theme/tokens.ts in the theme dispersal
@@ -81,7 +83,7 @@ export interface CanvasStageProps {
   viewport: ViewportState;
   selectedObjectIds?: string[];
   changedObjectIds?: string[];
-  /** Connection currently selected — renders endpoint handles + primary-stroke styling. */
+  /** Connection currently selected — renders endpoint handles and bend pills. */
   selectedConnectionId?: string | null;
   compact?: boolean;
   onObjectSelect?: (objectId: string) => void;
@@ -216,6 +218,7 @@ export function CanvasStage({
   const selected = new Set(selectedObjectIds);
   const changed = new Set(changedObjectIds);
   const zoom = viewport.zoom;
+  const [hoveredAnchorDot, setHoveredAnchorDot] = useState<ActivePort | null>(null);
   // Bounds passed to interaction callbacks are the document's world bounds.
   // Callers that have migrated to world-space (screenToWorld) can ignore this;
   // it is kept only for backward-compatible callback signatures this checkpoint.
@@ -230,7 +233,10 @@ export function CanvasStage({
   const dropTargetId = interactionOverlay?.dropTargetId;
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
-  const stageCursor = style?.cursor ?? (handToolActive ? "grab" : selectToolActive ? SELECT_CURSOR : undefined);
+  const activeConnectorDrag = interactionOverlay?.connectorDrag ?? null;
+  const stageCursor =
+    style?.cursor ??
+    (activeConnectorDrag ? "default" : handToolActive ? "grab" : selectToolActive ? SELECT_CURSOR : undefined);
   const connectorDragSourceObjectId = interactionOverlay?.connectorDrag?.fromObjectId ?? null;
   const connectorDragSourceAnchor = interactionOverlay?.connectorDrag?.fromAnchor ?? null;
   const documentObjectIds = new Set(document.objects.map((object) => object.id));
@@ -240,6 +246,22 @@ export function CanvasStage({
       anchorDotObjectIds.push(objectId);
     }
   }
+  const hoveredQuickConnectDrag =
+    !activeConnectorDrag &&
+    Boolean(onStagePointerEvent) &&
+    !handToolActive &&
+    hoveredAnchorDot &&
+    anchorDotObjectIds.includes(hoveredAnchorDot.objectId)
+      ? (() => {
+          const object = objectById(document, hoveredAnchorDot.objectId);
+          if (!object) return null;
+          return {
+            fromObjectId: hoveredAnchorDot.objectId,
+            fromAnchor: hoveredAnchorDot.anchor,
+            point: quickConnectClickPoint(object, hoveredAnchorDot.anchor),
+          } satisfies NonNullable<InteractionOverlay["connectorDrag"]>;
+        })()
+      : null;
 
   return (
     <div
@@ -248,6 +270,7 @@ export function CanvasStage({
       data-canvas-stage="true"
       data-canvas-hand-tool={handToolActive ? "true" : undefined}
       data-canvas-select-tool={selectToolActive ? "true" : undefined}
+      data-canvas-connector-drag={activeConnectorDrag ? "true" : undefined}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -304,6 +327,9 @@ export function CanvasStage({
         }
         .interactive-canvas-stage[data-canvas-select-tool="true"] .interactive-canvas-object[data-editable="true"] {
           cursor: ${SELECT_CURSOR};
+        }
+        .interactive-canvas-stage[data-canvas-connector-drag="true"] .interactive-canvas-object[data-editable="true"] {
+          cursor: default;
         }
         .interactive-canvas-object[data-changed="true"] {
           box-shadow: 0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent);
@@ -527,6 +553,7 @@ export function CanvasStage({
                 : null
             }
             interactive
+            onHoveredAnchorChange={setHoveredAnchorDot}
           />
         )}
         {interactionOverlay?.marquee && (
@@ -546,11 +573,18 @@ export function CanvasStage({
         {interactionOverlay?.spacing?.map((hint, index) => (
           <SpacingChips key={`spacing-${hint.axis}-${index}`} viewport={viewport} hint={hint} />
         ))}
-        {interactionOverlay?.connectorDrag && (
+        {hoveredQuickConnectDrag && (
           <ConnectorDragPreview
             document={document}
             viewport={viewport}
-            drag={interactionOverlay.connectorDrag}
+            drag={hoveredQuickConnectDrag}
+          />
+        )}
+        {activeConnectorDrag && (
+          <ConnectorDragPreview
+            document={document}
+            viewport={viewport}
+            drag={activeConnectorDrag}
           />
         )}
         {overlay}

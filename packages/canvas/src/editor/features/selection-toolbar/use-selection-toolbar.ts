@@ -135,6 +135,8 @@ export interface SelectionToolbarApi {
   selectionToolbarControls: readonly ToolbarControlSpec[] | null;
   /** The primary selection's flyout components, keyed by opening action id. */
   selectionToolbarFlyouts: ToolbarFlyoutTable | null;
+  /** Remount key for the toolbar pill so the FigJam entrance animation replays exactly when the selection identity changes (never on pan/zoom repositioning). */
+  selectionSignature: string;
   selectionToolbarPosition: PositionSelectionToolbarResult | null;
   openFlyout: SelectionToolbarActionId | null;
   setOpenFlyout: Dispatch<SetStateAction<SelectionToolbarActionId | null>>;
@@ -191,6 +193,8 @@ export function useSelectionToolbar({
     selectedConnection,
   });
   const selectionToolbarVariant = resolvedToolbar?.kind ?? null;
+  const selectedIdsSignature = selectedIds.join(",");
+  const selectionSignature = `${selectionToolbarVariant}:${selectedConnectionId ?? ""}:${selectedIdsSignature}`;
   /**
    * Screen-space rect the SelectionToolbar anchors above (Wave 3a scope item 2).
    * Computed read-only from CanvasStage's own pure helpers — worldToScreen
@@ -267,7 +271,7 @@ export function useSelectionToolbar({
   // anchored to a control that's no longer rendered.
   useEffect(() => {
     setOpenFlyout(null);
-  }, [selectionToolbarVariant, selectedConnectionId, selectedIds.join(",")]);
+  }, [selectionToolbarVariant, selectedConnectionId, selectedIdsSignature]);
 
   const primarySelectedObject = selectedObjectsForToolbar[0];
   const selectionToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
@@ -343,6 +347,7 @@ export function useSelectionToolbar({
     selectionToolbarVariantLabel: resolvedToolbar?.variantLabel ?? null,
     selectionToolbarControls: resolvedToolbar?.controls ?? null,
     selectionToolbarFlyouts,
+    selectionSignature,
     selectionToolbarPosition,
     openFlyout,
     setOpenFlyout,

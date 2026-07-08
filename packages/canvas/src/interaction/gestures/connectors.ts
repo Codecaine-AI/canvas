@@ -13,6 +13,7 @@ import {
   polylinesAlmostEqual,
 } from "../../routing/bend-editing";
 import { nearestObjectAnchor, pointForAnchor, pointForObjectAnchor } from "../../routing/routing";
+import { connectionBoundsForObject } from "../../objects/geometry";
 import { isBelowTextType } from "../../objects/text-slots";
 import { createObjectId, type CanvasPoint } from "../../state/geometry";
 import { objectTypeLabel } from "../../state/schema/object-defaults";
@@ -98,11 +99,11 @@ function connectorCandidateAt(
   };
 }
 
-function quickConnectClickPoint(
+export function quickConnectClickPoint(
   fromObject: InteractiveCanvasObject,
   fromAnchor: ConnectorCreateGesture["fromAnchor"],
 ): CanvasPoint {
-  const { x, y, width, height } = fromObject.geometry;
+  const { x, y, width, height } = connectionBoundsForObject(fromObject);
   const gap = Math.max(width, QUICK_CONNECT_MIN_GAP_PX);
   const centerX = x + width / 2;
   const centerY = y + height / 2;

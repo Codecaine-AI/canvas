@@ -53,6 +53,7 @@ function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): Sele
     selectionToolbarVariantLabel: "connector",
     selectionToolbarControls: CONNECTOR_CONTROLS,
     selectionToolbarFlyouts: null,
+    selectionSignature: "connector:connection-a:",
     selectionToolbarPosition: { x: 0, y: 0, placement: "above" },
     openFlyout: null,
     setOpenFlyout: () => undefined,
@@ -75,6 +76,16 @@ describe("SelectionToolbar geometry / styling", () => {
     expect(bar.style.background).toBe("#1D1D1D");
     expect(bar.style.height).toBe("48px");
     expect(bar.style.borderRadius).toBe("14px");
+  });
+
+  it("applies the FigJam elevation and entrance animation to the toolbar pill", () => {
+    const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
+    const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
+    expect(bar).toBeTruthy();
+    expect(bar.style.boxShadow).toContain("0 0 0 0.5px");
+    expect(bar.style.boxShadow).toContain("0 2px 5px");
+    expect(bar.style.boxShadow).toContain("0 6px 18px");
+    expect(bar.style.animation).toContain("canvas-selection-toolbar-enter");
   });
 });
 
@@ -302,5 +313,45 @@ describe("SelectionToolbar connector current-value icons", () => {
       "M3 9L7 6.5V11.5Z",
     ]);
     expect(actionIconSvg(container, "color").querySelector("circle")?.getAttribute("fill")).toBe("#0D99FF");
+  });
+
+  it("remounts the toolbar pill on selection identity changes but not position changes", () => {
+    const firstConnection = connection({ id: "connection-a" });
+    const { container, rerender } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({
+          selectionSignature: "connector:connection-a:",
+          selectionToolbarPosition: { x: 0, y: 0, placement: "above" },
+        })}
+        selectedConnection={firstConnection}
+        dispatch={() => undefined}
+      />,
+    );
+    const firstToolbar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
+    expect(firstToolbar).toBeTruthy();
+
+    rerender(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({
+          selectionSignature: "connector:connection-a:",
+          selectionToolbarPosition: { x: 72, y: 40, placement: "above" },
+        })}
+        selectedConnection={firstConnection}
+        dispatch={() => undefined}
+      />,
+    );
+    expect(container.querySelector("[data-selection-toolbar]")).toBe(firstToolbar);
+
+    rerender(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({
+          selectionSignature: "connector:connection-b:",
+          selectionToolbarPosition: { x: 72, y: 40, placement: "above" },
+        })}
+        selectedConnection={connection({ id: "connection-b" })}
+        dispatch={() => undefined}
+      />,
+    );
+    expect(container.querySelector("[data-selection-toolbar]")).not.toBe(firstToolbar);
   });
 });

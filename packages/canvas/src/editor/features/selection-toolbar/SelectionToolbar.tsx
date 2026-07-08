@@ -129,6 +129,27 @@ export type SelectionToolbarProps = {
 
 const TOOLBAR_HEIGHT_PX = EDITOR_STYLE.selectionToolbarHeightPx;
 const TOOLBAR_BG = EDITOR_STYLE.selectionToolbarBg; // #1D1D1D
+const TOOLBAR_ENTER_ANIMATION_NAME = "canvas-selection-toolbar-enter";
+const TOOLBAR_ENTER_ANIMATION = `${TOOLBAR_ENTER_ANIMATION_NAME} 140ms cubic-bezier(0.22, 1, 0.36, 1) both`;
+const TOOLBAR_ANIMATION_STYLES = `
+@keyframes ${TOOLBAR_ENTER_ANIMATION_NAME} {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-selection-toolbar] {
+    animation-duration: 1ms !important;
+  }
+}
+`;
 
 function ToolbarButton({
   control,
@@ -227,46 +248,52 @@ function SelectionToolbarComponent({
   const label = variantLabel;
 
   return (
-    <div
-      role="toolbar"
-      aria-label={label ? `${label} selection toolbar` : "selection toolbar"}
-      data-selection-toolbar=""
-      data-variant={label}
-      className={className}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: TOOLBAR_HEIGHT_PX,
-        borderRadius: EDITOR_STYLE.selectionToolbarRadiusPx,
-        background: TOOLBAR_BG,
-        padding: `0 ${EDITOR_STYLE.selectionToolbarPaddingXPx}px`,
-        gap: EDITOR_STYLE.selectionToolbarGapPx,
-        boxSizing: "border-box",
-        ...style,
-      }}
-    >
-      {controls.map((control, i) => (
-        <span key={control.action} style={{ display: "inline-flex", alignItems: "center" }}>
-          <ToolbarButton
-            control={control}
-            onAction={onAction}
-            controlState={controlState}
-            activeFlyout={activeFlyout}
-          />
-          {control.dividerAfter && i < controls.length - 1 ? (
-            <span
-              data-divider=""
-              style={{
-                width: 1,
-                height: 24,
-                background: "rgba(255,255,255,0.2)",
-                margin: "0 6px",
-              }}
+    <>
+      <style>{TOOLBAR_ANIMATION_STYLES}</style>
+      <div
+        role="toolbar"
+        aria-label={label ? `${label} selection toolbar` : "selection toolbar"}
+        data-selection-toolbar=""
+        data-variant={label}
+        className={className}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          height: TOOLBAR_HEIGHT_PX,
+          borderRadius: EDITOR_STYLE.selectionToolbarRadiusPx,
+          background: TOOLBAR_BG,
+          padding: `0 ${EDITOR_STYLE.selectionToolbarPaddingXPx}px`,
+          gap: EDITOR_STYLE.selectionToolbarGapPx,
+          boxSizing: "border-box",
+          boxShadow: EDITOR_STYLE.selectionToolbarShadow,
+          animation: TOOLBAR_ENTER_ANIMATION,
+          willChange: "transform, opacity",
+          ...style,
+        }}
+      >
+        {controls.map((control, i) => (
+          <span key={control.action} style={{ display: "inline-flex", alignItems: "center" }}>
+            <ToolbarButton
+              control={control}
+              onAction={onAction}
+              controlState={controlState}
+              activeFlyout={activeFlyout}
             />
-          ) : null}
-        </span>
-      ))}
-    </div>
+            {control.dividerAfter && i < controls.length - 1 ? (
+              <span
+                data-divider=""
+                style={{
+                  width: 1,
+                  height: 24,
+                  background: "rgba(255,255,255,0.2)",
+                  margin: "0 6px",
+                }}
+              />
+            ) : null}
+          </span>
+        ))}
+      </div>
+    </>
   );
 }
 

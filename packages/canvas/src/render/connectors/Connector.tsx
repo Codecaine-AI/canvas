@@ -59,12 +59,9 @@ export function Connector({
   const showForwardArrow = arrow === "forward" || arrow === "both";
   const showBackArrow = arrow === "back" || arrow === "both";
   // Per-connection color pick (P1) resolved through the palette's connector
-  // role cells, falling back to the neutral "gray" pick — selection still
-  // recolors to the selection blue (UI chrome, outside the palette).
+  // role cells, falling back to the neutral "gray" pick.
   // Arrowheads inherit via the markers' fill="context-stroke" (see <defs>).
-  const stroke = selected
-    ? "var(--primary)"
-    : resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
+  const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
   const bendSegments =
     selected && safeZoom >= BEND_HANDLES_MIN_ZOOM
       ? connectorBendSegments(routed.points ?? [])
@@ -135,7 +132,7 @@ export function Connector({
             strokeWidth={endpointStrokeWidth}
             data-canvas-endpoint="from"
             data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "crosshair" }}
+            style={{ pointerEvents: "all", cursor: "default" }}
           />
           <circle
             cx={routed.end.x}
@@ -146,7 +143,7 @@ export function Connector({
             strokeWidth={endpointStrokeWidth}
             data-canvas-endpoint="to"
             data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "crosshair" }}
+            style={{ pointerEvents: "all", cursor: "default" }}
           />
         </>
       )}

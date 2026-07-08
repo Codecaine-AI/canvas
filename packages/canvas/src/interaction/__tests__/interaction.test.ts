@@ -19,6 +19,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../state/schema";
+import { connectionBoundsForObject } from "../../objects/geometry";
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
@@ -1356,6 +1357,39 @@ describe("interaction: connector-create from edge ports (3.3.2)", () => {
       },
     ]);
     expect(result.overlay).toEqual({ editObjectTextId: "a-2", editObjectTextSeed: "" });
+  });
+
+  it("clicking a below-label bottom port measures the spawn point from visual bounds", () => {
+    const icon = makeObject({
+      id: "icon-a",
+      type: "icon",
+      icon: "person",
+      text: "Interviewee Response",
+      geometry: { x: 10, y: 20, width: 87, height: 87 },
+    });
+    const document = makeDocument([icon]);
+    const ctx = makeContext(document);
+    const hit = { kind: "port" as const, objectId: "icon-a", anchor: "bottom" as const };
+    const visualBounds = connectionBoundsForObject(icon);
+    const expectedGap = Math.max(visualBounds.width, 120);
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 53.5, y: 127 }, hit), ctx);
+    result = stepInteraction(result.state, up({ x: 54, y: 128 }), ctx);
+
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.quickConnect",
+        fromObjectId: "icon-a",
+        fromAnchor: "bottom",
+        drop: {
+          point: {
+            x: visualBounds.x + visualBounds.width / 2,
+            y: visualBounds.y + visualBounds.height + expectedGap + visualBounds.height / 2,
+          },
+        },
+      },
+    ]);
   });
 
   it("Escape cancels the create-drag back to idle with no dispatch", () => {
