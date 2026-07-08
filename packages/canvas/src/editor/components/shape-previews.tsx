@@ -111,7 +111,7 @@ function iconGlyphPreview(glyphId: IconGlyphId): ShapePreviewIcon {
 
 // ---------------------------------------------------------------------------
 // True-outline polygon previews (Basic + Flowchart) — geometrically identical
-// to CanvasStage.tsx's real silhouettes, generated from the same functions.
+// to the object defs' real silhouettes, generated from the same functions.
 // ---------------------------------------------------------------------------
 
 const EllipseIcon = polygonIcon(ellipsePoints(PREVIEW_BOUNDS));
@@ -134,7 +134,7 @@ const OffPageConnectorIcon = svgIcon(
 );
 
 // ---------------------------------------------------------------------------
-// Hand-drawn bbox-tier previews (Basic + Flowchart types whose CanvasStage
+// Hand-drawn bbox-tier previews (Basic + Flowchart types whose on-canvas
 // silhouette is custom inline SVG rather than a shared point-generator) —
 // same simplified-mini approach as the pre-existing icons, matching each
 // type's real on-canvas motif (documentWavyPath, the folder tab, the

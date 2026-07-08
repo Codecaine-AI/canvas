@@ -16,6 +16,7 @@ import {
   ConnectorNoArrowheadsIcon,
   ConnectorSolidLineIcon,
   DashIcon,
+  FitToContentIcon,
   LockIcon,
   NoStrokeIcon,
   RenameIcon,
@@ -49,6 +50,7 @@ export type SelectionToolbarActionId =
   | "text"
   | "section-border-style"
   | "rename"
+  | "fit-children"
   | "lock"
   | "dash"
   | "arrowhead";
@@ -70,6 +72,8 @@ export type SelectionToolbarControl = {
 export type ToolbarControlState = {
   /** Highlighted control state (for example, locked). */
   active?: boolean;
+  /** Disabled control state (rendered muted and does not invoke actions). */
+  disabled?: boolean;
   /** "color" action swatch color; other actions use it as icon color. */
   color?: string;
   /** Per-action icon variant key resolved through ACTION_ICON_VARIANTS. */
@@ -90,6 +94,7 @@ const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
   text: TypeIcon,
   "section-border-style": StrokeIcon,
   rename: RenameIcon,
+  "fit-children": FitToContentIcon,
   lock: LockIcon,
   dash: ConnectorSolidLineIcon,
   arrowhead: ConnectorArrowRightIcon,
@@ -167,24 +172,33 @@ function ToolbarButton({
   const { Icon, action, hasFlyout, text } = control;
   const state = controlState?.[action];
   const label = state?.label ?? control.label;
+  const disabled = state?.disabled === true;
   const clearHover = () => setHovered(false);
   const EffectiveIcon = (state?.variant ? ACTION_ICON_VARIANTS[action]?.[state.variant] : undefined) ?? Icon;
   const expanded = activeFlyout !== undefined ? activeFlyout === action : open;
   return (
-    <div style={{ position: "relative", display: "inline-flex" }}>
+    <div
+      style={{ position: "relative", display: "inline-flex" }}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={clearHover}
+      onPointerCancel={clearHover}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={clearHover}
+    >
       <button
         type="button"
         data-toolbar-action={action}
         aria-label={label}
+        aria-disabled={disabled}
         aria-expanded={hasFlyout ? expanded : undefined}
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={clearHover}
-        onPointerCancel={clearHover}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={clearHover}
+        disabled={disabled}
         onBlur={clearHover}
-        onClick={() => {
+        onClick={(event) => {
           clearHover();
+          if (disabled) {
+            event.preventDefault();
+            return;
+          }
           if (hasFlyout) setOpen((v) => !v);
           onAction?.(action);
         }}
@@ -198,30 +212,39 @@ function ToolbarButton({
           border: "none",
           background: state?.active
             ? EDITOR_STYLE.accentPurple
-            : hovered
+            : hovered && !disabled
               ? "rgba(255,255,255,0.12)"
               : "transparent",
           color: "#FFFFFF",
-          cursor: "pointer",
+          cursor: disabled ? "default" : "pointer",
         }}
       >
-        {action === "color" ? (
-          <span
-            style={{
-              display: "inline-flex",
-              width: EDITOR_STYLE.selectionToolbarSwatchPx,
-              height: EDITOR_STYLE.selectionToolbarSwatchPx,
-            }}
-          >
-            <ColorSwatchIcon color={state?.color} style={{ width: "100%", height: "100%" }} />
-          </span>
-        ) : (
-          <span style={{ color: state?.color }}>
-            <EffectiveIcon className="h-5 w-5" />
-          </span>
-        )}
-        {text ? <span style={{ fontSize: 13, whiteSpace: "nowrap" }}>{text}</span> : null}
-        {hasFlyout ? <ChevronDownIcon className="h-3 w-3" /> : null}
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: EDITOR_STYLE.selectionToolbarGapPx,
+            opacity: disabled ? 0.4 : 1,
+          }}
+        >
+          {action === "color" ? (
+            <span
+              style={{
+                display: "inline-flex",
+                width: EDITOR_STYLE.selectionToolbarSwatchPx,
+                height: EDITOR_STYLE.selectionToolbarSwatchPx,
+              }}
+            >
+              <ColorSwatchIcon color={state?.color} style={{ width: "100%", height: "100%" }} />
+            </span>
+          ) : (
+            <span style={{ color: state?.color }}>
+              <EffectiveIcon className="h-5 w-5" />
+            </span>
+          )}
+          {text ? <span style={{ fontSize: 13, whiteSpace: "nowrap" }}>{text}</span> : null}
+          {hasFlyout ? <ChevronDownIcon className="h-3 w-3" /> : null}
+        </span>
       </button>
       <Tooltip label={label} visible={hovered} placement="top" />
     </div>

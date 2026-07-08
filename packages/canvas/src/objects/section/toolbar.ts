@@ -12,6 +12,7 @@ export const SECTION_TOOLBAR: ToolbarSpec = {
     { action: "color", label: "Color", hasFlyout: true },
     { action: "section-border-style", label: "Border style", hasFlyout: true },
     { action: "rename", label: "Rename", dividerAfter: true },
+    { action: "fit-children", label: "Fit to content" },
     { action: "lock", label: "Lock", hasFlyout: true },
   ],
 };

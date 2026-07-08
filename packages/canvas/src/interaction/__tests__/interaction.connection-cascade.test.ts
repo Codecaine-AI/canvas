@@ -155,6 +155,30 @@ describe("connector-create: cascade snapping (W3b)", () => {
     ]);
   });
 
+  it("inside an empty section area has no candidate and quick-connects at the release point", () => {
+    const section = makeObject({
+      id: "section-target",
+      type: "section",
+      text: "Section",
+      geometry: { x: 220, y: -100, width: 400, height: 300 },
+    });
+    const ctx = makeContext(makeDocument([makeObject({ id: "a" }), section]));
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 50 }, PORT_HIT), ctx);
+    result = stepInteraction(result.state, move({ x: 400, y: 50 }), ctx);
+    expect(result.overlay.connectorDrag?.candidate).toBeUndefined();
+
+    result = stepInteraction(result.state, up({ x: 400, y: 50 }), ctx);
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.quickConnect",
+        fromObjectId: "a",
+        fromAnchor: "right",
+        drop: { point: { x: 400, y: 50 } },
+      },
+    ]);
+  });
+
   it("uses shared paint order when a shape overlaps a later-in-array section", () => {
     const shape = makeObject({
       id: "shape-target",

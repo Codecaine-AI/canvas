@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+import { sectionTitleChipWorldRect } from "../../../../objects/section/title-chip-geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../../state/schema";
 import { resolveContextMenuTarget } from "../use-canvas-context-menu";
 
@@ -21,6 +22,13 @@ const rectBehind: InteractiveCanvasObject = {
   type: "process",
   text: "Rect",
   geometry: { x: 0, y: 0, width: 100, height: 100 },
+};
+
+const shortSection: InteractiveCanvasObject = {
+  id: "short-section",
+  type: "section",
+  text: "Short section",
+  geometry: { x: 0, y: 0, width: 100, height: 20 },
 };
 
 function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
@@ -46,5 +54,18 @@ describe("resolveContextMenuTarget (D16)", () => {
 
   it("returns null (canvas menu) for a corner click with nothing behind", () => {
     expect(resolveContextMenuTarget(doc([diamond]), diamond, { x: 5, y: 5 })).toBeNull();
+  });
+
+  it("can retarget back to a section through its zoom-scaled title chip", () => {
+    const zoom = 0.25;
+    const point = sectionTitleChipWorldRect(shortSection, zoom);
+    expect(
+      resolveContextMenuTarget(
+        doc([shortSection]),
+        shortSection,
+        { x: point.x + 8, y: point.y + point.height - 8 },
+        { zoom },
+      )?.id,
+    ).toBe("short-section");
   });
 });

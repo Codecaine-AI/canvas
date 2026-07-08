@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "board-1",
+  "id": "board-2",
   "title": "Untitled board",
   "mode": "diagram",
   "viewport": {
@@ -67,24 +67,19 @@
       }
     },
     {
-      "id": "untitled-board",
-      "type": "section",
-      "text": "",
-      "color": "gray",
-      "parentId": null,
+      "id": "sticky",
+      "type": "sticky",
+      "text": "# Test\n- Overall Context is why we are doing the interview with **bold emphasis**\n- Who the client is, plus `inline code`",
+      "color": "yellow",
+      "parentId": "diagram-frame",
       "geometry": {
-        "x": 1520,
-        "y": 80,
-        "width": 720,
-        "height": 368
+        "x": 400,
+        "y": 224,
+        "width": 176,
+        "height": 128
       },
       "style": {
-        "shape": "section"
-      },
-      "layout": {
-        "mode": "free",
-        "padding": 32,
-        "gap": 24
+        "shape": "note"
       }
     }
   ],
@@ -101,21 +96,6 @@
       },
       "style": "solid",
       "arrow": "forward"
-    },
-    {
-      "id": "connection-1",
-      "from": {
-        "objectId": "diagram-frame",
-        "anchor": "right"
-      },
-      "to": {
-        "objectId": "next-step",
-        "anchor": "top"
-      },
-      "label": "Yes",
-      "style": "solid",
-      "arrow": "forward",
-      "color": "gray"
     }
   ],
   "annotations": []

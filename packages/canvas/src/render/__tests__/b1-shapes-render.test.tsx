@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import { SHAPE_STROKE_WIDTH_PX } from "../../theme";
 
 afterEach(() => {
   cleanup();
@@ -38,6 +39,7 @@ function withMeasuredShell<T>(width: number, height: number, run: () => T): T {
 }
 
 const SCREEN = { width: 1600, height: 900 };
+const DATABASE_STROKE_WIDTH = 7;
 
 /**
  * One object per Wave B1 native type (default sizes from the implementation
@@ -86,6 +88,9 @@ const B1_OBJECTS: InteractiveCanvasObject[] = [
   // HBW parity fixes under test alongside the new set:
   b1Object("document-1", "document", 160, 120, 20),
   b1Object("arrow-1", "arrow-shape", 200, 100, 21, { direction: "right" }),
+  b1Object("database-1", "database", 140, 120, 22, {
+    style: { shape: "database", strokeWidth: DATABASE_STROKE_WIDTH },
+  }),
 ];
 
 const b1Document: InteractiveCanvasDocument = {
@@ -106,6 +111,37 @@ function renderB1() {
 function polygonPointCount(container: HTMLElement, objectId: string): number | undefined {
   const polygon = container.querySelector(`[data-canvas-object-id="${objectId}"] polygon`);
   return polygon?.getAttribute("points")?.trim().split(/\s+/).length;
+}
+
+function silhouetteSvg(
+  container: HTMLElement,
+  objectId: string,
+  silhouette: string,
+): SVGSVGElement {
+  const svg = container.querySelector(
+    `[data-canvas-object-id="${objectId}"] [data-canvas-shape-silhouette="${silhouette}"]`,
+  ) as SVGSVGElement | null;
+  expect(svg).toBeTruthy();
+  return svg!;
+}
+
+function pathNumbers(path: Element | null): number[] {
+  expect(path).toBeTruthy();
+  return (path!.getAttribute("d")?.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+}
+
+function expectNumbersClose(actual: number[], expected: number[]): void {
+  expect(actual.length).toBeGreaterThanOrEqual(expected.length);
+  expected.forEach((value, index) => {
+    expect(actual[index]).toBeCloseTo(value);
+  });
+}
+
+function expectStrokeWidth(element: Element | null, expected: number): void {
+  expect(element).toBeTruthy();
+  expect(element!.getAttribute("stroke-width") ?? element!.getAttribute("strokeWidth")).toBe(
+    `${expected}`,
+  );
 }
 
 describe("Wave B1 render smoke: every new native shape renders without crashing", () => {
@@ -231,6 +267,55 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
       for (const path of paths) {
         expect(path.getAttribute("d") ?? "").toContain("C");
       }
+    });
+  });
+
+  it("renders fixed-stroke SVG silhouettes in object-local coordinates", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = renderB1();
+
+      const database = silhouetteSvg(container, "database-1", "database");
+      expect(database.getAttribute("viewBox")).toBe("0 0 140 120");
+      expectStrokeWidth(database.querySelector("path"), DATABASE_STROKE_WIDTH);
+      expectStrokeWidth(database.querySelector("ellipse"), DATABASE_STROKE_WIDTH);
+      expectNumbersClose(pathNumbers(database.querySelector("path")), [
+        5.6, 26.4, 5.6, 14.4, 134.4, 14.4, 134.4, 26.4,
+      ]);
+      const databaseLid = database.querySelector("ellipse");
+      expect(Number(databaseLid?.getAttribute("rx"))).toBeCloseTo(64.4);
+      expect(Number(databaseLid?.getAttribute("ry"))).toBeCloseTo(14.4);
+
+      const folder = silhouetteSvg(container, "folder-1", "folder");
+      expect(folder.getAttribute("viewBox")).toBe("0 0 140 110");
+      expectStrokeWidth(folder.querySelector("path"), SHAPE_STROKE_WIDTH_PX);
+      expectNumbersClose(pathNumbers(folder.querySelector("path")), [
+        0, 8.8, 53.2, 26.4, 140, 110, 0,
+      ]);
+
+      const document = silhouetteSvg(container, "document-1", "document");
+      expect(document.getAttribute("viewBox")).toBe("0 0 160 120");
+      expectStrokeWidth(document.querySelector("path"), SHAPE_STROKE_WIDTH_PX);
+      expectNumbersClose(pathNumbers(document.querySelector("path")), [
+        0, 0, 160, 0, 160, 98.4, 132.8, 98.4,
+      ]);
+
+      const documentStack = silhouetteSvg(container, "document-stack-1", "document-stack");
+      expect(documentStack.getAttribute("viewBox")).toBe("0 0 160 120");
+      const documentStackPaths = documentStack.querySelectorAll("path");
+      expect(documentStackPaths.length).toBe(2);
+      expectStrokeWidth(documentStackPaths[0] ?? null, SHAPE_STROKE_WIDTH_PX);
+      expectStrokeWidth(documentStackPaths[1] ?? null, SHAPE_STROKE_WIDTH_PX);
+      expectNumbersClose(pathNumbers(documentStackPaths[0] ?? null), [0, 0, 150.4, 0]);
+      expectNumbersClose(pathNumbers(documentStackPaths[1] ?? null), [9.6, 7.2, 160, 7.2]);
+
+      const cylinder = silhouetteSvg(container, "cylinder-horizontal-1", "cylinder-horizontal");
+      expect(cylinder.getAttribute("viewBox")).toBe("0 0 150 100");
+      const cylinderPaths = cylinder.querySelectorAll("path");
+      expect(cylinderPaths.length).toBe(3);
+      for (const path of cylinderPaths) {
+        expectStrokeWidth(path, SHAPE_STROKE_WIDTH_PX);
+      }
+      expectNumbersClose(pathNumbers(cylinderPaths[0] ?? null), [27, 5, 123, 138, 5, 147]);
     });
   });
 

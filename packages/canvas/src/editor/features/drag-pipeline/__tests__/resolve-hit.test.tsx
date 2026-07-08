@@ -32,6 +32,13 @@ const rectBehind: InteractiveCanvasObject = {
   geometry: { x: 0, y: 0, width: 100, height: 100 },
 };
 
+const section: InteractiveCanvasObject = {
+  id: "section",
+  type: "section",
+  text: "Tiny section",
+  geometry: { x: 0, y: 0, width: 20, height: 20 },
+};
+
 function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
   return {
     schemaVersion: 1,
@@ -46,6 +53,13 @@ function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
 function diamondButton(): HTMLElement {
   const el = window.document.createElement("button");
   el.setAttribute("data-canvas-object-id", "diamond");
+  return el;
+}
+
+function sectionTitleChip(): HTMLElement {
+  const el = window.document.createElement("span");
+  el.setAttribute("data-canvas-object-id", "section");
+  el.setAttribute("data-canvas-section-title-chip", "section");
   return el;
 }
 
@@ -109,6 +123,14 @@ describe("resolveHit outline veto (D16)", () => {
       kind: "port",
       objectId: "diamond",
       anchor: "left",
+    });
+  });
+
+  it("resolves a section title chip to its section even outside the section outline", () => {
+    const document = doc([section]);
+    expect(resolveHit(sectionTitleChip(), document, { x: 90, y: 10 })).toEqual({
+      kind: "object",
+      objectId: "section",
     });
   });
 

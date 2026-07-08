@@ -16,6 +16,7 @@ import {
   type InteractiveCanvasObject,
   type InteractiveCanvasObjectType,
 } from "../../index";
+import { routeConnection } from "../../routing/routing";
 import { reconcileSectionMembership } from "../section-membership";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
@@ -130,6 +131,50 @@ function makeConnectionDocument(): InteractiveCanvasDocument {
       },
     ],
   };
+}
+
+function makeWaypointedConnectionDocument(): InteractiveCanvasDocument {
+  const document = makeConnectionDocument();
+  const waypoints: Array<[number, number]> = [
+    [220, 88],
+    [220, 188],
+    [260, 188],
+  ];
+  return {
+    ...document,
+    connections: document.connections.map((connection) =>
+      connection.id === "connection-a" ? { ...connection, waypoints } : connection,
+    ),
+  };
+}
+
+function connectionById(document: InteractiveCanvasDocument, id: string) {
+  const connection = document.connections.find((candidate) => candidate.id === id);
+  if (!connection) throw new Error(`connection ${id} missing`);
+  return connection;
+}
+
+function objectById(document: InteractiveCanvasDocument, id: string) {
+  const object = document.objects.find((candidate) => candidate.id === id);
+  if (!object) throw new Error(`object ${id} missing`);
+  return object;
+}
+
+function nonOrthogonalSegments(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  epsilon = 0.5,
+) {
+  const segments = [];
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]!;
+    const current = points[index]!;
+    const dx = Math.abs(current.x - previous.x);
+    const dy = Math.abs(current.y - previous.y);
+    if (dx > epsilon && dy > epsilon) {
+      segments.push({ from: previous, to: current });
+    }
+  }
+  return segments;
 }
 
 function makeClipboardDocument(): InteractiveCanvasDocument {
@@ -1150,6 +1195,7 @@ describe("interactive canvas: section membership reconciliation", () => {
       name: string;
       state: ReturnType<typeof createInteractiveCanvasState>;
       action: CanvasAction;
+      expectedSectionGeometry?: InteractiveCanvasObject["geometry"];
     }> = [
       {
         name: "canvas.addObject",
@@ -1222,6 +1268,7 @@ describe("interactive canvas: section membership reconciliation", () => {
         name: "canvas.fitSectionToChildren",
         state: createInteractiveCanvasState(baseDocument),
         action: { type: "canvas.fitSectionToChildren", sectionId: "section", padding: 24 },
+        expectedSectionGeometry: { x: 16, y: -16, width: 368, height: 192 },
       },
       {
         name: "canvas.setObjectType",
@@ -1239,8 +1286,12 @@ describe("interactive canvas: section membership reconciliation", () => {
       },
     ];
 
-    for (const { state, action } of cases) {
+    for (const { state, action, expectedSectionGeometry } of cases) {
       const next = reduceInteractiveCanvasState(state, action);
+      if (expectedSectionGeometry) {
+        expect(next.document.objects.find((object) => object.id === "section")?.geometry)
+          .toEqual(expectedSectionGeometry);
+      }
       expectSectionMembershipReconciled(next.document);
     }
   });
@@ -1266,8 +1317,62 @@ describe("interactive canvas: connection actions", () => {
       .toBe("process-b");
   });
 
+  it("clears waypoints in the reconnect history entry when an endpoint moves to a different object", () => {
+    let state = createInteractiveCanvasState(makeWaypointedConnectionDocument());
+    const initialHistoryLength = state.history.past.length;
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateConnection",
+      connectionId: "connection-a",
+      patch: { to: { objectId: "process-c", anchor: "left" } },
+    });
+
+    const connection = connectionById(state.document, "connection-a");
+    const routed = routeConnection(
+      objectById(state.document, connection.from.objectId),
+      objectById(state.document, connection.to.objectId),
+      connection,
+      state.document.objects,
+    );
+
+    expect(state.lastChange?.summary).toBe("Reconnected connector");
+    expect(state.history.past.length).toBe(initialHistoryLength + 1);
+    expect(connection.to.objectId).toBe("process-c");
+    expect(connection.label).toBe("A to B");
+    expect(connection.waypoints).toBeUndefined();
+    expect(nonOrthogonalSegments(routed.points ?? [])).toEqual([]);
+
+    state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
+    const undoneConnection = connectionById(state.document, "connection-a");
+    expect(state.history.past.length).toBe(initialHistoryLength);
+    expect(undoneConnection.to.objectId).toBe("process-b");
+    expect(undoneConnection.waypoints).toEqual([
+      [220, 88],
+      [220, 188],
+      [260, 188],
+    ]);
+  });
+
+  it("clears waypoints when reconnecting to a different anchor on the same object", () => {
+    let state = createInteractiveCanvasState(makeWaypointedConnectionDocument());
+    const initialHistoryLength = state.history.past.length;
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateConnection",
+      connectionId: "connection-a",
+      patch: { to: { objectId: "process-b", anchor: "top" } },
+    });
+
+    const connection = connectionById(state.document, "connection-a");
+    expect(state.lastChange?.summary).toBe("Reconnected connector");
+    expect(state.history.past.length).toBe(initialHistoryLength + 1);
+    expect(connection.to).toEqual({ objectId: "process-b", anchor: "top" });
+    expect(connection.waypoints).toBeUndefined();
+  });
+
   it("updates connection metadata without reconnecting", () => {
     let state = createInteractiveCanvasState(makeConnectionDocument());
+    const initialHistoryLength = state.history.past.length;
 
     state = reduceInteractiveCanvasState(state, {
       type: "canvas.updateConnection",
@@ -1275,9 +1380,15 @@ describe("interactive canvas: connection actions", () => {
       patch: { label: "Reviewed connector" },
     });
 
-    expect(state.lastChange?.summary).toBe("Updated connector");
+    expect(state.lastChange?.summary).toBe("Edited connector label");
+    expect(state.history.past.length).toBe(initialHistoryLength + 1);
     expect(state.document.connections.find((connection) => connection.id === "connection-a")?.label)
       .toBe("Reviewed connector");
+
+    state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
+    expect(state.history.past.length).toBe(initialHistoryLength);
+    expect(state.document.connections.find((connection) => connection.id === "connection-a")?.label)
+      .toBe("A to B");
   });
 
   it("records a connector waypoint commit as one undoable history entry", () => {

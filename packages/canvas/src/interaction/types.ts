@@ -85,8 +85,9 @@ export type CanvasPointerEvent = {
  *  - `snapKind: "outline"` — snapped to the nearest point on the shape's real
  *    outline (within 8 world px), off-anchor. `position` carries the exact
  *    [0..1, 0..1] relative attach point that gets stored on the endpoint.
- *  - `snapKind: "inside"` — pointer is inside the shape beyond both snap
- *    radii; commits the coarse nearest `anchor` side only (pre-W3b behavior).
+ *  - `snapKind: "inside"` — pointer is inside an eligible non-section shape
+ *    beyond both snap radii; commits the coarse nearest `anchor` side only
+ *    (pre-W3b behavior).
  *
  * `anchor` is always populated (coarse nearest side) so overlay code and the
  * routing fallback path never need to branch on kind.

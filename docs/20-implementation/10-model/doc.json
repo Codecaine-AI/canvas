@@ -3648,7 +3648,7 @@
           }
         },
         {
-          "insert": "-separated segment; any line starting with "
+          "insert": "-separated segment; every line starts with optional two-space-pair structural indent depth, then optional "
         },
         {
           "insert": "\"- \"",
@@ -3661,16 +3661,20 @@
           }
         },
         {
-          "insert": " renders as a bulleted line (the "
+          "insert": " bullet or #/##/### heading prefix. The markdown prefix (indent plus marker) is always hidden, and "
         },
         {
-          "insert": "\"- \"",
+          "insert": "objects/sticky/markdown.tsx",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/sticky/markdown.tsx"
+            }
           }
         },
         {
-          "insert": " prefix is stripped and replaced with a "
+          "insert": " emits data-line-depth (clamped at 5) so all line kinds share one em-based indent column grid; bullets offset one extra column for the glyph gutter and choose "
         },
         {
           "insert": "•",
@@ -3679,7 +3683,7 @@
           }
         },
         {
-          "insert": " glyph via CSS "
+          "insert": " at depth 0 via CSS "
         },
         {
           "insert": "::before",
@@ -3692,7 +3696,7 @@
           }
         },
         {
-          "insert": "). Sticky is also the only shape with a drop shadow ("
+          "insert": ". Sticky is also the only shape with a drop shadow ("
         },
         {
           "insert": "STICKY_GEOMETRY.shadow",

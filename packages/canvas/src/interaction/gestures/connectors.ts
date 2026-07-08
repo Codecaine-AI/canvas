@@ -8,6 +8,8 @@
  */
 import { resolveConnectionCascade } from "../../routing/connection-overlay";
 import {
+  bendSimplifyToleranceForZoom,
+  bendSnapToleranceForZoom,
   commitBendPolyline,
   dragOrthogonalSegment,
   polylinesAlmostEqual,
@@ -17,7 +19,11 @@ import { connectionBoundsForObject } from "../../objects/geometry";
 import { isBelowTextType } from "../../objects/text-slots";
 import { createObjectId, type CanvasPoint } from "../../state/geometry";
 import { objectTypeLabel } from "../../state/schema/object-defaults";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import type {
+  InteractiveCanvasConnection,
+  InteractiveCanvasDocument,
+  InteractiveCanvasObject,
+} from "../../state/schema";
 import { paintOrderedObjects } from "../../state/z-order";
 import {
   DRAG_THRESHOLD,
@@ -124,10 +130,14 @@ function quickConnectNewObjectId(
 function bendPointsForEvent(
   state: ConnectorBendDragGesture,
   event: CanvasPointerEvent,
+  zoom: number,
 ): CanvasPoint[] {
   return dragOrthogonalSegment(state.startPoints, state.segmentIndex, {
     dx: event.world.x - state.startWorld.x,
     dy: event.world.y - state.startWorld.y,
+  }, {
+    snapTolerance: bendSnapToleranceForZoom(zoom),
+    simplifyTolerance: bendSimplifyToleranceForZoom(zoom),
   });
 }
 
@@ -140,6 +150,25 @@ function bendDragOverlay(state: ConnectorBendDragGesture) {
       points: state.currentPoints,
     },
   };
+}
+
+function sameEndpointPosition(
+  a: InteractiveCanvasConnection["from"]["position"],
+  b: InteractiveCanvasConnection["from"]["position"],
+): boolean {
+  if (!a || !b) return !a && !b;
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+function endpointChanged(
+  previous: InteractiveCanvasConnection["from"],
+  next: InteractiveCanvasConnection["from"],
+): boolean {
+  return (
+    next.objectId !== previous.objectId ||
+    next.anchor !== previous.anchor ||
+    !sameEndpointPosition(next.position, previous.position)
+  );
 }
 
 export function stepFromConnectorEndpointDrag(
@@ -163,7 +192,18 @@ export function stepFromConnectorEndpointDrag(
       anchor: candidate.anchor,
       ...(candidate.position ? { position: candidate.position } : {}),
     };
-    const patch = state.end === "from" ? { from: endpoint } : { to: endpoint };
+    const connection = ctx.document.connections.find(
+      (candidateConnection) => candidateConnection.id === state.connectionId,
+    );
+    const previousEndpoint = state.end === "from" ? connection?.from : connection?.to;
+    const clearsWaypoints =
+      !!connection?.waypoints &&
+      !!previousEndpoint &&
+      endpointChanged(previousEndpoint, endpoint);
+    const patch = {
+      ...(state.end === "from" ? { from: endpoint } : { to: endpoint }),
+      ...(clearsWaypoints ? { waypoints: undefined } : {}),
+    };
     return {
       state: IDLE_INTERACTION_STATE,
       dispatch: [{ type: "canvas.updateConnection", connectionId: state.connectionId, patch }],
@@ -244,16 +284,20 @@ export function stepFromConnectorCreate(
 export function stepFromConnectorBendDrag(
   state: ConnectorBendDragGesture,
   event: CanvasPointerEvent,
-  _ctx: InteractionContext,
+  ctx: InteractionContext,
 ): InteractionResult {
   if (event.type === "cancel") return toIdle();
 
   if (event.type === "up") {
-    const finalPoints = bendPointsForEvent(state, event);
+    const tolerance = bendSimplifyToleranceForZoom(ctx.viewport.zoom);
+    const finalPoints = bendPointsForEvent(state, event, ctx.viewport.zoom);
     if (polylinesAlmostEqual(finalPoints, state.startPoints)) {
       return toIdle();
     }
-    const commit = commitBendPolyline(finalPoints);
+    const commit = commitBendPolyline(finalPoints, tolerance);
+    if (polylinesAlmostEqual(commit.points, state.startPoints)) {
+      return toIdle();
+    }
     return {
       state: IDLE_INTERACTION_STATE,
       dispatch: [
@@ -274,7 +318,7 @@ export function stepFromConnectorBendDrag(
   const nextState: ConnectorBendDragGesture = {
     ...state,
     point: event.world,
-    currentPoints: bendPointsForEvent(state, event),
+    currentPoints: bendPointsForEvent(state, event, ctx.viewport.zoom),
   };
   return { state: nextState, dispatch: [], overlay: bendDragOverlay(nextState) };
 }

@@ -20,6 +20,7 @@ export { CursorIcon } from "./cursor-icon";
 export { DashIcon } from "./dash-icon";
 export { DiamondIcon } from "./diamond-icon";
 export { ExpandIcon } from "./expand-icon";
+export { FitToContentIcon } from "./fit-to-content-icon";
 export { FontStyleIcon } from "./font-style-icon";
 export { FrameIcon } from "./frame-icon";
 export { GitBranchIcon } from "./git-branch-icon";

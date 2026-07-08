@@ -14,8 +14,8 @@ import type { ConnectorDef, ToolbarSpec } from "../object-def";
 export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
 
 /**
- * The connector selection toolbar: stroke and label-align were dropped as
- * inert controls with no registered flyout or schema backing. DATA-ONLY since
+ * The connector selection toolbar: style controls are flyout-backed, while
+ * Text opens the routed-midpoint label editor directly. DATA-ONLY since
  * the co-location alignment: the flyout components live in
  * editor/features/selection-toolbar/flyouts/connector-flyouts.tsx (keyed by
  * def kind + action id).
@@ -25,6 +25,7 @@ const CONNECTOR_TOOLBAR: ToolbarSpec = {
     { action: "color", label: "Line color", hasFlyout: true },
     { action: "dash", label: "Line style", hasFlyout: true },
     { action: "arrowhead", label: "Arrowhead style", hasFlyout: true },
+    { action: "text", label: "Text" },
   ],
 };
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../../../interaction/clipboard";
-import { hitTestObjects } from "../../../interaction/hit-testing";
+import { hitTestObjects, type HitTestOptions } from "../../../interaction/hit-testing";
 import { outlineContainsPoint } from "../../../objects/geometry";
 import { defaultGeometryFor, type CanvasAction } from "../../../state/actions";
 import type { CanvasBounds, CanvasPoint } from "../../../state/geometry";
@@ -13,6 +13,7 @@ import type {
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../../../state/schema";
+import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 
 export type CanvasContextMenuState =
   | {
@@ -40,9 +41,10 @@ export function resolveContextMenuTarget(
   document: InteractiveCanvasDocument,
   clicked: InteractiveCanvasObject,
   world: CanvasPoint,
+  options: HitTestOptions = {},
 ): InteractiveCanvasObject | null {
   if (outlineContainsPoint(clicked, world)) return clicked;
-  return hitTestObjects(document, world);
+  return hitTestObjects(document, world, options);
 }
 
 function geometryForContextObject(
@@ -62,6 +64,7 @@ export interface UseCanvasContextMenuArgs {
   document: InteractiveCanvasDocument;
   dispatch: (action: CanvasAction) => void;
   screenToWorld: (point: CanvasPoint) => CanvasPoint;
+  zoom?: number;
 }
 
 export interface CanvasContextMenuApi {
@@ -82,6 +85,7 @@ export interface CanvasContextMenuApi {
   copyFromContextMenu: () => void;
   setLockFromContextMenu: (mode: "all" | "background" | undefined) => void;
   addContextAnnotation: () => void;
+  contextObjectFitDisabled: boolean;
   fitContextObject: () => void;
   tidySectionMembership: () => void;
   deleteContextSelection: () => void;
@@ -98,6 +102,7 @@ export function useCanvasContextMenu({
   document,
   dispatch,
   screenToWorld,
+  zoom = 1,
 }: UseCanvasContextMenuArgs): CanvasContextMenuApi {
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
 
@@ -140,7 +145,7 @@ export function useCanvasContextMenu({
       const canvasPoint = canvasPointFromContextMenu(event);
       // D16: a right-click in a true-outline shape's empty bbox corner
       // retargets to the object behind it, or to the canvas menu.
-      const target = resolveContextMenuTarget(document, object, canvasPoint);
+      const target = resolveContextMenuTarget(document, object, canvasPoint, { zoom });
       if (!target) {
         openCanvasContextMenu(event, bounds);
         return;
@@ -159,7 +164,7 @@ export function useCanvasContextMenu({
         canvasPoint,
       });
     },
-    [canvasPointFromContextMenu, dispatch, document, openCanvasContextMenu],
+    [canvasPointFromContextMenu, dispatch, document, openCanvasContextMenu, zoom],
   );
 
   const addObjectFromContextMenu = (objectType: InteractiveCanvasObjectType) => {
@@ -248,8 +253,10 @@ export function useCanvasContextMenu({
     if (contextMenu?.kind !== "object") return;
     const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
     if (contextObject?.type !== "section") return;
-    dispatch({
-      type: "canvas.fitSectionToChildren",
+    if (isSectionFitted(document, contextObject.id)) return;
+    animateSectionFitToChildren({
+      document,
+      dispatch,
       sectionId: contextObject.id,
     });
     setContextMenu(null);
@@ -274,6 +281,8 @@ export function useCanvasContextMenu({
     contextMenu?.kind === "object"
       ? document.objects.find((object) => object.id === contextMenu.objectId)
       : null;
+  const contextObjectFitDisabled =
+    contextObject?.type === "section" ? isSectionFitted(document, contextObject.id) : false;
 
   return {
     contextMenu,
@@ -288,6 +297,7 @@ export function useCanvasContextMenu({
     copyFromContextMenu,
     setLockFromContextMenu,
     addContextAnnotation,
+    contextObjectFitDisabled,
     fitContextObject,
     tidySectionMembership,
     deleteContextSelection,

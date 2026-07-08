@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
+import { routeConnection } from "../../routing/routing";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 afterEach(() => {
@@ -41,6 +42,13 @@ function makeDocument(): InteractiveCanvasDocument {
 
 const viewport = { x: 0, y: 0, zoom: 1 };
 
+function rectCenter(rect: Element): { x: number; y: number } {
+  return {
+    x: Number(rect.getAttribute("x")) + Number(rect.getAttribute("width")) / 2,
+    y: Number(rect.getAttribute("y")) + Number(rect.getAttribute("height")) / 2,
+  };
+}
+
 describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
   it("renders a wide invisible hit path with data-canvas-connection-id", () => {
     const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
@@ -63,11 +71,94 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     expect(container.querySelector('[data-canvas-endpoint="to"]')).toBeTruthy();
   });
 
+  it("renders one bend handle for a selected straight connector", () => {
+    const { container } = render(
+      <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId="connection-a" />,
+    );
+    const bendHandles = container.querySelectorAll(
+      '[data-canvas-bend-segment][data-canvas-connection-id="connection-a"]',
+    );
+
+    expect(bendHandles.length).toBe(1);
+    expect(bendHandles[0]?.getAttribute("data-canvas-bend-segment")).toBe("0");
+  });
+
+  it("offsets the bend handle from the label point for a labeled straight connector", () => {
+    const document = makeDocument();
+    const { container } = render(
+      <CanvasStage document={document} viewport={viewport} selectedConnectionId="connection-a" />,
+    );
+    const bendHandle = container.querySelector(
+      '[data-canvas-bend-segment][data-canvas-connection-id="connection-a"]',
+    );
+    const routed = routeConnection(
+      document.objects[0]!,
+      document.objects[1]!,
+      document.connections[0]!,
+      document.objects,
+    );
+    const start = routed.points![0]!;
+    const end = routed.points![1]!;
+    const expected = {
+      x: start.x + (end.x - start.x) * 0.25,
+      y: start.y + (end.y - start.y) * 0.25,
+    };
+
+    expect(bendHandle).toBeTruthy();
+    expect(rectCenter(bendHandle!)).toEqual(expected);
+    expect(rectCenter(bendHandle!)).not.toEqual(routed.labelPoint);
+  });
+
+  it("keeps the bend handle at the midpoint for an unlabeled straight connector", () => {
+    const document = makeDocument();
+    document.connections = [{ ...document.connections[0]!, label: "" }];
+
+    const { container } = render(
+      <CanvasStage document={document} viewport={viewport} selectedConnectionId="connection-a" />,
+    );
+    const bendHandle = container.querySelector(
+      '[data-canvas-bend-segment][data-canvas-connection-id="connection-a"]',
+    );
+    const routed = routeConnection(
+      document.objects[0]!,
+      document.objects[1]!,
+      document.connections[0]!,
+      document.objects,
+    );
+
+    expect(bendHandle).toBeTruthy();
+    expect(rectCenter(bendHandle!)).toEqual(routed.labelPoint);
+  });
+
   it("renders a label chip at the connector's label point", () => {
-    const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
+    const document = makeDocument();
+    const { container } = render(<CanvasStage document={document} viewport={viewport} />);
     const chip = container.querySelector('[data-canvas-connection-label="connection-a"]');
+    const routed = routeConnection(
+      document.objects[0]!,
+      document.objects[1]!,
+      document.connections[0]!,
+      document.objects,
+    );
+
     expect(chip).toBeTruthy();
     expect(chip?.textContent).toBe("handles");
+    expect(chip?.getAttribute("transform")).toBe(
+      `translate(${routed.labelPoint.x} ${routed.labelPoint.y})`,
+    );
+
+    const labelText = chip?.querySelector("text");
+    expect(labelText?.getAttribute("font-size")).toBe("16");
+    expect(labelText?.getAttribute("font-weight")).toBe("700");
+  });
+
+  it("omits the label chip for an empty connector label", () => {
+    const document = makeDocument();
+    document.connections = [{ ...document.connections[0]!, label: "" }];
+
+    const { container } = render(<CanvasStage document={document} viewport={viewport} />);
+
+    expect(container.querySelector('[data-canvas-connection-label="connection-a"]')).toBeNull();
   });
 
   it("forwards double-click on the hit path as the editConnectionLabel intent", () => {
@@ -98,6 +189,21 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     expect(chip).toBeTruthy();
     fireEvent.doubleClick(chip!);
     expect(onConnectionDoubleClick).toHaveBeenCalledWith("connection-a");
+  });
+
+  it("paints bend handles after the label chip so bend pills stay above labels", () => {
+    const { container } = render(
+      <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId="connection-a" />,
+    );
+    const chip = container.querySelector('[data-canvas-connection-label="connection-a"]');
+    const bendHandle = container.querySelector(
+      '[data-canvas-bend-segment][data-canvas-connection-id="connection-a"]',
+    );
+
+    expect(chip).toBeTruthy();
+    expect(bendHandle).toBeTruthy();
+    expect(Boolean(chip!.compareDocumentPosition(bendHandle!) & Node.DOCUMENT_POSITION_FOLLOWING))
+      .toBe(true);
   });
 
   it("renders anchor dots for SELECTED objects only in editable mode (P3/D5)", () => {

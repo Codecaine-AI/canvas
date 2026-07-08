@@ -11,6 +11,7 @@ import {
   outlineContainsPoint,
   OUTLINE_HIT_TOLERANCE_WORLD_PX,
 } from "../../objects/geometry";
+import { sectionTitleChipWorldRect } from "../../objects/section/title-chip-geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { hitTestObjects } from "../hit-testing";
 
@@ -27,6 +28,13 @@ const rectBehind: InteractiveCanvasObject = {
   type: "process",
   text: "Rect",
   geometry: { x: 0, y: 0, width: 100, height: 100 },
+};
+
+const shortSection: InteractiveCanvasObject = {
+  id: "short-section",
+  type: "section",
+  text: "Short section",
+  geometry: { x: 0, y: 0, width: 100, height: 20 },
 };
 
 function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
@@ -97,5 +105,27 @@ describe("hitTestObjects (D16)", () => {
     });
 
     expect(hit?.id).toBe("person");
+  });
+
+  it("checks zoom-scaled section title chips before overlapping foreign objects", () => {
+    const zoom = 0.25;
+    const overlappingRect: InteractiveCanvasObject = {
+      id: "overlapping-rect",
+      type: "process",
+      text: "Overlapping rect",
+      geometry: { x: 0, y: 30, width: 80, height: 80 },
+    };
+    const chipRect = sectionTitleChipWorldRect(shortSection, zoom);
+    const point = {
+      x: chipRect.x + 8,
+      y: chipRect.y + chipRect.height - 8,
+    };
+
+    expect(point.y).toBeGreaterThan(shortSection.geometry.y + shortSection.geometry.height);
+    expect(point.x).toBeGreaterThanOrEqual(overlappingRect.geometry.x);
+    expect(point.x).toBeLessThanOrEqual(overlappingRect.geometry.x + overlappingRect.geometry.width);
+    expect(point.y).toBeGreaterThanOrEqual(overlappingRect.geometry.y);
+    expect(point.y).toBeLessThanOrEqual(overlappingRect.geometry.y + overlappingRect.geometry.height);
+    expect(hitTestObjects(doc([shortSection, overlappingRect]), point, { zoom })?.id).toBe("short-section");
   });
 });

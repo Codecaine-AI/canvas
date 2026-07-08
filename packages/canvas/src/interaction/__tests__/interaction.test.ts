@@ -1208,6 +1208,36 @@ describe("interaction: connector-endpoint-drag (3.2.2)", () => {
     ]);
   });
 
+  it("clears stored waypoints when releasing a waypointed endpoint onto a different object", () => {
+    const baseDocument = endpointDoc();
+    const document = {
+      ...baseDocument,
+      connections: [
+        {
+          ...baseDocument.connections[0]!,
+          waypoints: [
+            [200, 50],
+            [200, 240],
+          ],
+        },
+      ],
+    };
+    const ctx = makeContext(document);
+    const hit = { kind: "endpoint" as const, connectionId: "c1", end: "to" as const };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 50 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 350, y: 350 }), ctx);
+    result = stepInteraction(result.state, up({ x: 350, y: 350 }), ctx);
+
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.updateConnection",
+        connectionId: "c1",
+        patch: { to: { objectId: "c", anchor: expect.any(String) }, waypoints: undefined },
+      },
+    ]);
+  });
+
   it("reverts silently (no dispatch) when released over empty space", () => {
     const document = endpointDoc();
     const ctx = makeContext(document);

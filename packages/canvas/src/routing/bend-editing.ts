@@ -3,6 +3,7 @@
 import type { CanvasPoint } from "../state/geometry";
 
 export const BEND_SIMPLIFY_TOLERANCE_PX = 4;
+export const BEND_SNAP_TOLERANCE_SCREEN_PX = 8;
 
 const AXIS_EPSILON = 0.01;
 
@@ -13,7 +14,13 @@ export type ConnectorBendSegment = {
   start: CanvasPoint;
   end: CanvasPoint;
   midpoint: CanvasPoint;
+  handlePoint: CanvasPoint;
   axis: BendSegmentAxis;
+};
+
+export type ConnectorBendSegmentsOptions = {
+  labelPoint?: CanvasPoint | null;
+  labelClearancePx?: number;
 };
 
 export type BendCommit = {
@@ -23,18 +30,41 @@ export type BendCommit = {
   clearedWaypoints: boolean;
 };
 
-export function connectorBendSegments(points: ReadonlyArray<CanvasPoint>): ConnectorBendSegment[] {
+export type BendDragOptions = {
+  snapTolerance?: number;
+  simplifyTolerance?: number;
+};
+
+export function bendSnapToleranceForZoom(zoom: number): number {
+  return BEND_SNAP_TOLERANCE_SCREEN_PX / safeZoom(zoom);
+}
+
+export function bendSimplifyToleranceForZoom(zoom: number): number {
+  return Math.max(BEND_SIMPLIFY_TOLERANCE_PX, bendSnapToleranceForZoom(zoom));
+}
+
+export function connectorBendSegments(
+  points: ReadonlyArray<CanvasPoint>,
+  options: ConnectorBendSegmentsOptions = {},
+): ConnectorBendSegment[] {
   const segments: ConnectorBendSegment[] = [];
+  const labelSegmentIndex =
+    options.labelPoint ? segmentIndexContainingPoint(points, options.labelPoint) : null;
+
   for (let index = 0; index < points.length - 1; index += 1) {
     const start = points[index];
     const end = points[index + 1];
     const axis = segmentAxis(start, end);
     if (!axis) continue;
+    const midpoint = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
     segments.push({
       index,
       start,
       end,
-      midpoint: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 },
+      midpoint,
+      handlePoint: index === labelSegmentIndex
+        ? bendHandlePointAwayFromLabel(start, end, options.labelPoint!, options.labelClearancePx)
+        : midpoint,
       axis,
     });
   }
@@ -45,6 +75,7 @@ export function dragOrthogonalSegment(
   points: ReadonlyArray<CanvasPoint>,
   segmentIndex: number,
   delta: { dx: number; dy: number },
+  options: BendDragOptions = {},
 ): CanvasPoint[] {
   const axis = segmentAxis(points[segmentIndex], points[segmentIndex + 1]);
   if (!axis) return clonePoints(points);
@@ -55,6 +86,20 @@ export function dragOrthogonalSegment(
     return clonePoints(points);
   }
   if (Math.abs(offset) <= AXIS_EPSILON) return clonePoints(points);
+
+  const snapped = snapDraggedSegment(points, segmentIndex, axis, offset, options);
+  if (snapped) return snapped;
+
+  return dragTranslatedSegment(points, segmentIndex, axis, offset);
+}
+
+function dragTranslatedSegment(
+  points: ReadonlyArray<CanvasPoint>,
+  segmentIndex: number,
+  axis: BendSegmentAxis,
+  offset: number,
+): CanvasPoint[] {
+  const lastIndex = points.length - 1;
 
   if (lastIndex === 1) {
     return dragDirectSegment(points[0], points[1], axis, offset);
@@ -83,7 +128,7 @@ export function simplifyOrthogonalPolyline(
   points: ReadonlyArray<CanvasPoint>,
   tolerance = BEND_SIMPLIFY_TOLERANCE_PX,
 ): CanvasPoint[] {
-  let simplified = normalizeNearlyOrthogonalSegments(removeNearDuplicatePoints(clonePoints(points), tolerance), tolerance);
+  let simplified = compactDegenerateSegments(clonePoints(points), tolerance);
   let changed = true;
 
   while (changed) {
@@ -111,16 +156,19 @@ export function simplifyOrthogonalPolyline(
 
       next.push(current);
     }
-    simplified = normalizeNearlyOrthogonalSegments(removeNearDuplicatePoints(next, tolerance), tolerance);
+    simplified = compactDegenerateSegments(next, tolerance);
   }
 
   return simplified;
 }
 
-export function commitBendPolyline(points: ReadonlyArray<CanvasPoint>): BendCommit {
-  const simplified = simplifyOrthogonalPolyline(points);
+export function commitBendPolyline(
+  points: ReadonlyArray<CanvasPoint>,
+  tolerance = BEND_SIMPLIFY_TOLERANCE_PX,
+): BendCommit {
+  const simplified = simplifyOrthogonalPolyline(points, tolerance);
   const interiorCornerCount = countInteriorCorners(simplified);
-  const clearedWaypoints = interiorCornerCount < 2;
+  const clearedWaypoints = isStraightRun(simplified, tolerance);
   return {
     points: simplified,
     interiorCornerCount,
@@ -188,6 +236,93 @@ function dragEndStub(
   return [...clonePoints(points.slice(0, -2)), movedStart, { x: movedStart.x, y: last.y }, last];
 }
 
+function snapDraggedSegment(
+  points: ReadonlyArray<CanvasPoint>,
+  segmentIndex: number,
+  axis: BendSegmentAxis,
+  offset: number,
+  options: BendDragOptions,
+): CanvasPoint[] | null {
+  const tolerance = options.snapTolerance;
+  if (!tolerance || tolerance <= 0) return null;
+
+  const startAxisPosition = segmentAxisPosition(points, segmentIndex, axis);
+  const currentAxisPosition = startAxisPosition + offset;
+  const simplifyTolerance = options.simplifyTolerance ?? tolerance;
+  const previousSegment = sameOrientationSegment(points, segmentIndex, axis, -1);
+  if (previousSegment !== null) {
+    const target = segmentAxisPosition(points, previousSegment, axis);
+    if (Math.abs(currentAxisPosition - target) <= tolerance) {
+      return simplifyOrthogonalPolyline(
+        dragTranslatedSegment(points, segmentIndex, axis, target - startAxisPosition),
+        simplifyTolerance,
+      );
+    }
+  }
+
+  const nextSegment = sameOrientationSegment(points, segmentIndex, axis, 1);
+  if (nextSegment !== null) {
+    const target = segmentAxisPosition(points, nextSegment, axis);
+    if (Math.abs(currentAxisPosition - target) <= tolerance) {
+      return simplifyOrthogonalPolyline(
+        dragTranslatedSegment(points, segmentIndex, axis, target - startAxisPosition),
+        simplifyTolerance,
+      );
+    }
+  }
+
+  const straightAxisPosition = endpointStraightAxisPosition(points, axis, tolerance);
+  if (
+    straightAxisPosition !== null &&
+    Math.abs(currentAxisPosition - straightAxisPosition) <= tolerance
+  ) {
+    return [clonePoint(points[0]), clonePoint(points[points.length - 1])];
+  }
+
+  return null;
+}
+
+function sameOrientationSegment(
+  points: ReadonlyArray<CanvasPoint>,
+  segmentIndex: number,
+  axis: BendSegmentAxis,
+  direction: -1 | 1,
+): number | null {
+  for (
+    let index = segmentIndex + direction;
+    index >= 0 && index < points.length - 1;
+    index += direction
+  ) {
+    if (segmentAxis(points[index], points[index + 1]) === axis) return index;
+  }
+  return null;
+}
+
+function segmentAxisPosition(
+  points: ReadonlyArray<CanvasPoint>,
+  segmentIndex: number,
+  axis: BendSegmentAxis,
+): number {
+  const start = points[segmentIndex];
+  const end = points[segmentIndex + 1];
+  return axis === "horizontal"
+    ? (start.y + end.y) / 2
+    : (start.x + end.x) / 2;
+}
+
+function endpointStraightAxisPosition(
+  points: ReadonlyArray<CanvasPoint>,
+  axis: BendSegmentAxis,
+  tolerance: number,
+): number | null {
+  const start = points[0];
+  const end = points[points.length - 1];
+  const startPosition = axis === "horizontal" ? start.y : start.x;
+  const endPosition = axis === "horizontal" ? end.y : end.x;
+  if (Math.abs(startPosition - endPosition) > tolerance) return null;
+  return (startPosition + endPosition) / 2;
+}
+
 function countInteriorCorners(points: ReadonlyArray<CanvasPoint>): number {
   let corners = 0;
   for (let index = 1; index < points.length - 1; index += 1) {
@@ -220,6 +355,51 @@ function areCollinear(
   const horizontal = Math.max(a.y, b.y, c.y) - Math.min(a.y, b.y, c.y) <= tolerance;
   const vertical = Math.max(a.x, b.x, c.x) - Math.min(a.x, b.x, c.x) <= tolerance;
   return horizontal || vertical;
+}
+
+function compactDegenerateSegments(points: CanvasPoint[], tolerance: number): CanvasPoint[] {
+  const collapsed = collapseShortSegments(
+    normalizeNearlyOrthogonalSegments(clonePoints(points), tolerance),
+    tolerance,
+  );
+  return normalizeNearlyOrthogonalSegments(removeNearDuplicatePoints(collapsed, tolerance), tolerance);
+}
+
+function collapseShortSegments(points: CanvasPoint[], tolerance: number): CanvasPoint[] {
+  const result = clonePoints(points);
+  let index = 0;
+  while (index < result.length - 1) {
+    if (result.length <= 2) break;
+    if (distance(result[index], result[index + 1]) <= tolerance) {
+      const removeIndex = index === result.length - 2 ? index : index + 1;
+      removePointAndSnapJoin(result, removeIndex, tolerance);
+      index = Math.max(0, index - 1);
+      continue;
+    }
+    index += 1;
+  }
+  return result;
+}
+
+function removePointAndSnapJoin(points: CanvasPoint[], removeIndex: number, tolerance: number): void {
+  const previous = points[removeIndex - 1];
+  const next = points[removeIndex + 1];
+  if (previous && next) {
+    if (Math.abs(previous.x - next.x) <= tolerance) {
+      if (removeIndex + 1 < points.length - 1) {
+        points[removeIndex + 1] = { ...next, x: previous.x };
+      } else if (removeIndex - 1 > 0) {
+        points[removeIndex - 1] = { ...previous, x: next.x };
+      }
+    } else if (Math.abs(previous.y - next.y) <= tolerance) {
+      if (removeIndex + 1 < points.length - 1) {
+        points[removeIndex + 1] = { ...next, y: previous.y };
+      } else if (removeIndex - 1 > 0) {
+        points[removeIndex - 1] = { ...previous, y: next.y };
+      }
+    }
+  }
+  points.splice(removeIndex, 1);
 }
 
 function snapCollinearCollapse(
@@ -300,6 +480,95 @@ function removeNearDuplicatePoints(points: CanvasPoint[], tolerance: number): Ca
     result.push(point);
   }
   return result;
+}
+
+function isStraightRun(points: ReadonlyArray<CanvasPoint>, tolerance: number): boolean {
+  if (points.length <= 2) return true;
+  const start = points[0];
+  const end = points[points.length - 1];
+  return points.slice(1, -1).every((point) => distanceToSegment(point, start, end) <= tolerance);
+}
+
+function distanceToSegment(point: CanvasPoint, start: CanvasPoint, end: CanvasPoint): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= AXIS_EPSILON) return distance(point, start);
+  const t = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
+  const projection = { x: start.x + t * dx, y: start.y + t * dy };
+  return distance(point, projection);
+}
+
+function segmentIndexContainingPoint(
+  points: ReadonlyArray<CanvasPoint>,
+  point: CanvasPoint,
+): number | null {
+  let closestIndex: number | null = null;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    const axis = segmentAxis(start, end);
+    if (!axis) continue;
+
+    const segmentLength = distance(start, end);
+    if (segmentLength <= AXIS_EPSILON) continue;
+    const distanceFromSegment = distanceToSegment(point, start, end);
+    if (distanceFromSegment > AXIS_EPSILON || distanceFromSegment >= closestDistance) continue;
+
+    closestDistance = distanceFromSegment;
+    closestIndex = index;
+  }
+
+  return closestIndex;
+}
+
+function bendHandlePointAwayFromLabel(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  labelPoint: CanvasPoint,
+  labelClearancePx = 24,
+): CanvasPoint {
+  const segmentLength = distance(start, end);
+  if (segmentLength < 48) {
+    return { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+  }
+
+  const preferred = [0.25, 0.75].map((t) => pointAlongSegment(start, end, t));
+  const preferredPoint = fartherFromLabel(preferred[0], preferred[1], labelPoint);
+  if (distance(preferredPoint, labelPoint) >= labelClearancePx) return preferredPoint;
+
+  const labelT = segmentParameterForPoint(start, end, labelPoint);
+  const clearanceT = Math.min(0.5, labelClearancePx / segmentLength);
+  const clearanceCandidates = [
+    pointAlongSegment(start, end, Math.max(0, labelT - clearanceT)),
+    pointAlongSegment(start, end, Math.min(1, labelT + clearanceT)),
+  ];
+  return fartherFromLabel(clearanceCandidates[0], clearanceCandidates[1], labelPoint);
+}
+
+function pointAlongSegment(start: CanvasPoint, end: CanvasPoint, t: number): CanvasPoint {
+  return {
+    x: start.x + (end.x - start.x) * t,
+    y: start.y + (end.y - start.y) * t,
+  };
+}
+
+function segmentParameterForPoint(start: CanvasPoint, end: CanvasPoint, point: CanvasPoint): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= AXIS_EPSILON) return 0.5;
+  return Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
+}
+
+function fartherFromLabel(a: CanvasPoint, b: CanvasPoint, labelPoint: CanvasPoint): CanvasPoint {
+  return distance(a, labelPoint) >= distance(b, labelPoint) ? a : b;
+}
+
+function safeZoom(zoom: number): number {
+  return Number.isFinite(zoom) && zoom > AXIS_EPSILON ? zoom : 1;
 }
 
 function clonePoints(points: ReadonlyArray<CanvasPoint>): CanvasPoint[] {

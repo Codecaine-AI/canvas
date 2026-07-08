@@ -19,10 +19,13 @@ import {
 } from "../../../objects/text-slots";
 import {
   STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX,
+  stickyMarkdownLineAttrs,
 } from "../../../objects/sticky/markdown";
 import {
   activeStickyMarkdownLineIndexes,
   applyStickyMarkdownEdit,
+  applyStickyMarkdownIndent,
+  normalizeStickyMarkdownCaret,
   parseStickyMarkdown,
   sourceOffsetToStickyMarkdownDomPosition,
   stickyMarkdownDomPositionToSourceOffset,
@@ -43,6 +46,10 @@ interface MarkdownSlotTextEditorProps {
   value: string;
   setValue: TextEditingApi["setObjectTextEditValue"];
   commit: TextEditingApi["commitObjectText"];
+  /**
+   * Accepted for API compatibility but intentionally unused: the markdown
+   * editor has no revert path; undo after commit is the revert.
+   */
   cancel: TextEditingApi["cancelObjectTextEdit"];
 }
 
@@ -113,11 +120,18 @@ function lastLeaf(node: Node | null): HTMLElement | null {
   return lastLeaf(node.parentElement);
 }
 
-function offsetFromLeaf(leaf: HTMLElement, textOffset: number): number {
+function offsetFromLeaf(
+  leaf: HTMLElement,
+  textOffset: number,
+  options?: { allowTextOffsetOverflow?: boolean },
+): number {
   const start = sourceNumber(leaf, SOURCE_START_ATTR);
   const end = sourceNumber(leaf, SOURCE_END_ATTR);
   if (end === start) return start;
-  return start + clamp(textOffset, 0, end - start);
+  const normalizedOffset = options?.allowTextOffsetOverflow
+    ? Math.max(textOffset, 0)
+    : clamp(textOffset, 0, end - start);
+  return start + normalizedOffset;
 }
 
 function domPointToSourceOffset(
@@ -125,9 +139,10 @@ function domPointToSourceOffset(
   node: Node,
   nodeOffset: number,
   fallback: number,
+  options?: { allowTextOffsetOverflow?: boolean },
 ): number {
   const leaf = closestLeaf(node, root);
-  if (leaf) return offsetFromLeaf(leaf, nodeOffset);
+  if (leaf) return offsetFromLeaf(leaf, nodeOffset, options);
 
   if (node instanceof Element) {
     const next = node.childNodes.item(nodeOffset);
@@ -145,14 +160,27 @@ function domPointToSourceOffset(
 function currentDomSelection(
   root: HTMLElement,
   fallback: StickyMarkdownSelection,
+  options?: { allowTextOffsetOverflow?: boolean },
 ): StickyMarkdownSelection {
   const selection = root.ownerDocument.getSelection?.() ?? window.getSelection?.() ?? null;
   if (!selection || selection.rangeCount === 0) return fallback;
   const range = selection.getRangeAt(0);
   if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) return fallback;
 
-  const start = domPointToSourceOffset(root, range.startContainer, range.startOffset, fallback.start);
-  const end = domPointToSourceOffset(root, range.endContainer, range.endOffset, fallback.end);
+  const start = domPointToSourceOffset(
+    root,
+    range.startContainer,
+    range.startOffset,
+    fallback.start,
+    options,
+  );
+  const end = domPointToSourceOffset(
+    root,
+    range.endContainer,
+    range.endOffset,
+    fallback.end,
+    options,
+  );
   return { start: Math.min(start, end), end: Math.max(start, end) };
 }
 
@@ -220,19 +248,32 @@ function readPlainTextPaste(event: ClipboardEvent<HTMLDivElement>): string {
   return event.clipboardData.getData("text/plain");
 }
 
+function markerHidden(leaf: StickyMarkdownLeaf, markerVisible: boolean): boolean {
+  if (leaf.role !== "marker") return false;
+  if (
+    leaf.markerKind === "indent-prefix" ||
+    leaf.markerKind === "heading-prefix" ||
+    leaf.markerKind === "bullet-prefix"
+  ) {
+    return true;
+  }
+  return !markerVisible;
+}
+
 function markerStyle(leaf: StickyMarkdownLeaf, markerVisible: boolean): CSSProperties | undefined {
   if (leaf.role !== "marker") return undefined;
-  return markerVisible
-    ? { opacity: 0.35 }
-    : {
+  return markerHidden(leaf, markerVisible)
+    ? {
         opacity: 0,
         fontSize: 0,
         lineHeight: 0,
         userSelect: "none",
-      };
+      }
+    : { opacity: 0.35 };
 }
 
 function renderLeaf(leaf: StickyMarkdownLeaf, markerVisible: boolean): ReactNode {
+  const hidden = markerHidden(leaf, markerVisible);
   return (
     <span
       key={leaf.key}
@@ -243,9 +284,7 @@ function renderLeaf(leaf: StickyMarkdownLeaf, markerVisible: boolean): ReactNode
         [SOURCE_END_ATTR]: leaf.sourceEnd,
       }}
       data-sticky-markdown-marker={leaf.role === "marker" ? leaf.markerKind : undefined}
-      data-sticky-markdown-marker-hidden={
-        leaf.role === "marker" && !markerVisible ? "true" : undefined
-      }
+      data-sticky-markdown-marker-hidden={hidden ? "true" : undefined}
       style={markerStyle(leaf, markerVisible)}
     >
       {leaf.text}
@@ -292,9 +331,8 @@ function renderLine(line: StickyMarkdownLine, markerVisible: boolean): ReactNode
       key={line.index}
       className="interactive-canvas-sticky-line"
       {...{ [LINE_ATTR]: line.index }}
-      data-sticky-markdown-line-active={markerVisible ? "true" : undefined}
       data-heading={line.headingLevel}
-      data-bullet={line.kind === "bullet" ? "true" : undefined}
+      {...stickyMarkdownLineAttrs(line)}
       style={line.headingLevel ? HEADING_STYLE[line.headingLevel] : undefined}
     >
       {line.prefix ? renderLeaf(line.prefix, markerVisible) : null}
@@ -303,6 +341,20 @@ function renderLine(line: StickyMarkdownLine, markerVisible: boolean): ReactNode
         : line.inline.map((token) => renderInlineToken(token, markerVisible))}
     </span>
   );
+}
+
+function normalizeCollapsedSelection(
+  document: StickyMarkdownDocument,
+  selection: StickyMarkdownSelection,
+  direction: -1 | 0 | 1,
+): StickyMarkdownSelection {
+  if (selection.start !== selection.end) return selection;
+  const offset = normalizeStickyMarkdownCaret(document, selection.start, direction);
+  return { start: offset, end: offset };
+}
+
+function selectionEquals(a: StickyMarkdownSelection, b: StickyMarkdownSelection): boolean {
+  return a.start === b.start && a.end === b.end;
 }
 
 /**
@@ -319,7 +371,6 @@ export function MarkdownSlotTextEditor({
   value,
   setValue,
   commit,
-  cancel,
 }: MarkdownSlotTextEditorProps) {
   const resolved = resolveTextSlot(slot, target, 1, { draftText: value });
   const { rect, typography } = resolved;
@@ -344,15 +395,28 @@ export function MarkdownSlotTextEditor({
     setSelectionState(next);
   }
 
-  function applyEdit(edit: StickyMarkdownEdit): void {
+  function applyEditResult(result: { source: string; selection: StickyMarkdownSelection }): void {
+    const nextDocument = parseStickyMarkdown(result.source);
+    const nextSelection = normalizeCollapsedSelection(nextDocument, result.selection, 0);
+    desiredSelectionRef.current = nextSelection;
+    setSelection(nextSelection);
+    setValue(result.source);
+  }
+
+  function readSelection(direction: -1 | 0 | 1 = 0): StickyMarkdownSelection {
     const element = editableRef.current;
     const currentSelection = element
       ? currentDomSelection(element, selectionRef.current)
       : selectionRef.current;
-    const result = applyStickyMarkdownEdit(value, currentSelection, edit);
-    desiredSelectionRef.current = result.selection;
-    setSelection(result.selection);
-    setValue(result.source);
+    return normalizeCollapsedSelection(documentModel, currentSelection, direction);
+  }
+
+  function applyEdit(edit: StickyMarkdownEdit): void {
+    applyEditResult(applyStickyMarkdownEdit(value, readSelection(), edit));
+  }
+
+  function applyIndent(delta: 1 | -1): void {
+    applyEditResult(applyStickyMarkdownIndent(value, readSelection(), delta));
   }
 
   function reconcileDomMutation(element: HTMLDivElement): void {
@@ -363,7 +427,11 @@ export function MarkdownSlotTextEditor({
     // source coordinates; otherwise fall back to the end of the composed source.
     const nextSource = serializeMarkdownSourceFromDom(element);
     const unmappedSelection = { start: -1, end: -1 };
-    const mappedSelection = currentDomSelection(element, unmappedSelection);
+    const mappedSelection = currentDomSelection(element, unmappedSelection, {
+      // The DOM leaves still have the previous source-start/end attributes
+      // while their text may already include the browser's mutation.
+      allowTextOffsetOverflow: true,
+    });
     const nextSelection =
       mappedSelection.start < 0 || mappedSelection.end < 0
         ? { start: nextSource.length, end: nextSource.length }
@@ -371,9 +439,7 @@ export function MarkdownSlotTextEditor({
             start: clamp(mappedSelection.start, 0, nextSource.length),
             end: clamp(mappedSelection.end, 0, nextSource.length),
           };
-    desiredSelectionRef.current = nextSelection;
-    setSelection(nextSelection);
-    setValue(nextSource);
+    applyEditResult({ source: nextSource, selection: nextSelection });
   }
 
   beforeInputHandlerRef.current = (event: InputEvent): void => {
@@ -407,9 +473,10 @@ export function MarkdownSlotTextEditor({
     const element = editableRef.current;
     if (!element) return;
 
-    // React 19's onBeforeInput is still synthesized from keypress/textInput and
-    // does not expose InputEvent.inputType. Register the native event once and
-    // route through a ref so the handler always sees the latest draft state.
+    // React 19's onBeforeInput is synthesized from
+    // compositionend/keypress/textInput/paste and does not expose native
+    // InputEvent.inputType. Register the native event once and route through a
+    // ref so the handler always sees the latest draft state.
     const handleBeforeInput = (event: InputEvent) => {
       beforeInputHandlerRef.current(event);
     };
@@ -423,7 +490,9 @@ export function MarkdownSlotTextEditor({
     const element = editableRef.current;
     const desired = desiredSelectionRef.current;
     if (!element || !desired) return;
-    restoreDomSelection(element, documentModel, desired);
+    const nextDesired = normalizeCollapsedSelection(documentModel, desired, 0);
+    restoreDomSelection(element, documentModel, nextDesired);
+    if (!selectionEquals(desired, nextDesired)) setSelection(nextDesired);
     desiredSelectionRef.current = null;
   }, [documentModel]);
 
@@ -482,22 +551,41 @@ export function MarkdownSlotTextEditor({
           applyEdit({ type: "insertText", text: readPlainTextPaste(event) });
         }}
         onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-          if (event.key === "Enter" && !event.shiftKey) {
+          if (event.key === "Tab") {
+            // Tab must never focus-blur the editor and force-commit.
             event.preventDefault();
-            commit();
-          } else if (event.key === "Enter" && event.shiftKey) {
+            applyIndent(event.shiftKey ? -1 : 1);
+          } else if (event.key === "Enter") {
             event.preventDefault();
             applyEdit({ type: "insertLineBreak" });
           } else if (event.key === "Escape") {
+            // Escape no longer cancels. There is no keyboard revert for the
+            // markdown editor anymore; reverting is undo's job after commit.
             event.preventDefault();
-            cancel();
+            commit();
           }
         }}
         onKeyUp={(event) => {
-          setSelection(currentDomSelection(event.currentTarget, selectionRef.current));
+          const direction: -1 | 0 | 1 =
+            event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+          const currentSelection = currentDomSelection(event.currentTarget, selectionRef.current);
+          const nextSelection = normalizeCollapsedSelection(
+            documentModel,
+            currentSelection,
+            direction,
+          );
+          if (!selectionEquals(currentSelection, nextSelection)) {
+            restoreDomSelection(event.currentTarget, documentModel, nextSelection);
+          }
+          setSelection(nextSelection);
         }}
         onMouseUp={(event) => {
-          setSelection(currentDomSelection(event.currentTarget, selectionRef.current));
+          const currentSelection = currentDomSelection(event.currentTarget, selectionRef.current);
+          const nextSelection = normalizeCollapsedSelection(documentModel, currentSelection, 0);
+          if (!selectionEquals(currentSelection, nextSelection)) {
+            restoreDomSelection(event.currentTarget, documentModel, nextSelection);
+          }
+          setSelection(nextSelection);
         }}
         style={{
           display: "block",

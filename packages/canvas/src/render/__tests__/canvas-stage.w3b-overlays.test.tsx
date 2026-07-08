@@ -53,12 +53,15 @@ function makeDocument(overrides: Partial<InteractiveCanvasDocument> = {}): Inter
 const viewport = { x: 0, y: 0, zoom: 1 };
 
 describe("CanvasStage: connector drag hover ports (W3b)", () => {
-  function dragOverlay(candidate: NonNullable<InteractionOverlay["connectorDrag"]>["candidate"]): InteractionOverlay {
+  function dragOverlay(
+    candidate: NonNullable<InteractionOverlay["connectorDrag"]>["candidate"],
+    point = { x: 402, y: 48 },
+  ): InteractionOverlay {
     return {
       connectorDrag: {
         fromObjectId: "process-a",
         fromAnchor: "right",
-        point: { x: 402, y: 48 },
+        point,
         candidate,
       },
     };
@@ -135,6 +138,63 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
 
     const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
     expect(previewPath.getAttribute("stroke")).toBe("#757575");
+    expect(previewPath.getAttribute("stroke-width")).toBe("4");
+    expect(previewPath.getAttribute("stroke-dasharray")).toBeNull();
+    expect(previewPath.getAttribute("marker-end")).toBe("url(#w3b-overlay-doc-arrow-forward)");
+  });
+
+  it("renders an empty-canvas create preview as a routed elbow, not a diagonal line", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        interactionOverlay={dragOverlay(undefined, { x: 280, y: 180 })}
+      />,
+    );
+
+    const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
+    expect(previewPath).toBeTruthy();
+    expect(previewPath.getAttribute("d")).toContain("Q");
+    expect(previewPath.getAttribute("d")).not.toBe("M 160 48 L 280 180");
+  });
+
+  it("renders a forward arrowhead only on to-endpoint re-drag previews", () => {
+    const toDrag = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        interactionOverlay={{
+          connectorDrag: {
+            connectionId: "connection-a",
+            end: "to",
+            point: { x: 280, y: 180 },
+          },
+        }}
+      />,
+    );
+    const toPreviewPath = toDrag.container.querySelector(
+      "[data-canvas-connector-preview-path]",
+    ) as SVGPathElement;
+    expect(toPreviewPath.getAttribute("marker-end")).toBe("url(#w3b-overlay-doc-arrow-forward)");
+    toDrag.unmount();
+
+    const fromDrag = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        interactionOverlay={{
+          connectorDrag: {
+            connectionId: "connection-a",
+            end: "from",
+            point: { x: 280, y: 180 },
+          },
+        }}
+      />,
+    );
+    const fromPreviewPath = fromDrag.container.querySelector(
+      "[data-canvas-connector-preview-path]",
+    ) as SVGPathElement;
+    expect(fromPreviewPath.getAttribute("marker-end")).toBeNull();
   });
 });
 

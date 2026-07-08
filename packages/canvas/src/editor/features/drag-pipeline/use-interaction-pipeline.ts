@@ -36,6 +36,7 @@ import { type Anchor } from "../../../routing/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
 import { panBy, type ViewportState } from "../../../render/viewport";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
+import { animateSectionFitToChildren } from "../section-fit/animate-section-fit";
 
 /** Width of the stage-edge band (screen px) where drag auto-pan kicks in (T1.2.1). */
 const EDGE_PAN_BAND_PX = 36;
@@ -87,9 +88,10 @@ type DragPointerSnapshot = {
  * object edge ports carry data-canvas-port + data-canvas-object-id; connector
  * bend pills carry data-canvas-bend-segment + data-canvas-connection-id;
  * connector hit paths carry data-canvas-connection-id (checked after chrome
- * elements, since they render as siblings, not inside, the hit path); object shapes
- * carry data-canvas-object-id; everything else falls through to a pure
- * world-space hitTestObjects (topmost-first, section border band).
+ * elements, since they render as siblings, not inside, the hit path); section
+ * title chips carry data-canvas-section-title-chip + data-canvas-object-id;
+ * object shapes carry data-canvas-object-id; everything else falls through to
+ * a pure world-space hitTestObjects (topmost-first, including section chips).
  *
  * D16 (P3): a DOM-matched object is VETOED when the pointer is outside its
  * def-declared outline (objects/geometry.ts outlineContainsPoint) — the
@@ -99,12 +101,15 @@ type DragPointerSnapshot = {
  * rule, so the vetoed object is naturally skipped) and finds the object
  * behind, or resolves to canvas. This one veto covers click-select,
  * drag-start, marquee-from-corner, and double-click-to-edit, since every
- * pointer path funnels through here. Exported for unit tests.
+ * pointer path funnels through here. Section title chips bypass this veto:
+ * their zoom-counter-scaled DOM may extend outside the section outline, but a
+ * chip press still belongs to that section. Exported for unit tests.
  */
 export function resolveHit(
   target: Element,
   document: InteractiveCanvasDocument,
   world: CanvasPoint,
+  options: { zoom?: number } = {},
 ): CanvasHit {
   const handleElement = target.closest("[data-canvas-handle]");
   if (handleElement instanceof HTMLElement) {
@@ -149,6 +154,14 @@ export function resolveHit(
     const connectionId = connectionElement.getAttribute("data-canvas-connection-id");
     if (connectionId) return { kind: "connection", connectionId };
   }
+  const sectionChipElement = target.closest("[data-canvas-section-title-chip]");
+  if (sectionChipElement instanceof HTMLElement) {
+    const objectId = sectionChipElement.getAttribute("data-canvas-section-title-chip");
+    const object = objectId ? document.objects.find((item) => item.id === objectId) : null;
+    if (object?.type === "section") {
+      return { kind: "object", objectId: object.id };
+    }
+  }
   const objectElement = target.closest("[data-canvas-object-id]");
   if (objectElement instanceof HTMLElement) {
     const objectId = objectElement.getAttribute("data-canvas-object-id");
@@ -161,7 +174,7 @@ export function resolveHit(
       }
     }
   }
-  const hit = hitTestObjects(document, world);
+  const hit = hitTestObjects(document, world, options);
   if (hit) return { kind: "object", objectId: hit.id };
   return { kind: "canvas" };
 }
@@ -266,7 +279,7 @@ export function useInteractionPipeline({
       const screen = stageScreenPointFromClient(nativeEvent, stage);
       const world = screenToWorld(screen);
       const target = nativeEvent.target instanceof Element ? nativeEvent.target : stage;
-      const hit = resolveHit(target, stateRef.current.document, world);
+      const hit = resolveHit(target, stateRef.current.document, world, { zoom: viewportRef.current.zoom });
       return {
         type,
         world,
@@ -416,11 +429,19 @@ export function useInteractionPipeline({
       if (sectionObject) {
         event.preventDefault();
         event.stopPropagation();
+        const sectionId = sectionObject.getAttribute("data-canvas-object-id");
+        if (sectionId) {
+          animateSectionFitToChildren({
+            getDocument: () => stateRef.current.document,
+            dispatch,
+            sectionId,
+          });
+        }
         return;
       }
       runInteraction(buildPointerEvent("double", event.nativeEvent, stage));
     },
-    [buildPointerEvent, openObjectTextEditor, runInteraction],
+    [buildPointerEvent, dispatch, openObjectTextEditor, runInteraction],
   );
 
   const onWindowPointerMove = useCallback(

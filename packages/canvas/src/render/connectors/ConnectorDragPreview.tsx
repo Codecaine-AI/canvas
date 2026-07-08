@@ -5,15 +5,20 @@ import type { InteractionOverlay } from "../../interaction/interaction";
 import { getConnectionAnchors } from "../../objects/geometry";
 import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
 import { polylineInteriorWaypoints } from "../../routing/bend-editing";
-import { pointForObjectAnchor, routeConnection, type Anchor } from "../../routing/routing";
+import { routeConnection, routeConnectionToPoint, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
 import { ObjectShape } from "../ObjectShape";
 import { resolveConnectorStroke } from "../../palette";
 import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import type {
+  InteractiveCanvasConnection,
+  InteractiveCanvasDocument,
+  InteractiveCanvasObject,
+} from "../../state/schema";
 /** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
+const CONNECTOR_PREVIEW_STROKE_WIDTH_PX = 4;
 
 function quickConnectGhostObject(
   source: InteractiveCanvasObject,
@@ -48,7 +53,7 @@ function quickConnectGhostObject(
 /**
  * Live preview rendered while a connector endpoint is being dragged (3.2.2
  * reconnect) or a brand-new connector is being pulled from a port (3.3.2
- * create): a dashed path from the fixed end to either the hovered candidate's
+ * create): a routed path from the fixed end to either the hovered candidate's
  * anchor point or the raw pointer position, plus 4 anchor dots on the
  * currently-hovered candidate object (the snapped one emphasized).
  */
@@ -76,7 +81,7 @@ export function ConnectorDragPreview({
     );
     const strokeDasharray =
       connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
-    const transform = `translate(${-viewport.x * viewport.zoom} ${-viewport.y * viewport.zoom}) scale(${viewport.zoom})`;
+    const transform = worldSvgTransform(viewport);
 
     return (
       <svg
@@ -98,38 +103,14 @@ export function ConnectorDragPreview({
     );
   }
 
-  let fixedWorld: CanvasPoint | null = null;
+  const candidateObject = drag.candidate ? objectById(document, drag.candidate.objectId) ?? undefined : undefined;
+  const sourceObject = drag.fromObjectId ? objectById(document, drag.fromObjectId) ?? undefined : undefined;
+  const previewPath = routedPreviewPath(document, drag, sourceObject, candidateObject);
+  if (!previewPath) return null;
+  const markerEnd = previewShowsForwardArrowhead(document, drag)
+    ? `url(#${document.id}-arrow-forward)`
+    : undefined;
 
-  if (drag.connectionId) {
-    const connection = document.connections.find((item) => item.id === drag.connectionId);
-    if (connection) {
-      const fromObject = objectById(document, connection.from.objectId);
-      const toObject = objectById(document, connection.to.objectId);
-      if (fromObject && toObject) {
-        const routed = routeConnection(fromObject, toObject, connection, document.objects);
-        fixedWorld = drag.end === "from" ? routed.end : routed.start;
-      }
-    }
-  } else if (drag.fromObjectId && drag.fromAnchor) {
-    const fromObject = objectById(document, drag.fromObjectId);
-    if (fromObject) {
-      fixedWorld = pointForObjectAnchor(fromObject, drag.fromAnchor);
-    }
-  }
-
-  if (!fixedWorld) return null;
-
-  // The dashed preview aims at the exact snapped point (anchor or outline —
-  // W3b cascade) when one exists, else the coarse anchor side, else the raw
-  // pointer.
-  const candidateObject = drag.candidate ? objectById(document, drag.candidate.objectId) : undefined;
-  const sourceObject = drag.fromObjectId ? objectById(document, drag.fromObjectId) : undefined;
-  const targetWorld =
-    drag.candidate?.point ??
-    (candidateObject ? pointForObjectAnchor(candidateObject, drag.candidate!.anchor) : drag.point);
-
-  const start = worldToScreen(viewport, fixedWorld);
-  const end = worldToScreen(viewport, targetWorld);
   // True-outline port anchors (connection-overlay.ts getConnectionAnchors) in
   // a stable top/bottom/left/right order (matching its candidates array).
   const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
@@ -156,15 +137,17 @@ export function ConnectorDragPreview({
         style={{ position: "absolute", left: 0, top: 0, overflow: "visible", pointerEvents: "none" }}
         aria-hidden="true"
       >
-        <path
-          d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
-          fill="none"
-          stroke={CONNECTOR_PREVIEW_STROKE}
-          strokeWidth={2}
-          strokeDasharray="6 6"
-          strokeLinecap="round"
-          data-canvas-connector-preview-path="true"
-        />
+        <g transform={worldSvgTransform(viewport)}>
+          <path
+            d={previewPath}
+            fill="none"
+            stroke={CONNECTOR_PREVIEW_STROKE}
+            strokeWidth={CONNECTOR_PREVIEW_STROKE_WIDTH_PX}
+            strokeLinecap="butt"
+            markerEnd={markerEnd}
+            data-canvas-connector-preview-path="true"
+          />
+        </g>
       </svg>
       {/* FigJam-style hover ports (W3b): 4 white-fill, selection-blue-ring
           circles on the hovered object's true outline; the anchor the cascade
@@ -217,4 +200,77 @@ export function ConnectorDragPreview({
       )}
     </>
   );
+}
+
+function routedPreviewPath(
+  document: InteractiveCanvasDocument,
+  drag: NonNullable<InteractionOverlay["connectorDrag"]>,
+  sourceObject: InteractiveCanvasObject | undefined,
+  candidateObject: InteractiveCanvasObject | undefined,
+): string | null {
+  if (drag.connectionId) {
+    const connection = document.connections.find((item) => item.id === drag.connectionId);
+    if (!connection || !drag.end) return null;
+    const fromObject = objectById(document, connection.from.objectId);
+    const toObject = objectById(document, connection.to.objectId);
+    if (!fromObject || !toObject) return null;
+
+    if (candidateObject && drag.candidate) {
+      const candidateEndpoint = {
+        objectId: candidateObject.id,
+        anchor: drag.candidate.anchor,
+        ...(drag.candidate.position ? { position: drag.candidate.position } : {}),
+      };
+      const previewConnection: InteractiveCanvasConnection = {
+        id: `${connection.id}-preview`,
+        from: drag.end === "from" ? candidateEndpoint : connection.from,
+        to: drag.end === "to" ? candidateEndpoint : connection.to,
+      };
+      const previewFromObject = drag.end === "from" ? candidateObject : fromObject;
+      const previewToObject = drag.end === "to" ? candidateObject : toObject;
+      return routeConnection(
+        previewFromObject,
+        previewToObject,
+        previewConnection,
+        document.objects,
+      ).path;
+    }
+
+    const routed = routeConnection(fromObject, toObject, connection, document.objects);
+    const fixedObject = drag.end === "from" ? toObject : fromObject;
+    const fixedAnchor = drag.end === "from" ? routed.endAnchor : routed.startAnchor;
+    return routeConnectionToPoint(fixedObject, fixedAnchor, drag.point).path;
+  }
+
+  if (!sourceObject || !drag.fromAnchor) return null;
+
+  if (candidateObject && drag.candidate) {
+    const previewConnection: InteractiveCanvasConnection = {
+      id: `${sourceObject.id}-${candidateObject.id}-preview`,
+      from: { objectId: sourceObject.id, anchor: drag.fromAnchor },
+      to: {
+        objectId: candidateObject.id,
+        anchor: drag.candidate.anchor,
+        ...(drag.candidate.position ? { position: drag.candidate.position } : {}),
+      },
+    };
+    return routeConnection(sourceObject, candidateObject, previewConnection, document.objects).path;
+  }
+
+  return routeConnectionToPoint(sourceObject, drag.fromAnchor, drag.point).path;
+}
+
+function previewShowsForwardArrowhead(
+  document: InteractiveCanvasDocument,
+  drag: NonNullable<InteractionOverlay["connectorDrag"]>,
+): boolean {
+  if (!drag.connectionId) return true;
+  if (drag.end !== "to") return false;
+  const connection = document.connections.find((item) => item.id === drag.connectionId);
+  const arrow = connection?.arrow ?? "forward";
+  return arrow === "forward" || arrow === "both";
+}
+
+function worldSvgTransform(viewport: ViewportState): string {
+  return `translate(${-viewport.x * viewport.zoom} ${-viewport.y * viewport.zoom}) scale(${viewport.zoom})`;
 }

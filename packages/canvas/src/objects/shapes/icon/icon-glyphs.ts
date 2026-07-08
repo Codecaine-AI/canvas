@@ -19,9 +19,9 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  * interface icons (co-location alignment).
  *
  * Stroke width is NOT baked into the path data — callers apply
- * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` (tuned for the ~130px object size,
- * see IconShapeBody's ICON_APPROX_SIZE_PX) so the glyph scales cleanly if
- * the viewBox is later re-projected into a differently sized object.
+ * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` in viewBox units. The SVG is
+ * re-projected to the object's geometry box so the glyph weight scales
+ * proportionally with the object.
  */
 
 /** The 26 Advanced-tier glyph ids (exact enum from the parity brief). */
@@ -57,10 +57,11 @@ export const ICON_GLYPH_IDS = [
 export type IconGlyphId = (typeof ICON_GLYPH_IDS)[number];
 
 /**
- * Recommended default stroke width for a glyph drawn at its native (18x18
- * Nucleo) viewBox. 1.5/18 is the same stroke-to-grid ratio as the previous
- * hand-drawn registry's 2/24 (both 1/12 — Nucleo's native weight), so the
- * rendered glyph weight is unchanged.
+ * Recommended default stroke width, in viewBox units, for a glyph drawn at its
+ * native (18x18 Nucleo) viewBox. 1.5/18 is the same stroke-to-grid ratio
+ * as the previous hand-drawn registry's 2/24 (both 1/12 — Nucleo's native
+ * weight), so the rendered glyph weight scales proportionally when the SVG
+ * is re-projected to the object's geometry box.
  */
 export const ICON_GLYPH_STROKE_WIDTH = 1.5;
 

@@ -45,6 +45,7 @@ export function SelectionToolbarLayer({
     openFlyout,
     setOpenFlyout,
     primarySelectedObject,
+    primarySectionFitted,
     handleSelectionToolbarAction,
     applyColorToSelection,
     setLockForSelection,
@@ -71,6 +72,9 @@ export function SelectionToolbarLayer({
       // The section frame border IS the chip fill (§3.2).
       color: resolveSectionColors(currentPick).chip.fill,
     };
+    if (primarySectionFitted) {
+      controlState["fit-children"] = { disabled: true };
+    }
   } else if (primarySelectedObject) {
     controlState.color = {
       color: resolveSwatchPreview(

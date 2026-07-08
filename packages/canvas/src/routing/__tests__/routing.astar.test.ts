@@ -184,7 +184,7 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     expect(pathEndsNearAnchor(routed.path, routed.end)).toBe(true);
   });
 
-  it("honors explicit connection.waypoints instead of recomputing a route", () => {
+  it("honors orthogonal explicit connection.waypoints instead of recomputing a route", () => {
     const from: InteractiveCanvasObject = {
       id: "wp-a",
       type: "process",
@@ -206,6 +206,7 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
         [150, 30],
         [150, 200],
         [250, 200],
+        [250, 30],
       ],
     };
 
@@ -215,6 +216,7 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     expect(points).toContainEqual({ x: 150, y: 30 });
     expect(points).toContainEqual({ x: 150, y: 200 });
     expect(points).toContainEqual({ x: 250, y: 200 });
+    expect(points).toContainEqual({ x: 250, y: 30 });
   });
 
   it("uses endpoint `position` (relative anchor) instead of side anchor when present", () => {

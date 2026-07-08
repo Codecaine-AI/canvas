@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook } from "@testing-library/react";
 import { createRef } from "react";
 import { SelectionToolbar } from "../SelectionToolbar";
 import { SelectionToolbarLayer } from "../SelectionToolbarLayer";
 import { resolveConnectorControlState } from "../connector-control-state";
+import { useSelectionToolbar } from "../use-selection-toolbar";
 import type { SelectionToolbarApi } from "../use-selection-toolbar";
 import {
   connectorDef,
@@ -13,15 +14,32 @@ import {
 } from "../../../../objects/object-def";
 import { SECTION_TOOLBAR } from "../../../../objects/section/toolbar";
 import { SHAPE_TOOLBAR } from "../../../../objects/shapes/toolbar";
-import type { InteractiveCanvasConnection } from "../../../../state/schema";
+import {
+  createInteractiveCanvasState,
+  reduceInteractiveCanvasState,
+  type CanvasAction,
+} from "../../../../state/actions";
+import { sectionFitGeometry } from "../../../../state/geometry";
+import type { InteractiveCanvasConnection, InteractiveCanvasDocument } from "../../../../state/schema";
 
 const SHAPE_CONTROLS = SHAPE_TOOLBAR.controls;
 const SECTION_CONTROLS = SECTION_TOOLBAR.controls;
 const CONNECTOR_CONTROLS = connectorDef.toolbar.controls; // ConnectorDef (D19): toolbar is a required field
 const STICKY_CONTROLS = objectDefForType("sticky")!.toolbar!.controls;
 
+type RafGlobal = typeof globalThis & {
+  requestAnimationFrame?: (callback: FrameRequestCallback) => number;
+  cancelAnimationFrame?: (handle: number) => void;
+};
+
+const rafGlobal = globalThis as RafGlobal;
+const originalRequestAnimationFrame = rafGlobal.requestAnimationFrame;
+const originalCancelAnimationFrame = rafGlobal.cancelAnimationFrame;
+
 afterEach(() => {
   cleanup();
+  rafGlobal.requestAnimationFrame = originalRequestAnimationFrame;
+  rafGlobal.cancelAnimationFrame = originalCancelAnimationFrame;
 });
 
 function connection(overrides: Partial<InteractiveCanvasConnection> = {}): InteractiveCanvasConnection {
@@ -30,6 +48,54 @@ function connection(overrides: Partial<InteractiveCanvasConnection> = {}): Inter
     from: { objectId: "a", anchor: "right" },
     to: { objectId: "b", anchor: "left" },
     ...overrides,
+  };
+}
+
+function toolbarDocument(): InteractiveCanvasDocument {
+  return {
+    schemaVersion: 1,
+    id: "toolbar-test-doc",
+    mode: "diagram",
+    objects: [
+      {
+        id: "a",
+        type: "process",
+        text: "A",
+        geometry: { x: 0, y: 0, width: 120, height: 80 },
+      },
+      {
+        id: "b",
+        type: "process",
+        text: "B",
+        geometry: { x: 240, y: 0, width: 120, height: 80 },
+      },
+    ],
+    connections: [connection()],
+  };
+}
+
+function sectionToolbarDocument(): InteractiveCanvasDocument {
+  return {
+    schemaVersion: 1,
+    id: "section-toolbar-action-test-doc",
+    mode: "diagram",
+    objects: [
+      {
+        id: "section-a",
+        type: "section",
+        text: "Section A",
+        geometry: { x: 100, y: 80, width: 520, height: 360 },
+        style: { shape: "section" },
+      },
+      {
+        id: "child-a",
+        type: "process",
+        text: "Child A",
+        parentId: "section-a",
+        geometry: { x: 260, y: 220, width: 120, height: 80 },
+      },
+    ],
+    connections: [],
   };
 }
 
@@ -59,6 +125,7 @@ function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): Sele
     setOpenFlyout: () => undefined,
     selectedObjectsForToolbar: [],
     primarySelectedObject: undefined,
+    primarySectionFitted: false,
     handleSelectionToolbarAction: () => undefined,
     applyColorToSelection: () => undefined,
     setLockForSelection: () => undefined,
@@ -111,16 +178,16 @@ describe("SelectionToolbar registry-driven control sets", () => {
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "section-border-style", "rename", "lock"]);
+    expect(actions).toEqual(["color", "section-border-style", "rename", "fit-children", "lock"]);
     expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
-  it("connector controls render exactly the 3 connector controls", () => {
+  it("connector controls render the 4 connector controls", () => {
     const { container } = render(<SelectionToolbar controls={CONNECTOR_CONTROLS} variantLabel="connector" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "dash", "arrowhead"]);
+    expect(actions).toEqual(["color", "dash", "arrowhead", "text"]);
   });
 
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
@@ -166,6 +233,77 @@ describe("SelectionToolbar interaction", () => {
     fireEvent.click(textButton);
     expect(onAction).toHaveBeenCalledTimes(1);
     expect(onAction.mock.calls[0][0]).toBe("text");
+  });
+
+  it("connector text is a plain Text button that fires the text action", () => {
+    const onAction = mock((_action: string, _value?: unknown) => {});
+    const { container } = render(
+      <SelectionToolbar controls={CONNECTOR_CONTROLS} variantLabel="connector" onAction={onAction} />,
+    );
+    const textButton = container.querySelector('[data-toolbar-action="text"]') as HTMLElement;
+    expect(textButton.getAttribute("aria-label")).toBe("Text");
+    expect(textButton.getAttribute("aria-expanded")).toBeNull();
+
+    fireEvent.click(textButton);
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(onAction.mock.calls[0][0]).toBe("text");
+  });
+
+  it("opens connector label editing from the connector text action", () => {
+    const document = toolbarDocument();
+    const openObjectTextEditor = mock((_objectId: string) => {});
+    const openConnectionLabelEditor = mock((_connectionId: string) => {});
+    const { result } = renderHook(() =>
+      useSelectionToolbar({
+        document,
+        dispatch: () => undefined,
+        selection: { kind: "connection", connectionId: "connection-a" },
+        selectedIds: [],
+        selectedConnection: document.connections[0],
+        selectedConnectionId: "connection-a",
+        viewport: { x: 0, y: 0, zoom: 1 },
+        stageRef: createRef<HTMLDivElement>(),
+        openObjectTextEditor,
+        openConnectionLabelEditor,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSelectionToolbarAction("text");
+    });
+
+    expect(openConnectionLabelEditor).toHaveBeenCalledWith("connection-a");
+    expect(openObjectTextEditor).toHaveBeenCalledTimes(0);
+  });
+
+  it("fits the selected section from the fit-children action", () => {
+    rafGlobal.requestAnimationFrame = undefined;
+    rafGlobal.cancelAnimationFrame = undefined;
+    const document = sectionToolbarDocument();
+    const dispatch = mock((_action: CanvasAction) => {});
+    const { result } = renderHook(() =>
+      useSelectionToolbar({
+        document,
+        dispatch,
+        selection: { kind: "objects", objectIds: ["section-a"] },
+        selectedIds: ["section-a"],
+        selectedConnection: undefined,
+        selectedConnectionId: null,
+        viewport: { x: 0, y: 0, zoom: 1 },
+        stageRef: createRef<HTMLDivElement>(),
+        openObjectTextEditor: mock((_objectId: string) => {}),
+        openConnectionLabelEditor: mock((_connectionId: string) => {}),
+      }),
+    );
+
+    act(() => {
+      result.current.handleSelectionToolbarAction("fit-children");
+    });
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "canvas.fitSectionToChildren",
+      sectionId: "section-a",
+    });
   });
 
   it("toggles aria-expanded on flyout controls but not on plain buttons", () => {
@@ -427,5 +565,114 @@ describe("SelectionToolbar connector current-value icons", () => {
       />,
     );
     expect(container.querySelector("[data-selection-toolbar]")).not.toBe(firstToolbar);
+  });
+});
+
+function sectionToolbarDocumentWithGeometry(
+  geometry: InteractiveCanvasDocument["objects"][number]["geometry"],
+): InteractiveCanvasDocument {
+  return {
+    ...sectionToolbarDocument(),
+    objects: sectionToolbarDocument().objects.map((object) =>
+      object.id === "section-a" ? { ...object, geometry } : object,
+    ),
+  };
+}
+
+function fittedSectionToolbarDocument(): InteractiveCanvasDocument {
+  let state = createInteractiveCanvasState(sectionToolbarDocument());
+  const targetGeometry = sectionFitGeometry(state.document, "section-a");
+  expect(targetGeometry).toBeTruthy();
+  state = reduceInteractiveCanvasState(state, {
+    type: "canvas.fitSectionToChildren",
+    sectionId: "section-a",
+  });
+  const section = state.document.objects.find((object) => object.id === "section-a");
+  expect(section?.geometry).toEqual(targetGeometry);
+  return state.document;
+}
+
+function stageRefForToolbarLayer() {
+  const stage = globalThis.document.createElement("div");
+  stage.getBoundingClientRect = () =>
+    ({
+      x: 0,
+      y: 0,
+      width: 1200,
+      height: 900,
+      top: 0,
+      left: 0,
+      right: 1200,
+      bottom: 900,
+      toJSON: () => ({}),
+    }) as DOMRect;
+  return { current: stage };
+}
+
+function renderSectionToolbarLayer(document: InteractiveCanvasDocument) {
+  const { result } = renderHook(() =>
+    useSelectionToolbar({
+      document,
+      dispatch: () => undefined,
+      selection: { kind: "objects", objectIds: ["section-a"] },
+      selectedIds: ["section-a"],
+      selectedConnection: undefined,
+      selectedConnectionId: null,
+      viewport: { x: 0, y: 0, zoom: 1 },
+      stageRef: stageRefForToolbarLayer(),
+      openObjectTextEditor: mock((_objectId: string) => {}),
+      openConnectionLabelEditor: mock((_connectionId: string) => {}),
+    }),
+  );
+  return render(
+    <SelectionToolbarLayer
+      toolbar={result.current}
+      selectedConnection={undefined}
+      dispatch={() => undefined}
+    />,
+  );
+}
+
+describe("SelectionToolbar section fit disabled state", () => {
+  it("renders disabled fit-children controls without firing onAction", () => {
+    const onAction = mock((_action: string, _value?: unknown) => {});
+    const { container } = render(
+      <SelectionToolbar
+        controls={SECTION_CONTROLS}
+        variantLabel="section"
+        onAction={onAction}
+        controlState={{ "fit-children": { disabled: true } }}
+      />,
+    );
+    const fitButton = container.querySelector(
+      '[data-toolbar-action="fit-children"]',
+    ) as HTMLButtonElement;
+
+    expect(fitButton.disabled).toBe(true);
+    expect(fitButton.getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(fitButton);
+    expect(onAction).toHaveBeenCalledTimes(0);
+  });
+
+  it("disables fit-children in layer controlState only when the section is already fitted", () => {
+    const fitted = renderSectionToolbarLayer(fittedSectionToolbarDocument());
+    const fittedButton = fitted.container.querySelector(
+      '[data-toolbar-action="fit-children"]',
+    ) as HTMLButtonElement;
+    expect(fittedButton.disabled).toBe(true);
+
+    const oversized = renderSectionToolbarLayer(sectionToolbarDocument());
+    const oversizedButton = oversized.container.querySelector(
+      '[data-toolbar-action="fit-children"]',
+    ) as HTMLButtonElement;
+    expect(oversizedButton.disabled).toBe(false);
+
+    const undersized = renderSectionToolbarLayer(
+      sectionToolbarDocumentWithGeometry({ x: 280, y: 230, width: 40, height: 30 }),
+    );
+    const undersizedButton = undersized.container.querySelector(
+      '[data-toolbar-action="fit-children"]',
+    ) as HTMLButtonElement;
+    expect(undersizedButton.disabled).toBe(false);
   });
 });

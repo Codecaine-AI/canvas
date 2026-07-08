@@ -18,6 +18,7 @@ import {
   resolveTextSlot,
   slotLineHeightPx,
 } from "../../../../objects/text-slots";
+import { CanvasStage } from "../../../../render/CanvasStage";
 import { ObjectShape } from "../../../../render/ObjectShape";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { TextEditingOverlay } from "../TextEditingOverlay";
@@ -95,23 +96,40 @@ function expectAtRestMatchesEditor(object: InteractiveCanvasObject) {
     def!.colorRole,
     def!.buttonBorder,
   );
-  const view = render(
-    <ObjectShape
-      object={object}
-      selected={false}
-      changed={false}
-      bounds={{ minX: 0, minY: 0, maxX: 2000, maxY: 2000 }}
-    />,
-  );
-  const slot =
+  const view =
     object.type === "section"
-      ? view.container.querySelector<HTMLElement>("[data-canvas-section-title-chip]")
-      : view.container.querySelector<HTMLElement>("[data-canvas-text-slot]");
+      ? render(
+          <CanvasStage
+            document={{
+              schemaVersion: 1,
+              id: "at-rest-section-chip-test",
+              mode: "diagram",
+              objects: [object],
+              connections: [],
+            }}
+            viewport={{ x: 0, y: 0, zoom: 1 }}
+          />,
+        )
+      : render(
+          <ObjectShape
+            object={object}
+            selected={false}
+            changed={false}
+            bounds={{ minX: 0, minY: 0, maxX: 2000, maxY: 2000 }}
+          />,
+        );
+  const slot = view.container.querySelector<HTMLElement>(
+    object.type === "section" ? "[data-canvas-section-title-chip]" : "[data-canvas-text-slot]",
+  );
   expect(slot).not.toBeNull();
   const atRestWorldLeft =
-    object.geometry.x + effectiveButtonBorderWidth + cssPx(slot!.style.left);
+    object.type === "section"
+      ? cssPx(slot!.style.left)
+      : object.geometry.x + effectiveButtonBorderWidth + cssPx(slot!.style.left);
   const atRestWorldTop =
-    object.geometry.y + effectiveButtonBorderWidth + cssPx(slot!.style.top);
+    object.type === "section"
+      ? cssPx(slot!.style.top)
+      : object.geometry.y + effectiveButtonBorderWidth + cssPx(slot!.style.top);
   expect(atRestWorldLeft).toBeCloseTo(object.geometry.x + resolved.rect.x, 6);
   expect(atRestWorldTop).toBeCloseTo(object.geometry.y + resolved.rect.y, 6);
   if (object.type !== "section") {
@@ -533,8 +551,8 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(editor.getAttribute("data-canvas-section-title-editor")).toBe("se1");
     const { slot, effectiveButtonBorderWidth } = expectAtRestMatchesEditor(object);
     expect(effectiveButtonBorderWidth).toBe(2);
-    expect(slot.style.left).toBe("1px");
-    expect(slot.style.top).toBe("1px");
+    expect(slot.style.left).toBe("43px");
+    expect(slot.style.top).toBe("43px");
   });
 
   it("section: chip editor counter-scales when zoomed out, like the chip", () => {

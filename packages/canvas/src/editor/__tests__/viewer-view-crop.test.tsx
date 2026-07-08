@@ -359,13 +359,19 @@ describe("InteractiveCanvasViewer: expanded shape vocabulary rendering (checkpoi
       const violetSoft = resolveShapeColors("violet");
       const blueSoft = resolveShapeColors("blue");
 
-      const personFill = personSvg!.querySelector("rect")?.getAttribute("fill");
+      const personFillLayer = personSvg!.querySelector("[data-canvas-icon-fill-layer]");
+      expect(personSvg!.querySelector("rect")).toBeNull();
+      expect(personFillLayer?.getAttribute("stroke")).toBe("none");
+      const personFill = personFillLayer?.getAttribute("fill");
       expect(personFill).toBe(greenSoft.fill);
 
       const databaseFill = databaseSvg!.querySelector("ellipse")?.getAttribute("fill");
       expect(databaseFill).toBe(violetSoft.fill);
 
-      const chatFill = chatSvg!.querySelector("rect")?.getAttribute("fill");
+      const chatFillLayer = chatSvg!.querySelector("[data-canvas-icon-fill-layer]");
+      expect(chatSvg!.querySelector("rect")).toBeNull();
+      expect(chatFillLayer?.getAttribute("stroke")).toBe("none");
+      const chatFill = chatFillLayer?.getAttribute("fill");
       expect(chatFill).toBe(blueSoft.fill);
     });
   });

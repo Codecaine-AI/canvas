@@ -8,9 +8,13 @@ import {
   type InteractionContext,
   type InteractionState,
 } from "../../interaction/interaction";
-import { sectionCaptureMembers } from "../geometry";
 import { renderOrderedObjects } from "../../render/CanvasStage";
-import { SECTION_CAPTURE_OVERLAP_THRESHOLD } from "../geometry";
+import {
+  SECTION_CAPTURE_OVERLAP_THRESHOLD,
+  SECTION_TITLE_CLEARANCE_PX,
+  sectionCaptureMembers,
+  sectionFitGeometry,
+} from "../geometry";
 import { tokenizeCodeBlock, tokenizeCodeLine } from "../../render/code-tokenizer";
 import { validateInteractiveCanvasDocument } from "../schema";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../actions";
@@ -480,6 +484,51 @@ describe("schema: W5 FigJam parity shape set (Wave A)", () => {
       expect(added?.geometry.width).toBe(testCase.width);
       expect(added?.geometry.height).toBe(testCase.height);
     }
+  });
+});
+
+describe("geometry: sectionFitGeometry", () => {
+  it("returns null for empty sections and non-sections", () => {
+    const document = makeDocument([
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray" },
+      makeObject({ id: "process-a" }),
+    ]);
+
+    expect(sectionFitGeometry(document, "section-a")).toBeNull();
+    expect(sectionFitGeometry(document, "process-a")).toBeNull();
+    expect(sectionFitGeometry(document, "missing")).toBeNull();
+  });
+
+  it("adds title clearance above direct children while using base padding elsewhere", () => {
+    const padding = 24;
+    const document = makeDocument([
+      { ...makeObject({ id: "section-a" }), type: "section", text: "A", color: "gray" },
+      makeObject({
+        id: "child-a",
+        parentId: "section-a",
+        geometry: { x: 56, y: 118, width: 80, height: 64 },
+      }),
+      makeObject({
+        id: "child-b",
+        parentId: "section-a",
+        geometry: { x: 168, y: 152, width: 80, height: 80 },
+      }),
+      makeObject({
+        id: "nested-child",
+        parentId: "child-a",
+        geometry: { x: -400, y: -400, width: 80, height: 80 },
+      }),
+    ]);
+
+    const geometry = sectionFitGeometry(document, "section-a", padding);
+
+    expect(geometry).not.toBeNull();
+    if (!geometry) return;
+    expect(geometry).toEqual({ x: 32, y: 64, width: 240, height: 192 });
+    expect(56 - geometry.x).toBe(padding);
+    expect(118 - geometry.y).toBe(padding + SECTION_TITLE_CLEARANCE_PX);
+    expect(geometry.x + geometry.width - (168 + 80)).toBe(padding);
+    expect(geometry.y + geometry.height - (152 + 80)).toBe(padding);
   });
 });
 

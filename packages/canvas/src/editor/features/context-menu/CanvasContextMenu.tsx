@@ -3,10 +3,10 @@
 import {
   ArrowRightIcon,
   BoxIcon,
-  CheckIcon,
   ClipboardPasteIcon,
   CopyIcon,
   DiamondIcon,
+  FitToContentIcon,
   FrameIcon,
   LayersIcon,
   LockIcon,
@@ -36,6 +36,7 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
     copyFromContextMenu,
     setLockFromContextMenu,
     addContextAnnotation,
+    contextObjectFitDisabled,
     fitContextObject,
     tidySectionMembership,
     deleteContextSelection,
@@ -71,10 +72,12 @@ export function CanvasContextMenu({ menu }: CanvasContextMenuProps) {
               <button
                 type="button"
                 role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                aria-disabled={contextObjectFitDisabled}
+                disabled={contextObjectFitDisabled}
                 onClick={fitContextObject}
               >
-                <CheckIcon className="h-4 w-4 text-muted-foreground" />
+                <FitToContentIcon className="h-4 w-4 text-muted-foreground" />
                 Fit children
               </button>
               <button

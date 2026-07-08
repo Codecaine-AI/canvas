@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-li
 import { useRef } from "react";
 import syntheticCanvas from "../../../../../canvases/synthetic.canvas.json";
 import type { CanvasAction, CanvasSelection } from "../../state/actions";
+import { sectionFitGeometry } from "../../state/geometry";
 import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction/interaction";
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
@@ -10,6 +11,23 @@ import { useCanvasHotkeys } from "../use-canvas-hotkeys";
 import { TITLE_CHIP } from "../../objects/text-slots";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
+
+type RafGlobal = typeof globalThis & {
+  requestAnimationFrame?: (callback: FrameRequestCallback) => number;
+  cancelAnimationFrame?: (handle: number) => void;
+};
+
+function disableRaf() {
+  const rafGlobal = globalThis as RafGlobal;
+  const originalRequestAnimationFrame = rafGlobal.requestAnimationFrame;
+  const originalCancelAnimationFrame = rafGlobal.cancelAnimationFrame;
+  rafGlobal.requestAnimationFrame = undefined;
+  rafGlobal.cancelAnimationFrame = undefined;
+  return () => {
+    rafGlobal.requestAnimationFrame = originalRequestAnimationFrame;
+    rafGlobal.cancelAnimationFrame = originalCancelAnimationFrame;
+  };
+}
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
@@ -98,6 +116,22 @@ function sectionRenameDocument(): InteractiveCanvasDocument {
       },
     ],
     connections: [],
+  };
+}
+
+function sectionFitDocument(): InteractiveCanvasDocument {
+  const document = sectionRenameDocument();
+  return {
+    ...document,
+    objects: [
+      ...document.objects,
+      makeObject({
+        id: "child-a",
+        text: "Child A",
+        parentId: "section-a",
+        geometry: { x: 260, y: 220, width: 120, height: 80 },
+      }),
+    ],
   };
 }
 
@@ -541,6 +575,30 @@ describe("InteractiveCanvasEditor: double-click inline text editing (4.2.1)", ()
       expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
       expect(screen.queryByRole("textbox", { name: "Section title" })).toBeNull();
     } finally {
+      restoreRect();
+    }
+  });
+
+  it("double-clicking a section body fits it around recorded children", () => {
+    const restoreRect = stubStageRect();
+    const restoreRaf = disableRaf();
+    try {
+      const document = sectionFitDocument();
+      const targetGeometry = sectionFitGeometry(document, "section-a");
+      expect(targetGeometry).toBeTruthy();
+      render(<InteractiveCanvasEditor document={document} onSave={() => undefined} onCancel={() => undefined} />);
+
+      const section = screen.getByRole("button", { name: /Original section/i }) as HTMLElement;
+      fireEvent.doubleClick(section, { clientX: 360, clientY: 280 });
+
+      expect(section.style.left).toBe(`${targetGeometry!.x}px`);
+      expect(section.style.top).toBe(`${targetGeometry!.y}px`);
+      expect(section.style.width).toBe(`${targetGeometry!.width}px`);
+      expect(section.style.height).toBe(`${targetGeometry!.height}px`);
+      expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Section title" })).toBeNull();
+    } finally {
+      restoreRaf();
       restoreRect();
     }
   });

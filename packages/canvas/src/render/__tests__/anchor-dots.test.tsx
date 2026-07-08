@@ -138,7 +138,8 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
     expect(previewPath).toBeTruthy();
     expect(previewPath.getAttribute("stroke")).toBe("#757575");
-    expect(previewPath.getAttribute("d")).toBe("M 400 50 L 570 50");
+    expect(previewPath.getAttribute("d")).toBe("M 410 50 L 560 50");
+    expect(previewPath.getAttribute("marker-end")).toBe("url(#anchor-dots-doc-arrow-forward)");
 
     fireEvent.pointerLeave(right!);
 

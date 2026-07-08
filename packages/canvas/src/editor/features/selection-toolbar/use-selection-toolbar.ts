@@ -27,6 +27,7 @@ import {
 } from "../../../objects/object-def";
 import { worldToScreen, type ViewportState } from "../../../render/viewport";
 import { isCanvasColor } from "../../../state/schema";
+import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 import type {
   CanvasColor,
   CanvasSectionStrokeStyle,
@@ -122,6 +123,8 @@ export interface UseSelectionToolbarArgs {
    * Editability-aware in-place text editor opener from useTextEditing.
    */
   openObjectTextEditor: (objectId: string) => void;
+  /** Connector-label editor opener from useTextEditing. */
+  openConnectionLabelEditor: (connectionId: string) => void;
 }
 
 export interface SelectionToolbarApi {
@@ -142,6 +145,7 @@ export interface SelectionToolbarApi {
   setOpenFlyout: Dispatch<SetStateAction<SelectionToolbarActionId | null>>;
   selectedObjectsForToolbar: InteractiveCanvasObject[];
   primarySelectedObject: InteractiveCanvasObject | undefined;
+  primarySectionFitted: boolean;
   handleSelectionToolbarAction: (action: SelectionToolbarActionId, value?: unknown) => void;
   /** Applies a palette pick to every selected object (P1) — also wired into the Inspector's "Color" swatches. */
   applyColorToSelection: (color: CanvasColor) => void;
@@ -170,6 +174,7 @@ export function useSelectionToolbar({
   viewport,
   stageRef,
   openObjectTextEditor,
+  openConnectionLabelEditor,
 }: UseSelectionToolbarArgs): SelectionToolbarApi {
   // Which SelectionToolbar flyout (if any) is currently open, tracked by action
   // id since SelectionToolbar's buttons only report `onAction(action)` without
@@ -275,6 +280,10 @@ export function useSelectionToolbar({
 
   const primarySelectedObject = selectedObjectsForToolbar[0];
   const selectionToolbarFlyouts = resolvedToolbar?.flyouts ?? null;
+  const primarySectionFitted =
+    primarySelectedObject?.type === "section"
+      ? isSectionFitted(document, primarySelectedObject.id)
+      : false;
 
   const setLockForSelection = useCallback((mode: "all" | "background" | undefined) => {
     for (const object of selectedObjectsForToolbar) {
@@ -320,6 +329,18 @@ export function useSelectionToolbar({
         applyColorToSelection(value);
         return;
       }
+      if (action === "text" && selectedConnectionId) {
+        openConnectionLabelEditor(selectedConnectionId);
+        return;
+      }
+      if (action === "fit-children" && primarySelectedObject?.type === "section") {
+        animateSectionFitToChildren({
+          document,
+          dispatch,
+          sectionId: primarySelectedObject.id,
+        });
+        return;
+      }
       if ((action === "rename" || action === "text") && primarySelectedObject) {
         openObjectTextEditor(primarySelectedObject.id);
         return;
@@ -335,9 +356,13 @@ export function useSelectionToolbar({
     [
       applyColorToSelection,
       applySectionBorderStyleToSelection,
+      dispatch,
+      document,
       selectionToolbarFlyouts,
+      selectedConnectionId,
       primarySelectedObject,
       openObjectTextEditor,
+      openConnectionLabelEditor,
     ],
   );
 
@@ -353,6 +378,7 @@ export function useSelectionToolbar({
     setOpenFlyout,
     selectedObjectsForToolbar,
     primarySelectedObject,
+    primarySectionFitted,
     handleSelectionToolbarAction,
     applyColorToSelection,
     setLockForSelection,

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import type { CanvasPoint } from "../../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
-import { autoPickAnchors, routeConnection, type Anchor } from "../routing";
+import { autoPickAnchors, routeConnection, routeConnectionToPoint, type Anchor } from "../routing";
 import { CONNECTOR_END_GAP_PX } from "../routing";
 
 const EPSILON = 1e-6;
 const MIN_STUB = 24;
+const SHORT_REVERSAL_THRESHOLD = 10;
 
 /** Parses the trailing "L x y" (or "Q ... x y") pair from a rendered path string. */
 function lastPointOf(path: string): CanvasPoint {
@@ -62,6 +63,44 @@ function normalFor(anchor: Anchor): CanvasPoint {
   if (anchor === "right") return { x: 1, y: 0 };
   if (anchor === "bottom") return { x: 0, y: 1 };
   return { x: -1, y: 0 };
+}
+
+function shortReversalSegments(points: ReadonlyArray<CanvasPoint>) {
+  const reversals = [];
+  for (let index = 1; index < points.length - 1; index += 1) {
+    const a = points[index - 1]!;
+    const b = points[index]!;
+    const c = points[index + 1]!;
+    const first = { x: b.x - a.x, y: b.y - a.y };
+    const second = { x: c.x - b.x, y: c.y - b.y };
+    const cross = first.x * second.y - first.y * second.x;
+    const dot = first.x * second.x + first.y * second.y;
+    const firstLength = Math.hypot(first.x, first.y);
+    const secondLength = Math.hypot(second.x, second.y);
+
+    if (
+      Math.abs(cross) < EPSILON &&
+      dot < -EPSILON &&
+      Math.min(firstLength, secondLength) < SHORT_REVERSAL_THRESHOLD
+    ) {
+      reversals.push({ index, firstLength, secondLength });
+    }
+  }
+  return reversals;
+}
+
+function nonOrthogonalSegments(points: ReadonlyArray<CanvasPoint>, epsilon = 0.5) {
+  const segments = [];
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]!;
+    const current = points[index]!;
+    const dx = Math.abs(current.x - previous.x);
+    const dy = Math.abs(current.y - previous.y);
+    if (dx > epsilon && dy > epsilon) {
+      segments.push({ from: previous, to: current });
+    }
+  }
+  return segments;
 }
 
 function parseNumbers(path: string): number[] {
@@ -121,6 +160,22 @@ describe("routing", () => {
         endAnchor: "top",
       });
     });
+
+    it("uses horizontal facing anchors when a left-of-target source vertically overlaps", () => {
+      const from = {
+        ...object("from", 0, 0),
+        geometry: { x: 0, y: 0, width: 100, height: 300 },
+      };
+      const to = {
+        ...object("to", 140, 180),
+        geometry: { x: 140, y: 180, width: 100, height: 300 },
+      };
+
+      expect(autoPickAnchors(from.geometry, to.geometry)).toEqual({
+        startAnchor: "right",
+        endAnchor: "left",
+      });
+    });
   });
 
   describe("routeConnection", () => {
@@ -168,6 +223,28 @@ describe("routing", () => {
       expectClose(renderedEnd.y, routed.end.y);
     });
 
+    it("auto-routes near-aligned facing anchors to an exactly horizontal slid segment", () => {
+      const from = object("from", 0, 230);
+      const to = object("to", 240, 234);
+      const routed = routeConnection(from, to, connection("solid"));
+
+      expect(routed.points).toEqual([routed.start, routed.end]);
+      expectPointClose(routed.start, { x: 100, y: 262 });
+      expectPointClose(routed.end, { x: 240, y: 262 });
+      expectClose(routed.start.y, routed.end.y);
+      expect(routed.start.y).toBeGreaterThanOrEqual(from.geometry.y + CONNECTOR_END_GAP_PX);
+      expect(routed.start.y).toBeLessThanOrEqual(from.geometry.y + from.geometry.height - CONNECTOR_END_GAP_PX);
+      expect(routed.end.y).toBeGreaterThanOrEqual(to.geometry.y + CONNECTOR_END_GAP_PX);
+      expect(routed.end.y).toBeLessThanOrEqual(to.geometry.y + to.geometry.height - CONNECTOR_END_GAP_PX);
+      expect(parseNumbers(routed.path).length).toBe(4);
+
+      const renderedStart = firstPointOf(routed.path);
+      const renderedEnd = lastPointOf(routed.path);
+      expectClose(Math.hypot(renderedStart.x - routed.start.x, renderedStart.y - routed.start.y), CONNECTOR_END_GAP_PX);
+      expectClose(Math.hypot(renderedEnd.x - routed.end.x, renderedEnd.y - routed.end.y), CONNECTOR_END_GAP_PX);
+      expectClose(renderedStart.y, renderedEnd.y);
+    });
+
     it("uses the same elbow route for solid and dashed line styles", () => {
       const from = object("from", 0, 0);
       const to = object("to", 260, 120);
@@ -205,6 +282,26 @@ describe("routing", () => {
       ).toBe(true);
     });
 
+    it("places labels at the exact polyline arc-length midpoint", () => {
+      const from = object("from", 0, 0);
+      const to = object("to", 260, 120);
+      const routed = routeConnection(from, to, connection("solid", { from: "top", to: "left" }));
+
+      expectPointClose(routed.labelPoint, { x: 56, y: 150 });
+    });
+
+    it("ignores stale waypoint polylines with diagonal segments and falls back to an orthogonal route", () => {
+      const from = object("from", 0, 0);
+      const to = object("to", 300, 160);
+      const routed = routeConnection(from, to, {
+        ...connection("solid", { from: "right", to: "left" }),
+        waypoints: [[140, 80]],
+      });
+
+      expect(nonOrthogonalSegments(routed.points ?? [])).toEqual([]);
+      expect(routed.points).not.toContainEqual({ x: 140, y: 80 });
+    });
+
     it("respects explicit anchors and uses their border midpoints", () => {
       const from = object("from", 0, 0);
       const to = object("to", 240, 0);
@@ -214,6 +311,70 @@ describe("routing", () => {
       expect(routed.endAnchor).toBe("left");
       expectPointClose(routed.start, borderPoint(from, "top"));
       expectPointClose(routed.end, borderPoint(to, "left"));
+    });
+  });
+
+  describe("routeConnectionToPoint", () => {
+    it("routes a free-point preview orthogonally with rounded corners and end gaps", () => {
+      const from = object("from", 0, 0);
+      const routed = routeConnectionToPoint(from, "right", { x: 280, y: 180 });
+
+      expect(routed.start).toEqual({ x: 100, y: 30 });
+      expect(routed.end).toEqual({ x: 280, y: 180 });
+      expect(routed.path).toContain("Q");
+      expect(routed.points).toEqual([
+        { x: 100, y: 30 },
+        { x: 124, y: 30 },
+        { x: 190, y: 30 },
+        { x: 190, y: 180 },
+        { x: 256, y: 180 },
+        { x: 280, y: 180 },
+      ]);
+
+      const renderedEnd = lastPointOf(routed.path);
+      expectClose(Math.hypot(renderedEnd.x - routed.end.x, renderedEnd.y - routed.end.y), CONNECTOR_END_GAP_PX);
+    });
+
+    it("keeps an aligned free-point preview as a straight routed run", () => {
+      const from = object("from", 0, 0);
+      const routed = routeConnectionToPoint(from, "right", { x: 270, y: 30 });
+
+      expect(routed.points).toEqual([routed.start, routed.end]);
+      expect(parseNumbers(routed.path).length).toBe(4);
+      expect(firstPointOf(routed.path)).toEqual({ x: 110, y: 30 });
+      expect(lastPointOf(routed.path)).toEqual({ x: 260, y: 30 });
+    });
+
+    it("does not emit short reversal segments for nearby free-point previews", () => {
+      const from = object("from", 0, 0);
+      const anchors: Anchor[] = ["top", "right", "bottom", "left"];
+      const offsets = [-20, -8, 8, 20];
+
+      for (const anchor of anchors) {
+        const start = borderPoint(from, anchor);
+        const normal = normalFor(anchor);
+        const tangent = { x: -normal.y, y: normal.x };
+
+        for (const offset of offsets) {
+          const point = {
+            x: start.x + normal.x * 30 + tangent.x * offset,
+            y: start.y + normal.y * 30 + tangent.y * offset,
+          };
+          const routed = routeConnectionToPoint(from, anchor, point);
+
+          expect({
+            anchor,
+            offset,
+            points: routed.points,
+            reversals: shortReversalSegments(routed.points ?? []),
+          }).toEqual({
+            anchor,
+            offset,
+            points: routed.points,
+            reversals: [],
+          });
+        }
+      }
     });
   });
 });

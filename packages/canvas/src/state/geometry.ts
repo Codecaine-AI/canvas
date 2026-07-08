@@ -8,6 +8,11 @@ import type {
 } from "./schema";
 
 export const CANVAS_GRID_SIZE = 16;
+const SECTION_FIT_PADDING_PX = 24;
+// Mirrors TITLE_CHIP.insetFromSectionCornerPx + TITLE_CHIP.heightPx (3 + 27)
+// in ../objects/text-slots.ts. Keep this state-side to avoid importing
+// renderer/object definitions into model geometry helpers.
+export const SECTION_TITLE_CLEARANCE_PX = 30;
 
 export type CanvasPoint = {
   x: number;
@@ -131,22 +136,41 @@ export function objectById(
 export function fitSectionToChildren(
   document: InteractiveCanvasDocument,
   sectionId: string,
-  padding = 32,
+  padding = SECTION_FIT_PADDING_PX,
 ): InteractiveCanvasDocument {
-  const section = objectById(document, sectionId);
-  if (!section || section.type !== "section") return document;
-  const children = document.objects.filter((object) => object.parentId === sectionId);
-  const bounds = boundsForGeometries(
-    children.map((object) => object.geometry),
-    padding,
-  );
-  if (!bounds) return document;
+  const geometry = sectionFitGeometry(document, sectionId, padding);
+  if (!geometry) return document;
   return {
     ...document,
     objects: document.objects.map((object) =>
-      object.id === sectionId ? { ...object, geometry: snapGeometry(bounds) } : object,
+      object.id === sectionId ? { ...object, geometry } : object,
     ),
   };
+}
+
+export function sectionFitGeometry(
+  document: InteractiveCanvasDocument,
+  sectionId: string,
+  padding = SECTION_FIT_PADDING_PX,
+): CanvasGeometry | null {
+  const section = objectById(document, sectionId);
+  if (!section || section.type !== "section") return null;
+  const children = document.objects.filter((object) => object.parentId === sectionId);
+  if (children.length === 0) return null;
+
+  const geometries = children.map((object) => object.geometry);
+  const minX = Math.min(...geometries.map((geometry) => geometry.x));
+  const minY = Math.min(...geometries.map((geometry) => geometry.y));
+  const maxX = Math.max(...geometries.map((geometry) => geometry.x + geometry.width));
+  const maxY = Math.max(...geometries.map((geometry) => geometry.y + geometry.height));
+  const topPadding = padding + SECTION_TITLE_CLEARANCE_PX;
+
+  return snapGeometry({
+    x: roundCanvasNumber(minX - padding),
+    y: roundCanvasNumber(minY - topPadding),
+    width: roundCanvasNumber(maxX - minX + padding * 2),
+    height: roundCanvasNumber(maxY - minY + topPadding + padding),
+  });
 }
 
 export function alignObjects(

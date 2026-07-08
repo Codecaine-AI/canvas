@@ -77,6 +77,35 @@ describe("resolveConnectionCascade", () => {
     expect(result).toEqual({ kind: "inside", objectId: "rect-1" });
   });
 
+  it("treats empty section interiors as free canvas instead of inside candidates", () => {
+    const section = rectObject({
+      id: "section-1",
+      type: "section",
+      text: "Section",
+      geometry: { x: 0, y: 0, width: 400, height: 300 },
+    });
+    const point = { x: 200, y: 150 };
+    const result = resolveConnectionCascade(point, [section], 1);
+
+    expect(result).toEqual({ kind: "free", point });
+  });
+
+  it("still snaps to a section outline within the outline radius", () => {
+    const section = rectObject({
+      id: "section-1",
+      type: "section",
+      text: "Section",
+      geometry: { x: 0, y: 0, width: 400, height: 300 },
+    });
+    const result = resolveConnectionCascade({ x: 80, y: 4 }, [section], 1);
+
+    expect(result.kind).toBe("outline");
+    if (result.kind === "outline") {
+      expect(result.objectId).toBe("section-1");
+      expect(result.point).toEqual({ x: 80, y: 0 });
+    }
+  });
+
   it("resolves to 'free' with the raw point when no candidate's hover-expanded bound contains the pointer", () => {
     const object = rectObject();
     const point = { x: 5000, y: 5000 };

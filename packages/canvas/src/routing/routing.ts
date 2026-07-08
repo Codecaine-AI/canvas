@@ -2,7 +2,7 @@
 
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
-import { connectionBoundsForObject, getConnectionAnchors } from "../objects/geometry";
+import { connectionBoundsForObject, getConnectionAnchors, outlinePolygon } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
@@ -44,6 +44,10 @@ const CORNER_RADIUS = CONNECTOR_ELBOW_CORNER_RADIUS_PX;
  * its own tangent at each end so it still visually aims at the anchor.
  */
 const END_GAP = CONNECTOR_END_GAP_PX;
+const AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX = 8;
+const STRAIGHT_EDGE_MARGIN_PX = CONNECTOR_END_GAP_PX;
+const ROUTE_EPSILON = 0.01;
+const WAYPOINT_ORTHOGONAL_EPSILON_PX = 0.5;
 
 export type Anchor = "top" | "right" | "bottom" | "left";
 
@@ -62,7 +66,7 @@ export type RoutedConnection = {
   points?: CanvasPoint[];
 };
 
-/** Picks facing side anchors from relative object centers. */
+/** Picks facing side anchors from relative object centers and overlapping spans. */
 export function autoPickAnchors(
   fromBounds: CanvasBounds,
   toBounds: CanvasBounds,
@@ -71,6 +75,32 @@ export function autoPickAnchors(
   const toCenter = centerOf(toBounds);
   const dx = toCenter.x - fromCenter.x;
   const dy = toCenter.y - fromCenter.y;
+  const verticalOverlap = rangesOverlap(
+    fromBounds.y,
+    fromBounds.y + fromBounds.height,
+    toBounds.y,
+    toBounds.y + toBounds.height,
+    AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+  );
+  const horizontalOverlap = rangesOverlap(
+    fromBounds.x,
+    fromBounds.x + fromBounds.width,
+    toBounds.x,
+    toBounds.x + toBounds.width,
+    AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+  );
+
+  if (verticalOverlap && Math.abs(dx) > ROUTE_EPSILON) {
+    return dx >= 0
+      ? { startAnchor: "right", endAnchor: "left" }
+      : { startAnchor: "left", endAnchor: "right" };
+  }
+
+  if (horizontalOverlap && Math.abs(dy) > ROUTE_EPSILON) {
+    return dy >= 0
+      ? { startAnchor: "bottom", endAnchor: "top" }
+      : { startAnchor: "top", endAnchor: "bottom" };
+  }
 
   if (Math.abs(dx) >= Math.abs(dy)) {
     return dx >= 0
@@ -83,15 +113,24 @@ export function autoPickAnchors(
     : { startAnchor: "top", endAnchor: "bottom" };
 }
 
+function rangesOverlap(
+  startA: number,
+  endA: number,
+  startB: number,
+  endB: number,
+  tolerance: number,
+): boolean {
+  return startA <= endB + tolerance && startB <= endA + tolerance;
+}
+
 /**
  * Routes a connection between two object border midpoints.
  *
  * `obstacles` is optional: pass the current document's objects (typically all
  * of them — the two endpoints and their section ancestors are excluded
- * automatically) so routes detour around unrelated shapes via A*
- * orthogonal routing. Omitting it keeps the pre-existing 3-arg behavior:
- * routes still upgrade to a real orthogonal A* path around the two endpoint
- * bounds themselves, they just won't detour around siblings.
+ * automatically) so routes detour around unrelated shapes when a simple
+ * facing route would cross one. Omitting it keeps the pre-existing 3-arg
+ * behavior without sibling detours.
  */
 export function routeConnection(
   fromObject: InteractiveCanvasObject,
@@ -109,8 +148,30 @@ export function routeConnection(
 
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
-    return routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor);
+    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor);
+    if (waypointRoute) return waypointRoute;
   }
+
+  const extraObstacleBounds = routingObstacleBounds(
+    fromObject,
+    toObject,
+    start,
+    end,
+    obstacles ?? [],
+  );
+  const straight = routeStraightIfAligned(
+    fromObject,
+    toObject,
+    start,
+    end,
+    startAnchor,
+    endAnchor,
+    extraObstacleBounds,
+  );
+  if (straight) return straight;
+
+  const elbow = routeElbow(start, end, startAnchor, endAnchor);
+  if (!polylineCrossesObstacles(elbow.points ?? [], extraObstacleBounds)) return elbow;
 
   const orthogonal = routeOrthogonalAStar(
     fromObject,
@@ -119,10 +180,32 @@ export function routeConnection(
     end,
     startAnchor,
     endAnchor,
-    obstacles ?? [],
+    extraObstacleBounds,
   );
   if (orthogonal) return orthogonal;
-  return routeElbow(start, end, startAnchor, endAnchor);
+  return elbow;
+}
+
+/**
+ * Cheap live-preview route from a fixed object side to a free world point.
+ *
+ * This intentionally avoids the A* obstacle pass so connector-create pointer
+ * frames stay light, but it reuses the same rounded/end-gap path construction
+ * as real connectors.
+ */
+export function routeConnectionToPoint(
+  fromObject: InteractiveCanvasObject,
+  fromAnchor: Anchor,
+  point: CanvasPoint,
+): RoutedConnection {
+  const start = pointForObjectAnchor(fromObject, fromAnchor);
+  const endAnchor = freePointEndAnchor(start, point);
+
+  if (isStraightFromAnchorToPoint(start, point, fromAnchor)) {
+    return routedConnectionFromPoints([start, point], start, point, fromAnchor, endAnchor);
+  }
+
+  return routeFreePointElbow(start, point, fromAnchor, endAnchor);
 }
 
 /** Returns the relative-position anchor point for `bounds`, or null when `position` is absent. */
@@ -154,31 +237,28 @@ function routeWaypoints(
   waypoints: CanvasPoint[],
   startAnchor: Anchor,
   endAnchor: Anchor,
-): RoutedConnection {
+): RoutedConnection | null {
   const points = dedupeConsecutivePoints([start, ...waypoints, end]);
-  return {
-    path: roundedPolylinePath(points),
-    start,
-    end,
-    labelPoint: polylineHalfwaySegmentMidpoint(points),
-    startAnchor,
-    endAnchor,
-    points,
-  };
+  if (!isOrthogonalPolyline(points, WAYPOINT_ORTHOGONAL_EPSILON_PX)) return null;
+  return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
+}
+
+function isOrthogonalPolyline(points: ReadonlyArray<CanvasPoint>, epsilon: number): boolean {
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]!;
+    const current = points[index]!;
+    const dx = Math.abs(current.x - previous.x);
+    const dy = Math.abs(current.y - previous.y);
+    if (dx > epsilon && dy > epsilon) return false;
+  }
+  return true;
 }
 
 /**
  * Attempts an obstacle-avoiding orthogonal route via the vendored BlockSuite
- * A* path generator (D33 thread B). Builds obstacle bounds from the two
- * endpoint objects (so the route doesn't cut through either shape) plus the
- * caller-supplied `obstacles` objects, excluding the two endpoints' own
- * owners and their section ancestors from that extra obstacle set (a
- * connection touching a nested object must necessarily pass through its
- * parent sections' bounds — that's containment, not an obstacle crossing).
- * Also excludes any obstacle whose interior strictly contains the start or
- * end anchor point: a shape enclosing an endpoint can never be routed around
- * (e.g. a plain rectangle drawn behind a cluster of nodes), and feeding it to
- * the generator poisons the rest of the route.
+ * A* path generator (D33 thread B). The caller passes already-filtered extra
+ * obstacle bounds; the endpoint bounds are still supplied separately so the
+ * generated route does not cut through either owner shape.
  * Returns null (letting the caller fall back to the simple elbow route) when
  * the generator can't produce a usable multi-point path.
  */
@@ -189,22 +269,9 @@ function routeOrthogonalAStar(
   end: CanvasPoint,
   startAnchor: Anchor,
   endAnchor: Anchor,
-  obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  extraObstacleBounds: ReadonlyArray<CanvasBounds>,
 ): RoutedConnection | null {
-  const excludedIds = new Set<string>([fromObject.id, toObject.id]);
-  collectAncestorIds(fromObject.id, excludedIds, obstacles);
-  collectAncestorIds(toObject.id, excludedIds, obstacles);
-
-  const extraObstacles: OrthogonalObstacle[] = obstacles
-    .filter(
-      (object) =>
-        !excludedIds.has(object.id) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object), start) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object), end),
-    )
-    // Below-slot labels are outside stored geometry; routing treats the union
-    // as the obstacle so edges do not cut through readable text.
-    .map((object) => toObstacle(connectionBoundsForObject(object)));
+  const extraObstacles = extraObstacleBounds.map(toObstacle);
 
   let waypoints: Array<[number, number]>;
   try {
@@ -228,12 +295,276 @@ function routeOrthogonalAStar(
 
   const points = dedupeConsecutivePoints(waypoints.map(([x, y]) => ({ x, y })));
   if (points.length < 2) return null;
+  const straightPoints = isNearStraightPolyline(points, AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX)
+    ? exactStraightAnchoredPoints(
+        fromObject,
+        toObject,
+        start,
+        end,
+        startAnchor,
+        endAnchor,
+        AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+      )
+    : null;
+  const routedPoints = straightPoints ?? points;
+  const routedStart = routedPoints[0]!;
+  const routedEnd = routedPoints[routedPoints.length - 1]!;
 
+  return routedConnectionFromPoints(routedPoints, routedStart, routedEnd, startAnchor, endAnchor);
+}
+
+function routingObstacleBounds(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  start: CanvasPoint,
+  end: CanvasPoint,
+  obstacles: ReadonlyArray<InteractiveCanvasObject>,
+): CanvasBounds[] {
+  const excludedIds = new Set<string>([fromObject.id, toObject.id]);
+  collectAncestorIds(fromObject.id, excludedIds, obstacles);
+  collectAncestorIds(toObject.id, excludedIds, obstacles);
+
+  return obstacles
+    .filter(
+      (object) =>
+        !excludedIds.has(object.id) &&
+        !boundsStrictlyContain(connectionBoundsForObject(object), start) &&
+        !boundsStrictlyContain(connectionBoundsForObject(object), end),
+    )
+    .map((object) => connectionBoundsForObject(object));
+}
+
+function routeStraightIfAligned(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+  obstacleBounds: ReadonlyArray<CanvasBounds>,
+): RoutedConnection | null {
+  const points = exactStraightAnchoredPoints(
+    fromObject,
+    toObject,
+    start,
+    end,
+    startAnchor,
+    endAnchor,
+    AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+  );
+  if (!points) return null;
+
+  if (polylineCrossesObstacles(points, obstacleBounds)) return null;
+  return routedConnectionFromPoints(points, points[0], points[1], startAnchor, endAnchor);
+}
+
+function exactStraightAnchoredPoints(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+  tolerance: number,
+): [CanvasPoint, CanvasPoint] | null {
+  const axis = straightRouteAxis(start, end, tolerance);
+  if (!axis || !anchorsFaceAlongAxis(start, end, startAnchor, endAnchor, axis)) return null;
+
+  const startSpan = edgeSlideSpan(fromObject, startAnchor);
+  const endSpan = edgeSlideSpan(toObject, endAnchor);
+  if (!startSpan || !endSpan) return null;
+
+  const overlapMin = Math.max(startSpan.min, endSpan.min);
+  const overlapMax = Math.min(startSpan.max, endSpan.max);
+  if (overlapMin > overlapMax + ROUTE_EPSILON) return null;
+
+  if (axis === "horizontal") {
+    const averageY = (start.y + end.y) / 2;
+    const y = clamp(averageY, overlapMin, overlapMax);
+    return [
+      { x: startSpan.fixed, y },
+      { x: endSpan.fixed, y },
+    ];
+  }
+
+  const averageX = (start.x + end.x) / 2;
+  const x = clamp(averageX, overlapMin, overlapMax);
+  return [
+    { x, y: startSpan.fixed },
+    { x, y: endSpan.fixed },
+  ];
+}
+
+type EdgeSlideSpan = {
+  fixed: number;
+  min: number;
+  max: number;
+};
+
+function edgeSlideSpan(
+  object: InteractiveCanvasObject,
+  anchor: Anchor,
+): EdgeSlideSpan | null {
+  const bounds = connectionBoundsForObject(object);
+  const polygon = outlinePolygon(object);
+  const fixed = edgeFixedCoordinate(bounds, anchor);
+  const slideCoordinate = isHorizontalAnchor(anchor) ? "y" : "x";
+  let min = Infinity;
+  let max = -Infinity;
+
+  for (let index = 0; index < polygon.length; index += 1) {
+    const a = polygon[index]!;
+    const b = polygon[(index + 1) % polygon.length]!;
+    if (!segmentLiesOnAnchorEdge(a, b, anchor, fixed)) continue;
+
+    const aSlide = a[slideCoordinate];
+    const bSlide = b[slideCoordinate];
+    min = Math.min(min, aSlide, bSlide);
+    max = Math.max(max, aSlide, bSlide);
+  }
+
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max - min <= ROUTE_EPSILON) {
+    return null;
+  }
+
+  const margin = Math.min(STRAIGHT_EDGE_MARGIN_PX, (max - min) / 2);
+  return {
+    fixed,
+    min: min + margin,
+    max: max - margin,
+  };
+}
+
+function edgeFixedCoordinate(bounds: CanvasBounds, anchor: Anchor): number {
+  if (anchor === "left") return bounds.x;
+  if (anchor === "right") return bounds.x + bounds.width;
+  if (anchor === "top") return bounds.y;
+  return bounds.y + bounds.height;
+}
+
+function segmentLiesOnAnchorEdge(
+  a: CanvasPoint,
+  b: CanvasPoint,
+  anchor: Anchor,
+  fixed: number,
+): boolean {
+  if (isHorizontalAnchor(anchor)) {
+    return (
+      Math.abs(a.x - fixed) <= ROUTE_EPSILON &&
+      Math.abs(b.x - fixed) <= ROUTE_EPSILON &&
+      Math.abs(a.y - b.y) > ROUTE_EPSILON
+    );
+  }
+  return (
+    Math.abs(a.y - fixed) <= ROUTE_EPSILON &&
+    Math.abs(b.y - fixed) <= ROUTE_EPSILON &&
+    Math.abs(a.x - b.x) > ROUTE_EPSILON
+  );
+}
+
+function straightRouteAxis(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  tolerance: number,
+): "horizontal" | "vertical" | null {
+  const dx = Math.abs(end.x - start.x);
+  const dy = Math.abs(end.y - start.y);
+  if (dy <= tolerance && dx > ROUTE_EPSILON) return "horizontal";
+  if (dx <= tolerance && dy > ROUTE_EPSILON) return "vertical";
+  return null;
+}
+
+function anchorsFaceAlongAxis(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+  axis: "horizontal" | "vertical",
+): boolean {
+  if (axis === "horizontal") {
+    return end.x >= start.x
+      ? startAnchor === "right" && endAnchor === "left"
+      : startAnchor === "left" && endAnchor === "right";
+  }
+  return end.y >= start.y
+    ? startAnchor === "bottom" && endAnchor === "top"
+    : startAnchor === "top" && endAnchor === "bottom";
+}
+
+function isNearStraightPolyline(points: ReadonlyArray<CanvasPoint>, tolerance: number): boolean {
+  if (points.length <= 2) return true;
+  const start = points[0];
+  const end = points[points.length - 1];
+  return points.slice(1, -1).every((point) => distanceToSegment(point, start, end) <= tolerance);
+}
+
+function polylineCrossesObstacles(
+  points: ReadonlyArray<CanvasPoint>,
+  obstacleBounds: ReadonlyArray<CanvasBounds>,
+): boolean {
+  if (points.length < 2 || obstacleBounds.length === 0) return false;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    for (const bounds of obstacleBounds) {
+      if (segmentCrossesInterior(start, end, bounds)) return true;
+    }
+  }
+  return false;
+}
+
+function segmentCrossesInterior(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  bounds: CanvasBounds,
+  epsilon = 0.5,
+): boolean {
+  const left = bounds.x + epsilon;
+  const right = bounds.x + bounds.width - epsilon;
+  const top = bounds.y + epsilon;
+  const bottom = bounds.y + bounds.height - epsilon;
+  if (left >= right || top >= bottom) return false;
+
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  let t0 = 0;
+  let t1 = 1;
+
+  const clip = (p: number, q: number): boolean => {
+    if (Math.abs(p) <= ROUTE_EPSILON) return q >= 0;
+    const r = q / p;
+    if (p < 0) {
+      if (r > t1) return false;
+      if (r > t0) t0 = r;
+    } else {
+      if (r < t0) return false;
+      if (r < t1) t1 = r;
+    }
+    return true;
+  };
+
+  return (
+    clip(-dx, start.x - left) &&
+    clip(dx, right - start.x) &&
+    clip(-dy, start.y - top) &&
+    clip(dy, bottom - start.y) &&
+    t1 > ROUTE_EPSILON &&
+    t0 < 1 - ROUTE_EPSILON
+  );
+}
+
+function routedConnectionFromPoints(
+  points: CanvasPoint[],
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+): RoutedConnection {
   return {
     path: roundedPolylinePath(points),
     start,
     end,
-    labelPoint: polylineHalfwaySegmentMidpoint(points),
+    labelPoint: polylineHalfwayPoint(points),
     startAnchor,
     endAnchor,
     points,
@@ -372,15 +703,86 @@ function routeElbow(
   const corners = elbowCorners(stubStart, stubEnd, startAnchor, endAnchor);
   const points = dedupeConsecutivePoints([start, stubStart, ...corners, stubEnd, end]);
 
-  return {
-    path: roundedPolylinePath(points),
-    start,
-    end,
-    labelPoint: polylineHalfwaySegmentMidpoint(points),
-    startAnchor,
-    endAnchor,
-    points,
-  };
+  return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
+}
+
+function routeFreePointElbow(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+): RoutedConnection {
+  const stubStart = addScaled(start, normalFor(startAnchor), MIN_STUB);
+  const stubEnd = addScaled(end, normalFor(endAnchor), MIN_STUB);
+  const corners = elbowCorners(stubStart, stubEnd, startAnchor, endAnchor);
+  const points = collapseShortReversingRuns(
+    dedupeConsecutivePoints([start, stubStart, ...corners, stubEnd, end]),
+  );
+
+  return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
+}
+
+function collapseShortReversingRuns(points: CanvasPoint[]): CanvasPoint[] {
+  const result = [...points];
+  let index = 1;
+  while (index < result.length - 1) {
+    const previous = result[index - 1]!;
+    const current = result[index]!;
+    const next = result[index + 1]!;
+    const incoming = { x: current.x - previous.x, y: current.y - previous.y };
+    const outgoing = { x: next.x - current.x, y: next.y - current.y };
+    const cross = incoming.x * outgoing.y - incoming.y * outgoing.x;
+    const dot = incoming.x * outgoing.x + incoming.y * outgoing.y;
+
+    if (Math.abs(cross) > ROUTE_EPSILON || dot >= -ROUTE_EPSILON) {
+      index += 1;
+      continue;
+    }
+
+    const incomingLength = Math.hypot(incoming.x, incoming.y);
+    const outgoingLength = Math.hypot(outgoing.x, outgoing.y);
+    const segmentCount = result.length - 1;
+    const effectiveIncomingLength =
+      index - 1 === 0 ? Math.max(0, incomingLength - END_GAP) : incomingLength;
+    const effectiveOutgoingLength =
+      index === segmentCount - 1 ? Math.max(0, outgoingLength - END_GAP) : outgoingLength;
+
+    if (
+      Math.min(effectiveIncomingLength, effectiveOutgoingLength) >
+      CORNER_RADIUS + ROUTE_EPSILON
+    ) {
+      index += 1;
+      continue;
+    }
+
+    result.splice(index, 1);
+    const deduped = dedupeConsecutivePoints(result);
+    result.length = 0;
+    result.push(...deduped);
+    index = Math.max(1, index - 1);
+  }
+  return result;
+}
+
+function freePointEndAnchor(start: CanvasPoint, end: CanvasPoint): Anchor {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "left" : "right";
+  return dy >= 0 ? "top" : "bottom";
+}
+
+function isStraightFromAnchorToPoint(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  startAnchor: Anchor,
+): boolean {
+  if (isHorizontalAnchor(startAnchor)) {
+    if (Math.abs(start.y - end.y) > ROUTE_EPSILON) return false;
+    return end.x >= start.x ? startAnchor === "right" : startAnchor === "left";
+  }
+
+  if (Math.abs(start.x - end.x) > ROUTE_EPSILON) return false;
+  return end.y >= start.y ? startAnchor === "bottom" : startAnchor === "top";
 }
 
 function elbowCorners(
@@ -493,7 +895,7 @@ function pointToward(from: CanvasPoint, to: CanvasPoint, length: number): Canvas
   };
 }
 
-function polylineHalfwaySegmentMidpoint(points: CanvasPoint[]): CanvasPoint {
+function polylineHalfwayPoint(points: CanvasPoint[]): CanvasPoint {
   const segments = [];
   let totalLength = 0;
 
@@ -512,13 +914,14 @@ function polylineHalfwaySegmentMidpoint(points: CanvasPoint[]): CanvasPoint {
   let traveled = 0;
   for (const segment of segments) {
     if (traveled + segment.length >= halfwayLength) {
-      return midpoint(segment.start, segment.end);
+      const distanceIntoSegment = halfwayLength - traveled;
+      return pointToward(segment.start, segment.end, distanceIntoSegment);
     }
     traveled += segment.length;
   }
 
   const finalSegment = segments[segments.length - 1];
-  return midpoint(finalSegment.start, finalSegment.end);
+  return finalSegment.end;
 }
 
 function dedupeConsecutivePoints(points: CanvasPoint[]): CanvasPoint[] {
@@ -528,8 +931,20 @@ function dedupeConsecutivePoints(points: CanvasPoint[]): CanvasPoint[] {
   });
 }
 
-function midpoint(a: CanvasPoint, b: CanvasPoint): CanvasPoint {
-  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function distanceToSegment(point: CanvasPoint, start: CanvasPoint, end: CanvasPoint): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= ROUTE_EPSILON) return distance(point, start);
+  const t = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
+  return distance(point, {
+    x: start.x + t * dx,
+    y: start.y + t * dy,
+  });
 }
 
 function distance(a: CanvasPoint, b: CanvasPoint): number {

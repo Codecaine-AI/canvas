@@ -33,6 +33,25 @@ export function hasValidEndpoint(
   );
 }
 
+function sameEndpointPosition(
+  a: InteractiveCanvasConnection["from"]["position"],
+  b: InteractiveCanvasConnection["from"]["position"],
+): boolean {
+  if (!a || !b) return !a && !b;
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+function endpointChanged(
+  previous: InteractiveCanvasConnection["from"],
+  next: InteractiveCanvasConnection["from"],
+): boolean {
+  return (
+    next.objectId !== previous.objectId ||
+    next.anchor !== previous.anchor ||
+    !sameEndpointPosition(next.position, previous.position)
+  );
+}
+
 export function removeConnection(
   document: InteractiveCanvasDocument,
   connectionId: string,
@@ -203,17 +222,22 @@ export function handleUpdateConnection(
   const mergedTo = action.patch.to ?? existing.to;
   if (mergedFrom.objectId === mergedTo.objectId) return state;
 
+  const endpointsChanged =
+    endpointChanged(existing.from, mergedFrom) ||
+    endpointChanged(existing.to, mergedTo);
+  const patch =
+    endpointsChanged &&
+    (existing.waypoints !== undefined || action.patch.waypoints !== undefined)
+      ? { ...action.patch, waypoints: undefined }
+      : action.patch;
   const updatedConnection: InteractiveCanvasConnection = {
     ...existing,
-    ...action.patch,
+    ...patch,
     from: mergedFrom,
     to: mergedTo,
   };
-  const endpointsChanged =
-    mergedFrom.objectId !== existing.from.objectId ||
-    mergedFrom.anchor !== existing.from.anchor ||
-    mergedTo.objectId !== existing.to.objectId ||
-    mergedTo.anchor !== existing.to.anchor;
+  const patchKeys = Object.keys(action.patch);
+  const labelOnlyChanged = patchKeys.length === 1 && patchKeys[0] === "label";
   const document = {
     ...state.document,
     connections: state.document.connections.map((connection) =>
@@ -222,7 +246,11 @@ export function handleUpdateConnection(
   };
   return withHistory(state, document, {
     source: "human",
-    summary: endpointsChanged ? "Reconnected connector" : "Updated connector",
+    summary: endpointsChanged
+      ? "Reconnected connector"
+      : labelOnlyChanged
+        ? "Edited connector label"
+        : "Updated connector",
     changedObjectIds: [],
     changedConnectionIds: [action.connectionId],
     changedAnnotationIds: [],

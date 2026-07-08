@@ -10,9 +10,10 @@ export const DOCUMENT_GEOMETRY = {
 } as const;
 
 /**
- * Wavy-bottom document silhouette geometry — moved here verbatim from the
- * now-deleted render/ShapeSilhouette.tsx. Shared with the document-stack
- * def, which draws the same wave twice at an offset.
+ * Wavy-bottom document silhouette geometry. Coordinates are object-local,
+ * preserving the original 100x100 proportions at the object's true size.
+ * Shared with the document-stack def, which draws the same wave twice at an
+ * offset.
  */
 export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): string {
   const top = y;
@@ -35,10 +36,7 @@ export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): strin
  * Document (W5) — inline SVG wavy-bottom silhouette (CSS clip-path can't
  * express the wave) painted behind the label/body content; the button
  * chrome stays fully transparent so only one outline is visible. Stroke
- * width follows the object's resolved stroke width (legacy passed
- * `shapeStrokeWidth` through for document/folder/document-stack/
- * cylinder-horizontal — see the now-deleted render/ShapeSilhouette.tsx's
- * call site for this shape).
+ * width follows the object's resolved stroke width.
  */
 export const documentShapeDef: ShapeDef = {
   type: "document",
@@ -46,7 +44,7 @@ export const documentShapeDef: ShapeDef = {
   buttonBorder: "suppressed",
   silhouette: {
     className: "interactive-canvas-object-document",
-    silhouette: ({ colors, strokeWidth }) => (
+    silhouette: ({ object, colors, strokeWidth }) => (
       <svg
         style={{
           position: "absolute",
@@ -57,13 +55,13 @@ export const documentShapeDef: ShapeDef = {
           overflow: "visible",
           pointerEvents: "none",
         }}
-        viewBox="0 0 100 100"
+        viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}
         preserveAspectRatio="none"
         aria-hidden="true"
         data-canvas-shape-silhouette="document"
       >
         <path
-          d={documentWavyPath()}
+          d={documentWavyPath(0, 0, object.geometry.width, object.geometry.height)}
           fill={colors.fill}
           stroke={colors.border}
           strokeWidth={strokeWidth}

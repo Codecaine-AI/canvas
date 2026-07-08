@@ -6,12 +6,7 @@ import { CONNECTOR_DASH_PATTERN_PX } from "../connector/def";
 import { BBOX_OUTLINE } from "../geometry";
 import { resolveObjectBorderWidth } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
-import {
-  TITLE_CHIP,
-  TITLE_CHIP_TEXT_SLOT,
-  titleChipMaxWidthPx,
-  titleChipScale,
-} from "../text-slots";
+import { TITLE_CHIP, TITLE_CHIP_TEXT_SLOT } from "../text-slots";
 import { SECTION_TOOLBAR } from "./toolbar";
 
 /**
@@ -32,8 +27,8 @@ export const SECTION_GEOMETRY = {
  * have no centered text, no shadow, no edge ports, and their "border" is
  * literally the title chip's fill color (per spec, border = chip fill).
  *
- * `hideText` maps to hiding the title CHIP — the chip IS the section's
- * visible text, edited in place via the title-chip editor.
+ * CanvasStage owns the floating title chip layer; this renderer is only the
+ * section body/backdrop and optional dashed frame.
  */
 function SectionObjectView({
   object,
@@ -41,8 +36,6 @@ function SectionObjectView({
   dropTarget,
   bounds,
   editable,
-  hideText,
-  zoom = 1,
   onObjectSelect,
   onObjectContextMenu,
 }: ObjectRenderProps) {
@@ -57,7 +50,6 @@ function SectionObjectView({
   });
   const renderedStrokeWidth = object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx;
   const title = object.text;
-  const titleScale = titleChipScale(zoom);
   return (
     <button
       type="button"
@@ -72,6 +64,7 @@ function SectionObjectView({
       data-selected={selected ? "true" : undefined}
       data-drop-target={dropTarget ? "true" : undefined}
       data-editable={(editable ?? Boolean(onObjectSelect)) ? "true" : undefined}
+      aria-label={title}
       style={{
         left: `${object.geometry.x}px`,
         top: `${object.geometry.y}px`,
@@ -123,26 +116,6 @@ function SectionObjectView({
           />
         </svg>
       ) : null}
-      {!hideText && (
-        <span
-          className="interactive-canvas-section-title-chip"
-          data-canvas-section-title-chip={object.id}
-          style={{
-            left: `${TITLE_CHIP.insetFromSectionCornerPx - borderWidth}px`,
-            top: `${TITLE_CHIP.insetFromSectionCornerPx - borderWidth}px`,
-            background: family.chip.fill,
-            borderColor: family.chip.border,
-            maxWidth: `${titleChipMaxWidthPx(object.geometry.width, titleScale)}px`,
-            ...(titleScale !== 1
-              ? {
-                  transform: `scale(${titleScale})`,
-                }
-              : {}),
-          }}
-        >
-          <span>{title}</span>
-        </span>
-      )}
     </button>
   );
 }
@@ -152,8 +125,8 @@ export const sectionDef: ObjectDef = {
   render: SectionObjectView,
   css: `
         /* W2 — section: tint fill, subtle border (= chip fill), no shadow, no
-           button-style chrome; the floating title chip is a separate
-           absolutely-positioned child. */
+           button-style chrome; the floating title chip renders in CanvasStage's
+           section-header layer. */
         .interactive-canvas-object-section {
           border-style: solid;
           border-width: ${SECTION_GEOMETRY.borderWidthPx}px;

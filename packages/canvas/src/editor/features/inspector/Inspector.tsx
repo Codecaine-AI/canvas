@@ -6,7 +6,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
-  CheckIcon,
+  FitToContentIcon,
   GitBranchIcon,
   MessageSquareIcon,
   PlusIcon,
@@ -25,10 +25,13 @@ import { CANVAS_COLORS } from "../../../state/schema";
 import type {
   CanvasColor,
   InteractiveCanvasConnection,
+  InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../../state/schema";
+import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 
 export interface InspectorProps {
+  document: InteractiveCanvasDocument;
   lastChange: CanvasChangeSummary | undefined;
   selectedObject: InteractiveCanvasObject | undefined;
   selectedConnection: InteractiveCanvasConnection | undefined;
@@ -39,6 +42,7 @@ export interface InspectorProps {
 }
 
 export function Inspector({
+  document,
   lastChange,
   selectedObject,
   selectedConnection,
@@ -47,6 +51,8 @@ export function Inspector({
   applyColorToSelection,
 }: InspectorProps) {
   const [annotationBody, setAnnotationBody] = useState("");
+  const selectedSectionFitted =
+    selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
 
   const addAnnotation = () => {
     const body = annotationBody.trim();
@@ -188,14 +194,18 @@ export function Inspector({
             type="button"
             variant="outline"
             className="justify-start"
-            onClick={() =>
-              dispatch({
-                type: "canvas.fitSectionToChildren",
+            aria-disabled={selectedSectionFitted}
+            disabled={selectedSectionFitted}
+            onClick={() => {
+              if (selectedSectionFitted) return;
+              animateSectionFitToChildren({
+                document,
+                dispatch,
                 sectionId: selectedObject.id,
-              })
-            }
+              });
+            }}
           >
-            <CheckIcon className="h-4 w-4" />
+            <FitToContentIcon className="h-4 w-4" />
             Fit children
           </Button>
         )}

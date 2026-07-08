@@ -14,10 +14,10 @@ import {
  * live preview editor. The draft string remains raw markdown while editing;
  * only this closed token model decides how that source is visually decorated.
  *
- * Scope, deliberately closed: H1–H3 (`#`/`##`/`###` line prefixes), `- `
- * bullets, `**bold**`, and inline `` `code` ``. Nothing else — no links, no
- * images, no tables, no nesting (a heading line is a heading, a bullet line
- * is a bullet; inline marks apply within either).
+ * Scope, deliberately closed: H1–H3 (`#`/`##`/`###` line prefixes),
+ * structural two-space indentation, `- ` bullets, `**bold**`, and inline
+ * `` `code` ``. Nothing else — no links, no images, no tables (a heading line
+ * is a heading, a bullet line is a bullet; inline marks apply within either).
  */
 
 export const STICKY_MARKDOWN_LINE_HEIGHT_PX = 36;
@@ -39,6 +39,29 @@ const HEADING_STYLE: Record<1 | 2 | 3, { fontSize: string; lineHeight: string }>
   2: { fontSize: "1.25em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[2]}px` },
   3: { fontSize: "1.1em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[3]}px` },
 };
+
+type StickyMarkdownLineAttrs = {
+  "data-line-depth": string;
+  "data-bullet"?: "true";
+  "data-bullet-glyph"?: "1" | "2" | "3";
+};
+
+/**
+ * Shared D14 line attributes for at-rest and live-editor line rendering.
+ * Visual indentation clamps at depth 5, while bullet glyph buckets keep depth
+ * 2+ visually stable.
+ */
+export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdownLineAttrs {
+  const depth = line.depth;
+  const attrs: StickyMarkdownLineAttrs = {
+    "data-line-depth": String(Math.min(depth, 5)),
+  };
+  if (line.kind === "bullet") {
+    attrs["data-bullet"] = "true";
+    attrs["data-bullet-glyph"] = depth === 0 ? "1" : depth === 1 ? "2" : "3";
+  }
+  return attrs;
+}
 
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
 function renderInline(tokens: readonly StickyMarkdownInlineToken[]): ReactNode[] {
@@ -73,6 +96,7 @@ function renderLine(line: StickyMarkdownLine): ReactNode {
         key={line.index}
         className="interactive-canvas-sticky-line"
         data-heading={level}
+        {...stickyMarkdownLineAttrs(line)}
         style={{ ...HEADING_STYLE[level], fontWeight: 700 }}
       >
         {renderInline(line.inline)}
@@ -84,7 +108,7 @@ function renderLine(line: StickyMarkdownLine): ReactNode {
       // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
       key={line.index}
       className="interactive-canvas-sticky-line"
-      data-bullet={line.kind === "bullet" ? "true" : undefined}
+      {...stickyMarkdownLineAttrs(line)}
     >
       {/* A blank line keeps its line box (nbsp) so at-rest paragraph spacing
           matches the raw-source line count the editor shows (D14). */}

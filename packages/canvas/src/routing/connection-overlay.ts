@@ -9,7 +9,8 @@
  *
  * This module lifts the ALGORITHM only: the `renderConnector` decision
  * cascade (anchor snap within a screen-px radius, else nearest-outline-point
- * within a world-px radius, else inside-the-shape, else free point). No
+ * within a world-px radius, else inside eligible non-frame shapes, else free
+ * point). No
  * `Overlay`/canvas-paint code, no `GfxController`/grid search.
  *
  * The per-object outline polygons and 4-cardinal anchor projection the
@@ -68,6 +69,13 @@ export type ConnectionCascadeResult =
   | { kind: "inside"; objectId: string }
   | { kind: "free"; point: CanvasPoint };
 
+function canResolveInsideTier(candidate: InteractiveCanvasObject): boolean {
+  // Sections are grouping frames: empty interior space should behave like free
+  // canvas for connector creation/re-drag, while their edges remain connectable
+  // through the anchor and outline tiers above.
+  return candidate.type !== "section";
+}
+
 /**
  * Ported from upstream `ConnectionOverlay.renderConnector`'s decision cascade.
  * Given the current pointer `point` (world space) and the full list of
@@ -80,8 +88,10 @@ export type ConnectionCascadeResult =
  *      SCREEN distance is < ANCHOR_SNAP_VIEW_PX;
  *   3. else snap to the nearest outline point if its WORLD distance is <
  *      OUTLINE_SNAP_WORLD_PX;
- *   4. else, if the pointer is inside the shape, connect to its center
- *      (id-only, no explicit `position`);
+ *   4. else, if the pointer is inside an eligible non-frame shape, connect
+ *      to its center (id-only, no explicit `position`); section/frame
+ *      interiors deliberately stay free while their anchors/outlines remain
+ *      valid snap targets;
  *   5. else (pointer near but outside, beyond both snap radii) the object
  *      doesn't win and the loop continues to the next candidate.
  *
@@ -130,7 +140,7 @@ export function resolveConnectionCascade(
       };
     }
 
-    if (pointInPolygon(point, polygon)) {
+    if (canResolveInsideTier(candidate) && pointInPolygon(point, polygon)) {
       return { kind: "inside", objectId: candidate.id };
     }
   }

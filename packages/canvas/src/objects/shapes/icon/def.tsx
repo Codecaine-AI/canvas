@@ -16,8 +16,8 @@ import { SHAPE_TOOLBAR } from "../toolbar";
  */
 function IconObjectView(props: ObjectRenderProps) {
   const { object, hideText } = props;
-  // P1/D13 — no fixed/inert-default carve-outs: the glyph takes the object's
-  // resolved palette fill plus ink border like every other shape.
+  // P1/D13 — no fixed/inert-default carve-outs: fill paints glyph interiors
+  // and stroke is ink like every other shape.
   const colors = resolveObjectRoleColors(object, "shape") as ResolvedShapeObjectColors;
 
   return (
@@ -36,7 +36,7 @@ function IconObjectView(props: ObjectRenderProps) {
     >
       {/* W5/Wave C — `icon` shape: IconShapeBody paints the glyph; the text
           renders through the shared "below" slot preset. Colors (P1/D13): resolved palette pick —
-          fill = pastel chip; stroke = ink. */}
+          fill paints glyph interiors; stroke is ink. */}
       <IconShapeBody
         object={object}
         colors={{

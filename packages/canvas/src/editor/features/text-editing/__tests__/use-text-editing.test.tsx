@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, renderHook } from "@testing-library/react";
+import { routeConnection } from "../../../../routing/routing";
 import type { CanvasAction } from "../../../../state/actions";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
 import { useTextEditing } from "../use-text-editing";
@@ -49,7 +50,16 @@ const document: InteractiveCanvasDocument = {
       style: { shape: "plus" },
     },
   ],
-  connections: [],
+  connections: [
+    {
+      id: "connection-a",
+      from: { objectId: "shape-a", anchor: "right" },
+      to: { objectId: "person-a", anchor: "left" },
+      label: "Old connector label",
+      style: "solid",
+      arrow: "forward",
+    },
+  ],
 };
 
 function setup() {
@@ -161,5 +171,58 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
 
     expect(result.current.objectTextEditId).toBeNull();
     expect(result.current.objectTextEditTarget).toBeUndefined();
+  });
+});
+
+describe("useTextEditing connector labels", () => {
+  it("opens connector label editing at the routed midpoint and commits through updateConnection", () => {
+    const { result, dispatch } = setup();
+    const connection = document.connections[0]!;
+    const fromObject = document.objects.find((object) => object.id === connection.from.objectId)!;
+    const toObject = document.objects.find((object) => object.id === connection.to.objectId)!;
+    const routed = routeConnection(fromObject, toObject, connection, document.objects);
+
+    act(() => {
+      result.current.openConnectionLabelEditor("connection-a");
+    });
+
+    expect(result.current.labelEditConnectionId).toBe("connection-a");
+    expect(result.current.labelEditValue).toBe("Old connector label");
+    expect(result.current.labelEditPoint).toEqual(routed.labelPoint);
+
+    act(() => {
+      result.current.setLabelEditValue("New connector label");
+    });
+    act(() => {
+      result.current.commitConnectionLabel();
+    });
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "canvas.updateConnection",
+      connectionId: "connection-a",
+      patch: { label: "New connector label" },
+    });
+    expect(result.current.labelEditConnectionId).toBeNull();
+  });
+
+  it("commits an empty connector label as undefined", () => {
+    const { result, dispatch } = setup();
+
+    act(() => {
+      result.current.openConnectionLabelEditor("connection-a");
+    });
+    act(() => {
+      result.current.setLabelEditValue("   ");
+    });
+    act(() => {
+      result.current.commitConnectionLabel();
+    });
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "canvas.updateConnection",
+      connectionId: "connection-a",
+      patch: { label: undefined },
+    });
   });
 });

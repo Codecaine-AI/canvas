@@ -7,9 +7,14 @@
  * document + a world point/bounds, so it's independently unit-testable.
  */
 import { connectionBoundsForObject, outlineContainsPoint } from "../objects/geometry";
+import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 import { paintOrderedObjects } from "../state/z-order";
+
+export type HitTestOptions = {
+  zoom?: number;
+};
 
 export function objectGeometryMap(
   document: InteractiveCanvasDocument,
@@ -50,6 +55,10 @@ export function descendantIds(document: InteractiveCanvasDocument, containerId: 
  * Hit-tests world point against document objects, topmost-first by the same
  * paint order used by CanvasStage.
  *
+ * Section title chips render in their own z layer above all canvas objects,
+ * so their zoom-scaled world rects get a first pass before ordinary object
+ * outlines.
+ *
  * D16 (P3): hits respect each object's def-declared outline
  * (objects/geometry.ts outlineContainsPoint) — a diamond's empty corners fall
  * through to whatever is behind. The bbox check doubles as the fast reject
@@ -59,8 +68,18 @@ export function descendantIds(document: InteractiveCanvasDocument, containerId: 
 export function hitTestObjects(
   document: InteractiveCanvasDocument,
   worldPoint: CanvasPoint,
+  options: HitTestOptions = {},
 ): InteractiveCanvasObject | null {
   const objects = paintOrderedObjects(document);
+  const zoom = options.zoom ?? 1;
+  for (let index = objects.length - 1; index >= 0; index -= 1) {
+    const object = objects[index]!;
+    if (object.type !== "section") continue;
+    const { x, y, width, height } = sectionTitleChipWorldRect(object, zoom);
+    const insideChip =
+      worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
+    if (insideChip) return object;
+  }
   for (let index = objects.length - 1; index >= 0; index -= 1) {
     const object = objects[index]!;
     // Below-slot text lives outside stored geometry but remains part of the

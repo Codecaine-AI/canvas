@@ -19,7 +19,6 @@ import { canvasSurfaceStyle } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector } from "./connectors/Connector";
-import { ConnectionLabelChip } from "./connectors/ConnectionLabelChip";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
 import { AnchorDots, type ActivePort } from "./overlays/AnchorDots";
@@ -28,6 +27,7 @@ import { PlacePreview } from "./overlays/PlacePreview";
 import { SnapGuideLine } from "./overlays/SnapGuideLine";
 import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
+import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import type { CanvasTool } from "../state/actions";
 import { quickConnectClickPoint } from "../interaction/gestures/connectors";
 
@@ -154,6 +154,9 @@ export interface CanvasStageProps {
  * while non-section-vs-non-section order never changes from the document's
  * natural order.
  *
+ * CanvasStage splits that paint order into a five-layer world stack:
+ * section 0 < connector 1 < object 2 < section header 3 < world overlay 4.
+ *
  * Depth is the length of a section's `parentId` ancestor chain (root
  * sections are depth 0). Sections are the only legal parent type, so every
  * ancestor on the chain is a section.
@@ -184,9 +187,13 @@ export { annotationTargetLabel, renderOrderedObjects, ObjectShape, SelectionBox 
  *    so the dot pitch stays legible whether zoomed far out or in close.
  *  - a single transformed "world layer" (`translate(-x*zoom, -y*zoom) scale(zoom)`,
  *    transform-origin 0 0) containing:
- *      - an SVG connector layer (overflow visible, absolutely positioned,
- *        drawn in raw world units — the parent transform handles scaling)
- *      - DOM object shapes positioned with raw world px left/top/width/height
+ *      - section backdrops at z 0
+ *      - an SVG connector layer at z 1 (overflow visible, absolutely
+ *        positioned, drawn in raw world units — the parent transform handles
+ *        scaling)
+ *      - non-section DOM object shapes at z 2
+ *      - section title chips at z 3
+ *      - world overlays/editors at z 4
  *  - an untransformed screen-space `overlay` slot: SelectionBox (handles),
  *    marquee rect, and (future) snap guides / spacing chips / drop-target glow.
  */
@@ -229,6 +236,8 @@ export function CanvasStage({
   // legible at both extremes instead of the fixed-32px grid disappearing when
   // zoomed out or turning into a dense hatch when zoomed in.
   const grid = gridBackground(zoom, { x: viewport.x, y: viewport.y });
+  const orderedObjects = renderOrderedObjects(document.objects);
+  const orderedSections = orderedObjects.filter((object) => object.type === "section");
 
   const dropTargetId = interactionOverlay?.dropTargetId;
   const handToolActive = activeTool === "hand";
@@ -366,10 +375,11 @@ export function CanvasStage({
         }}
       >
         {/*
-          W4 z-layering: connectors paint ABOVE section fills (z 1 vs the
-          sections' z 0) but BELOW every non-section shape (z 2) — matching
-          FigJam, where a connector crossing a section/card backdrop stays
-          visible instead of being buried under the tint. See objectStyle.
+          W4 z-layering: section fills (z 0) < connectors (z 1) <
+          non-section objects (z 2) < section title chips (z 3) < world
+          overlays/editors (z 4). Connectors stay visible over section tint,
+          ordinary objects stay above connectors, and section headers float
+          FigJam-style above all canvas objects.
         */}
         <svg
           className="interactive-canvas-layer pointer-events-none"
@@ -461,7 +471,7 @@ export function CanvasStage({
             onCanvasContextMenu(event, bounds);
           }}
         >
-          {renderOrderedObjects(document.objects).map((object) => (
+          {orderedObjects.map((object) => (
             <ObjectShape
               key={object.id}
               object={object}
@@ -480,8 +490,26 @@ export function CanvasStage({
         </div>
         <div
           className="interactive-canvas-layer"
-          data-canvas-world-overlay-layer="true"
+          data-canvas-section-header-layer="true"
           style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 3 }}
+        >
+          {orderedSections.map((section) =>
+            editingTextObjectId === section.id ? null : (
+              <SectionTitleChip
+                key={section.id}
+                section={section}
+                zoom={zoom}
+                bounds={bounds}
+                onObjectSelect={onObjectSelect}
+                onObjectContextMenu={onObjectContextMenu}
+              />
+            ),
+          )}
+        </div>
+        <div
+          className="interactive-canvas-layer"
+          data-canvas-world-overlay-layer="true"
+          style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 4 }}
         >
           {/*
             Armed-tool ghost preview: the full draft object the placement will
@@ -505,21 +533,6 @@ export function CanvasStage({
               />
             </div>
           )}
-          {document.connections.map((connection) => {
-            const fromObject = objectById(document, connection.from.objectId);
-            const toObject = objectById(document, connection.to.objectId);
-            if (!fromObject || !toObject) return null;
-            return (
-              <ConnectionLabelChip
-                key={connection.id}
-                connection={connection}
-                fromObject={fromObject}
-                toObject={toObject}
-                obstacles={document.objects}
-                onDoubleClick={onConnectionDoubleClick}
-              />
-            );
-          })}
           {!handToolActive && worldOverlay}
         </div>
       </div>

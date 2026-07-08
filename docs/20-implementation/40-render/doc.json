@@ -324,7 +324,25 @@
           }
         },
         {
-          "insert": " computes the geometric layer-cake order before the scene is drawn: sections first by containment depth, then area descending, then stable schema index; non-sections keep schema order. See "
+          "insert": " computes the geometric layer-cake order before the scene is drawn: sections first by containment depth, then area descending, then stable schema index; non-sections keep schema order. CanvasStage splits the world-space tiers into section bodies at z 0, connector SVG at z 1, objects at z 2, the floating "
+        },
+        {
+          "insert": "data-canvas-section-header-layer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at z 3, and "
+        },
+        {
+          "insert": "worldOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at z 4. Section title chips are emitted into that header layer, not inline inside the section body renderer. See "
         },
         {
           "insert": "canvas-10-system-design-30-layering",

@@ -1,6 +1,4 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, render } from "@testing-library/react";
-import { createElement } from "react";
+import { describe, expect, it } from "bun:test";
 import {
   estimateTitleChipWidthPx,
   resolveTextSlot,
@@ -23,25 +21,6 @@ function makeSection(overrides: Partial<InteractiveCanvasObject> = {}): Interact
     ...overrides,
   } as InteractiveCanvasObject;
 }
-
-function renderSectionChip(object: InteractiveCanvasObject, zoom = 1): HTMLElement {
-  const view = render(
-    createElement(sectionDef.render, {
-      object,
-      selected: false,
-      changed: false,
-      bounds: { minX: 0, minY: 0, maxX: 1000, maxY: 1000 },
-      zoom,
-    }),
-  );
-  const chip = view.container.querySelector<HTMLElement>("[data-canvas-section-title-chip]");
-  expect(chip).not.toBeNull();
-  return chip!;
-}
-
-afterEach(() => {
-  cleanup();
-});
 
 describe("section title chip scale", () => {
   it("keeps natural size at zoom 1 and when zoomed in", () => {
@@ -84,17 +63,6 @@ describe("section title chip scale", () => {
       expect(resolved.rect.width * resolved.scale).toBeLessThanOrEqual(
         object.geometry.width - TITLE_CHIP.insetFromSectionCornerPx * 2,
       );
-    }
-  });
-
-  it("applies the at-rest chip max-width at natural and zoomed-out scales", () => {
-    const object = makeSection({ geometry: { x: 0, y: 0, width: 120, height: 90 } });
-
-    for (const zoom of [1, 0.25]) {
-      const scale = titleChipScale(zoom);
-      const chip = renderSectionChip(object, zoom);
-      expect(chip.style.maxWidth).toBe(`${titleChipMaxWidthPx(object.geometry.width, scale)}px`);
-      expect(chip.style.transform).toBe(scale === 1 ? "" : `scale(${scale})`);
     }
   });
 

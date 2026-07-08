@@ -83,24 +83,82 @@ export const stickyDef: ObjectDef = {
         .interactive-canvas-sticky-line {
           display: block;
         }
-        .interactive-canvas-sticky-line[data-bullet="true"] {
-          position: relative;
-          padding-left: 1em;
-        }
-        .interactive-canvas-sticky-line[data-bullet="true"]::before {
-          content: "•";
-          position: absolute;
-          left: 0;
-        }
         /*
-         * The live editor shows the active line's raw "- " marker; suppress
-         * the decorative bullet there so the marker is not doubled.
+         * D14 line layout is keyed by the shared renderer/editor attrs.
+         * Visual padding clamps at depth 5; bullet glyphs bucket depth 2+
+         * together. Center markers in a 1em gutter so glyph side bearings do
+         * not shift gaps.
          */
-        .interactive-canvas-sticky-line[data-bullet="true"][data-sticky-markdown-line-active="true"] {
+        .interactive-canvas-sticky-line[data-line-depth="0"] {
           padding-left: 0;
         }
-        .interactive-canvas-sticky-line[data-bullet="true"][data-sticky-markdown-line-active="true"]::before {
-          content: none;
+        .interactive-canvas-sticky-line[data-line-depth="1"] {
+          padding-left: 1em;
+        }
+        .interactive-canvas-sticky-line[data-line-depth="2"] {
+          padding-left: 2em;
+        }
+        .interactive-canvas-sticky-line[data-line-depth="3"] {
+          padding-left: 3em;
+        }
+        .interactive-canvas-sticky-line[data-line-depth="4"] {
+          padding-left: 4em;
+        }
+        .interactive-canvas-sticky-line[data-line-depth="5"] {
+          padding-left: 5em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"] {
+          position: relative;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"]::before {
+          position: absolute;
+          width: 1em;
+          text-align: center;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="0"] {
+          padding-left: 1em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="0"]::before {
+          left: 0;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="1"] {
+          padding-left: 2em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="1"]::before {
+          left: 1em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="2"] {
+          padding-left: 3em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="2"]::before {
+          left: 2em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="3"] {
+          padding-left: 4em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="3"]::before {
+          left: 3em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="4"] {
+          padding-left: 5em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="4"]::before {
+          left: 4em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="5"] {
+          padding-left: 6em;
+        }
+        .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="5"]::before {
+          left: 5em;
+        }
+        .interactive-canvas-sticky-line[data-bullet-glyph="1"]::before {
+          content: "•";
+        }
+        .interactive-canvas-sticky-line[data-bullet-glyph="2"]::before {
+          content: "◦";
+        }
+        .interactive-canvas-sticky-line[data-bullet-glyph="3"]::before {
+          content: "▪";
         }
 `,
   // Stamped from the schema-vocabulary defaults leaf (P4) like every def.

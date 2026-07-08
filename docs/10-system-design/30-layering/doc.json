@@ -21,6 +21,10 @@
         "b-layering-stack-heading-11",
         "b-layering-stack-body-12",
         "b-layering-stack-code-13",
+        "b-layering-section-headers-heading-35",
+        "b-layering-section-headers-body-36",
+        "b-layering-section-headers-render-37",
+        "b-layering-section-headers-hit-testing-38",
         "b-layering-demo-canvas-14",
         "b-layering-reconcile-heading-15",
         "b-layering-reconcile-body-16",
@@ -51,6 +55,7 @@
           "section membership",
           "parentId",
           "SECTION_CAPTURE_OVERLAP_THRESHOLD",
+          "section header layer",
           "paintOrderedObjects",
           "hit testing",
           "migrateSectionMembership"
@@ -309,7 +314,7 @@
           }
         },
         {
-          "insert": ". Every section paints before every non-section. Among sections, containment depth sorts ascending, then area sorts descending so bigger same-depth sections sink behind smaller ones, then the original schema index is the stable final tie-breaker. Non-sections keep schema order. The CSS tiers stay unchanged: section backdrops at z 0, connectors at z 1, shapes at z 2."
+          "insert": ". Every section paints before every non-section. Among sections, containment depth sorts ascending, then area sorts descending so bigger same-depth sections sink behind smaller ones, then the original schema index is the stable final tie-breaker. Non-sections keep schema order. The CSS tiers are: section bodies at z 0, connector SVG at z 1, objects at z 2, section headers at z 3, and world overlay at z 4."
         }
       ]
     },
@@ -322,7 +327,150 @@
       },
       "text": [
         {
-          "insert": "sections:\n  depth ascending\n  area descending\n  schema index ascending\nnon-sections:\n  schema order\ncss tiers:\n  section backdrops z 0\n  connectors z 1\n  shapes z 2"
+          "insert": "sections:\n  depth ascending\n  area descending\n  schema index ascending\nnon-sections:\n  schema order\ncss tiers:\n  section bodies z 0\n  connector SVG z 1\n  objects z 2\n  section headers z 3\n  world overlay z 4"
+        }
+      ]
+    },
+    "b-layering-section-headers-heading-35": {
+      "id": "b-layering-section-headers-heading-35",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Floating section headers"
+        }
+      ]
+    },
+    "b-layering-section-headers-body-36": {
+      "id": "b-layering-section-headers-body-36",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Section title chips follow FigJam parity: the header should stay readable and clickable in full view even when stickies, shapes, or connectors occupy the section body. The old inline chip was trapped inside the section button's z 0 stacking context and "
+        },
+        {
+          "insert": "overflow: hidden",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so it could paint under content or be clipped by its own body."
+        }
+      ]
+    },
+    "b-layering-section-headers-render-37": {
+      "id": "b-layering-section-headers-render-37",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " now emits a world-space "
+        },
+        {
+          "insert": "data-canvas-section-header-layer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at z 3, with one title chip per section in section paint order so nested section chips sit above their parents. The chip view still uses "
+        },
+        {
+          "insert": "TITLE_CHIP",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "symbol": "TITLE_CHIP"
+            }
+          }
+        },
+        {
+          "insert": " as the single geometry source and counter-scales through "
+        },
+        {
+          "insert": "titleChipScale",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It carries "
+        },
+        {
+          "insert": "data-canvas-object-id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so the DOM hit path resolves chip clicks and drags to the section, plus "
+        },
+        {
+          "insert": "data-canvas-section-title-chip",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for double-click rename."
+        }
+      ]
+    },
+    "b-layering-section-headers-hit-testing-38": {
+      "id": "b-layering-section-headers-hit-testing-38",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Hit-testing agrees with the visual layer. Chip hits bypass the "
+        },
+        {
+          "insert": "outlineContainsPoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " veto in "
+        },
+        {
+          "insert": "resolveHit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " because a low-zoom, counter-scaled chip can extend past the section rectangle. The geometric fallback "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " also runs a first pass over chip rects, so a click on a visible title chip selects its section even when the chip overlaps a foreign object."
         }
       ]
     },

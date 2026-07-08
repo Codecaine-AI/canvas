@@ -1,8 +1,6 @@
 "use client";
 
 import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
-/** Approximate on-canvas icon-object size the glyph stroke is tuned for (moved from theme/tokens.ts in the theme dispersal). */
-const ICON_APPROX_SIZE_PX = 130;
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
 /**
@@ -20,7 +18,7 @@ export type IconShapeBodyObject = Pick<InteractiveCanvasObject, "icon"> & {
 export type IconShapeBodyColors = {
   /** Glyph stroke color (falls back to a sensible neutral if omitted). */
   stroke?: string;
-  /** Optional fill behind the glyph's bounding square; glyph paths themselves stay fill="none". */
+  /** Optional fill painted into the glyph's own interiors. */
   fill?: string;
 };
 
@@ -34,12 +32,20 @@ function renderGlyphElement(element: IconGlyphElement, key: number) {
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
 
+function isFillGlyphElement(element: IconGlyphElement) {
+  return element.kind === "path" || element.kind === "circle";
+}
+
+function glyphElementHasClosedInterior(element: IconGlyphElement) {
+  return element.kind === "circle" || (element.kind === "path" && /[zZ]/.test(element.d));
+}
+
 /**
  * Pure presentational body for the `icon` shape family: renders the resolved
- * glyph, centered. The object's text renders separately through the shared
- * "below" text slot (objects/text-slots.ts — bold black text in the band
- * under the glyph), so this component
- * is glyph-only since the P2 text unification.
+ * glyph, centered, with optional fill inside the glyph's own interiors. The
+ * object's text renders separately through the shared "below" text slot
+ * (objects/text-slots.ts — bold black text in the band under the glyph), so
+ * this component is glyph-only since the P2 text unification.
  *
  * The caller (`objects/shapes/icon/def.tsx`) is responsible for the outer
  * button/positioning chrome, matching how other shape bodies are composed.
@@ -55,6 +61,12 @@ export function IconShapeBody({
   const glyph = glyphId ? ICON_GLYPHS[glyphId] : undefined;
   const stroke = colors?.stroke ?? "#1D1D1D";
   const fill = colors?.fill;
+  // SVG fills open paths by chord-closing them. For mixed glyphs those chords
+  // are either overpainted by a later same-color container fill in this layer,
+  // hidden under the element's own ink stroke, or are the intended interior
+  // (archive/database/coin/package). All-open line-art glyphs would expose
+  // naked chord-fill triangles, so gate fills on at least one closed element.
+  const shouldRenderFillLayer = Boolean(fill && glyph?.elements.some(glyphElementHasClosedInterior));
 
   return (
     <div
@@ -65,7 +77,6 @@ export function IconShapeBody({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "8px",
         width: "100%",
         height: "100%",
         pointerEvents: "none",
@@ -73,8 +84,7 @@ export function IconShapeBody({
     >
       <svg
         viewBox={glyph ? `0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}` : "0 0 18 18"}
-        width={ICON_APPROX_SIZE_PX * 0.55}
-        height={ICON_APPROX_SIZE_PX * 0.55}
+        style={{ width: "100%", height: "100%" }}
         fill="none"
         stroke={stroke}
         strokeWidth={ICON_GLYPH_STROKE_WIDTH}
@@ -83,17 +93,14 @@ export function IconShapeBody({
         aria-hidden="true"
         data-canvas-icon-glyph={glyph?.id ?? "unknown"}
       >
-        {fill ? (
-          <rect
-            x={0}
-            y={0}
-            width={glyph?.viewBoxSize ?? 18}
-            height={glyph?.viewBoxSize ?? 18}
-            fill={fill}
-            stroke="none"
-          />
+        {shouldRenderFillLayer ? (
+          <g data-canvas-icon-fill-layer="" fill={fill} stroke="none">
+            {glyph?.elements.map((element, index) => (isFillGlyphElement(element) ? renderGlyphElement(element, index) : null))}
+          </g>
         ) : null}
-        {glyph?.elements.map((element, index) => renderGlyphElement(element, index))}
+        <g data-canvas-icon-ink-layer="">
+          {glyph?.elements.map((element, index) => renderGlyphElement(element, index))}
+        </g>
       </svg>
     </div>
   );

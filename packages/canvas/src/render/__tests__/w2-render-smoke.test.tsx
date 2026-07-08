@@ -4,7 +4,7 @@ import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
 import { CanvasStage } from "../CanvasStage";
 import { OBJECT_DEFS_CSS } from "../../objects/object-def";
-import { titleChipScale } from "../../objects/text-slots";
+import { TITLE_CHIP, titleChipMaxWidthPx, titleChipScale } from "../../objects/text-slots";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDocument;
@@ -82,12 +82,58 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
       const outer = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
       expect(outer).toBeTruthy();
-      expect(outer!.textContent).toContain("Memory pipeline");
+      const outerChip = container.querySelector(
+        '[data-canvas-section-header-layer="true"] [data-canvas-section-title-chip="outer-section"]',
+      ) as HTMLElement | null;
+      expect(outerChip?.textContent).toContain("Memory pipeline");
 
       const inner = container.querySelector('[data-canvas-object-id="inner-section"]') as HTMLElement | null;
       expect(inner).toBeTruthy();
-      expect(inner!.textContent).toContain("New memory");
+      const innerChip = container.querySelector(
+        '[data-canvas-section-header-layer="true"] [data-canvas-section-title-chip="inner-section"]',
+      ) as HTMLElement | null;
+      expect(innerChip?.textContent).toContain("New memory");
     });
+  });
+
+  it("renders section title chips in the z3 header layer above objects and below world overlays", () => {
+    const { container } = render(
+      <CanvasStage document={sectionTitleScaleDocument} viewport={{ x: 0, y: 0, zoom: 1 }} />,
+    );
+
+    const headerLayer = container.querySelector('[data-canvas-section-header-layer="true"]') as HTMLElement | null;
+    const worldOverlay = container.querySelector('[data-canvas-world-overlay-layer="true"]') as HTMLElement | null;
+    const objectLayerChip = container.querySelector(
+      '[data-canvas-object-layer="true"] [data-canvas-section-title-chip="wide-section"]',
+    );
+    const chip = headerLayer?.querySelector(
+      '[data-canvas-section-title-chip="wide-section"]',
+    ) as HTMLElement | null;
+
+    expect(headerLayer).toBeTruthy();
+    expect(headerLayer!.style.zIndex).toBe("3");
+    expect(headerLayer!.style.pointerEvents).toBe("none");
+    expect(worldOverlay).toBeTruthy();
+    expect(worldOverlay!.style.zIndex).toBe("4");
+    expect(objectLayerChip).toBeNull();
+    expect(chip).toBeTruthy();
+    expect(chip!.getAttribute("data-canvas-object-id")).toBe("wide-section");
+    expect(chip!.style.pointerEvents).toBe("auto");
+    expect(chip!.style.left).toBe(`${100 + TITLE_CHIP.insetFromSectionCornerPx}px`);
+    expect(chip!.style.top).toBe(`${80 + TITLE_CHIP.insetFromSectionCornerPx}px`);
+  });
+
+  it("hides the section title chip while that section title is being edited", () => {
+    const { container } = render(
+      <CanvasStage
+        document={sectionTitleScaleDocument}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        editingTextObjectId="wide-section"
+      />,
+    );
+
+    expect(container.querySelector('[data-canvas-object-id="wide-section"]')).toBeTruthy();
+    expect(container.querySelector('[data-canvas-section-title-chip="wide-section"]')).toBeNull();
   });
 
   it("counter-scales section title chips only when zoomed out", () => {
@@ -114,7 +160,9 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     expect(scaledChip!.style.transform).toBe(`scale(${expectedScale})`);
     // Width budget: the scaled chip may span the section's inner width
     // (2000 - 2*3 inset) but no further; overflow ellipsizes via CSS.
-    expect(scaledChip!.style.maxWidth).toBe(`${(2000 - 6) / expectedScale}px`);
+    expect(scaledChip!.style.maxWidth).toBe(
+      `${titleChipMaxWidthPx(sectionTitleScaleDocument.objects[0]!.geometry.width, expectedScale)}px`,
+    );
   });
 
   it("renders a section color pick with dashed border style through the section role cells", () => {
@@ -164,7 +212,9 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
-      const allObjectNodes = Array.from(container.querySelectorAll("[data-canvas-object-id]"));
+      const allObjectNodes = Array.from(
+        container.querySelectorAll('[data-canvas-object-layer="true"] [data-canvas-object-id]'),
+      );
       const sectionIndex = allObjectNodes.findIndex(
         (node) => node.getAttribute("data-canvas-object-id") === "outer-section",
       );

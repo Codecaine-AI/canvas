@@ -164,6 +164,7 @@ export function InteractiveCanvasEditor({
     document: state.document,
     dispatch,
     screenToWorld,
+    zoom: viewport.zoom,
   });
   const {
     isContextMenuOpen,
@@ -190,6 +191,7 @@ export function InteractiveCanvasEditor({
     viewport,
     stageRef,
     openObjectTextEditor,
+    openConnectionLabelEditor,
   });
   const { applyColorToSelection } = selectionToolbar;
   const selectionContext = useMemo(
@@ -383,6 +385,7 @@ export function InteractiveCanvasEditor({
 
       {showInspector ? (
         <Inspector
+          document={state.document}
           lastChange={state.lastChange}
           selectedObject={selectedObject}
           selectedConnection={selectedConnection}

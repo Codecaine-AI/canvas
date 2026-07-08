@@ -20,10 +20,10 @@
       "color": "white",
       "parentId": null,
       "geometry": {
-        "x": 687.1046422441693,
-        "y": 433.5017998570172,
-        "width": 4895.5,
-        "height": 2031.5
+        "x": 768,
+        "y": 432,
+        "width": 4672,
+        "height": 1984
       },
       "style": {
         "shape": "section"
@@ -32,7 +32,7 @@
     {
       "id": "sticky-overall-context",
       "type": "sticky",
-      "text": "# Test\n\n- Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n- Who the client is, etc\n- EX “We are doing this interview to understand why someone would change pharmacies",
+      "text": "# Test\nThis is pretty nice\n- test\n## Testing\n- asdf\n  - asdf\n  - asd\n    - asdf\n### Testing\n\n- testing this\n- testing\n  - esketit\n\n\n- testing this new setup\n\n- Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n- Who the client is, etc\n- EX “We are doing this interview to understand why someone would change pharmacies",
       "color": "yellow",
       "parentId": "page-frame",
       "geometry": {
@@ -70,10 +70,10 @@
       "color": "green",
       "parentId": "page-frame",
       "geometry": {
-        "x": 1279.4683514553637,
-        "y": 492.9422944306086,
-        "width": 570,
-        "height": 1690
+        "x": 1328,
+        "y": 560,
+        "width": 496,
+        "height": 1616
       },
       "style": {
         "shape": "section"
@@ -275,12 +275,13 @@
       "id": "chip-generate-transition-response",
       "type": "icon",
       "text": "Generate Transition Response",
+      "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 2155.799687434696,
-        "y": 906.2702717946693,
+        "x": 2163.4020961193232,
+        "y": 1006.3120070271481,
         "width": 115.63728061962729,
-        "height": 162.98346302779896
+        "height": 114.52014974952954
       },
       "style": {
         "shape": "icon"
@@ -291,11 +292,11 @@
       "id": "chip-adapt-question",
       "type": "icon",
       "text": "Adapt Question Based on Interview History",
-      "color": "blue",
+      "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 2152.101996389208,
-        "y": 1380.5747258417998,
+        "x": 2159.9196991281815,
+        "y": 1412.2453985387233,
         "width": 131.9115328506541,
         "height": 144
       },
@@ -310,8 +311,8 @@
       "text": "AI Asks Question",
       "parentId": "section",
       "geometry": {
-        "x": 3235.213811718098,
-        "y": 538.7787577458772,
+        "x": 3204.4116165661508,
+        "y": 580.3711009734172,
         "width": 114,
         "height": 114
       },
@@ -324,12 +325,13 @@
       "id": "person-interviewee-response",
       "type": "icon",
       "text": "Interviewee Response",
+      "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3263.564579157857,
-        "y": 1196.2189537436932,
-        "width": 94.5,
-        "height": 87
+        "x": 3123.0397283801944,
+        "y": 1028.6186560545143,
+        "width": 276.75403010225455,
+        "height": 229.7540974149913
       },
       "style": {
         "shape": "icon"
@@ -342,8 +344,8 @@
       "text": "Generate Probing Question",
       "parentId": "section",
       "geometry": {
-        "x": 5303.981104712475,
-        "y": 1097.1366323435377,
+        "x": 5236.619569863951,
+        "y": 1084.576799441073,
         "width": 96,
         "height": 108
       },
@@ -359,8 +361,8 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3827.881377674128,
-        "y": 646.2652910562076,
+        "x": 3778.47886928408,
+        "y": 684.621410798547,
         "width": 1129.5,
         "height": 906
       },
@@ -375,8 +377,8 @@
       "color": "red",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4160.881377674126,
-        "y": 715.2652910562076,
+        "x": 3825.474690783733,
+        "y": 756.7415182320756,
         "width": 414,
         "height": 223.5
       },
@@ -392,8 +394,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3874.881377674128,
-        "y": 990.2652910562076,
+        "x": 3825.47886928408,
+        "y": 1028.621410798547,
         "width": 308,
         "height": 508
       },
@@ -408,8 +410,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3894.881377674128,
-        "y": 1040.2652910562076,
+        "x": 3845.47886928408,
+        "y": 1078.621410798547,
         "width": 268,
         "height": 66
       },
@@ -424,8 +426,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3894.881377674128,
-        "y": 1165.2652910562076,
+        "x": 3845.47886928408,
+        "y": 1203.621410798547,
         "width": 268,
         "height": 66
       },
@@ -440,8 +442,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3894.881377674128,
-        "y": 1290.2652910562076,
+        "x": 3845.47886928408,
+        "y": 1328.621410798547,
         "width": 268,
         "height": 66
       },
@@ -456,8 +458,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3894.881377674128,
-        "y": 1415.2652910562076,
+        "x": 3845.47886928408,
+        "y": 1453.621410798547,
         "width": 268,
         "height": 66
       },
@@ -472,8 +474,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4242.881377674126,
-        "y": 990.2652910562076,
+        "x": 4193.4788692840775,
+        "y": 1028.621410798547,
         "width": 666,
         "height": 514
       },
@@ -487,8 +489,8 @@
       "text": "class Memory(BaseModel):\n    id: str = Field(description=\"mem_0, mem_1, mem_n\")\n    content: str = Field(description=\"text of the memory\")",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4262.881377674126,
-        "y": 1030.2652910562076,
+        "x": 4213.478869284079,
+        "y": 1068.621410798547,
         "width": 626,
         "height": 170
       },
@@ -503,8 +505,8 @@
       "text": "{\n  \"id\": \"mem_0\",\n  \"content\": \"Likes pizza\"\n},\n{\n  \"id\": \"mem_1\",\n  \"content\": \"Doesn't like the cold\"\n},",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4262.881377674126,
-        "y": 1220.2652910562076,
+        "x": 4213.478869284079,
+        "y": 1258.621410798547,
         "width": 626,
         "height": 260
       },
@@ -520,8 +522,8 @@
       "color": "blue",
       "parentId": "section",
       "geometry": {
-        "x": 2131.172116361285,
-        "y": 2052.438134671549,
+        "x": 2132.870407406531,
+        "y": 2021.5792709697207,
         "width": 176,
         "height": 66
       },
@@ -536,8 +538,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2578.2712688265283,
-        "y": 1817.265399590421,
+        "x": 2528.8715854459006,
+        "y": 1869.0862235306033,
         "width": 348,
         "height": 100
       },
@@ -553,8 +555,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2578.273473891233,
-        "y": 1965.198868309794,
+        "x": 2528.870965501185,
+        "y": 2003.5549880521335,
         "width": 348,
         "height": 102.06166899741811
       },
@@ -570,8 +572,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2578.273473891233,
-        "y": 2117.260537307213,
+        "x": 2528.870965501185,
+        "y": 2155.6166570495525,
         "width": 348,
         "height": 100
       },
@@ -587,14 +589,13 @@
       "color": "red",
       "parentId": "section",
       "geometry": {
-        "x": 3062.7169451193427,
-        "y": 1930.7306530481078,
+        "x": 3031.915734729717,
+        "y": 1969.0815981552296,
         "width": 459,
         "height": 171
       },
       "style": {
-        "shape": "rounded-rect",
-        "strokeWidth": 8
+        "shape": "rounded-rect"
       }
     },
     {
@@ -604,8 +605,8 @@
       "color": "white",
       "parentId": "section",
       "geometry": {
-        "x": 3671.273473891233,
-        "y": 1770.2605373072138,
+        "x": 3621.870965501185,
+        "y": 1808.6166570495532,
         "width": 430,
         "height": 528
       },
@@ -620,8 +621,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3708.273473891233,
-        "y": 1817.2605373072129,
+        "x": 3658.870965501185,
+        "y": 1855.6166570495523,
         "width": 331,
         "height": 100
       },
@@ -637,8 +638,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3708.273473891233,
-        "y": 1967.2605373072122,
+        "x": 3658.870965501185,
+        "y": 2005.6166570495516,
         "width": 331,
         "height": 100
       },
@@ -654,8 +655,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3708.273473891233,
-        "y": 2117.260537307213,
+        "x": 3658.870965501185,
+        "y": 2155.6166570495525,
         "width": 331,
         "height": 100
       },
@@ -671,10 +672,10 @@
       "color": "red",
       "parentId": "page-frame",
       "geometry": {
-        "x": 1906.9065841788795,
-        "y": 460.86407374739724,
-        "width": 3528.726361070256,
-        "height": 1908.8122654765853
+        "x": 2064,
+        "y": 528,
+        "width": 3296,
+        "height": 1840
       },
       "style": {
         "shape": "section"
@@ -687,8 +688,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2748.7455676448917,
-        "y": 708.629487176335,
+        "x": 2699.3430592548434,
+        "y": 746.9856069186744,
         "width": 268.90181050103456,
         "height": 288.3141351017505
       },
@@ -704,8 +705,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2572.7455676448917,
-        "y": 804.629487176335,
+        "x": 2559.5201688609855,
+        "y": 898.4892441342156,
         "width": 225.3920472907589,
         "height": 282.6242476461332
       },
@@ -721,8 +722,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2391.893171158142,
-        "y": 1322.2156446249714,
+        "x": 2341.7932008100765,
+        "y": 1368.003591910323,
         "width": 233.57627231692913,
         "height": 238.47774875318942
       },
@@ -738,8 +739,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2688.271685790248,
-        "y": 1352.2659995037664,
+        "x": 2720.908216043393,
+        "y": 1390.6240913942343,
         "width": 128,
         "height": 128
       },
@@ -755,8 +756,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2862.271622571966,
-        "y": 1346.266231173497,
+        "x": 3010.6160838033643,
+        "y": 1390.6270817686122,
         "width": 128,
         "height": 128
       },
@@ -823,30 +824,11 @@
         ]
       },
       "to": {
-        "objectId": "chat-ai-asks-question",
+        "objectId": "chip-generate-transition-response",
         "anchor": "left"
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
-      "color": "gray"
-    },
-    {
-      "id": "conn-questions-to-generate-transition-response",
-      "from": {
-        "objectId": "card-questions",
-        "anchor": "right",
-        "position": [
-          1,
-          0.02
-        ]
-      },
-      "to": {
-        "objectId": "chip-generate-transition-response",
-        "anchor": "top"
-      },
-      "style": "solid",
-      "arrow": "none",
       "role": "flow",
       "color": "gray"
     },
@@ -863,7 +845,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "orange"
+      "color": "gray"
     },
     {
       "id": "conn-get-next-question-to-adapt-question",
@@ -878,7 +860,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "violet"
+      "color": "gray"
     },
     {
       "id": "conn-generate-probing-question-to-ai-asks-question",
@@ -923,17 +905,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "green",
-      "waypoints": [
-        [
-          3586.1446095660226,
-          1239.7189537436932
-        ],
-        [
-          3586.1446095660226,
-          1099.2652910562076
-        ]
-      ]
+      "color": "green"
     },
     {
       "id": "conn-interviewee-response-to-emphasis-box",
@@ -945,6 +917,7 @@
         "objectId": "emphasis-box-research-objective",
         "anchor": "top"
       },
+      "label": "Test",
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
@@ -1008,17 +981,7 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red",
-      "waypoints": [
-        [
-          2997.3634818156497,
-          2016.23
-        ],
-        [
-          2997.3634818156497,
-          1867.27
-        ]
-      ]
+      "color": "red"
     },
     {
       "id": "conn-emphasis-box-to-null-response",
@@ -1103,11 +1066,7 @@
       },
       "to": {
         "objectId": "chip-generate-probing-question",
-        "anchor": "bottom",
-        "position": [
-          0.8,
-          1
-        ]
+        "anchor": "bottom"
       },
       "style": "solid",
       "arrow": "forward",
@@ -1122,11 +1081,7 @@
       },
       "to": {
         "objectId": "chip-generate-probing-question",
-        "anchor": "bottom",
-        "position": [
-          0.8,
-          1
-        ]
+        "anchor": "bottom"
       },
       "style": "solid",
       "arrow": "forward",
@@ -1141,11 +1096,7 @@
       },
       "to": {
         "objectId": "chip-generate-probing-question",
-        "anchor": "bottom",
-        "position": [
-          0.8,
-          1
-        ]
+        "anchor": "bottom"
       },
       "style": "solid",
       "arrow": "forward",
@@ -1160,15 +1111,39 @@
       },
       "to": {
         "objectId": "chip-generate-probing-question",
-        "anchor": "left",
-        "position": [
-          0,
-          1
-        ]
+        "anchor": "left"
       },
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "icon-4",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "icon-5",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "connection-2",
+      "from": {
+        "objectId": "chip-generate-transition-response",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "chat-ai-asks-question",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
       "color": "gray"
     }
   ],

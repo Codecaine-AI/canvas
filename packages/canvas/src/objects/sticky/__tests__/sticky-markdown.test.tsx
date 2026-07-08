@@ -59,6 +59,49 @@ describe("sticky markdown", () => {
     ]);
   });
 
+  it("renders indented bullets with clamped depth and glyph attributes", () => {
+    const { container } = render(
+      <StickyMarkdown text={"- a\n  - b\n    - c\n          - deep\n            - deeper\n - x"} />,
+    );
+    const lines = Array.from(
+      container.querySelectorAll<HTMLElement>(".interactive-canvas-sticky-line"),
+    );
+    const bullets = lines.filter((line) => line.getAttribute("data-bullet") === "true");
+
+    expect(bullets).toHaveLength(5);
+    expect(bullets.map((line) => line.getAttribute("data-line-depth"))).toEqual([
+      "0",
+      "1",
+      "2",
+      "5",
+      "5",
+    ]);
+    expect(bullets.map((line) => line.getAttribute("data-bullet-glyph"))).toEqual([
+      "1",
+      "2",
+      "3",
+      "3",
+      "3",
+    ]);
+    expect(lines[5].getAttribute("data-bullet")).toBeNull();
+    expect(lines[5].getAttribute("data-line-depth")).toBe("0");
+    expect(lines[5].textContent).toBe(" - x");
+  });
+
+  it("renders structural depth attributes on paragraphs and headings", () => {
+    const { container } = render(<StickyMarkdown text={"  paragraph\n  # Heading"} />);
+    const lines = Array.from(
+      container.querySelectorAll<HTMLElement>(".interactive-canvas-sticky-line"),
+    );
+
+    expect(lines.map((line) => line.getAttribute("data-line-depth"))).toEqual(["1", "1"]);
+    expect(lines[0].getAttribute("data-bullet")).toBeNull();
+    expect(lines[0].textContent).toBe("paragraph");
+    expect(lines[1].getAttribute("data-heading")).toBe("1");
+    expect(lines[1].style.fontSize).toBe("1.5em");
+    expect(lines[1].textContent).toBe("Heading");
+  });
+
   it("floors sticky clamp budget to whole 36px body lines", () => {
     expect(textSlotClampLineCount(371, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(10);
     expect(textSlotClampLineCount(72, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(2);
