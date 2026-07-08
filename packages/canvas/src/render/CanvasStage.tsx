@@ -10,7 +10,6 @@ import {
 import {
   documentBounds,
   objectById,
-  sectionDescendantIds,
   type CanvasBounds,
 } from "../state/geometry";
 import { gridBackground } from "./grid";
@@ -161,21 +160,6 @@ function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCa
   return paintOrderedObjects(objects);
 }
 
-/** contentHidden hides a section's RECORDED members — its transitive parentId descendants — while nested section backdrops stay visible. */
-function visibleObjectsForSections(
-  objects: InteractiveCanvasObject[],
-  document: InteractiveCanvasDocument,
-): InteractiveCanvasObject[] {
-  const hidden = new Set<string>();
-  for (const section of objects) {
-    if (section.type !== "section" || !section.contentHidden) continue;
-    for (const memberId of sectionDescendantIds(document, section.id)) {
-      hidden.add(memberId);
-    }
-  }
-  return hidden.size === 0 ? objects : objects.filter((object) => object.type === "section" || !hidden.has(object.id));
-}
-
 function annotationTargetLabel(target: CanvasAnnotationTarget): string {
   if (target.kind === "object") return target.objectId;
   if (target.kind === "connection") return target.connectionId;
@@ -247,6 +231,15 @@ export function CanvasStage({
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
   const stageCursor = style?.cursor ?? (handToolActive ? "grab" : selectToolActive ? SELECT_CURSOR : undefined);
+  const connectorDragSourceObjectId = interactionOverlay?.connectorDrag?.fromObjectId ?? null;
+  const connectorDragSourceAnchor = interactionOverlay?.connectorDrag?.fromAnchor ?? null;
+  const documentObjectIds = new Set(document.objects.map((object) => object.id));
+  const anchorDotObjectIds = [...selectedObjectIds];
+  for (const objectId of [connectorDragSourceObjectId]) {
+    if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
+      anchorDotObjectIds.push(objectId);
+    }
+  }
 
   return (
     <div
@@ -269,6 +262,12 @@ export function CanvasStage({
         backgroundSize: grid.backgroundSize,
         backgroundColor: CANVAS_BG,
         fontFamily: CANVAS_FONT_FAMILY,
+        // Board text (labels, section titles, captions) is chrome, not
+        // document text — drags must never sweep a native DOM selection
+        // across it. Text-editing surfaces opt back in with user-select:
+        // text.
+        userSelect: "none",
+        WebkitUserSelect: "none",
         ...style,
         cursor: stageCursor,
       }}
@@ -414,6 +413,7 @@ export function CanvasStage({
                 toObject={toObject}
                 selected={isSelected}
                 dimmed={isDragging}
+                zoom={zoom}
                 onDoubleClick={onConnectionDoubleClick}
               />
             );
@@ -435,7 +435,7 @@ export function CanvasStage({
             onCanvasContextMenu(event, bounds);
           }}
         >
-          {renderOrderedObjects(visibleObjectsForSections(document.objects, document)).map((object) => (
+          {renderOrderedObjects(document.objects).map((object) => (
             <ObjectShape
               key={object.id}
               object={object}
@@ -520,7 +520,12 @@ export function CanvasStage({
           <AnchorDots
             document={document}
             viewport={viewport}
-            selectedObjectIds={selectedObjectIds}
+            selectedObjectIds={anchorDotObjectIds}
+            activePort={
+              connectorDragSourceObjectId && connectorDragSourceAnchor
+                ? { objectId: connectorDragSourceObjectId, anchor: connectorDragSourceAnchor }
+                : null
+            }
             interactive
           />
         )}

@@ -43,7 +43,7 @@ function iconObject(id: string, icon: string, index: number): InteractiveCanvasO
   return {
     id,
     type: "icon",
-    label: `${id} label`,
+    text: `${id} label`,
     icon: icon as InteractiveCanvasObject["icon"],
     geometry: { x: (index % 6) * 160, y: Math.floor(index / 6) * 160, width: 120, height: 120 },
     style: { shape: "icon" },
@@ -85,7 +85,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
     });
   });
 
-  it("renders the label BELOW the glyph, matching the chip-icon/person convention", () => {
+  it("renders the label BELOW the glyph", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
       const node = container.querySelector('[data-canvas-object-id="icon-cpu"]');
@@ -105,28 +105,36 @@ describe("Wave C render smoke: the `icon` object type", () => {
     });
   });
 
-  it("falls back to a neutral stroke glyph when no explicit color is set (bbox tier — no chip background)", () => {
+  it("renders the default (gray) pick as a pastel chip + saturated stroke (P1/D13 — no fixed colors)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
       const svg = container.querySelector('[data-canvas-object-id="icon-cpu"] [data-canvas-icon-glyph="cpu"]');
       expect(svg?.getAttribute("fill")).toBe("none");
-      expect(svg?.getAttribute("stroke")).toBeTruthy();
-      // No filled background rect behind the glyph when the object has no explicit fill/stroke.
-      expect(svg?.querySelector("rect")).toBeNull();
+      // gray shape cells: ink #757575 strokes the glyph, fill #E6E6E6 chips behind it.
+      expect(svg?.getAttribute("stroke")).toBe("#757575");
+      expect(svg?.querySelector("rect")?.getAttribute("fill")).toBe("#E6E6E6");
     });
   });
 
-  it("honors an explicit stroke/fill override (hasExplicitColor precedent shared with chip-icon/person)", () => {
+  it("renders every pick as chip + ink stroke", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const coloredObject: InteractiveCanvasObject = {
-        ...iconObject("icon-colored", "shield", 0),
-        style: { shape: "icon", stroke: "#123456", fill: "#abcdef" },
+      const softObject: InteractiveCanvasObject = {
+        ...iconObject("icon-blue", "shield", 0),
+        color: "blue",
       };
-      const { container } = render(<InteractiveCanvasViewer document={iconDocument([coloredObject])} />);
-      const svg = container.querySelector('[data-canvas-object-id="icon-colored"] [data-canvas-icon-glyph="shield"]');
-      expect(svg?.getAttribute("stroke")).toBe("#123456");
-      const backgroundRect = svg?.querySelector("rect");
-      expect(backgroundRect?.getAttribute("fill")).toBe("#abcdef");
+      const boldObject: InteractiveCanvasObject = {
+        ...iconObject("icon-bold", "gear", 1),
+        color: "red",
+      };
+      const { container } = render(
+        <InteractiveCanvasViewer document={iconDocument([softObject, boldObject])} />,
+      );
+      const softSvg = container.querySelector('[data-canvas-object-id="icon-blue"] [data-canvas-icon-glyph="shield"]');
+      expect(softSvg?.getAttribute("stroke")).toBe("#0D99FF");
+      expect(softSvg?.querySelector("rect")?.getAttribute("fill")).toBe("#C2E5FF");
+      const boldSvg = container.querySelector('[data-canvas-object-id="icon-bold"] [data-canvas-icon-glyph="gear"]');
+      expect(boldSvg?.getAttribute("stroke")).toBe("#F24822");
+      expect(boldSvg?.querySelector("rect")?.getAttribute("fill")).toBe("#FFC7C2");
     });
   });
 });

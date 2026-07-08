@@ -203,31 +203,25 @@
           }
         },
         {
-          "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app chrome is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app chrome around the board is allowed to follow the host theme. See the sourcing comment directly above the constant in "
+          "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app chrome is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app chrome around the board is allowed to follow the host theme. See the sourcing comment beside the stage surface constants in "
+        },
+        {
+          "insert": "render/CanvasStage.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the old "
         },
         {
           "insert": "figjam-tokens.ts",
           "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", and "
-        },
-        {
-          "insert": "theme.ts",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", which maps canvas object tones through the host's CSS variables for chrome but never dark-shifts the board background itself."
+          "insert": " module was dispersed to its consumers in the theme dispersal — and note that nothing in the engine dark-shifts the board surface."
         }
       ],
       "children": []
@@ -241,19 +235,7 @@
       },
       "text": [
         {
-          "insert": "Rendering decisions — fills, stroke widths, corner radii, shadows, type sizes, dash patterns, arrowhead geometry — are not design opinions to be re-litigated per component; they're settled by matching FigJam's sampled tokens in "
-        },
-        {
-          "insert": "figjam-tokens.ts",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", which is a hand-written typed mirror of "
+          "insert": "Rendering decisions — fills, stroke widths, corner radii, shadows, type sizes, dash patterns, arrowhead geometry — are not design opinions to be re-litigated per component; they're settled by matching FigJam's sampled tokens — hand-written typed mirrors of "
         },
         {
           "insert": "figjam-style-tokens.json",
@@ -271,7 +253,19 @@
           }
         },
         {
-          "insert": "). When a rendering question comes up — what radius should this shape have, what's the stroke color — the answer is \"what does FigJam do,\" checked against the sampled tokens, not \"what looks nice to me right now.\" New visual work should extend that module rather than hardcoding fresh values elsewhere."
+          "insert": "), co-located with their consumers since the theme dispersal (every color hex in "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", geometry constants beside each object def"
+        },
+        {
+          "insert": "). When a rendering question comes up — what radius should this shape have, what's the stroke color — the answer is \"what does FigJam do,\" checked against the sampled tokens, not \"what looks nice to me right now.\" New visual work should extend those sampled, provenance-commented constants rather than hardcoding fresh values elsewhere."
         }
       ],
       "children": []

@@ -3,7 +3,6 @@ import {
   reconcileSectionMembership,
   resolveSectionParent,
 } from "../section-membership";
-import { sectionDescendantIds } from "../geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../schema";
 
 function makeObject(
@@ -109,71 +108,38 @@ describe("section membership resolver", () => {
     expect(resolveSectionParent(exactThreshold, document)).toBe("section");
   });
 
-  it("respects collapsed and locked section adoption rules", () => {
-    const hidden = makeSection({
-      id: "hidden",
-      contentHidden: true,
-      geometry: { x: 0, y: 0, width: 200, height: 200 },
-    });
-    const hiddenChild = makeObject({
-      id: "hidden-child",
-      geometry: { x: 40, y: 40, width: 80, height: 80 },
-    });
+  it("respects locked section adoption rules", () => {
     const lockedAll = makeSection({
       id: "locked-all",
       locked: "all",
-      geometry: { x: 300, y: 0, width: 200, height: 200 },
+      geometry: { x: 0, y: 0, width: 200, height: 200 },
     });
     const lockedAllChild = makeObject({
       id: "locked-all-child",
-      geometry: { x: 340, y: 40, width: 80, height: 80 },
+      geometry: { x: 40, y: 40, width: 80, height: 80 },
     });
     const lockedBackground = makeSection({
       id: "locked-background",
       locked: "background",
-      geometry: { x: 600, y: 0, width: 200, height: 200 },
+      geometry: { x: 300, y: 0, width: 200, height: 200 },
     });
     const lockedBackgroundChild = makeObject({
       id: "locked-background-child",
-      geometry: { x: 640, y: 40, width: 80, height: 80 },
+      geometry: { x: 340, y: 40, width: 80, height: 80 },
     });
     const document = makeDocument([
-      hidden,
-      hiddenChild,
       lockedAll,
       lockedAllChild,
       lockedBackground,
       lockedBackgroundChild,
     ]);
 
-    expect(resolveSectionParent(hiddenChild, document)).toBeNull();
     expect(resolveSectionParent(lockedAllChild, document)).toBeNull();
     expect(resolveSectionParent(lockedBackgroundChild, document)).toBe("locked-background");
   });
 });
 
 describe("section membership reconciliation", () => {
-  it("retains collapsed section children across reconcile so contents stay hidden", () => {
-    const collapsed = makeSection({
-      id: "collapsed",
-      contentHidden: true,
-      geometry: { x: 0, y: 0, width: 240, height: 240 },
-    });
-    const child = makeObject({
-      id: "child",
-      parentId: "collapsed",
-      geometry: { x: 40, y: 40, width: 80, height: 80 },
-    });
-    const document = makeDocument([collapsed, child]);
-
-    expect(resolveSectionParent(child, document)).toBe("collapsed");
-
-    const reconciled = reconcileSectionMembership(document);
-    expect(objectById(reconciled, "child").parentId).toBe("collapsed");
-    expect(objectById(reconciled, "collapsed").contentHidden).toBe(true);
-    expect(sectionDescendantIds(reconciled, "collapsed").has("child")).toBe(true);
-  });
-
   it("retains locked-all section children across reconcile", () => {
     const locked = makeSection({
       id: "locked",
@@ -192,41 +158,22 @@ describe("section membership reconciliation", () => {
     expect(objectById(reconciled, "child").parentId).toBe("locked");
   });
 
-  it("does not newly adopt a free object into a collapsed section", () => {
-    const collapsed = makeSection({
-      id: "collapsed",
-      contentHidden: true,
-      geometry: { x: 0, y: 0, width: 240, height: 240 },
-    });
-    const free = makeObject({
-      id: "free",
-      geometry: { x: 40, y: 40, width: 80, height: 80 },
-    });
-    const document = makeDocument([collapsed, free]);
-
-    expect(resolveSectionParent(free, document)).toBeNull();
-
-    const reconciled = reconcileSectionMembership(document);
-    expect(objectById(reconciled, "free").parentId).toBeNull();
-  });
-
   it("releases a retained child when its geometry no longer qualifies", () => {
-    const collapsed = makeSection({
-      id: "collapsed",
-      contentHidden: true,
+    const section = makeSection({
+      id: "section",
       geometry: { x: 0, y: 0, width: 240, height: 240 },
     });
     const movedAway = makeObject({
       id: "moved-away",
-      parentId: "collapsed",
+      parentId: "section",
       geometry: { x: 400, y: 40, width: 80, height: 80 },
     });
     const tooLarge = makeObject({
       id: "too-large",
-      parentId: "collapsed",
+      parentId: "section",
       geometry: { x: 20, y: 20, width: 260, height: 260 },
     });
-    const document = makeDocument([collapsed, movedAway, tooLarge]);
+    const document = makeDocument([section, movedAway, tooLarge]);
 
     const reconciled = reconcileSectionMembership(document);
 

@@ -17,11 +17,7 @@ import type { ShapeDef } from "../shape-def";
 export const rectangleShapeDef: ShapeDef = {
   type: "rectangle",
   shape: "rounded-rect",
-  outline: {},
-  text: { kind: "label" },
-  defaultSize: { width: 360, height: 240 },
-  defaultPosition: { x: 80, y: 80 },
-  defaultTone: "neutral",
+  silhouette: {},
   catalog: { label: "Rectangle", keywords: ["rectangle", "square", "box", "rect"] },
 };
 

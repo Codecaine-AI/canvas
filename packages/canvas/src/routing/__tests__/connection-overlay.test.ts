@@ -94,10 +94,11 @@ describe("resolveConnectionCascade", () => {
   it("uses the extended below-text box for hover, outline, and bottom anchor snapping", () => {
     const object = rectObject({
       id: "person-1",
-      type: "person",
+      type: "icon",
+      icon: "person",
       text: "Adapt Question Based on Interview History",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
-      style: { shape: "person" },
+      style: { shape: "icon" },
     });
     const bounds = connectionBoundsForObject(object);
     const bottomPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height - 2 };

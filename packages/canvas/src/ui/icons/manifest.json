@@ -19,8 +19,6 @@
     { "export": "DashIcon", "source": "nucleo_ui/outline/editing/18px_line-dashed.svg" },
     { "export": "DiamondIcon", "source": "nucleo_ui/outline/gaming/18px_suit-diamonds.svg" },
     { "export": "ExpandIcon", "source": "nucleo_ui/outline/arrows/18px_arrows-expand-diagonal.svg" },
-    { "export": "EyeIcon", "source": "nucleo_ui/outline/ui-layout/18px_eye.svg" },
-    { "export": "EyeOffIcon", "source": "nucleo_ui/outline/ui-layout/18px_eye-slash.svg" },
     { "export": "FontStyleIcon", "source": "nucleo_ui/outline/editing/18px_text-a.svg" },
     { "export": "FrameIcon", "source": "nucleo_ui/outline/design-development/18px_frame.svg" },
     { "export": "GitBranchIcon", "source": "nucleo_ui/outline/design-development/18px_code-branch.svg" },

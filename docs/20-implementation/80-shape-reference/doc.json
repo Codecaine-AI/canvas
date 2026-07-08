@@ -24,6 +24,7 @@
         "b-shape-ref-intro-1",
         "b-shape-ref-intro-2",
         "b-shape-ref-intro-3",
+        "b-shape-ref-stale",
         "b-shape-ref-type-container",
         "b-shape-ref-type-container-p1",
         "b-shape-ref-type-container-p2",
@@ -37,18 +38,10 @@
         "b-shape-ref-type-decision-p2",
         "b-shape-ref-type-decision-p3",
         "b-shape-ref-type-decision-canvas",
-        "b-shape-ref-type-text",
-        "b-shape-ref-type-text-p1",
-        "b-shape-ref-type-text-p2",
-        "b-shape-ref-type-text-canvas",
         "b-shape-ref-type-sticky",
         "b-shape-ref-type-sticky-p1",
         "b-shape-ref-type-sticky-p2",
         "b-shape-ref-type-sticky-canvas",
-        "b-shape-ref-type-source-node",
-        "b-shape-ref-type-source-node-p1",
-        "b-shape-ref-type-source-node-p2",
-        "b-shape-ref-type-source-node-canvas",
         "b-shape-ref-type-annotation-marker",
         "b-shape-ref-type-annotation-marker-p1",
         "b-shape-ref-type-annotation-marker-p2",
@@ -57,18 +50,10 @@
         "b-shape-ref-type-document-p1",
         "b-shape-ref-type-document-p2",
         "b-shape-ref-type-document-canvas",
-        "b-shape-ref-type-person",
-        "b-shape-ref-type-person-p1",
-        "b-shape-ref-type-person-p2",
-        "b-shape-ref-type-person-canvas",
         "b-shape-ref-type-database",
         "b-shape-ref-type-database-p1",
         "b-shape-ref-type-database-p2",
         "b-shape-ref-type-database-canvas",
-        "b-shape-ref-type-chat",
-        "b-shape-ref-type-chat-p1",
-        "b-shape-ref-type-chat-p2",
-        "b-shape-ref-type-chat-canvas",
         "b-shape-ref-type-section",
         "b-shape-ref-type-section-p1",
         "b-shape-ref-type-section-p2",
@@ -91,10 +76,6 @@
         "b-shape-ref-type-code-block-p1",
         "b-shape-ref-type-code-block-p2",
         "b-shape-ref-type-code-block-canvas",
-        "b-shape-ref-type-chip-icon",
-        "b-shape-ref-type-chip-icon-p1",
-        "b-shape-ref-type-chip-icon-p2",
-        "b-shape-ref-type-chip-icon-canvas",
         "b-shape-ref-type-ellipse",
         "b-shape-ref-type-ellipse-p1",
         "b-shape-ref-type-ellipse-p2",
@@ -197,7 +178,7 @@
       "children": [],
       "text": [
         {
-          "insert": "A per-shape visual and connection reference: every one of the 37 "
+          "insert": "A per-shape visual and connection reference: every one of the 32 "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -225,7 +206,7 @@
           }
         },
         {
-          "insert": " — schema fields, tones, and validation rules are documented there, not repeated here — and on the shape API design doc "
+          "insert": " — schema fields and validation rules are documented there, not repeated here — and on the shape API design doc "
         },
         {
           "insert": "canvas-10-system-design-10-shape-api",
@@ -258,23 +239,27 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "getConnectionAnchors"
             }
           }
         },
         {
-          "insert": " builds four cardinal candidates offset "
+          "insert": " (in "
+        },
+        {
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " since the P3 geometry move) builds four cardinal candidates offset "
         },
         {
           "insert": "ANCHOR_OFFSET_PX",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "ANCHOR_OFFSET_PX"
-            }
+            "code": true
           }
         },
         {
@@ -286,13 +271,22 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "outlinePolygon"
             }
           }
         },
         {
-          "insert": ". True outlines are modeled for rect/rounded-rect, pill, diamond, and arrow-shape; every other type falls back to its axis-aligned bounding rect. During an interactive connect, "
+          "insert": ". Outlines are def-declared "
+        },
+        {
+          "insert": "OutlineSpec",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "s now: true outlines cover pill, diamond, arrow-shape, ellipse, and the W5 polygon set (triangle, parallelogram, pentagon, octagon, star, plus, chevron, off-page-connector, trapezoid, manual-input, hexagon, or/summing junctions); every other type falls back to its axis-aligned bounding rect. During an interactive connect, "
         },
         {
           "insert": "resolveConnectionCascade",
@@ -311,12 +305,7 @@
         {
           "insert": "ANCHOR_SNAP_VIEW_PX",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "ANCHOR_SNAP_VIEW_PX"
-            }
+            "code": true
           }
         },
         {
@@ -325,12 +314,7 @@
         {
           "insert": "OUTLINE_SNAP_WORLD_PX",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "OUTLINE_SNAP_WORLD_PX"
-            }
+            "code": true
           }
         },
         {
@@ -348,13 +332,13 @@
           "insert": "Every embed below follows the same recipe: the subject shape sits at its "
         },
         {
-          "insert": "defaultGeometryFor",
+          "insert": "OBJECT_TYPE_DEFAULTS",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
@@ -368,7 +352,7 @@
           }
         },
         {
-          "insert": " markers outside it. Each marker's connection endpoint stores BOTH the coarse side anchor and the exact "
+          "insert": " (caption) markers outside it. Each marker's connection endpoint stores BOTH the coarse side anchor and the exact "
         },
         {
           "insert": "position",
@@ -409,7 +393,7 @@
           }
         },
         {
-          "insert": " the top/bottom anchors sit visibly inside the bounding box, on the chevron body's edges. A fifth free-floating text object under each shape states the text-slot rule (centered vs. top-left vs. below-icon vs. body-only)."
+          "insert": " the top/bottom anchors sit visibly inside the bounding box, on the chevron body's edges. A fifth free-floating caption under each shape states the text-slot rule (centered vs. top-left vs. below-icon vs. body-only)."
         }
       ]
     },
@@ -853,158 +837,6 @@
       },
       "children": []
     },
-    "b-shape-ref-type-text": {
-      "id": "b-shape-ref-type-text",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "text"
-        }
-      ]
-    },
-    "b-shape-ref-type-text-p1": {
-      "id": "b-shape-ref-type-text-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Free-floating label text, FigJam's plain-text tool. Takes the catch-all default "
-        },
-        {
-          "insert": "{ width: 184, height: 96 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ". It has no entry in "
-        },
-        {
-          "insert": "shapeForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "shapeForType"
-            }
-          }
-        },
-        {
-          "insert": " at all — "
-        },
-        {
-          "insert": "ObjectShape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ObjectShape"
-            }
-          }
-        },
-        {
-          "insert": " special-cases it into the borderless "
-        },
-        {
-          "insert": "\"label\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " shape: bold black 20px text ("
-        },
-        {
-          "insert": "TEXT_SIZES_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "TEXT_SIZES_PX"
-            }
-          }
-        },
-        {
-          "insert": " boldLabel), transparent background, no border, and no rendered body."
-        }
-      ]
-    },
-    "b-shape-ref-type-text-p2": {
-      "id": "b-shape-ref-type-text-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Anchors treat this type as a plain rect outline ("
-        },
-        {
-          "insert": "outlinePolygon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "outlinePolygon"
-            }
-          }
-        },
-        {
-          "insert": "'s fallback), which matches the drawn (invisible) text box. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "184×96",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (252, 160) = [0.5, 0]; right (344, 208) = [1, 0.5]; bottom (252, 256) = [0.5, 1]; left (160, 208) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-text-canvas": {
-      "id": "b-shape-ref-type-text-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Text — anchors & text slot",
-        "canvasId": "shape-ref-text"
-      },
-      "children": []
-    },
     "b-shape-ref-type-sticky": {
       "id": "b-shape-ref-type-sticky",
       "flavour": "heading",
@@ -1030,99 +862,29 @@
         {
           "insert": "{ width: 176, height: 128 }",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
+            "code": true
           }
         },
         {
-          "insert": " — deliberately compact next to the sampled FigJam board default of 416×420 recorded in "
+          "insert": " — deliberately compact next to the sampled FigJam board default. Its "
         },
         {
-          "insert": "STICKY_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/def.tsx",
-              "symbol": "STICKY_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": ". Body text splits on newlines, and any line starting with "
-        },
-        {
-          "insert": "\"- \"",
+          "insert": "text",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " renders as a bullet. Sticky notes do not render the generic "
+          "insert": " renders as simple markdown (D18: H1–H3, bullets, bold — "
         },
         {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
-            }
-          }
-        },
-        {
-          "insert": " field — all user-facing text is the "
-        },
-        {
-          "insert": "body",
+          "insert": "objects/sticky/markdown.tsx",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "; "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " persists only as the accessible name (the "
-        },
-        {
-          "insert": "aria-label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-chrome.tsx",
-              "symbol": "ObjectButtonChrome"
-            }
-          }
-        },
-        {
-          "insert": " on the object button), and inline editing targets the body ("
-        },
-        {
-          "insert": "labelEditing: { target: \"body\" }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/def.tsx",
-              "symbol": "stickyDef"
-            }
-          }
-        },
-        {
-          "insert": "). The former author chip is gone — the type-only "
+          "insert": ") in the inset-body text slot (21px sides, 28px top), and the in-place editor opens in exactly that slot (D14). The optional "
         },
         {
           "insert": "author",
@@ -1131,7 +893,30 @@
           }
         },
         {
-          "insert": " field no longer renders on the canvas."
+          "insert": " field is metadata only — it no longer renders on the canvas. Sticky color is the exact per-swatch sticky fill hex ("
+        },
+        {
+          "insert": "resolveStickyFill",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "resolveStickyFill"
+            }
+          }
+        },
+        {
+          "insert": "), first-use default "
+        },
+        {
+          "insert": "\"yellow\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ]
     },
@@ -1195,130 +980,6 @@
       "props": {
         "title": "Sticky — anchors & text slot",
         "canvasId": "shape-ref-sticky"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-source-node": {
-      "id": "b-shape-ref-type-source-node",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "source-node"
-        }
-      ]
-    },
-    "b-shape-ref-type-source-node-p1": {
-      "id": "b-shape-ref-type-source-node-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "An agent/source-code origin marker — typically paired with the "
-        },
-        {
-          "insert": "source",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field (path/symbol/section) to pin a canvas position to a codebase location. Takes the catch-all default "
-        },
-        {
-          "insert": "{ width: 184, height: 96 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": " and renders as a plain rounded rect (no dedicated "
-        },
-        {
-          "insert": "shapeForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "shapeForType"
-            }
-          }
-        },
-        {
-          "insert": " case), label top-left, body below."
-        }
-      ]
-    },
-    "b-shape-ref-type-source-node-p2": {
-      "id": "b-shape-ref-type-source-node-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Anchors treat this type as a plain rect outline ("
-        },
-        {
-          "insert": "outlinePolygon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "outlinePolygon"
-            }
-          }
-        },
-        {
-          "insert": "'s fallback), which matches the drawn rounded rect. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "184×96",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (252, 160) = [0.5, 0]; right (344, 208) = [1, 0.5]; bottom (252, 256) = [0.5, 1]; left (160, 208) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-source-node-canvas": {
-      "id": "b-shape-ref-type-source-node-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Source Node — anchors & text slot",
-        "canvasId": "shape-ref-source-node"
       },
       "children": []
     },
@@ -1534,116 +1195,6 @@
       },
       "children": []
     },
-    "b-shape-ref-type-person": {
-      "id": "b-shape-ref-type-person",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "person"
-        }
-      ]
-    },
-    "b-shape-ref-type-person-p1": {
-      "id": "b-shape-ref-type-person-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A human actor (D16). Default geometry "
-        },
-        {
-          "insert": "{ width: 120, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": " — tall enough for the head-and-shoulders SVG "
-        },
-        {
-          "insert": "ShapeSilhouette",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", filled with "
-        },
-        {
-          "insert": "PERSON_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/person.tsx",
-              "symbol": "PERSON_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " unless explicitly recolored. The label renders below the icon in bold black (W2 restyle), and is dropped entirely when the object is under 100px tall."
-        }
-      ]
-    },
-    "b-shape-ref-type-person-p2": {
-      "id": "b-shape-ref-type-person-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), so anchors land on the box around the glyph, not on the head/shoulders path itself. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "120×140",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (220, 160) = [0.5, 0]; right (280, 230) = [1, 0.5]; bottom (220, 300) = [0.5, 1]; left (160, 230) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-person-canvas": {
-      "id": "b-shape-ref-type-person-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Person — anchors & text slot",
-        "canvasId": "shape-ref-person"
-      },
-      "children": []
-    },
     "b-shape-ref-type-database": {
       "id": "b-shape-ref-type-database",
       "flavour": "heading",
@@ -1678,7 +1229,7 @@
           }
         },
         {
-          "insert": ", drawn as an SVG cylinder silhouette. Unlike person/chat/chip-icon it kept the older tone-driven pastel styling in the W2 restyle, and its label renders centered over the silhouette rather than below it."
+          "insert": ", drawn as an SVG cylinder silhouette. Unlike the icon glyph family, it keeps tone-driven pastel styling and renders its label centered over the silhouette rather than below it."
         }
       ]
     },
@@ -1731,107 +1282,6 @@
       },
       "children": []
     },
-    "b-shape-ref-type-chat": {
-      "id": "b-shape-ref-type-chat",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "chat"
-        }
-      ]
-    },
-    "b-shape-ref-type-chat-p1": {
-      "id": "b-shape-ref-type-chat-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A chat/conversation surface (D16). Default geometry "
-        },
-        {
-          "insert": "{ width: 180, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", drawn as a speech-bubble SVG silhouette with a bottom-left tail, filled with "
-        },
-        {
-          "insert": "CHAT_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/basic/chat.tsx",
-              "symbol": "CHAT_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " unless recolored. Like person and chip-icon, the label renders below the icon in bold black."
-        }
-      ]
-    },
-    "b-shape-ref-type-chat-p2": {
-      "id": "b-shape-ref-type-chat-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), so the bubble tail and rounded corners are inside the anchor rect. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "180×110",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (250, 160) = [0.5, 0]; right (340, 215) = [1, 0.5]; bottom (250, 270) = [0.5, 1]; left (160, 215) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-chat-canvas": {
-      "id": "b-shape-ref-type-chat-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Chat — anchors & text slot",
-        "canvasId": "shape-ref-chat"
-      },
-      "children": []
-    },
     "b-shape-ref-type-section": {
       "id": "b-shape-ref-type-section",
       "flavour": "heading",
@@ -1852,111 +1302,71 @@
       "children": [],
       "text": [
         {
-          "insert": "The FigJam section (W2) — the one type that captures members geometrically instead of via "
-        },
-        {
-          "insert": "parentId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". Default geometry is deliberately large, "
+          "insert": "The FigJam section (W2) — the one type with corner-only handles and descendant drag capture. Default geometry is deliberately large, "
         },
         {
           "insert": "{ width: 480, height: 360 }",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
+            "code": true
           }
         },
         {
-          "insert": ". It requires a "
+          "insert": ". Its "
         },
         {
-          "insert": "title",
+          "insert": "text",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and a "
+          "insert": " renders in a floating title chip near the top-left corner ("
         },
         {
-          "insert": "tint",
+          "insert": "TITLE_CHIP",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "symbol": "TITLE_CHIP"
+            }
+          }
+        },
+        {
+          "insert": ": 27px tall, 16px/700 bold text, 3px inset), and the section's visible border color IS the chip's fill color — both resolve from the single "
+        },
+        {
+          "insert": "color",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " family; the title renders in a floating chip near the top-left corner ("
+          "insert": " pick through "
         },
         {
-          "insert": "SECTION_GEOMETRY",
+          "insert": "resolveSectionColors",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "SECTION_GEOMETRY"
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "resolveSectionColors"
             }
           }
         },
         {
-          "insert": ": 27px tall, 16px/700 bold text, 3px inset), and the section's visible border color IS the chip family's border color ("
+          "insert": " (tint wash + chip fill/border). When zoomed out the chip counter-scales sub-linearly ("
         },
         {
-          "insert": "SECTION_FAMILIES",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "SECTION_FAMILIES"
-            }
-          }
-        },
-        {
-          "insert": "). The "
-        },
-        {
-          "insert": "label",
+          "insert": "titleChipScale: (1/zoom)^0.6",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " field is still required by validation but is not separately rendered — the chip is the visible title. The embed uses the "
-        },
-        {
-          "insert": "blue",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " tint."
-        },
-        {
-          "insert": " When zoomed out the chip counter-scales sub-linearly ("
-        },
-        {
-          "insert": "sectionTitleScale",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "sectionTitleScale"
-            }
-          }
-        },
-        {
-          "insert": ": (1/zoom)^0.6, capped at 6×) and truncates to its section's inner width with an ellipsis, so section names stay readable from afar without dwarfing the board."
+          "insert": ", capped at 6×) and truncates to its section's inner width with an ellipsis, so section names stay readable from afar without dwarfing the board."
         }
       ]
     },
@@ -2601,130 +2011,6 @@
       "props": {
         "title": "Code Block — anchors & text slot",
         "canvasId": "shape-ref-code-block"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-chip-icon": {
-      "id": "b-shape-ref-type-chip-icon",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "chip-icon"
-        }
-      ]
-    },
-    "b-shape-ref-type-chip-icon-p1": {
-      "id": "b-shape-ref-type-chip-icon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The CPU/chip glyph (W2 icon set). Default geometry "
-        },
-        {
-          "insert": "{ width: 120, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": " (same footprint as person), drawn via the SVG "
-        },
-        {
-          "insert": "ShapeSilhouette",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ": a rounded square body with four pins per side, filled with "
-        },
-        {
-          "insert": "CHIP_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/chip-icon.tsx",
-              "symbol": "CHIP_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " unless recolored ("
-        },
-        {
-          "insert": "ICON_APPROX_SIZE_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/icon/IconShapeBody.tsx",
-              "symbol": "ICON_APPROX_SIZE_PX"
-            }
-          }
-        },
-        {
-          "insert": " records the ~130px reference icon size). Label renders below the icon in bold black."
-        }
-      ]
-    },
-    "b-shape-ref-type-chip-icon-p2": {
-      "id": "b-shape-ref-type-chip-icon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), so anchors land on the box around the glyph — including the pin stubs, which reach the box edges. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "120×140",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (220, 160) = [0.5, 0]; right (280, 230) = [1, 0.5]; bottom (220, 300) = [0.5, 1]; left (160, 230) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-chip-icon-canvas": {
-      "id": "b-shape-ref-type-chip-icon-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Chip Icon — anchors & text slot",
-        "canvasId": "shape-ref-chip-icon"
       },
       "children": []
     },
@@ -3920,7 +3206,7 @@
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"icon\"; rendered via IconShapeBody, the same label-below-glyph layout chip-icon/person/chat use. This embed uses glyph \"cpu\" — 26 glyphs exist in total (activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe)."
+          "insert": ", default tone \"neutral\", style.shape \"icon\"; rendered via IconShapeBody with the label-below-glyph layout used by every icon glyph. This embed uses glyph \"cpu\"; the same icon type also covers the retired Person and Chat catalog entries through glyphs \"person\" and \"chat\" — 26 glyphs exist in total (activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe)."
         }
       ]
     },
@@ -3942,6 +3228,51 @@
         "title": "Icon (CPU glyph) — anchors & text slot",
         "canvasId": "shape-ref-icon"
       },
+      "children": []
+    },
+    "b-shape-ref-stale": {
+      "id": "b-shape-ref-stale",
+      "flavour": "observation",
+      "props": {
+        "title": "STALE NOTICE — pre-overhaul content below"
+      },
+      "text": [
+        {
+          "insert": "The per-type prose below predates the object-definition overhaul in places: mentions of label/body fields, default tones, labelEditing targets, and section title/tint families are historical (the anchor positions and outline tiers remain accurate). For the shipped contract — the single "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field, the "
+        },
+        {
+          "insert": "color?: CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " 10-pick color model and per-kind role tables, def-declared text slots, and def-declared outlines — see "
+        },
+        {
+          "insert": "canvas-10-system-design-10-shape-api",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "canvas-10-system-design-10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": "; where this section and that doc disagree, that doc (and the code it cites) wins."
+        }
+      ],
       "children": []
     }
   }

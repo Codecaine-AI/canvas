@@ -56,6 +56,7 @@ export type CanvasHit =
   | { kind: "handle"; objectId: string; handle: ResizeHandle }
   | { kind: "connection"; connectionId: string }
   | { kind: "endpoint"; connectionId: string; end: "from" | "to" }
+  | { kind: "bend-segment"; connectionId: string; segmentIndex: number }
   | { kind: "port"; objectId: string; anchor: Anchor };
 
 export type CanvasPointerEventType = "down" | "move" | "up" | "cancel" | "double";
@@ -113,6 +114,8 @@ export type ConnectorDragOverlay = {
   end?: "from" | "to";
   fromObjectId?: string;
   fromAnchor?: Anchor;
+  bendSegmentIndex?: number;
+  points?: CanvasPoint[];
   point: CanvasPoint;
   candidate?: ConnectorAnchorCandidate;
 };
@@ -229,8 +232,21 @@ export type ConnectorCreateGesture = {
   kind: "connector-create";
   fromObjectId: string;
   fromAnchor: Anchor;
+  startWorld: CanvasPoint;
   point: CanvasPoint;
+  hasDragged: boolean;
   candidate?: ConnectorAnchorCandidate;
+};
+
+/** Dragging one selected connector segment perpendicular to its axis. */
+export type ConnectorBendDragGesture = {
+  kind: "connector-bend-drag";
+  connectionId: string;
+  segmentIndex: number;
+  startWorld: CanvasPoint;
+  point: CanvasPoint;
+  startPoints: CanvasPoint[];
+  currentPoints: CanvasPoint[];
 };
 
 export type InteractionState =
@@ -241,7 +257,8 @@ export type InteractionState =
   | MarqueeGesture
   | PlaceGesture
   | ConnectorEndpointDragGesture
-  | ConnectorCreateGesture;
+  | ConnectorCreateGesture
+  | ConnectorBendDragGesture;
 
 export const IDLE_INTERACTION_STATE: InteractionState = { kind: "idle" };
 

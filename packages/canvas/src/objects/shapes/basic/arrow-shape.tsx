@@ -1,12 +1,35 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { ARROW_SHAPE_GEOMETRY, arrowShapePoints } from "../../../routing/connection-overlay";
+import { ARROW_SHAPE_OUTLINE, ARROW_SHAPE_GEOMETRY, arrowShapePoints } from "../../geometry";
+import { CENTER_TEXT_INSET_PX, rectTextSlot, type LocalRect } from "../../text-slots";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import type { InteractiveCanvasObject } from "../../../state/schema";
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
+}
+
+/**
+ * Object-local text rect: horizontally keeps the legacy tail-side body band
+ * that excludes the chevron head; vertically stays inside the 0.60H body bar
+ * with a 4px guard on each edge.
+ */
+export function arrowShapeTextRect(object: InteractiveCanvasObject): LocalRect {
+  const direction: "left" | "right" = object.direction === "left" ? "left" : "right";
+  const contentWidth = Math.max(0, object.geometry.width - CENTER_TEXT_INSET_PX.x * 2);
+  const bodyWidth = contentWidth * (1 - ARROW_SHAPE_GEOMETRY.headWidthRatio);
+  const bodyInset = (object.geometry.height * (1 - ARROW_SHAPE_GEOMETRY.bodyHeightRatio)) / 2;
+  return {
+    x:
+      direction === "left"
+        ? CENTER_TEXT_INSET_PX.x + (contentWidth - bodyWidth)
+        : CENTER_TEXT_INSET_PX.x,
+    y: bodyInset + 4,
+    width: bodyWidth,
+    height: Math.max(0, object.geometry.height * ARROW_SHAPE_GEOMETRY.bodyHeightRatio - 8),
+  };
 }
 
 /**
@@ -18,7 +41,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const arrowShapeShapeDef: ShapeDef = {
   type: "arrow-shape",
   shape: "arrow-shape",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: ARROW_SHAPE_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-arrow-shape",
     silhouette: ({ object, colors, strokeWidth }) => {
       const direction: "left" | "right" = object.direction === "left" ? "left" : "right";
@@ -45,27 +70,15 @@ export const arrowShapeShapeDef: ShapeDef = {
       );
     },
   },
-  text: {
-    kind: "label",
-    labelStyle: (object) => {
-      const direction: "left" | "right" = object.direction === "left" ? "left" : "right";
-      // Center the label within the chevron BODY (the head side carries no
-      // text in FigJam), not the full bounding box.
-      return {
-        [direction === "left" ? "marginLeft" : "marginRight"]: `${ARROW_SHAPE_GEOMETRY.headWidthRatio * 100}%`,
-      };
-    },
-  },
-  defaultSize: { width: 361, height: 100 },
-  defaultTone: "process",
+  // Rect-function slot: center the text within the arrow BODY (the head side
+  // carries no text in FigJam), not the full bounding box — replaces the old
+  // labelStyle margin hack with the same resulting center.
+  text: rectTextSlot(arrowShapeTextRect),
   css: `
         /* W2/W4 — arrow-shape: the SVG silhouette (interactive-canvas-arrow-
            shape-silhouette) paints the full 7-point chevron (fill + stroke),
            so the button chrome stays fully transparent — one outline only. */
         .interactive-canvas-object-arrow-shape {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: ${ARROW_SHAPE_GEOMETRY.bodyCornerRadiusPx}px;
           background: transparent !important;
@@ -73,10 +86,6 @@ export const arrowShapeShapeDef: ShapeDef = {
         }
         .interactive-canvas-arrow-shape-silhouette {
           z-index: 0;
-        }
-        .interactive-canvas-object-arrow-shape .interactive-canvas-object-label {
-          position: relative;
-          z-index: 1;
         }
 `,
   catalog: { label: "Arrow", keywords: ["arrow", "chevron", "arrow-shape"] },

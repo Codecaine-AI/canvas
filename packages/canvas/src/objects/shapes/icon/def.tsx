@@ -1,9 +1,11 @@
 "use client";
 
 import { IconShapeBody } from "./IconShapeBody";
-import { resolveObjectColors } from "../../../theme";
-import { EdgePorts, ObjectButtonChrome } from "../../object-chrome";
+import { objectTypeDefaults } from "../../../state/schema/object-defaults";
+import { BBOX_OUTLINE } from "../../geometry";
+import { ObjectButtonChrome, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
+import { BELOW_TEXT_SLOT } from "../../text-slots";
 import { SHAPE_TOOLBAR } from "../toolbar";
 
 /**
@@ -13,20 +15,10 @@ import { SHAPE_TOOLBAR } from "../toolbar";
  * ObjectShape's `isIconShape` branch byte-for-byte (RESTRUCTURE.md step 4).
  */
 function IconObjectView(props: ObjectRenderProps) {
-  const { object, showPorts, zoom = 1, hideLabel } = props;
-  const colors = resolveObjectColors(object.style);
-  // "neutral" is the inert per-type default every placed object carries
-  // (state/actions/defaults.ts toneForType — "never actually read" for W5
-  // types), NOT a deliberate recolor: counting it as explicit put a washed-out
-  // fill chip behind every freshly placed glyph. Only a real recolor
-  // (paletteToken / non-neutral tone / fill / stroke) switches the glyph off
-  // the default dark-stroke, no-fill "bbox" rendering.
-  const hasExplicitColor = Boolean(
-    object.style?.paletteToken ||
-      (object.style?.tone && object.style.tone !== "neutral") ||
-      object.style?.fill ||
-      object.style?.stroke,
-  );
+  const { object, hideText } = props;
+  // P1/D13 — no fixed/inert-default carve-outs: the glyph takes the object's
+  // resolved palette fill plus ink border like every other shape.
+  const colors = resolveObjectRoleColors(object, "shape") as ResolvedShapeObjectColors;
 
   return (
     <ObjectButtonChrome
@@ -38,22 +30,28 @@ function IconObjectView(props: ObjectRenderProps) {
       dropTarget={props.dropTarget}
       editable={props.editable}
       bounds={props.bounds}
+      buttonBorder="suppressed"
       onObjectSelect={props.onObjectSelect}
       onObjectContextMenu={props.onObjectContextMenu}
     >
-      {/* W5/Wave C — `icon` shape: glyph + label-below-glyph, entirely composed
-          by IconShapeBody (mirrors chip-icon/person's label-below-icon layout
-          but as a single self-contained body rather than a silhouette +
-          separate label span). Colors: an explicit fill/stroke on the object
-          wins (same `hasExplicitColor` precedent as chip-icon/person/chat);
-          otherwise the glyph uses a neutral dark stroke with no fill, per the
-          brief's "bbox" outline tier (no chip background behind the glyph). */}
+      {/* W5/Wave C — `icon` shape: IconShapeBody paints the glyph; the text
+          renders through the shared "below" slot preset. Colors (P1/D13): resolved palette pick —
+          fill = pastel chip; stroke = ink. */}
       <IconShapeBody
         object={object}
-        colors={hasExplicitColor ? { stroke: colors.border, fill: colors.fill } : undefined}
-        hideLabel={hideLabel}
+        colors={{
+          stroke: colors.border,
+          fill: colors.fill,
+        }}
       />
-      {showPorts && <EdgePorts object={object} zoom={zoom} />}
+      {!hideText && (
+        <ObjectSlotText
+          object={object}
+          slot={BELOW_TEXT_SLOT}
+          buttonBorder="suppressed"
+          className="interactive-canvas-label-below-icon"
+        />
+      )}
     </ObjectButtonChrome>
   );
 }
@@ -62,7 +60,6 @@ export const iconDef: ObjectDef = {
   kind: "icon",
   render: IconObjectView,
   /*
-   * Same chrome-strip as the other glyph-only shapes (chip-icon/person):
    * IconShapeBody paints the glyph itself and the brief's "bbox" tier means
    * NO chip/box behind it, so the button chrome goes fully transparent —
    * `!important` beats objectStyle's inline `background: colors.fill`.
@@ -74,19 +71,19 @@ export const iconDef: ObjectDef = {
           border-radius: 0;
           background: transparent !important;
           box-shadow: none;
+          overflow: visible;
           padding: 8px;
         }
 `,
-  defaults: {
-    geometry: { x: 160, y: 160, width: 120, height: 120 },
-    tone: "neutral",
-    shape: "icon",
-    label: "Icon",
-  },
+  // Stamped from the schema-vocabulary defaults leaf (P4) like every def.
+  defaults: objectTypeDefaults("icon"),
+  colorRole: "shape",
+  buttonBorder: "suppressed",
   handles: "all",
-  hitTest: "solid",
+  outline: BBOX_OUTLINE,
   dragCapture: "none",
   // Pre-migration, this type resolved to the "shape" toolbar variant.
   toolbar: SHAPE_TOOLBAR,
-  labelEditing: { target: "label" },
+  textSlot: BELOW_TEXT_SLOT,
+  textEditing: { editable: true },
 };

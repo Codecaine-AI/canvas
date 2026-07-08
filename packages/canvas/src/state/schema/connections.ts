@@ -1,6 +1,8 @@
 "use client";
 
-export type CanvasConnectionStyle = "solid" | "dotted" | "elbow" | "smooth";
+import type { CanvasColor } from "./colors";
+
+export type CanvasConnectionStyle = "solid" | "dashed";
 
 export type CanvasArrowDirection = "none" | "forward" | "back" | "both";
 
@@ -25,13 +27,13 @@ export type InteractiveCanvasConnection = {
   style?: CanvasConnectionStyle;
   arrow?: CanvasArrowDirection;
   role?: string;
-  /**
-   * Stroke color for this connector (W3b/W4). Any non-empty string is
-   * accepted (hex expected in practice — see theme/tokens.ts's
-   * CONNECTOR_COLORS in objects/connector/def.ts for the sampled FigJam set). Absent means the default
-   * neutral gray (CONNECTOR_DEFAULT_COLOR); arrowheads inherit the stroke.
+   /**
+   * Stroke color pick for this connector (P1, OBJECT-DEF-OVERHAUL.md D1/D12)
+   * — a swatch id from the closed 10-id roster, resolved to a stroke hex via
+   * palette.ts's connector role cells. Absent means the default neutral gray
+   * pick ("gray"); arrowheads inherit the stroke.
    */
-  color?: string;
+  color?: CanvasColor;
   /**
    * Optional world-space polyline override (D33 thread B). When present,
    * `routeConnection` honors these points verbatim instead of recomputing

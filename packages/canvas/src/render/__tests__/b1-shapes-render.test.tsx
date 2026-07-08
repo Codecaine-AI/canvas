@@ -55,7 +55,7 @@ function b1Object(
   return {
     id,
     type,
-    label: `${id} label`,
+    text: `${id} label`,
     geometry: { x: (index % 6) * 220, y: Math.floor(index / 6) * 220, width, height },
     style: { shape: type as NonNullable<InteractiveCanvasObject["style"]>["shape"] },
     ...extra,
@@ -174,13 +174,13 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
     });
   });
 
-  it("renders NO visible label text for plus / or-junction / summing-junction (a11y-only labels)", () => {
+  it("renders NO visible text for plus / or-junction / summing-junction (a11y-only labels)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderB1();
       for (const id of ["plus-1", "or-junction-1", "summing-junction-1"]) {
         const node = container.querySelector(`[data-canvas-object-id="${id}"]`);
         expect(node?.querySelector(".interactive-canvas-object-label")).toBeNull();
-        // Schema still requires a label; it survives as the accessible name.
+        // Schema still requires text; it survives as the accessible name.
         expect(node?.getAttribute("aria-label")).toContain(id);
       }
       // Sanity: a labeled shape from the same set does show its label span.
@@ -263,7 +263,7 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
     // Superseded by Wave C's icon-case wiring in CanvasStage.tsx — this used
     // to assert the pre-Wave-C fallthrough-to-default-box stub; see
     // icon-shape-render.test.tsx for the fuller Wave C render coverage
-    // (multiple glyphs, hideLabel behavior, explicit-color override).
+    // (multiple glyphs, hideText behavior, explicit-color override).
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const iconDocument: InteractiveCanvasDocument = {
         ...b1Document,
@@ -271,7 +271,7 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
           {
             id: "icon-1",
             type: "icon",
-            label: "CPU icon",
+            text: "CPU icon",
             icon: "cpu",
             geometry: { x: 0, y: 0, width: 120, height: 120 },
             style: { shape: "icon" },

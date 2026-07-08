@@ -24,6 +24,10 @@
  *    - already-migrated legacy `"<hue>-soft"` ids → `"<hue>"`
  *  The legacy fields are DELETED (no legacy read path, D10).
  *
+ *  D21 — standalone icon-shape retirement: converts `person`, `chat`, and
+ *  `chip-icon` objects to the parameterized `icon` object with glyphs
+ *  `person`, `chat`, and `cpu`.
+ *
  * Text mapping (D11):
  *   - section              → text = title ?? label
  *   - sticky / code-block  → text = body ("" when absent; the label was never
@@ -31,11 +35,13 @@
  *   - everything else      → text = label, with a non-empty body appended on
  *                            a new line so no content is lost
  *
- * `author` (sticky), `language` (code-block), `icon`, `direction`, and
- * connection `label`s are untouched.
+ * `author` (sticky), `language` (code-block), `direction`, and connection
+ * `label`s are untouched. Existing `icon` glyphs on non-retired icon objects
+ * are untouched.
  *
- * Idempotent: objects/connections that carry none of the legacy fields are
- * skipped, so re-running over a migrated store is a no-op.
+ * Idempotent: objects/connections that carry none of the legacy fields or
+ * retired icon object types/shapes are skipped, so re-running over a migrated
+ * store is a no-op.
  *
  * Usage:
  *   bun tools/migrate-canvas-docs/migrate.ts [dir-or-files...]
@@ -327,6 +333,38 @@ export function migrateConnectionColor(connection: JsonObject): JsonObject | nul
 }
 
 // ---------------------------------------------------------------------------
+// D21 — standalone icon-shape retirement.
+// ---------------------------------------------------------------------------
+
+const RETIRED_ICON_TYPE_TO_GLYPH: Record<string, string> = {
+  person: "person",
+  chat: "chat",
+  "chip-icon": "cpu",
+};
+
+function retiredIconGlyph(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  return RETIRED_ICON_TYPE_TO_GLYPH[value];
+}
+
+export function migrateStandaloneIconObject(object: JsonObject): JsonObject | null {
+  const icon = retiredIconGlyph(object.type);
+  const style = isRecord(object.style) ? object.style : undefined;
+  const hasRetiredShape = style !== undefined && retiredIconGlyph(style.shape) !== undefined;
+  if (!icon && !hasRetiredShape) return null;
+
+  const migrated = { ...object };
+  if (icon) {
+    migrated.type = "icon";
+    migrated.icon = icon;
+  }
+  if (style && hasRetiredShape) {
+    migrated.style = { ...style, shape: "icon" };
+  }
+  return migrated;
+}
+
+// ---------------------------------------------------------------------------
 // D1 — section membership transform.
 // ---------------------------------------------------------------------------
 
@@ -372,6 +410,8 @@ export function migrateDocument(doc: JsonObject): { doc: JsonObject; migrated: n
       if (textMigrated) current = textMigrated;
       const colorMigrated = migrateObjectColor(current);
       if (colorMigrated) current = colorMigrated;
+      const standaloneIconMigrated = migrateStandaloneIconObject(current);
+      if (standaloneIconMigrated) current = standaloneIconMigrated;
       if (current !== object) migrated += 1;
       return current;
     });

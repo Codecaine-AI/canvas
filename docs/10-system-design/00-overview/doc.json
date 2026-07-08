@@ -151,8 +151,16 @@
         "title": "Engine layer layout",
         "entries": [
           {
-            "path": "packages/canvas/src/model/",
+            "path": "packages/canvas/src/state/",
             "note": "document schema, action vocabulary, reducer, geometry helpers (pure, no DOM)"
+          },
+          {
+            "path": "packages/canvas/src/objects/",
+            "note": "the object-def registry: ObjectDef/ShapeDef, text-slot presets, outline geometry, per-kind defs"
+          },
+          {
+            "path": "packages/canvas/src/palette.ts",
+            "note": "canonical 10-pick ink/fill/wash color table + per-role resolvers (leaf module)"
           },
           {
             "path": "packages/canvas/src/interaction/",
@@ -164,15 +172,15 @@
           },
           {
             "path": "packages/canvas/src/render/",
-            "note": "SVG/DOM presentation layer: CanvasStage, adaptive grid, theme + FigJam tokens, code tokenizer"
+            "note": "SVG/DOM presentation layer: CanvasStage, adaptive grid, overlays (SelectionBox/AnchorDots), code tokenizer"
           },
           {
             "path": "packages/canvas/src/editor/",
-            "note": "React component wiring: InteractiveCanvasEditor/Viewer, viewport model, hotkeys"
+            "note": "React component wiring: InteractiveCanvasEditor/Viewer, viewport model, hotkeys, chrome components + editor features"
           },
           {
-            "path": "packages/canvas/src/chrome/",
-            "note": "FigJam-parity UI chrome: dock, selection toolbar, color palette, shapes panel"
+            "path": "packages/canvas/src/editor/components/ + features/",
+            "note": "FigJam-parity UI chrome: CanvasDock, selection toolbar + flyouts, ColorPicker, ShapesPanel, text editing"
           },
           {
             "path": "packages/canvas/src/ui/",
@@ -388,37 +396,29 @@
         {
           "insert": "theme.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
+            "code": true
           }
         },
         {
-          "insert": " and "
+          "insert": " is a small surface-style module (grid/guide CSS variables, the universal 4px shape stroke, text sizes); the FigJam pixel-parity constants co-locate with their consumers since the theme dispersal — "
         },
         {
-          "insert": "figjam-tokens.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " (in "
-        },
-        {
-          "insert": "src/render/",
+          "insert": "palette.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ") hold the token/theme system, including the FigJam pixel-parity constants."
+          "insert": " for the 10-pick ink/fill/wash color table, "
+        },
+        {
+          "insert": "grid.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for grid constants, geometry constants beside each object def."
         }
       ],
       "children": []
@@ -705,43 +705,7 @@
           "insert": ", "
         },
         {
-          "insert": "./theme",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "./figjam-tokens",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "./chrome",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
           "insert": "./connection-overlay",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "canvases/*.canvas.json",
           "attributes": {
             "code": true
           }
@@ -787,7 +751,7 @@
           }
         },
         {
-          "insert": ", clipboard, code tokenizer, FigJam tokens, geometry, interaction, routing, snapping, both editor/viewer components, schema, "
+          "insert": ", the palette table and role resolvers, clipboard, code tokenizer, geometry, interaction, routing, snapping, both editor/viewer components, schema, "
         },
         {
           "insert": "SpectreRef",

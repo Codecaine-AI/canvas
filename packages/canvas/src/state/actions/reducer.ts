@@ -104,7 +104,7 @@ function shouldReconcileSectionMembership(action: CanvasAction): boolean {
 function objectPatchTouchesSectionMembership(
   patch: Extract<CanvasAction, { type: "canvas.updateObject" }>["patch"],
 ): boolean {
-  return ["geometry", "type", "locked", "contentHidden", "parentId"].some((key) =>
+  return ["geometry", "type", "locked", "parentId"].some((key) =>
     Object.prototype.hasOwnProperty.call(patch, key),
   );
 }

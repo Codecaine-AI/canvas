@@ -10,6 +10,7 @@ import {
   type RefObject,
 } from "react";
 import { computeEdgePan } from "../../../interaction/edge-pan";
+import { outlineContainsPoint } from "../../../objects/geometry";
 import {
   cancelInteraction,
   createFrameCoalescer,
@@ -17,6 +18,7 @@ import {
   hitTestObjects,
   IDLE_INTERACTION_STATE,
   objectTypeForTool,
+  placePreviewColorFor,
   placePreviewOverlayFor,
   stepInteraction,
   type ArmedShapeVariant,
@@ -52,6 +54,7 @@ const EDGE_PAN_DRAG_KINDS = new Set<InteractionState["kind"]>([
   "place",
   "connector-endpoint-drag",
   "connector-create",
+  "connector-bend-drag",
 ]);
 
 /**
@@ -74,13 +77,23 @@ type DragPointerSnapshot = {
  * resize handles carry data-canvas-handle + data-canvas-object-id; connector
  * endpoint handles carry data-canvas-endpoint + data-canvas-connection-id;
  * object edge ports carry data-canvas-port + data-canvas-object-id; connector
- * hit paths carry data-canvas-connection-id (checked after endpoint, since an
- * endpoint circle is rendered as a sibling, not inside, the hit path — order
- * here matters only for elements nested under one another); object shapes
+ * bend pills carry data-canvas-bend-segment + data-canvas-connection-id;
+ * connector hit paths carry data-canvas-connection-id (checked after chrome
+ * elements, since they render as siblings, not inside, the hit path); object shapes
  * carry data-canvas-object-id; everything else falls through to a pure
  * world-space hitTestObjects (topmost-first, section border band).
+ *
+ * D16 (P3): a DOM-matched object is VETOED when the pointer is outside its
+ * def-declared outline (objects/geometry.ts outlineContainsPoint) — the
+ * object button covers the full bbox, so a click in a diamond's empty corner
+ * lands on the button but must not hit the object. The vetoed event falls
+ * through to the world-space hitTestObjects (which applies the same outline
+ * rule, so the vetoed object is naturally skipped) and finds the object
+ * behind, or resolves to canvas. This one veto covers click-select,
+ * drag-start, marquee-from-corner, and double-click-to-edit, since every
+ * pointer path funnels through here. Exported for unit tests.
  */
-function resolveHit(
+export function resolveHit(
   target: Element,
   document: InteractiveCanvasDocument,
   world: CanvasPoint,
@@ -114,6 +127,15 @@ function resolveHit(
       return { kind: "port", objectId, anchor };
     }
   }
+  const bendSegmentElement = target.closest("[data-canvas-bend-segment]");
+  if (bendSegmentElement instanceof Element) {
+    const connectionId = bendSegmentElement.getAttribute("data-canvas-connection-id");
+    const rawSegmentIndex = bendSegmentElement.getAttribute("data-canvas-bend-segment");
+    const segmentIndex = rawSegmentIndex === null ? NaN : Number(rawSegmentIndex);
+    if (connectionId && Number.isInteger(segmentIndex) && segmentIndex >= 0) {
+      return { kind: "bend-segment", connectionId, segmentIndex };
+    }
+  }
   const connectionElement = target.closest("[data-canvas-connection-id]");
   if (connectionElement instanceof Element) {
     const connectionId = connectionElement.getAttribute("data-canvas-connection-id");
@@ -122,7 +144,14 @@ function resolveHit(
   const objectElement = target.closest("[data-canvas-object-id]");
   if (objectElement instanceof HTMLElement) {
     const objectId = objectElement.getAttribute("data-canvas-object-id");
-    if (objectId) return { kind: "object", objectId };
+    if (objectId) {
+      const object = document.objects.find((item) => item.id === objectId);
+      // D16 outline veto (see doc comment above). An id with no matching
+      // document object (stale DOM) keeps the pre-D16 behavior.
+      if (!object || outlineContainsPoint(object, world)) {
+        return { kind: "object", objectId };
+      }
+    }
   }
   const hit = hitTestObjects(document, world);
   if (hit) return { kind: "object", objectId: hit.id };
@@ -137,6 +166,8 @@ export interface UseInteractionPipelineArgs {
   stickyPlacement?: boolean;
   /** Catalog-entry variant of the armed tool (Shapes panel pick) — flows into placements and the ghost preview. */
   armedShape?: ArmedShapeVariant;
+  /** Per-kind last-picked color memory (D17, reducer state) — ghost-preview fidelity, see InteractionContext.lastPickedColor. */
+  lastPickedColor?: InteractionContext["lastPickedColor"];
   viewport: ViewportState;
   dispatch: (action: CanvasAction) => void;
   setViewport: (updater: ViewportState | ((viewport: ViewportState) => ViewportState)) => void;
@@ -145,13 +176,13 @@ export interface UseInteractionPipelineArgs {
   closeContextMenu: () => void;
   /**
    * One-shot signal sink (4.2.1): the interaction machine resolved a
-   * double-click to "open the inline label editor for this object id"; the
-   * seed value (existing label ?? machine seed ?? "") is computed here so the
-   * label-editing wiring stays byte-identical.
+   * double-click to "open the in-place text editor for this object id"; the
+   * seed value (existing text ?? machine seed ?? "") is computed here so the
+   * text-editing wiring stays byte-identical.
    */
-  onOpenObjectLabelEditor: (objectId: string, value: string) => void;
-  /** Label-editing feature's open fn — section title chip double-clicks route here. */
-  openObjectLabelEditor: (objectId: string) => void;
+  onOpenObjectTextEditor: (objectId: string, value: string) => void;
+  /** Text-editing feature's open fn — section title chip double-clicks route here. */
+  openObjectTextEditor: (objectId: string) => void;
 }
 
 export interface InteractionPipelineApi {
@@ -183,21 +214,22 @@ export function useInteractionPipeline({
   tool,
   stickyPlacement = false,
   armedShape,
+  lastPickedColor,
   viewport,
   dispatch,
   setViewport,
   screenToWorld,
   closeContextMenu,
-  onOpenObjectLabelEditor,
-  openObjectLabelEditor,
+  onOpenObjectTextEditor,
+  openObjectTextEditor,
 }: UseInteractionPipelineArgs): InteractionPipelineApi {
   // Interaction machine: a ref holds the current InteractionState (gestures
   // happen faster than React state updates should be trusted for), while
   // overlay is mirrored into useState so CanvasStage's overlay slot re-renders.
   const interactionStateRef = useRef<InteractionState>(IDLE_INTERACTION_STATE);
   const [interactionOverlay, setInteractionOverlay] = useState<InteractionOverlay>({});
-  const stateRef = useRef({ document, selection, tool, stickyPlacement, armedShape });
-  stateRef.current = { document, selection, tool, stickyPlacement, armedShape };
+  const stateRef = useRef({ document, selection, tool, stickyPlacement, armedShape, lastPickedColor });
+  stateRef.current = { document, selection, tool, stickyPlacement, armedShape, lastPickedColor };
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
 
@@ -241,6 +273,7 @@ export function useInteractionPipeline({
         tool: stateRef.current.tool,
         stickyPlacement: stateRef.current.stickyPlacement,
         armedShape: stateRef.current.armedShape,
+        lastPickedColor: stateRef.current.lastPickedColor,
         viewport: viewportRef.current,
       };
       const result = stepInteraction(interactionStateRef.current, canvasEvent, ctx);
@@ -250,17 +283,17 @@ export function useInteractionPipeline({
         dispatch(action);
       }
       // One-shot signal (4.2.1): the machine resolved a double-click to "open
-      // the inline label editor for this object id" — for a freshly created
+      // the in-place text editor for this object id" — for a freshly created
       // object the id was predicted via the same createObjectId() call the
       // canvas.addObject reducer makes, so it's already correct even though
       // the dispatch above hasn't been reflected in `state` yet this tick.
-      if (result.overlay.editObjectLabelId) {
-        const objectId = result.overlay.editObjectLabelId;
+      if (result.overlay.editObjectTextId) {
+        const objectId = result.overlay.editObjectTextId;
         const existing = stateRef.current.document.objects.find((item) => item.id === objectId);
-        onOpenObjectLabelEditor(objectId, existing?.label ?? result.overlay.editObjectLabelSeed ?? "");
+        onOpenObjectTextEditor(objectId, existing?.text ?? result.overlay.editObjectTextSeed ?? "");
       }
     },
-    [dispatch, onOpenObjectLabelEditor],
+    [dispatch, onOpenObjectTextEditor],
   );
 
   // ——— rAF drag pipeline (checkpoint 1, T1.1.1 + T1.2.1) ————————————————————
@@ -359,7 +392,7 @@ export function useInteractionPipeline({
         event.preventDefault();
         event.stopPropagation();
         const objectId = sectionChip.getAttribute("data-canvas-section-title-chip");
-        if (objectId) openObjectLabelEditor(objectId);
+        if (objectId) openObjectTextEditor(objectId);
         return;
       }
       const sectionObject = target?.closest('[data-canvas-object-type="section"]');
@@ -370,7 +403,7 @@ export function useInteractionPipeline({
       }
       runInteraction(buildPointerEvent("double", event.nativeEvent, stage));
     },
-    [buildPointerEvent, openObjectLabelEditor, runInteraction],
+    [buildPointerEvent, openObjectTextEditor, runInteraction],
   );
 
   const onWindowPointerMove = useCallback(
@@ -456,6 +489,7 @@ export function useInteractionPipeline({
           armedType,
           defaultGeometryForPlacement(armedType, world),
           stateRef.current.armedShape,
+          placePreviewColorFor(armedType, { lastPickedColor: stateRef.current.lastPickedColor }),
         ),
       );
     },

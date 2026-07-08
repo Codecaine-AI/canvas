@@ -6,22 +6,16 @@ import type { ShapeDef } from "../shape-def";
 /**
  * Annotation marker — a small round pin/dot, pure CSS (no silhouette): the
  * base `interactive-canvas-object` chrome (border + background) plus a
- * pill-shaped border-radius override and centered, padding-free content.
+ * pill-shaped border-radius override and slot text.
  * Placement default (220, 220) diverges from the shape-family standard
- * (160, 160) — see defaultGeometryFor in state/actions/defaults.ts.
+ * (160, 160) — see OBJECT_TYPE_DEFAULTS in state/schema/object-defaults.ts.
  */
 export const annotationMarkerShapeDef: ShapeDef = {
   type: "annotation-marker",
   shape: "marker",
-  outline: { className: "interactive-canvas-object-marker" },
-  text: { kind: "label" },
-  defaultSize: { width: 40, height: 40 },
-  defaultPosition: { x: 220, y: 220 },
-  defaultTone: "annotation",
+  silhouette: { className: "interactive-canvas-object-marker" },
   css: `
         .interactive-canvas-object-marker {
-          align-items: center;
-          justify-content: center;
           border-radius: 999px;
           padding: 0;
         }

@@ -1,5 +1,6 @@
 "use client";
 
+import { JUNCTION_OUTLINE } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -14,7 +15,9 @@ import type { ShapeDef } from "../shape-def";
 export const summingJunctionShapeDef: ShapeDef = {
   type: "summing-junction",
   shape: "summing-junction",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: JUNCTION_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-summing-junction",
     silhouette: ({ object, colors, strokeWidth }) => (
       <svg
@@ -33,22 +36,17 @@ export const summingJunctionShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "none" },
-  defaultSize: { width: 100, height: 100 },
-  defaultTone: "neutral",
+  text: "none",
   /*
    * Moved from CanvasStage's grouped rule (summing-junction shares its
    * selector group there with folder/document-stack/cylinder-horizontal/
    * triangle/parallelogram/pentagon/octagon/star/plus/chevron/off-page-
    * connector/trapezoid/manual-input/hexagon/document/or-junction — 17
-   * selectors total). Declarations are verbatim; summing-junction carries no
+   * selectors total). Paint declarations moved here; summing-junction carries no
    * additional per-shape follow-up rule in the legacy block.
    */
   css: `
         .interactive-canvas-object-summing-junction {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
@@ -56,7 +54,7 @@ export const summingJunctionShapeDef: ShapeDef = {
           overflow: visible;
         }
 `,
-  catalog: { label: "Summing Junction", keywords: ["summing", "junction", "flow", "gateway"] },
+  catalog: { label: "Summing junction", keywords: ["summing", "junction", "flow", "gateway"] },
 };
 
 export const summingJunctionDef = shapeObjectDef(summingJunctionShapeDef);

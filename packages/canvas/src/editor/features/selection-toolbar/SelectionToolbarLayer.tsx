@@ -1,9 +1,9 @@
 "use client";
 
 import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
-import type { CanvasAction } from "../../../state/actions";
-import { CONNECTOR_DEFAULT_COLOR } from "../../../objects/connector/def";
-import { paletteTokenStyle, resolveSectionColors } from "../../../theme";
+import { resolveConnectorControlState } from "./connector-control-state";
+import { colorKindForType, FIRST_USE_COLORS, type CanvasAction } from "../../../state/actions";
+import { resolveSectionColors, resolveSwatchPreview } from "../../../palette";
 import type { SelectionToolbarApi } from "./use-selection-toolbar";
 import type { InteractiveCanvasConnection } from "../../../state/schema";
 
@@ -38,35 +38,37 @@ export function SelectionToolbarLayer({
     setOpenFlyout,
     primarySelectedObject,
     handleSelectionToolbarAction,
-    applyPaletteTokenToSelection,
+    applyColorToSelection,
     setLockForSelection,
-    applyTintToSelection,
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   } = toolbar;
   if (!selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
   const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
   const controlState: Partial<Record<SelectionToolbarActionId, ToolbarControlState>> = {};
+  // P1/D12 — the toolbar's current-color swatch shows the PICK's preview hex
+  // (identical for every kind), not the kind-specific rendering.
   if (primarySelectedObject?.type === "section") {
-    const sectionColors = resolveSectionColors(primarySelectedObject.tint);
+    const currentPick = primarySelectedObject.color ?? FIRST_USE_COLORS.section;
     controlState.color = {
-      color: primarySelectedObject.style?.fill ?? sectionColors.tint,
+      color: resolveSwatchPreview(currentPick),
     };
     controlState["section-border-style"] = {
       variant: primarySelectedObject.style?.strokeStyle ?? "solid",
-      color: primarySelectedObject.style?.stroke ?? sectionColors.chipBorder ?? "transparent",
+      // The section frame border IS the chip fill (§3.2).
+      color: resolveSectionColors(currentPick).chip.fill,
     };
-    controlState.visibility = primarySelectedObject.contentHidden
-      ? { variant: "hidden", label: "Show contents" }
-      : { label: "Hide contents" };
   } else if (primarySelectedObject) {
     controlState.color = {
-      color: paletteTokenStyle(primarySelectedObject.style?.paletteToken ?? "note").accent,
+      color: resolveSwatchPreview(
+        primarySelectedObject.color ?? FIRST_USE_COLORS[colorKindForType(primarySelectedObject.type)],
+      ),
     };
   } else if (selectedConnection) {
     controlState.color = {
-      color: selectedConnection.color ?? CONNECTOR_DEFAULT_COLOR,
+      color: resolveSwatchPreview(selectedConnection.color ?? FIRST_USE_COLORS.connector),
     };
+    Object.assign(controlState, resolveConnectorControlState([selectedConnection]));
   }
   if (primarySelectedObject) {
     controlState.lock = primarySelectedObject.locked
@@ -92,9 +94,8 @@ export function SelectionToolbarLayer({
           selectedConnection={selectedConnection}
           dispatch={dispatch}
           close={() => setOpenFlyout(null)}
-          applyPaletteTokenToSelection={applyPaletteTokenToSelection}
+          applyColorToSelection={applyColorToSelection}
           applySectionBorderStyleToSelection={applySectionBorderStyleToSelection}
-          applyTintToSelection={applyTintToSelection}
           setLockForSelection={setLockForSelection}
           swapSelectedShape={swapSelectedShape}
         />

@@ -2,6 +2,7 @@
 
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
+import { connectionBoundsForObject, getConnectionAnchors } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
@@ -54,11 +55,9 @@ export type RoutedConnection = {
   startAnchor: Anchor;
   endAnchor: Anchor;
   /**
-   * The route's world-space polyline vertices, start -> end, for polyline
-   * styles (elbow, A-star, waypoints; straight routes get the 2 endpoints).
-   * Absent for `smooth` (a cubic curve has no corner vertices). Interior
-   * entries (all but first/last) are the elbow corners — used by
-   * CanvasStage's bend-affordance stubs (W3b, render-only).
+   * The route's world-space polyline vertices, start -> end. Interior entries
+   * (all but first/last) are the elbow corners — used by CanvasStage's
+   * bend-affordance stubs (W3b, render-only).
    */
   points?: CanvasPoint[];
 };
@@ -89,10 +88,10 @@ export function autoPickAnchors(
  *
  * `obstacles` is optional: pass the current document's objects (typically all
  * of them — the two endpoints and their section ancestors are excluded
- * automatically) so elbow-style routes detour around unrelated shapes via A*
+ * automatically) so routes detour around unrelated shapes via A*
  * orthogonal routing. Omitting it keeps the pre-existing 3-arg behavior:
- * elbow routes still upgrade to a real orthogonal A* path around the two
- * endpoint bounds themselves, they just won't detour around siblings.
+ * routes still upgrade to a real orthogonal A* path around the two endpoint
+ * bounds themselves, they just won't detour around siblings.
  */
 export function routeConnection(
   fromObject: InteractiveCanvasObject,
@@ -100,54 +99,30 @@ export function routeConnection(
   connection: InteractiveCanvasConnection,
   obstacles?: ReadonlyArray<InteractiveCanvasObject>,
 ): RoutedConnection {
-  const pickedAnchors = autoPickAnchors(fromObject.geometry, toObject.geometry);
+  const fromBounds = connectionBoundsForObject(fromObject);
+  const toBounds = connectionBoundsForObject(toObject);
+  const pickedAnchors = autoPickAnchors(fromBounds, toBounds);
   const startAnchor = explicitAnchor(connection.from.anchor) ?? pickedAnchors.startAnchor;
   const endAnchor = explicitAnchor(connection.to.anchor) ?? pickedAnchors.endAnchor;
-  const start = pointForPosition(fromObject.geometry, connection.from.position) ?? pointForAnchor(fromObject.geometry, startAnchor);
-  const end = pointForPosition(toObject.geometry, connection.to.position) ?? pointForAnchor(toObject.geometry, endAnchor);
-  const style = connection.style ?? "solid";
+  const start = pointForObjectPosition(fromObject, connection.from.position) ?? pointForObjectAnchor(fromObject, startAnchor);
+  const end = pointForObjectPosition(toObject, connection.to.position) ?? pointForObjectAnchor(toObject, endAnchor);
 
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
     return routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor);
   }
 
-  if (style === "elbow") {
-    const orthogonal = routeOrthogonalAStar(
-      fromObject,
-      toObject,
-      start,
-      end,
-      startAnchor,
-      endAnchor,
-      obstacles ?? [],
-    );
-    if (orthogonal) return orthogonal;
-    return routeElbow(start, end, startAnchor, endAnchor);
-  }
-
-  if (style === "smooth") {
-    return routeSmooth(start, end, startAnchor, endAnchor);
-  }
-
-  return {
-    path: straightPathWithEndGap(start, end),
+  const orthogonal = routeOrthogonalAStar(
+    fromObject,
+    toObject,
     start,
     end,
-    labelPoint: midpoint(start, end),
     startAnchor,
     endAnchor,
-    points: [start, end],
-  };
-}
-
-/** Straight-line path (style: "solid"/"dotted") pulled back by END_GAP at both ends — see roundedPolylinePath's doc comment. */
-function straightPathWithEndGap(start: CanvasPoint, end: CanvasPoint): string {
-  const segmentLength = distance(start, end);
-  const gap = Math.min(END_GAP, segmentLength / 2);
-  const renderStart = pointToward(start, end, gap);
-  const renderEnd = pointToward(end, start, gap);
-  return `M ${renderStart.x} ${renderStart.y} L ${renderEnd.x} ${renderEnd.y}`;
+    obstacles ?? [],
+  );
+  if (orthogonal) return orthogonal;
+  return routeElbow(start, end, startAnchor, endAnchor);
 }
 
 /** Returns the relative-position anchor point for `bounds`, or null when `position` is absent. */
@@ -155,6 +130,13 @@ function pointForPosition(bounds: CanvasBounds, position?: [number, number]): Ca
   if (!position) return null;
   const [rx, ry] = position;
   return { x: bounds.x + rx * bounds.width, y: bounds.y + ry * bounds.height };
+}
+
+function pointForObjectPosition(
+  object: InteractiveCanvasObject,
+  position?: [number, number],
+): CanvasPoint | null {
+  return pointForPosition(connectionBoundsForObject(object), position);
 }
 
 /** Validates a connection's `waypoints` are a usable (2+) polyline; returns null otherwise. */
@@ -217,18 +199,20 @@ function routeOrthogonalAStar(
     .filter(
       (object) =>
         !excludedIds.has(object.id) &&
-        !boundsStrictlyContain(object.geometry, start) &&
-        !boundsStrictlyContain(object.geometry, end),
+        !boundsStrictlyContain(connectionBoundsForObject(object), start) &&
+        !boundsStrictlyContain(connectionBoundsForObject(object), end),
     )
-    .map((object) => toObstacle(object.geometry));
+    // Below-slot labels are outside stored geometry; routing treats the union
+    // as the obstacle so edges do not cut through readable text.
+    .map((object) => toObstacle(connectionBoundsForObject(object)));
 
   let waypoints: Array<[number, number]>;
   try {
     const generator = new PathGenerator();
     waypoints = generator.generateOrthogonalConnectorPath(
       {
-        startBound: toObstacle(fromObject.geometry),
-        endBound: toObstacle(toObject.geometry),
+        startBound: toObstacle(connectionBoundsForObject(fromObject)),
+        endBound: toObstacle(connectionBoundsForObject(toObject)),
         startPoint: [start.x, start.y],
         endPoint: [end.x, end.y],
         obstacles: extraObstacles,
@@ -305,6 +289,17 @@ export function pointForAnchor(bounds: CanvasBounds, anchor: Anchor): CanvasPoin
   return { x: bounds.x, y: bounds.y + bounds.height / 2 };
 }
 
+export function pointForObjectAnchor(
+  object: InteractiveCanvasObject,
+  anchor: Anchor,
+): CanvasPoint {
+  const anchors = getConnectionAnchors(object);
+  if (anchor === "top") return anchors[0]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
+  if (anchor === "bottom") return anchors[1]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
+  if (anchor === "left") return anchors[2]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
+  return anchors[3]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
+}
+
 /** The four side-anchor points for a bounds, in a stable ["top","right","bottom","left"] order. */
 export function anchorPoints(bounds: CanvasBounds): Record<Anchor, CanvasPoint> {
   return {
@@ -322,6 +317,30 @@ export function nearestAnchor(bounds: CanvasBounds, point: CanvasPoint): Anchor 
   let closestDistance = Infinity;
   for (const anchor of ["top", "right", "bottom", "left"] as Anchor[]) {
     const candidate = points[anchor];
+    const d = Math.hypot(candidate.x - point.x, candidate.y - point.y);
+    if (d < closestDistance) {
+      closestDistance = d;
+      closest = anchor;
+    }
+  }
+  return closest;
+}
+
+export function nearestObjectAnchor(
+  object: InteractiveCanvasObject,
+  point: CanvasPoint,
+): Anchor {
+  const anchors = getConnectionAnchors(object);
+  const entries: Array<[Anchor, CanvasPoint | undefined]> = [
+    ["top", anchors[0]?.point],
+    ["bottom", anchors[1]?.point],
+    ["left", anchors[2]?.point],
+    ["right", anchors[3]?.point],
+  ];
+  let closest: Anchor = "top";
+  let closestDistance = Infinity;
+  for (const [anchor, candidate] of entries) {
+    if (!candidate) continue;
     const d = Math.hypot(candidate.x - point.x, candidate.y - point.y);
     if (d < closestDistance) {
       closestDistance = d;
@@ -361,34 +380,6 @@ function routeElbow(
     startAnchor,
     endAnchor,
     points,
-  };
-}
-
-function routeSmooth(
-  start: CanvasPoint,
-  end: CanvasPoint,
-  startAnchor: Anchor,
-  endAnchor: Anchor,
-): RoutedConnection {
-  const controlDistance = Math.max(40, distance(start, end) / 2);
-  const control1 = addScaled(start, normalFor(startAnchor), controlDistance);
-  const control2 = addScaled(end, normalFor(endAnchor), controlDistance);
-  // Pull the rendered endpoints back toward their own control point (the
-  // curve's initial/final tangent direction) so the drawn path still aims at
-  // start/end without touching them — same END_GAP rule as the other styles.
-  const renderStart = pointToward(start, control1, Math.min(END_GAP, controlDistance / 2));
-  const renderEnd = pointToward(end, control2, Math.min(END_GAP, controlDistance / 2));
-
-  return {
-    path: `M ${renderStart.x} ${renderStart.y} C ${control1.x} ${control1.y}, ${control2.x} ${control2.y}, ${renderEnd.x} ${renderEnd.y}`,
-    start,
-    end,
-    labelPoint: {
-      x: 0.125 * start.x + 0.375 * control1.x + 0.375 * control2.x + 0.125 * end.x,
-      y: 0.125 * start.y + 0.375 * control1.y + 0.375 * control2.y + 0.125 * end.y,
-    },
-    startAnchor,
-    endAnchor,
   };
 }
 

@@ -35,7 +35,12 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return SHAPE_SEARCH_ENTRIES;
-    return SHAPE_SEARCH_ENTRIES.filter((e) => e.label.toLowerCase().includes(q));
+    // Labels + the def-declared catalog keywords (P4: entries carry the
+    // registry's `catalog.keywords`, so "box" finds Square, "subroutine"
+    // finds Predefined process).
+    return SHAPE_SEARCH_ENTRIES.filter(
+      (e) => e.label.toLowerCase().includes(q) || e.keywords?.some((k) => k.includes(q)),
+    );
   }, [query]);
 
   return (

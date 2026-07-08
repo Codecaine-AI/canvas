@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { ArrowLeftIcon, PanelRightIcon, PlusIcon, TrashIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
+import { ArrowLeftIcon, PanelRightIcon, PlusIcon, ShapesIcon, TrashIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
 import {
   InteractiveCanvasEditor,
   type InteractiveCanvasDocument,
 } from "@codecaine-ai/canvas";
 import { Button } from "@codecaine-ai/canvas/ui/button";
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
+import { GalleryPage } from "./GalleryPage";
 
 type CanvasListItem = {
   id: string;
@@ -13,11 +14,14 @@ type CanvasListItem = {
   updated_at: string;
 };
 
-type Route = { name: "list" } | { name: "canvas"; id: string };
+type Route = { name: "list" } | { name: "gallery" } | { name: "canvas"; id: string };
 
 const SHOW_INSPECTOR_STORAGE_KEY = "studio.showInspector";
 
 function parseRoute(pathname: string): Route {
+  if (pathname === "/gallery" || pathname === "/gallery/") {
+    return { name: "gallery" };
+  }
   const match = pathname.match(/^\/canvas\/([^/]+)\/?$/);
   if (match) return { name: "canvas", id: decodeURIComponent(match[1]) };
   return { name: "list" };
@@ -54,27 +58,30 @@ function createStarterCanvasDocument(input: {
     objects: [
       {
         id: "diagram-frame",
-        type: "container",
-        label: input.title,
+        type: "section",
+        text: input.title,
+        color: "gray",
         geometry: { x: 80, y: 80, width: 720, height: 360 },
-        style: { tone: "neutral", shape: "rounded-rect" },
+        style: { shape: "section" },
         layout: { mode: "free", padding: 32, gap: 24 },
       },
       {
         id: "start",
         type: "process",
-        label: "Start",
+        text: "Start",
+        color: "green",
         parentId: "diagram-frame",
         geometry: { x: 160, y: 200, width: 160, height: 80 },
-        style: { tone: "input", shape: "rounded-rect" },
+        style: { shape: "rounded-rect" },
       },
       {
         id: "next-step",
         type: "process",
-        label: "Next step",
+        text: "Next step",
+        color: "blue",
         parentId: "diagram-frame",
         geometry: { x: 440, y: 200, width: 180, height: 80 },
-        style: { tone: "process", shape: "rounded-rect" },
+        style: { shape: "rounded-rect" },
       },
     ],
     connections: [
@@ -86,7 +93,6 @@ function createStarterCanvasDocument(input: {
         arrow: "forward",
       },
     ],
-    links: [],
     annotations: [],
   };
 }
@@ -394,6 +400,10 @@ export function App() {
     );
   }
 
+  if (route.name === "gallery") {
+    return <GalleryPage onBack={() => navigate("/")} />;
+  }
+
   return (
     <div className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-8">
       <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
@@ -403,10 +413,16 @@ export function App() {
             Codecaine Studio
           </h1>
         </div>
-        <Button type="button" onClick={() => void createBoard()}>
-          <PlusIcon className="h-4 w-4" />
-          New board
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
+            <ShapesIcon className="h-4 w-4" />
+            Object Gallery
+          </Button>
+          <Button type="button" onClick={() => void createBoard()}>
+            <PlusIcon className="h-4 w-4" />
+            New board
+          </Button>
+        </div>
       </header>
 
       <section>

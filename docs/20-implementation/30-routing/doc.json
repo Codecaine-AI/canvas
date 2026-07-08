@@ -646,7 +646,7 @@
           }
         },
         {
-          "insert": " picks whichever of those four is closest to an arbitrary point — a plain bounding-box heuristic, distinct from the real-outline anchor projection the connection overlay performs (see below) for live drag/hover interaction."
+          "insert": " picks whichever of those four is closest to an arbitrary point — a plain bounding-box heuristic, distinct from the real-outline anchor projection objects/geometry.ts performs for live drag/hover interaction (see below)."
         }
       ],
       "children": []
@@ -840,7 +840,7 @@
           }
         },
         {
-          "insert": " is a separate, purely-computational module for the live interaction surface around making and re-pointing connections — it is not the routing algorithm itself, but the logic that decides where a connector endpoint should snap while a person is dragging it. It ports two pieces from BlockSuite's "
+          "insert": " is a separate, purely-computational module for the live interaction surface around making and re-pointing connections — it is not the routing algorithm itself, but the logic that decides where a connector endpoint should snap while a person is dragging it. Since the P3 geometry move (OBJECT-DEF-OVERHAUL.md D4) it carries exactly ONE port from BlockSuite's "
         },
         {
           "insert": "connector-manager.ts",
@@ -850,29 +850,6 @@
         },
         {
           "insert": ": "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " (from upstream "
-        },
-        {
-          "insert": "getAnchors",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and "
         },
         {
           "insert": "resolveConnectionCascade",
@@ -895,16 +872,38 @@
           }
         },
         {
-          "insert": "'s decision cascade). Both are algorithm-only ports: no canvas-paint, no "
+          "insert": "'s decision cascade). The outline polygons and 4-cardinal anchor projection the cascade consumes moved into "
         },
         {
-          "insert": "GfxController",
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " — the defs own their outline geometry now — and routing reaches them through the single allowed boundary edge: the import-boundaries test pins routing's "
+        },
+        {
+          "insert": "objects/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/grid search, and no rotation support — this repo renders the overlay in React (CanvasStage) from this module's pure return values."
+          "insert": " imports to exactly "
+        },
+        {
+          "insert": "routing/connection-overlay.ts -> ../objects/geometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a pure, React-free module; routing must never import def components). The cascade itself, its thresholds, and its behavior are unchanged — the port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support."
         }
       ],
       "children": []
@@ -920,13 +919,31 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "getConnectionAnchors"
             }
           }
         },
         {
-          "insert": " computes 4 cardinal port candidates (N/S/E/W of an object's center, offset "
+          "insert": " (now in "
+        },
+        {
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", ported from upstream "
+        },
+        {
+          "insert": "getAnchors",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") computes 4 cardinal port candidates (N/S/E/W of an object's center, offset "
         },
         {
           "insert": "ANCHOR_OFFSET_PX",
@@ -934,7 +951,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ANCHOR_OFFSET_PX"
             }
           }
@@ -948,36 +965,55 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "outlinePolygon"
             }
           }
         },
         {
-          "insert": " and a center-to-candidate line/outline intersection. True (non-bounding-box) outlines are modeled for rect/rounded-rect, pill/stadium, diamond, and the arrow-shape chevron ("
+          "insert": " and a center-to-candidate line/outline intersection. Which outline that is comes from the def-declared "
         },
         {
-          "insert": "arrowShapePoints",
+          "insert": "OutlineSpec",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "arrowShapePoints"
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "OutlineSpec"
             }
           }
         },
         {
-          "insert": ", built from "
+          "insert": " resolved by "
         },
         {
-          "insert": "ARROW_SHAPE_GEOMETRY",
+          "insert": "outlineSpecFor",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "outlineSpecFor"
+            }
           }
         },
         {
-          "insert": "'s head-width ratio); every other object type falls back to its axis-aligned bounding rect, matching upstream's own conservative fallback for diamond/ellipse/triangle."
+          "insert": ": true (non-bounding-box) outlines cover pill/stadium, diamond, arrow-shape, and the W5 parity set (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, off-page-connector, trapezoid, manual-input, hexagon, and the or/summing junction circles); every other object type falls back to its axis-aligned bounding rect, matching upstream's own conservative fallback. The same anchors also feed the selected-object anchor dots ("
+        },
+        {
+          "insert": "AnchorDots",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "symbol": "AnchorDots"
+            }
+          }
+        },
+        {
+          "insert": ") and hit-testing (D16), so attachment, affordance, and clicks can never disagree."
         }
       ],
       "children": []

@@ -1,5 +1,6 @@
 "use client";
 
+import { JUNCTION_OUTLINE } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -13,7 +14,9 @@ import type { ShapeDef } from "../shape-def";
 export const orJunctionShapeDef: ShapeDef = {
   type: "or-junction",
   shape: "or-junction",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: JUNCTION_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-or-junction",
     silhouette: ({ object, colors, strokeWidth }) => (
       <svg
@@ -32,22 +35,17 @@ export const orJunctionShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "none" },
-  defaultSize: { width: 100, height: 100 },
-  defaultTone: "neutral",
+  text: "none",
   /*
    * Moved from CanvasStage's grouped rule (or-junction shares its selector
    * group there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/document/summing-junction — 17 selectors
-   * total). Declarations are verbatim; or-junction carries no additional
+   * total). Paint declarations moved here; or-junction carries no additional
    * per-shape follow-up rule in the legacy block.
    */
   css: `
         .interactive-canvas-object-or-junction {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
@@ -55,7 +53,7 @@ export const orJunctionShapeDef: ShapeDef = {
           overflow: visible;
         }
 `,
-  catalog: { label: "Or Junction", keywords: ["or", "junction", "flow", "gateway"] },
+  catalog: { label: "Or junction", keywords: ["or", "junction", "flow", "gateway"] },
 };
 
 export const orJunctionDef = shapeObjectDef(orJunctionShapeDef);

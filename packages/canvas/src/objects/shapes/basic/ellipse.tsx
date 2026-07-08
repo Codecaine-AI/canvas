@@ -1,17 +1,20 @@
 "use client";
 
+import { ELLIPSE_OUTLINE } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
 /**
  * Ellipse (W5, Wave A) — a true-outline SVG silhouette (an explicit stroke
- * traces the actual ellipse, not the bounding box) behind centered text;
+ * traces the actual ellipse, not the bounding box) behind the slot text;
  * the button chrome stays fully transparent so only one outline is visible.
  */
 export const ellipseShapeDef: ShapeDef = {
   type: "ellipse",
   shape: "ellipse",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: ELLIPSE_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-ellipse",
     silhouette: ({ object, colors, strokeWidth }) => (
       <svg
@@ -34,13 +37,8 @@ export const ellipseShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 160, height: 120 },
   css: `
         .interactive-canvas-object-ellipse {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

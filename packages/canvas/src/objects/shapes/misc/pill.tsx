@@ -1,5 +1,6 @@
 "use client";
 
+import { PILL_OUTLINE } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -12,18 +13,13 @@ import type { ShapeDef } from "../shape-def";
 export const pillShapeDef: ShapeDef = {
   type: "pill",
   shape: "pill",
-  outline: {
+  outline: PILL_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-pill",
   },
-  text: { kind: "label" },
-  defaultSize: { width: 200, height: 64 },
-  defaultTone: "input",
   css: `
         /* W2 — pill: true stadium shape, radius = height/2 (computed inline via CSS calc). */
         .interactive-canvas-object-pill {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border-radius: 999px;
         }
 `,

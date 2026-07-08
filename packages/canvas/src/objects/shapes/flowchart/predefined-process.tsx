@@ -26,7 +26,7 @@ export const PREDEFINED_PROCESS_GEOMETRY = {
 export const predefinedProcessShapeDef: ShapeDef = {
   type: "predefined-process",
   shape: "predefined-process",
-  outline: {
+  silhouette: {
     className: "interactive-canvas-object-predefined-process",
     silhouette: () => {
       // W2 — predefined-process: rect with two inner vertical bars inset from
@@ -48,15 +48,9 @@ export const predefinedProcessShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 200, height: 100 },
-  defaultTone: "memory",
   css: `
         /* W2 — predefined-process: rect + two inner vertical bars near each edge. */
         .interactive-canvas-object-predefined-process {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border-radius: ${PREDEFINED_PROCESS_GEOMETRY.cornerRadiusPx}px;
         }
         .interactive-canvas-predefined-process-bar {
@@ -68,7 +62,7 @@ export const predefinedProcessShapeDef: ShapeDef = {
           opacity: 0.6;
         }
 `,
-  catalog: { label: "Predefined Process", keywords: ["predefined-process", "predefined process", "subroutine"] },
+  catalog: { label: "Predefined process", keywords: ["predefined-process", "predefined process", "subroutine"] },
 };
 
 export const predefinedProcessDef = shapeObjectDef(predefinedProcessShapeDef);

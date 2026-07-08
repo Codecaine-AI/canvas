@@ -17,7 +17,7 @@ import type {
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 100 },
     ...overrides,
   };

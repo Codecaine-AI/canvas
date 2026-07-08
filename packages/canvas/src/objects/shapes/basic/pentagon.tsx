@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { pentagonPoints } from "../../../routing/connection-overlay";
+import { PENTAGON_OUTLINE, pentagonPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -17,7 +17,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const pentagonShapeDef: ShapeDef = {
   type: "pentagon",
   shape: "pentagon",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: PENTAGON_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-pentagon",
     silhouette: ({ object, colors, strokeWidth }) => {
       const points = pointsAttribute(
@@ -43,23 +45,17 @@ export const pentagonShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 140 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (pentagon shares its selector group
    * there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/octagon/star/plus/chevron/off-page-connector/trapezoid/
    * manual-input/hexagon/or-junction/summing-junction — 17 selectors total).
-   * Declarations are verbatim; pentagon carries no additional per-shape
+   * Paint declarations moved here; pentagon carries no additional per-shape
    * follow-up rule in the legacy block (unlike folder/document-stack/
    * triangle/off-page-connector/manual-input/star, which do).
    */
   css: `
         .interactive-canvas-object-pentagon {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

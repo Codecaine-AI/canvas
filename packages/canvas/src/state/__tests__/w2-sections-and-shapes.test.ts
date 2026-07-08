@@ -102,7 +102,8 @@ describe("schema: W2 object types round-trip", () => {
     expect(types.has("arrow-shape")).toBe(true);
     expect(types.has("predefined-process")).toBe(true);
     expect(types.has("code-block")).toBe(true);
-    expect(types.has("chip-icon")).toBe(true);
+    expect(types.has("icon")).toBe(true);
+    expect(validation.document.objects.some((object) => object.type === "icon" && object.icon === "cpu")).toBe(true);
     expect(validation.warnings).toBeUndefined();
   });
 
@@ -232,7 +233,7 @@ describe("schema: W2 object types round-trip", () => {
     expect(validation.document.objects[0]?.style?.strokeStyle).toBe("dashed");
   });
 
-  it("preserves section visibility and lock flags through validation", () => {
+  it("preserves section lock flags through validation", () => {
     const doc = {
       schemaVersion: 1,
       id: "w2-test-doc",
@@ -244,7 +245,6 @@ describe("schema: W2 object types round-trip", () => {
           text: "A",
           color: "gray",
           locked: true,
-          contentHidden: true,
           style: { shape: "section" },
         },
       ],
@@ -255,7 +255,6 @@ describe("schema: W2 object types round-trip", () => {
     expect(validation.ok).toBe(true);
     if (!validation.ok) return;
     expect(validation.document.objects[0]?.locked).toBe("background");
-    expect(validation.document.objects[0]?.contentHidden).toBe(true);
 
     const validateLock = (locked: unknown) => {
       const lockValidation = validateInteractiveCanvasDocument({

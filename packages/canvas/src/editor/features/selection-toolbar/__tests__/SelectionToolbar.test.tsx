@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { createRef } from "react";
 import { SelectionToolbar } from "../SelectionToolbar";
+import { SelectionToolbarLayer } from "../SelectionToolbarLayer";
+import { resolveConnectorControlState } from "../connector-control-state";
+import type { SelectionToolbarApi } from "../use-selection-toolbar";
 import {
   connectorDef,
   intersectToolbarControls,
@@ -9,15 +13,59 @@ import {
 } from "../../../../objects/object-def";
 import { SECTION_TOOLBAR } from "../../../../objects/section/toolbar";
 import { SHAPE_TOOLBAR } from "../../../../objects/shapes/toolbar";
+import type { InteractiveCanvasConnection } from "../../../../state/schema";
 
 const SHAPE_CONTROLS = SHAPE_TOOLBAR.controls;
 const SECTION_CONTROLS = SECTION_TOOLBAR.controls;
-const CONNECTOR_CONTROLS = connectorDef.toolbar!.controls;
+const CONNECTOR_CONTROLS = connectorDef.toolbar.controls; // ConnectorDef (D19): toolbar is a required field
 const STICKY_CONTROLS = objectDefForType("sticky")!.toolbar!.controls;
 
 afterEach(() => {
   cleanup();
 });
+
+function connection(overrides: Partial<InteractiveCanvasConnection> = {}): InteractiveCanvasConnection {
+  return {
+    id: "connection-a",
+    from: { objectId: "a", anchor: "right" },
+    to: { objectId: "b", anchor: "left" },
+    ...overrides,
+  };
+}
+
+function actionIconSvg(container: HTMLElement, action: string): SVGSVGElement {
+  const button = container.querySelector(`[data-toolbar-action="${action}"]`);
+  const svg = button?.querySelector("svg");
+  expect(svg).toBeTruthy();
+  return svg as SVGSVGElement;
+}
+
+function actionIconPathData(container: HTMLElement, action: string): readonly (string | null)[] {
+  return Array.from(actionIconSvg(container, action).querySelectorAll("path")).map((path) =>
+    path.getAttribute("d"),
+  );
+}
+
+function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): SelectionToolbarApi {
+  return {
+    selectionToolbarRef: createRef<HTMLDivElement>(),
+    selectionToolbarVariant: "connector",
+    selectionToolbarVariantLabel: "connector",
+    selectionToolbarControls: CONNECTOR_CONTROLS,
+    selectionToolbarFlyouts: null,
+    selectionToolbarPosition: { x: 0, y: 0, placement: "above" },
+    openFlyout: null,
+    setOpenFlyout: () => undefined,
+    selectedObjectsForToolbar: [],
+    primarySelectedObject: undefined,
+    handleSelectionToolbarAction: () => undefined,
+    applyColorToSelection: () => undefined,
+    setLockForSelection: () => undefined,
+    applySectionBorderStyleToSelection: () => undefined,
+    swapSelectedShape: () => undefined,
+    ...overrides,
+  };
+}
 
 describe("SelectionToolbar geometry / styling", () => {
   it("renders the dark #1D1D1D bar at the 48px height with rounded-rect radius", () => {
@@ -52,16 +100,16 @@ describe("SelectionToolbar registry-driven control sets", () => {
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "section-border-style", "rename", "visibility", "lock"]);
+    expect(actions).toEqual(["color", "section-border-style", "rename", "lock"]);
     expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
-  it("connector controls render exactly the 4 measured controls", () => {
+  it("connector controls render exactly the 3 connector controls", () => {
     const { container } = render(<SelectionToolbar controls={CONNECTOR_CONTROLS} variantLabel="connector" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "dash", "routing", "arrowhead"]);
+    expect(actions).toEqual(["color", "dash", "arrowhead"]);
   });
 
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
@@ -146,5 +194,113 @@ describe("SelectionToolbar interaction", () => {
     expect(onAction.mock.calls.at(-1)).toEqual(["section-border-style"]);
     expect(border.getAttribute("aria-expanded")).toBe("true");
     expect(container.querySelector("[data-color-palette-popover]")).toBeNull();
+  });
+});
+
+describe("SelectionToolbar connector current-value icons", () => {
+  const arrowIcons = [
+    { arrow: "none", paths: ["M3 9H15"] },
+    { arrow: "forward", paths: ["M3 9H12.5", "M15 9L11 6.5V11.5Z"] },
+    { arrow: "back", paths: ["M5.5 9H15", "M3 9L7 6.5V11.5Z"] },
+    {
+      arrow: "both",
+      paths: ["M5.5 9H12.5", "M3 9L7 6.5V11.5Z", "M15 9L11 6.5V11.5Z"],
+    },
+  ] as const;
+
+  for (const { arrow, paths } of arrowIcons) {
+    it(`arrowhead button reflects ${arrow}`, () => {
+      const { container } = render(
+        <SelectionToolbar
+          controls={CONNECTOR_CONTROLS}
+          variantLabel="connector"
+          controlState={resolveConnectorControlState([connection({ arrow })])}
+        />,
+      );
+
+      expect(actionIconPathData(container, "arrowhead")).toEqual(paths);
+    });
+  }
+
+  it("dash button reflects solid and dashed connector styles", () => {
+    const solid = render(
+      <SelectionToolbar
+        controls={CONNECTOR_CONTROLS}
+        variantLabel="connector"
+        controlState={resolveConnectorControlState([connection({ style: "solid" })])}
+      />,
+    );
+    expect(
+      actionIconSvg(solid.container, "dash").querySelector("path")?.getAttribute("stroke-dasharray"),
+    ).toBeNull();
+    solid.unmount();
+
+    const dashed = render(
+      <SelectionToolbar
+        controls={CONNECTOR_CONTROLS}
+        variantLabel="connector"
+        controlState={resolveConnectorControlState([connection({ style: "dashed" })])}
+      />,
+    );
+    expect(
+      actionIconSvg(dashed.container, "dash").querySelector("path")?.getAttribute("stroke-dasharray"),
+    ).toBe("3 2");
+  });
+
+  it("mixed connector selections fall back to the default connector glyphs", () => {
+    const { container } = render(
+      <SelectionToolbar
+        controls={CONNECTOR_CONTROLS}
+        variantLabel="connector"
+        controlState={resolveConnectorControlState([
+          connection({ id: "connection-a", style: "dashed", arrow: "both" }),
+          connection({ id: "connection-b", style: "solid", arrow: "none" }),
+        ])}
+      />,
+    );
+
+    expect(actionIconSvg(container, "dash").querySelector("path")?.getAttribute("stroke-dasharray")).toBeNull();
+    expect(actionIconPathData(container, "arrowhead")).toEqual([
+      "M3 9H12.5",
+      "M15 9L11 6.5V11.5Z",
+    ]);
+  });
+
+  it("treats absent connector fields as their schema defaults", () => {
+    const { container } = render(
+      <SelectionToolbar
+        controls={CONNECTOR_CONTROLS}
+        variantLabel="connector"
+        controlState={resolveConnectorControlState([
+          connection({ id: "connection-a" }),
+          connection({ id: "connection-b", style: "solid", arrow: "forward" }),
+        ])}
+      />,
+    );
+
+    expect(actionIconSvg(container, "dash").querySelector("path")?.getAttribute("stroke-dasharray")).toBeNull();
+    expect(actionIconPathData(container, "arrowhead")).toEqual([
+      "M3 9H12.5",
+      "M15 9L11 6.5V11.5Z",
+    ]);
+  });
+
+  it("layer feeds selected connector values into collapsed toolbar buttons", () => {
+    const { container } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi()}
+        selectedConnection={connection({ style: "dashed", arrow: "back", color: "blue" })}
+        dispatch={() => undefined}
+      />,
+    );
+
+    expect(
+      actionIconSvg(container, "dash").querySelector("path")?.getAttribute("stroke-dasharray"),
+    ).toBe("3 2");
+    expect(actionIconPathData(container, "arrowhead")).toEqual([
+      "M5.5 9H15",
+      "M3 9L7 6.5V11.5Z",
+    ]);
+    expect(actionIconSvg(container, "color").querySelector("circle")?.getAttribute("fill")).toBe("#0D99FF");
   });
 });

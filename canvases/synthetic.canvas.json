@@ -185,7 +185,7 @@
     },
     {
       "id": "stakeholder",
-      "type": "person",
+      "type": "icon",
       "text": "Stakeholder",
       "color": "green",
       "parentId": null,
@@ -196,8 +196,9 @@
         "height": 88
       },
       "style": {
-        "shape": "person"
-      }
+        "shape": "icon"
+      },
+      "icon": "person"
     },
     {
       "id": "memory-store",
@@ -217,7 +218,7 @@
     },
     {
       "id": "clarify-chat",
-      "type": "chat",
+      "type": "icon",
       "text": "Clarify chat",
       "color": "blue",
       "parentId": null,
@@ -228,8 +229,9 @@
         "height": 110
       },
       "style": {
-        "shape": "chat"
-      }
+        "shape": "icon"
+      },
+      "icon": "chat"
     }
   ],
   "connections": [

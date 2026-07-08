@@ -5,8 +5,8 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Database — a cylinder silhouette (lid ellipse + body path) drawn via inline
- * SVG behind centered text; the button chrome stays fully transparent so only
- * one outline is visible. Unlike chat/chip-icon/person, database keeps the
+ * SVG behind the slot text; the button chrome stays fully transparent so only
+ * one outline is visible. Unlike icon glyph shapes, database keeps the
  * older tone-driven pastel-pair styling (colors.fill/colors.border) rather
  * than a fixed icon-color pair — it was not in the W2 restyle scope — and the
  * legacy renderer never passes a resolved stroke width for it, so the
@@ -15,7 +15,8 @@ import type { ShapeDef } from "../shape-def";
 export const databaseShapeDef: ShapeDef = {
   type: "database",
   shape: "database",
-  outline: {
+  buttonBorder: "suppressed",
+  silhouette: {
     className: "interactive-canvas-object-database",
     silhouette: ({ colors }) => (
       <svg
@@ -43,14 +44,9 @@ export const databaseShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 120 },
-  defaultTone: "memory",
   /*
    * Moved from CanvasStage's grouped rules (database shared selector groups
-   * with chat/chip-icon there). Declarations are verbatim; the two
-   * same-selector rules mirror the original two groups so the declaration
-   * cascade (padding: 8px, then padding-top: 14%) is preserved exactly.
+   * with other bbox silhouettes there). Paint declarations moved here.
    */
   css: `
         .interactive-canvas-object-database {
@@ -61,13 +57,6 @@ export const databaseShapeDef: ShapeDef = {
           border-radius: 0;
           background: transparent !important;
           box-shadow: none;
-          padding: 8px;
-        }
-        .interactive-canvas-object-database {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding-top: 14%;
         }
 `,
   catalog: { label: "Database", keywords: ["database", "storage", "data", "cylinder"] },

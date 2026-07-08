@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { trapezoidPoints } from "../../../routing/connection-overlay";
+import { TRAPEZOID_OUTLINE, trapezoidPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -18,7 +18,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const trapezoidShapeDef: ShapeDef = {
   type: "trapezoid",
   shape: "trapezoid",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: TRAPEZOID_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-trapezoid",
     silhouette: ({ object, colors, strokeWidth }) => (
       <svg
@@ -41,22 +43,16 @@ export const trapezoidShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 150, height: 100 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (trapezoid shares its selector
    * group there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * manual-input/hexagon/document/or-junction/summing-junction — 17
-   * selectors total). Declarations are verbatim; trapezoid carries no
+   * selectors total). Paint declarations moved here; trapezoid carries no
    * additional per-shape follow-up rule in the legacy block.
    */
   css: `
         .interactive-canvas-object-trapezoid {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

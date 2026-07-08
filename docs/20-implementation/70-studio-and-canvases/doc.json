@@ -645,7 +645,7 @@
           }
         },
         {
-          "insert": ", the FigJam visual-parity recreation of the user's own \"V2 Flow\" FigJam board — 42 objects and 24 connections reproducing sections, stickies, pills, chip-icons, chat/person shapes, code blocks, arrow-shape chevrons, and the full connector network at exact sampled fill/stroke colors. This is the sample already embedded live in the "
+          "insert": ", the FigJam visual-parity recreation of the user's own \"V2 Flow\" FigJam board — 42 objects and 24 connections reproducing sections, stickies, pills, icon objects with cpu, chat, and person glyphs, code blocks, arrow-shape chevrons, and the full connector network with per-object palette color picks (migrated to the closed 10-pick roster in the color-prune cutover). This is the sample already embedded live in the "
         },
         {
           "insert": "canvas-00-overview",
@@ -720,7 +720,7 @@
           }
         },
         {
-          "insert": ", which asserts on its exact object-type inventory (13 sections, 3 stickies, 7 pills, 3 chip-icons, 6 arrow-shape chevrons, and so on) and its connector count. It is also, unchanged, the literal source object serialized into the sidecar that "
+          "insert": ", which asserts on its exact object-type inventory (13 sections, 3 stickies, 7 pills, 3 cpu-glyph icons, 6 arrow-shape chevrons, and so on) and its connector count. It is also, unchanged, the literal source object serialized into the sidecar that "
         },
         {
           "insert": "canvas-00-overview",
@@ -788,20 +788,7 @@
       },
       "text": [
         {
-          "insert": "packages/canvas/src/model/__tests__/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/__tests__"
-            }
-          }
-        },
-        {
-          "insert": " holds tests that validate a sample's own internal consistency rather than exercising other engine subsystems. "
-        },
-        {
-          "insert": "v2-flow-figjam.test.ts",
+          "insert": "packages/canvas/src/state/__tests__/v2-flow-figjam-canvas.test.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -811,62 +798,34 @@
           }
         },
         {
-          "insert": " asserts that "
-        },
-        {
-          "insert": "v2-flow.canvas.json",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " passes "
+          "insert": " holds tests that validate the sample's own internal consistency rather than exercising other engine subsystems: it asserts that v2-flow.canvas.json passes "
         },
         {
           "insert": "validateInteractiveCanvasDocument",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/validate.ts",
-              "symbol": "validateInteractiveCanvasDocument"
-            }
+            "code": true
           }
         },
         {
           "insert": " with no hard errors and no unexpected warnings (e.g. an unknown "
         },
         {
-          "insert": "paletteToken",
+          "insert": "color",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "), that its object-type inventory matches expected counts exactly (13 sections, 3 stickies, 7 pills, 3 chip-icons, 1 chat, 1 person, 5 predefined-process, 2 code-block, 6 arrow-shape, 1 text), that it has at least 20 connections, that every connection endpoint and every object "
+          "insert": " swatch id), that its object-type inventory matches expected counts exactly (12 sections, 3 stickies, 7 pills, 5 icons (cpu x3, chat x1, person x1), 5 predefined-process, 2 code-block, 6 arrow-shape, 1 rectangle), that it has at least 20 connections, that every connection endpoint and every object parentId resolves to a real object id, and that every object carries a "
         },
         {
-          "insert": "parentId",
+          "insert": "color",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " resolves to a real object id, and that every section tint is a known "
-        },
-        {
-          "insert": "SECTION_FAMILIES",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "SECTION_FAMILIES"
-            }
-          }
-        },
-        {
-          "insert": " key. These checks guard the sample's own shape, independent of whatever else in the engine happens to consume it."
+          "insert": " pick from the closed roster. These checks guard the sample's own shape, independent of whatever else in the engine happens to consume it."
         }
       ],
       "children": []

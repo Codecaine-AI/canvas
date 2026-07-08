@@ -20,7 +20,7 @@ function overlapArea(a: CanvasBounds, b: CanvasBounds): number {
 function sectionCanParent(section: InteractiveCanvasObject, object: InteractiveCanvasObject): boolean {
   if (section.type !== "section") return false;
   if (section.id === (object.parentId ?? null)) return true;
-  return section.contentHidden !== true && section.locked !== "all";
+  return section.locked !== "all";
 }
 
 export function resolveSectionParent(

@@ -17,7 +17,8 @@ import type { ShapeDef } from "../shape-def";
 export const cylinderHorizontalShapeDef: ShapeDef = {
   type: "cylinder-horizontal",
   shape: "cylinder-horizontal",
-  outline: {
+  buttonBorder: "suppressed",
+  silhouette: {
     className: "interactive-canvas-object-cylinder-horizontal",
     silhouette: ({ colors, strokeWidth }) => (
       <svg
@@ -57,20 +58,13 @@ export const cylinderHorizontalShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 150, height: 100 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (cylinder-horizontal shared its
-   * selector group there with folder/document-stack). Declarations are
-   * verbatim. Unlike folder/document-stack, cylinder-horizontal has no
+   * selector group there with folder/document-stack). Paint declarations moved here. Unlike folder/document-stack, cylinder-horizontal has no
    * per-shape follow-up rule in the legacy block — group copy only.
    */
   css: `
         .interactive-canvas-object-cylinder-horizontal {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
@@ -79,7 +73,7 @@ export const cylinderHorizontalShapeDef: ShapeDef = {
         }
 `,
   catalog: {
-    label: "Cylinder (Horizontal)",
+    label: "Cylinder (horizontal)",
     keywords: ["cylinder", "horizontal", "storage", "database"],
   },
 };

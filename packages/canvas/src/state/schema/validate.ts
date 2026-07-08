@@ -7,14 +7,13 @@ import type {
   CanvasArrowDirection,
   InteractiveCanvasConnection,
 } from "./connections";
+import { isCanvasColor } from "./colors";
+import type { CanvasColor } from "./colors";
 import type { InteractiveCanvasDocument } from "./document";
 import type {
   CanvasIconGlyph,
-  CanvasPaletteToken,
-  CanvasSectionTint,
   CanvasShapeDirection,
   InteractiveCanvasObjectType,
-  InteractiveCanvasTone,
 } from "./object-types";
 import type { CanvasGeometry, InteractiveCanvasObject } from "./objects";
 import type { CanvasObjectStyle, CanvasSectionStrokeStyle } from "./style";
@@ -28,7 +27,7 @@ export type CanvasValidationResult =
   | {
       ok: true;
       document: InteractiveCanvasDocument;
-      /** Non-fatal normalization notes — e.g. an unknown paletteToken was dropped. */
+      /** Non-fatal normalization notes — e.g. an unknown color id was dropped. */
       warnings?: CanvasValidationIssue[];
     }
   | { ok: false; issues: CanvasValidationIssue[] };
@@ -54,15 +53,12 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "sticky" ||
     value === "annotation-marker" ||
     value === "document" ||
-    value === "person" ||
     value === "database" ||
-    value === "chat" ||
     value === "section" ||
     value === "pill" ||
     value === "arrow-shape" ||
     value === "predefined-process" ||
     value === "code-block" ||
-    value === "chip-icon" ||
     // W5 — FigJam parity shape set (Wave A):
     value === "ellipse" ||
     value === "triangle" ||
@@ -84,21 +80,6 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "cylinder-horizontal" ||
     value === "page-corner" ||
     value === "icon"
-  );
-}
-
-function isSectionTint(value: unknown): value is CanvasSectionTint {
-  return (
-    value === "green" ||
-    value === "purple" ||
-    value === "orange" ||
-    value === "yellow" ||
-    value === "gray" ||
-    value === "white" ||
-    value === "pink" ||
-    value === "red" ||
-    value === "blue" ||
-    value === "teal"
   );
 }
 
@@ -146,18 +127,9 @@ function isCanvasIconGlyph(value: unknown): value is CanvasIconGlyph {
   );
 }
 
-function isPaletteToken(value: unknown): value is CanvasPaletteToken {
-  return (
-    value === "process" ||
-    value === "input" ||
-    value === "hot" ||
-    value === "memory" ||
-    value === "note"
-  );
-}
-
-function isConnectionStyle(value: unknown): value is CanvasConnectionStyle {
-  return value === "solid" || value === "dotted" || value === "elbow" || value === "smooth";
+function normalizeConnectionStyle(value: unknown): CanvasConnectionStyle {
+  if (value === "dashed" || value === "dotted") return "dashed";
+  return "solid";
 }
 
 function isSectionStrokeStyle(value: unknown): value is CanvasSectionStrokeStyle {
@@ -325,51 +297,36 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       issues.push({ path: `${path}.type`, message: "Unknown canvas object type." });
       continue;
     }
-    const label = typeof rawObject.label === "string" ? rawObject.label.trim() : "";
-    if (!label) {
-      issues.push({ path: `${path}.label`, message: "Object label is required." });
+    // D3/D11 — the single unified text field. Required (hard migration: the
+    // legacy label/body/title fields are gone from the schema, and documents
+    // carrying them without `text` fail validation), but MAY be empty — a
+    // fresh sticky or code block has no text yet.
+    if (typeof rawObject.text !== "string") {
+      issues.push({ path: `${path}.text`, message: "Object text is required (a string; may be empty)." });
       continue;
     }
+    const text = rawObject.text;
     objectIds.add(id);
-    let paletteToken: CanvasPaletteToken | undefined;
-    if (isRecord(rawObject.style) && rawObject.style.paletteToken !== undefined) {
-      if (isPaletteToken(rawObject.style.paletteToken)) {
-        paletteToken = rawObject.style.paletteToken;
+
+    // P1 — the ONE color pick: optional, soft-validated against the closed
+    // 10-id roster. Unknown ids are dropped with a warning.
+    let color: CanvasColor | undefined;
+    if (rawObject.color !== undefined) {
+      if (isCanvasColor(rawObject.color)) {
+        color = rawObject.color;
       } else {
         warnings.push({
-          path: `${path}.style.paletteToken`,
-          message: `Unknown paletteToken "${String(rawObject.style.paletteToken)}" was dropped.`,
+          path: `${path}.color`,
+          message: `Unknown color "${String(rawObject.color)}" was dropped.`,
         });
       }
     }
 
-    // W4 — explicit fill/stroke/strokeWidth: optional, soft-validated (invalid
-    // values are dropped with a warning, mirroring paletteToken above).
-    let fill: string | undefined;
-    let stroke: string | undefined;
+    // strokeWidth/strokeStyle: optional, soft-validated (invalid values are
+    // dropped with a warning).
     let strokeWidth: number | undefined;
     let strokeStyle: CanvasSectionStrokeStyle | undefined;
     if (isRecord(rawObject.style)) {
-      if (rawObject.style.fill !== undefined) {
-        if (typeof rawObject.style.fill === "string" && rawObject.style.fill.trim().length > 0) {
-          fill = rawObject.style.fill;
-        } else {
-          warnings.push({
-            path: `${path}.style.fill`,
-            message: "style.fill must be a non-empty string; it was dropped.",
-          });
-        }
-      }
-      if (rawObject.style.stroke !== undefined) {
-        if (typeof rawObject.style.stroke === "string" && rawObject.style.stroke.trim().length > 0) {
-          stroke = rawObject.style.stroke;
-        } else {
-          warnings.push({
-            path: `${path}.style.stroke`,
-            message: "style.stroke must be a non-empty string; it was dropped.",
-          });
-        }
-      }
       if (rawObject.style.strokeWidth !== undefined) {
         if (isFiniteNumber(rawObject.style.strokeWidth) && rawObject.style.strokeWidth > 0) {
           strokeWidth = rawObject.style.strokeWidth;
@@ -392,23 +349,9 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       }
     }
 
-    // W2 — section requires title + a known tint family; both are hard
-    // validation errors (not warnings) since a section with no tint/title
-    // can't be rendered at all.
-    let title: string | undefined;
-    let tint: CanvasSectionTint | undefined;
-    if (rawObject.type === "section") {
-      title = typeof rawObject.title === "string" ? rawObject.title.trim() : "";
-      if (!title) {
-        issues.push({ path: `${path}.title`, message: "Section requires a title." });
-        continue;
-      }
-      if (!isSectionTint(rawObject.tint)) {
-        issues.push({ path: `${path}.tint`, message: "Section requires a known tint family." });
-        continue;
-      }
-      tint = rawObject.tint;
-    }
+    // (The old section `tint` requirement died in the P1 color cutover —
+    // sections color through the optional `color` pick like every other
+    // kind, falling back to the neutral "gray" family.)
 
     // W2 — arrow-shape direction defaults to "right" when omitted/invalid
     // (non-fatal: a chevron pointing right is a reasonable default, not worth
@@ -442,23 +385,16 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     objects.push({
       id,
       type: rawObject.type,
-      label,
-      body: typeof rawObject.body === "string" ? rawObject.body : undefined,
+      text,
+      color,
       parentId: typeof rawObject.parentId === "string" ? rawObject.parentId : null,
       geometry,
       style: isRecord(rawObject.style)
         ? {
-            tone:
-              typeof rawObject.style.tone === "string"
-                ? (rawObject.style.tone as InteractiveCanvasTone)
-                : undefined,
             shape:
               typeof rawObject.style.shape === "string"
                 ? (rawObject.style.shape as CanvasObjectStyle["shape"])
                 : undefined,
-            paletteToken,
-            fill,
-            stroke,
             strokeWidth,
             strokeStyle,
           }
@@ -477,10 +413,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
             gap: isFiniteNumber(rawObject.layout.gap) ? rawObject.layout.gap : undefined,
           }
         : undefined,
-      title,
-      tint,
       locked: parseSectionLockMode(rawObject.locked),
-      contentHidden: typeof rawObject.contentHidden === "boolean" ? rawObject.contentHidden : undefined,
       direction,
       language: typeof rawObject.language === "string" ? rawObject.language : undefined,
       author: typeof rawObject.author === "string" ? rawObject.author : undefined,
@@ -556,18 +489,29 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       waypoints = normalizedWaypoints;
     }
 
+    // P1 — connector color is a swatch id from the closed roster, mirroring
+    // the object `color` soft-validation above (D10: raw hexes are gone).
+    let connectionColor: CanvasColor | undefined;
+    if (rawConnection.color !== undefined) {
+      if (isCanvasColor(rawConnection.color)) {
+        connectionColor = rawConnection.color;
+      } else {
+        warnings.push({
+          path: `${path}.color`,
+          message: `Unknown color "${String(rawConnection.color)}" was dropped.`,
+        });
+      }
+    }
+
     connections.push({
       id,
       from,
       to,
       label: typeof rawConnection.label === "string" ? rawConnection.label : undefined,
-      style: isConnectionStyle(rawConnection.style) ? rawConnection.style : "solid",
+      style: normalizeConnectionStyle(rawConnection.style),
       arrow: isArrow(rawConnection.arrow) ? rawConnection.arrow : "forward",
       role: typeof rawConnection.role === "string" ? rawConnection.role : undefined,
-      color:
-        typeof rawConnection.color === "string" && rawConnection.color.trim() !== ""
-          ? rawConnection.color
-          : undefined,
+      color: connectionColor,
       waypoints,
     });
   }
@@ -628,30 +572,32 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
 
   if (issues.length > 0) return { ok: false, issues };
 
+  const document: InteractiveCanvasDocument = {
+    schemaVersion: 1,
+    id: value.id as string,
+    title: typeof value.title === "string" ? value.title : undefined,
+    mode: "diagram",
+    viewport: isRecord(value.viewport)
+      ? {
+          x: isFiniteNumber(value.viewport.x) ? value.viewport.x : 0,
+          y: isFiniteNumber(value.viewport.y) ? value.viewport.y : 0,
+          zoom: isFiniteNumber(value.viewport.zoom) ? value.viewport.zoom : 1,
+        }
+      : undefined,
+    size: isRecord(value.size)
+      ? {
+          width: isFiniteNumber(value.size.width) ? value.size.width : 1200,
+          height: isFiniteNumber(value.size.height) ? value.size.height : 720,
+        }
+      : undefined,
+    objects,
+    connections,
+    annotations,
+  };
+
   return {
     ok: true,
-    document: {
-      schemaVersion: 1,
-      id: value.id as string,
-      title: typeof value.title === "string" ? value.title : undefined,
-      mode: "diagram",
-      viewport: isRecord(value.viewport)
-        ? {
-            x: isFiniteNumber(value.viewport.x) ? value.viewport.x : 0,
-            y: isFiniteNumber(value.viewport.y) ? value.viewport.y : 0,
-            zoom: isFiniteNumber(value.viewport.zoom) ? value.viewport.zoom : 1,
-          }
-        : undefined,
-      size: isRecord(value.size)
-        ? {
-            width: isFiniteNumber(value.size.width) ? value.size.width : 1200,
-            height: isFiniteNumber(value.size.height) ? value.size.height : 720,
-          }
-        : undefined,
-      objects,
-      connections,
-      annotations,
-    },
+    document,
     warnings: warnings.length > 0 ? warnings : undefined,
   };
 }

@@ -20,13 +20,13 @@ function baseDocument(overrides: {
       {
         id: "a",
         type: "process",
-        label: "A",
+        text: "A",
         geometry: { x: 0, y: 0, width: 100, height: 60 },
       },
       {
         id: "b",
         type: "process",
-        label: "B",
+        text: "B",
         geometry: { x: 300, y: 0, width: 100, height: 60 },
       },
     ],
@@ -42,6 +42,29 @@ function baseDocument(overrides: {
 }
 
 describe("schema — D33 thread B additions (position, waypoints)", () => {
+  it("migrates legacy connection styles at the validation load boundary", () => {
+    const cases: Array<[unknown, "solid" | "dashed"]> = [
+      ["solid", "solid"],
+      ["dashed", "dashed"],
+      ["dotted", "dashed"],
+      ["elbow", "solid"],
+      ["smooth", "solid"],
+      ["mystery", "solid"],
+      [undefined, "solid"],
+    ];
+
+    for (const [rawStyle, expected] of cases) {
+      const doc = baseDocument({
+        connectionExtra: rawStyle === undefined ? {} : { style: rawStyle },
+      });
+      const result = validateInteractiveCanvasDocument(doc);
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) continue;
+      expect(result.document.connections[0]?.style).toBe(expected);
+    }
+  });
+
   it("accepts and round-trips an endpoint `position`", () => {
     const doc = baseDocument({ fromExtra: { position: [0.5, 1] }, toExtra: { position: [0, 0.25] } });
     const result = validateInteractiveCanvasDocument(doc);

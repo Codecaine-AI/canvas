@@ -3,18 +3,18 @@
 import type { ComponentType, MouseEvent as ReactMouseEvent } from "react";
 import type { CanvasBounds } from "../state/geometry";
 import type {
-  CanvasGeometry,
   CanvasObjectStyle,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-  InteractiveCanvasTone,
 } from "../state/schema";
+import type { ObjectTypeDefaults } from "../state/schema/object-defaults";
+import type { OutlineSpec } from "./geometry";
+import type { TextSlot } from "./text-slots";
 import { codeBlockDef } from "./code-block/def";
 import { connectorDef } from "./connector/def";
 import { sectionDef } from "./section/def";
 import { stickyDef } from "./sticky/def";
 import { arrowShapeDef } from "./shapes/basic/arrow-shape";
-import { chatDef } from "./shapes/basic/chat";
 import { chevronDef } from "./shapes/basic/chevron";
 import { decisionDef } from "./shapes/basic/decision";
 import { ellipseDef } from "./shapes/basic/ellipse";
@@ -42,8 +42,6 @@ import { summingJunctionDef } from "./shapes/flowchart/summing-junction";
 import { trapezoidDef } from "./shapes/flowchart/trapezoid";
 import { iconDef } from "./shapes/icon/def";
 import { annotationMarkerDef } from "./shapes/misc/annotation-marker";
-import { chipIconDef } from "./shapes/misc/chip-icon";
-import { personDef } from "./shapes/misc/person";
 import { pillDef } from "./shapes/misc/pill";
 
 /**
@@ -54,15 +52,19 @@ import { pillDef } from "./shapes/misc/pill";
  * shapes share ONE behavior and get their ObjectDef generated from a
  * ShapeDef via `objects/shapes/base.tsx`.
  *
- * Current scope: `render`, `css`, the className carried by the render path,
- * `handles`/`hitTest`/`dragCapture` (interaction/core.ts, hit-testing.ts,
- * gestures/move.ts, SelectionBox — cf3aec8), and `toolbar` (the
- * selection-toolbar layer's use-selection-toolbar.ts — 4c0d62d) are all CONSUMED
- * from the registry. `labelEditing` is DECLARED but not yet consumed —
- * inline label-editing dispatch still checks `object.type === "section"`
- * directly. `defaults` is likewise DECLARED but not yet consumed — per-type
- * defaults still live in state/actions/defaults.ts and are wired through the
- * registry in a later chunk (RESTRUCTURE.md step 6).
+ * Every field is CONSUMED from the registry: `render`, `css`, the className
+ * carried by the render path, `handles`/`dragCapture` (interaction/core.ts,
+ * hit-testing.ts, gestures/move.ts, SelectionBox — cf3aec8), `toolbar` (the
+ * selection-toolbar layer's use-selection-toolbar.ts — 4c0d62d),
+ * `textSlot`/`textEditing` (P2: at-rest renderer + in-place editor overlay),
+ * `outline` (P3: anchors/dots/snap/hit-testing via objects/geometry.ts),
+ * `defaults` (P4: stamped from the schema-vocabulary leaf
+ * state/schema/object-defaults.ts — the same rows the reducer's creation/
+ * swap paths read), and `catalog` (P4: the Shapes-panel catalog derives its
+ * entry labels/keywords from the def).
+ *
+ * Connectors are NOT objects (D19): they have their own small ConnectorDef
+ * below — ObjectDef carries no connector stub fields.
  */
 
 /** Props every object renderer receives — mirrors render/ObjectShape's public props. */
@@ -75,12 +77,10 @@ export interface ObjectRenderProps {
   bounds: CanvasBounds;
   /** Shows the grab-cursor affordance; defaults to true when any select/pointer handler is wired. */
   editable?: boolean;
-  /** Renders quick-connect edge ports — only true in the interactive editor. */
-  showPorts?: boolean;
-  /** Current viewport zoom — used to counter-scale edge ports to a constant screen size. */
+  /** Current viewport zoom — used to counter-scale zoom-invariant chrome (the section title chip). */
   zoom?: number;
-  /** True while this object's label is being edited inline (4.2.1) — hides the static label span. */
-  hideLabel?: boolean;
+  /** True while this object's text is being edited in place (D14) — hides the at-rest text so the editor is the only visible copy. */
+  hideText?: boolean;
   onObjectSelect?: (objectId: string) => void;
   onObjectContextMenu?: (
     event: ReactMouseEvent<HTMLElement>,
@@ -92,9 +92,6 @@ export interface ObjectRenderProps {
 /** Resize-handle set: full 8-handle compass, corner-only (sections), or none. */
 export type ObjectHandles = "all" | "corners" | "none";
 
-/** Pointer hit-testing: every kind hit-tests on its whole box. */
-export type ObjectHitTest = "solid";
-
 /**
  * What a drag of this object carries along: persisted `parentId` descendants
  * (sections — membership is auto-managed on drop), or nothing.
@@ -102,13 +99,18 @@ export type ObjectHitTest = "solid";
 export type ObjectDragCapture = "descendants" | "none";
 
 /**
- * What inline text editing targets on this object: the standard `label`, the
- * section's floating title chip (`title` field), the `body` text, or nothing.
+ * In-place text editing (D14). The old per-field target ("label" /
+ * "section-title" / "body") died with the single `text` field — the def keeps
+ * only whether double-click / the toolbar "text" action opens the editor.
+ * WHERE editing happens is the def's `textSlot`: the editor overlay is
+ * positioned and typographically styled from the SAME slot preset the
+ * renderer uses, so at rest and mid-edit are pixel-identical (caret aside).
+ * `markdown` is intentionally opt-in, because only sticky owns the closed D18
+ * grammar and the source-offset decoration machinery needed for live preview.
  */
-export type LabelEditingTarget = "label" | "section-title" | "body" | "none";
-
-export interface LabelEditingSpec {
-  target: LabelEditingTarget;
+export interface TextEditingSpec {
+  editable: boolean;
+  markdown?: boolean;
 }
 
 /**
@@ -134,18 +136,32 @@ export interface ToolbarSpec {
   controls: readonly ToolbarControlSpec[];
 }
 
-/** Type-level defaults, the registry-side replacement for state/actions/defaults.ts (wired in step 6). */
-export interface ObjectDefaults {
-  geometry: CanvasGeometry;
-  tone: InteractiveCanvasTone;
-  /** Effective render shape; usually also the `style.shape` value step 6 will stamp. */
-  shape?: RenderObjectShape;
-  /** Human-readable type label (context menu, inspector, a11y). */
+/**
+ * Catalog metadata (P4, O7): the def is the single source for the picker's
+ * per-shape identity — `label` is the picker-facing display string (sentence
+ * case, may differ from the type label in state/schema/object-defaults.ts),
+ * `keywords` feed shape search. objects/catalog.ts derives its entries from
+ * this; only the ARRANGEMENT (category grouping, ordering, direction/icon
+ * placement variants) stays catalog-side.
+ */
+export interface ObjectCatalogMeta {
   label: string;
+  keywords?: readonly string[];
 }
 
+/**
+ * Which palette role table this kind's `object.color` pick resolves through
+ * (P1, OBJECT-DEF-OVERHAUL.md §3.5, D1/D12): the roster is universal (all
+ * 10 hue picks, identical previews), the role decides rendering — shape =
+ * fill+border pair, sticky = exact fill hex, section = tint + title chip.
+ * (Connectors resolve through the separate "connector" role cells via
+ * ConnectorDef.colorRole, D19.)
+ */
+export type ObjectColorRole = "shape" | "sticky" | "section";
+export type ObjectButtonBorderPolicy = "painted" | "suppressed";
+
 export interface ObjectDef {
-  /** Registry key — the object `type` for type-keyed kinds, the selection kind for connector. */
+  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */
   kind: string;
   /** The object's world-layer renderer (receives the same props as render/ObjectShape). */
   render: ComponentType<ObjectRenderProps>;
@@ -156,13 +172,58 @@ export interface ObjectDef {
    * exception) + the concatenated `css` of every registered def.
    */
   css: string;
-  defaults: ObjectDefaults;
+  /**
+   * Per-type creation/placement defaults (P4): stamped VERBATIM from the
+   * schema-vocabulary leaf (state/schema/object-defaults.ts, the same rows
+   * the reducer reads — state/ can't import objects/, so the data lives
+   * below both and the registry carries it upward). Identity-locked by
+   * objects/__tests__/type-defaults.test.ts.
+   */
+  defaults: ObjectTypeDefaults;
+  /** Palette role table this kind's color pick renders through (P1, §3.5). */
+  colorRole: ObjectColorRole;
+  /** Whether the outer button itself contributes a CSS border/padding-box inset. */
+  buttonBorder: ObjectButtonBorderPolicy;
+  /**
+   * The kind's geometric outline (P3, D4 — objects/geometry.ts): connection
+   * anchors, anchor dots, outline snap, and pointer hit-testing (D16) all
+   * derive from it. Bbox for everything but the true-outline shapes; a
+   * true-outline def must reference the SAME exported spec object the
+   * geometry dispatch tables use (identity-checked by
+   * objects/__tests__/geometry-def-agreement.test.ts).
+   */
+  outline: OutlineSpec;
   handles: ObjectHandles;
-  hitTest: ObjectHitTest;
   dragCapture: ObjectDragCapture;
-  labelEditing: LabelEditingSpec;
+  /**
+   * Where and how this kind's `object.text` renders AND is edited (D3/D6/D14
+   * — objects/text-slots.ts preset library). Absent = the kind renders no
+   * object text at all (plus / or-junction / summing-junction glyphs).
+   */
+  textSlot?: TextSlot;
+  textEditing: TextEditingSpec;
   /** This kind's selection toolbar (step 5): data-only control list. */
   toolbar?: ToolbarSpec;
+  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists (section/sticky/code-block; icon entries derive from the glyph registry). */
+  catalog?: ObjectCatalogMeta;
+}
+
+/**
+ * Connector definition (P4, D19): connectors are what CONNECT objects, not
+ * objects — connections draw through render/connectors/*, route through
+ * routing/, and are selected as their own selection kind. Their def is
+ * therefore honest and small: the selection toolbar it carries, the palette
+ * role its `connection.color` pick resolves through, and where its label
+ * lives (rendered AND edited at routeConnection().labelPoint — see
+ * editor/features/text-editing/use-text-editing.ts).
+ */
+export interface ConnectorDef {
+  kind: "connector";
+  toolbar: ToolbarSpec;
+  /** Connection color picks resolve through palette.ts's "connector" role cells (resolveConnectorStroke). */
+  colorRole: "connector";
+  /** Labels edit in place at the routed midpoint, not via an object text slot. */
+  labelEditing: "routed-midpoint";
 }
 
 /**
@@ -189,9 +250,9 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  *    type-keyed for RENDER dispatch: its rendering is purely style.shape-driven
  *    (an explicit non-default style.shape wins), so it flows through the
  *    render-shape table — typically to the rounded-rect def. Its ObjectDef
- *    still registers in OBJECT_DEFS to carry defaults (step 6) and behavioral
- *    flags (step 4, which needs a type-keyed BEHAVIOR lookup, distinct from
- *    render dispatch).
+ *    still registers in OBJECT_DEFS to carry defaults and behavioral
+ *    flags (the type-keyed BEHAVIOR lookup below, distinct from render
+ *    dispatch).
  *  - everything else is dispatched on the effective render shape, so e.g. a
  *    `sticky`-typed object WITHOUT `style.shape: "note"` keeps falling
  *    through to the rounded-rect path exactly as before.
@@ -205,13 +266,10 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   "code-block": codeBlockDef,
   "rounded-rect": processDef,
   ellipse: ellipseDef,
-  person: personDef,
   diamond: decisionDef,
   marker: annotationMarkerDef,
   document: documentDef,
   database: databaseDef,
-  chat: chatDef,
-  "chip-icon": chipIconDef,
   pill: pillDef,
   "arrow-shape": arrowShapeDef,
   "predefined-process": predefinedProcessDef,
@@ -236,25 +294,18 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   icon: iconDef,
 };
 
-/** Registered defs in stylesheet order (their `css` is appended in this order). */
+/** Registered defs in stylesheet order (their `css` is appended in this order). Objects only — the connector's ConnectorDef (D19) is not an ObjectDef and lives outside this registry. */
 export const OBJECT_DEFS: readonly ObjectDef[] = [
-  // Selection-kind def (connections aren't objects): carries the connector
-  // toolbar; css is empty and objectDefForType never resolves to it since
-  // "connector" is not an InteractiveCanvasObjectType.
-  connectorDef,
   sectionDef,
   stickyDef,
   codeBlockDef,
   processDef,
   ellipseDef,
-  personDef,
   rectangleDef,
   decisionDef,
   annotationMarkerDef,
   documentDef,
   databaseDef,
-  chatDef,
-  chipIconDef,
   pillDef,
   arrowShapeDef,
   predefinedProcessDef,
@@ -286,12 +337,11 @@ export function objectDefFor(object: InteractiveCanvasObject): ObjectDef | undef
 const DEFS_BY_KIND = new Map(OBJECT_DEFS.map((def) => [def.kind, def]));
 
 /**
- * Behavior lookup: the flags (`handles`/`hitTest`/`dragCapture`/`labelEditing`)
+ * Behavior lookup: the flags (`handles`/`dragCapture`/`textEditing`)
  * belong to the object TYPE, unlike render dispatch (`objectDefFor` above),
  * which keys on the effective `style.shape` (only `section` render-dispatches
  * by type). Every InteractiveCanvasObjectType has a def whose `kind` is the
- * type, so this only returns `undefined` for non-type kinds (e.g. a future
- * connector def) or out-of-vocabulary strings.
+ * type, so this only returns `undefined` for out-of-vocabulary strings.
  */
 export function objectDefForType(type: InteractiveCanvasObjectType): ObjectDef | undefined {
   return DEFS_BY_KIND.get(type);
@@ -316,4 +366,7 @@ export function intersectToolbarControls(defs: readonly ObjectDef[]): ToolbarCon
   );
 }
 
+// The connector's honest small def (D19) — re-exported here because this
+// module is the def-registry entry point consumers already import from,
+// even though the ConnectorDef is deliberately NOT in OBJECT_DEFS.
 export { connectorDef };

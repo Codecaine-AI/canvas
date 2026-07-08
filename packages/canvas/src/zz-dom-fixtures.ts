@@ -15,7 +15,7 @@ import { createElement } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CanvasStage, type CanvasStageProps } from "./render/CanvasStage";
-import { defaultGeometryFor, shapeForType } from "./state/actions/defaults";
+import { defaultGeometryFor, shapeForType } from "./state/schema/object-defaults";
 import {
   validateInteractiveCanvasDocument,
   type CanvasObjectStyle,
@@ -36,15 +36,12 @@ export const ALL_OBJECT_TYPES = [
   "sticky",
   "annotation-marker",
   "document",
-  "person",
   "database",
-  "chat",
   "section",
   "pill",
   "arrow-shape",
   "predefined-process",
   "code-block",
-  "chip-icon",
   "ellipse",
   "triangle",
   "parallelogram",
@@ -76,14 +73,11 @@ export const ALL_SHAPES = [
   "note",
   "marker",
   "document",
-  "person",
   "database",
-  "chat",
   "section",
   "arrow-shape",
   "predefined-process",
   "code-block",
-  "chip-icon",
   "ellipse",
   "triangle",
   "parallelogram",
@@ -189,7 +183,7 @@ function buildAllTypesDoc(): InteractiveCanvasDocument {
     const object: InteractiveCanvasObject = {
       id: `a-${type}`,
       type,
-      label: `Label ${type}`,
+      text: `Label ${type}`,
       parentId: null,
       geometry: {
         x: base.x + col * CELL_W,
@@ -199,10 +193,10 @@ function buildAllTypesDoc(): InteractiveCanvasDocument {
       },
       style: { shape: shapeForType(type) },
     };
-    if (index % 2 === 1) object.body = `Body ${type}`;
+    if (index % 2 === 1) object.text = `${object.text}\nBody ${type}`;
     if (type === "section") {
-      object.title = "Title section";
-      object.tint = "blue";
+      object.text = "Title section";
+      object.color = "blue";
     }
     if (type === "icon") object.icon = "gear";
     if (type === "code-block") object.language = "python";
@@ -222,9 +216,9 @@ function buildAllTypesDoc(): InteractiveCanvasDocument {
       id: "conn-a-1",
       from: { objectId: "a-decision", anchor: "bottom" },
       to: { objectId: "a-sticky", anchor: "top" },
-      style: "elbow",
+      style: "solid",
       arrow: "both",
-      color: "#757575",
+      color: "gray",
     },
   ];
   return {
@@ -251,8 +245,10 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
     shape: ShapeName;
     direction?: InteractiveCanvasObject["direction"];
     height?: number;
-    body?: string;
+    extraText?: string;
+    color?: InteractiveCanvasObject["color"];
     style?: Omit<CanvasObjectStyle, "shape">;
+    icon?: InteractiveCanvasObject["icon"];
   };
   const variants: Variant[] = [];
   for (const shape of ALL_SHAPES) {
@@ -264,25 +260,28 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
   }
   variants.push({ slug: "dir-up-triangle", shape: "triangle", direction: "up" });
   variants.push({ slug: "dir-down-triangle", shape: "triangle", direction: "down" });
-  variants.push({ slug: "chat-h80", shape: "chat", height: 80, body: "Body chat h80" });
-  variants.push({ slug: "chat-h120", shape: "chat", height: 120, body: "Body chat h120" });
-  variants.push({ slug: "person-h80", shape: "person", height: 80, body: "Body person h80" });
-  for (const shape of ["document", "database", "chat", "chip-icon", "person", "arrow-shape"] as const) {
+  variants.push({ slug: "icon-chat-h80", shape: "icon", height: 80, extraText: "Body icon chat h80", icon: "chat" });
+  variants.push({ slug: "icon-chat-h120", shape: "icon", height: 120, extraText: "Body icon chat h120", icon: "chat" });
+  variants.push({ slug: "icon-person-h80", shape: "icon", height: 80, extraText: "Body icon person h80", icon: "person" });
+  for (const shape of ["document", "database", "icon", "arrow-shape"] as const) {
+    // P1 — color-pick coverage per silhouette family: a soft pick with a
+    // strokeWidth override, a borderless bold pick, and a second soft hue.
     variants.push({
-      slug: `styled-fill-${shape}`,
+      slug: `styled-soft-${shape}`,
       shape,
-      style: { fill: "#FDE68A", stroke: "#B45309", strokeWidth: 6 },
+      color: "yellow",
+      style: { strokeWidth: 6 },
     });
-    variants.push({ slug: `styled-tone-${shape}`, shape, style: { tone: "memory" } });
-    variants.push({ slug: `styled-token-${shape}`, shape, style: { paletteToken: "hot" } });
+    variants.push({ slug: `styled-bold-${shape}`, shape, color: "violet" });
+    variants.push({ slug: `styled-soft2-${shape}`, shape, color: "orange" });
   }
   const objects: InteractiveCanvasObject[] = variants.map((variant, index) => {
     const col = index % GRID_COLS;
     const row = Math.floor(index / GRID_COLS);
-    const object: InteractiveCanvasObject = {
+      const object: InteractiveCanvasObject = {
       id: `b-${index}-${variant.slug}`,
       type: "process",
-      label: `Label ${variant.slug}`,
+      text: `Label ${variant.slug}`,
       parentId: null,
       geometry: {
         x: 40 + col * CELL_W,
@@ -292,8 +291,10 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
       },
       style: { shape: variant.shape, ...(variant.style ?? {}) },
     };
+    if (variant.color) object.color = variant.color;
     if (variant.direction) object.direction = variant.direction;
-    if (variant.body) object.body = variant.body;
+    if (variant.shape === "icon") object.icon = variant.icon ?? "gear";
+    if (variant.extraText) object.text = `${object.text}\n${variant.extraText}`;
     return object;
   });
   const connections: InteractiveCanvasConnection[] = [
@@ -325,39 +326,36 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
     {
       id: "c-section-one",
       type: "section",
-      label: "Label section one",
+      text: "Section One",
       parentId: null,
       geometry: { x: 40, y: 40, width: 520, height: 400 },
       style: { shape: "section" },
-      title: "Section One",
-      tint: "green",
+      color: "green",
     },
     {
       id: "c-section-nested",
       type: "section",
-      label: "Label nested section",
+      text: "Nested Section",
       parentId: null,
       geometry: { x: 80, y: 100, width: 240, height: 180 },
       style: { shape: "section" },
-      title: "Nested Section",
-      tint: "yellow",
+      color: "yellow",
     },
     {
       id: "c-section-hidden",
       type: "section",
-      label: "Label hidden section",
+      text: "Hidden Section",
       parentId: null,
       geometry: { x: 700, y: 40, width: 480, height: 360 },
       style: { shape: "section" },
-      title: "Hidden Section",
-      tint: "purple",
+      color: "violet",
       contentHidden: true,
     },
     // Objects >=60% inside the contentHidden section (should be hidden).
     {
       id: "c-hidden-a",
       type: "process",
-      label: "Label hidden a",
+      text: "Label hidden a",
       parentId: null,
       geometry: { x: 740, y: 100, width: 160, height: 90 },
       style: { shape: "rounded-rect" },
@@ -365,17 +363,16 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
     {
       id: "c-hidden-b",
       type: "decision",
-      label: "Label hidden b",
+      text: "Label hidden b\nBody hidden b",
       parentId: null,
       geometry: { x: 940, y: 240, width: 160, height: 112 },
       style: { shape: "diamond" },
-      body: "Body hidden b",
     },
     // Plain rectangle (replaces the legacy container; no children).
     {
       id: "c-rectangle",
       type: "rectangle",
-      label: "Label rectangle",
+      text: "Label rectangle",
       parentId: null,
       geometry: { x: 40, y: 520, width: 360, height: 240 },
     },
@@ -383,7 +380,7 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
     {
       id: "c-child-one",
       type: "process",
-      label: "Label child one",
+      text: "Label child one",
       parentId: "c-section-one",
       geometry: { x: 80, y: 560, width: 140, height: 80 },
       style: { shape: "rounded-rect" },
@@ -391,33 +388,30 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
     {
       id: "c-child-two",
       type: "process",
-      label: "Label child two",
+      text: "Label child two\nBody child two",
       parentId: "c-section-one",
       geometry: { x: 220, y: 660, width: 140, height: 80 },
       style: { shape: "rounded-rect" },
-      body: "Body child two",
     },
-    // Sticky with body + author.
+    // Sticky with text + author.
     {
       id: "c-sticky",
       type: "sticky",
-      label: "Label sticky",
+      text: "Body sticky",
       parentId: null,
       geometry: { x: 360, y: 120, width: 176, height: 128 },
       style: { shape: "note" },
-      body: "Body sticky",
       author: "zz",
     },
     // Code block.
     {
       id: "c-code-block",
       type: "code-block",
-      label: "Label code block",
+      text: "def f():\n    return 1",
       parentId: null,
       geometry: { x: 960, y: 480, width: 320, height: 200 },
       style: { shape: "code-block" },
       language: "python",
-      body: "def f():\n    return 1",
     },
   ];
   const connections: InteractiveCanvasConnection[] = [
@@ -426,7 +420,7 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
       from: { objectId: "c-sticky", anchor: "right" },
       to: { objectId: "c-code-block", anchor: "top" },
       label: "C link",
-      style: "smooth",
+      style: "solid",
       arrow: "forward",
     },
   ];
@@ -450,7 +444,7 @@ function buildAdversarialDoc(): InteractiveCanvasDocument {
     {
       id: "d-rectangle-diamond",
       type: "rectangle",
-      label: "Label rectangle diamond",
+      text: "Label rectangle diamond",
       parentId: null,
       geometry: { x: 80, y: 80, width: 360, height: 240 },
       style: { shape: "diamond" },
@@ -507,7 +501,7 @@ function stageProps(document: InteractiveCanvasDocument, profile: ProfileName): 
     selectedObjectIds,
     changedObjectIds,
     selectedConnectionId: document.connections[0]?.id ?? null,
-    editingLabelObjectId: ids[2] ?? null,
+    editingTextObjectId: ids[2] ?? null,
     interactionOverlay: { dropTargetId: ids[4] ?? null },
     activeTool: "select",
     onObjectSelect: (_objectId: string) => {},

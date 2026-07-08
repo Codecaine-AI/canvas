@@ -16,13 +16,13 @@ function makeDocument(): InteractiveCanvasDocument {
       {
         id: "process-a",
         type: "process",
-        label: "Process A",
+        text: "Process A",
         geometry: { x: 0, y: 0, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
-        label: "Process B",
+        text: "Process B",
         geometry: { x: 400, y: 0, width: 160, height: 96 },
       },
     ],
@@ -100,12 +100,26 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     expect(onConnectionDoubleClick).toHaveBeenCalledWith("connection-a");
   });
 
-  it("renders edge ports on hover-capable object shapes in editable mode", () => {
+  it("renders anchor dots for SELECTED objects only in editable mode (P3/D5)", () => {
     const { container } = render(
-      <CanvasStage document={makeDocument()} viewport={viewport} onStagePointerEvent={() => {}} />,
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedObjectIds={["process-a"]}
+        onStagePointerEvent={() => {}}
+      />,
     );
-    const ports = container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]');
-    expect(ports.length).toBe(4);
+    const dots = container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]');
+    expect(dots.length).toBe(4);
+    // Unselected objects carry no dots (the old invisible per-object ports are gone).
+    expect(
+      container.querySelectorAll('[data-canvas-object-id="process-b"][data-canvas-port]').length,
+    ).toBe(0);
+    // Dots are grabbable and live in the screen-space overlay, NOT inside the
+    // (overflow-clipping) object button.
+    const dot = dots[0] as HTMLElement;
+    expect(dot.style.pointerEvents).toBe("auto");
+    expect(dot.closest("[data-canvas-object-type]")).toBeNull();
   });
 
   it("makes object affordance layers inert in hand mode and restores them in select mode", () => {
@@ -148,9 +162,11 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
     expect(restoredHandle?.style.pointerEvents).toBe("auto");
   });
 
-  it("omits edge ports in read-only (non-editable) mode", () => {
-    const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
-    const ports = container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]');
-    expect(ports.length).toBe(0);
+  it("omits anchor dots in read-only (non-editable) mode, selection or not", () => {
+    const { container } = render(
+      <CanvasStage document={makeDocument()} viewport={viewport} selectedObjectIds={["process-a"]} />,
+    );
+    const dots = container.querySelectorAll('[data-canvas-object-id="process-a"][data-canvas-port]');
+    expect(dots.length).toBe(0);
   });
 });

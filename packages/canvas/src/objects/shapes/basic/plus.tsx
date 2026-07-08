@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { plusPoints } from "../../../routing/connection-overlay";
+import { PLUS_OUTLINE, plusPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -15,7 +15,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
  * painted behind the label; the button chrome stays fully transparent so
  * only one outline is visible. Legacy `hidesVisibleText` suppressed BOTH the
  * label span and the body span for plus (along with or-junction/summing-
- * junction) — `text: { kind: "none" }` reproduces that exactly, since
+ * junction) — `text: "none"` reproduces that exactly, since
  * base.tsx's shared ShapeObjectView gates both the label span
  * (`shape.text.kind === "label"`) and the body span
  * (`shape.text.kind !== "none"`) on the text-zone kind, so "none" drops both.
@@ -23,7 +23,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const plusShapeDef: ShapeDef = {
   type: "plus",
   shape: "plus",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: PLUS_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-plus",
     silhouette: ({ object, colors, strokeWidth }) => {
       const localBounds = { x: 0, y: 0, width: object.geometry.width, height: object.geometry.height };
@@ -47,22 +49,17 @@ export const plusShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "none" },
-  defaultSize: { width: 120, height: 120 },
-  defaultTone: "neutral",
+  text: "none",
   /*
    * Moved from CanvasStage's grouped rule (plus shares its selector group
    * there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/star/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/or-junction/summing-junction).
-   * Declarations are verbatim; plus carries no additional per-shape
+   * Paint declarations moved here; plus carries no additional per-shape
    * follow-up rule in the legacy block.
    */
   css: `
         .interactive-canvas-object-plus {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

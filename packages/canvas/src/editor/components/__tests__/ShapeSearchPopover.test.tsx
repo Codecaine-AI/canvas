@@ -30,13 +30,27 @@ describe("ShapeSearchPopover geometry", () => {
 });
 
 describe("ShapeSearchPopover search filtering", () => {
-  it("filters entries as the user types, case-insensitively", () => {
+  it("filters entries as the user types, case-insensitively (labels + def keywords)", () => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "database" } });
-    const buttons = container.querySelectorAll("[data-shape-entry]");
-    expect(buttons.length).toBe(1);
-    expect(buttons[0].getAttribute("aria-label")?.toLowerCase()).toContain("database");
+    // P4 catalog unification: search matches the def-declared keywords too —
+    // "database" hits Database (label) AND Cylinder (horizontal), whose def
+    // keywords include "database".
+    const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
+      b.getAttribute("aria-label"),
+    );
+    expect(labels).toEqual(["Database", "Cylinder (horizontal)"]);
+  });
+
+  it("matches def-declared catalog keywords that appear in no label", () => {
+    const { container } = render(<ShapeSearchPopover />);
+    const input = container.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "subroutine" } });
+    const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
+      b.getAttribute("aria-label"),
+    );
+    expect(labels).toEqual(["Predefined process"]);
   });
 
   it("shows a no-results message when nothing matches", () => {

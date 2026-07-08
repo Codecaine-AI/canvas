@@ -4,26 +4,78 @@
     {
       "name": "studio",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4000"],
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/studio",
+        "dev",
+        "--port",
+        "4000"
+      ],
       "port": 4000
     },
     {
       "name": "studio-alt",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4100"],
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/studio",
+        "dev",
+        "--port",
+        "4100"
+      ],
       "port": 4100
     },
     {
       "name": "studio-alt2",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4200"],
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/studio",
+        "dev",
+        "--port",
+        "4200"
+      ],
       "port": 4200
     },
     {
       "name": "studio-alt3",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "packages/studio", "dev", "--port", "4300"],
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "packages/studio",
+        "dev",
+        "--port",
+        "4300"
+      ],
       "port": 4300
+    },
+    {
+      "name": "popup-doc",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4500",
+        "--directory",
+        "to_add/black pop up"
+      ],
+      "port": 4500
+    },
+    {
+      "name": "studio-bun",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": [
+        "--bun",
+        "vite",
+        "--port",
+        "4400"
+      ],
+      "cwd": "packages/studio",
+      "port": 4400
     }
   ]
 }

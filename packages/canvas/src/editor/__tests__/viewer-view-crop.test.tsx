@@ -6,7 +6,7 @@ import {
   fitBounds,
   fitDocument,
   InteractiveCanvasViewer,
-  paletteTokenStyle,
+  resolveShapeColors,
   type InteractiveCanvasDocument,
 } from "../../index";
 
@@ -69,16 +69,15 @@ function makeSectionViewDocument(): InteractiveCanvasDocument {
       {
         id: "input-context",
         type: "section",
-        label: "Input Context",
-        title: "Input Context",
-        tint: "blue",
+        text: "Input Context",
+        color: "blue",
         parentId: null,
         geometry: { x: 100, y: 100, width: 400, height: 300 },
       },
       {
         id: "member-process",
         type: "process",
-        label: "Member Process",
+        text: "Member Process",
         parentId: "input-context",
         geometry: { x: 140, y: 160, width: 160, height: 80 },
       },
@@ -87,16 +86,15 @@ function makeSectionViewDocument(): InteractiveCanvasDocument {
         // be the union of section + descendants, not the section frame alone.
         id: "overflowing-member",
         type: "process",
-        label: "Overflowing Member",
+        text: "Overflowing Member",
         parentId: "input-context",
         geometry: { x: 420, y: 320, width: 200, height: 120 },
       },
       {
         id: "nested-section",
         type: "section",
-        label: "Nested",
-        title: "Nested",
-        tint: "green",
+        text: "Nested",
+        color: "green",
         parentId: "input-context",
         geometry: { x: 160, y: 260, width: 200, height: 120 },
       },
@@ -104,7 +102,7 @@ function makeSectionViewDocument(): InteractiveCanvasDocument {
         // Transitive descendant (child of the nested section).
         id: "deep-member",
         type: "sticky",
-        label: "Deep Member",
+        text: "",
         parentId: "nested-section",
         geometry: { x: 180, y: 280, width: 120, height: 80 },
       },
@@ -114,14 +112,14 @@ function makeSectionViewDocument(): InteractiveCanvasDocument {
         // object; membership is the recorded parentId chain only.
         id: "outsider",
         type: "process",
-        label: "Outsider",
+        text: "Outsider",
         parentId: null,
         geometry: { x: 1800, y: 600, width: 160, height: 80 },
       },
       {
         id: "plain-rectangle",
         type: "rectangle",
-        label: "Plain Rectangle",
+        text: "Plain Rectangle",
         parentId: null,
         geometry: { x: 1400, y: 100, width: 200, height: 120 },
       },
@@ -266,46 +264,54 @@ function makeExpandedVocabDocument(): InteractiveCanvasDocument {
       {
         id: "doc-a",
         type: "document",
-        label: "Doc A",
+        text: "Doc A",
         geometry: { x: 0, y: 0, width: 160, height: 128 },
-        style: { shape: "document", paletteToken: "memory" },
+        color: "violet",
+        style: { shape: "document" },
       },
       {
         id: "person-a",
-        type: "person",
-        label: "Person A",
+        type: "icon",
+        icon: "person",
+        text: "Person A",
+        color: "green",
         geometry: { x: 200, y: 0, width: 128, height: 144 },
-        style: { shape: "person", paletteToken: "input" },
+        style: { shape: "icon" },
       },
       {
         id: "person-compact",
-        type: "person",
-        label: "Compact Person",
+        type: "icon",
+        icon: "person",
+        text: "Compact Person",
+        color: "green",
         geometry: { x: 200, y: 200, width: 128, height: 80 },
-        style: { shape: "person", paletteToken: "input" },
+        style: { shape: "icon" },
       },
       {
         id: "database-a",
         type: "database",
-        label: "Database A",
+        text: "Database A",
         geometry: { x: 400, y: 0, width: 144, height: 128 },
-        style: { shape: "database", paletteToken: "memory" },
+        color: "violet",
+        style: { shape: "database" },
       },
       {
         id: "chat-a",
-        type: "chat",
-        label: "Chat A",
-        body: "Hello there",
+        type: "icon",
+        icon: "chat",
+        text: "Chat A\nHello there",
+        color: "blue",
         geometry: { x: 600, y: 0, width: 176, height: 112 },
-        style: { shape: "chat", paletteToken: "process" },
+        style: { shape: "icon" },
       },
       {
         id: "chat-compact",
-        type: "chat",
-        label: "Compact Chat",
-        body: "Hello there",
+        type: "icon",
+        icon: "chat",
+        text: "Compact Chat\nHello there",
+        color: "blue",
         geometry: { x: 600, y: 200, width: 176, height: 80 },
-        style: { shape: "chat", paletteToken: "process" },
+        style: { shape: "icon" },
       },
     ],
     connections: [],
@@ -323,7 +329,7 @@ describe("InteractiveCanvasViewer: expanded shape vocabulary rendering (checkpoi
         container.querySelector('[data-canvas-object-id="doc-a"].interactive-canvas-object-document'),
       ).toBeTruthy();
       expect(
-        container.querySelector('[data-canvas-object-id="person-a"].interactive-canvas-object-person'),
+        container.querySelector('[data-canvas-object-id="person-a"].interactive-canvas-object-icon'),
       ).toBeTruthy();
       expect(
         container.querySelector(
@@ -331,58 +337,57 @@ describe("InteractiveCanvasViewer: expanded shape vocabulary rendering (checkpoi
         ),
       ).toBeTruthy();
       expect(
-        container.querySelector('[data-canvas-object-id="chat-a"].interactive-canvas-object-chat'),
+        container.querySelector('[data-canvas-object-id="chat-a"].interactive-canvas-object-icon'),
       ).toBeTruthy();
     });
   });
 
-  it("renders inline SVG silhouettes for person/database/chat, filled from the palette token", () => {
+  it("renders icon glyphs and the database silhouette, filled from the palette pick", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
         <InteractiveCanvasViewer document={makeExpandedVocabDocument()} />,
       );
 
-      const personSvg = container.querySelector('[data-canvas-shape-silhouette="person"]');
+      const personSvg = container.querySelector('[data-canvas-object-id="person-a"] [data-canvas-icon-glyph="person"]');
       const databaseSvg = container.querySelector('[data-canvas-shape-silhouette="database"]');
-      const chatSvg = container.querySelector('[data-canvas-shape-silhouette="chat"]');
+      const chatSvg = container.querySelector('[data-canvas-object-id="chat-a"] [data-canvas-icon-glyph="chat"]');
       expect(personSvg).toBeTruthy();
       expect(databaseSvg).toBeTruthy();
       expect(chatSvg).toBeTruthy();
 
-      const inputStyle = paletteTokenStyle("input");
-      const memoryStyle = paletteTokenStyle("memory");
-      const processStyle = paletteTokenStyle("process");
+      const greenSoft = resolveShapeColors("green");
+      const violetSoft = resolveShapeColors("violet");
+      const blueSoft = resolveShapeColors("blue");
 
-      const personFill = personSvg!.querySelector("circle")?.getAttribute("fill");
-      expect(personFill).toBe(inputStyle.fill);
+      const personFill = personSvg!.querySelector("rect")?.getAttribute("fill");
+      expect(personFill).toBe(greenSoft.fill);
 
       const databaseFill = databaseSvg!.querySelector("ellipse")?.getAttribute("fill");
-      expect(databaseFill).toBe(memoryStyle.fill);
+      expect(databaseFill).toBe(violetSoft.fill);
 
-      const chatFill = chatSvg!.querySelector("path")?.getAttribute("fill");
-      expect(chatFill).toBe(processStyle.fill);
+      const chatFill = chatSvg!.querySelector("rect")?.getAttribute("fill");
+      expect(chatFill).toBe(blueSoft.fill);
     });
   });
 
-  it("hides label and body text for person/chat objects under 100px height", () => {
+  it("renders compact person text and chat's unified below-glyph text", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(
         <InteractiveCanvasViewer document={makeExpandedVocabDocument()} />,
       );
 
       const tallPerson = container.querySelector('[data-canvas-object-id="person-a"]');
-      expect(tallPerson?.querySelector(".interactive-canvas-object-label")).toBeTruthy();
+      expect(tallPerson?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toContain("Person A");
 
       const compactPerson = container.querySelector('[data-canvas-object-id="person-compact"]');
-      expect(compactPerson?.querySelector(".interactive-canvas-object-label")).toBeNull();
+      expect(compactPerson?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toContain("Compact Person");
 
-      // Tall chat still renders its body copy (only person hides its label
-      // when compact; body copy hides for both person and chat).
       const chat = container.querySelector('[data-canvas-object-id="chat-a"]');
-      expect(chat?.querySelector(".interactive-canvas-object-body")).toBeTruthy();
+      expect(chat?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toContain("Hello there");
 
       const compactChat = container.querySelector('[data-canvas-object-id="chat-compact"]');
-      expect(compactChat?.querySelector(".interactive-canvas-object-body")).toBeNull();
+      expect(compactChat?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toContain("Compact Chat");
+      expect(compactChat?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toContain("Hello there");
     });
   });
 

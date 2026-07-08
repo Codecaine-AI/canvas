@@ -83,7 +83,7 @@
       "id": "card-general",
       "type": "section",
       "text": "General",
-      "color": "orange",
+      "color": "blue",
       "parentId": "section-interview-inputs",
       "geometry": {
         "x": 1359.4709801698516,
@@ -273,79 +273,84 @@
     },
     {
       "id": "chip-generate-transition-response",
-      "type": "chip-icon",
+      "type": "icon",
       "text": "Generate Transition Response",
       "parentId": "section",
       "geometry": {
-        "x": 2175.054119789804,
-        "y": 949.6407846183342,
+        "x": 2155.799687434696,
+        "y": 906.2702717946693,
         "width": 115.63728061962729,
         "height": 162.98346302779896
       },
       "style": {
-        "shape": "chip-icon"
-      }
+        "shape": "icon"
+      },
+      "icon": "cpu"
     },
     {
       "id": "chip-adapt-question",
-      "type": "chip-icon",
+      "type": "icon",
       "text": "Adapt Question Based on Interview History",
       "color": "blue",
       "parentId": "section",
       "geometry": {
-        "x": 2171.3564287443164,
-        "y": 1423.9452386654648,
+        "x": 2152.101996389208,
+        "y": 1380.5747258417998,
         "width": 131.9115328506541,
         "height": 144
       },
       "style": {
-        "shape": "chip-icon"
-      }
+        "shape": "icon"
+      },
+      "icon": "cpu"
     },
     {
       "id": "chat-ai-asks-question",
-      "type": "chat",
+      "type": "icon",
       "text": "AI Asks Question",
       "parentId": "section",
       "geometry": {
-        "x": 3254.4682440732063,
-        "y": 582.1492705695422,
+        "x": 3235.213811718098,
+        "y": 538.7787577458772,
         "width": 114,
         "height": 114
       },
       "style": {
-        "shape": "chat"
-      }
+        "shape": "icon"
+      },
+      "icon": "chat"
     },
     {
       "id": "person-interviewee-response",
-      "type": "person",
+      "type": "icon",
       "text": "Interviewee Response",
       "parentId": "section",
       "geometry": {
-        "x": 3282.8190115129655,
-        "y": 1239.5894665673582,
+        "x": 3263.564579157857,
+        "y": 1196.2189537436932,
         "width": 94.5,
         "height": 87
       },
       "style": {
-        "shape": "person"
-      }
+        "shape": "icon"
+      },
+      "icon": "person"
     },
     {
       "id": "chip-generate-probing-question",
-      "type": "chip-icon",
+      "type": "icon",
       "text": "Generate Probing Question",
       "parentId": "section",
       "geometry": {
-        "x": 5323.235537067582,
-        "y": 1140.5071451672027,
+        "x": 5303.981104712475,
+        "y": 1097.1366323435377,
         "width": 96,
         "height": 108
       },
       "style": {
-        "shape": "chip-icon"
-      }
+        "shape": "icon"
+      },
+      "icon": "cpu"
     },
     {
       "id": "section-memory-bank",
@@ -354,15 +359,14 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3847.1358100292364,
-        "y": 689.6358038798726,
+        "x": 3827.881377674128,
+        "y": 646.2652910562076,
         "width": 1129.5,
         "height": 906
       },
       "style": {
         "shape": "section"
-      },
-      "contentHidden": false
+      }
     },
     {
       "id": "sticky-memory-bank",
@@ -371,8 +375,8 @@
       "color": "red",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4180.135810029235,
-        "y": 758.6358038798726,
+        "x": 4160.881377674126,
+        "y": 715.2652910562076,
         "width": 414,
         "height": 223.5
       },
@@ -388,8 +392,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3894.1358100292364,
-        "y": 1033.6358038798726,
+        "x": 3874.881377674128,
+        "y": 990.2652910562076,
         "width": 308,
         "height": 508
       },
@@ -404,8 +408,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3914.1358100292364,
-        "y": 1083.6358038798726,
+        "x": 3894.881377674128,
+        "y": 1040.2652910562076,
         "width": 268,
         "height": 66
       },
@@ -420,8 +424,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3914.1358100292364,
-        "y": 1208.6358038798726,
+        "x": 3894.881377674128,
+        "y": 1165.2652910562076,
         "width": 268,
         "height": 66
       },
@@ -436,8 +440,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3914.1358100292364,
-        "y": 1333.6358038798726,
+        "x": 3894.881377674128,
+        "y": 1290.2652910562076,
         "width": 268,
         "height": 66
       },
@@ -452,8 +456,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3914.1358100292364,
-        "y": 1458.6358038798726,
+        "x": 3894.881377674128,
+        "y": 1415.2652910562076,
         "width": 268,
         "height": 66
       },
@@ -468,8 +472,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4262.135810029235,
-        "y": 1033.6358038798726,
+        "x": 4242.881377674126,
+        "y": 990.2652910562076,
         "width": 666,
         "height": 514
       },
@@ -483,8 +487,8 @@
       "text": "class Memory(BaseModel):\n    id: str = Field(description=\"mem_0, mem_1, mem_n\")\n    content: str = Field(description=\"text of the memory\")",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4282.135810029235,
-        "y": 1073.6358038798726,
+        "x": 4262.881377674126,
+        "y": 1030.2652910562076,
         "width": 626,
         "height": 170
       },
@@ -499,8 +503,8 @@
       "text": "{\n  \"id\": \"mem_0\",\n  \"content\": \"Likes pizza\"\n},\n{\n  \"id\": \"mem_1\",\n  \"content\": \"Doesn't like the cold\"\n},",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4282.135810029235,
-        "y": 1263.6358038798726,
+        "x": 4262.881377674126,
+        "y": 1220.2652910562076,
         "width": 626,
         "height": 260
       },
@@ -516,8 +520,8 @@
       "color": "blue",
       "parentId": "section",
       "geometry": {
-        "x": 2150.4265487163934,
-        "y": 2095.8086474952142,
+        "x": 2131.172116361285,
+        "y": 2052.438134671549,
         "width": 176,
         "height": 66
       },
@@ -532,8 +536,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2597.5257011816366,
-        "y": 1860.635912414086,
+        "x": 2578.2712688265283,
+        "y": 1817.265399590421,
         "width": 348,
         "height": 100
       },
@@ -549,8 +553,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2597.5279062463414,
-        "y": 2008.569381133459,
+        "x": 2578.273473891233,
+        "y": 1965.198868309794,
         "width": 348,
         "height": 102.06166899741811
       },
@@ -566,8 +570,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2597.5279062463414,
-        "y": 2160.631050130878,
+        "x": 2578.273473891233,
+        "y": 2117.260537307213,
         "width": 348,
         "height": 100
       },
@@ -583,8 +587,8 @@
       "color": "red",
       "parentId": "section",
       "geometry": {
-        "x": 3120.0279062463414,
-        "y": 1993.6310501308772,
+        "x": 3100.773473891233,
+        "y": 1950.2605373072122,
         "width": 459,
         "height": 171
       },
@@ -600,8 +604,8 @@
       "color": "white",
       "parentId": "section",
       "geometry": {
-        "x": 3690.5279062463414,
-        "y": 1813.6310501308787,
+        "x": 3671.273473891233,
+        "y": 1770.2605373072138,
         "width": 430,
         "height": 528
       },
@@ -616,8 +620,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3727.5279062463414,
-        "y": 1860.6310501308778,
+        "x": 3708.273473891233,
+        "y": 1817.2605373072129,
         "width": 331,
         "height": 100
       },
@@ -633,8 +637,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3727.5279062463414,
-        "y": 2010.6310501308772,
+        "x": 3708.273473891233,
+        "y": 1967.2605373072122,
         "width": 331,
         "height": 100
       },
@@ -650,8 +654,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3727.5279062463414,
-        "y": 2160.631050130878,
+        "x": 3708.273473891233,
+        "y": 2117.260537307213,
         "width": 331,
         "height": 100
       },
@@ -667,15 +671,14 @@
       "color": "red",
       "parentId": "page-frame",
       "geometry": {
-        "x": 1926.1610165339878,
-        "y": 504.2345865710622,
+        "x": 1906.9065841788795,
+        "y": 460.86407374739724,
         "width": 3528.726361070256,
         "height": 1908.8122654765853
       },
       "style": {
         "shape": "section"
-      },
-      "contentHidden": false
+      }
     },
     {
       "id": "icon",
@@ -684,8 +687,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2768,
-        "y": 752,
+        "x": 2748.7455676448917,
+        "y": 708.629487176335,
         "width": 268.90181050103456,
         "height": 288.3141351017505
       },
@@ -701,8 +704,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2592,
-        "y": 848,
+        "x": 2572.7455676448917,
+        "y": 804.629487176335,
         "width": 225.3920472907589,
         "height": 282.6242476461332
       },
@@ -718,10 +721,10 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2528,
-        "y": 1376,
-        "width": 186.37635930251463,
-        "height": 198.24721318926504
+        "x": 2391.893171158142,
+        "y": 1322.2156446249714,
+        "width": 233.57627231692913,
+        "height": 238.47774875318942
       },
       "style": {
         "shape": "icon"
@@ -735,8 +738,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2707.526118145356,
-        "y": 1395.6365123274313,
+        "x": 2688.271685790248,
+        "y": 1352.2659995037664,
         "width": 128,
         "height": 128
       },
@@ -752,8 +755,8 @@
       "color": "gray",
       "parentId": "section",
       "geometry": {
-        "x": 2881.5260549270743,
-        "y": 1389.636743997162,
+        "x": 2862.271622571966,
+        "y": 1346.266231173497,
         "width": 128,
         "height": 128
       },
@@ -804,7 +807,7 @@
         "objectId": "card-question-n",
         "anchor": "top"
       },
-      "style": "dashed",
+      "style": "solid",
       "arrow": "none",
       "role": "sequence",
       "color": "gray"
@@ -1028,12 +1031,12 @@
       "color": "red",
       "waypoints": [
         [
-          3047.5324396419264,
-          2079.151937997548
+          3028.278007286818,
+          2035.781425173883
         ],
         [
-          3047.5324396419264,
-          2210.651937997548
+          3028.278007286818,
+          2167.281425173883
         ]
       ]
     },
@@ -1053,12 +1056,12 @@
       "color": "red",
       "waypoints": [
         [
-          3647.5324396419255,
-          2079.151937997548
+          3628.2780072868177,
+          2035.781425173883
         ],
         [
-          3647.5324396419255,
-          1910.6519379975489
+          3628.2780072868177,
+          1867.281425173884
         ]
       ]
     },
@@ -1078,12 +1081,12 @@
       "color": "red",
       "waypoints": [
         [
-          3647.5324396419255,
-          2079.151937997548
+          3628.2780072868177,
+          2035.781425173883
         ],
         [
-          3647.5324396419255,
-          2060.651937997546
+          3628.2780072868177,
+          2017.2814251738812
         ]
       ]
     },
@@ -1103,12 +1106,12 @@
       "color": "red",
       "waypoints": [
         [
-          3647.5324396419255,
-          2079.151937997548
+          3628.2780072868177,
+          2035.781425173883
         ],
         [
-          3647.5324396419255,
-          2210.651937997548
+          3628.2780072868177,
+          2167.281425173883
         ]
       ]
     },

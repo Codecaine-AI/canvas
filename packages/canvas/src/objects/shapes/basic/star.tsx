@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { starPoints } from "../../../routing/connection-overlay";
+import { STAR_OUTLINE, starPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -20,7 +20,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const starShapeDef: ShapeDef = {
   type: "star",
   shape: "star",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: STAR_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-star",
     silhouette: ({ object, colors, strokeWidth }) => (
       <svg
@@ -43,23 +45,17 @@ export const starShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 140 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (star shares its selector group
    * there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/plus/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/document/or-junction/summing-junction —
-   * 17 selectors total). Declarations are verbatim; star also carries its
+   * 17 selectors total). Paint declarations moved here; star also carries its
    * own follow-up label-font-size rule in the legacy block (after the
    * group), preserved here in the same source order.
    */
   css: `
         .interactive-canvas-object-star {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

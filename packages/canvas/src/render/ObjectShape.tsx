@@ -5,7 +5,8 @@ import {
   renderShapeFor,
   type ObjectRenderProps,
 } from "../objects/object-def";
-import { EdgePorts, ObjectButtonChrome } from "../objects/object-chrome";
+import { ObjectButtonChrome, ObjectSlotText } from "../objects/object-chrome";
+import { CENTER_TEXT_SLOT } from "../objects/text-slots";
 
 /**
  * Registry-driven object renderer (RESTRUCTURE.md step 4, mass conversion
@@ -14,7 +15,7 @@ import { EdgePorts, ObjectButtonChrome } from "../objects/object-chrome";
  * only fires for a render shape with no registered def (today that is solely
  * an explicit `style.shape: "section"` on a non-section object, which always
  * rendered the plain default chrome), reproducing the old default branch:
- * base className, plain label/body spans, edge ports.
+ * base className, the default center text slot, edge ports.
  */
 export function ObjectShape(props: ObjectRenderProps) {
   const def = objectDefFor(props.object);
@@ -26,7 +27,7 @@ export function ObjectShape(props: ObjectRenderProps) {
 }
 
 function GenericObjectShape(props: ObjectRenderProps) {
-  const { object, compact, showPorts, zoom = 1, hideLabel } = props;
+  const { object, hideText } = props;
   return (
     <ObjectButtonChrome
       object={object}
@@ -40,9 +41,7 @@ function GenericObjectShape(props: ObjectRenderProps) {
       onObjectSelect={props.onObjectSelect}
       onObjectContextMenu={props.onObjectContextMenu}
     >
-      {!hideLabel && <span className="interactive-canvas-object-label">{object.label}</span>}
-      {object.body && !compact && <span className="interactive-canvas-object-body">{object.body}</span>}
-      {showPorts && <EdgePorts object={object} zoom={zoom} />}
+      {!hideText && <ObjectSlotText object={object} slot={CENTER_TEXT_SLOT} />}
     </ObjectButtonChrome>
   );
 }

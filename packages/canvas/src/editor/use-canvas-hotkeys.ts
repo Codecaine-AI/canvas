@@ -22,9 +22,7 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   S              sticky tool
  *   Shift+S        section tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)
- *   U              person tool (checkpoint 5 — D16 expanded vocabulary)
  *   B              database tool (checkpoint 5 — D16 expanded vocabulary)
- *   M              chat tool (checkpoint 5 — D16 expanded vocabulary)
  *   Delete/Backspace   canvas.deleteSelection (objects AND selected connections)
  *   Cmd/Ctrl-D     canvas.duplicateSelection (preventDefault — beats the browser's
  *                  bookmark-page shortcut)
@@ -57,12 +55,9 @@ const TOOL_KEY_MAP: Record<string, CanvasTool> = {
   d: "decision",
   s: "sticky",
   // Checkpoint 5 (D16 expanded vocabulary) — chosen to avoid colliding with
-  // the letters above: O(dOcument), U(person — "U" reads as a person icon
-  // mnemonic gap-filler), B(dataBase), M(chat/Message).
+  // the letters above: O(dOcument), B(dataBase).
   o: "document",
-  u: "person",
   b: "database",
-  m: "chat",
 };
 
 export type UseCanvasHotkeysArgs = {

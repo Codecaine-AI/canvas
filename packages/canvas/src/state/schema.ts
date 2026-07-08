@@ -7,8 +7,11 @@
  * `@codecaine-ai/canvas/schema` here and 13+ external consumers import from
  * it, so it stays a pure barrel whose export surface is unchanged from the
  * pre-split single-file module. The implementation lives in ./schema/:
- *  - ./schema/object-types — object-type union + tone/palette/tint/
- *                            direction/icon-glyph enums
+ *  - ./schema/object-types — object-type union + direction/icon-glyph enums
+ *  - ./schema/colors       — CanvasHue/CanvasColor: the 10-id closed color
+ *                            vocabulary (P1 replaced paletteToken/tone/tint/
+ *                            raw hex storage with it — see palette.ts for
+ *                            the ink/fill/wash table)
  *  - ./schema/style        — CanvasObjectStyle + its shape/stroke unions
  *  - ./schema/objects      — CanvasGeometry + the base InteractiveCanvasObject
  *  - ./schema/connections  — endpoints, connections, connector style/arrow
@@ -19,12 +22,11 @@
 export type {
   CanvasArrowShapeDirection,
   CanvasIconGlyph,
-  CanvasPaletteToken,
-  CanvasSectionTint,
   CanvasShapeDirection,
   InteractiveCanvasObjectType,
-  InteractiveCanvasTone,
 } from "./schema/object-types";
+export { CANVAS_COLORS, CANVAS_HUES, isCanvasColor } from "./schema/colors.ts";
+export type { CanvasColor, CanvasHue } from "./schema/colors";
 export type { CanvasObjectStyle, CanvasSectionStrokeStyle } from "./schema/style";
 export type { CanvasGeometry, InteractiveCanvasObject } from "./schema/objects";
 export type {

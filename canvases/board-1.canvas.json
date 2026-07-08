@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "board-1",
+  "title": "Untitled board",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 960,
+    "height": 560
+  },
+  "objects": [
+    {
+      "id": "diagram-frame",
+      "type": "section",
+      "text": "Untitled board",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 80,
+        "width": 720,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      },
+      "layout": {
+        "mode": "free",
+        "padding": 32,
+        "gap": 24
+      }
+    },
+    {
+      "id": "start",
+      "type": "process",
+      "text": "Start",
+      "color": "green",
+      "parentId": "diagram-frame",
+      "geometry": {
+        "x": 160,
+        "y": 200,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "next-step",
+      "type": "process",
+      "text": "Next step",
+      "color": "blue",
+      "parentId": "diagram-frame",
+      "geometry": {
+        "x": 440,
+        "y": 200,
+        "width": 180,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "untitled-board",
+      "type": "section",
+      "text": "",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 80,
+        "width": 720,
+        "height": 368
+      },
+      "style": {
+        "shape": "section"
+      },
+      "layout": {
+        "mode": "free",
+        "padding": 32,
+        "gap": 24
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "start-to-next",
+      "from": {
+        "objectId": "start",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "next-step",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "diagram-frame",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "untitled-board"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          800,
+          145
+        ],
+        [
+          1160,
+          145
+        ],
+        [
+          1160,
+          264
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

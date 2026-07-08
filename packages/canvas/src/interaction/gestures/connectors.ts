@@ -7,22 +7,33 @@
  * candidate through the ported AFFiNE connection cascade (W3b).
  */
 import { resolveConnectionCascade } from "../../routing/connection-overlay";
+import {
+  commitBendPolyline,
+  dragOrthogonalSegment,
+  polylinesAlmostEqual,
+} from "../../routing/bend-editing";
 import { nearestObjectAnchor, pointForAnchor, pointForObjectAnchor } from "../../routing/routing";
 import { isBelowTextType } from "../../objects/text-slots";
-import type { CanvasPoint } from "../../state/geometry";
-import type { InteractiveCanvasDocument } from "../../state/schema";
+import { createObjectId, type CanvasPoint } from "../../state/geometry";
+import { objectTypeLabel } from "../../state/schema/object-defaults";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { paintOrderedObjects } from "../../state/z-order";
 import {
+  DRAG_THRESHOLD,
   IDLE_INTERACTION_STATE,
   emptyOverlay,
   toIdle,
+  worldDistance,
   type CanvasPointerEvent,
   type ConnectorAnchorCandidate,
+  type ConnectorBendDragGesture,
   type ConnectorCreateGesture,
   type ConnectorEndpointDragGesture,
   type InteractionContext,
   type InteractionResult,
 } from "../types";
+
+const QUICK_CONNECT_MIN_GAP_PX = 120;
 
 /**
  * Resolves the connect-target under the pointer through the ported AFFiNE
@@ -87,6 +98,49 @@ function connectorCandidateAt(
   };
 }
 
+function quickConnectClickPoint(
+  fromObject: InteractiveCanvasObject,
+  fromAnchor: ConnectorCreateGesture["fromAnchor"],
+): CanvasPoint {
+  const { x, y, width, height } = fromObject.geometry;
+  const gap = Math.max(width, QUICK_CONNECT_MIN_GAP_PX);
+  const centerX = x + width / 2;
+  const centerY = y + height / 2;
+
+  if (fromAnchor === "top") return { x: centerX, y: y - gap - height / 2 };
+  if (fromAnchor === "bottom") return { x: centerX, y: y + height + gap + height / 2 };
+  if (fromAnchor === "left") return { x: x - gap - width / 2, y: centerY };
+  return { x: x + width + gap + width / 2, y: centerY };
+}
+
+function quickConnectNewObjectId(
+  document: InteractiveCanvasDocument,
+  fromObject: InteractiveCanvasObject,
+): string {
+  return createObjectId(document, fromObject.text.trim() || objectTypeLabel(fromObject.type));
+}
+
+function bendPointsForEvent(
+  state: ConnectorBendDragGesture,
+  event: CanvasPointerEvent,
+): CanvasPoint[] {
+  return dragOrthogonalSegment(state.startPoints, state.segmentIndex, {
+    dx: event.world.x - state.startWorld.x,
+    dy: event.world.y - state.startWorld.y,
+  });
+}
+
+function bendDragOverlay(state: ConnectorBendDragGesture) {
+  return {
+    connectorDrag: {
+      connectionId: state.connectionId,
+      bendSegmentIndex: state.segmentIndex,
+      point: state.point,
+      points: state.currentPoints,
+    },
+  };
+}
+
 export function stepFromConnectorEndpointDrag(
   state: ConnectorEndpointDragGesture,
   event: CanvasPointerEvent,
@@ -131,8 +185,11 @@ export function stepFromConnectorCreate(
   if (event.type === "cancel") return toIdle();
 
   if (event.type === "up") {
+    const fromObject = ctx.document.objects.find((object) => object.id === state.fromObjectId);
+    const isClick =
+      !state.hasDragged && worldDistance(state.startWorld, event.world) < DRAG_THRESHOLD;
     const candidate = state.candidate;
-    if (candidate) {
+    if (!isClick && candidate) {
       return {
         state: IDLE_INTERACTION_STATE,
         dispatch: [
@@ -150,6 +207,12 @@ export function stepFromConnectorCreate(
       };
     }
     // Released on empty canvas: create-and-connect as a single history entry.
+    const point = isClick && fromObject
+      ? quickConnectClickPoint(fromObject, state.fromAnchor)
+      : event.world;
+    const editObjectTextId = fromObject
+      ? quickConnectNewObjectId(ctx.document, fromObject)
+      : undefined;
     return {
       state: IDLE_INTERACTION_STATE,
       dispatch: [
@@ -157,16 +220,60 @@ export function stepFromConnectorCreate(
           type: "canvas.quickConnect",
           fromObjectId: state.fromObjectId,
           fromAnchor: state.fromAnchor,
-          drop: { point: event.world },
+          drop: { point },
+        },
+      ],
+      overlay: editObjectTextId
+        ? { editObjectTextId, editObjectTextSeed: "" }
+        : emptyOverlay(),
+    };
+  }
+
+  if (event.type !== "move") return { state, dispatch: [], overlay: { connectorDrag: state } };
+
+  const hasDragged =
+    state.hasDragged || worldDistance(state.startWorld, event.world) >= DRAG_THRESHOLD;
+  const candidate = hasDragged
+    ? connectorCandidateAt(ctx.document, event.world, state.fromObjectId, ctx.viewport.zoom)
+    : undefined;
+  const nextState: ConnectorCreateGesture = { ...state, point: event.world, hasDragged, candidate };
+  return { state: nextState, dispatch: [], overlay: { connectorDrag: nextState } };
+}
+
+export function stepFromConnectorBendDrag(
+  state: ConnectorBendDragGesture,
+  event: CanvasPointerEvent,
+  _ctx: InteractionContext,
+): InteractionResult {
+  if (event.type === "cancel") return toIdle();
+
+  if (event.type === "up") {
+    const finalPoints = bendPointsForEvent(state, event);
+    if (polylinesAlmostEqual(finalPoints, state.startPoints)) {
+      return toIdle();
+    }
+    const commit = commitBendPolyline(finalPoints);
+    return {
+      state: IDLE_INTERACTION_STATE,
+      dispatch: [
+        {
+          type: "canvas.updateConnection",
+          connectionId: state.connectionId,
+          patch: commit.clearedWaypoints
+            ? { waypoints: undefined }
+            : { waypoints: commit.waypoints },
         },
       ],
       overlay: emptyOverlay(),
     };
   }
 
-  if (event.type !== "move") return { state, dispatch: [], overlay: { connectorDrag: state } };
+  if (event.type !== "move") return { state, dispatch: [], overlay: bendDragOverlay(state) };
 
-  const candidate = connectorCandidateAt(ctx.document, event.world, state.fromObjectId, ctx.viewport.zoom);
-  const nextState: ConnectorCreateGesture = { ...state, point: event.world, candidate };
-  return { state: nextState, dispatch: [], overlay: { connectorDrag: nextState } };
+  const nextState: ConnectorBendDragGesture = {
+    ...state,
+    point: event.world,
+    currentPoints: bendPointsForEvent(state, event),
+  };
+  return { state: nextState, dispatch: [], overlay: bendDragOverlay(nextState) };
 }

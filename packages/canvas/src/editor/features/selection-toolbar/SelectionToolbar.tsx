@@ -7,16 +7,18 @@ import type { ToolbarControlSpec } from "../../../objects/object-def";
 import { EDITOR_STYLE } from "../../components/editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
-  ArrowRightIcon,
   ChevronDownIcon,
   ColorSwatchIcon,
+  ConnectorArrowLeftIcon,
+  ConnectorArrowRightIcon,
+  ConnectorArrowsBothIcon,
+  ConnectorDashedLineIcon,
+  ConnectorNoArrowheadsIcon,
+  ConnectorSolidLineIcon,
   DashIcon,
-  EyeIcon,
-  EyeOffIcon,
   LockIcon,
   NoStrokeIcon,
   RenameIcon,
-  RoutingIcon,
   ShapeSwapIcon,
   StrokeIcon,
   TypeIcon,
@@ -47,10 +49,8 @@ export type SelectionToolbarActionId =
   | "text"
   | "section-border-style"
   | "rename"
-  | "visibility"
   | "lock"
   | "dash"
-  | "routing"
   | "arrowhead";
 
 type Icon = (props: { className?: string; color?: string }) => React.JSX.Element;
@@ -90,16 +90,20 @@ const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
   text: TypeIcon,
   "section-border-style": StrokeIcon,
   rename: RenameIcon,
-  visibility: EyeIcon,
   lock: LockIcon,
-  dash: DashIcon,
-  routing: RoutingIcon,
-  arrowhead: ArrowRightIcon,
+  dash: ConnectorSolidLineIcon,
+  arrowhead: ConnectorArrowRightIcon,
 };
 
 const ACTION_ICON_VARIANTS: Partial<Record<SelectionToolbarActionId, Record<string, Icon>>> = {
   "section-border-style": { solid: StrokeIcon, dashed: DashIcon, none: NoStrokeIcon },
-  visibility: { hidden: EyeOffIcon },
+  dash: { solid: ConnectorSolidLineIcon, dashed: ConnectorDashedLineIcon },
+  arrowhead: {
+    none: ConnectorNoArrowheadsIcon,
+    forward: ConnectorArrowRightIcon,
+    back: ConnectorArrowLeftIcon,
+    both: ConnectorArrowsBothIcon,
+  },
 };
 
 /** Fallback for out-of-vocabulary action ids in a registry-supplied spec. */

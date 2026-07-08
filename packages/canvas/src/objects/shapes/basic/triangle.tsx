@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { trianglePoints } from "../../../routing/connection-overlay";
+import { TRIANGLE_OUTLINE, trianglePoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -20,7 +20,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const triangleShapeDef: ShapeDef = {
   type: "triangle",
   shape: "triangle",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: TRIANGLE_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-triangle",
     silhouette: ({ object, colors, strokeWidth }) => {
       const direction: "up" | "down" = object.direction === "down" ? "down" : "up";
@@ -46,33 +48,19 @@ export const triangleShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 120 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (triangle shares its selector group
    * there with folder/document-stack/cylinder-horizontal/parallelogram/
    * pentagon/octagon/star/plus/chevron/off-page-connector/trapezoid/
-   * manual-input/hexagon/or-junction/summing-junction — 17 selectors total),
-   * PLUS triangle's own per-shape follow-up rule. Both rules target this same
-   * selector at equal specificity; the follow-up (justify-content: flex-end)
-   * must stay declared AFTER the group-copy (justify-content: center) so the
-   * cascade keeps flex-end winning, exactly as legacy source order did.
+   * manual-input/hexagon/or-junction/summing-junction).
    */
   css: `
         .interactive-canvas-object-triangle {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
           box-shadow: none;
           overflow: visible;
-        }
-        .interactive-canvas-object-triangle {
-          justify-content: flex-end;
-          padding: 18% 18% 10%;
         }
 `,
   catalog: { label: "Triangle", keywords: ["triangle", "shape"] },

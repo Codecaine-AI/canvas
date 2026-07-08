@@ -1,70 +1,39 @@
 "use client";
 
-import { resolveSectionColors } from "../../theme";
+import { resolveSectionColors } from "../../palette";
+import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
 import { CONNECTOR_DASH_PATTERN_PX } from "../connector/def";
+import { BBOX_OUTLINE } from "../geometry";
+import { resolveObjectBorderWidth } from "../object-chrome";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
+import {
+  TITLE_CHIP,
+  TITLE_CHIP_TEXT_SLOT,
+  titleChipMaxWidthPx,
+  titleChipScale,
+} from "../text-slots";
 import { SECTION_TOOLBAR } from "./toolbar";
 
-/** Section geometry (moved from theme/tokens.ts in the theme dispersal — per-kind constants co-locate with their def; also consumed by the editor's label-editing overlay). */
+/**
+ * Section frame geometry. The title CHIP's geometry/typography/scale live on
+ * the "title-chip" text-slot preset (objects/text-slots.ts TITLE_CHIP) — the
+ * single source the at-rest chip, the in-place title editor, and this def's
+ * CSS all consume.
+ */
 export const SECTION_GEOMETRY = {
   cornerRadiusPx: 8.5,
   borderWidthPx: 2,
-  titleChip: {
-    heightPx: 27,
-    borderWidthPx: 2,
-    textColor: "#000000",
-    fontSizePx: 16,
-    fontWeight: 700,
-    paddingXPx: 10,
-    insetFromSectionCornerPx: 3,
-    maxZoomOutScale: 6,
-    // Sub-linear zoom-out growth: 1 = constant screen size (full 1/zoom
-    // compensation, reads oversized next to the shrunken content), 0 = no
-    // growth. 0.6 keeps titles readable from afar without dwarfing the board.
-    zoomOutGrowth: 0.6,
-  },
 } as const;
-
-/** Heuristic screen width of the title chip at zoom 1 — mirrors the label editor's input sizing. */
-export function estimateSectionTitleChipWidthPx(title: string): number {
-  const { fontSizePx, paddingXPx, borderWidthPx } = SECTION_GEOMETRY.titleChip;
-  return Math.max(72, title.length * fontSizePx * 0.62 + paddingXPx * 2 + borderWidthPx * 2);
-}
-
-/**
- * FigJam-style counter-scale for the section title chip: when zoomed out the
- * chip grows by (1/zoom)^zoomOutGrowth — sub-linear, so titles read from afar
- * yet still shrink somewhat with the board instead of staying full-size on
- * screen. Uniform across all sections regardless of their width (a long
- * title truncates to its section via `sectionTitleMaxWidthPx` rather than
- * shrinking, so labels never come out in mismatched sizes). At zoom >= 1 the
- * scale is 1 (the chip renders at its natural document size).
- */
-export function sectionTitleScale(zoom: number): number {
-  const { maxZoomOutScale, zoomOutGrowth } = SECTION_GEOMETRY.titleChip;
-  return Math.min(Math.max((1 / zoom) ** zoomOutGrowth, 1), maxZoomOutScale);
-}
-
-/**
- * Pre-transform width budget for a scaled chip: the scaled chip may span up
- * to its section's inner width but never spill past it — overflow renders as
- * an ellipsis instead of a mid-letter clip at the section's overflow:hidden
- * edge.
- */
-export function sectionTitleMaxWidthPx(sectionWidthPx: number, scale: number): number {
-  const inner = sectionWidthPx - SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx * 2;
-  return Math.max(0, inner / scale);
-}
 
 /**
  * FigJam section (W2) — a large tinted backdrop with a floating title chip
- * in the top-left corner, per SECTION_GEOMETRY. Deliberately NOT built on
- * the generic button/label/body chrome the shape family shares: sections
- * have no centered label, no shadow, no edge ports, and their "border" is
+ * in the top-left corner, per the title-chip slot preset. Deliberately NOT
+ * built on the generic button/label chrome the shape family shares: sections
+ * have no centered text, no shadow, no edge ports, and their "border" is
  * literally the title chip's fill color (per spec, border = chip fill).
  *
- * `hideLabel` maps to hiding the title CHIP — the chip IS the section's
- * visible text, edited in place via the title-chip label editor.
+ * `hideText` maps to hiding the title CHIP — the chip IS the section's
+ * visible text, edited in place via the title-chip editor.
  */
 function SectionObjectView({
   object,
@@ -72,21 +41,23 @@ function SectionObjectView({
   dropTarget,
   bounds,
   editable,
-  hideLabel,
+  hideText,
   zoom = 1,
   onObjectSelect,
   onObjectContextMenu,
 }: ObjectRenderProps) {
-  const family = resolveSectionColors(object.tint);
-  const borderColor = object.style?.stroke ?? family.chipBorder ?? "transparent";
+  // P1 — the section's color pick resolves through the palette's section
+  // role cells: body fill = tint, frame border = the title chip's FILL color
+  // (§3.2: chip fill IS the section border color), chip = fill + border pair.
+  const family = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
+  const borderColor = family.chip.fill;
   const borderStyle = object.style?.strokeStyle ?? "solid";
-  const borderWidth =
-    borderStyle === "none" || borderStyle === "dashed"
-      ? 0
-      : (object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx);
+  const borderWidth = resolveObjectBorderWidth(object, "section", "painted", {
+    defaultSectionBorderWidthPx: SECTION_GEOMETRY.borderWidthPx,
+  });
   const renderedStrokeWidth = object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx;
-  const title = object.title ?? object.label;
-  const titleScale = sectionTitleScale(zoom);
+  const title = object.text;
+  const titleScale = titleChipScale(zoom);
   return (
     <button
       type="button"
@@ -106,7 +77,7 @@ function SectionObjectView({
         top: `${object.geometry.y}px`,
         width: `${object.geometry.width}px`,
         height: `${object.geometry.height}px`,
-        background: object.style?.fill ?? family.tint,
+        background: family.tint,
         borderColor,
         borderStyle,
         borderWidth,
@@ -152,17 +123,19 @@ function SectionObjectView({
           />
         </svg>
       ) : null}
-      {!hideLabel && (
+      {!hideText && (
         <span
           className="interactive-canvas-section-title-chip"
           data-canvas-section-title-chip={object.id}
           style={{
-            background: family.chipFill ?? "transparent",
-            borderColor: family.chipBorder ?? "transparent",
+            left: `${TITLE_CHIP.insetFromSectionCornerPx - borderWidth}px`,
+            top: `${TITLE_CHIP.insetFromSectionCornerPx - borderWidth}px`,
+            background: family.chip.fill,
+            borderColor: family.chip.border,
+            maxWidth: `${titleChipMaxWidthPx(object.geometry.width, titleScale)}px`,
             ...(titleScale !== 1
               ? {
                   transform: `scale(${titleScale})`,
-                  maxWidth: `${sectionTitleMaxWidthPx(object.geometry.width, titleScale)}px`,
                 }
               : {}),
           }}
@@ -200,19 +173,19 @@ export const sectionDef: ObjectDef = {
         }
         .interactive-canvas-section-title-chip {
           position: absolute;
-          left: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
-          top: ${SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px;
-          height: ${SECTION_GEOMETRY.titleChip.heightPx}px;
+          left: ${TITLE_CHIP.insetFromSectionCornerPx}px;
+          top: ${TITLE_CHIP.insetFromSectionCornerPx}px;
+          height: ${TITLE_CHIP.heightPx}px;
           display: flex;
           align-items: center;
           border-style: solid;
-          border-width: ${SECTION_GEOMETRY.titleChip.borderWidthPx}px;
+          border-width: ${TITLE_CHIP.borderWidthPx}px;
           border-radius: 6px;
-          padding: 0 ${SECTION_GEOMETRY.titleChip.paddingXPx}px;
-          font-size: ${SECTION_GEOMETRY.titleChip.fontSizePx}px;
-          font-weight: ${SECTION_GEOMETRY.titleChip.fontWeight};
+          padding: 0 ${TITLE_CHIP.paddingXPx}px;
+          font-size: ${TITLE_CHIP.fontSizePx}px;
+          font-weight: ${TITLE_CHIP.fontWeight};
           transform-origin: top left;
-          color: ${SECTION_GEOMETRY.titleChip.textColor};
+          color: ${TITLE_CHIP.textColor};
           white-space: nowrap;
           overflow: hidden;
         }
@@ -226,21 +199,20 @@ export const sectionDef: ObjectDef = {
           white-space: nowrap;
         }
 `,
-  defaults: {
-    // W2 — sections default large (they're meant to wrap other objects, so a
-    // backdrop-sized footprint reads better than a shape-sized default).
-    geometry: { x: 80, y: 80, width: 480, height: 360 },
-    tone: "neutral",
-    shape: "section",
-    label: "Section",
-  },
+  // Stamped from the schema-vocabulary defaults leaf (P4); sections default
+  // large there (a container-like footprint reads better than a shape-sized
+  // default).
+  defaults: objectTypeDefaults("section"),
+  colorRole: "section",
+  buttonBorder: "painted",
   // Sections get corner-only handles; locked sections refuse resize/drag.
   handles: "corners",
-  hitTest: "solid",
+  outline: BBOX_OUTLINE,
   // Section membership is a persisted, auto-managed parentId (assigned on
   // drop into a section, cleared on drop onto open canvas); dragging a
   // section carries its transitive parentId descendants along.
   dragCapture: "descendants",
   toolbar: SECTION_TOOLBAR,
-  labelEditing: { target: "section-title" },
+  textSlot: TITLE_CHIP_TEXT_SLOT,
+  textEditing: { editable: true },
 };

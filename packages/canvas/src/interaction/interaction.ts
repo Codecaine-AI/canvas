@@ -31,6 +31,7 @@ export {
   type CanvasPointerEvent,
   type CanvasPointerEventType,
   type ConnectorAnchorCandidate,
+  type ConnectorBendDragGesture,
   type ConnectorDragOverlay,
   type InteractionContext,
   type InteractionOverlay,

@@ -805,39 +805,16 @@
           }
         },
         {
-          "insert": " (an inventory of every chrome surface observed). Every FigJam-derived constant in "
+          "insert": " (an inventory of every chrome surface observed). Every FigJam-derived constant in the engine — dispersed beside its consumer since the theme dispersal, notably the "
         },
         {
-          "insert": "render/",
+          "insert": "palette.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (notably "
-        },
-        {
-          "insert": "figjam-tokens.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ") and in "
-        },
-        {
-          "insert": "chrome/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components"
-            }
-          }
+          "insert": " color table —"
         },
         {
           "insert": " traces back to this corpus — it is the single source of truth for pixel-parity decisions, not any individual engineer's judgment call."
@@ -857,7 +834,7 @@
           "insert": "Not every pixel value in the analysis corpus is a direct measurement off the reference recordings. Some are documented extrapolations for states the source recordings didn't capture — for example, the "
         },
         {
-          "insert": "ContextToolbar",
+          "insert": "SelectionToolbar",
           "attributes": {
             "code": true
           }

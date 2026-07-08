@@ -22,7 +22,8 @@ export const FOLDER_GEOMETRY = {
 export const folderShapeDef: ShapeDef = {
   type: "folder",
   shape: "folder",
-  outline: {
+  buttonBorder: "suppressed",
+  silhouette: {
     className: "interactive-canvas-object-folder",
     silhouette: ({ colors, strokeWidth }) => {
       const tabWidth = FOLDER_GEOMETRY.tabWidthRatio * 100;
@@ -55,35 +56,21 @@ export const folderShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 110 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (folder shared its selector group
    * there with document-stack/cylinder-horizontal — the last three members
    * of the trans­parent-chrome group, alongside document/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/or-junction/summing-junction, already
-   * converted). Declarations are verbatim; the group copy comes FIRST, the
-   * per-shape follow-up rule (padding-top: 26%) SECOND, preserving the
-   * padding cascade (the follow-up's padding-top must win over any earlier
-   * shorthand `padding` — none is set on this class here, so ordering is
-   * inert for folder specifically, but kept for parity with the source
-   * order).
+   * converted). Paint declarations moved here.
    */
   css: `
         .interactive-canvas-object-folder {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
           box-shadow: none;
           overflow: visible;
-        }
-        .interactive-canvas-object-folder {
-          padding-top: 26%;
         }
 `,
   catalog: { label: "Folder", keywords: ["folder", "directory", "file"] },

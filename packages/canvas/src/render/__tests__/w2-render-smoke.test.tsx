@@ -4,7 +4,7 @@ import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements
 import { InteractiveCanvasViewer } from "../../editor/InteractiveCanvasViewer";
 import { CanvasStage } from "../CanvasStage";
 import { OBJECT_DEFS_CSS } from "../../objects/object-def";
-import { sectionTitleScale } from "../../objects/section/def";
+import { titleChipScale } from "../../objects/text-slots";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 const v2FlowElementsDocument = v2FlowElementsDocumentJson as InteractiveCanvasDocument;
@@ -56,9 +56,8 @@ const sectionTitleScaleDocument: InteractiveCanvasDocument = {
     {
       id: "wide-section",
       type: "section",
-      label: "Readable section",
-      title: "Readable section",
-      tint: "blue",
+      text: "Readable section",
+      color: "blue",
       geometry: { x: 100, y: 80, width: 2000, height: 560 },
     },
   ],
@@ -77,7 +76,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("renders sections with a title chip showing their `title` (not `label`)", () => {
+  it("renders sections with a title chip showing their text", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
 
@@ -110,7 +109,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
       "[data-canvas-section-title-chip='wide-section']",
     ) as HTMLElement | null;
     expect(scaledChip).toBeTruthy();
-    const expectedScale = sectionTitleScale(0.25);
+    const expectedScale = titleChipScale(0.25);
     expect(expectedScale).toBeGreaterThan(1);
     expect(scaledChip!.style.transform).toBe(`scale(${expectedScale})`);
     // Width budget: the scaled chip may span the section's inner width
@@ -118,7 +117,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     expect(scaledChip!.style.maxWidth).toBe(`${(2000 - 6) / expectedScale}px`);
   });
 
-  it("renders explicit section fill and dashed border style", () => {
+  it("renders a section color pick with dashed border style through the section role cells", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const document = {
         ...v2FlowElementsDocument,
@@ -126,7 +125,8 @@ describe("W2 render smoke: every new object type renders without throwing", () =
           object.id === "outer-section"
             ? {
                 ...object,
-                style: { ...object.style, fill: "#C2E5FF", stroke: "#3DADFF", strokeStyle: "dashed" as const },
+                color: "blue" as const,
+                style: { ...object.style, strokeStyle: "dashed" as const },
               }
             : object,
         ),
@@ -134,8 +134,9 @@ describe("W2 render smoke: every new object type renders without throwing", () =
       const { container } = render(<InteractiveCanvasViewer document={document} />);
       const section = container.querySelector('[data-canvas-object-id="outer-section"]') as HTMLElement | null;
 
-      expect(section?.style.background).toBe("#C2E5FF");
-      expect(section?.style.borderColor).toBe("#3DADFF");
+      // blue section cells: tint fill; frame border = chip FILL (§3.2).
+      expect(section?.style.background).toBe("#F5FBFF");
+      expect(section?.style.borderColor).toBe("#C2E5FF");
       expect(section?.style.borderStyle).toBe("dashed");
       expect(section?.querySelector("[data-section-border-dash] rect")?.getAttribute("stroke-dasharray")).toBe("19 7");
     });
@@ -159,21 +160,6 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("hides captured member objects while section contentHidden is true", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const document = {
-        ...v2FlowElementsDocument,
-        objects: v2FlowElementsDocument.objects.map((object) =>
-          object.id === "outer-section" ? { ...object, contentHidden: true } : object,
-        ),
-      };
-      const { container } = render(<InteractiveCanvasViewer document={document} />);
-
-      expect(container.querySelector('[data-canvas-object-id="outer-section"]')).toBeTruthy();
-      expect(container.querySelector('[data-canvas-object-id="captured-pill"]')).toBeFalsy();
-    });
-  });
-
   it("renders sections below non-section objects in DOM order", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
@@ -191,17 +177,17 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("renders the chip-icon silhouette", () => {
+  it("renders the migrated chip visual as a cpu icon glyph", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
-      const chipSvg = container.querySelector('[data-canvas-shape-silhouette="chip-icon"]');
+      const chipSvg = container.querySelector('[data-canvas-object-id="chip-icon-node"] [data-canvas-icon-glyph="cpu"]');
       expect(chipSvg).toBeTruthy();
     });
   });
 
   it("registers the icon-shape chrome-strip so Advanced glyphs render without the generic box", () => {
     // The glyph IS the shape (brief's "bbox" tier): the button chrome must go
-    // fully transparent, like chip-icon/person. `!important` is load-bearing —
+    // fully transparent. `!important` is load-bearing —
     // it has to beat objectStyle's inline `background: colors.fill`.
     const iconRule = OBJECT_DEFS_CSS.match(/\.interactive-canvas-object-icon\s*\{[^}]*\}/)?.[0];
     expect(iconRule).toBeTruthy();
@@ -217,15 +203,19 @@ describe("W2 render smoke: every new object type renders without throwing", () =
       expect(person?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe("Interviewee");
 
       const chat = container.querySelector('[data-canvas-object-id="restyled-chat"]');
-      expect(chat?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe("Live Q&A");
+      const chatText = chat?.querySelector(".interactive-canvas-label-below-icon")?.textContent;
+      expect(chatText).toContain("Live Q&A");
+      expect(chatText).toContain("Realtime exchange between interviewer and interviewee.");
     });
   });
 
-  it("hides the compact person's label under 100px height", () => {
+  it("renders the compact person's label below the glyph", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
       const compactPerson = container.querySelector('[data-canvas-object-id="compact-person"]');
-      expect(compactPerson?.querySelector(".interactive-canvas-label-below-icon")).toBeNull();
+      expect(compactPerson?.querySelector(".interactive-canvas-label-below-icon")?.textContent).toBe(
+        "Compact person",
+      );
     });
   });
 
@@ -238,7 +228,7 @@ describe("W2 render smoke: every new object type renders without throwing", () =
 
       const author = sticky!.querySelector(".interactive-canvas-sticky-author");
       expect(author).toBeNull();
-      expect(sticky!.querySelector(".interactive-canvas-object-label")).toBeNull();
+      expect(sticky!.querySelector(".interactive-canvas-object-label.interactive-canvas-sticky-body")).toBeTruthy();
 
       const bulletLines = sticky!.querySelectorAll('.interactive-canvas-sticky-line[data-bullet="true"]');
       expect(bulletLines.length).toBe(2);

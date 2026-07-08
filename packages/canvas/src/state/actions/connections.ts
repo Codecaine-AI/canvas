@@ -6,7 +6,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../schema";
-import { defaultGeometryFor, objectTypeLabel, toneForType } from "./defaults";
+import { FIRST_USE_COLORS, objectTypeLabel } from "../schema/object-defaults";
 import { nextId } from "./helpers";
 import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
@@ -49,6 +49,33 @@ export function removeConnection(
   };
 }
 
+function duplicateSourceObjectForQuickConnect(
+  source: InteractiveCanvasObject,
+  id: string,
+  point: { x: number; y: number },
+): InteractiveCanvasObject {
+  const { width, height } = source.geometry;
+  return {
+    id,
+    type: source.type,
+    text: "",
+    ...(source.color ? { color: source.color } : {}),
+    parentId: source.parentId ?? null,
+    geometry: snapGeometry({
+      x: point.x - width / 2,
+      y: point.y - height / 2,
+      width,
+      height,
+    }),
+    ...(source.style ? { style: { ...source.style } } : {}),
+    ...(source.layout ? { layout: { ...source.layout } } : {}),
+    ...(source.direction ? { direction: source.direction } : {}),
+    ...(typeof source.language === "string" ? { language: source.language } : {}),
+    ...(typeof source.author === "string" ? { author: source.author } : {}),
+    ...(source.icon ? { icon: source.icon } : {}),
+  };
+}
+
 export function handleAddConnection(
   state: InteractiveCanvasState,
   action: Extract<CanvasAction, { type: "canvas.addConnection" }>,
@@ -68,6 +95,7 @@ export function handleAddConnection(
     label: action.label,
     style: action.style ?? "solid",
     arrow: action.arrow ?? "forward",
+    color: FIRST_USE_COLORS.connector,
   };
   return withHistory(
     {
@@ -112,6 +140,7 @@ export function handleQuickConnect(
       to: { objectId: drop.objectId, anchor: drop.anchor },
       style: "solid",
       arrow: "forward",
+      color: FIRST_USE_COLORS.connector,
     };
     return withHistory(
       { ...state, selection: { kind: "connection", connectionId } },
@@ -126,34 +155,24 @@ export function handleQuickConnect(
     );
   }
 
-  // Create-and-connect: drop on empty canvas creates a new process object
+  // Create-and-connect: drop on empty canvas duplicates the source object
   // centered at the drop point, then connects to it — one history entry.
   const point = drop.point;
-  const size = defaultGeometryFor("process");
-  const label = objectTypeLabel("process");
-  const newObjectId = createObjectId(state.document, label);
-  const newObject: InteractiveCanvasObject = {
-    id: newObjectId,
-    type: "process",
-    label,
-    parentId: fromObject.parentId ?? null,
-    geometry: snapGeometry({
-      x: point.x - size.width / 2,
-      y: point.y - size.height / 2,
-      width: size.width,
-      height: size.height,
-    }),
-    style: { tone: toneForType("process"), shape: "rounded-rect" },
-  };
+  const newObjectId = createObjectId(
+    state.document,
+    fromObject.text.trim() || objectTypeLabel(fromObject.type),
+  );
+  const newObject = duplicateSourceObjectForQuickConnect(fromObject, newObjectId, point);
   const connection: InteractiveCanvasConnection = {
     id: connectionId,
     from: { objectId: action.fromObjectId, anchor: action.fromAnchor },
     to: { objectId: newObjectId },
     style: "solid",
     arrow: "forward",
+    color: FIRST_USE_COLORS.connector,
   };
   return withHistory(
-    { ...state, selection: { kind: "connection", connectionId } },
+    { ...state, selection: { kind: "objects", objectIds: [newObjectId] } },
     {
       ...state.document,
       objects: [...state.document.objects, newObject],
@@ -161,7 +180,7 @@ export function handleQuickConnect(
     },
     {
       source: "human",
-      summary: "Added connected process",
+      summary: `Added connected ${objectTypeLabel(fromObject.type)}`,
       changedObjectIds: [newObjectId],
       changedConnectionIds: [connectionId],
       changedAnnotationIds: [],

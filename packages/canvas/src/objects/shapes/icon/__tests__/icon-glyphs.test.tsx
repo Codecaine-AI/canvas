@@ -65,7 +65,7 @@ describe("ICON_GLYPHS registry", () => {
     it(`renders valid, non-empty SVG markup for "${id}"`, () => {
       const glyph = ICON_GLYPHS[id];
       const { container } = render(
-        <IconShapeBody object={{ label: "Sample", icon: id, geometry: { width: 120, height: 120 } }} />,
+        <IconShapeBody object={{ icon: id, geometry: { width: 120, height: 120 } }} />,
       );
       const svg = container.querySelector("svg");
       expect(svg).not.toBeNull();
@@ -80,38 +80,31 @@ describe("ICON_GLYPHS registry", () => {
 });
 
 describe("IconShapeBody", () => {
-  it("renders the object's label below the glyph", () => {
-    const { container, getByText } = render(
+  it("renders only the glyph body; text is rendered by the icon object def", () => {
+    const { container } = render(
       <IconShapeBody
-        object={{ label: "My Server", icon: "server", geometry: { width: 120, height: 120 } }}
+        object={{ icon: "server", geometry: { width: 120, height: 120 } }}
         colors={{ stroke: "#111111", fill: "#EEEEEE" }}
       />,
     );
 
-    const label = getByText("My Server");
-    expect(label).toBeTruthy();
-    expect(label.className).toContain("interactive-canvas-label-below-icon");
+    expect(container.querySelector(".interactive-canvas-label-below-icon")).toBeNull();
 
     const svg = container.querySelector("svg[data-canvas-icon-glyph='server']");
     expect(svg).not.toBeNull();
 
-    // Layout order: glyph svg should precede the label span in DOM order,
-    // matching the "label BELOW the glyph" requirement.
     const root = container.querySelector("[data-canvas-icon-shape-body]");
     expect(root).not.toBeNull();
-    const children = Array.from(root?.children ?? []);
-    const svgIndex = children.findIndex((child) => child.tagName.toLowerCase() === "svg");
-    const labelIndex = children.findIndex((child) => child.textContent === "My Server");
-    expect(svgIndex).toBeGreaterThanOrEqual(0);
-    expect(labelIndex).toBeGreaterThan(svgIndex);
+    expect(root?.children.length).toBe(1);
   });
 
   it("renders gracefully with no icon set (unknown glyph)", () => {
     const { container } = render(
-      <IconShapeBody object={{ label: "No Icon", geometry: { width: 120, height: 120 } }} />,
+      <IconShapeBody object={{ geometry: { width: 120, height: 120 } }} />,
     );
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
-    expect(container.textContent).toContain("No Icon");
+    expect(svg?.getAttribute("data-canvas-icon-glyph")).toBe("unknown");
+    expect(container.textContent).toBe("");
   });
 });

@@ -73,7 +73,7 @@
           }
         },
         {
-          "insert": ", each a first-class shape a user can place directly. This is the tier our 37 "
+          "insert": ", each a first-class shape a user can place directly. This is the tier our 32 "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -87,7 +87,7 @@
           }
         },
         {
-          "insert": " values and 34 "
+          "insert": " values and 31 "
         },
         {
           "insert": "style.shape",
@@ -182,16 +182,30 @@
           }
         },
         {
-          "insert": " values (they don't appear anywhere in the plugin typings' shape enum). Treated here as a separate icon tier, compared against our icon-shaped object types ("
+          "insert": " values (they don't appear anywhere in the plugin typings' shape enum). Treated here as a separate icon tier, compared against our "
         },
         {
-          "insert": "chip-icon",
+          "insert": "icon",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/object-types.ts",
               "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " object type and its 26 glyphs (including "
+        },
+        {
+          "insert": "cpu",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "CanvasIconGlyph"
             }
           }
         },
@@ -205,26 +219,12 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
+              "symbol": "CanvasIconGlyph"
             }
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "database",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": ", "
+          "insert": ", and "
         },
         {
           "insert": "chat",
@@ -233,21 +233,7 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
+              "symbol": "CanvasIconGlyph"
             }
           }
         },
@@ -456,7 +442,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name               shapeType          verdict  our mapping                     notes\n------------------------  -----------------  -------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE     rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            HAVE     ellipse                         true ellipse inscribed in the bounding box, true-outline anchors (W5)\nDiamond                   DIAMOND            HAVE     decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        HAVE     triangle (direction:up)         isosceles triangle polygon, true-outline anchors (W5)\nTriangle (down)           TRIANGLE_DOWN      HAVE     triangle (direction:down)       same primitive as TRIANGLE_UP, flipped via the direction field (W5)\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE     rectangle/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           HAVE     pentagon                        5-point regular polygon, true-outline anchors (W5)\nOctagon                   OCTAGON            HAVE     octagon                         8-point regular polygon, true-outline anchors (W5)\nPlus/cross                PLUS               HAVE     plus                            12-point cross polygon, true-outline anchors; renders no visible label text (a11y-only) (W5)\nBlock arrow (left)        ARROW_LEFT         HAVE     arrow-shape (direction:left)    bodyHeightRatio raised 0.53->0.60 in W5 so the body reads blockier; approximate pending pixel sample\nBlock arrow (right)       ARROW_RIGHT        HAVE     arrow-shape (direction:right)   same bodyHeightRatio 0.60 update as ARROW_LEFT; approximate pending pixel sample\nFat chevron arrow         CHEVRON            HAVE     chevron                         landed as its own object type distinct from arrow-shape, not a weight variant (W5)\nStar                      STAR               HAVE     star                            5-point star polygon, true-outline anchors; inner-radius ratio flagged approximate pending pixel-reference check (W5)\nSpeech bubble             SPEECH_BUBBLE      HAVE     chat                            true SVG path with bottom-left triangular tail; close silhouette match, tail position/angle is a fixed style choice not user-configurable"
+          "insert": "FigJam name               shapeType          verdict  our mapping                     notes\n------------------------  -----------------  -------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE     rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            HAVE     ellipse                         true ellipse inscribed in the bounding box, true-outline anchors (W5)\nDiamond                   DIAMOND            HAVE     decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        HAVE     triangle (direction:up)         isosceles triangle polygon, true-outline anchors (W5)\nTriangle (down)           TRIANGLE_DOWN      HAVE     triangle (direction:down)       same primitive as TRIANGLE_UP, flipped via the direction field (W5)\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE     rectangle/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           HAVE     pentagon                        5-point regular polygon, true-outline anchors (W5)\nOctagon                   OCTAGON            HAVE     octagon                         8-point regular polygon, true-outline anchors (W5)\nPlus/cross                PLUS               HAVE     plus                            12-point cross polygon, true-outline anchors; renders no visible label text (a11y-only) (W5)\nBlock arrow (left)        ARROW_LEFT         HAVE     arrow-shape (direction:left)    bodyHeightRatio raised 0.53->0.60 in W5 so the body reads blockier; approximate pending pixel sample\nBlock arrow (right)       ARROW_RIGHT        HAVE     arrow-shape (direction:right)   same bodyHeightRatio 0.60 update as ARROW_LEFT; approximate pending pixel sample\nFat chevron arrow         CHEVRON            HAVE     chevron                         landed as its own object type distinct from arrow-shape, not a weight variant (W5)\nStar                      STAR               HAVE     star                            5-point star polygon, true-outline anchors; inner-radius ratio flagged approximate pending pixel-reference check (W5)\nSpeech bubble             SPEECH_BUBBLE      HAVE     icon (glyph: chat)              Chat catalog entry stamps type icon with glyph chat after D21"
         }
       ]
     },
@@ -559,10 +545,10 @@
       },
       "text": [
         {
-          "insert": "Speech bubble is HAVE, not HAVE-BUT-WRONG, but still worth noting: "
+          "insert": "Speech bubble is HAVE via the catalog's "
         },
         {
-          "insert": "chat",
+          "insert": "type: \"icon\", icon: \"chat\"",
           "attributes": {
             "code": true,
             "reference": {
@@ -573,7 +559,7 @@
           }
         },
         {
-          "insert": " is a genuine SVG speech-bubble path with a fixed bottom-left triangular tail (see the Advanced-tier discussion below for why reusing this same shape there is a tier mismatch)."
+          "insert": " mapping; there is no separate speech-bubble object type after D21."
         }
       ]
     },
@@ -820,26 +806,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      superseded the old chat-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       chip-icon (W2) remains the dedicated shapeType-tier CPU silhouette; icon/cpu is the Advanced-tier chip glyph\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      superseded the old code-block-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    superseded the old person-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
-        }
-      ]
-    },
-    "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29": {
-      "id": "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29",
-      "flavour": "list-item",
-      "children": [],
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Chat bubble",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": our chat is a full native shapeType-tier shape (SPEECH_BUBBLE parity target), not a small component icon; using it to stand in for this Advanced tile means it's oversized/over-featured relative to sibling icons, and it's identical to the Basic-tier speech bubble, not a distinct chip glyph."
+          "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      uses the chat glyph after D21\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       uses the cpu glyph after D21\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      superseded the old code-block-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    uses the person glyph after D21\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
         }
       ]
     },
@@ -858,7 +825,7 @@
           }
         },
         {
-          "insert": ": our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch as chat: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape."
+          "insert": ": our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch pattern: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape."
         }
       ]
     },
@@ -877,7 +844,7 @@
           }
         },
         {
-          "insert": ": same tier mismatch as chat/database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip."
+          "insert": ": same tier mismatch pattern as database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip."
         }
       ]
     },
@@ -900,25 +867,6 @@
         }
       ]
     },
-    "b-figjam-parity-bold-person-user-our-person-is-a-full-33": {
-      "id": "b-figjam-parity-bold-person-user-our-person-is-a-full-33",
-      "flavour": "list-item",
-      "children": [],
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Person/user",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": our person is a full shapeType-tier silhouette (rounded-shoulders body + head circle), same over-scaled tier mismatch as chat/database/document."
-        }
-      ]
-    },
     "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34": {
       "id": "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
       "flavour": "paragraph",
@@ -935,81 +883,7 @@
           }
         },
         {
-          "insert": ", not shapeType primitives — placing one drops a small pre-styled icon-in-a-chip onto the board, not a resizable geometric shape. Genuine parity with this tier therefore doesn't mean building 26 bespoke InteractiveCanvasObjectType values; it means one icon-shape ",
-          "attributes": {
-            "italic": true
-          }
-        },
-        {
-          "insert": "family* — a single object type (or a "
-        },
-        {
-          "insert": "chip-icon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": "-style "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " variant) parameterized by an icon-glyph selector, the same way "
-        },
-        {
-          "insert": "arrow-shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " is parameterized by "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasArrowShapeDirection"
-            }
-          }
-        },
-        {
-          "insert": ". We already cover roughly five of the 26 conceptually (chip/CPU, database, chat, document, person) but every one of those five is implemented as a full native shapeType-tier shape reused out of its proper tier, rather than as a member of a small-icon family — so today's coverage is a set of tier-mismatched reuses, not a real head start on the family itself. "
-        },
-        {
-          "insert": "chip-icon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " (schema.ts) is the closest structural precedent: it's already a fixed-glyph icon-in-a-chip, just hardcoded to a single CPU glyph with no selector — extending it with an icon-name field is the natural path to real Advanced-tier parity."
-        },
-        {
-          "insert": " W5 built exactly this: a single "
+          "insert": ", not shapeType primitives — placing one drops a small pre-styled icon-in-a-chip onto the board, not a resizable geometric shape. D21 makes that one "
         },
         {
           "insert": "icon",
@@ -1037,7 +911,7 @@
           }
         },
         {
-          "insert": " field drawn from a 26-value CanvasIconGlyph enum — covering the tier in one type rather than 26 bespoke ones, and superseding the five tier-mismatched reuses (chat, database, document, code-block, person) noted above with correctly-scoped icon glyphs instead."
+          "insert": " field drawn from the 26-value CanvasIconGlyph enum, so the chat, cpu, database, file, code, and person concepts are glyphs rather than bespoke object types."
         }
       ]
     },
@@ -1190,10 +1064,10 @@
       "props": {},
       "text": [
         {
-          "insert": "Default size 160x120 (wide oval, same default sizing convention as other basic shapes). Text slot centered like other shapes. Connection anchors: needs to join the true-outline tier ("
+          "insert": "Default size 160x120 (wide oval, same default sizing convention as other basic shapes). Text slot centered like other shapes. Connection anchors: joined the true-outline tier in W5 (now "
         },
         {
-          "insert": "outlineShapeFor",
+          "insert": "ELLIPSE_OUTLINE",
           "attributes": {
             "code": true,
             "reference": {
@@ -1204,7 +1078,7 @@
           }
         },
         {
-          "insert": " in connection-overlay.ts) alongside rect/pill/diamond/arrow-shape — an ellipse's outline-intersection is closed-form (parametric ellipse/line intersection), so it's a natural 5th member, not a bbox-fallback shape. Style surface: fill/stroke/strokeStyle like any basic shape, no special fields. Suggested name: new "
+          "insert": " in objects/geometry.ts, where the def-declared outlines live since P3) alongside rect/pill/diamond/arrow-shape — an ellipse's outline-intersection is closed-form (parametric ellipse/line intersection), so it's a natural 5th member, not a bbox-fallback shape. Style surface: fill/stroke/strokeStyle like any basic shape, no special fields. Suggested name: new "
         },
         {
           "insert": "style.shape: \"ellipse\"",
@@ -1559,7 +1433,7 @@
           "insert": " a fixed fraction of width (e.g. 15-20%, matching FigJam's visual skew angle — needs a pixel-reference check against a live sample, flag as approximate)."
         },
         {
-          "insert": " Landed in W5 as a fixed ratio in figjam-tokens.ts, with the approximate-pending-pixel-check flag preserved in its doc comment.",
+          "insert": " Landed in W5 as a fixed ratio (now in objects/geometry.ts since the theme dispersal), with the approximate-pending-pixel-check flag preserved in its doc comment.",
           "attributes": {
             "italic": true
           }
@@ -1656,27 +1530,28 @@
           "insert": " trick already used for "
         },
         {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
           "insert": "database",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
-          "insert": "/"
+          "insert": " and "
         },
         {
-          "insert": "chip-icon",
+          "insert": "icon",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
@@ -1738,7 +1613,7 @@
           "insert": "A 5-point star polygon: 10 alternating outer/inner vertices around the bounding box center, outer radius touching the box edge, inner radius a fixed fraction (~0.4x outer, matching FigJam's visual proportions — flag as approximate pending a pixel-reference check)."
         },
         {
-          "insert": " Landed in W5 as a fixed ratio in figjam-tokens.ts, with the approximate-pending-pixel-check flag preserved in its doc comment.",
+          "insert": " Landed in W5 as a fixed ratio (now in objects/geometry.ts since the theme dispersal), with the approximate-pending-pixel-check flag preserved in its doc comment.",
           "attributes": {
             "italic": true
           }
@@ -1970,7 +1845,7 @@
           "insert": " — the same construction strategy as the existing "
         },
         {
-          "insert": "chat",
+          "insert": "document",
           "attributes": {
             "code": true,
             "reference": {
@@ -1981,7 +1856,7 @@
           }
         },
         {
-          "insert": " speech-bubble tail (one path, not a rect + separate tab overlay)."
+          "insert": " wavy SVG path (one path, not a rect + separate tab overlay)."
         }
       ]
     },
@@ -2004,9 +1879,14 @@
           "insert": "/"
         },
         {
-          "insert": "chip-icon",
+          "insert": "icon",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
@@ -2104,36 +1984,28 @@
           "insert": "Default size 150x110. Text slot centered in the upper two-thirds (above the wave). Connection anchors: bbox fallback, matching the existing precedent for non-rectangular icon-silhouette shapes ("
         },
         {
-          "insert": "chat",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
           "insert": "database",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
           "insert": "/"
         },
         {
-          "insert": "chip-icon",
+          "insert": "icon",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
@@ -2155,16 +2027,7 @@
           }
         },
         {
-          "insert": " type, tracked as a HAVE-BUT-WRONG spec-delta in the Flowchart section, not a new type) — but if a genuinely separate \"page with folded corner, ENG_FILE\" shape is ALSO wanted going forward (since "
-        },
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " would be freed up to become the true wavy-bottom shape), that's "
+          "insert": " type, tracked as a HAVE-BUT-WRONG spec-delta in the Flowchart section, not a new type) — but if a genuinely separate \"page with folded corner, ENG_FILE\" shape is ALSO wanted later, call it "
         },
         {
           "insert": "type: \"page-corner\"",
@@ -2173,7 +2036,7 @@
           }
         },
         {
-          "insert": " / "
+          "insert": "/"
         },
         {
           "insert": "style.shape: \"page-corner\"",
@@ -2182,7 +2045,16 @@
           }
         },
         {
-          "insert": ", reusing the exact clip-path geometry we already have today, just under a correctly-scoped name."
+          "insert": " rather than overloading "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ]
     },
@@ -2975,53 +2847,55 @@
       },
       "text": [
         {
-          "insert": "A single color pick drives both fill and border — there are no separate border-color or stroke-width pickers. Shapes and stickies set a palette token and derive fill/stroke from it ("
+          "insert": "One color pick per object, matching FigJam's model: every kind — shapes, stickies, sections, connectors — stores a single "
         },
         {
-          "insert": "useSelectionToolbar",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
-              "symbol": "useSelectionToolbar"
-            }
-          }
-        },
-        {
-          "insert": "); sections pick one of the 10 tint families in "
-        },
-        {
-          "insert": "SECTION_FAMILIES",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "SECTION_FAMILIES"
-            }
-          }
-        },
-        {
-          "insert": ", and picking a tint clears any "
-        },
-        {
-          "insert": "style.fill",
+          "insert": "color?: CanvasColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": " swatch id from the closed 10-pick roster (FigJam's popover minus the custom wheel and minus black, D7/D12) and offers one pick per hue through the one shared "
         },
         {
-          "insert": "style.stroke",
+          "insert": "ColorPicker",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " overrides so the family fully owns the section's colors."
+          "insert": ". The kind's palette role table decides rendering ("
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "CANVAS_PALETTE"
+            }
+          }
+        },
+        {
+          "insert": "): ink is the picker swatch plus every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Every shape is bordered, white keeps gray strokes, and legacy `-soft` ids migrate to the bare hue id. This replaced the earlier palette-token/tint split described elsewhere in this doc's history."
+        },
+        {
+          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+        },
+        {
+          "insert": "board-design-reference/analysis/palette-sheet.html",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference/analysis/palette-sheet.html"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -3317,27 +3191,14 @@
           "insert": "/"
         },
         {
-          "insert": "chat",
+          "insert": "icon",
           "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "chip-icon",
-          "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
           }
         },
         {
@@ -3516,7 +3377,7 @@
       },
       "text": [
         {
-          "insert": "Every corner radius in our renderer is a hardcoded constant sourced from figjam-tokens.ts ("
+          "insert": "Every corner radius in our renderer is a hardcoded constant, formerly in figjam-tokens.ts and now co-located with each def ("
         },
         {
           "insert": "STICKY_GEOMETRY",
@@ -3711,11 +3572,9 @@
         "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26",
         "b-figjam-parity-advanced-27",
         "b-figjam-parity-advanced-table-28",
-        "b-figjam-parity-bold-chat-bubble-our-chat-is-a-full-n-29",
         "b-figjam-parity-bold-database-our-database-is-a-true-30",
         "b-figjam-parity-bold-file-document-same-tier-mismatch-31",
         "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32",
-        "b-figjam-parity-bold-person-user-our-person-is-a-full-33",
         "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
         "b-figjam-parity-missing-shape-specs-35",
         "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",

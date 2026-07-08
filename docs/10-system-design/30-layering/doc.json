@@ -246,20 +246,11 @@
       "children": [],
       "props": {
         "severity": "hard",
-        "title": "Collapsed and locked-all sections do not adopt new members"
+        "title": "Locked-all sections do not adopt new members"
       },
       "text": [
         {
           "insert": "A section with "
-        },
-        {
-          "insert": "contentHidden === true",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " or "
         },
         {
           "insert": "locked === \"all\"",
@@ -268,7 +259,7 @@
           }
         },
         {
-          "insert": " retains existing members so hidden or locked content does not leak out during reconcile. The same section never adopts a new free object; the object must qualify for another visible/unlocked section or remain parentless."
+          "insert": " retains existing members so locked content does not leak out during reconcile. The same section never adopts a new free object; the object must qualify for another unlocked section or remain parentless."
         }
       ]
     },
@@ -476,15 +467,6 @@
       "text": [
         {
           "insert": "A stored document outside an active live gesture should be section-membership clean. If a discrete action mutates geometry, type, "
-        },
-        {
-          "insert": "contentHidden",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
         },
         {
           "insert": "locked",

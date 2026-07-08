@@ -24,6 +24,8 @@
         "b-editor-heading-editor-vs-viewer-2",
         "b-editor-editor-desc-3",
         "b-editor-editor-composition-4",
+        "b-editor-text-editing-para",
+        "b-editor-color-para",
         "b-editor-viewer-desc-5",
         "b-editor-viewer-relationship-6",
         "b-editor-heading-viewport-7",
@@ -39,7 +41,6 @@
         "b-editor-hotkey-c-17",
         "b-editor-hotkey-p-18",
         "b-editor-hotkey-d-19",
-        "b-editor-hotkey-t-20",
         "b-editor-hotkey-s-21",
         "b-editor-hotkey-o-22",
         "b-editor-hotkey-u-23",
@@ -214,12 +215,7 @@
         {
           "insert": "CanvasStage",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "CanvasStage"
-            }
+            "code": true
           }
         },
         {
@@ -228,12 +224,7 @@
         {
           "insert": "useCanvasViewport",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-viewport.ts",
-              "symbol": "useCanvasViewport"
-            }
+            "code": true
           }
         },
         {
@@ -242,19 +233,14 @@
         {
           "insert": "useCanvasHotkeys",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
-              "symbol": "useCanvasHotkeys"
-            }
+            "code": true
           }
         },
         {
-          "insert": ") for keyboard, and the FigJam-parity chrome components — "
+          "insert": ") for keyboard, and the editor chrome around that stage — "
         },
         {
-          "insert": "FigJamDock",
+          "insert": "CanvasDock",
           "attributes": {
             "code": true,
             "reference": {
@@ -268,69 +254,68 @@
           "insert": ", "
         },
         {
-          "insert": "ContextToolbar",
+          "insert": "SelectionToolbarLayer",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
-              "symbol": "SelectionToolbar"
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
+              "symbol": "SelectionToolbarLayer"
             }
           }
         },
         {
-          "insert": ", "
+          "insert": " (whose flyouts include the one "
+        },
+        {
+          "insert": "ColorPicker",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "symbol": "ColorPicker"
+            }
+          }
+        },
+        {
+          "insert": "), "
         },
         {
           "insert": "ShapesPanel",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
-              "symbol": "ShapesPanel"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "ColorPalettePopover",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
-              "symbol": "ColorPalettePopover"
-            }
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "ZoomControls",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
-              "symbol": "ZoomControls"
-            }
-          }
-        },
-        {
-          "insert": " — around that stage. A small "
-        },
-        {
-          "insert": "TOOL_KEY_MAP",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "-style mapping translates the dock's fixed "
+          "insert": ", "
+        },
+        {
+          "insert": "ZoomControls",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "TopBar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Inspector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the context menu. A small mapping translates the dock's fixed "
         },
         {
           "insert": "ToolId",
@@ -344,12 +329,7 @@
         {
           "insert": "CanvasTool",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/types.ts",
-              "symbol": "CanvasTool"
-            }
+            "code": true
           }
         },
         {
@@ -1104,25 +1084,6 @@
       ],
       "children": []
     },
-    "b-editor-hotkey-t-20": {
-      "id": "b-editor-hotkey-t-20",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "T",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — text tool"
-        }
-      ],
-      "children": []
-    },
     "b-editor-hotkey-s-21": {
       "id": "b-editor-hotkey-s-21",
       "flavour": "list-item",
@@ -1530,7 +1491,7 @@
           }
         },
         {
-          "insert": " callback reports true — the editor wires this to whether an inline label or connector-label editor currently has focus. Both checks exist because the inline editors own the keyboard while focused, but focus can lag a render, so the callback is a defensive second guard. Space is deliberately NOT bound in this hook at all — "
+          "insert": " callback reports true — the editor wires this to whether the in-place text editor or connector-label editor currently has focus. Both checks exist because the inline editors own the keyboard while focused, but focus can lag a render, so the callback is a defensive second guard. Space is deliberately NOT bound in this hook at all — "
         },
         {
           "insert": "useCanvasViewport",
@@ -1726,6 +1687,174 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-text-editing-para": {
+      "id": "b-editor-text-editing-para",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Text editing is the "
+        },
+        {
+          "insert": "editor/features/text-editing/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " feature (renamed from the old label-editing feature when the schema collapsed to one "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field). "
+        },
+        {
+          "insert": "useTextEditing",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/text-editing/use-text-editing.ts",
+              "symbol": "useTextEditing"
+            }
+          }
+        },
+        {
+          "insert": " owns two editor states: the in-place OBJECT text editor (opened by double-click for any def whose "
+        },
+        {
+          "insert": "textEditing.editable",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is true — pure glyphs like plus/or-junction/summing-junction refuse it) and the connector-label editor (an input at "
+        },
+        {
+          "insert": "routeConnection().labelPoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", per the ConnectorDef's routed-midpoint contract). The object editor is in-place by construction (D14): "
+        },
+        {
+          "insert": "TextEditingOverlay",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
+              "symbol": "TextEditingOverlay"
+            }
+          }
+        },
+        {
+          "insert": " positions and styles its textarea from the SAME "
+        },
+        {
+          "insert": "resolveTextSlot",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "symbol": "resolveTextSlot"
+            }
+          }
+        },
+        {
+          "insert": " descriptor the at-rest renderer uses — same rect, same typography, chip counter-scale included — while the def's renderer receives "
+        },
+        {
+          "insert": "hideText",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so at rest and mid-edit are pixel-identical, caret aside."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-color-para": {
+      "id": "b-editor-color-para",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Color editing is likewise one surface: every kind's toolbar color control opens the same "
+        },
+        {
+          "insert": "ColorPicker",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "symbol": "ColorPicker"
+            }
+          }
+        },
+        {
+          "insert": " (the 10-pick "
+        },
+        {
+          "insert": "CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " row) through the shared color flyout; a pick dispatches a plain "
+        },
+        {
+          "insert": "canvas.updateObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " color patch, which the reducer also records into its per-kind last-picked memory ("
+        },
+        {
+          "insert": "state.lastPickedColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", D17) so the next created object of that kind takes the remembered color. The editor threads "
+        },
+        {
+          "insert": "lastPickedColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " into the interaction pipeline so the place-tool ghost previews the color the object will actually be created with."
         }
       ],
       "children": []

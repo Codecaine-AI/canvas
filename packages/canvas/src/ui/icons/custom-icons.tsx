@@ -43,3 +43,55 @@ export function StickyIcon({ className, style }: IconProps) {
     </svg>
   );
 }
+
+export function ConnectorSolidLineIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M3 9H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ConnectorDashedLineIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M3 9H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="3 2" />
+    </svg>
+  );
+}
+
+export function ConnectorNoArrowheadsIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M3 9H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ConnectorArrowRightIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M3 9H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M15 9L11 6.5V11.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function ConnectorArrowLeftIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M5.5 9H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M3 9L7 6.5V11.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function ConnectorArrowsBothIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 18 18" className={className} style={style} fill="none" aria-hidden="true">
+      <path d="M5.5 9H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M3 9L7 6.5V11.5Z" fill="currentColor" />
+      <path d="M15 9L11 6.5V11.5Z" fill="currentColor" />
+    </svg>
+  );
+}

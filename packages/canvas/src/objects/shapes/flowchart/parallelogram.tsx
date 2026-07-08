@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { parallelogramPoints } from "../../../routing/connection-overlay";
+import { PARALLELOGRAM_OUTLINE, parallelogramPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -21,7 +21,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const parallelogramShapeDef: ShapeDef = {
   type: "parallelogram",
   shape: "parallelogram",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: PARALLELOGRAM_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-parallelogram",
     silhouette: ({ object, colors, strokeWidth }) => {
       const direction: "left" | "right" = object.direction === "left" ? "left" : "right";
@@ -47,23 +49,17 @@ export const parallelogramShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 160, height: 100 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (parallelogram shares its selector
    * group there with folder/document-stack/cylinder-horizontal/triangle/
    * pentagon/octagon/star/plus/chevron/off-page-connector/trapezoid/
    * manual-input/hexagon/or-junction/summing-junction — 17 selectors total).
-   * Declarations are verbatim; parallelogram itself carries no additional
+   * Paint declarations moved here; parallelogram itself carries no additional
    * per-shape follow-up rule in the legacy block (unlike triangle/folder/
    * document-stack).
    */
   css: `
         .interactive-canvas-object-parallelogram {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

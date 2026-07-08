@@ -10,16 +10,13 @@ export type InteractiveCanvasObjectType =
   | "annotation-marker"
   // D16 — expanded vocabulary for the reference diagrams (checkpoint 5):
   | "document"
-  | "person"
   | "database"
-  | "chat"
   // W2 — FigJam sections + V2 Flow shape vocabulary:
   | "section"
   | "pill"
   | "arrow-shape"
   | "predefined-process"
   | "code-block"
-  | "chip-icon"
   // W5 — FigJam parity shape set (Wave A): 19 native Basic/Flowchart primitives
   // plus the icon-glyph family, per docs/10-system-design/20-figjam-parity's
   // "Missing shape specs" and the Wave A implementation brief.
@@ -44,44 +41,10 @@ export type InteractiveCanvasObjectType =
   | "page-corner"
   | "icon";
 
-export type InteractiveCanvasTone =
-  | "neutral"
-  | "input"
-  | "process"
-  | "decision"
-  | "memory"
-  | "agent"
-  | "warning"
-  | "annotation";
-
-/**
- * Semantic color-as-meaning presets (D16, design doc §4.4): when present on an
- * object's style, this wins over `tone` for color resolution (see
- * theme.ts#resolveObjectColors) — process=blue (actions), input=green
- * (user/input/confirmed), hot=orange/red (generation/errors/loops),
- * memory=purple (documents/intents/memory), note=yellow (notes/decisions/cautions).
- */
-export type CanvasPaletteToken = "process" | "input" | "hot" | "memory" | "note";
-
-/**
- * FigJam section tint family (W2) — keys mirror theme/tokens.ts's
- * SECTION_FAMILIES record (theme.ts) exactly (that file is the source of truth for the
- * actual color values). Note: the W2 brief's prose used "cream" for the warm
- * neutral family; figjam-style-tokens.json's sampled key for that same tint is
- * "orange" — we use "orange" here to stay in lockstep with theme/tokens.ts
- * rather than introduce a duplicate/aliased key.
- */
-export type CanvasSectionTint =
-  | "green"
-  | "purple"
-  | "orange"
-  | "yellow"
-  | "gray"
-  | "white"
-  | "pink"
-  | "red"
-  | "blue"
-  | "teal";
+// (The legacy color enums — InteractiveCanvasTone, CanvasPaletteToken,
+// CanvasSectionTint — died in the P1 color cutover, OBJECT-DEF-OVERHAUL.md
+// D1/D10: color is now the single `color?: CanvasColor` pick, see
+// state/schema/colors.ts.)
 
 /**
  * Directional field shared by every direction-aware shape (W5). Individual
@@ -102,7 +65,7 @@ export type CanvasArrowShapeDirection = CanvasShapeDirection;
 /**
  * Icon glyph selector for `type: "icon"` (W5) — the Advanced-tier FigJam
  * component family, 26 stroke-outline glyphs rendered in a 24x24 viewBox
- * with the label below (chip-icon precedent). Exact ids per the Wave A
+ * with the label below. Exact ids per the Wave A
  * implementation brief; Wave B2 owns the actual glyph-path registry.
  */
 export type CanvasIconGlyph =

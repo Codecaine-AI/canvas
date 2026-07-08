@@ -32,7 +32,7 @@ function object(id: string, x: number, y: number): InteractiveCanvasObject {
   return {
     id,
     type: "process",
-    label: id,
+    text: id,
     geometry: { x, y, width: 100, height: 60 },
   };
 }
@@ -127,7 +127,7 @@ describe("routing", () => {
     it("routes elbow stubs perpendicular to start and end anchors", () => {
       const from = object("from", 0, 0);
       const to = object("to", 260, 120);
-      const routed = routeConnection(from, to, connection("elbow"));
+      const routed = routeConnection(from, to, connection("solid"));
       const firstTarget = firstLineTarget(routed.path);
       const startNormal = normalFor(routed.startAnchor);
       const numbers = parseNumbers(routed.path);
@@ -168,43 +168,21 @@ describe("routing", () => {
       expectClose(renderedEnd.y, routed.end.y);
     });
 
-    it("places straight labels at the segment midpoint", () => {
+    it("uses the same elbow route for solid and dashed line styles", () => {
       const from = object("from", 0, 0);
-      const to = object("to", 240, 0);
-      const routed = routeConnection(from, to, connection("dotted"));
+      const to = object("to", 260, 120);
+      const solid = routeConnection(from, to, connection("solid"));
+      const dashed = routeConnection(from, to, connection("dashed"));
 
-      expectPointClose(routed.labelPoint, {
-        x: (routed.start.x + routed.end.x) / 2,
-        y: (routed.start.y + routed.end.y) / 2,
-      });
-    });
-
-    it("places smooth labels at cubic t=0.5", () => {
-      const from = object("from", 0, 0);
-      const to = object("to", 240, 0);
-      const routed = routeConnection(from, to, connection("smooth"));
-      const controlDistance = Math.max(40, Math.hypot(routed.end.x - routed.start.x, routed.end.y - routed.start.y) / 2);
-      const startNormal = normalFor(routed.startAnchor);
-      const endNormal = normalFor(routed.endAnchor);
-      const control1 = {
-        x: routed.start.x + startNormal.x * controlDistance,
-        y: routed.start.y + startNormal.y * controlDistance,
-      };
-      const control2 = {
-        x: routed.end.x + endNormal.x * controlDistance,
-        y: routed.end.y + endNormal.y * controlDistance,
-      };
-
-      expectPointClose(routed.labelPoint, {
-        x: 0.125 * routed.start.x + 0.375 * control1.x + 0.375 * control2.x + 0.125 * routed.end.x,
-        y: 0.125 * routed.start.y + 0.375 * control1.y + 0.375 * control2.y + 0.125 * routed.end.y,
-      });
+      expect(dashed.path).toBe(solid.path);
+      expect(dashed.points).toEqual(solid.points);
+      expect(dashed.labelPoint).toEqual(solid.labelPoint);
     });
 
     it("places elbow labels on the unrounded path middle", () => {
       const from = object("from", 0, 0);
       const to = object("to", 260, 120);
-      const routed = routeConnection(from, to, connection("elbow"));
+      const routed = routeConnection(from, to, connection("solid"));
       const stubStart = { x: routed.start.x + MIN_STUB, y: routed.start.y };
       const stubEnd = { x: routed.end.x - MIN_STUB, y: routed.end.y };
       const midX = (stubStart.x + stubEnd.x) / 2;

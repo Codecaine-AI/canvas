@@ -586,10 +586,11 @@ describe("interaction: marquee selection", () => {
     const document = makeDocument([
       makeObject({
         id: "person",
-        type: "person",
+        type: "icon",
+        icon: "person",
         text: "Adapt Question Based on Interview History",
         geometry: { x: 100, y: 100, width: 120, height: 140 },
-        style: { shape: "person" },
+        style: { shape: "icon" },
       }),
     ]);
     const ctx = makeContext(document);
@@ -1202,6 +1203,84 @@ describe("interaction: connector-endpoint-drag (3.2.2)", () => {
   });
 });
 
+describe("interaction: connector-bend-drag", () => {
+  function bendDoc() {
+    return makeDocument(
+      [
+        makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+        makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
+      ],
+      [
+        makeConnection({
+          id: "c1",
+          from: { objectId: "a", anchor: "right" },
+          to: { objectId: "b", anchor: "left" },
+          waypoints: [
+            [150, 50],
+            [150, 160],
+            [300, 160],
+          ],
+        }),
+      ],
+    );
+  }
+
+  it("commits immediately to connector-bend-drag on a segment pill hit", () => {
+    const document = bendDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 1 };
+
+    const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 150, y: 100 }, hit), ctx);
+    expect(result.state.kind).toBe("connector-bend-drag");
+    expect(result.overlay.connectorDrag?.connectionId).toBe("c1");
+    expect(result.overlay.connectorDrag?.bendSegmentIndex).toBe(1);
+  });
+
+  it("previews perpendicular segment movement and commits waypoints on release", () => {
+    const document = bendDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 1 };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 150, y: 100 }, hit), ctx);
+    result = stepInteraction(result.state, move({ x: 180, y: 240 }), ctx);
+    expect(result.dispatch).toEqual([]);
+    expect(result.overlay.connectorDrag?.points).toEqual([
+      { x: 100, y: 50 },
+      { x: 180, y: 50 },
+      { x: 180, y: 160 },
+      { x: 300, y: 160 },
+      { x: 300, y: 50 },
+    ]);
+
+    result = stepInteraction(result.state, up({ x: 180, y: 240 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.updateConnection",
+        connectionId: "c1",
+        patch: {
+          waypoints: [
+            [180, 50],
+            [180, 160],
+            [300, 160],
+          ],
+        },
+      },
+    ]);
+  });
+
+  it("Escape cancels the bend drag back to idle with no dispatch", () => {
+    const document = bendDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 1 };
+
+    const dragging = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 150, y: 100 }, hit), ctx);
+    const cancelled = cancelInteraction(dragging.state);
+    expect(cancelled.state.kind).toBe("idle");
+    expect(cancelled.dispatch).toEqual([]);
+  });
+});
+
 describe("interaction: connector-create from edge ports (3.3.2)", () => {
   function portDoc() {
     return makeDocument([
@@ -1258,6 +1337,25 @@ describe("interaction: connector-create from edge ports (3.3.2)", () => {
         drop: { point: { x: 1000, y: 1000 } },
       },
     ]);
+  });
+
+  it("clicking a port quick-connects one source-width gap away in the port direction", () => {
+    const document = portDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "port" as const, objectId: "a", anchor: "right" as const };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 50 }, hit), ctx);
+    result = stepInteraction(result.state, up({ x: 101, y: 51 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.quickConnect",
+        fromObjectId: "a",
+        fromAnchor: "right",
+        drop: { point: { x: 270, y: 50 } },
+      },
+    ]);
+    expect(result.overlay).toEqual({ editObjectTextId: "a-2", editObjectTextSeed: "" });
   });
 
   it("Escape cancels the create-drag back to idle with no dispatch", () => {

@@ -16,7 +16,7 @@ import type { ShapeDef } from "../shape-def";
 export const internalStorageShapeDef: ShapeDef = {
   type: "internal-storage",
   shape: "internal-storage",
-  outline: {
+  silhouette: {
     className: "interactive-canvas-object-internal-storage",
     silhouette: () => (
       <>
@@ -31,15 +31,8 @@ export const internalStorageShapeDef: ShapeDef = {
       </>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 150, height: 110 },
-  defaultTone: "neutral",
   css: `
         .interactive-canvas-object-internal-storage {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 18% 12% 12% 22%;
         }
         .interactive-canvas-internal-storage-rule {
           position: absolute;
@@ -61,7 +54,7 @@ export const internalStorageShapeDef: ShapeDef = {
           height: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2}px;
         }
 `,
-  catalog: { label: "Internal Storage", keywords: ["internal-storage", "internal storage"] },
+  catalog: { label: "Internal storage", keywords: ["internal-storage", "internal storage"] },
 };
 
 export const internalStorageDef = shapeObjectDef(internalStorageShapeDef);

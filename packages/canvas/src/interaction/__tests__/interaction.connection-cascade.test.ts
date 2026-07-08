@@ -22,7 +22,7 @@ import type {
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 100 },
     ...overrides,
   };
@@ -151,6 +151,36 @@ describe("connector-create: cascade snapping (W3b)", () => {
         toObjectId: "b",
         fromAnchor: "right",
         toAnchor: "left",
+      },
+    ]);
+  });
+
+  it("uses shared paint order when a shape overlaps a later-in-array section", () => {
+    const shape = makeObject({
+      id: "shape-target",
+      geometry: { x: 300, y: 0, width: 100, height: 100 },
+    });
+    const laterSection = makeObject({
+      id: "section-target",
+      type: "section",
+      text: "Section",
+      geometry: { x: 280, y: -20, width: 180, height: 160 },
+    });
+    const ctx = makeContext(makeDocument([makeObject({ id: "a" }), shape, laterSection]));
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 50 }, PORT_HIT), ctx);
+    result = stepInteraction(result.state, move({ x: 350, y: 50 }), ctx);
+
+    expect(result.overlay.connectorDrag?.candidate?.objectId).toBe("shape-target");
+
+    result = stepInteraction(result.state, up({ x: 350, y: 50 }), ctx);
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.addConnection",
+        fromObjectId: "a",
+        toObjectId: "shape-target",
+        fromAnchor: "right",
+        toAnchor: "top",
       },
     ]);
   });

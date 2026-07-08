@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { hexagonPoints } from "../../../routing/connection-overlay";
+import { HEXAGON_OUTLINE, hexagonPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -18,7 +18,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const hexagonShapeDef: ShapeDef = {
   type: "hexagon",
   shape: "hexagon",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: HEXAGON_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-hexagon",
     silhouette: ({ object, colors, strokeWidth }) => {
       const points = pointsAttribute(
@@ -44,23 +46,17 @@ export const hexagonShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 150, height: 100 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (hexagon shares its selector group
    * there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * trapezoid/manual-input/or-junction/summing-junction — 17 selectors
-   * total). Declarations are verbatim; hexagon carries no additional
+   * total). Paint declarations moved here; hexagon carries no additional
    * per-shape follow-up rule in the legacy block (unlike folder/
    * document-stack/triangle/off-page-connector/manual-input/star, which do).
    */
   css: `
         .interactive-canvas-object-hexagon {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

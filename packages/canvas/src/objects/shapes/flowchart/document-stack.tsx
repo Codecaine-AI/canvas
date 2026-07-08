@@ -24,7 +24,8 @@ export const DOCUMENT_STACK_GEOMETRY = {
 export const documentStackShapeDef: ShapeDef = {
   type: "document-stack",
   shape: "document-stack",
-  outline: {
+  buttonBorder: "suppressed",
+  silhouette: {
     className: "interactive-canvas-object-document-stack",
     silhouette: ({ colors, strokeWidth }) => {
       const offset = DOCUMENT_STACK_GEOMETRY.offsetPx;
@@ -64,33 +65,20 @@ export const documentStackShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 160, height: 120 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (document-stack shared its
-   * selector group there with folder/cylinder-horizontal). Declarations are
-   * verbatim; group copy FIRST, then the per-shape follow-up rule
-   * (padding-top/padding-left offset by DOCUMENT_STACK_GEOMETRY.offsetPx)
-   * SECOND — same cascade-preserving order as the source stylesheet.
+   * selector group there with folder/cylinder-horizontal). Paint declarations moved here.
    */
   css: `
         .interactive-canvas-object-document-stack {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;
           box-shadow: none;
           overflow: visible;
         }
-        .interactive-canvas-object-document-stack {
-          padding-top: calc(12px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
-          padding-left: calc(14px + ${DOCUMENT_STACK_GEOMETRY.offsetPx}px);
-        }
 `,
-  catalog: { label: "Document Stack", keywords: ["document-stack", "documents", "stack", "pages"] },
+  catalog: { label: "Document stack", keywords: ["document-stack", "documents", "stack", "pages"] },
 };
 
 export const documentStackDef = shapeObjectDef(documentStackShapeDef);

@@ -253,7 +253,10 @@ function ShapesPanelComponent({
     if (!q) return SHAPE_CATALOG;
     return SHAPE_CATALOG.map((category) => ({
       ...category,
-      entries: category.entries.filter((e) => e.label.toLowerCase().includes(q)),
+      // Labels + def-declared catalog keywords (P4 catalog unification).
+      entries: category.entries.filter(
+        (e) => e.label.toLowerCase().includes(q) || e.keywords?.some((k) => k.includes(q)),
+      ),
     })).filter((category) => category.entries.length > 0);
   }, [query]);
 

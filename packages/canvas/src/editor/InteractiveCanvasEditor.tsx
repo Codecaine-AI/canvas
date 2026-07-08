@@ -29,8 +29,8 @@ import { SelectionToolbarLayer } from "./features/selection-toolbar/SelectionToo
 import { useSelectionToolbar } from "./features/selection-toolbar/use-selection-toolbar";
 import { useInteractionPipeline } from "./features/drag-pipeline/use-interaction-pipeline";
 import { Inspector } from "./features/inspector/Inspector";
-import { LabelEditingOverlay } from "./features/label-editing/LabelEditingOverlay";
-import { useLabelEditing } from "./features/label-editing/use-label-editing";
+import { TextEditingOverlay } from "./features/text-editing/TextEditingOverlay";
+import { useTextEditing } from "./features/text-editing/use-text-editing";
 import { TopBar } from "./components/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
@@ -90,8 +90,8 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
 
 /**
  * Every other CanvasTool value (rectangle/process/decision/
- * document/person/database/chat/pill/arrow-shape/predefined-process/
- * code-block/chip-icon/annotation) is armed exclusively via the Shapes panel
+ * document/database/pill/arrow-shape/predefined-process/
+ * code-block/annotation) is armed exclusively via the Shapes panel
  * or the shape-search swap popover now — the dock's "shapes" button opens
  * that surface (see ShapesPanel wiring below) rather than exposing 16
  * individual per-type buttons as the old toolbar did.
@@ -114,17 +114,17 @@ export function InteractiveCanvasEditor({
 }: InteractiveCanvasEditorProps) {
   const [state, dispatch] = useReducer(reducer, document, createInteractiveCanvasState);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  // Inline label editing (connector labels + object labels/section titles) —
-  // state and callbacks live in editor/features/label-editing.
-  const labelEditing = useLabelEditing({ document: state.document, dispatch });
+  // In-place text editing (connector labels + the unified object text) —
+  // state and callbacks live in editor/features/text-editing.
+  const textEditing = useTextEditing({ document: state.document, dispatch });
   const {
     labelEditConnectionId,
-    objectLabelEditId,
-    setObjectLabelEditId,
-    setObjectLabelEditValue,
+    objectTextEditId,
+    setObjectTextEditId,
+    setObjectTextEditValue,
     openConnectionLabelEditor,
-    openObjectLabelEditor,
-  } = labelEditing;
+    openObjectTextEditor,
+  } = textEditing;
   // While the Shapes panel is open, keep the dock's Shapes button highlighted
   // so the bottom chrome reflects the active shape-adding mode.
   const [shapesPanelPhase, setShapesPanelPhase] = useState<ShapesPanelPhase>("closed");
@@ -148,7 +148,7 @@ export function InteractiveCanvasEditor({
             icon: armedShapeEntry.icon,
             // Advanced-tier icons read their glyph's display name ("Database"),
             // not the generic per-type default ("Icon").
-            label: armedShapeEntry.objectType === "icon" ? armedShapeEntry.label : undefined,
+            text: armedShapeEntry.objectType === "icon" ? armedShapeEntry.label : undefined,
           }
         : undefined,
     [armedShapeEntry],
@@ -189,9 +189,9 @@ export function InteractiveCanvasEditor({
     selectedConnectionId,
     viewport,
     stageRef,
-    openObjectLabelEditor,
+    openObjectTextEditor,
   });
-  const { applyPaletteTokenToSelection } = selectionToolbar;
+  const { applyColorToSelection } = selectionToolbar;
   const selectionContext = useMemo(
     () => buildSelectionContext(state.document, state.selection),
     [state.document, state.selection],
@@ -208,20 +208,20 @@ export function InteractiveCanvasEditor({
   }, [onDocumentChange, state.document]);
 
   // One-shot signal sink for the interaction machine's double-click
-  // label-edit intent. Existing objects open through the target-aware
-  // useLabelEditing opener; freshly created objects may not be present in
+  // text-edit intent. Existing objects open through the editability-aware
+  // useTextEditing opener; freshly created objects may not be present in
   // state.document yet, so that path keeps the pipeline's seed value.
-  const handleOpenObjectLabelEditorFromInteraction = useCallback(
+  const handleOpenObjectTextEditorFromInteraction = useCallback(
     (objectId: string, value: string) => {
       const existing = state.document.objects.find((object) => object.id === objectId);
       if (existing) {
-        openObjectLabelEditor(objectId);
+        openObjectTextEditor(objectId);
         return;
       }
-      setObjectLabelEditId(objectId);
-      setObjectLabelEditValue(value);
+      setObjectTextEditId(objectId);
+      setObjectTextEditValue(value);
     },
-    [openObjectLabelEditor, setObjectLabelEditId, setObjectLabelEditValue, state.document.objects],
+    [openObjectTextEditor, setObjectTextEditId, setObjectTextEditValue, state.document.objects],
   );
 
   // Pointer-interaction / rAF drag pipeline (hit resolution, interaction
@@ -241,18 +241,19 @@ export function InteractiveCanvasEditor({
     tool: state.tool,
     stickyPlacement: shapesPanelOpen,
     armedShape,
+    lastPickedColor: state.lastPickedColor,
     viewport,
     dispatch,
     setViewport,
     screenToWorld,
     closeContextMenu,
-    onOpenObjectLabelEditor: handleOpenObjectLabelEditorFromInteraction,
-    openObjectLabelEditor,
+    onOpenObjectTextEditor: handleOpenObjectTextEditorFromInteraction,
+    openObjectTextEditor,
   });
 
   const isTypingContextActive = useCallback(
-    () => labelEditConnectionId !== null || objectLabelEditId !== null,
-    [labelEditConnectionId, objectLabelEditId],
+    () => labelEditConnectionId !== null || objectTextEditId !== null,
+    [labelEditConnectionId, objectTextEditId],
   );
 
   // Picking a shape arms its creation tool but keeps the panel open — the
@@ -349,7 +350,7 @@ export function InteractiveCanvasEditor({
         onStagePointerLeave={handleStagePointerLeave}
         onStageDoubleClick={handleStageDoubleClick}
         interactionOverlay={interactionOverlay}
-        editingLabelObjectId={objectLabelEditId}
+        editingTextObjectId={objectTextEditId}
         activeTool={state.tool}
         className="h-full"
         style={{
@@ -361,7 +362,7 @@ export function InteractiveCanvasEditor({
                 ? "crosshair"
                 : undefined,
         }}
-        worldOverlay={<LabelEditingOverlay labelEditing={labelEditing} zoom={viewport.zoom} />}
+        worldOverlay={<TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />}
       />
 
       <CanvasContextMenu menu={canvasContextMenu} />
@@ -388,7 +389,7 @@ export function InteractiveCanvasEditor({
           selectedConnection={selectedConnection}
           selectionContext={selectionContext}
           dispatch={dispatch}
-          applyPaletteTokenToSelection={applyPaletteTokenToSelection}
+          applyColorToSelection={applyColorToSelection}
         />
       ) : null}
 

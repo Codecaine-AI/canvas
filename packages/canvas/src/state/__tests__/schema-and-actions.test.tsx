@@ -356,7 +356,7 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("accepts the expanded object vocabulary (document/person/database/chat) with color picks", () => {
+  it("accepts the expanded object vocabulary plus icon glyph replacements with color picks", () => {
     const document: InteractiveCanvasDocument = {
       schemaVersion: 1,
       id: "expanded-vocab-doc",
@@ -371,9 +371,11 @@ describe("interactive canvas schema and actions", () => {
         },
         {
           id: "person-a",
-          type: "person",
+          type: "icon",
+          icon: "person",
           text: "Person A",
           geometry: { x: 200, y: 0, width: 120, height: 140 },
+          style: { shape: "icon" },
           color: "green",
         },
         {
@@ -385,9 +387,11 @@ describe("interactive canvas schema and actions", () => {
         },
         {
           id: "chat-a",
-          type: "chat",
+          type: "icon",
+          icon: "chat",
           text: "Chat A",
           geometry: { x: 600, y: 0, width: 180, height: 110 },
+          style: { shape: "icon" },
           color: "blue",
         },
       ],
@@ -398,7 +402,13 @@ describe("interactive canvas schema and actions", () => {
     expect(validation.ok).toBe(true);
     if (validation.ok) {
       const types = validation.document.objects.map((object) => object.type);
-      expect(types).toEqual(["document", "person", "database", "chat"]);
+      expect(types).toEqual(["document", "icon", "database", "icon"]);
+      expect(validation.document.objects.map((object) => object.icon)).toEqual([
+        undefined,
+        "person",
+        undefined,
+        "chat",
+      ]);
       expect(validation.document.objects.map((object) => object.color)).toEqual([
         "violet",
         "green",
@@ -442,22 +452,25 @@ describe("interactive canvas schema and actions", () => {
     const base = createInteractiveCanvasState(syntheticCanvasDocument);
     const cases: Array<{
       objectType: InteractiveCanvasObjectType;
+      icon?: InteractiveCanvasObject["icon"];
       expectedShape: string;
       expectedSize: { width: number; height: number };
     }> = [
       { objectType: "document", expectedShape: "document", expectedSize: { width: 160, height: 128 } },
-      { objectType: "person", expectedShape: "person", expectedSize: { width: 128, height: 144 } },
+      { objectType: "icon", icon: "person", expectedShape: "icon", expectedSize: { width: 128, height: 128 } },
       { objectType: "database", expectedShape: "database", expectedSize: { width: 144, height: 128 } },
-      { objectType: "chat", expectedShape: "chat", expectedSize: { width: 176, height: 112 } },
+      { objectType: "icon", icon: "chat", expectedShape: "icon", expectedSize: { width: 128, height: 128 } },
     ];
 
     for (const testCase of cases) {
       const state = reduceInteractiveCanvasState(base, {
         type: "canvas.addObject",
         objectType: testCase.objectType,
+        ...(testCase.icon ? { icon: testCase.icon } : null),
       });
       const added = state.document.objects.at(-1);
       expect(added?.type).toBe(testCase.objectType);
+      if (testCase.icon) expect(added?.icon).toBe(testCase.icon);
       expect(added?.style?.shape).toBe(testCase.expectedShape);
       expect(added?.geometry.width).toBe(testCase.expectedSize.width);
       expect(added?.geometry.height).toBe(testCase.expectedSize.height);
@@ -1031,7 +1044,7 @@ describe("interactive canvas: section membership reconciliation", () => {
     expectSectionMembershipReconciled(state.document);
   });
 
-  it("canvas.updateObject keeps children when collapsing a section", () => {
+  it("canvas.updateObject keeps children when locking a section", () => {
     const state = createInteractiveCanvasState(
       makeMembershipDocument([
         makeMembershipSection({ id: "section", geometry: { x: 0, y: 0, width: 300, height: 300 } }),
@@ -1046,10 +1059,10 @@ describe("interactive canvas: section membership reconciliation", () => {
     const next = reduceInteractiveCanvasState(state, {
       type: "canvas.updateObject",
       objectId: "section",
-      patch: { contentHidden: true },
+      patch: { locked: "all" },
     });
 
-    expect(next.document.objects.find((object) => object.id === "section")?.contentHidden).toBe(true);
+    expect(next.document.objects.find((object) => object.id === "section")?.locked).toBe("all");
     expect(parentId(next.document, "child")).toBe("section");
     expectSectionMembershipReconciled(next.document);
   });
@@ -1267,6 +1280,36 @@ describe("interactive canvas: connection actions", () => {
       .toBe("Reviewed connector");
   });
 
+  it("records a connector waypoint commit as one undoable history entry", () => {
+    let state = createInteractiveCanvasState(makeConnectionDocument());
+    const initialHistoryLength = state.history.past.length;
+
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateConnection",
+      connectionId: "connection-a",
+      patch: {
+        waypoints: [
+          [220, 88],
+          [220, 168],
+          [260, 168],
+        ],
+      },
+    });
+
+    expect(state.history.past.length).toBe(initialHistoryLength + 1);
+    expect(state.document.connections.find((connection) => connection.id === "connection-a")?.waypoints)
+      .toEqual([
+        [220, 88],
+        [220, 168],
+        [260, 168],
+      ]);
+
+    state = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
+    expect(state.history.past.length).toBe(initialHistoryLength);
+    expect(state.document.connections.find((connection) => connection.id === "connection-a")?.waypoints)
+      .toBeUndefined();
+  });
+
   it("rejects an unknown endpoint objectId", () => {
     const initialState = createInteractiveCanvasState(makeConnectionDocument());
 
@@ -1348,6 +1391,7 @@ describe("interactive canvas: connection actions", () => {
     );
     expect(created?.from.anchor).toBe("bottom");
     expect(created?.to.anchor).toBe("top");
+    expect(created?.color).toBe("gray");
   });
 });
 
@@ -1612,6 +1656,7 @@ describe("interactive canvas: quickConnect action (3.3.2)", () => {
     expect(created).toBeTruthy();
     expect(created?.from.anchor).toBe("bottom");
     expect(created?.to.anchor).toBe("top");
+    expect(created?.color).toBe("gray");
     expect(state.history.past.length).toBe(initialState.history.past.length + 1);
 
     const undone = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
@@ -1671,10 +1716,53 @@ describe("interactive canvas: quickConnect action (3.3.2)", () => {
     );
     expect(newConnection?.from.objectId).toBe("process-a");
     expect(newConnection?.from.anchor).toBe("bottom");
+    expect(newConnection?.color).toBe("gray");
 
     const undone = reduceInteractiveCanvasState(state, { type: "canvas.undo" });
     expect(undone.document.objects.length).toBe(initialState.document.objects.length);
     expect(undone.document.connections.length).toBe(initialState.document.connections.length);
+  });
+
+  it("dropping on empty canvas duplicates the source object's kind, size, color, and style with empty text", () => {
+    const initialState = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "quick-duplicate-doc",
+      mode: "diagram",
+      objects: [
+        {
+          id: "source",
+          type: "triangle",
+          text: "Source label",
+          color: "green",
+          geometry: { x: 64, y: 96, width: 160, height: 128 },
+          style: { shape: "triangle", strokeWidth: 6 },
+          direction: "down",
+        },
+      ],
+      connections: [],
+    });
+
+    const state = reduceInteractiveCanvasState(initialState, {
+      type: "canvas.quickConnect",
+      fromObjectId: "source",
+      fromAnchor: "right",
+      drop: { point: { x: 512, y: 512 } },
+    });
+
+    const newObject = state.document.objects.find((object) => object.id !== "source");
+    expect(newObject).toMatchObject({
+      type: "triangle",
+      text: "",
+      color: "green",
+      geometry: { x: 432, y: 448, width: 160, height: 128 },
+      style: { shape: "triangle", strokeWidth: 6 },
+      direction: "down",
+    });
+    expect(state.selection).toEqual({ kind: "objects", objectIds: [newObject?.id] });
+    const newConnection = state.document.connections.find(
+      (connection) => connection.to.objectId === newObject?.id,
+    );
+    expect(newConnection?.color).toBe("gray");
   });
 
   it("returns the same state when fromObjectId does not exist", () => {

@@ -25,21 +25,16 @@ import {
   type ObjectDef,
   type ToolbarControlSpec,
 } from "../../../objects/object-def";
-import { nearestPaletteToken } from "../../../objects/palette";
 import { worldToScreen, type ViewportState } from "../../../render/viewport";
+import { isCanvasColor } from "../../../state/schema";
 import type {
-  CanvasPaletteToken,
+  CanvasColor,
   CanvasSectionStrokeStyle,
-  CanvasSectionTint,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../../../state/schema";
-
-// Moved to objects/palette.ts (step 5) so toolbar flyout components declared
-// on ObjectDefs can share it; re-exported here for existing importers.
-export { nearestPaletteToken } from "../../../objects/palette";
 
 /** The registry-resolved selection toolbar for the current selection (step 5). */
 interface ResolvedSelectionToolbar {
@@ -62,14 +57,6 @@ interface ResolvedSelectionToolbar {
 
 const SPECIAL_SINGLE_VARIANT_LABELS = new Set(["section", "sticky"]);
 
-const PALETTE_TOKEN_SECTION_TINT: Record<CanvasPaletteToken, CanvasSectionTint> = {
-  process: "blue",
-  input: "green",
-  hot: "orange",
-  memory: "purple",
-  note: "yellow",
-};
-
 /**
  * Derives the toolbar for the current selection by def resolution (step 5):
  * connection → connectorDef; single object → its type's def; multi → the
@@ -83,11 +70,13 @@ function resolveSelectionToolbarForSelection(args: {
 }): ResolvedSelectionToolbar | null {
   const { selection, selectedObjects, selectedConnection } = args;
   if (selection.kind === "connection" && selectedConnection) {
+    // ConnectorDef (D19): connections resolve to the connector's own small
+    // def — toolbar is a required field there, no object-def stubbing.
     return {
-      kind: "connector",
+      kind: connectorDef.kind,
       variantLabel: "connector",
-      controls: connectorDef.toolbar?.controls ?? [],
-      flyouts: toolbarFlyoutsForKind("connector"),
+      controls: connectorDef.toolbar.controls,
+      flyouts: toolbarFlyoutsForKind(connectorDef.kind),
     };
   }
   if (selection.kind === "objects" && selectedObjects.length > 0) {
@@ -130,9 +119,9 @@ export interface UseSelectionToolbarArgs {
   viewport: ViewportState;
   stageRef: RefObject<HTMLDivElement | null>;
   /**
-   * Target-aware inline text editor opener from useLabelEditing.
+   * Editability-aware in-place text editor opener from useTextEditing.
    */
-  openObjectLabelEditor: (objectId: string) => void;
+  openObjectTextEditor: (objectId: string) => void;
 }
 
 export interface SelectionToolbarApi {
@@ -152,10 +141,9 @@ export interface SelectionToolbarApi {
   selectedObjectsForToolbar: InteractiveCanvasObject[];
   primarySelectedObject: InteractiveCanvasObject | undefined;
   handleSelectionToolbarAction: (action: SelectionToolbarActionId, value?: unknown) => void;
-  /** Also wired into the Inspector's "Color" swatches (checkpoint 5, D16). */
-  applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
+  /** Applies a palette pick to every selected object (P1) — also wired into the Inspector's "Color" swatches. */
+  applyColorToSelection: (color: CanvasColor) => void;
   setLockForSelection: (mode: "all" | "background" | undefined) => void;
-  applyTintToSelection: (tint: CanvasSectionTint) => void;
   applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
   swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
 }
@@ -179,7 +167,7 @@ export function useSelectionToolbar({
   selectedConnectionId,
   viewport,
   stageRef,
-  openObjectLabelEditor,
+  openObjectTextEditor,
 }: UseSelectionToolbarArgs): SelectionToolbarApi {
   // Which SelectionToolbar flyout (if any) is currently open, tracked by action
   // id since SelectionToolbar's buttons only report `onAction(action)` without
@@ -238,35 +226,22 @@ export function useSelectionToolbar({
     });
   }, [selectionScreenRect, selectionToolbarSize, stageRef]);
   /**
-   * Inspector "Color" swatches (checkpoint 5, D16) apply to every selected
-   * object, not just the primary one — canvas.updateObject only patches a
-   * single objectId, so dispatch once per id. Its style merge
-   * (`{ ...object.style, ...patch.style }`) overwrites the keys being changed
-   * while leaving `shape`/`tone` untouched.
+   * One color pick applied to every selected object (P1, D12/D17) — a plain
+   * `color` patch per id; the reducer records the pick in the per-kind
+   * last-picked memory. canvas.updateObject only patches a single objectId,
+   * so dispatch once per id.
    */
-  const applyPaletteTokenToSelection = useCallback(
-    (token: CanvasPaletteToken | undefined) => {
+  const applyColorToSelection = useCallback(
+    (color: CanvasColor) => {
       for (const objectId of selectedIds) {
-        const object = document.objects.find((item) => item.id === objectId);
-        if (object?.type === "section") {
-          dispatch({
-            type: "canvas.updateObject",
-            objectId,
-            patch: {
-              tint: token ? PALETTE_TOKEN_SECTION_TINT[token] : "gray",
-              style: { fill: undefined, stroke: undefined },
-            },
-          });
-          continue;
-        }
         dispatch({
           type: "canvas.updateObject",
           objectId,
-          patch: { style: { paletteToken: token } },
+          patch: { color },
         });
       }
     },
-    [dispatch, selectedIds, document.objects],
+    [dispatch, selectedIds],
   );
 
   // Measure the SelectionToolbar's actual rendered size so positioning is exact
@@ -307,31 +282,6 @@ export function useSelectionToolbar({
     }
   }, [dispatch, selectedObjectsForToolbar]);
 
-  const toggleSectionContentHiddenForSelection = useCallback(() => {
-    for (const object of selectedObjectsForToolbar) {
-      if (object.type !== "section") continue;
-      dispatch({
-        type: "canvas.updateObject",
-        objectId: object.id,
-        patch: { contentHidden: !object.contentHidden },
-      });
-    }
-  }, [dispatch, selectedObjectsForToolbar]);
-
-  const applyTintToSelection = useCallback(
-    (tint: CanvasSectionTint) => {
-      for (const object of selectedObjectsForToolbar) {
-        if (object.type !== "section") continue;
-        dispatch({
-          type: "canvas.updateObject",
-          objectId: object.id,
-          patch: { tint, style: { fill: undefined, stroke: undefined } },
-        });
-      }
-    },
-    [dispatch, selectedObjectsForToolbar],
-  );
-
   const applySectionBorderStyleToSelection = useCallback(
     (strokeStyle: CanvasSectionStrokeStyle) => {
       for (const object of selectedObjectsForToolbar) {
@@ -362,16 +312,12 @@ export function useSelectionToolbar({
         applySectionBorderStyleToSelection(value);
         return;
       }
-      if (action === "color" && typeof value === "string") {
-        applyPaletteTokenToSelection(nearestPaletteToken(value));
+      if (action === "color" && isCanvasColor(value)) {
+        applyColorToSelection(value);
         return;
       }
       if ((action === "rename" || action === "text") && primarySelectedObject) {
-        openObjectLabelEditor(primarySelectedObject.id);
-        return;
-      }
-      if (action === "visibility") {
-        toggleSectionContentHiddenForSelection();
+        openObjectTextEditor(primarySelectedObject.id);
         return;
       }
       // An action opens a flyout iff the editor-side flyout registry
@@ -383,12 +329,11 @@ export function useSelectionToolbar({
       }
     },
     [
-      applyPaletteTokenToSelection,
+      applyColorToSelection,
       applySectionBorderStyleToSelection,
       selectionToolbarFlyouts,
       primarySelectedObject,
-      toggleSectionContentHiddenForSelection,
-      openObjectLabelEditor,
+      openObjectTextEditor,
     ],
   );
 
@@ -404,9 +349,8 @@ export function useSelectionToolbar({
     selectedObjectsForToolbar,
     primarySelectedObject,
     handleSelectionToolbarAction,
-    applyPaletteTokenToSelection,
+    applyColorToSelection,
     setLockForSelection,
-    applyTintToSelection,
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   };

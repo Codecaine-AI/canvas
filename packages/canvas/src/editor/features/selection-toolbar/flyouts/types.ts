@@ -1,9 +1,8 @@
 import type { ComponentType } from "react";
 import type { CanvasAction } from "../../../../state/actions";
 import type {
-  CanvasPaletteToken,
+  CanvasColor,
   CanvasSectionStrokeStyle,
-  CanvasSectionTint,
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
@@ -24,9 +23,9 @@ export interface ToolbarFlyoutProps {
   selectedConnection?: InteractiveCanvasConnection;
   dispatch: (action: CanvasAction) => void;
   close: () => void;
-  applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
+  /** Applies a palette pick to every selected object (P1 — dispatches `color` patches). */
+  applyColorToSelection: (color: CanvasColor) => void;
   applySectionBorderStyleToSelection: (strokeStyle: CanvasSectionStrokeStyle) => void;
-  applyTintToSelection: (tint: CanvasSectionTint) => void;
   setLockForSelection: (mode: "all" | "background" | undefined) => void;
   swapSelectedShape: (objectType: InteractiveCanvasObjectType) => void;
 }

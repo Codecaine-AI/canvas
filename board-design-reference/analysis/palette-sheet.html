@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Canvas palette — 10 picks (ink / fill / wash)</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", sans-serif; color: #1d1d1d; background: #fff; margin: 40px auto; max-width: 760px; padding: 0 20px; }
+  h1 { font-size: 22px; font-weight: 600; }
+  h2 { font-size: 16px; font-weight: 600; margin-top: 32px; }
+  p, li { font-size: 14px; line-height: 1.6; color: #444; }
+  .grid { display: grid; grid-template-columns: 56px 52px 60px 82px 50px 110px; gap: 14px 16px; align-items: center; margin-top: 16px; }
+  .hdr { font-size: 11px; color: #999; text-transform: lowercase; }
+  .hue { font-size: 13px; color: #555; }
+  .dot { display: inline-block; width: 26px; height: 26px; border-radius: 50%; }
+  .line { display: block; width: 50px; height: 3px; border-radius: 2px; }
+  .shape { width: 74px; height: 36px; border-radius: 6px; }
+  .sticky { width: 40px; height: 40px; border-radius: 3px; }
+  .section { width: 106px; height: 44px; border-radius: 5px; border: 0.5px solid #e3e3e3; padding: 4px; box-sizing: border-box; }
+  .chip { display: inline-block; width: 36px; height: 13px; border-radius: 3px; }
+  table { border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  th, td { border: 1px solid #e3e3e3; padding: 6px 12px; text-align: left; }
+  th { background: #f7f7f7; font-weight: 600; font-size: 12px; }
+  code { font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .note { font-size: 12px; color: #888; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>Canvas palette — 10 picks (ink / fill / wash)</h1>
+<p>The color vocabulary is 10 picks, one per hue. Each pick resolves to three stops:</p>
+<ul>
+  <li><strong>Ink</strong> (dark) — the picker swatch, and every stroke: shape border, connector line, section chip border. What you pick is what lines get.</li>
+  <li><strong>Fill</strong> (light) — shape fill, sticky fill, section chip fill.</li>
+  <li><strong>Wash</strong> (lightest) — the section background tint, so sections always sit lighter than the objects on them.</li>
+</ul>
+<p>Inks are <em>line-safe</em>: chosen so a 2px stroke reads on the #F5F5F5 board (mustard yellow #E8A302 rather than FigJam's bright #FFCD29, deep orange #EB7500, mid gray #757575). Legacy <code>&lt;hue&gt;-soft</code> ids migrate to the bare hue id.</p>
+
+<h2>Applied sheet</h2>
+<div class="grid">
+  <div class="hdr">hue</div><div class="hdr">pick</div><div class="hdr">line</div><div class="hdr">shape</div><div class="hdr">sticky</div><div class="hdr">section</div>
+
+  <div class="hue">gray</div>
+  <div><span class="dot" style="background:#757575"></span></div>
+  <div><span class="line" style="background:#757575"></span></div>
+  <div class="shape" style="background:#E6E6E6;border:2px solid #757575"></div>
+  <div class="sticky" style="background:#E6E6E6"></div>
+  <div class="section" style="background:#F9F9F9"><span class="chip" style="background:#E6E6E6;border:1px solid #757575"></span></div>
+
+  <div class="hue">red</div>
+  <div><span class="dot" style="background:#F24822"></span></div>
+  <div><span class="line" style="background:#F24822"></span></div>
+  <div class="shape" style="background:#FFC7C2;border:2px solid #F24822"></div>
+  <div class="sticky" style="background:#FFAFA3"></div>
+  <div class="section" style="background:#FFF5F5"><span class="chip" style="background:#FFC7C2;border:1px solid #F24822"></span></div>
+
+  <div class="hue">orange</div>
+  <div><span class="dot" style="background:#EB7500"></span></div>
+  <div><span class="line" style="background:#EB7500"></span></div>
+  <div class="shape" style="background:#FFE0C2;border:2px solid #EB7500"></div>
+  <div class="sticky" style="background:#FFE0C2"></div>
+  <div class="section" style="background:#FFF7F0"><span class="chip" style="background:#FFE0C2;border:1px solid #EB7500"></span></div>
+
+  <div class="hue">yellow</div>
+  <div><span class="dot" style="background:#E8A302"></span></div>
+  <div><span class="line" style="background:#E8A302"></span></div>
+  <div class="shape" style="background:#FFECBD;border:2px solid #E8A302"></div>
+  <div class="sticky" style="background:#FFE299"></div>
+  <div class="section" style="background:#FFFBF0"><span class="chip" style="background:#FFECBD;border:1px solid #E8A302"></span></div>
+
+  <div class="hue">green</div>
+  <div><span class="dot" style="background:#14AE5C"></span></div>
+  <div><span class="line" style="background:#14AE5C"></span></div>
+  <div class="shape" style="background:#DDF8E2;border:2px solid #14AE5C"></div>
+  <div class="sticky" style="background:#DDF8E2"></div>
+  <div class="section" style="background:#EBFFEE"><span class="chip" style="background:#DDF8E2;border:1px solid #14AE5C"></span></div>
+
+  <div class="hue">teal</div>
+  <div><span class="dot" style="background:#369E94"></span></div>
+  <div><span class="line" style="background:#369E94"></span></div>
+  <div class="shape" style="background:#C6FAF6;border:2px solid #369E94"></div>
+  <div class="sticky" style="background:#C6FAF6"></div>
+  <div class="section" style="background:#EAFDFB"><span class="chip" style="background:#C6FAF6;border:1px solid #369E94"></span></div>
+
+  <div class="hue">blue</div>
+  <div><span class="dot" style="background:#0D99FF"></span></div>
+  <div><span class="line" style="background:#0D99FF"></span></div>
+  <div class="shape" style="background:#C2E5FF;border:2px solid #0D99FF"></div>
+  <div class="sticky" style="background:#A8DAFF"></div>
+  <div class="section" style="background:#F5FBFF"><span class="chip" style="background:#C2E5FF;border:1px solid #0D99FF"></span></div>
+
+  <div class="hue">violet</div>
+  <div><span class="dot" style="background:#9747FF"></span></div>
+  <div><span class="line" style="background:#9747FF"></span></div>
+  <div class="shape" style="background:#DCCCFF;border:2px solid #9747FF"></div>
+  <div class="sticky" style="background:#DCCCFF"></div>
+  <div class="section" style="background:#F8F5FF"><span class="chip" style="background:#DCCCFF;border:1px solid #9747FF"></span></div>
+
+  <div class="hue">pink</div>
+  <div><span class="dot" style="background:#F849C1"></span></div>
+  <div><span class="line" style="background:#F849C1"></span></div>
+  <div class="shape" style="background:#FFC2EC;border:2px solid #F849C1"></div>
+  <div class="sticky" style="background:#FFC2EC"></div>
+  <div class="section" style="background:#FFF0FA"><span class="chip" style="background:#FFC2EC;border:1px solid #F849C1"></span></div>
+
+  <div class="hue">white</div>
+  <div><span class="dot" style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #c4c4c4"></span></div>
+  <div><span class="line" style="background:#757575"></span></div>
+  <div class="shape" style="background:#FFFFFF;border:2px solid #757575"></div>
+  <div class="sticky" style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #e3e3e3"></div>
+  <div class="section" style="background:#FFFFFF"><span class="chip" style="background:#E6E6E6;border:1px solid #C4C4C4"></span></div>
+</div>
+<p class="note">Pick = picker swatch (ink). Line = connector stroke. Shape = fill + ink border. Section = wash tint with its title chip (chip fill + ink border).</p>
+
+<h2>Hex table</h2>
+<table>
+  <tr><th>hue</th><th>ink</th><th>shape fill</th><th>sticky fill</th><th>section wash</th></tr>
+  <tr><td>gray</td><td><code>#757575</code></td><td><code>#E6E6E6</code></td><td><code>#E6E6E6</code></td><td><code>#F9F9F9</code></td></tr>
+  <tr><td>red</td><td><code>#F24822</code></td><td><code>#FFC7C2</code></td><td><code>#FFAFA3</code></td><td><code>#FFF5F5</code></td></tr>
+  <tr><td>orange</td><td><code>#EB7500</code></td><td><code>#FFE0C2</code></td><td><code>#FFE0C2</code></td><td><code>#FFF7F0</code></td></tr>
+  <tr><td>yellow</td><td><code>#E8A302</code></td><td><code>#FFECBD</code></td><td><code>#FFE299</code></td><td><code>#FFFBF0</code></td></tr>
+  <tr><td>green</td><td><code>#14AE5C</code></td><td><code>#DDF8E2</code></td><td><code>#DDF8E2</code></td><td><code>#EBFFEE</code></td></tr>
+  <tr><td>teal</td><td><code>#369E94</code></td><td><code>#C6FAF6</code></td><td><code>#C6FAF6</code></td><td><code>#EAFDFB</code></td></tr>
+  <tr><td>blue</td><td><code>#0D99FF</code></td><td><code>#C2E5FF</code></td><td><code>#A8DAFF</code></td><td><code>#F5FBFF</code></td></tr>
+  <tr><td>violet</td><td><code>#9747FF</code></td><td><code>#DCCCFF</code></td><td><code>#DCCCFF</code></td><td><code>#F8F5FF</code></td></tr>
+  <tr><td>pink</td><td><code>#F849C1</code></td><td><code>#FFC2EC</code></td><td><code>#FFC2EC</code></td><td><code>#FFF0FA</code></td></tr>
+  <tr><td>white</td><td><code>#757575</code> (strokes)</td><td><code>#FFFFFF</code></td><td><code>#FFFFFF</code></td><td><code>#FFFFFF</code></td></tr>
+</table>
+
+<h2>Exceptions</h2>
+<ul>
+  <li><strong>White</strong>: picker swatch shows <code>#FFFFFF</code> (with a contrast ring), but all its strokes use the neutral gray ink <code>#757575</code>. Its section chip is <code>#E6E6E6</code> / <code>#C4C4C4</code> so it doesn't vanish on the white tint.</li>
+  <li><strong>Gray</strong> section chip borders with the full ink <code>#757575</code> (the derived light-gray chip border would be invisible on the near-white wash).</li>
+  <li><strong>Teal</strong>: fill lightened from the legacy pastel <code>#5AD8CC</code> to <code>#C6FAF6</code> so it sits in the same pastel band as the other fills; its wash is derived.</li>
+</ul>
+<p class="note">Source of truth in code: packages/canvas/src/palette.ts (hexes) and packages/canvas/src/state/schema/colors.ts (ids). This sheet documents the design intent behind them.</p>
+</body>
+</html>

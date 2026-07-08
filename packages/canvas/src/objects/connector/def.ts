@@ -1,4 +1,4 @@
-import type { ObjectDef, ToolbarSpec } from "../object-def";
+import type { ConnectorDef, ToolbarSpec } from "../object-def";
 
 // ---------------------------------------------------------------------------
 // Connector style constants (moved from theme/tokens.ts in the theme
@@ -6,57 +6,41 @@ import type { ObjectDef, ToolbarSpec } from "../object-def";
 // from FigJam reference exports; px figures are LOGICAL px.
 // ---------------------------------------------------------------------------
 
-/** Named connector stroke colors. */
-export const CONNECTOR_COLORS = {
-  gray: "#757575",
-  orange: "#EB7500",
-  green: "#3E9B4B",
-  red: "#F24822",
-  purple: "#9747FF",
-  darkYellow: "#E8A302",
-} as const;
-
-/** Default connector color when none is specified — neutral gray. */
-export const CONNECTOR_DEFAULT_COLOR = CONNECTOR_COLORS.gray;
+// (The old CONNECTOR_COLORS hex set + CONNECTOR_DEFAULT_COLOR died in the P1
+// color cutover: connector strokes resolve from `connection.color` through
+// palette.ts's resolveConnectorStroke, defaulting to the "gray" pick.)
 
 /** Dash pattern, logical px: 19px dash / 7px gap. */
 export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
 
 /**
- * Connector def (step 5) — a SELECTION-KIND def, not an object type:
- * connections aren't objects, so `objectDefForType` never resolves to it and
- * its `render` is never dispatched (connections draw through
- * render/connectors/*). It exists to carry the connector selection toolbar:
- * stroke and label-align were dropped as inert controls with no registered
- * flyout or schema backing. DATA-ONLY since the co-location alignment: the
- * flyout components live in editor/features/selection-toolbar/flyouts/
- * connector-flyouts.tsx (keyed by def kind + action id).
+ * The connector selection toolbar: stroke and label-align were dropped as
+ * inert controls with no registered flyout or schema backing. DATA-ONLY since
+ * the co-location alignment: the flyout components live in
+ * editor/features/selection-toolbar/flyouts/connector-flyouts.tsx (keyed by
+ * def kind + action id).
  */
 const CONNECTOR_TOOLBAR: ToolbarSpec = {
   controls: [
     { action: "color", label: "Line color", hasFlyout: true },
     { action: "dash", label: "Line style", hasFlyout: true },
-    { action: "routing", label: "Corner style", hasFlyout: true },
     { action: "arrowhead", label: "Arrowhead style", hasFlyout: true },
   ],
 };
 
-export const connectorDef: ObjectDef = {
+/**
+ * The connector def (D19) — a ConnectorDef, NOT an ObjectDef: connections
+ * aren't objects (no render dispatch, no geometry defaults, no text slot, no
+ * outline), so since P4 this carries exactly what connectors have — the
+ * selection toolbar, the "connector" palette role their `connection.color`
+ * resolves through (render/connectors + resolveConnectorStroke), and the
+ * routed-midpoint label contract (labels render and edit at
+ * routeConnection().labelPoint — use-text-editing.ts's connection path).
+ * It is deliberately absent from OBJECT_DEFS.
+ */
+export const connectorDef: ConnectorDef = {
   kind: "connector",
-  // Never dispatched: connections render via render/connectors, not through
-  // the object registry's render path.
-  render: () => null,
-  css: "",
-  // Placeholder defaults — connections have no object geometry/tone; nothing
-  // reads these (defaults lookups key on InteractiveCanvasObjectType).
-  defaults: {
-    geometry: { x: 0, y: 0, width: 0, height: 0 },
-    tone: "neutral",
-    label: "Connector",
-  },
-  handles: "none",
-  hitTest: "solid",
-  dragCapture: "none",
-  labelEditing: { target: "none" },
   toolbar: CONNECTOR_TOOLBAR,
+  colorRole: "connector",
+  labelEditing: "routed-midpoint",
 };

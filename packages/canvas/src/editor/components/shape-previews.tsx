@@ -7,20 +7,24 @@
  * ShapeSearchPopover resolve each catalog entry's 20x20 monochrome preview
  * through `shapeCatalogPreview(entry)`.
  *
- * Preview strategy (unchanged from the Wave C catalog rewrite):
- *   - Basic/Flowchart entries whose outline is one of connection-overlay.ts's
+ * Preview strategy (Wave C, re-audited at P4 — derive where the def's
+ * geometry makes it trivial, keep documented explicit minis where a literal
+ * outline reads worse at 20x20):
+ *   - Basic/Flowchart entries whose outline is one of objects/geometry.ts's
  *     true-outline polygon generators (ellipse/triangle/parallelogram/
  *     pentagon/octagon/star/plus/chevron/trapezoid/manual-input/hexagon)
- *     reuse that EXACT generator function against a small local
- *     `PREVIEW_BOUNDS` box, guaranteeing the tiny picker glyph is
- *     geometrically identical (same vertex math) to what CanvasStage.tsx
- *     actually draws on the canvas — see `polygonIcon()` below.
- *   - Basic/Flowchart entries that are bbox-tier custom SVG in CanvasStage
+ *     reuse that EXACT generator function — the SAME vertex math the def's
+ *     `outline` spec, the on-canvas silhouette, anchors, and hit-testing all
+ *     share since P3 — against a small local `PREVIEW_BOUNDS` box, so the
+ *     picker glyph derives from the def's geometry — see `polygonIcon()`.
+ *   - Bbox-outline entries whose silhouette is custom def SVG
  *     (database/document/folder/document-stack/cylinder-horizontal/
  *     predefined-process/internal-storage/junctions/arrow-shape/square/
- *     rounded-rect/chat) get small hand-drawn inline SVG minis using the same
- *     visual motif CanvasStage renders (wavy-bottom document, folder tab,
- *     double-stacked pages, horizontal cylinder, etc.).
+ *     rounded-rect) keep small hand-drawn inline SVG minis using the
+ *     same visual motif the def renders (wavy-bottom document, folder tab,
+ *     double-stacked pages, horizontal cylinder, etc.) — deliberately NOT
+ *     derived: their real outlines are plain bboxes, and a 20x20 rectangle
+ *     for every one of them would be strictly worse than the motif minis.
  *   - Advanced-tier entries (all 26 icon glyphs) reuse the glyph paths
  *     directly from the ICON_GLYPHS registry (the same registry
  *     IconShapeBody renders on-canvas) via `iconGlyphPreview()`.
@@ -41,7 +45,7 @@ import {
   starPoints,
   trapezoidPoints,
   trianglePoints,
-} from "../../routing/connection-overlay";
+} from "../../objects/geometry";
 
 /** Inline SVG preview, 20x20 viewBox, monochrome (currentColor). */
 export type ShapePreviewIcon = (props: { className?: string }) => React.JSX.Element;
@@ -59,7 +63,7 @@ function pointsToAttr(points: { x: number; y: number }[]): string {
   return points.map((p) => `${p.x},${p.y}`).join(" ");
 }
 
-/** Builds a preview component from one of connection-overlay.ts's true-outline polygon generators, so the tiny picker glyph is geometrically identical to the real on-canvas outline. */
+/** Builds a preview component from one of objects/geometry.ts's true-outline polygon generators (the def outline's own vertex math), so the tiny picker glyph is geometrically identical to the real on-canvas outline. */
 function polygonIcon(points: { x: number; y: number }[]): ShapePreviewIcon {
   const attr = pointsToAttr(points);
   return function PolygonPreview({ className }: { className?: string }) {
@@ -124,7 +128,7 @@ const TrapezoidIcon = polygonIcon(trapezoidPoints(PREVIEW_BOUNDS));
 const ManualInputIcon = polygonIcon(manualInputPoints(PREVIEW_BOUNDS));
 const HexagonIcon = polygonIcon(hexagonPoints(PREVIEW_BOUNDS));
 
-/** Off-page-connector: downward pentagon/"shield" silhouette (see connection-overlay.ts's offPageConnectorPoints doc comment on the SHIELD naming note). */
+/** Off-page-connector: downward pentagon/"shield" silhouette (see objects/geometry.ts's offPageConnectorPoints doc comment on the SHIELD naming note). */
 const OffPageConnectorIcon = svgIcon(
   `<path d="M3 4h14v7.2L10 17 3 11.2Z" stroke="currentColor" stroke-width="${S}" stroke-linejoin="round" />`,
 );
@@ -142,9 +146,6 @@ const OffPageConnectorIcon = svgIcon(
 const SquareIcon = svgIcon(`<rect x="4" y="4" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="${S}" />`);
 const RoundedRectIcon = svgIcon(`<rect x="3.5" y="5.5" width="13" height="9" rx="3" stroke="currentColor" stroke-width="${S}" />`);
 const DiamondIcon = svgIcon(`<path d="M10 3.5 16.5 10 10 16.5 3.5 10Z" stroke="currentColor" stroke-width="${S}" stroke-linejoin="round" />`);
-const SpeechBubbleIcon = svgIcon(
-  `<path d="M3.5 4.5h13a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H9l-3 3v-3H3.5a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="${S}" stroke-linejoin="round" />`,
-);
 const DatabaseIcon = svgIcon(
   `<path d="M3.5 6c0-1.4 2.9-2.3 6.5-2.3s6.5.9 6.5 2.3v8c0 1.4-2.9 2.3-6.5 2.3S3.5 15.4 3.5 14Z" stroke="currentColor" stroke-width="${S}" /><path d="M16.5 6c0 1.4-2.9 2.3-6.5 2.3S3.5 7.4 3.5 6" stroke="currentColor" stroke-width="${S}" />`,
 );
@@ -199,7 +200,6 @@ const PREVIEWS_BY_ENTRY_ID: Readonly<Record<string, ShapePreviewIcon>> = {
   "basic-arrow-right": ArrowShapeRightIcon,
   "basic-chevron": ChevronRightIcon,
   "basic-star": StarIcon,
-  "basic-chat": SpeechBubbleIcon,
   "flow-parallelogram-right": ParallelogramRightIcon,
   "flow-parallelogram-left": ParallelogramLeftIcon,
   "flow-database": DatabaseIcon,

@@ -43,7 +43,8 @@ export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): strin
 export const documentShapeDef: ShapeDef = {
   type: "document",
   shape: "document",
-  outline: {
+  buttonBorder: "suppressed",
+  silhouette: {
     className: "interactive-canvas-object-document",
     silhouette: ({ colors, strokeWidth }) => (
       <svg
@@ -71,23 +72,17 @@ export const documentShapeDef: ShapeDef = {
       </svg>
     ),
   },
-  text: { kind: "label" },
-  defaultSize: { width: 160, height: 120 },
-  defaultTone: "memory",
   /*
    * Moved from CanvasStage's grouped rule (document shares its selector
    * group there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/or-junction/summing-junction — 17
-   * selectors total). Declarations are verbatim; document itself carries no
+   * selectors total). Paint declarations moved here; document itself carries no
    * additional per-shape follow-up rule in the legacy block (unlike folder/
    * document-stack/triangle, which do).
    */
   css: `
         .interactive-canvas-object-document {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

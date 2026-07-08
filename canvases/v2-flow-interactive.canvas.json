@@ -414,7 +414,7 @@
     },
     {
       "id": "interviewee",
-      "type": "person",
+      "type": "icon",
       "text": "Interviewee",
       "color": "green",
       "geometry": {
@@ -424,13 +424,14 @@
         "height": 144
       },
       "style": {
-        "shape": "person"
+        "shape": "icon"
       },
-      "parentId": null
+      "parentId": null,
+      "icon": "person"
     },
     {
       "id": "live-qa-exchange",
-      "type": "chat",
+      "type": "icon",
       "text": "Live Q&A exchange\nRealtime back-and-forth rendered to the interviewee.",
       "color": "blue",
       "parentId": null,
@@ -441,8 +442,9 @@
         "height": 110
       },
       "style": {
-        "shape": "chat"
-      }
+        "shape": "icon"
+      },
+      "icon": "chat"
     },
     {
       "id": "final-interview-spec",

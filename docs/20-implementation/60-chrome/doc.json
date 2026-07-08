@@ -80,15 +80,20 @@
         {
           "insert": "packages/canvas/src/editor/components/",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components"
-            }
+            "code": true
           }
         },
         {
-          "insert": " and implements the FigJam-parity surface UI for the canvas engine: the bottom tool dock, the selection-aware context toolbar, the color palette popover, the two shape-browsing surfaces, and the zoom pill. It was built per the spec docs under "
+          "insert": " and implements the FigJam-parity surface UI for the canvas engine: the bottom tool dock, the selection-aware floating toolbar (hosted from "
+        },
+        {
+          "insert": "editor/features/selection-toolbar/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), the one color picker, the two shape-browsing surfaces, and the zoom pill. It was built per the spec docs under "
         },
         {
           "insert": "board-design-reference/analysis/",
@@ -97,56 +102,7 @@
           }
         },
         {
-          "insert": " ("
-        },
-        {
-          "insert": "figjam-bottom-dock-spec.md",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "figjam-chrome-catalog.md",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "figjam-style-tokens.json",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "figjam-style-spec.md",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and is documented in full in the components directory's own "
-        },
-        {
-          "insert": "README.md",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components/README.md"
-            }
-          }
-        },
-        {
-          "insert": ", which this doc summarizes and cross-links."
+          "insert": " (figjam-bottom-dock-spec.md, figjam-chrome-catalog.md, figjam-style-tokens.json/figjam-style-spec.md) and is documented in the components directory's own README.md, which this doc summarizes and cross-links."
         }
       ],
       "children": []
@@ -295,7 +251,7 @@
       },
       "text": [
         {
-          "insert": "FigJamDock.tsx",
+          "insert": "CanvasDock.tsx",
           "attributes": {
             "code": true,
             "reference": {
@@ -306,7 +262,7 @@
           }
         },
         {
-          "insert": " — the white stadium bottom dock: 462x37px, 13 buttons across 5 whitespace groups."
+          "insert": " — the white stadium bottom dock (renamed from FigJamDock; the FIGJAM_DOCK_*_PX size exports remain): 462x37px, 13 buttons across 5 whitespace groups."
         }
       ],
       "children": []
@@ -509,18 +465,27 @@
       },
       "text": [
         {
-          "insert": "ColorPalettePopover.tsx",
+          "insert": "ColorPicker.tsx",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
-              "symbol": "ColorPalettePopover"
+              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "symbol": "ColorPicker"
             }
           }
         },
         {
-          "insert": " — a 2x11 swatch grid plus a rainbow-ring current-color swatch."
+          "insert": " — THE one color picker: the 10-pick "
+        },
+        {
+          "insert": "CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " swatch row, identical for every kind, with a rainbow ring on the current pick. Replaces the old ColorPalettePopover, the section-tint flyout, and the connector swatch row."
         }
       ],
       "children": []
@@ -533,7 +498,7 @@
       },
       "text": [
         {
-          "insert": "catalog.ts",
+          "insert": "objects/catalog.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -543,29 +508,16 @@
           }
         },
         {
-          "insert": " — shape catalog data, now deliberately data-only (plain "
+          "insert": " — shape catalog ARRANGEMENT (categories, ordering, direction/icon variants), deliberately data-only: entry labels/keywords derive from each def's "
         },
         {
-          "insert": ".ts",
+          "insert": "catalog",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "): the inline JSX preview factories it used to embed moved editor-side to "
-        },
-        {
-          "insert": "shape-previews.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/components/shape-previews.tsx"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": " metadata (P4), and the JSX preview glyphs live editor-side in shape-previews.tsx."
         }
       ],
       "children": []
@@ -664,7 +616,7 @@
       },
       "text": [
         {
-          "insert": "FigJamDock"
+          "insert": "CanvasDock"
         }
       ],
       "children": []
@@ -675,7 +627,7 @@
       "props": {},
       "text": [
         {
-          "insert": "FigJamDock",
+          "insert": "CanvasDock",
           "attributes": {
             "code": true,
             "reference": {
@@ -1232,7 +1184,7 @@
           "insert": "), and "
         },
         {
-          "insert": "ColorPalettePopover",
+          "insert": "ColorPicker",
           "attributes": {
             "code": true,
             "reference": {
@@ -1262,75 +1214,61 @@
       "flavour": "decision",
       "props": {
         "status": "accepted",
-        "title": "One color per object"
+        "title": "One color pick per object, one picker for every kind"
       },
       "text": [
         {
-          "insert": "Shapes and stickies apply palette tokens directly; sections are tint-driven. The section color flyout is a single 10-tint row ("
+          "insert": "Every kind — shape, sticky, section, connector — stores one "
         },
         {
-          "insert": "section-flyouts.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/section-flyouts.tsx"
-            }
-          }
-        },
-        {
-          "insert": "): one pick sets fill + border together through the tint family and clears any "
-        },
-        {
-          "insert": "style.fill",
+          "insert": "color?: CanvasColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": " pick and offers the same 10 hue picks through the same "
         },
         {
-          "insert": "style.stroke",
+          "insert": "ColorPicker",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " overrides ("
+          "insert": " flyout; the def's "
         },
         {
-          "insert": "applyTintToSelection",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
-              "symbol": "applyTintToSelection"
-            }
-          }
-        },
-        {
-          "insert": " patches "
-        },
-        {
-          "insert": "{ tint, style: { fill: undefined, stroke: undefined } }",
+          "insert": "colorRole",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "). The border-style flyout is style-only (solid/dashed/none); the old separate fill and stroke palettes and their appliers were deleted. Section lock is likewise a flyout — Lock all / Lock background only / Unlock — writing the schema's "
+          "insert": " (and the ConnectorDef's "
+        },
+        {
+          "insert": "\"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " role) decides how the pick renders via palette.ts's role tables. A section pick sets tint + title-chip colors together (the section border IS the chip fill); there are no separate fill/stroke palettes and no section-specific tint row anymore. The section border-style flyout stays style-only (solid/dashed/none writing "
+        },
+        {
+          "insert": "style.strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and section lock remains its own flyout — Lock all / Lock background only / Unlock — writing the schema's "
         },
         {
           "insert": "locked?: \"all\" | \"background\"",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "locked"
-            }
+            "code": true
           }
         },
         {
@@ -1347,7 +1285,7 @@
       },
       "text": [
         {
-          "insert": "ColorPalettePopover"
+          "insert": "ColorPicker"
         }
       ],
       "children": []
@@ -1358,81 +1296,50 @@
       "props": {},
       "text": [
         {
-          "insert": "ColorPalettePopover",
+          "insert": "ColorPicker",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPalettePopover.tsx",
-              "symbol": "ColorPalettePopover"
+              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "symbol": "ColorPicker"
             }
           }
         },
         {
-          "insert": " anchors roughly 9px above the toolbar's color-swatch button (the gap is exported as "
+          "insert": " renders the closed 10-pick roster ("
         },
         {
-          "insert": "COLOR_PALETTE_ANCHOR_GAP_PX",
+          "insert": "CANVAS_COLORS",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ") using "
+          "insert": ") as a single 10-swatch row on the dark FigJam popover chrome, resolving each preview hex via "
         },
         {
-          "insert": "@floating-ui/react",
+          "insert": "resolveSwatchPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "resolveSwatchPreview"
+            }
+          }
+        },
+        {
+          "insert": " — previews are identical for every kind (D12: a pick is a direction; the kind's role table decides rendering). "
+        },
+        {
+          "insert": "current",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "'s "
-        },
-        {
-          "insert": "useFloating",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "offset",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "flip",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "shift",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — the component does not self-position beyond that. "
-        },
-        {
-          "insert": "currentColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " drives the rainbow-ringed final swatch; "
+          "insert": " drives the rainbow-ringed swatch; "
         },
         {
           "insert": "onPick",
@@ -1441,25 +1348,25 @@
           }
         },
         {
-          "insert": " fires the same for every swatch including that one. The underlying tokens file's "
+          "insert": " fires with the picked "
         },
         {
-          "insert": "PALETTE_POPOVER_SWATCHES",
+          "insert": "CanvasColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " ships an 11+9 split, not the 11+11 the visual grid needs — "
+          "insert": " id. There is no custom-color wheel and no per-kind roster: the old 2x11/22-swatch ColorPalettePopover, its nearest-token mapping, and its row-padding hack are all gone. The picker opens from each toolbar's color control via the shared color flyout in "
         },
         {
-          "insert": "ColorPalettePopover",
+          "insert": "editor/features/selection-toolbar/flyouts/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " pads row 2 up to 10 direct swatches (repeating from the front of row 1) before appending the rainbow-current swatch, purely to hit the catalog's exact 2x11=22 layout without editing the shared tokens file. If a future tokens re-sample adds real, distinct row-2 colors, the padding logic in this component should be removed."
+          "insert": ", which also writes the per-kind last-picked memory (D17) through the dispatched color patch."
         }
       ],
       "children": []
@@ -1636,7 +1543,7 @@
           "insert": " prop anyway, since a task brief asked for one — a consumer aiming for strict frame-parity can omit the prop entirely, or wire it to the canvas viewport's current zoom otherwise. Suggested wrapper position is bottom-right, independent of "
         },
         {
-          "insert": "FigJamDock",
+          "insert": "CanvasDock",
           "attributes": {
             "code": true
           }

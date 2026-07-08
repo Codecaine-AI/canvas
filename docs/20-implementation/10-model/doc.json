@@ -25,24 +25,22 @@
         "b-model-heading-schema",
         "b-model-schema-p1",
         "b-model-schema-p2",
+        "b-model-schema-records-intro",
+        "b-model-code-object",
+        "b-model-code-connection",
         "b-model-schema-object-types-heading",
         "b-model-schema-object-types-list-container",
         "b-model-schema-object-types-list-process",
         "b-model-schema-object-types-list-decision",
-        "b-model-schema-object-types-list-text",
         "b-model-schema-object-types-list-sticky",
-        "b-model-schema-object-types-list-source-node",
         "b-model-schema-object-types-list-annotation-marker",
         "b-model-schema-object-types-list-document",
-        "b-model-schema-object-types-list-person",
         "b-model-schema-object-types-list-database",
-        "b-model-schema-object-types-list-chat",
         "b-model-schema-object-types-list-section",
         "b-model-schema-object-types-list-pill",
         "b-model-schema-object-types-list-arrow-shape",
         "b-model-schema-object-types-list-predefined-process",
         "b-model-schema-object-types-list-code-block",
-        "b-model-schema-object-types-list-chip-icon",
         "b-model-schema-object-types-list-ellipse",
         "b-model-schema-object-types-list-triangle",
         "b-model-schema-object-types-list-parallelogram",
@@ -66,10 +64,12 @@
         "b-model-schema-p3",
         "b-model-schema-color-heading",
         "b-model-schema-color-p1",
+        "b-model-schema-color-migration",
         "b-model-schema-validator-heading",
         "b-model-schema-validator-p1",
         "b-model-heading-object-ref",
         "b-model-object-ref-intro",
+        "b-model-object-ref-stale",
         "b-model-type-container",
         "b-model-type-container-p1",
         "b-model-type-container-p2",
@@ -80,28 +80,17 @@
         "b-model-type-decision",
         "b-model-type-decision-p1",
         "b-model-type-decision-p2",
-        "b-model-type-text",
-        "b-model-type-text-p1",
-        "b-model-type-text-p2",
         "b-model-type-sticky",
         "b-model-type-sticky-p1",
         "b-model-type-sticky-p2",
-        "b-model-type-source-node",
-        "b-model-type-source-node-p1",
         "b-model-type-annotation-marker",
         "b-model-type-annotation-marker-p1",
         "b-model-type-document",
         "b-model-type-document-p1",
         "b-model-type-document-p2",
-        "b-model-type-person",
-        "b-model-type-person-p1",
-        "b-model-type-person-p2",
         "b-model-type-database",
         "b-model-type-database-p1",
         "b-model-type-database-p2",
-        "b-model-type-chat",
-        "b-model-type-chat-p1",
-        "b-model-type-chat-p2",
         "b-model-type-section",
         "b-model-type-section-p1",
         "b-model-type-section-lock-decision",
@@ -121,9 +110,6 @@
         "b-model-type-code-block",
         "b-model-type-code-block-p1",
         "b-model-type-code-block-p2",
-        "b-model-type-chip-icon",
-        "b-model-type-chip-icon-p1",
-        "b-model-type-chip-icon-p2",
         "b-model-type-ellipse",
         "b-model-type-ellipse-p1",
         "b-model-type-ellipse-p2",
@@ -435,7 +421,52 @@
           }
         },
         {
-          "insert": " from the object type vocabulary below, a label, optional body text, an optional "
+          "insert": " from the object type vocabulary below, a single required "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field (the kind decides where and how it renders — the legacy "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " trio died in the P2 text unification, OBJECT-DEF-OVERHAUL.md D3/D11), an optional "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " swatch pick from the closed 10-pick roster (see below), an optional "
         },
         {
           "insert": "parentId",
@@ -453,7 +484,43 @@
           }
         },
         {
-          "insert": " (x/y/width/height), and optional style/layout/source metadata. "
+          "insert": " (x/y/width/height), and optional style/layout/per-type fields ("
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "language",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). "
         },
         {
           "insert": "connections",
@@ -485,7 +552,25 @@
           }
         },
         {
-          "insert": "), carry style/arrow/color, and may carry an explicit "
+          "insert": "), carry style/arrow, their own separate "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", an optional "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " swatch pick, and may carry an explicit "
         },
         {
           "insert": "waypoints",
@@ -668,25 +753,6 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-text": {
-      "id": "b-model-schema-object-types-list-text",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — free-floating label text."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-sticky": {
       "id": "b-model-schema-object-types-list-sticky",
       "flavour": "list-item",
@@ -701,7 +767,16 @@
           }
         },
         {
-          "insert": " — a note card; can carry an "
+          "insert": " — a note card; renders its "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as simple markdown (D18) and carries an optional "
         },
         {
           "insert": "author",
@@ -710,26 +785,7 @@
           }
         },
         {
-          "insert": " rendered bottom-left."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-source-node": {
-      "id": "b-model-schema-object-types-list-source-node",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "source-node",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — an agent/source-code origin marker."
+          "insert": " metadata field."
         }
       ],
       "children": []
@@ -781,25 +837,6 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-person": {
-      "id": "b-model-schema-object-types-list-person",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in D16, expanded vocabulary for reference diagrams."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-database": {
       "id": "b-model-schema-object-types-list-database",
       "flavour": "list-item",
@@ -809,25 +846,6 @@
       "text": [
         {
           "insert": "database",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in D16, expanded vocabulary for reference diagrams."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-chat": {
-      "id": "b-model-schema-object-types-list-chat",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "chat",
           "attributes": {
             "code": true
           }
@@ -852,7 +870,25 @@
           }
         },
         {
-          "insert": " — added in W2 (FigJam sections + V2 Flow shape vocabulary); requires a "
+          "insert": " — added in W2 (FigJam sections + V2 Flow shape vocabulary); renders its "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as the floating top-left title chip and colors through the same single "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pick as every other kind (the old required "
         },
         {
           "insert": "title",
@@ -861,7 +897,7 @@
           }
         },
         {
-          "insert": " and a known "
+          "insert": "/"
         },
         {
           "insert": "tint",
@@ -870,7 +906,7 @@
           }
         },
         {
-          "insert": " family; since W6 the only grouping object — members record membership via a persisted, auto-managed parentId and move with the section when it is dragged."
+          "insert": " fields died in the P1/P2 cutovers); since W6 the only grouping object — members record membership via a persisted, auto-managed parentId and move with the section when it is dragged."
         }
       ],
       "children": []
@@ -969,32 +1005,69 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-chip-icon": {
-      "id": "b-model-schema-object-types-list-chip-icon",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "chip-icon",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in W2, FigJam sections + V2 Flow shape vocabulary."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-p3": {
       "id": "b-model-schema-p3",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "That's 37 object types in total. The D16 wave (document, person, database, chat) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block, chip-icon) added FigJam-parity sections plus the V2 Flow shape set; the W5 wave (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, folder, document-stack, off-page-connector, trapezoid, manual-input, hexagon, internal-storage, or-junction, summing-junction, cylinder-horizontal, page-corner, icon) closed out FigJam's Basic/Flowchart/Advanced picker tiers — 19 native shape primitives plus one icon-glyph family ("
+          "insert": "That's 32 object types in total (the early text and source-node types were retired along the way). The D16 wave (document, database) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block) added FigJam-parity sections plus the V2 Flow shape set; D21 folded the retired Person/Chat/Chip catalog entries into the "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "InteractiveCanvasObjectType"
+            }
+          }
+        },
+        {
+          "insert": " type with glyphs "
+        },
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "cpu",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "symbol": "CanvasIconGlyph"
+            }
+          }
+        },
+        {
+          "insert": ". The W5 wave (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, folder, document-stack, off-page-connector, trapezoid, manual-input, hexagon, internal-storage, or-junction, summing-junction, cylinder-horizontal, page-corner, icon) closed out FigJam's Basic/Flowchart/Advanced picker tiers — 19 native shape primitives plus one icon-glyph family ("
         },
         {
           "insert": "icon",
@@ -1035,7 +1108,7 @@
       },
       "text": [
         {
-          "insert": "Color resolution: tone, palette token, section tint"
+          "insert": "Color: one pick from the closed 10-pick roster"
         }
       ],
       "children": []
@@ -1046,70 +1119,133 @@
       "props": {},
       "text": [
         {
-          "insert": "Color layers in increasing precedence. "
+          "insert": "Color is a single stored field per object/connection: "
         },
         {
-          "insert": "tone",
+          "insert": "color?: CanvasColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is the base semantic bucket (neutral, input, process, decision, memory, agent, warning, annotation) that most object types resolve their default fill/stroke from. "
+          "insert": " — a swatch id from the closed 10-pick roster in "
         },
         {
-          "insert": "paletteToken",
+          "insert": "state/schema/colors.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts",
+              "symbol": "CanvasColor"
+            }
+          }
+        },
+        {
+          "insert": " (10 FigJam hues × bold/soft; black dropped, D12). The id carries no hex; what a pick looks like per kind is resolved through the role tables in "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "CANVAS_PALETTE"
+            }
+          }
+        },
+        {
+          "insert": " — shape fill+border pair, section tint + title chip, exact sticky fill, connector stroke — selected by each def's "
+        },
+        {
+          "insert": "colorRole",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (D16) is a coarser color-as-meaning preset — process=blue, input=green, hot=orange/red, memory=purple, note=yellow — and wins over "
+          "insert": ". An absent pick renders as the kind's first-use default ("
         },
         {
-          "insert": "tone",
+          "insert": "FIRST_USE_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "FIRST_USE_COLORS"
+            }
+          }
+        },
+        {
+          "insert": ": sticky "
+        },
+        {
+          "insert": "\"yellow\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " when set. An explicit "
+          "insert": ", connector "
         },
         {
-          "insert": "style.fill",
+          "insert": "\"gray\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": ", everything else "
         },
         {
-          "insert": "style.stroke",
+          "insert": "\"gray\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (W4) wins over both, letting the FigJam pastel-pair palette apply directly. "
+          "insert": "), and new objects take the per-kind last-picked color (D17, "
         },
         {
-          "insert": "section",
+          "insert": "state.lastPickedColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " objects sit outside this ladder entirely: their fill/chip color comes from a separate "
+          "insert": "). All object text is one fixed dark color (D8) — there is no per-color text derivation. The full model is specified in "
         },
         {
-          "insert": "tint",
+          "insert": "canvas-10-system-design-10-shape-api",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "canvas-10-system-design-10-shape-api"
+            }
           }
         },
         {
-          "insert": " family (green, purple, orange, yellow, gray, white, pink, red, blue, teal) resolved against FigJam's own section color tokens, not the tone/paletteToken system."
+          "insert": "."
+        },
+        {
+          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+        },
+        {
+          "insert": "board-design-reference/analysis/palette-sheet.html",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference/analysis/palette-sheet.html"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1180,46 +1316,37 @@
           }
         },
         {
-          "insert": ". The key distinction is soft vs. hard: an unknown "
+          "insert": ". The key distinction is soft vs. hard: an object or connection "
         },
         {
-          "insert": "paletteToken",
+          "insert": "color",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " or an invalid "
+          "insert": " that isn't one of the 20 "
         },
         {
-          "insert": "style.fill",
+          "insert": "CanvasColor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": " ids is dropped with a warning ("
         },
         {
-          "insert": "stroke",
+          "insert": "Unknown color \"…\" was dropped.",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": ") and normalization continues — same treatment as an invalid "
         },
         {
-          "insert": "strokeWidth",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is just dropped with a warning and normalization continues, while a missing geometry, a duplicate id, an unknown object type, or a section missing its "
-        },
-        {
-          "insert": "title",
+          "insert": "style.strokeWidth",
           "attributes": {
             "code": true
           }
@@ -1228,13 +1355,58 @@
           "insert": "/"
         },
         {
-          "insert": "tint",
+          "insert": "strokeStyle",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is a hard error that fails the whole document. "
+          "insert": " — while a missing "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a missing "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (required, may be empty), a duplicate id, an unknown object "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a non-section "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " target, or an "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-typed object without a valid glyph is a hard error that fails the whole document. "
         },
         {
           "insert": "assertInteractiveCanvasDocument",
@@ -1312,31 +1484,31 @@
           "insert": " enumerates the active tool: "
         },
         {
-          "insert": "select, hand, rectangle, process, decision, text, sticky, source-node, annotation-marker, annotation",
+          "insert": "select, hand, annotation",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", plus the D16 tools "
+          "insert": " plus one tool per placeable object type ("
         },
         {
-          "insert": "document, person, database, chat",
+          "insert": "rectangle",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and the W2 tools "
+          "insert": " through "
         },
         {
-          "insert": "section, pill, arrow-shape, predefined-process, code-block, chip-icon",
+          "insert": "icon",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "."
+          "insert": " — the retired text/source-node tools died with their types)."
         }
       ],
       "children": []
@@ -1402,7 +1574,39 @@
           }
         },
         {
-          "insert": " — creates one new object of a given type, with default geometry/tone/shape if not supplied, and selects it."
+          "insert": " — creates one new object of a given type — geometry/"
+        },
+        {
+          "insert": "style.shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " default from the type's row in "
+        },
+        {
+          "insert": "state/schema/object-defaults.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the per-kind last-picked memory (D17) when not supplied — and selects it."
         }
       ],
       "children": []
@@ -1658,7 +1862,25 @@
           }
         },
         {
-          "insert": " — shape-swaps an object to a different type in place, preserving geometry/label/parentId while re-deriving "
+          "insert": " — shape-swaps an object to a different type in place, preserving geometry/"
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/parentId while re-deriving "
         },
         {
           "insert": "style.shape",
@@ -1667,7 +1889,7 @@
           }
         },
         {
-          "insert": " and seeding or clearing section-only title/tint fields."
+          "insert": " from the type's defaults row (a color pick is a direction, D12 — the new kind's role table decides how the carried-over pick renders)."
         }
       ],
       "children": []
@@ -2165,7 +2387,7 @@
           }
         },
         {
-          "insert": " walks it transitively (drag carry, delete cascade, contentHidden, and view-crop all read that)."
+          "insert": " walks it transitively (drag carry, delete cascade, and view-crop all read that)."
         }
       ],
       "children": []
@@ -2453,7 +2675,7 @@
           }
         },
         {
-          "insert": " (the W2 wave's section capture/tint/title validation and the new V2 Flow shape vocabulary — pill, arrow-shape, predefined-process, code-block, chip-icon)."
+          "insert": " (the W2 wave's section capture/tint/title validation and the new V2 Flow shape vocabulary — pill, arrow-shape, predefined-process, code-block, and the CPU icon glyph)."
         }
       ],
       "children": []
@@ -2525,317 +2747,48 @@
         {
           "insert": "InteractiveCanvasObjectType",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
+            "code": true
           }
         },
         {
-          "insert": " value below is documented against its actual defaults: "
+          "insert": " value below is documented against its defaults and its render behavior. Since the P4 consolidation the defaults live in one table — "
         },
         {
-          "insert": "defaultGeometryFor",
+          "insert": "OBJECT_TYPE_DEFAULTS",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
         {
-          "insert": " (creation-time size), "
-        },
-        {
-          "insert": "toneForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "toneForType"
-            }
-          }
-        },
-        {
-          "insert": " (default color tone), "
-        },
-        {
-          "insert": "shapeForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "shapeForType"
-            }
-          }
-        },
-        {
-          "insert": " (the "
+          "insert": " (geometry, "
         },
         {
           "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " a fresh "
-        },
-        {
-          "insert": "canvas.addObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/types.ts",
-              "symbol": "CanvasAction"
-            }
-          }
-        },
-        {
-          "insert": " seeds), and the "
-        },
-        {
-          "insert": "ObjectShape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ObjectShape"
-            }
-          }
-        },
-        {
-          "insert": " render function in "
-        },
-        {
-          "insert": "CanvasStage.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " that actually lays each shape out. The shared base fields ("
-        },
-        {
-          "insert": "id",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "type",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "parentId",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "geometry",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "layout",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "source",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ") are covered above; this section calls out what each of them means for a specific type, plus the type-only fields ("
+          "insert": ", label per type; the old defaultGeometryFor/toneForType/shapeForType switches are gone) — and rendering dispatches through each type's registered ObjectDef ("
         },
         {
-          "insert": "title",
+          "insert": "objectDefFor",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "objectDefFor"
             }
           }
         },
         {
-          "insert": "/"
-        },
-        {
-          "insert": "tint",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "locked",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " for sections, "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " for arrow-shape, "
-        },
-        {
-          "insert": "language",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " for code-block, "
-        },
-        {
-          "insert": "author",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " for sticky) documented inline on "
-        },
-        {
-          "insert": "InteractiveCanvasObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": ")."
         }
       ],
       "children": []
@@ -3498,178 +3451,6 @@
       ],
       "children": []
     },
-    "b-model-type-text": {
-      "id": "b-model-type-text",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "text"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-text-p1": {
-      "id": "b-model-type-text-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Free-floating label text with no surrounding box — FigJam's plain-text tool. Uses the shared "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " field like every other type, but "
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " is not rendered for this shape (there is no space for it once the box chrome is gone)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-text-p2": {
-      "id": "b-model-type-text-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Default geometry falls through to the catch-all "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ". "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the one type with no entry in "
-        },
-        {
-          "insert": "shapeForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "shapeForType"
-            }
-          }
-        },
-        {
-          "insert": "'s if-chain at all; instead "
-        },
-        {
-          "insert": "ObjectShape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
-              "symbol": "ObjectShape"
-            }
-          }
-        },
-        {
-          "insert": " special-cases it directly: "
-        },
-        {
-          "insert": "object.style?.shape ?? (object.type === \"text\" ? \"label\" : \"rounded-rect\")",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " — so a "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " object with no explicit "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " renders as the borderless "
-        },
-        {
-          "insert": "\"label\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " shape: bold black text, 20px ("
-        },
-        {
-          "insert": "TEXT_SIZES_PX.boldLabel",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts"
-            }
-          }
-        },
-        {
-          "insert": "), transparent background, 4px padding, no border."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-sticky": {
       "id": "b-model-type-sticky",
       "flavour": "heading",
@@ -3780,7 +3561,7 @@
           }
         },
         {
-          "insert": " override in color resolution that bypasses the desaturated tone-mix in favor of an exact "
+          "insert": " role in color resolution that uses the palette's sticky fill instead of the shape fill, preserving an exact "
         },
         {
           "insert": "STICKY_COLORS",
@@ -3794,7 +3575,7 @@
           }
         },
         {
-          "insert": " hex (yellow/red/pink/blue/lightBlue/blueGray) — FigJam stickies are saturated, unlike other shapes' pastel tone-mix fills."
+          "insert": " hex per hue while shapes use their own fill + ink border role."
         }
       ],
       "children": []
@@ -3944,128 +3725,6 @@
         },
         {
           "insert": ") — every other shape is flat/shadowless per the FigJam parity spec."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-source-node": {
-      "id": "b-model-type-source-node",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "source-node"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-source-node-p1": {
-      "id": "b-model-type-source-node-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "An agent/source-code origin marker — pins a canvas position to a place an agent or automation originated from. Default tone "
-        },
-        {
-          "insert": "\"agent\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " falls through to "
-        },
-        {
-          "insert": "\"rounded-rect\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (no dedicated case in "
-        },
-        {
-          "insert": "shapeForType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "shapeForType"
-            }
-          }
-        },
-        {
-          "insert": "). Default geometry falls through to the catch-all "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ". Typically pairs with the "
-        },
-        {
-          "insert": "source",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field ("
-        },
-        {
-          "insert": "path",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "symbol",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") to record exactly where in the codebase the marker points, though nothing enforces that pairing at the schema level."
         }
       ],
       "children": []
@@ -4329,229 +3988,6 @@
       ],
       "children": []
     },
-    "b-model-type-person": {
-      "id": "b-model-type-person",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "person"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-person-p1": {
-      "id": "b-model-type-person-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in D16 — represents a human actor. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 120, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (the tallest of the D16 defaults, to fit a head-and-shoulders silhouette), default tone "
-        },
-        {
-          "insert": "\"input\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (user/input/confirmed per the palette-token doc comment), "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"person\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-person-p2": {
-      "id": "b-model-type-person-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Rendered via an SVG "
-        },
-        {
-          "insert": "ShapeSilhouette",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (a rounded-shoulders body path plus a head circle, "
-        },
-        {
-          "insert": "viewBox "
-        },
-        {
-          "insert": "0 0 100 100",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " scaled to fill the object's actual box) rather than the CSS-box chrome other shapes use — the button element itself is transparent/borderless. Fill/stroke default to "
-        },
-        {
-          "insert": "PERSON_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/person.tsx",
-              "symbol": "PERSON_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "fill \"#66D575\" / stroke \"#3E9B4B\""
-        },
-        {
-          "insert": ") unless the object has an explicit "
-        },
-        {
-          "insert": "paletteToken",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "tone",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "fill",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "stroke",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": ", in which case the resolved theme color is used instead. "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " renders below the icon in bold black, not overlaid on it; when "
-        },
-        {
-          "insert": "geometry.height",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " is under 100px ("
-        },
-        {
-          "insert": "isCompactSilhouette",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": "), the label is dropped entirely to keep the icon legible at small sizes."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-database": {
       "id": "b-model-type-database",
       "flavour": "heading",
@@ -4643,7 +4079,7 @@
           }
         },
         {
-          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike person/chat/chip-icon — it was "
+          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike the icon glyph family — it was "
         },
         {
           "insert": "not part of the W2 restyle's \"label below icon\" treatment: database keeps the older tone-driven pastel-pair styling, and its label/body render "
@@ -4663,173 +4099,6 @@
         },
         {
           "insert": ") rather than below it."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chat": {
-      "id": "b-model-type-chat",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "chat"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chat-p1": {
-      "id": "b-model-type-chat-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in D16 — represents a chat/conversation surface. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 180, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"process\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"chat\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chat-p2": {
-      "id": "b-model-type-chat-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "SVG silhouette is a rounded speech-bubble path with a small tail at the bottom-left. Like "
-        },
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "chip-icon",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", chat got the W2 restyle: fill/stroke default to "
-        },
-        {
-          "insert": "CHAT_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/basic/chat.tsx",
-              "symbol": "CHAT_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "fill \"#FF9E42\" / stroke \"#EB7500\""
-        },
-        {
-          "insert": ") unless overridden by an explicit tone/palette/fill, and "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " renders below the icon in bold black ("
-        },
-        {
-          "insert": "justify-content: flex-end; padding-bottom: 10%",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": "). Below 100px height, the compact-silhouette height check does "
-        },
-        {
-          "insert": "NOT drop chat's label the way it drops person's — only "
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " is suppressed at small sizes for both."
         }
       ],
       "children": []
@@ -6218,164 +5487,6 @@
       ],
       "children": []
     },
-    "b-model-type-chip-icon": {
-      "id": "b-model-type-chip-icon",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "chip-icon"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chip-icon-p1": {
-      "id": "b-model-type-chip-icon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W2 — a small CPU/chip glyph from the V2 Flow icon set. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 120, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (same footprint as "
-        },
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), default tone "
-        },
-        {
-          "insert": "\"neutral\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (inert — resolves from "
-        },
-        {
-          "insert": "CHIP_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/chip-icon.tsx",
-              "symbol": "CHIP_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " unless overridden), "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"chip-icon\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chip-icon-p2": {
-      "id": "b-model-type-chip-icon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Rendered via the same "
-        },
-        {
-          "insert": "ShapeSilhouette",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " SVG mechanism as person/database/chat: a rounded square body with 4 pins per side ("
-        },
-        {
-          "insert": "viewBox \"0 0 100 100\""
-        },
-        {
-          "insert": "), fill/stroke defaulting to "
-        },
-        {
-          "insert": "CHIP_ICON_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/chip-icon.tsx",
-              "symbol": "CHIP_ICON_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "fill \"#FFE0C2\" / stroke \"#FF9E42\""
-        },
-        {
-          "insert": ") unless the object has an explicit tone/palette/fill override. Like person and chat, "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " renders below the icon in bold black rather than overlaid on it."
-        }
-      ],
-      "children": []
-    },
     "b-model-heading-layout-conventions": {
       "id": "b-model-heading-layout-conventions",
       "flavour": "heading",
@@ -6641,113 +5752,48 @@
       "props": {},
       "text": [
         {
-          "insert": "The default sizes in the per-type reference above (set by "
+          "insert": "The default sizes in the per-type reference above (the "
         },
         {
-          "insert": "defaultGeometryFor",
+          "insert": "OBJECT_TYPE_DEFAULTS",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
         {
-          "insert": ") are creation-time seeds only, chosen for a reasonable initial placement — they are not the same numbers as "
-        },
-        {
-          "insert": "figjam-tokens.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": "'s pixel-sampled reference constants (e.g. "
+          "insert": " rows) are creation-time seeds only, chosen for a reasonable initial placement — they are not the same numbers as the pixel-sampled reference constants co-located with each def (e.g. the sticky def's "
         },
         {
           "insert": "STICKY_GEOMETRY.defaultSizePx",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/def.tsx"
-            }
+            "code": true
           }
         },
         {
           "insert": " is 416x420, sampled from real FigJam exports, versus "
         },
         {
-          "insert": "addObject",
+          "insert": "canvas.addObject",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": "'s smaller 176x128 sticky seed). Treat "
-        },
-        {
-          "insert": "figjam-tokens.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " as the visual-fidelity source of truth (corner radii, stroke widths, font sizes, per-shape color tokens) and "
-        },
-        {
-          "insert": "defaultGeometryFor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": " as just the placement convenience every "
+          "insert": "'s smaller 176x128 sticky seed). Treat the sampled, provenance-commented constants as the visual-fidelity source of truth (corner radii, stroke widths, font sizes, palette hexes) and the defaults table as just the placement convenience every "
         },
         {
           "insert": "canvas.addObject",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " call falls back to when no explicit "
-        },
-        {
-          "insert": "geometry",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " is supplied."
+          "insert": " call falls back to when no explicit geometry is supplied."
         }
       ],
       "children": []
@@ -8451,7 +7497,7 @@
           }
         },
         {
-          "insert": ", the same label-below-glyph layout chip-icon/person/chat use, drawing from the "
+          "insert": ", the label-below-glyph layout used by the icon family, drawing from the "
         },
         {
           "insert": "ICON_GLYPHS",
@@ -8525,12 +7571,12 @@
           "insert": " edge; at zoom ≥ 1 no transform is emitted, so the resting DOM is unchanged. The section-title editor input ("
         },
         {
-          "insert": "LabelEditingOverlay",
+          "insert": "TextEditingOverlay",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/label-editing/LabelEditingOverlay.tsx",
+              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
               "symbol": "SectionTitleEditor"
             }
           }
@@ -8553,6 +7599,225 @@
           "insert": "."
         }
       ]
+    },
+    "b-model-schema-records-intro": {
+      "id": "b-model-schema-records-intro",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The two record types, verbatim from the schema (doc comments trimmed):"
+        }
+      ],
+      "children": []
+    },
+    "b-model-code-object": {
+      "id": "b-model-code-object",
+      "flavour": "code",
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "// packages/canvas/src/state/schema/objects.ts\nexport type CanvasGeometry = {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n};\n\nexport type InteractiveCanvasObject = {\n  id: string;\n  type: InteractiveCanvasObjectType;\n  /** The object's ONE text field (D3/D11) — replaces the legacy `label`/`body`/`title` trio.\n      The kind decides rendering; may be empty. Connections keep their own separate `label`. */\n  text: string;\n  /** The object's ONE color pick (D1/D12/D17) — a swatch id from the closed 10-pick roster\n      (state/schema/colors.ts). Absent = the kind's first-use default. */\n  color?: CanvasColor;\n  parentId?: string | null;\n  geometry: CanvasGeometry;\n  style?: CanvasObjectStyle;\n  layout?: {\n    mode: \"free\" | \"row\" | \"column\" | \"stack\";\n    padding?: number;\n    gap?: number;\n  };\n  /** `type: \"section\"` only (W2) — two-mode section lock. */\n  locked?: \"all\" | \"background\";\n  /** arrow-shape | chevron | parallelogram: \"left\" | \"right\" (default \"right\");\n      triangle: \"up\" | \"down\" (default \"up\"). */\n  direction?: CanvasShapeDirection;\n  /** `type: \"code-block\"` only — selects the minimal tokenizer in code-tokenizer.ts. */\n  language?: string;\n  /** `type: \"sticky\"` only. */\n  author?: string;\n  /** `type: \"icon\"` only (W5) — REQUIRED glyph selector (26 ids in CanvasIconGlyph);\n      missing/unknown is a hard validation error. */\n  icon?: CanvasIconGlyph;\n};"
+        }
+      ],
+      "children": []
+    },
+    "b-model-code-connection": {
+      "id": "b-model-code-connection",
+      "flavour": "code",
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "// packages/canvas/src/state/schema/connections.ts\nexport type CanvasConnectionStyle = \"solid\" | \"dotted\" | \"elbow\" | \"smooth\";\n\nexport type CanvasArrowDirection = \"none\" | \"forward\" | \"back\" | \"both\";\n\nexport type CanvasConnectionEndpoint = {\n  objectId: string;\n  anchor?: \"top\" | \"right\" | \"bottom\" | \"left\" | \"center\";\n  /** Relative anchor point on the endpoint object's bounds, [0..1, 0..1] fractions of\n      (width, height) from the top-left corner. When present, routing uses it as a more\n      precise anchor than the coarse `anchor` side. */\n  position?: [number, number];\n};\n\nexport type InteractiveCanvasConnection = {\n  id: string;\n  from: CanvasConnectionEndpoint;\n  to: CanvasConnectionEndpoint;\n  label?: string;\n  style?: CanvasConnectionStyle;\n  arrow?: CanvasArrowDirection;\n  role?: string;\n  /** Stroke color pick (P1, D1/D12) — a swatch id from the closed 10-pick roster, resolved\n      to the palette ink hex via the connector role. Absent = the default \"gray\". */\n  color?: CanvasColor;\n  /** Optional world-space polyline override. When present, `routeConnection` honors these\n      points verbatim instead of recomputing an obstacle-avoiding route. */\n  waypoints?: Array<[number, number]>;\n};"
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-color-migration": {
+      "id": "b-model-schema-color-migration",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The cutover was a hard, one-time migration (D10): "
+        },
+        {
+          "insert": "tools/migrate-canvas-docs/migrate.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a bun script, idempotent, in-place over "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") mapped every legacy color — "
+        },
+        {
+          "insert": "style.fill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "style.stroke",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hexes, "
+        },
+        {
+          "insert": "paletteToken",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "tone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", section "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " names, raw connector hexes — to its nearest swatch id, and collapsed "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " into the single "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field (section "
+        },
+        {
+          "insert": "title ?? label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; sticky/code-block "
+        },
+        {
+          "insert": "body",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; everything else "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a non-empty body appended on a new line). The legacy fields were deleted from the schema and validator with no legacy read path — an old document's leftover keys are simply ignored as unknown."
+        }
+      ],
+      "children": []
+    },
+    "b-model-object-ref-stale": {
+      "id": "b-model-object-ref-stale",
+      "flavour": "observation",
+      "props": {
+        "title": "STALE NOTICE — pre-overhaul content below"
+      },
+      "text": [
+        {
+          "insert": "The per-type walkthrough below predates the object-definition overhaul: mentions of label/body/title fields, tones, palette tokens, section tint families, and CanvasStage-resident per-shape layout are historical. For the shipped contract — the single "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field, the "
+        },
+        {
+          "insert": "color?: CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " 10-pick color model and per-kind role tables, def-declared text slots, and def-declared outlines — see "
+        },
+        {
+          "insert": "canvas-10-system-design-10-shape-api",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "canvas-10-system-design-10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": "; where this section and that doc disagree, that doc (and the code it cites) wins."
+        }
+      ],
+      "children": []
     }
   }
 }

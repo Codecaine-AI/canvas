@@ -13,7 +13,7 @@ import type { InteractiveCanvasObject } from "../../../state/schema";
  * has both, this is just a `Pick` of the fields actually used so the type
  * stays in lockstep with schema.ts without pulling in the full object shape.
  */
-export type IconShapeBodyObject = Pick<InteractiveCanvasObject, "label" | "icon"> & {
+export type IconShapeBodyObject = Pick<InteractiveCanvasObject, "icon"> & {
   geometry: Pick<InteractiveCanvasObject["geometry"], "width" | "height">;
 };
 
@@ -36,25 +36,20 @@ function renderGlyphElement(element: IconGlyphElement, key: number) {
 
 /**
  * Pure presentational body for the `icon` shape family: renders the resolved
- * glyph centered above the object's label, mirroring the label-below-icon
- * layout FigJam-restyled person/chat/chip-icon shapes use in CanvasStage.tsx
- * (`.interactive-canvas-label-below-icon` — bold black text under a large
- * centered glyph, no chip background behind the glyph itself).
+ * glyph, centered. The object's text renders separately through the shared
+ * "below" text slot (objects/text-slots.ts — bold black text in the band
+ * under the glyph), so this component
+ * is glyph-only since the P2 text unification.
  *
- * This component only renders the glyph + label content; the caller (the
- * `icon`-case wiring in CanvasStage, added by a later wave) is responsible
- * for the outer button/positioning chrome, matching how other shape bodies
- * are composed in this file.
+ * The caller (`objects/shapes/icon/def.tsx`) is responsible for the outer
+ * button/positioning chrome, matching how other shape bodies are composed.
  */
 export function IconShapeBody({
   object,
   colors,
-  hideLabel,
 }: {
   object: IconShapeBodyObject;
   colors?: IconShapeBodyColors;
-  /** True while this object's label is being edited inline — hides the static label span but keeps the glyph visible (matches the person/chat/chip-icon convention in CanvasStage). */
-  hideLabel?: boolean;
 }) {
   const glyphId = object.icon as IconGlyphId | undefined;
   const glyph = glyphId ? ICON_GLYPHS[glyphId] : undefined;
@@ -100,14 +95,6 @@ export function IconShapeBody({
         ) : null}
         {glyph?.elements.map((element, index) => renderGlyphElement(element, index))}
       </svg>
-      {!hideLabel && (
-        <span
-          className="interactive-canvas-object-label interactive-canvas-label-below-icon"
-          style={{ pointerEvents: "auto" }}
-        >
-          {object.label}
-        </span>
-      )}
     </div>
   );
 }

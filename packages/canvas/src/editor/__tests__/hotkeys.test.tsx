@@ -7,14 +7,14 @@ import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { useCanvasHotkeys } from "../use-canvas-hotkeys";
-import { SECTION_GEOMETRY } from "../../objects/section/def";
+import { TITLE_CHIP } from "../../objects/text-slots";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 100 },
     ...overrides,
   };
@@ -91,8 +91,7 @@ function sectionRenameDocument(): InteractiveCanvasDocument {
       {
         id: "section-a",
         type: "section",
-        label: "Original section",
-        title: "Original section",
+        text: "Original section",
         tint: "purple",
         geometry: { x: 100, y: 80, width: 520, height: 360 },
         style: { shape: "section" },
@@ -234,7 +233,7 @@ describe("useCanvasHotkeys", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "section" });
   });
 
-  it("maps the checkpoint-5 expanded-vocabulary letters (O/U/B/M) to canvas.setTool", () => {
+  it("maps the remaining checkpoint-5 expanded-vocabulary letters (O/B) to canvas.setTool", () => {
     const { dispatch } = setup();
 
     act(() => {
@@ -243,19 +242,20 @@ describe("useCanvasHotkeys", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "document" });
 
     act(() => {
-      dispatchKeyDown({ key: "u" });
-    });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "person" });
-
-    act(() => {
       dispatchKeyDown({ key: "b" });
     });
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "database" });
+  });
+
+  it("does not dispatch for retired person/chat hotkeys", () => {
+    const { dispatch } = setup();
 
     act(() => {
+      dispatchKeyDown({ key: "u" });
       dispatchKeyDown({ key: "m" });
     });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "chat" });
+
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it("cancels the active interaction machine gesture on Escape instead of clearing selection", () => {
@@ -335,7 +335,7 @@ describe("useCanvasHotkeys", () => {
   });
 });
 
-describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", () => {
+describe("InteractiveCanvasEditor: double-click inline text editing (4.2.1)", () => {
   function stubStageRect() {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
@@ -421,7 +421,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
     }
   });
 
-  it("double-clicking an object opens a textarea seeded with its label, and Enter commits canvas.updateObject", () => {
+  it("double-clicking an object opens a textarea seeded with its text, and Enter commits canvas.updateObject", () => {
     const restoreRect = stubStageRect();
     try {
       const saved: InteractiveCanvasDocument[] = [];
@@ -438,22 +438,22 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       const object = screen.getByRole("button", { name: /User brief/i });
       fireEvent.doubleClick(object, { clientX: 232, clientY: 244 });
 
-      const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
+      const textarea = screen.getByRole("textbox", { name: "Object text" }) as HTMLTextAreaElement;
       expect(textarea.value).toBe("User brief");
-      // Static label hides on the edited object while editing (avoids double rendering).
+      // Static text hides on the edited object while editing (avoids double rendering).
       expect(object.querySelector(".interactive-canvas-object-label")).toBeNull();
 
       fireEvent.change(textarea, { target: { value: "Renamed brief" } });
       fireEvent.keyDown(textarea, { key: "Enter" });
 
-      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
       expect(screen.getAllByText("Renamed brief").length).toBeGreaterThan(0);
     } finally {
       restoreRect();
     }
   });
 
-  it("Escape cancels an inline label edit without committing changes", () => {
+  it("Escape cancels an inline text edit without committing changes", () => {
     const restoreRect = stubStageRect();
     try {
       render(
@@ -467,11 +467,11 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       const object = screen.getByRole("button", { name: /User brief/i });
       fireEvent.doubleClick(object, { clientX: 232, clientY: 244 });
 
-      const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
+      const textarea = screen.getByRole("textbox", { name: "Object text" }) as HTMLTextAreaElement;
       fireEvent.change(textarea, { target: { value: "Should not stick" } });
       fireEvent.keyDown(textarea, { key: "Escape" });
 
-      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
       expect(screen.getAllByText("User brief").length).toBeGreaterThan(0);
       expect(screen.queryByText("Should not stick")).toBeNull();
     } finally {
@@ -493,17 +493,17 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       const object = screen.getByRole("button", { name: /User brief/i });
       fireEvent.doubleClick(object, { clientX: 232, clientY: 244 });
 
-      const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
+      const textarea = screen.getByRole("textbox", { name: "Object text" }) as HTMLTextAreaElement;
       fireEvent.keyDown(textarea, { key: "Enter", shiftKey: true });
 
       // Still open — shift-Enter must not commit/close the editor.
-      expect(screen.getByRole("textbox", { name: "Object label" })).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Object text" })).toBeTruthy();
     } finally {
       restoreRect();
     }
   });
 
-  it("blur commits the inline label edit", () => {
+  it("blur commits the inline text edit", () => {
     const restoreRect = stubStageRect();
     try {
       render(
@@ -517,18 +517,18 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       const object = screen.getByRole("button", { name: /User brief/i });
       fireEvent.doubleClick(object, { clientX: 232, clientY: 244 });
 
-      const textarea = screen.getByRole("textbox", { name: "Object label" }) as HTMLTextAreaElement;
+      const textarea = screen.getByRole("textbox", { name: "Object text" }) as HTMLTextAreaElement;
       fireEvent.change(textarea, { target: { value: "Blurred rename" } });
       fireEvent.blur(textarea);
 
-      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
       expect(screen.getAllByText("Blurred rename").length).toBeGreaterThan(0);
     } finally {
       restoreRect();
     }
   });
 
-  it("double-clicking a section body selects but does not open the label editor", () => {
+  it("double-clicking a section body selects but does not open the text editor", () => {
     const restoreRect = stubStageRect();
     try {
       render(<InteractiveCanvasEditor document={sectionRenameDocument()} onSave={() => undefined} onCancel={() => undefined} />);
@@ -538,7 +538,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       fireEvent.doubleClick(section, { clientX: 360, clientY: 280 });
 
       expect(screen.getByRole("button", { name: /Original section/i }).getAttribute("data-selected")).toBe("true");
-      expect(screen.queryByRole("textbox", { name: "Object label" })).toBeNull();
+      expect(screen.queryByRole("textbox", { name: "Object text" })).toBeNull();
       expect(screen.queryByRole("textbox", { name: "Section title" })).toBeNull();
     } finally {
       restoreRect();
@@ -558,9 +558,9 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
       expect(input.value).toBe("Original section");
       expect(input.tagName).toBe("INPUT");
       expect(input.className).toContain("interactive-canvas-section-title-editor");
-      expect(input.style.left).toBe(`${100 + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`);
-      expect(input.style.top).toBe(`${80 + SECTION_GEOMETRY.titleChip.insetFromSectionCornerPx}px`);
-      expect(input.style.height).toBe(`${SECTION_GEOMETRY.titleChip.heightPx}px`);
+      expect(input.style.left).toBe(`${100 + TITLE_CHIP.insetFromSectionCornerPx}px`);
+      expect(input.style.top).toBe(`${80 + TITLE_CHIP.insetFromSectionCornerPx}px`);
+      expect(input.style.height).toBe(`${TITLE_CHIP.heightPx}px`);
       expect(Number.parseFloat(input.style.width)).toBeLessThan(520);
     } finally {
       restoreRect();
@@ -598,7 +598,7 @@ describe("InteractiveCanvasEditor: double-click inline label editing (4.2.1)", (
   });
 });
 
-describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)", () => {
+describe("InteractiveCanvasEditor: Inspector color section (P1 — one 10-pick roster)", () => {
   function stubStageRect() {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
@@ -642,11 +642,10 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
         {
           id: "section-a",
           type: "section",
-          label: "Section A",
-          title: "Section A",
-          tint: "blue",
+          text: "Section A",
+          color: "blue",
           geometry: { x: 120, y: 120, width: 320, height: 220 },
-          style: { shape: "section", fill: "#C2E5FF", stroke: "#3DADFF", strokeStyle: "solid" },
+          style: { shape: "section", strokeStyle: "solid" },
         },
       ],
       connections: [],
@@ -684,7 +683,7 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     expect(screen.getByText("Selection context")).toBeTruthy();
   });
 
-  it("clicking a swatch sets paletteToken on the selected object without touching its shape/tone", () => {
+  it("clicking a swatch sets the color pick on the selected object without touching its shape", () => {
     const restoreRect = stubStageRect();
     try {
       render(
@@ -699,7 +698,7 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
       const object = screen.getByRole("button", { name: /User brief/i });
       pointerClick(object, { clientX: 232, clientY: 244 });
 
-      const swatch = document.querySelector('[data-canvas-palette-swatch="hot"]') as HTMLElement;
+      const swatch = document.querySelector('[data-canvas-color-swatch="orange"]') as HTMLElement;
       expect(swatch).toBeTruthy();
       fireEvent.click(swatch);
 
@@ -710,7 +709,7 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
     }
   });
 
-  it("applies the palette token to every selected object when multiple are selected (shift-click)", () => {
+  it("applies the color pick to every selected object when multiple are selected (shift-click)", () => {
     const restoreRect = stubStageRect();
     try {
       render(
@@ -724,27 +723,32 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       const brief = screen.getByRole("button", { name: /User brief/i });
       const summarizes = screen.getByRole("button", { name: /Agent summarizes/i });
+      const stage = document.querySelector("[data-canvas-stage='true']") as HTMLElement;
 
-      pointerClick(brief, { clientX: 232, clientY: 244 });
-      pointerClick(summarizes, { clientX: 536, clientY: 220, shiftKey: true });
+      // Marquee-select both objects (identity viewport: screen == world).
+      fireEvent.pointerDown(stage, { pointerId: 21, button: 0, clientX: 130, clientY: 160 });
+      fireEvent.pointerMove(window, { pointerId: 21, clientX: 660, clientY: 300 });
+      fireEvent.pointerUp(window, { pointerId: 21, clientX: 660, clientY: 300 });
+      expect(brief.getAttribute("data-selected")).toBe("true");
+      expect(summarizes.getAttribute("data-selected")).toBe("true");
 
-      const swatch = document.querySelector('[data-canvas-palette-swatch="memory"]') as HTMLElement;
+      const swatch = document.querySelector('[data-canvas-color-swatch="violet"]') as HTMLElement;
       fireEvent.click(swatch);
 
-      // Both objects should now render their SVG-less rounded-rect chrome
-      // recolored via the "memory" token's inline style values (checked via
-      // the shared theme helper so this test doesn't hardcode the raw
-      // color-mix string).
+      // Both objects take the pick: their chrome recolors to the violet
+      // shape cells (pastel fill + saturated border).
       const containerEl = window.document.body;
-      expect(containerEl.querySelectorAll('[data-canvas-palette-swatch="memory"][data-selected="true"]').length).toBe(1);
+      expect(containerEl.querySelectorAll('[data-canvas-color-swatch="violet"][data-selected="true"]').length).toBe(1);
       expect(brief.getAttribute("data-canvas-object-shape")).toBe("rounded-rect");
       expect(summarizes.getAttribute("data-canvas-object-shape")).toBe("rounded-rect");
+      expect(brief.style.background).toBe("#DCCCFF");
+      expect(summarizes.style.background).toBe("#DCCCFF");
     } finally {
       restoreRect();
     }
   });
 
-  it("the 'none' swatch clears the palette token, falling back to tone", () => {
+  it("renders all 10 swatches and picking another one moves the selection ring", () => {
     const restoreRect = stubStageRect();
     try {
       render(
@@ -759,15 +763,17 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
       const object = screen.getByRole("button", { name: /User brief/i });
       pointerClick(object, { clientX: 232, clientY: 244 });
 
-      const hotSwatch = document.querySelector('[data-canvas-palette-swatch="hot"]') as HTMLElement;
-      fireEvent.click(hotSwatch);
-      expect(hotSwatch.getAttribute("data-selected")).toBe("true");
+      expect(document.querySelectorAll("[data-canvas-color-swatch]").length).toBe(10);
 
-      const noneSwatch = document.querySelector('[data-canvas-palette-swatch="none"]') as HTMLElement;
-      fireEvent.click(noneSwatch);
+      const orangeSwatch = document.querySelector('[data-canvas-color-swatch="orange"]') as HTMLElement;
+      fireEvent.click(orangeSwatch);
+      expect(orangeSwatch.getAttribute("data-selected")).toBe("true");
 
-      expect(noneSwatch.getAttribute("data-selected")).toBe("true");
-      expect(hotSwatch.getAttribute("data-selected")).toBeNull();
+      const tealSwatch = document.querySelector('[data-canvas-color-swatch="teal"]') as HTMLElement;
+      fireEvent.click(tealSwatch);
+
+      expect(tealSwatch.getAttribute("data-selected")).toBe("true");
+      expect(orangeSwatch.getAttribute("data-selected")).toBeNull();
     } finally {
       restoreRect();
     }
@@ -786,22 +792,22 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       selectSection();
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      expect(container.querySelectorAll("[data-section-tint]").length).toBe(10);
+      expect(container.querySelectorAll("[data-canvas-color]").length).toBe(10);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
 
       fireEvent.click(container.querySelector('[data-toolbar-action="section-border-style"]')!);
-      expect(container.querySelectorAll("[data-section-tint]").length).toBe(0);
+      expect(container.querySelectorAll("[data-canvas-color]").length).toBe(0);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeTruthy();
 
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      expect(container.querySelectorAll("[data-section-tint]").length).toBe(10);
+      expect(container.querySelectorAll("[data-canvas-color]").length).toBe(10);
       expect(container.querySelector('[data-toolbar-flyout="section-border"]')).toBeNull();
     } finally {
       restoreRect();
     }
   });
 
-  it("section tint pick updates fill and border together, clearing style overrides", () => {
+  it("section color pick updates fill and border together through the section role cells", () => {
     const restoreRect = stubStageRect();
     try {
       const { container } = render(
@@ -814,12 +820,12 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
 
       const section = selectSection();
       fireEvent.click(container.querySelector('[data-toolbar-action="color"]')!);
-      fireEvent.click(container.querySelector('[data-section-tint="green"]')!);
+      fireEvent.click(container.querySelector('[data-canvas-color="green"]')!);
 
-      // One pick drives both colors: the green family's tint + chipBorder win
-      // over the fixture's explicit fill/stroke overrides (which are cleared).
+      // One pick drives both colors through the section role cells: body =
+      // tint, frame border = the title chip's FILL color (§3.2).
       expect(section.style.background).toBe("#EBFFEE");
-      expect(section.style.borderColor).toBe("#66D575");
+      expect(section.style.borderColor).toBe("#DDF8E2");
     } finally {
       restoreRect();
     }
@@ -841,8 +847,9 @@ describe("InteractiveCanvasEditor: Inspector color section (checkpoint 5, D16)",
       fireEvent.click(container.querySelector('[data-section-border-style="dashed"]')!);
 
       expect(section.style.borderStyle).toBe("dashed");
-      expect(section.style.background).toBe("#C2E5FF");
-      expect(section.style.borderColor).toBe("#3DADFF");
+      // Colors are untouched: the blue section cells (tint fill, chip-fill border).
+      expect(section.style.background).toBe("#F5FBFF");
+      expect(section.style.borderColor).toBe("#C2E5FF");
     } finally {
       restoreRect();
     }
@@ -957,7 +964,7 @@ describe("InteractiveCanvasEditor: Shapes creation flow (panel-armed repeat plac
     }
   });
 
-  it("an Advanced (icon) pick ghosts and places the actual glyph with its display name", () => {
+  it("an Advanced (icon) pick ghosts and places the actual glyph", () => {
     const restoreRect = stubStageRect();
     try {
       const { container, stage } = renderEditor();
@@ -966,16 +973,15 @@ describe("InteractiveCanvasEditor: Shapes creation flow (panel-armed repeat plac
 
       fireEvent.pointerMove(stage, { clientX: 400, clientY: 300 });
       const ghost = container.querySelector("[data-canvas-place-ghost]") as HTMLElement;
-      expect(ghost.textContent).toContain("Database");
+      expect(ghost.querySelector('[data-canvas-icon-id="database"]')).toBeTruthy();
 
       placeAt(stage, 400, 300);
       expect(placedObjectCount(container)).toBe(1);
       const placed = container.querySelector(
         '[data-canvas-object-layer] .interactive-canvas-object',
       ) as HTMLElement;
-      expect(placed.textContent).toContain("Database");
       // The glyph made it onto the object — an icon object without one renders blank.
-      expect(placed.querySelector("svg")).toBeTruthy();
+      expect(placed.querySelector('[data-canvas-icon-id="database"] svg')).toBeTruthy();
     } finally {
       restoreRect();
     }

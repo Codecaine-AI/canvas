@@ -8,16 +8,24 @@
  * ./types. Consumers import everything through ./interaction (the barrel).
  */
 import type { CanvasAction, CanvasSelection } from "../state/actions";
+import { objectById } from "../state/geometry";
+import { connectorBendSegments } from "../routing/bend-editing";
+import { routeConnection } from "../routing/routing";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";
 import { stepFromMarquee } from "./gestures/marquee";
 import {
   defaultGeometryForPlacement,
   objectTypeForTool,
+  placePreviewColorFor,
   placePreviewOverlayFor,
   stepFromPlace,
 } from "./gestures/place";
-import { stepFromConnectorCreate, stepFromConnectorEndpointDrag } from "./gestures/connectors";
+import {
+  stepFromConnectorBendDrag,
+  stepFromConnectorCreate,
+  stepFromConnectorEndpointDrag,
+} from "./gestures/connectors";
 import {
   DRAG_THRESHOLD,
   IDLE_INTERACTION_STATE,
@@ -26,6 +34,7 @@ import {
   toIdle,
   worldDistance,
   type CanvasPointerEvent,
+  type ConnectorBendDragGesture,
   type ConnectorCreateGesture,
   type ConnectorEndpointDragGesture,
   type InteractionContext,
@@ -101,6 +110,8 @@ export function stepInteraction(
       return stepFromConnectorEndpointDrag(state, event, ctx);
     case "connector-create":
       return stepFromConnectorCreate(state, event, ctx);
+    case "connector-bend-drag":
+      return stepFromConnectorBendDrag(state, event, ctx);
     default:
       return toIdle();
   }
@@ -116,12 +127,12 @@ function stepFromIdle(
   if (ctx.tool === "hand") return toIdle();
 
   if (event.type === "double") {
-    // Double-click on an existing object: start editing its label inline.
+    // Double-click on an existing object: start editing its text in place.
     if (event.hit.kind === "object") {
       return {
         state: IDLE_INTERACTION_STATE,
         dispatch: [],
-        overlay: { editObjectLabelId: event.hit.objectId },
+        overlay: { editObjectTextId: event.hit.objectId },
       };
     }
     return toIdle();
@@ -167,13 +178,52 @@ function stepFromIdle(
     return { state: pending, dispatch: [], overlay: { connectorDrag: pending } };
   }
 
+  if (event.hit.kind === "bend-segment") {
+    const hit = event.hit;
+    const connection = ctx.document.connections.find((candidate) => candidate.id === hit.connectionId);
+    if (!connection) return toIdle();
+    const fromObject = objectById(ctx.document, connection.from.objectId);
+    const toObject = objectById(ctx.document, connection.to.objectId);
+    if (!fromObject || !toObject) return toIdle();
+
+    const routed = routeConnection(fromObject, toObject, connection, ctx.document.objects);
+    const points = routed.points ?? [];
+    if (!connectorBendSegments(points).some((segment) => segment.index === hit.segmentIndex)) {
+      return toIdle();
+    }
+
+    const pending: ConnectorBendDragGesture = {
+      kind: "connector-bend-drag",
+      connectionId: hit.connectionId,
+      segmentIndex: hit.segmentIndex,
+      startWorld: event.world,
+      point: event.world,
+      startPoints: points,
+      currentPoints: points,
+    };
+    return {
+      state: pending,
+      dispatch: [],
+      overlay: {
+        connectorDrag: {
+          connectionId: pending.connectionId,
+          bendSegmentIndex: pending.segmentIndex,
+          point: pending.point,
+          points: pending.currentPoints,
+        },
+      },
+    };
+  }
+
   if (event.hit.kind === "port") {
     const hit = event.hit;
     const pending: ConnectorCreateGesture = {
       kind: "connector-create",
       fromObjectId: hit.objectId,
       fromAnchor: hit.anchor,
+      startWorld: event.world,
       point: event.world,
+      hasDragged: false,
     };
     return { state: pending, dispatch: [], overlay: { connectorDrag: pending } };
   }
@@ -201,6 +251,7 @@ function stepFromIdle(
         armedObjectTypeForClick,
         defaultGeometryForPlacement(armedObjectTypeForClick, event.world),
         ctx.armedShape,
+        placePreviewColorFor(armedObjectTypeForClick, ctx),
       ),
     };
   }
@@ -274,6 +325,7 @@ function stepFromIdle(
         armedObjectType,
         defaultGeometryForPlacement(armedObjectType, event.world),
         ctx.armedShape,
+        placePreviewColorFor(armedObjectType, ctx),
       ),
     };
   }

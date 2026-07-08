@@ -5,11 +5,11 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../state/schema";
+import { connectorBendSegments } from "../../routing/bend-editing";
 import { routeConnection } from "../../routing/routing";
-import {
-  CONNECTOR_DASH_PATTERN_PX,
-  CONNECTOR_DEFAULT_COLOR,
-} from "../../objects/connector/def";
+import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
+import { resolveConnectorStroke } from "../../palette";
+import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
 
 /** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
 const CONNECTOR_STROKE_WIDTH_PX = 4;
@@ -17,15 +17,18 @@ const CONNECTOR_STROKE_WIDTH_PX = 4;
 const SELECTION_BLUE = "#0D99FF";
 
 const CONNECTION_HIT_WIDTH = 14;
-const ENDPOINT_HANDLE_RADIUS = 6;
-/** Side length of the render-only bend-affordance square at elbow corners (W3b stub). */
-const BEND_STUB_SIZE = 12;
+const ENDPOINT_HANDLE_RADIUS_PX = 7.5;
+const ENDPOINT_HANDLE_STROKE_WIDTH_PX = 2.5;
+const BEND_HANDLE_LENGTH_PX = 26;
+const BEND_HANDLE_THICKNESS_PX = 8;
+const BEND_HANDLE_RADIUS_PX = 4;
+export const BEND_HANDLES_MIN_ZOOM = 0.4;
 
 /**
  * One routed connector: an invisible wide hit path (for click-to-select),
- * the visible routed path (elbow/smooth/straight per connection.style, with
- * forward/back/both arrowheads), and — when selected — small endpoint handles
- * at the routed start/end so 3.2.2's endpoint-drag gesture has a hit target.
+ * the visible routed path (elbow, with forward/back/both arrowheads), and —
+ * when selected — small endpoint handles at the routed start/end so 3.2.2's
+ * endpoint-drag gesture has a hit target.
  */
 export function Connector({
   document,
@@ -34,6 +37,7 @@ export function Connector({
   toObject,
   selected,
   dimmed,
+  zoom,
   onDoubleClick,
 }: {
   document: InteractiveCanvasDocument;
@@ -43,23 +47,33 @@ export function Connector({
   selected: boolean;
   /** True while this connector's own endpoint is mid-drag — visible path dims, hit path stays inert. */
   dimmed?: boolean;
+  zoom: number;
   onDoubleClick?: (connectionId: string) => void;
 }) {
   const routed = routeConnection(fromObject, toObject, connection, document.objects);
+  const safeZoom = Math.max(zoom, 0.001);
   // FigJam's dash pattern (theme/tokens.ts, CONNECTOR_DASH_PATTERN_PX).
   const strokeDasharray =
-    connection.style === "dotted" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
+    connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
   const arrow = connection.arrow ?? "forward";
   const showForwardArrow = arrow === "forward" || arrow === "both";
   const showBackArrow = arrow === "back" || arrow === "both";
-  // Per-connection color (W4) falling back to FigJam's chunky neutral gray —
-  // selection still recolors to the selection blue. Arrowheads inherit via the
-  // markers' fill="context-stroke" (see the <defs> block).
-  const stroke = selected ? "var(--primary)" : (connection.color ?? CONNECTOR_DEFAULT_COLOR);
-  // Bend-affordance stubs (W3b, render-only): the routed polyline's interior
-  // corners. Reroute editing is a later wave — these only show the affordance
-  // (translucent gray square + crosshair cursor) on the selected connector.
-  const bendPoints = selected ? (routed.points ?? []).slice(1, -1) : [];
+  // Per-connection color pick (P1) resolved through the palette's connector
+  // role cells, falling back to the neutral "gray" pick — selection still
+  // recolors to the selection blue (UI chrome, outside the palette).
+  // Arrowheads inherit via the markers' fill="context-stroke" (see <defs>).
+  const stroke = selected
+    ? "var(--primary)"
+    : resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
+  const bendSegments =
+    selected && safeZoom >= BEND_HANDLES_MIN_ZOOM
+      ? connectorBendSegments(routed.points ?? [])
+      : [];
+  const endpointRadius = ENDPOINT_HANDLE_RADIUS_PX / safeZoom;
+  const endpointStrokeWidth = ENDPOINT_HANDLE_STROKE_WIDTH_PX / safeZoom;
+  const bendHandleLength = BEND_HANDLE_LENGTH_PX / safeZoom;
+  const bendHandleThickness = BEND_HANDLE_THICKNESS_PX / safeZoom;
+  const bendHandleRadius = BEND_HANDLE_RADIUS_PX / safeZoom;
 
   return (
     <g data-canvas-connection-group={connection.id}>
@@ -90,30 +104,35 @@ export function Connector({
       />
       {selected && (
         <>
-          {/* Bend-affordance stubs (W3b, render-only): translucent gray square +
-              crosshair cursor at each elbow corner. No reroute editing yet. */}
-          {bendPoints.map((point, index) => (
+          {bendSegments.map((segment) => (
             <rect
-              key={`bend-${index}`}
-              x={point.x - BEND_STUB_SIZE / 2}
-              y={point.y - BEND_STUB_SIZE / 2}
-              width={BEND_STUB_SIZE}
-              height={BEND_STUB_SIZE}
-              rx={2}
-              fill="rgba(120, 120, 120, 0.35)"
-              data-canvas-bend-stub={connection.id}
-              style={{ pointerEvents: "all", cursor: "crosshair" }}
+              key={`bend-segment-${segment.index}`}
+              x={segment.midpoint.x - bendHandleLength / 2}
+              y={segment.midpoint.y - bendHandleThickness / 2}
+              width={bendHandleLength}
+              height={bendHandleThickness}
+              rx={bendHandleRadius}
+              fill={SELECTION_BLUE}
+              data-canvas-bend-segment={segment.index}
+              data-canvas-connection-id={connection.id}
+              transform={
+                segment.axis === "vertical"
+                  ? `rotate(90 ${segment.midpoint.x} ${segment.midpoint.y})`
+                  : undefined
+              }
+              style={{
+                pointerEvents: "all",
+                cursor: segment.axis === "horizontal" ? "ns-resize" : "ew-resize",
+              }}
             />
           ))}
-          {/* Hollow FigJam-blue endpoint circles (W3b): white fill + selection-
-              blue ring at both routed terminals — the endpoint-drag hit targets. */}
           <circle
             cx={routed.start.x}
             cy={routed.start.y}
-            r={ENDPOINT_HANDLE_RADIUS}
+            r={endpointRadius}
             fill="#FFFFFF"
             stroke={SELECTION_BLUE}
-            strokeWidth={1.5}
+            strokeWidth={endpointStrokeWidth}
             data-canvas-endpoint="from"
             data-canvas-connection-id={connection.id}
             style={{ pointerEvents: "all", cursor: "crosshair" }}
@@ -121,10 +140,10 @@ export function Connector({
           <circle
             cx={routed.end.x}
             cy={routed.end.y}
-            r={ENDPOINT_HANDLE_RADIUS}
+            r={endpointRadius}
             fill="#FFFFFF"
             stroke={SELECTION_BLUE}
-            strokeWidth={1.5}
+            strokeWidth={endpointStrokeWidth}
             data-canvas-endpoint="to"
             data-canvas-connection-id={connection.id}
             style={{ pointerEvents: "all", cursor: "crosshair" }}

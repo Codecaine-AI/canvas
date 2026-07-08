@@ -317,8 +317,8 @@ export function sectionCaptureMembers(
  * Transitive parentId-based descendants of a section (W6): every object whose
  * parentId chain leads to `sectionId`, including nested sections' members.
  * This is the persisted-membership counterpart to sectionCaptureMembers'
- * geometric probe — drag-carry, delete-cascade, and contentHidden all walk
- * this recorded chain. Returns a Set NOT including `sectionId` itself.
+ * geometric probe — drag-carry and delete-cascade walk this recorded chain.
+ * Returns a Set NOT including `sectionId` itself.
  */
 export function sectionDescendantIds(
   document: InteractiveCanvasDocument,

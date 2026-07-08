@@ -89,17 +89,12 @@ function routeAll(document: InteractiveCanvasDocument): Array<{
 }
 
 describe("routing — A* orthogonal integration (D33 thread B)", () => {
-  it("routes every elbow-style v2-flow connection without crossing a non-owner object's interior", () => {
-    // Obstacle-avoiding A* routing (routeOrthogonalAStar) only ever engages
-    // for `style: "elbow"` connections with no explicit waypoints/position
-    // override — those are the only cases where routeConnection is meant to
-    // detour around other shapes. "solid"/"dotted"/"smooth" connections are,
-    // by design (see routing.test.ts's pre-existing "places straight labels
-    // at the segment midpoint" contract), literal direct lines/curves between
-    // their two anchor points and may legitimately pass near or through
-    // unrelated shapes sitting on that line — that's not a routing bug.
+  it("routes every v2-flow connection without crossing a non-owner object's interior", () => {
+    // Obstacle-avoiding A* routing (routeOrthogonalAStar) is now the default
+    // for every connection without explicit waypoints. `style` controls only
+    // the rendered stroke pattern, not the route shape.
     const results = routeAll(v2FlowSampleDocument).filter(
-      ({ connection }) => connection.style === "elbow" && !connection.waypoints,
+      ({ connection }) => !connection.waypoints,
     );
     expect(results.length).toBeGreaterThan(0);
 
@@ -167,20 +162,20 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     const from: InteractiveCanvasObject = {
       id: "solo-a",
       type: "process",
-      label: "A",
+      text: "A",
       geometry: { x: 0, y: 0, width: 100, height: 60 },
     };
     const to: InteractiveCanvasObject = {
       id: "solo-b",
       type: "process",
-      label: "B",
+      text: "B",
       geometry: { x: 400, y: 300, width: 100, height: 60 },
     };
     const connection: InteractiveCanvasConnection = {
       id: "solo-connection",
       from: { objectId: "solo-a" },
       to: { objectId: "solo-b" },
-      style: "elbow",
+      style: "solid",
     };
 
     const routed = routeConnection(from, to, connection);
@@ -193,20 +188,20 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     const from: InteractiveCanvasObject = {
       id: "wp-a",
       type: "process",
-      label: "A",
+      text: "A",
       geometry: { x: 0, y: 0, width: 100, height: 60 },
     };
     const to: InteractiveCanvasObject = {
       id: "wp-b",
       type: "process",
-      label: "B",
+      text: "B",
       geometry: { x: 300, y: 0, width: 100, height: 60 },
     };
     const connection: InteractiveCanvasConnection = {
       id: "wp-connection",
       from: { objectId: "wp-a", anchor: "right" },
       to: { objectId: "wp-b", anchor: "left" },
-      style: "elbow",
+      style: "solid",
       waypoints: [
         [150, 30],
         [150, 200],
@@ -226,13 +221,13 @@ describe("routing — A* orthogonal integration (D33 thread B)", () => {
     const from: InteractiveCanvasObject = {
       id: "pos-a",
       type: "process",
-      label: "A",
+      text: "A",
       geometry: { x: 0, y: 0, width: 100, height: 60 },
     };
     const to: InteractiveCanvasObject = {
       id: "pos-b",
       type: "process",
-      label: "B",
+      text: "B",
       geometry: { x: 300, y: 0, width: 100, height: 60 },
     };
     const connection: InteractiveCanvasConnection = {

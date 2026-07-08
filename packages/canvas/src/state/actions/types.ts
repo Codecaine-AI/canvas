@@ -28,16 +28,13 @@ export type CanvasTool =
   | "annotation"
   // D16 — expanded vocabulary (checkpoint 5):
   | "document"
-  | "person"
   | "database"
-  | "chat"
   // W2 — FigJam sections + V2 Flow shape vocabulary:
   | "section"
   | "pill"
   | "arrow-shape"
   | "predefined-process"
   | "code-block"
-  | "chip-icon"
   // W5 — FigJam parity shape set (Wave A): one tool per new placeable object
   // type, mirroring the 1:1 tool<->type pattern every prior wave established
   // above (ShapesPanel/dock wiring for these is Wave C's concern, not this

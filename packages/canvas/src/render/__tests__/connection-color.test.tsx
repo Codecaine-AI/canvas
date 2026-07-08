@@ -15,20 +15,19 @@ afterEach(() => {
 });
 
 /**
- * W4 blocker: connections carry an additive `color?: string` (any non-empty
- * string; hex expected) that round-trips through schema validation, is
- * patchable via canvas.updateConnection, and is wired to the connector
- * selection toolbar's color flyout.
+ * P1: connections carry `color?: CanvasColor` (a swatch id from the closed
+ * 20-id roster) that round-trips through schema validation, is patchable via
+ * canvas.updateConnection, and is wired to the shared color flyout.
  */
 
-function makeDocument(color?: string): InteractiveCanvasDocument {
+function makeDocument(color?: InteractiveCanvasDocument["connections"][number]["color"]): InteractiveCanvasDocument {
   return {
     schemaVersion: 1,
     id: "connection-color-doc",
     mode: "diagram",
     objects: [
-      { id: "a", type: "process", label: "A", geometry: { x: 40, y: 40, width: 160, height: 96 } },
-      { id: "b", type: "process", label: "B", geometry: { x: 440, y: 40, width: 160, height: 96 } },
+      { id: "a", type: "process", text: "A", geometry: { x: 40, y: 40, width: 160, height: 96 } },
+      { id: "b", type: "process", text: "B", geometry: { x: 440, y: 40, width: 160, height: 96 } },
     ],
     connections: [
       {
@@ -44,18 +43,19 @@ function makeDocument(color?: string): InteractiveCanvasDocument {
 }
 
 describe("schema: connection color round-trip", () => {
-  it("keeps a valid color string through validation", () => {
-    const result = validateInteractiveCanvasDocument(makeDocument("#EB7500"));
+  it("keeps a valid color pick through validation", () => {
+    const result = validateInteractiveCanvasDocument(makeDocument("orange"));
     if (!result.ok) throw new Error("expected valid document");
-    expect(result.document.connections[0]!.color).toBe("#EB7500");
+    expect(result.document.connections[0]!.color).toBe("orange");
   });
 
-  it("drops an empty/whitespace color and leaves absent colors absent", () => {
+  it("drops a non-roster color (e.g. a legacy raw hex) with a warning and leaves absent colors absent", () => {
     const raw = makeDocument() as unknown as Record<string, unknown>;
-    (raw.connections as Array<Record<string, unknown>>)[0]!.color = "   ";
+    (raw.connections as Array<Record<string, unknown>>)[0]!.color = "#EB7500";
     const result = validateInteractiveCanvasDocument(raw);
     if (!result.ok) throw new Error("expected valid document");
     expect(result.document.connections[0]!.color).toBeUndefined();
+    expect((result.warnings ?? []).map((warning) => warning.message).join(" ")).toContain("#EB7500");
 
     const absent = validateInteractiveCanvasDocument(makeDocument());
     if (!absent.ok) throw new Error("expected valid document");
@@ -69,10 +69,10 @@ describe("actions: canvas.updateConnection color patch", () => {
     const next = reduceInteractiveCanvasState(state, {
       type: "canvas.updateConnection",
       connectionId: "connection-a",
-      patch: { color: "#3E9B4B" },
+      patch: { color: "green" },
     });
     const connection = next.document.connections[0]!;
-    expect(connection.color).toBe("#3E9B4B");
+    expect(connection.color).toBe("green");
     expect(connection.from).toEqual({ objectId: "a", anchor: "right" });
     expect(connection.to).toEqual({ objectId: "b", anchor: "left" });
     expect(connection.style).toBe("solid");
@@ -130,17 +130,18 @@ describe("editor: connector color flyout (selection toolbar)", () => {
       const colorButton = await screen.findByRole("button", { name: "Line color" });
       fireEvent.click(colorButton);
 
-      // The connector palette shows the sampled FigJam connector colors.
-      const popover = container.querySelector("[data-color-palette-popover]")!;
-      expect(popover).toBeTruthy();
-      const orange = popover.querySelector('[data-color="#EB7500"]')!;
+      // The one shared 10-hue picker opens with identical swatch previews (D12).
+      const picker = container.querySelector("[data-canvas-color-picker]")!;
+      expect(picker).toBeTruthy();
+      expect(picker.querySelectorAll("[data-canvas-color]").length).toBe(10);
+      const orange = picker.querySelector('[data-canvas-color="orange"]')!;
       expect(orange).toBeTruthy();
       fireEvent.click(orange);
 
-      // The patch landed: saving round-trips the color onto the document.
+      // The patch landed: saving round-trips the color pick onto the document.
       fireEvent.click(screen.getByRole("button", { name: /save/i }));
       expect(saved.length).toBe(1);
-      expect(saved[0]!.connections[0]!.color).toBe("#EB7500");
+      expect(saved[0]!.connections[0]!.color).toBe("orange");
     } finally {
       restoreRect();
     }

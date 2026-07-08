@@ -1,6 +1,7 @@
+import { ColorPickerFlyout } from "./color-flyout";
 import { CONNECTOR_FLYOUTS } from "./connector-flyouts";
 import { SECTION_FLYOUTS } from "./section-flyouts";
-import { PaletteColorFlyout, SHAPE_FLYOUTS } from "./shape-flyouts";
+import { SHAPE_FLYOUTS } from "./shape-flyouts";
 import type { ToolbarFlyoutTable } from "./types";
 
 export type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
@@ -12,16 +13,17 @@ export type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
  * data-only control lists; whether an action opens a flyout is decided HERE —
  * use-selection-toolbar checks `action in toolbarFlyoutsForKind(kind)`.
  *
- * The sticky special kind only exposes the shared palette-color flyout
- * (no shape-swap). Every other toolbar-carrying kind — the whole shape family
+ * The sticky special kind only exposes the shared color flyout (no
+ * shape-swap). Every other toolbar-carrying kind — the whole shape family
  * plus icon/code-block, which all share the shape toolbar — falls through to
  * SHAPE_FLYOUTS, mirroring the pre-move SHAPE_TOOLBAR.flyouts attachment in
- * objects/shapes/base.tsx.
+ * objects/shapes/base.tsx. Every kind's `color` action opens the SAME
+ * ColorPickerFlyout (P1, D12).
  */
 const FLYOUTS_BY_KIND: Readonly<Record<string, ToolbarFlyoutTable>> = {
   connector: CONNECTOR_FLYOUTS,
   section: SECTION_FLYOUTS,
-  sticky: { color: PaletteColorFlyout },
+  sticky: { color: ColorPickerFlyout },
 };
 
 /**

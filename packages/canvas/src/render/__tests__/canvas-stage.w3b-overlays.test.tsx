@@ -12,7 +12,7 @@ afterEach(() => {
 /**
  * W3b render smokes: hover ports + snapped-anchor highlight during connector
  * drags, hollow FigJam-blue endpoint circles on selected connectors,
- * distribution (equal-spacing) guides, the bend-affordance stub, and the
+ * distribution (equal-spacing) guides, the segment bend pills, and the
  * per-connection color field (stroke + context-stroke arrowheads).
  */
 
@@ -27,13 +27,13 @@ function makeDocument(overrides: Partial<InteractiveCanvasDocument> = {}): Inter
       {
         id: "process-a",
         type: "process",
-        label: "Process A",
+        text: "Process A",
         geometry: { x: 0, y: 0, width: 160, height: 96 },
       },
       {
         id: "process-b",
         type: "process",
-        label: "Process B",
+        text: "Process B",
         geometry: { x: 400, y: 0, width: 160, height: 96 },
       },
     ],
@@ -116,6 +116,26 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
     );
     expect(container.querySelectorAll("[data-canvas-anchor-dot]").length).toBe(0);
   });
+
+  it("renders a source-shaped empty-canvas ghost and gray preview stroke", () => {
+    const { container } = render(
+      <CanvasStage document={makeDocument()} viewport={viewport} interactionOverlay={dragOverlay(undefined)} />,
+    );
+    const ghost = container.querySelector("[data-canvas-quick-connect-ghost]") as HTMLElement;
+    expect(ghost).toBeTruthy();
+    expect(ghost.style.opacity).toBe("0.35");
+
+    const ghostObject = ghost.querySelector('[data-canvas-object-id="process-a-quick-connect-ghost"]') as HTMLElement;
+    expect(ghostObject).toBeTruthy();
+    expect(ghostObject.getAttribute("data-canvas-object-type")).toBe("process");
+    expect(ghostObject.style.left).toBe("322px");
+    expect(ghostObject.style.top).toBe("0px");
+    expect(ghostObject.style.width).toBe("160px");
+    expect(ghostObject.style.height).toBe("96px");
+
+    const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
+    expect(previewPath.getAttribute("stroke")).toBe("#757575");
+  });
 });
 
 describe("CanvasStage: selected-connector chrome (W3b)", () => {
@@ -129,22 +149,24 @@ describe("CanvasStage: selected-connector chrome (W3b)", () => {
     expect(to).toBeTruthy();
     expect(from!.getAttribute("fill")).toBe("#FFFFFF");
     expect(from!.getAttribute("stroke")).toBe(SELECTION_BLUE);
+    expect(from!.getAttribute("r")).toBe("7.5");
+    expect(from!.getAttribute("stroke-width")).toBe("2.5");
     expect(to!.getAttribute("stroke")).toBe(SELECTION_BLUE);
   });
 
-  it("renders render-only bend-affordance stubs at elbow corners with a crosshair cursor", () => {
+  it("renders segment bend pills for every routed segment with axis cursors", () => {
     // A vertical offset between the two objects forces the elbow route to turn.
     const documentWithElbow = makeDocument({
       objects: [
-        { id: "process-a", type: "process", label: "A", geometry: { x: 0, y: 0, width: 160, height: 96 } },
-        { id: "process-b", type: "process", label: "B", geometry: { x: 400, y: 300, width: 160, height: 96 } },
+        { id: "process-a", type: "process", text: "A", geometry: { x: 0, y: 0, width: 160, height: 96 } },
+        { id: "process-b", type: "process", text: "B", geometry: { x: 400, y: 300, width: 160, height: 96 } },
       ],
       connections: [
         {
           id: "connection-a",
           from: { objectId: "process-a", anchor: "right" },
           to: { objectId: "process-b", anchor: "left" },
-          style: "elbow",
+          style: "solid",
           arrow: "forward",
         },
       ],
@@ -152,17 +174,36 @@ describe("CanvasStage: selected-connector chrome (W3b)", () => {
     const { container } = render(
       <CanvasStage document={documentWithElbow} viewport={viewport} selectedConnectionId="connection-a" />,
     );
-    const stubs = container.querySelectorAll('[data-canvas-bend-stub="connection-a"]');
-    expect(stubs.length).toBeGreaterThan(0);
-    const stub = stubs[0] as SVGRectElement;
-    expect(stub.style.cursor).toBe("crosshair");
+    const pills = container.querySelectorAll('[data-canvas-connection-id="connection-a"][data-canvas-bend-segment]');
+    expect(pills.length).toBeGreaterThan(0);
+    expect(container.querySelectorAll("[data-canvas-bend-stub]").length).toBe(0);
+    expect(pills[0]!.getAttribute("fill")).toBe(SELECTION_BLUE);
+    expect(pills[0]!.getAttribute("width")).toBe("26");
+    expect(pills[0]!.getAttribute("height")).toBe("8");
+
+    const cursors = new Set(Array.from(pills).map((pill) => (pill as SVGRectElement).style.cursor));
+    expect(cursors.has("ns-resize")).toBe(true);
+    expect(cursors.has("ew-resize")).toBe(true);
   });
 
-  it("renders no bend stubs when the connection is not selected", () => {
+  it("hides bend pills below 40% zoom but keeps endpoint handles visible", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={{ x: 0, y: 0, zoom: 0.39 }}
+        selectedConnectionId="connection-a"
+      />,
+    );
+    expect(container.querySelectorAll("[data-canvas-bend-segment]").length).toBe(0);
+    expect(container.querySelector('[data-canvas-endpoint="from"]')).toBeTruthy();
+    expect(container.querySelector('[data-canvas-endpoint="to"]')).toBeTruthy();
+  });
+
+  it("renders no bend pills when the connection is not selected", () => {
     const { container } = render(
       <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId={null} />,
     );
-    expect(container.querySelectorAll("[data-canvas-bend-stub]").length).toBe(0);
+    expect(container.querySelectorAll("[data-canvas-bend-segment]").length).toBe(0);
   });
 });
 
@@ -191,8 +232,8 @@ describe("CanvasStage: distribution guides (W3b)", () => {
   });
 });
 
-describe("CanvasStage: connection color (W4 blocker)", () => {
-  it("renders connection.color as the visible stroke, falling back to the default gray", () => {
+describe("CanvasStage: connection color (P1 palette picks)", () => {
+  it("resolves connection.color through the connector role cells, falling back to the default gray", () => {
     const documentWithColor = makeDocument({
       connections: [
         {
@@ -201,13 +242,14 @@ describe("CanvasStage: connection color (W4 blocker)", () => {
           to: { objectId: "process-b", anchor: "left" },
           style: "solid",
           arrow: "forward",
-          color: "#EB7500",
+          color: "orange",
         },
       ],
     });
     const { container } = render(<CanvasStage document={documentWithColor} viewport={viewport} />);
     const group = container.querySelector('[data-canvas-connection-group="connection-a"]');
     const visiblePath = group!.querySelectorAll("path")[1]!;
+    // The "orange" pick's connector cell is the sampled #EB7500 stroke.
     expect(visiblePath.getAttribute("stroke")).toBe("#EB7500");
 
     cleanup();
@@ -225,7 +267,7 @@ describe("CanvasStage: connection color (W4 blocker)", () => {
           id: "connection-a",
           from: { objectId: "process-a", anchor: "right" },
           to: { objectId: "process-b", anchor: "left" },
-          color: "#3E9B4B",
+          color: "green",
         },
       ],
     });

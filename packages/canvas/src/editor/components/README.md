@@ -27,7 +27,7 @@ INTERFACE icons only.
 | `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
 | `ShapesPanel.tsx` | `ShapesPanel` | Full-height left-docked white Shapes sidebar (Panel B). |
 | `ShapeSearchPopover.tsx` | `ShapeSearchPopover` | Compact dark "Search for a shape" popover (Panel A), opened by the shape-swap flyout. |
-| `ColorPalettePopover.tsx` | `ColorPalettePopover` | 2x11 swatch grid flyout (owns `PALETTE_POPOVER_SWATCHES`). |
+| `ColorPicker.tsx` | `ColorPicker` | THE one 10-pick color picker (P1, D12): the closed hue roster, identical previews for every kind, current-color ring, no custom color. |
 | `shape-previews.tsx` | `shapeCatalogPreview()` | Maps `objects/catalog.ts` entries → 20x20 preview SVGs (polygon generators / hand-drawn minis / glyph data). |
 | `editor-style.ts` | `EDITOR_STYLE` | Editor interface style constants (né theme/tokens' `CHROME`). |
 | `TopBar.tsx` | `TopBar` | Top bar: board title (optionally inline-editable), undo/reset history controls, save/cancel, host-provided leading/action slots. |

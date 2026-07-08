@@ -14,7 +14,7 @@ import type {
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",
-    label: overrides.id,
+    text: overrides.id,
     geometry: { x: 0, y: 0, width: 100, height: 60 },
     ...overrides,
   };
@@ -135,7 +135,7 @@ describe("stale-waypoint reconciliation (W4)", () => {
     const next = reduceInteractiveCanvasState(state, {
       type: "canvas.updateObject",
       objectId: "a",
-      patch: { label: "renamed" },
+      patch: { text: "renamed" },
     });
     expect(connectionOf(next).waypoints).toEqual(WAYPOINTS);
   });

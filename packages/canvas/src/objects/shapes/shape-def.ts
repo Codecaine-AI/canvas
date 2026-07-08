@@ -1,15 +1,15 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
-import type { CanvasBounds, CanvasPoint } from "../../state/geometry";
+import type { ReactNode } from "react";
 import type {
   CanvasObjectStyle,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-  InteractiveCanvasTone,
 } from "../../state/schema";
-import type { Anchor } from "../../routing/routing";
-import type { CanvasToneStyle } from "../../theme";
+import type { OutlineSpec } from "../geometry";
+import type { ObjectButtonBorderPolicy, ObjectCatalogMeta } from "../object-def";
+import type { ResolvedShapeObjectColors } from "../object-chrome";
+import type { TextSlot } from "../text-slots";
 
 /**
  * Tier 2 of the two-tier registry (RESTRUCTURE.md): variant DATA for the
@@ -22,15 +22,24 @@ import type { CanvasToneStyle } from "../../theme";
 /** Everything a shape outline renderer may need, resolved once by the shared shape view. */
 export interface ShapeOutlineArgs {
   object: InteractiveCanvasObject;
-  /** Resolved fill/border/text colors (theme/resolve.ts resolveObjectColors). */
-  colors: CanvasToneStyle;
-  /** True when the object carries an explicit paletteToken/tone/fill/stroke. */
-  hasExplicitColor: boolean;
-  /** Resolved stroke width (theme/resolve.ts resolveObjectStrokeWidth). */
+  /**
+   * The object's color pick resolved through the "shape" palette role
+   * (object-chrome.tsx resolveObjectRoleColors): fill + ink border + the
+   * fixed dark text color (D8). D13: no silhouette carries fixed colors
+   * anymore — this is the ONLY color input.
+   */
+  colors: ResolvedShapeObjectColors;
+  /** Resolved stroke width. */
   strokeWidth: number;
 }
 
-export interface OutlineSpec {
+/**
+ * The VISUAL spec: how the shape paints (P3 rename from `OutlineSpec` — the
+ * geometric outline is now the separate `ShapeDef.outline: OutlineSpec` from
+ * objects/geometry.ts; a silhouette and its outline should trace the same
+ * curve, cross-checked by objects/__tests__/geometry-def-agreement.test.ts).
+ */
+export interface SilhouetteSpec {
   /**
    * Per-shape CSS class appended after the base `interactive-canvas-object`
    * class (omit for the plain rounded-rect chrome, which is fully styled by
@@ -38,55 +47,27 @@ export interface OutlineSpec {
    */
   className?: string;
   /**
-   * Optional absolutely-positioned outline layer (inline SVG silhouette or
-   * polygon) painted behind the text content. Omit for shapes whose outline
+   * Optional absolutely-positioned silhouette layer (inline SVG silhouette or
+   * polygon) painted behind the text content. Omit for shapes whose look
    * is pure CSS.
    */
   silhouette?: (args: ShapeOutlineArgs) => ReactNode;
 }
 
-export type TextZoneKind =
-  /** Standard label span + optional body span (rounded-rect, ellipse, most shapes). */
-  | "label"
-  /** Bold label rendered BELOW the silhouette (person/chat/chip-icon family). */
-  | "label-below-icon"
-  /** No visible text (plus, or-junction, summing-junction). */
-  | "none";
-
-export interface TextZoneSpec {
-  kind: TextZoneKind;
-  /**
-   * Below this object height the shape is treated as a compact glyph: label
-   * and body are dropped so the silhouette stays legible (person: 100px).
-   */
-  compactBelowHeightPx?: number;
-  /**
-   * What the compact threshold suppresses. Person (the default,
-   * "label-and-body") drops BOTH the below-icon label and the body; chat
-   * ("body") keeps its below-icon label and drops only the body copy.
-   */
-  compactDrops?: "label-and-body" | "body";
-  /** Per-shape inline label style (e.g. arrow-shape/chevron center the label within the body, not the bbox). */
-  labelStyle?: (object: InteractiveCanvasObject) => CSSProperties | undefined;
-}
-
 /**
- * Connector attachment points. Absent = the current behavior for every
- * shape: bbox compass points (top/right/bottom/left side midpoints).
- * Declared for shapes whose true outline should reposition anchors later;
- * not consumed anywhere yet.
+ * Where this shape's `object.text` renders and is edited (D3/D6): a preset
+ * from objects/text-slots.ts, or `"none"` for pure glyphs that carry no
+ * visible text (plus, or-junction, summing-junction — these are also not
+ * text-editable). Omit for the shape default, the "center" preset.
+ * Replaces the old TextZoneSpec kinds and the per-shape `labelStyle` margin
+ * hacks (arrow/chevron declare rect-function slots instead).
  */
-export interface AnchorSpec {
-  points: (bounds: CanvasBounds) => ReadonlyArray<{ anchor: Anchor; point: CanvasPoint }>;
-}
+export type ShapeTextSpec = TextSlot | "none";
 
-/** Shape-catalog metadata (objects/catalog.ts migrates onto this in a later chunk). Declared, unconsumed. */
-export interface ShapeCatalogMeta {
-  label: string;
-  /** Catalog preview glyph. */
-  icon?: ReactNode;
-  keywords?: readonly string[];
-}
+// (Catalog metadata is the shared ObjectCatalogMeta from ../object-def — the
+// def's `catalog` is the single source the Shapes-panel catalog derives its
+// entry labels/keywords from since P4; `label` is the picker-facing string,
+// distinct from the type label in state/schema/object-defaults.ts.)
 
 export interface ShapeDef {
   type: InteractiveCanvasObjectType;
@@ -97,15 +78,26 @@ export interface ShapeDef {
    * differs where history diverged (sticky → "note", process → "rounded-rect").
    */
   shape: NonNullable<CanvasObjectStyle["shape"]>;
-  outline: OutlineSpec;
-  text: TextZoneSpec;
-  anchors?: AnchorSpec;
-  defaultSize: { width: number; height: number };
-  /** Placement default; omit for the shape-family standard (160, 160). annotation-marker: (220, 220). */
-  defaultPosition?: { x: number; y: number };
-  /** Tone stamped on new objects of this type (defaults to "neutral" — the W5 inert fallback). */
-  defaultTone?: InteractiveCanvasTone;
+  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */
+  silhouette: SilhouetteSpec;
+  /** Whether the outer button itself paints the shape border. Defaults to "painted". */
+  buttonBorder?: ObjectButtonBorderPolicy;
+  /**
+   * The shape's geometric outline (D4, objects/geometry.ts): connection
+   * anchors, outline snap, and hit-testing (D16) all derive from it. Omit
+   * for the bbox default (`shapeObjectDef` stamps BBOX_OUTLINE). True-
+   * outline shapes MUST reference the same exported spec object the
+   * geometry dispatch tables use (identity-checked by test).
+   */
+  outline?: OutlineSpec;
+  /** Text slot (objects/text-slots.ts) — omit for the "center" preset default. */
+  text?: ShapeTextSpec;
+  // (No defaultSize/defaultPosition: per-type placement defaults are schema
+  // vocabulary — state/schema/object-defaults.ts — because the reducer needs
+  // them below the objects/ layer; `shapeObjectDef` stamps the same row onto
+  // the ObjectDef's `defaults`.)
   /** This shape's global-CSS rules (moved verbatim from CanvasStage's style block). */
   css?: string;
-  catalog: ShapeCatalogMeta;
+  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */
+  catalog: ObjectCatalogMeta;
 }

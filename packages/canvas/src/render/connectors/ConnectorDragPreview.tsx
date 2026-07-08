@@ -2,12 +2,48 @@
 
 import { objectById, type CanvasPoint } from "../../state/geometry";
 import type { InteractionOverlay } from "../../interaction/interaction";
-import { getConnectionAnchors } from "../../routing/connection-overlay";
-import { pointForAnchor, routeConnection, type Anchor } from "../../routing/routing";
+import { getConnectionAnchors } from "../../objects/geometry";
+import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
+import { polylineInteriorWaypoints } from "../../routing/bend-editing";
+import { pointForObjectAnchor, routeConnection, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
+import { ObjectShape } from "../ObjectShape";
+import { resolveConnectorStroke } from "../../palette";
+import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 /** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
-import type { InteractiveCanvasDocument } from "../../state/schema";
+const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
+
+function quickConnectGhostObject(
+  source: InteractiveCanvasObject,
+  viewport: ViewportState,
+  center: CanvasPoint,
+): InteractiveCanvasObject {
+  const topLeft = worldToScreen(viewport, {
+    x: center.x - source.geometry.width / 2,
+    y: center.y - source.geometry.height / 2,
+  });
+  return {
+    id: `${source.id}-quick-connect-ghost`,
+    type: source.type,
+    text: "",
+    ...(source.color ? { color: source.color } : {}),
+    parentId: null,
+    geometry: {
+      x: topLeft.x,
+      y: topLeft.y,
+      width: source.geometry.width * viewport.zoom,
+      height: source.geometry.height * viewport.zoom,
+    },
+    ...(source.style ? { style: { ...source.style } } : {}),
+    ...(source.layout ? { layout: { ...source.layout } } : {}),
+    ...(source.direction ? { direction: source.direction } : {}),
+    ...(typeof source.language === "string" ? { language: source.language } : {}),
+    ...(typeof source.author === "string" ? { author: source.author } : {}),
+    ...(source.icon ? { icon: source.icon } : {}),
+  };
+}
 
 /**
  * Live preview rendered while a connector endpoint is being dragged (3.2.2
@@ -25,6 +61,43 @@ export function ConnectorDragPreview({
   viewport: ViewportState;
   drag: NonNullable<InteractionOverlay["connectorDrag"]>;
 }) {
+  if (drag.connectionId && drag.points && drag.points.length >= 2) {
+    const connection = document.connections.find((item) => item.id === drag.connectionId);
+    if (!connection) return null;
+    const fromObject = objectById(document, connection.from.objectId);
+    const toObject = objectById(document, connection.to.objectId);
+    if (!fromObject || !toObject) return null;
+
+    const routed = routeConnection(
+      fromObject,
+      toObject,
+      { ...connection, waypoints: polylineInteriorWaypoints(drag.points) },
+      document.objects,
+    );
+    const strokeDasharray =
+      connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
+    const transform = `translate(${-viewport.x * viewport.zoom} ${-viewport.y * viewport.zoom}) scale(${viewport.zoom})`;
+
+    return (
+      <svg
+        style={{ position: "absolute", left: 0, top: 0, overflow: "visible", pointerEvents: "none" }}
+        aria-hidden="true"
+      >
+        <g transform={transform}>
+          <path
+            d={routed.path}
+            fill="none"
+            stroke={SELECTION_BLUE}
+            strokeWidth={4}
+            strokeLinecap="butt"
+            strokeDasharray={strokeDasharray}
+            data-canvas-connector-bend-preview-path="true"
+          />
+        </g>
+      </svg>
+    );
+  }
+
   let fixedWorld: CanvasPoint | null = null;
 
   if (drag.connectionId) {
@@ -40,7 +113,7 @@ export function ConnectorDragPreview({
   } else if (drag.fromObjectId && drag.fromAnchor) {
     const fromObject = objectById(document, drag.fromObjectId);
     if (fromObject) {
-      fixedWorld = pointForAnchor(fromObject.geometry, drag.fromAnchor);
+      fixedWorld = pointForObjectAnchor(fromObject, drag.fromAnchor);
     }
   }
 
@@ -50,9 +123,10 @@ export function ConnectorDragPreview({
   // W3b cascade) when one exists, else the coarse anchor side, else the raw
   // pointer.
   const candidateObject = drag.candidate ? objectById(document, drag.candidate.objectId) : undefined;
+  const sourceObject = drag.fromObjectId ? objectById(document, drag.fromObjectId) : undefined;
   const targetWorld =
     drag.candidate?.point ??
-    (candidateObject ? pointForAnchor(candidateObject.geometry, drag.candidate!.anchor) : drag.point);
+    (candidateObject ? pointForObjectAnchor(candidateObject, drag.candidate!.anchor) : drag.point);
 
   const start = worldToScreen(viewport, fixedWorld);
   const end = worldToScreen(viewport, targetWorld);
@@ -61,9 +135,23 @@ export function ConnectorDragPreview({
   const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
   const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];
   const snappedWorld = drag.candidate?.snapKind === "outline" ? drag.candidate.point : undefined;
+  const ghostObject =
+    !candidateObject && sourceObject ? quickConnectGhostObject(sourceObject, viewport, drag.point) : null;
 
   return (
     <>
+      {ghostObject ? (
+        <div data-canvas-quick-connect-ghost="true" style={{ opacity: 0.35, pointerEvents: "none" }}>
+          <ObjectShape
+            object={ghostObject}
+            selected={false}
+            changed={false}
+            bounds={ghostObject.geometry}
+            editable={false}
+            zoom={viewport.zoom}
+          />
+        </div>
+      ) : null}
       <svg
         style={{ position: "absolute", left: 0, top: 0, overflow: "visible", pointerEvents: "none" }}
         aria-hidden="true"
@@ -71,10 +159,11 @@ export function ConnectorDragPreview({
         <path
           d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
           fill="none"
-          stroke={SELECTION_BLUE}
+          stroke={CONNECTOR_PREVIEW_STROKE}
           strokeWidth={2}
           strokeDasharray="6 6"
           strokeLinecap="round"
+          data-canvas-connector-preview-path="true"
         />
       </svg>
       {/* FigJam-style hover ports (W3b): 4 white-fill, selection-blue-ring

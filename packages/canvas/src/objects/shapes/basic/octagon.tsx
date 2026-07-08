@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasPoint } from "../../../state/geometry";
-import { octagonPoints } from "../../../routing/connection-overlay";
+import { OCTAGON_OUTLINE, octagonPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
 
@@ -17,7 +17,9 @@ function pointsAttribute(points: CanvasPoint[]): string {
 export const octagonShapeDef: ShapeDef = {
   type: "octagon",
   shape: "octagon",
-  outline: {
+  buttonBorder: "suppressed",
+  outline: OCTAGON_OUTLINE,
+  silhouette: {
     className: "interactive-canvas-object-octagon",
     silhouette: ({ object, colors, strokeWidth }) => {
       const points = pointsAttribute(
@@ -43,23 +45,17 @@ export const octagonShapeDef: ShapeDef = {
       );
     },
   },
-  text: { kind: "label" },
-  defaultSize: { width: 140, height: 140 },
-  defaultTone: "neutral",
   /*
    * Moved from CanvasStage's grouped rule (octagon shares its selector group
    * there with folder/document-stack/cylinder-horizontal/triangle/
    * parallelogram/pentagon/star/plus/chevron/off-page-connector/trapezoid/
    * manual-input/hexagon/or-junction/summing-junction — 17 selectors total).
-   * Declarations are verbatim; octagon carries no additional per-shape
+   * Paint declarations moved here; octagon carries no additional per-shape
    * follow-up rule in the legacy block (unlike folder/document-stack/
    * triangle/off-page-connector/manual-input/star, which do).
    */
   css: `
         .interactive-canvas-object-octagon {
-          align-items: center;
-          justify-content: center;
-          text-align: center;
           border: none;
           border-radius: 0;
           background: transparent !important;

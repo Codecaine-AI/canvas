@@ -122,6 +122,30 @@ function violationsAcrossTree(
 }
 
 describe("import boundaries", () => {
+  test("palette.ts is a leaf (P0): imports only state/schema/colors, never theme.ts or objects/", () => {
+    // OBJECT-DEF-OVERHAUL.md §3.6: palette.ts is a top-level leaf sibling of
+    // theme.ts so both theme.ts and objects/ can import it without a
+    // layering violation. It must not import theme.ts (theme sits below it
+    // in this graph) or anything under objects/ (P0 is data-only; rewiring
+    // consumers is P1).
+    const specifiers = importSpecifiers(join(SRC_ROOT, "palette.ts"), {
+      skipTypeOnly: false,
+    }).filter((specifier) => specifier.startsWith("."));
+    expect(new Set(specifiers)).toEqual(new Set(["./state/schema/colors"]));
+  });
+
+  test("state/schema/object-defaults.ts is a schema-vocabulary leaf (P4): imports only schema siblings", () => {
+    // OBJECT-DEF-OVERHAUL.md §6 P4: the per-type defaults table lives BELOW
+    // both the reducer (which needs it at reduce time — the /actions subpath
+    // is a standalone public API) and the object registry (which stamps each
+    // def's `defaults` from it). It must therefore never import upward —
+    // only sibling schema vocabulary modules.
+    const specifiers = importSpecifiers(
+      join(SRC_ROOT, "state", "schema", "object-defaults.ts"),
+    );
+    expect(specifiers.filter((specifier) => !specifier.startsWith("./"))).toEqual([]);
+  });
+
   test("theme.ts is layer 0: no runtime src imports (type-only state/schema imports allowed)", () => {
     // Since the theme dispersal the theme is ONE file, src/theme.ts, and its
     // only src dependency is type-only state/schema imports (the style
@@ -151,13 +175,40 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("routing/ imports only state/ and vendor/ (never objects/, render/, editor/, interaction/, ui/, or theme)", () => {
-    // objects -> routing is a legal downward edge (shape defs reuse the
-    // true-outline generators); the reverse would be a layering inversion.
+  test("routing/ imports only state/, vendor/, and objects/geometry (never def components, render/, editor/, interaction/, ui/, or theme)", () => {
+    // P3 (OBJECT-DEF-OVERHAUL.md §3.6, D4): the defs own their outline
+    // geometry, so routing consumes the pure, React-free objects/geometry.ts.
+    // The connection cascade and the main router both need that edge now that
+    // below-slot labels have an external routing footprint; importing any
+    // other objects/ module (def components, registry) stays a layering
+    // inversion. The remaining legal objects -> routing edges are the two
+    // type-only `Anchor` imports (object-chrome.tsx, shapes/shape-def.ts).
     expect(
       violations(
         join(SRC_ROOT, "routing"),
         /^(\.\.\/)+(objects|render|interaction|editor|ui)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
+      ),
+    ).toEqual([
+      `${join("routing", "routing.ts")} -> ../objects/geometry`,
+      `${join("routing", "connection-overlay.ts")} -> ../objects/geometry`,
+    ]);
+  });
+
+  test("objects/geometry.ts is a React-free leaf (P3): imports only state/, text slots, and pure geometry helpers, never react or def modules", () => {
+    // OBJECT-DEF-OVERHAUL.md §3.6: routing reaches def outlines through a
+    // pure objects/geometry.ts — it must stay importable from the routing
+    // layer, so no react/react-dom and no imports from object defs/registry
+    // (defs import IT, not vice versa) or any higher layer. The text-slot edge
+    // is pure band math for below-slot extended bounds; inscribed-text-rects is
+    // a pure sibling table re-exported by geometry.ts for center text geometry.
+    const specifiers = importSpecifiers(join(SRC_ROOT, "objects", "geometry.ts"));
+    expect(specifiers.filter((specifier) => !specifier.startsWith("."))).toEqual([]);
+    expect(
+      specifiers.filter(
+        (specifier) =>
+          !/^\.\.\/state\//.test(specifier) &&
+          specifier !== "./text-slots" &&
+          specifier !== "./inscribed-text-rects",
       ),
     ).toEqual([]);
   });

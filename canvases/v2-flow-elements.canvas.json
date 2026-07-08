@@ -146,7 +146,7 @@
     },
     {
       "id": "chip-icon-node",
-      "type": "chip-icon",
+      "type": "icon",
       "text": "Model",
       "parentId": null,
       "geometry": {
@@ -156,12 +156,13 @@
         "height": 140
       },
       "style": {
-        "shape": "chip-icon"
-      }
+        "shape": "icon"
+      },
+      "icon": "cpu"
     },
     {
       "id": "restyled-person",
-      "type": "person",
+      "type": "icon",
       "text": "Interviewee",
       "color": "green",
       "parentId": null,
@@ -172,12 +173,13 @@
         "height": 144
       },
       "style": {
-        "shape": "person"
-      }
+        "shape": "icon"
+      },
+      "icon": "person"
     },
     {
       "id": "restyled-chat",
-      "type": "chat",
+      "type": "icon",
       "text": "Live Q&A\nRealtime exchange between interviewer and interviewee.",
       "color": "blue",
       "parentId": null,
@@ -188,12 +190,13 @@
         "height": 130
       },
       "style": {
-        "shape": "chat"
-      }
+        "shape": "icon"
+      },
+      "icon": "chat"
     },
     {
       "id": "compact-person",
-      "type": "person",
+      "type": "icon",
       "text": "Compact person",
       "color": "green",
       "parentId": null,
@@ -204,8 +207,9 @@
         "height": 72
       },
       "style": {
-        "shape": "person"
-      }
+        "shape": "icon"
+      },
+      "icon": "person"
     },
     {
       "id": "json-code-block",

@@ -1,35 +1,44 @@
 /**
- * catalog.ts — the shape catalog as PURE DATA (co-location alignment).
+ * catalog.ts — the Shapes-panel ARRANGEMENT of defs (P4, O7).
  *
- * Formerly objects/catalog/shape-catalog.tsx, which also carried inline JSX
- * preview components. Per Ford's layering principles objects/ holds catalog
- * DATA only: each entry is (id, label, objectType, direction?, icon?,
- * keywords?). The preview SVGs those entries render as in the picker UIs live
- * in editor/components/shape-previews.tsx (interface JSX belongs to the
- * editor), which maps entries -> preview components by entry id / glyph id.
+ * Since the P4 catalog unification the def is the single source of per-shape
+ * picker identity: every entry's `label` and `keywords` derive from the
+ * registered def's `catalog` metadata (ObjectCatalogMeta — declared on the
+ * ShapeDef, stamped onto the ObjectDef by shapeObjectDef). What legitimately
+ * stays HERE is arrangement only: the category grouping (Basic / Flowchart /
+ * Advanced), entry ordering, and the per-entry placement VARIANTS a single
+ * def fans out into — direction variants ("Triangle up"/"Triangle down",
+ * left/right arrows and parallelograms) and the 26 Advanced icon-glyph
+ * entries (one `type: "icon"` def × the glyph registry). Variant entries
+ * carry a label override because their display string is a property of the
+ * variant, not the def; everything else reads the def's label verbatim.
  *
- * Wave C structure preserved: exactly 3 sections (Basic / Flowchart /
- * Advanced) mirroring FigJam's actual picker model per
- * docs/10-system-design/20-figjam-parity/doc.json — no Recents/Connections/
- * "Other libraries" (connectors are a dock-only tool — see CanvasDock.tsx's
- * `"connector"` ToolId — not a Shapes-panel concept). `objectType` maps to
- * the REAL `InteractiveCanvasObjectType` from ../state/schema (all 19 W5
- * native types + "icon" are live), so every entry is enabled — there is no
+ * Entries are pure data (no JSX): the preview SVGs live in
+ * editor/components/shape-previews.tsx (interface JSX belongs to the editor),
+ * mapped by entry id / glyph id.
+ *
+ * Wave C structure preserved: exactly 3 sections mirroring FigJam's actual
+ * picker model per docs/10-system-design/20-figjam-parity/doc.json — no
+ * Recents/Connections/"Other libraries" (connectors are a dock-only tool —
+ * see CanvasDock.tsx's `"connector"` ToolId — not a Shapes-panel concept).
+ * Every entry maps to a live `InteractiveCanvasObjectType`, so there is no
  * "coming soon" disabled state.
  */
 
 import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../state/schema";
+import { objectDefForType } from "./object-def";
 import { ICON_GLYPHS, type IconGlyphId } from "./shapes/icon/icon-glyphs";
 
 export type ShapeCatalogEntry = {
   id: string;
+  /** Display label — the def's catalog label unless the entry is a direction variant with its own phrasing. */
   label: string;
   objectType: InteractiveCanvasObjectType;
   /** Direction/orientation field for direction-aware shapes (triangle up|down; parallelogram/chevron/arrow-shape left|right). Passed straight through to the inserted object's `direction`. */
   direction?: CanvasShapeDirection;
   /** REQUIRED when objectType === "icon" — selects which of the 26 Advanced-tier glyphs to insert. */
   icon?: CanvasIconGlyph;
-  /** Extra search terms beyond the label. Unpopulated today (search matches labels only); reserved for the ShapeDef.catalog keyword migration. */
+  /** Extra search terms beyond the label — the def's catalog keywords. */
   keywords?: readonly string[];
 };
 
@@ -40,11 +49,40 @@ export type ShapeCatalogCategory = {
 };
 
 // ---------------------------------------------------------------------------
-// Advanced tier: all 26 icon glyphs, each an insertable `type: "icon"` entry.
-// Labels come from the glyph registry's own display names (the same DATA
-// module IconShapeBody renders on-canvas — no components imported here).
+// Entry builders
 // ---------------------------------------------------------------------------
 
+/**
+ * One picker entry for `objectType`, identity derived from its registered
+ * def's catalog metadata. `options.label` overrides ONLY for direction/
+ * arrangement variants whose display string isn't the def's own (e.g.
+ * "Triangle up", "Left arrow", FigJam's "Square"/"Rounded rectangle"
+ * picker phrasings).
+ */
+function entry(
+  id: string,
+  objectType: InteractiveCanvasObjectType,
+  options?: { label?: string; direction?: CanvasShapeDirection },
+): ShapeCatalogEntry {
+  const meta = objectDefForType(objectType)?.catalog;
+  if (!meta) {
+    throw new Error(`shape catalog: type "${objectType}" has no def catalog metadata`);
+  }
+  return {
+    id,
+    objectType,
+    label: options?.label ?? meta.label,
+    keywords: meta.keywords,
+    ...(options?.direction ? { direction: options.direction } : null),
+  };
+}
+
+/**
+ * Advanced tier: all 26 icon glyphs, each an insertable `type: "icon"` entry.
+ * Labels come from the glyph registry's own display names (the same DATA
+ * module IconShapeBody renders on-canvas — the glyph registry IS the icon
+ * def's variant source, so identity still traces to the def's data).
+ */
 function advancedEntry(glyphId: IconGlyphId): ShapeCatalogEntry {
   return {
     id: `adv-${glyphId}`,
@@ -54,8 +92,23 @@ function advancedEntry(glyphId: IconGlyphId): ShapeCatalogEntry {
   };
 }
 
+function basicIconEntry(
+  id: string,
+  label: string,
+  icon: CanvasIconGlyph,
+  keywords: readonly string[],
+): ShapeCatalogEntry {
+  return {
+    id,
+    label,
+    objectType: "icon",
+    icon,
+    keywords,
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Categories
+// Categories (arrangement: grouping + ordering + variant fan-out)
 // ---------------------------------------------------------------------------
 
 export const SHAPE_CATALOG: ShapeCatalogCategory[] = [
@@ -63,42 +116,47 @@ export const SHAPE_CATALOG: ShapeCatalogCategory[] = [
     id: "basic",
     label: "Basic",
     entries: [
-      { id: "basic-square", label: "Square", objectType: "rectangle" },
-      { id: "basic-ellipse", label: "Ellipse", objectType: "ellipse" },
-      { id: "basic-decision-diamond", label: "Decision", objectType: "decision" },
-      { id: "basic-triangle-up", label: "Triangle up", objectType: "triangle", direction: "up" },
-      { id: "basic-triangle-down", label: "Triangle down", objectType: "triangle", direction: "down" },
-      { id: "basic-rounded-rect", label: "Rounded rectangle", objectType: "process" },
-      { id: "basic-pentagon", label: "Pentagon", objectType: "pentagon" },
-      { id: "basic-octagon", label: "Octagon", objectType: "octagon" },
-      { id: "basic-plus", label: "Plus", objectType: "plus" },
-      { id: "basic-arrow-left", label: "Left arrow", objectType: "arrow-shape", direction: "left" },
-      { id: "basic-arrow-right", label: "Right arrow", objectType: "arrow-shape", direction: "right" },
-      { id: "basic-chevron", label: "Chevron", objectType: "chevron", direction: "right" },
-      { id: "basic-star", label: "Star", objectType: "star" },
-      { id: "basic-chat", label: "Chat", objectType: "chat" },
+      // FigJam picker phrasing: the rectangle def's picker cell reads
+      // "Square", process's reads "Rounded rectangle" (both deliberate
+      // arrangement-level overrides — type labels stay "Rectangle"/"Process").
+      entry("basic-square", "rectangle", { label: "Square" }),
+      entry("basic-ellipse", "ellipse"),
+      entry("basic-decision-diamond", "decision"),
+      entry("basic-triangle-up", "triangle", { label: "Triangle up", direction: "up" }),
+      entry("basic-triangle-down", "triangle", { label: "Triangle down", direction: "down" }),
+      entry("basic-rounded-rect", "process", { label: "Rounded rectangle" }),
+      entry("basic-pentagon", "pentagon"),
+      entry("basic-octagon", "octagon"),
+      entry("basic-plus", "plus"),
+      entry("basic-arrow-left", "arrow-shape", { label: "Left arrow", direction: "left" }),
+      entry("basic-arrow-right", "arrow-shape", { label: "Right arrow", direction: "right" }),
+      entry("basic-chevron", "chevron", { direction: "right" }),
+      entry("basic-star", "star"),
+      basicIconEntry("basic-person", "Person", "person", ["person", "user", "actor", "people"]),
+      basicIconEntry("basic-chat", "Chat", "chat", ["chat", "speech", "bubble", "message"]),
+      basicIconEntry("basic-chip", "Chip", "cpu", ["chip", "cpu", "processor", "microchip"]),
     ],
   },
   {
     id: "flowchart",
     label: "Flowchart",
     entries: [
-      { id: "flow-parallelogram-right", label: "Parallelogram right", objectType: "parallelogram", direction: "right" },
-      { id: "flow-parallelogram-left", label: "Parallelogram left", objectType: "parallelogram", direction: "left" },
-      { id: "flow-database", label: "Database", objectType: "database" },
-      { id: "flow-cylinder-horizontal", label: "Cylinder (horizontal)", objectType: "cylinder-horizontal" },
-      { id: "flow-page-corner", label: "Page corner", objectType: "page-corner" },
-      { id: "flow-folder", label: "Folder", objectType: "folder" },
-      { id: "flow-document", label: "Document", objectType: "document" },
-      { id: "flow-document-stack", label: "Document stack", objectType: "document-stack" },
-      { id: "flow-predefined-process", label: "Predefined process", objectType: "predefined-process" },
-      { id: "flow-off-page-connector", label: "Off-page connector", objectType: "off-page-connector" },
-      { id: "flow-trapezoid", label: "Trapezoid", objectType: "trapezoid" },
-      { id: "flow-manual-input", label: "Manual input", objectType: "manual-input" },
-      { id: "flow-hexagon", label: "Hexagon", objectType: "hexagon" },
-      { id: "flow-internal-storage", label: "Internal storage", objectType: "internal-storage" },
-      { id: "flow-or-junction", label: "Or junction", objectType: "or-junction" },
-      { id: "flow-summing-junction", label: "Summing junction", objectType: "summing-junction" },
+      entry("flow-parallelogram-right", "parallelogram", { label: "Parallelogram right", direction: "right" }),
+      entry("flow-parallelogram-left", "parallelogram", { label: "Parallelogram left", direction: "left" }),
+      entry("flow-database", "database"),
+      entry("flow-cylinder-horizontal", "cylinder-horizontal"),
+      entry("flow-page-corner", "page-corner"),
+      entry("flow-folder", "folder"),
+      entry("flow-document", "document"),
+      entry("flow-document-stack", "document-stack"),
+      entry("flow-predefined-process", "predefined-process"),
+      entry("flow-off-page-connector", "off-page-connector"),
+      entry("flow-trapezoid", "trapezoid"),
+      entry("flow-manual-input", "manual-input"),
+      entry("flow-hexagon", "hexagon"),
+      entry("flow-internal-storage", "internal-storage"),
+      entry("flow-or-junction", "or-junction"),
+      entry("flow-summing-junction", "summing-junction"),
     ],
   },
   {

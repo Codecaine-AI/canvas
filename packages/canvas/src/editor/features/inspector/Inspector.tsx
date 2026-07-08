@@ -11,7 +11,6 @@ import {
   MessageSquareIcon,
   PlusIcon,
   TrashIcon,
-  XIcon,
 } from "../../../ui/icons";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
@@ -21,9 +20,10 @@ import {
   type CanvasAction,
   type CanvasChangeSummary,
 } from "../../../state/actions";
-import { CANVAS_PALETTE_TOKENS, paletteTokenStyle } from "../../../theme";
+import { resolveSwatchPreview } from "../../../palette";
+import { CANVAS_COLORS } from "../../../state/schema";
 import type {
-  CanvasPaletteToken,
+  CanvasColor,
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
 } from "../../../state/schema";
@@ -34,7 +34,8 @@ export interface InspectorProps {
   selectedConnection: InteractiveCanvasConnection | undefined;
   selectionContext: ReturnType<typeof buildSelectionContext>;
   dispatch: (action: CanvasAction) => void;
-  applyPaletteTokenToSelection: (token: CanvasPaletteToken | undefined) => void;
+  /** Applies a palette pick to every selected object (P1) — shared with the selection toolbar. */
+  applyColorToSelection: (color: CanvasColor) => void;
 }
 
 export function Inspector({
@@ -43,7 +44,7 @@ export function Inspector({
   selectedConnection,
   selectionContext,
   dispatch,
-  applyPaletteTokenToSelection,
+  applyColorToSelection,
 }: InspectorProps) {
   const [annotationBody, setAnnotationBody] = useState("");
 
@@ -75,27 +76,14 @@ export function Inspector({
     {selectedObject ? (
       <div className="grid gap-3">
         <label className="grid gap-1 text-xs">
-          <span className="text-muted-foreground">Label</span>
-          <Input
-            value={selectedObject.label}
-            onChange={(event) =>
-              dispatch({
-                type: "canvas.updateObject",
-                objectId: selectedObject.id,
-                patch: { label: event.target.value },
-              })
-            }
-          />
-        </label>
-        <label className="grid gap-1 text-xs">
-          <span className="text-muted-foreground">Body</span>
+          <span className="text-muted-foreground">Text</span>
           <Textarea
-            value={selectedObject.body ?? ""}
+            value={selectedObject.text}
             onChange={(event) =>
               dispatch({
                 type: "canvas.updateObject",
                 objectId: selectedObject.id,
-                patch: { body: event.target.value },
+                patch: { text: event.target.value },
               })
             }
           />
@@ -172,44 +160,27 @@ export function Inspector({
         </div>
         <div className="grid gap-1.5 text-xs">
           <span className="text-muted-foreground">Color</span>
+          {/* P1/D12 — the universal 10-hue roster; previews are the swatch
+              hexes themselves, identical for every kind. */}
           <div className="flex flex-wrap gap-1.5">
-            {CANVAS_PALETTE_TOKENS.map(({ token, label, description }) => (
+            {CANVAS_COLORS.map((color) => (
               <button
-                key={token}
+                key={color}
                 type="button"
-                title={description}
-                aria-label={`Set color: ${label}`}
-                aria-pressed={selectedObject.style?.paletteToken === token}
-                data-canvas-palette-swatch={token}
-                data-selected={selectedObject.style?.paletteToken === token ? "true" : undefined}
+                title={color}
+                aria-label={`Set color: ${color}`}
+                aria-pressed={selectedObject.color === color}
+                data-canvas-color-swatch={color}
+                data-selected={selectedObject.color === color ? "true" : undefined}
                 className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
                 style={{
-                  background: paletteTokenStyle(token).accent,
+                  background: resolveSwatchPreview(color),
                   borderColor:
-                    selectedObject.style?.paletteToken === token
-                      ? "var(--foreground)"
-                      : "transparent",
+                    selectedObject.color === color ? "var(--foreground)" : "var(--border)",
                 }}
-                onClick={() => applyPaletteTokenToSelection(token)}
+                onClick={() => applyColorToSelection(color)}
               />
             ))}
-            <button
-              type="button"
-              title="Clear semantic color — fall back to the object's tone"
-              aria-label="Set color: none"
-              aria-pressed={!selectedObject.style?.paletteToken}
-              data-canvas-palette-swatch="none"
-              data-selected={!selectedObject.style?.paletteToken ? "true" : undefined}
-              className="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-transform hover:scale-110"
-              style={{
-                borderColor: !selectedObject.style?.paletteToken
-                  ? "var(--foreground)"
-                  : "var(--border)",
-              }}
-              onClick={() => applyPaletteTokenToSelection(undefined)}
-            >
-              <XIcon className="h-3 w-3 text-muted-foreground" />
-            </button>
           </div>
         </div>
         {selectedObject.type === "section" && (
@@ -280,7 +251,7 @@ export function Inspector({
           />
         </label>
         <label className="grid gap-1 text-xs">
-          <span className="text-muted-foreground">Style</span>
+          <span className="text-muted-foreground">Line style</span>
           <select
             aria-label="Connector style"
             className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
@@ -294,9 +265,7 @@ export function Inspector({
             }
           >
             <option value="solid">Solid</option>
-            <option value="dotted">Dotted</option>
-            <option value="elbow">Elbow</option>
-            <option value="smooth">Smooth</option>
+            <option value="dashed">Dashed</option>
           </select>
         </label>
         <label className="grid gap-1 text-xs">

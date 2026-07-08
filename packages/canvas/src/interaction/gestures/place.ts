@@ -85,20 +85,15 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "sticky":
     case "annotation-marker":
     // D16 — these were previously missing from this switch, meaning an
-    // armed document/person/database/chat tool silently failed to start a
-    // PlaceGesture; fixed here alongside the W2 additions below since it's
-    // the same one-line pattern in the same switch.
+    // armed document/database tool silently failed to start a PlaceGesture.
     case "document":
-    case "person":
     case "database":
-    case "chat":
     // W2 — FigJam sections + V2 Flow shape vocabulary:
     case "section":
     case "pill":
     case "arrow-shape":
     case "predefined-process":
     case "code-block":
-    case "chip-icon":
     // W5 — FigJam parity shape set (Wave A added the tools; the Shapes-panel
     // creation-flow work wires them here). Same 1:1 tool<->type pattern as
     // every case above; without these an armed ellipse/triangle/… tool

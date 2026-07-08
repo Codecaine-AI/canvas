@@ -15,10 +15,7 @@ import type { ShapeDef } from "../shape-def";
 export const processShapeDef: ShapeDef = {
   type: "process",
   shape: "rounded-rect",
-  outline: {},
-  text: { kind: "label" },
-  defaultSize: { width: 184, height: 96 },
-  defaultTone: "process",
+  silhouette: {},
   catalog: { label: "Process", keywords: ["process", "step", "rectangle", "rounded"] },
 };
 
