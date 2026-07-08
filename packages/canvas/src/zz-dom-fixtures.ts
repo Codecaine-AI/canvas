@@ -317,7 +317,7 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
 }
 
 // ---------------------------------------------------------------------------
-// Synthetic doc C — "specials": sections (incl. contentHidden + nesting),
+// Synthetic doc C — "specials": sections (incl. nesting),
 // section parentId membership, sticky/code-block.
 // ---------------------------------------------------------------------------
 
@@ -349,9 +349,8 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
       geometry: { x: 700, y: 40, width: 480, height: 360 },
       style: { shape: "section" },
       color: "violet",
-      contentHidden: true,
     },
-    // Objects >=60% inside the contentHidden section (should be hidden).
+    // Objects >=60% inside the third section.
     {
       id: "c-hidden-a",
       type: "process",
