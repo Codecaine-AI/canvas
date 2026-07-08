@@ -229,6 +229,7 @@ export function InteractiveCanvasEditor({
   // state and handlers live in editor/features/drag-pipeline.
   const {
     interactionOverlay,
+    selectionDragActive,
     interactionStateRef,
     handleStagePointerDown,
     handleStagePointerMove,
@@ -395,6 +396,7 @@ export function InteractiveCanvasEditor({
         toolbar={selectionToolbar}
         selectedConnection={selectedConnection}
         dispatch={dispatch}
+        hidden={selectionDragActive}
       />
 
       {shapesPanelVisible && (

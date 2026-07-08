@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
 import { resolveConnectorControlState } from "./connector-control-state";
 import { colorKindForType, FIRST_USE_COLORS, type CanvasAction } from "../../../state/actions";
@@ -11,6 +12,11 @@ export interface SelectionToolbarLayerProps {
   toolbar: SelectionToolbarApi;
   selectedConnection: InteractiveCanvasConnection | undefined;
   dispatch: (action: CanvasAction) => void;
+  /**
+   * Drag-in-progress suppression — the toolbar unmounts during selection drags
+   * and remounts on drop, which replays the FigJam entrance animation.
+   */
+  hidden?: boolean;
 }
 
 /**
@@ -26,6 +32,7 @@ export function SelectionToolbarLayer({
   toolbar,
   selectedConnection,
   dispatch,
+  hidden = false,
 }: SelectionToolbarLayerProps) {
   const {
     selectionToolbarRef,
@@ -44,7 +51,12 @@ export function SelectionToolbarLayer({
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   } = toolbar;
-  if (!selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
+
+  useEffect(() => {
+    if (hidden) setOpenFlyout(null);
+  }, [hidden, setOpenFlyout]);
+
+  if (hidden || !selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
   const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
   const controlState: Partial<Record<SelectionToolbarActionId, ToolbarControlState>> = {};
   // P1/D12 — the toolbar's current-color swatch shows the PICK's preview hex

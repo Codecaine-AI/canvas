@@ -208,6 +208,80 @@ describe("SelectionToolbar interaction", () => {
   });
 });
 
+describe("SelectionToolbarLayer visibility", () => {
+  it("renders null when hidden is true even with a valid toolbar and position", () => {
+    const { container } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi()}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+        hidden
+      />,
+    );
+
+    expect(container.querySelector("[data-selection-toolbar]")).toBeNull();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("closes an open flyout when hidden flips true", () => {
+    const setOpenFlyout = mock((_action: Parameters<SelectionToolbarApi["setOpenFlyout"]>[0]) => {});
+    const { rerender } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({ openFlyout: "color", setOpenFlyout })}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+      />,
+    );
+    expect(setOpenFlyout).toHaveBeenCalledTimes(0);
+
+    rerender(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({ openFlyout: "color", setOpenFlyout })}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+        hidden
+      />,
+    );
+
+    expect(setOpenFlyout).toHaveBeenCalledTimes(1);
+    expect(setOpenFlyout.mock.calls[0]).toEqual([null]);
+  });
+
+  it("renders again as a fresh toolbar mount when hidden flips back false", () => {
+    const { container, rerender } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({ selectionSignature: "connector:connection-a:" })}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+      />,
+    );
+    const firstToolbar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
+    expect(firstToolbar).toBeTruthy();
+
+    rerender(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({ selectionSignature: "connector:connection-a:" })}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+        hidden
+      />,
+    );
+    expect(container.querySelector("[data-selection-toolbar]")).toBeNull();
+
+    rerender(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi({ selectionSignature: "connector:connection-a:" })}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+      />,
+    );
+
+    const secondToolbar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
+    expect(secondToolbar).toBeTruthy();
+    expect(secondToolbar).not.toBe(firstToolbar);
+  });
+});
+
 describe("SelectionToolbar connector current-value icons", () => {
   const arrowIcons = [
     { arrow: "none", paths: ["M3 9H15"] },

@@ -57,6 +57,14 @@ const EDGE_PAN_DRAG_KINDS = new Set<InteractionState["kind"]>([
   "connector-bend-drag",
 ]);
 
+export const SELECTION_DRAG_KINDS: ReadonlySet<string> = new Set([
+  "move",
+  "resize",
+  "connector-endpoint-drag",
+  "connector-bend-drag",
+  "connector-create",
+]);
+
 /**
  * Latest raw pointer sample for the active gesture: enough of the native event
  * for buildPointerEvent (position/buttons/modifiers/DOM target for hit
@@ -188,6 +196,13 @@ export interface UseInteractionPipelineArgs {
 export interface InteractionPipelineApi {
   /** Mirrored into state so CanvasStage's overlay slot re-renders. */
   interactionOverlay: InteractionOverlay;
+  /**
+   * True while the interaction machine is in a gesture that manipulates the
+   * current selection's geometry (`move`, `resize`, `connector-endpoint-drag`,
+   * `connector-bend-drag`, `connector-create`); the selection toolbar hides
+   * during these so the canvas stays visible mid-drag (FigJam parity).
+   */
+  selectionDragActive: boolean;
   /** Current machine state — read (not subscribed) by useCanvasHotkeys' Escape handling. */
   interactionStateRef: RefObject<InteractionState>;
   handleStagePointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
@@ -228,6 +243,7 @@ export function useInteractionPipeline({
   // overlay is mirrored into useState so CanvasStage's overlay slot re-renders.
   const interactionStateRef = useRef<InteractionState>(IDLE_INTERACTION_STATE);
   const [interactionOverlay, setInteractionOverlay] = useState<InteractionOverlay>({});
+  const [selectionDragActive, setSelectionDragActive] = useState<boolean>(false);
   const stateRef = useRef({ document, selection, tool, stickyPlacement, armedShape, lastPickedColor });
   stateRef.current = { document, selection, tool, stickyPlacement, armedShape, lastPickedColor };
   const viewportRef = useRef(viewport);
@@ -279,6 +295,7 @@ export function useInteractionPipeline({
       const result = stepInteraction(interactionStateRef.current, canvasEvent, ctx);
       interactionStateRef.current = result.state;
       setInteractionOverlay(result.overlay);
+      setSelectionDragActive(SELECTION_DRAG_KINDS.has(result.state.kind));
       for (const action of result.dispatch) {
         dispatch(action);
       }
@@ -519,6 +536,7 @@ export function useInteractionPipeline({
     lastDragPointerRef.current = null;
     interactionStateRef.current = result.state;
     setInteractionOverlay(result.overlay);
+    setSelectionDragActive(SELECTION_DRAG_KINDS.has(result.state.kind));
     activeGestureRef.current = null;
     for (const action of result.dispatch) {
       dispatch(action);
@@ -527,6 +545,7 @@ export function useInteractionPipeline({
 
   return {
     interactionOverlay,
+    selectionDragActive,
     interactionStateRef,
     handleStagePointerDown,
     handleStagePointerMove,

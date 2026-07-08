@@ -14,6 +14,7 @@ import {
   type InteractionState,
   type ResizeHandle,
 } from "../interaction";
+import { SELECTION_DRAG_KINDS } from "../../editor/features/drag-pipeline/use-interaction-pipeline";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
@@ -100,6 +101,33 @@ function reconcileSectionActions(actions: CanvasAction[]) {
       action.type === "canvas.reconcileSectionMembership",
   );
 }
+
+describe("interaction pipeline: selection drag activity", () => {
+  it("flags only gestures that manipulate the current selection's geometry", () => {
+    expect([...SELECTION_DRAG_KINDS].sort()).toEqual(
+      [
+        "connector-bend-drag",
+        "connector-create",
+        "connector-endpoint-drag",
+        "move",
+        "resize",
+      ].sort(),
+    );
+
+    for (const kind of [
+      "move",
+      "resize",
+      "connector-endpoint-drag",
+      "connector-bend-drag",
+      "connector-create",
+    ]) {
+      expect(SELECTION_DRAG_KINDS.has(kind)).toBe(true);
+    }
+    for (const kind of ["idle", "pressing", "marquee", "place"]) {
+      expect(SELECTION_DRAG_KINDS.has(kind)).toBe(false);
+    }
+  });
+});
 
 describe("interaction: hitTestObjects", () => {
   it("hits the topmost object at a point when objects overlap", () => {
@@ -1226,6 +1254,23 @@ describe("interaction: connector-bend-drag", () => {
     );
   }
 
+  function straightBendDoc(waypoints?: Array<[number, number]>) {
+    return makeDocument(
+      [
+        makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+        makeObject({ id: "b", geometry: { x: 300, y: 0, width: 100, height: 100 } }),
+      ],
+      [
+        makeConnection({
+          id: "c1",
+          from: { objectId: "a", anchor: "right" },
+          to: { objectId: "b", anchor: "left" },
+          ...(waypoints ? { waypoints } : {}),
+        }),
+      ],
+    );
+  }
+
   it("commits immediately to connector-bend-drag on a segment pill hit", () => {
     const document = bendDoc();
     const ctx = makeContext(document);
@@ -1266,6 +1311,67 @@ describe("interaction: connector-bend-drag", () => {
             [300, 160],
           ],
         },
+      },
+    ]);
+  });
+
+  it("drags a straight connector's only bend segment into persisted waypoints", () => {
+    const document = straightBendDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 0 };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 200, y: 50 }, hit), ctx);
+    expect(result.state.kind).toBe("connector-bend-drag");
+
+    result = stepInteraction(result.state, move({ x: 200, y: 90 }), ctx);
+    expect(result.dispatch).toEqual([]);
+    expect(result.overlay.connectorDrag?.points).toEqual([
+      { x: 100, y: 50 },
+      { x: 100, y: 90 },
+      { x: 300, y: 90 },
+      { x: 300, y: 50 },
+    ]);
+
+    result = stepInteraction(result.state, up({ x: 200, y: 90 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.updateConnection",
+        connectionId: "c1",
+        patch: {
+          waypoints: [
+            [100, 90],
+            [300, 90],
+          ],
+        },
+      },
+    ]);
+  });
+
+  it("snaps a bent straight connector back within tolerance and clears waypoints", () => {
+    const document = straightBendDoc([
+      [100, 90],
+      [300, 90],
+    ]);
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 1 };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 200, y: 90 }, hit), ctx);
+    expect(result.state.kind).toBe("connector-bend-drag");
+
+    result = stepInteraction(result.state, move({ x: 200, y: 56 }), ctx);
+    expect(result.overlay.connectorDrag?.points).toEqual([
+      { x: 100, y: 50 },
+      { x: 300, y: 50 },
+    ]);
+
+    result = stepInteraction(result.state, up({ x: 200, y: 56 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    expect(result.dispatch).toEqual([
+      {
+        type: "canvas.updateConnection",
+        connectionId: "c1",
+        patch: { waypoints: undefined },
       },
     ]);
   });

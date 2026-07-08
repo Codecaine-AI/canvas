@@ -46,6 +46,8 @@
         "b-chrome-decision-toolbar-specs-30",
         "b-chrome-decision-figjam-scale-31",
         "b-chrome-decision-one-color-32",
+        "b-chrome-decision-popup-motion-33",
+        "b-chrome-decision-drag-hide-34",
         "b-chrome-heading-color-palette-22",
         "b-chrome-para-color-palette-23",
         "b-chrome-heading-shapes-24",
@@ -1273,6 +1275,239 @@
         },
         {
           "insert": " field."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-popup-motion-33": {
+      "id": "b-chrome-decision-popup-motion-33",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Black pop-up motion and elevation follow the FigJam-measured recipe"
+      },
+      "text": [
+        {
+          "insert": "The selection toolbar enters with opacity 0→1 plus a 6px upward slide over 140ms on "
+        },
+        {
+          "insert": "cubic-bezier(0.22, 1, 0.36, 1)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the exact curve measured frame-by-frame from FigJam recordings (reference doc with live demos and measured tables: "
+        },
+        {
+          "insert": "to_add/black pop up/figjam-popup-animation.html",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). The keyframes live in "
+        },
+        {
+          "insert": "SelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "symbol": "SelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": " following the ShapesPanel mounted-"
+        },
+        {
+          "insert": "<style>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " convention, with a "
+        },
+        {
+          "insert": "prefers-reduced-motion",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " override. The animation replays on every appearance and selection-identity change — "
+        },
+        {
+          "insert": "selectionSignature",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "selectionSignature"
+            }
+          }
+        },
+        {
+          "insert": " (variant + connection id + selected ids, never viewport) keys the pill so React remounts it; pan/zoom repositioning never replays. Exits are an instant cut and flyouts never animate — FigJam's \"animate in, cut out\" asymmetry. Elevation is three shadow layers on "
+        },
+        {
+          "insert": "EDITOR_STYLE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "symbol": "EDITOR_STYLE"
+            }
+          }
+        },
+        {
+          "insert": ": a 0.5px zero-blur ring (the hairline \"border\" on the measured bars), a tight key shadow, and a wide ambient halo ("
+        },
+        {
+          "insert": "selectionToolbarShadow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "flyoutShadow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " carries the same ring)."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-decision-drag-hide-34": {
+      "id": "b-chrome-decision-drag-hide-34",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "The toolbar hides during selection drags and reappears animated on drop"
+      },
+      "text": [
+        {
+          "insert": "While a gesture that manipulates the selection's geometry is active — "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-endpoint-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-bend-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the set in "
+        },
+        {
+          "insert": "SELECTION_DRAG_KINDS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "symbol": "SELECTION_DRAG_KINDS"
+            }
+          }
+        },
+        {
+          "insert": " — the pipeline exposes "
+        },
+        {
+          "insert": "selectionDragActive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "SelectionToolbarLayer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
+              "symbol": "SelectionToolbarLayer"
+            }
+          }
+        },
+        {
+          "insert": " unmounts the toolbar (closing any open flyout) so the canvas stays visible mid-drag. Dropping remounts the pill, which replays the entrance animation for free. Sub-threshold presses never hide it ("
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " only starts past the drag threshold, so plain clicks don't flicker), and "
+        },
+        {
+          "insert": "marquee",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "place",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " don't either."
         }
       ],
       "children": []
