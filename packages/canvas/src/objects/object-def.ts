@@ -10,7 +10,7 @@ import type {
 import type { ObjectTypeDefaults } from "../state/schema/object-defaults";
 import type { OutlineSpec } from "./geometry";
 import type { TextSlot } from "./text-slots";
-import { connectorDef } from "./connector/def";
+import { connectorDef } from "../connectors/def";
 import { sectionDef } from "./section/def";
 import { stickyDef } from "./sticky/def";
 import { arrowShapeDef } from "./shapes/basic/arrow-shape";
@@ -208,8 +208,8 @@ export interface ObjectDef {
 
 /**
  * Connector definition (P4, D19): connectors are what CONNECT objects, not
- * objects — connections draw through render/connectors/*, route through
- * routing/, and are selected as their own selection kind. Their def is
+ * objects - connections draw and route through connectors/*, and are selected
+ * as their own selection kind. Their def is
  * therefore honest and small: the selection toolbar it carries, the palette
  * role its `connection.color` pick resolves through, and where its label
  * lives (rendered AND edited at routeConnection().labelPoint — see

@@ -1,10 +1,14 @@
 "use client";
 
+/**
+ * Connector anchor-dot overlay renders connection ports and exposes their DOM
+ * hit targets to the interaction pipeline.
+ */
 import { useEffect, useState } from "react";
-import type { Anchor } from "../../routing/routing";
-import type { InteractiveCanvasDocument } from "../../state/schema";
-import { connectionBoundsForObject } from "../../objects/geometry";
-import { worldToScreen, type ViewportState } from "../viewport";
+import type { Anchor } from "./routing";
+import type { InteractiveCanvasDocument } from "../state/schema";
+import { connectionBoundsForObject } from "../objects/geometry";
+import { worldToScreen, type ViewportState } from "../render/viewport";
 
 /** Selection outline/handle color — matches SelectionBox and the connector chrome (render must not import editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";

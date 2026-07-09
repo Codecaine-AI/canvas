@@ -4,7 +4,7 @@ import { useCallback, useState, type Dispatch, type SetStateAction } from "react
 import { objectDefFor } from "../../../objects/object-def";
 import type { CanvasAction } from "../../../state/actions";
 import type { CanvasPoint } from "../../../state/geometry";
-import { routeConnection } from "../../../routing/routing";
+import { routeConnection } from "../../../connectors/routing";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,

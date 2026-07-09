@@ -2,7 +2,7 @@
  * Ported (not verbatim) from BlockSuite.
  *
  * Upstream source: packages/affine/gfx/pointer/src/snap/snap-overlay.ts
- * License: MPL-2.0 (see ./NOTICE for details)
+ * License: MPL-2.0 (see repo-root PROVENANCE.md for details)
  *
  * This file extracts the pure, framework-free "distribution" (equal-spacing)
  * snap algorithm and the 9-way closest-distance alignment math from
@@ -24,8 +24,8 @@
  *     directions from the matched pair collecting further boxes at the exact
  *     same spacing (the "N equal gaps" guide chain)
  *
- * `almostEqual` is reused from `./gfx-types` (already vendored, same upstream
- * package). `ALIGN_THRESHOLD` / `DISTRIBUTION_LINE_OFFSET` / `STROKE_WIDTH`
+ * `almostEqual` is reused from `../connectors/pathfinding/gfx-types` (same
+ * upstream package). `ALIGN_THRESHOLD` / `DISTRIBUTION_LINE_OFFSET` / `STROKE_WIDTH`
  * and the two guide colors (`#8B5CF6` alignment / `#CC4187` distribution) are
  * copied verbatim from `snap-overlay.ts` lines 35-37 and 700/723.
  *
@@ -38,7 +38,7 @@
  * function/branch is control-flow-and-math-identical to upstream.
  */
 
-import { almostEqual } from "./gfx-types";
+import { almostEqual } from "../connectors/pathfinding/gfx-types";
 
 /** Plain axis-aligned bounds — this repo's `CanvasBounds` shape (`{x, y, width, height}`). */
 export type SnapBounds = {

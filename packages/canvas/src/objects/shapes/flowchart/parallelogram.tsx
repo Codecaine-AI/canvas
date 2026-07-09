@@ -11,7 +11,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Parallelogram (W5) — a single SVG polygon tracing the skewed-quadrilateral
- * silhouette (routing/connection-overlay.ts parallelogramPoints, the same
+ * silhouette (connectors/connection-cascade.ts parallelogramPoints, the same
  * true outline connector attachment uses), painted behind the label/body
  * content; the button chrome stays fully transparent so only one outline is
  * visible. Direction: "left" mirrors the skew horizontally (legacy

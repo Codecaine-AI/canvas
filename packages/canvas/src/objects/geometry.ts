@@ -4,15 +4,15 @@
  * Pure, React-free connection/outline geometry for the object defs
  * (OBJECT-DEF-OVERHAUL.md §3.4/§3.6, D4): outline polygon builders, the
  * per-object outline lookup, and the 4-cardinal connection anchors. This is
- * the surface routing/connection-overlay.ts consumes — routing must never
- * import def COMPONENTS, only this geometry module (see
+ * the surface connectors/connection-cascade.ts consumes - connector routing
+ * must never import def COMPONENTS, only this geometry module (see
  * __tests__/import-boundaries.test.ts).
  *
  * Anchor projection ported (adapted, not verbatim) from BlockSuite.
  *
  * Upstream source: packages/affine/gfx/connector/src/connector-manager.ts
  *   - `getAnchors` (lines 133-159)
- * License: MPL-2.0 (see ../vendor/blocksuite/NOTICE for details)
+ * License: MPL-2.0 (see repo-root PROVENANCE.md for details)
  *
  * This module lifts the ALGORITHM only: 4 cardinal port candidates offset
  * outside an object's bound, each projected onto the object's real outline

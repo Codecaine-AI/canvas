@@ -1,25 +1,29 @@
 "use client";
 
-import { objectById, type CanvasPoint } from "../../state/geometry";
-import type { InteractionOverlay } from "../../interaction/interaction";
-import { connectionBoundsForObject, getConnectionAnchors } from "../../objects/geometry";
-import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
+/**
+ * Connector drag previews draw live routed paths, anchor emphasis, and
+ * quick-connect ghosts during connector gestures.
+ */
+import { objectById, type CanvasPoint } from "../state/geometry";
+import type { InteractionOverlay } from "../interaction/interaction";
+import { connectionBoundsForObject, getConnectionAnchors } from "../objects/geometry";
+import { CONNECTOR_DASH_PATTERN_PX } from "./def";
 import {
   autoPickAnchors,
   connectorPathFromPoints,
   routeConnection,
   routeConnectionToPoint,
   type Anchor,
-} from "../../routing/routing";
-import { worldToScreen, type ViewportState } from "../viewport";
-import { ObjectShape } from "../ObjectShape";
-import { resolveConnectorStroke } from "../../palette";
-import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
+} from "./routing";
+import { worldToScreen, type ViewportState } from "../render/viewport";
+import { ObjectShape } from "../render/ObjectShape";
+import { resolveConnectorStroke } from "../palette";
+import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../state/schema";
+} from "../state/schema";
 /** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
@@ -133,7 +137,7 @@ export function ConnectorDragPreview({
     ? `url(#${document.id}-arrow-forward)`
     : undefined;
 
-  // True-outline port anchors (connection-overlay.ts getConnectionAnchors) in
+  // True-outline port anchors (connection-cascade.ts getConnectionAnchors) in
   // a stable top/bottom/left/right order (matching its candidates array).
   const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
   const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];

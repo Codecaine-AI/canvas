@@ -6,31 +6,31 @@
  * an object's edge port (connector-create, 3.3.2). Both resolve their hover
  * candidate through the ported AFFiNE connection cascade (W3b).
  */
-import { resolveConnectionCascade } from "../../routing/connection-overlay";
+import { resolveConnectionCascade } from "./connection-cascade";
 import {
   bendSimplifyToleranceForZoom,
   bendSnapToleranceForZoom,
   commitBendPolyline,
   dragOrthogonalSegment,
   polylinesAlmostEqual,
-} from "../../routing/bend-editing";
-import { nearestObjectAnchor, pointForAnchor, pointForObjectAnchor } from "../../routing/routing";
-import { connectionBoundsForObject } from "../../objects/geometry";
-import { isBelowTextType } from "../../objects/text-slots";
-import { createObjectId, type CanvasPoint } from "../../state/geometry";
-import { objectTypeLabel } from "../../state/schema/object-defaults";
+} from "./bend-editing";
+import { nearestObjectAnchor, pointForAnchor, pointForObjectAnchor } from "./routing";
+import { connectionBoundsForObject } from "../objects/geometry";
+import { isBelowTextType } from "../objects/text-slots";
+import { createObjectId, type CanvasPoint } from "../state/geometry";
+import { objectTypeLabel } from "../state/schema/object-defaults";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../state/schema";
-import { paintOrderedObjects } from "../../state/z-order";
-import type { CanvasAction } from "../../state/actions";
+} from "../state/schema";
+import { paintOrderedObjects } from "../state/z-order";
+import type { CanvasAction } from "../state/actions";
 import {
   DRAG_THRESHOLD,
   worldDistance,
   type CanvasPointerEvent,
-} from "../types";
+} from "../interaction/types";
 import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
@@ -41,7 +41,7 @@ import {
   type ConnectorEndpointDragGesture,
   type InteractionContext,
   type InteractionResult,
-} from "../gesture-state";
+} from "../interaction/gesture-state";
 
 const QUICK_CONNECT_MIN_GAP_PX = 120;
 const BEND_ENDPOINT_POSITION_EPSILON_PX = 0.5;
@@ -49,7 +49,7 @@ const UNIT_INTERVAL_EPSILON = 0.000001;
 
 /**
  * Resolves the connect-target under the pointer through the ported AFFiNE
- * connection cascade (W3b — connection-overlay.ts): anchor snap within 8 view
+ * connection cascade (W3b - connection-cascade.ts): anchor snap within 8 view
  * px, else nearest-outline-point snap within 8 world px, else inside-the-
  * shape, else no candidate. Candidates are passed topmost-first by shared
  * paint order, matching hitTestObjects, so an overlapping upper object wins,

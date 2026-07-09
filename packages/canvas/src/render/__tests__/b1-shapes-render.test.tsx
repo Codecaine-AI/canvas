@@ -154,7 +154,7 @@ describe("Wave B1 render smoke: every new native shape renders without crashing"
     });
   });
 
-  it("renders each true-outline polygon shape with the expected vertex count (same math as connection-overlay.ts)", () => {
+  it("renders each true-outline polygon shape with the expected vertex count (same math as connection-cascade.ts)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = renderB1();
       expect(polygonPointCount(container as HTMLElement, "triangle-up")).toBe(3);

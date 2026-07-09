@@ -1,15 +1,19 @@
 "use client";
 
+/**
+ * Connector rendering components draw routed connection paths plus selection
+ * chrome for endpoint and bend editing.
+ */
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../state/schema";
-import { connectorBendSegments } from "../../routing/bend-editing";
-import { routeConnection } from "../../routing/routing";
-import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
-import { resolveConnectorStroke } from "../../palette";
-import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
+} from "../state/schema";
+import { connectorBendSegments } from "./bend-editing";
+import { routeConnection } from "./routing";
+import { CONNECTOR_DASH_PATTERN_PX } from "./def";
+import { resolveConnectorStroke } from "../palette";
+import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 
 /** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
 const CONNECTOR_STROKE_WIDTH_PX = 4;

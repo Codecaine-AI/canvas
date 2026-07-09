@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Connector bend-editing helpers expose segment handles, drag translation,
+ * waypoint commits, and polyline simplification.
+ */
 import type { CanvasPoint } from "../state/geometry";
 
 export const BEND_SIMPLIFY_TOLERANCE_PX = 4;

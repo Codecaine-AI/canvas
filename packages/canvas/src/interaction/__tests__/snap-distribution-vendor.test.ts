@@ -7,7 +7,7 @@ import {
   calculateClosestDistances,
   DISTRIBUTION_GUIDE_COLOR,
   type SnapBounds,
-} from "../../vendor/blocksuite/snap-distribution";
+} from "../snap-distribution";
 
 function box(x: number, y: number, width: number, height: number): SnapBounds {
   return { x, y, width, height };

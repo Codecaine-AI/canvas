@@ -5,18 +5,18 @@
  *
  * Upstream source: packages/affine/gfx/connector/src/connector-manager.ts
  *   - `ConnectionOverlay.renderConnector`'s decision cascade (lines 958-1061)
- * License: MPL-2.0 (see ./vendor/blocksuite/NOTICE for details)
+ * License: MPL-2.0 (see repo-root PROVENANCE.md for details)
  *
- * This module lifts the ALGORITHM only: the `renderConnector` decision
+ * This connection-cascade module lifts the ALGORITHM only: the `renderConnector` decision
  * cascade (anchor snap within a screen-px radius, else nearest-outline-point
  * within a world-px radius, else inside eligible non-frame shapes, else free
  * point). No
  * `Overlay`/canvas-paint code, no `GfxController`/grid search.
  *
  * The per-object outline polygons and 4-cardinal anchor projection the
- * cascade consumes live in objects/geometry.ts (P3, D4 — the defs own their
- * outline geometry; routing consumes the pure React-free lookup, never def
- * components).
+ * cascade consumes live in objects/geometry.ts (P3, D4 - the defs own their
+ * outline geometry; connector routing consumes the pure React-free lookup,
+ * never def components).
  *
  * Constants copied verbatim from `affine-mining-map.md`'s Feature 3 table
  * (itself sourced from the file above): hover hit-zone expansion = bound

@@ -26,7 +26,7 @@ import { shapeForType } from "../../state/schema/object-defaults";
 import type { InteractiveCanvasObject, InteractiveCanvasObjectType } from "../../state/schema";
 import { ALL_OBJECT_TYPES } from "../../zz-dom-fixtures";
 import { getConnectionAnchors, outlinePolygon } from "../geometry";
-import { resolveConnectionCascade } from "../../routing/connection-overlay";
+import { resolveConnectionCascade } from "../../connectors/connection-cascade";
 
 type GeometryVariant = { name: string; x: number; y: number; width: number; height: number };
 

@@ -11,7 +11,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Hexagon (Flowchart "preparation" symbol) — a single SVG polygon tracing
- * the true 6-point outline (flat-top orientation, connection-overlay.ts
+ * the true 6-point outline (flat-top orientation, connection-cascade.ts
  * hexagonPoints) so an explicit stroke/fill traces the actual silhouette,
  * not the bounding box.
  */

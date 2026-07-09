@@ -1,10 +1,14 @@
 "use client";
 
+/**
+ * Connector routing helpers build orthogonal SVG paths, endpoint gaps, labels,
+ * and anchor picks for canvas connections.
+ */
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import type { Anchor } from "../state/schema/connections";
 import { connectionBoundsForObject, getConnectionAnchors, outlinePolygon } from "../objects/geometry";
-import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
+import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.

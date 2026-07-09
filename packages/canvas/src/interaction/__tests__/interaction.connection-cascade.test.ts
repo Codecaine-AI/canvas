@@ -14,7 +14,7 @@ import type {
 /**
  * W3b: the connector create/endpoint-drag gestures resolve their hover
  * candidate through the ported AFFiNE connection cascade
- * (connection-overlay.ts resolveConnectionCascade) — anchor snap within 8
+ * (connection-cascade.ts resolveConnectionCascade) — anchor snap within 8
  * VIEW px, outline snap within 8 WORLD px, inside fallback — and off-anchor
  * drops store the exact relative `position` on the endpoint.
  */

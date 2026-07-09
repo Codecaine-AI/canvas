@@ -11,7 +11,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Octagon (Basic) — a single SVG polygon tracing the true 8-point outline
- * (flat-top orientation, connection-overlay.ts octagonPoints) so an explicit
+ * (flat-top orientation, connection-cascade.ts octagonPoints) so an explicit
  * stroke/fill traces the actual silhouette, not the bounding box.
  */
 export const octagonShapeDef: ShapeDef = {

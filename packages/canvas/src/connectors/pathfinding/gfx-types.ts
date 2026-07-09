@@ -5,7 +5,7 @@
  *
  * Reimplemented (not copied) from BlockSuite's public `@blocksuite/global`
  * package so the vendored files can typecheck without a `@blocksuite/*`
- * dependency. See NOTICE for upstream source paths:
+ * dependency. See repo-root PROVENANCE.md for upstream source paths:
  *   - packages/framework/global/src/gfx/math.ts (almostEqual, isOverlap,
  *     lineIntersects, linePolygonIntersects, clamp)
  *   - packages/framework/global/src/gfx/model/vec.ts (Vec — subset used here)

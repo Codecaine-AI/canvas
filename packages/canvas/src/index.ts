@@ -16,7 +16,7 @@ export * from "./interaction/clipboard";
 export * from "./theme";
 export * from "./state/geometry";
 export * from "./interaction/interaction";
-export * from "./routing/routing";
+export * from "./connectors/routing";
 export * from "./interaction/snapping";
 export * from "./editor/InteractiveCanvasEditor";
 export * from "./editor/InteractiveCanvasViewer";

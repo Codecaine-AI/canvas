@@ -80,7 +80,7 @@ an `ObjectDef.toolbar`.
 - `objects/` imports NOTHING from `ui/` or `editor/` — defs are definitions
   + data + canvas-content rendering only.
 - `editor/components/` sits in layer 4: it may import `objects/`, `render/`,
-  `routing/`, `ui/`, `theme.ts`, and `state/`, but nothing outside `editor/`
+  `connectors/`, `ui/`, `theme.ts`, and `state/`, but nothing outside `editor/`
   may import it (render inlines its own copies of the two style values it
   shares visually with the editor — the select cursor and selection blue).
 - `ui/` imports nothing from the rest of src — primitives stay dumb.

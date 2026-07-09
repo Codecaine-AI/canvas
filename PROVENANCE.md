@@ -16,11 +16,14 @@ asymmetric re-route)"), on 2026-07-05.
   (`CanvasSidecarEmbed.test.tsx`, `library-page.test.tsx`) stayed in Spectre
   alongside them.
 - `apps/frontend/src/lib/vendor/blocksuite/{a-star,graph,priority-queue,
-  gfx-types,path-generator,snap-distribution}.ts` → `packages/canvas/src/vendor/blocksuite/`,
-  each still carrying its original BlockSuite (MPL-2.0) provenance header.
-  `slash-menu-model.ts` (also vendored from BlockSuite, but backing
-  Spectre's docs editor slash menu, not the canvas engine) stayed in
-  Spectre. See `packages/canvas/src/vendor/blocksuite/NOTICE` here and
+  gfx-types,path-generator,snap-distribution}.ts` moved into the canvas
+  package and now live at `packages/canvas/src/connectors/pathfinding/`
+  (`a-star`, `graph`, `priority-queue`, `gfx-types`, `path-generator`) and
+  `packages/canvas/src/interaction/snap-distribution.ts`. Each still carries
+  its original BlockSuite (MPL-2.0) provenance header. `slash-menu-model.ts`
+  (also vendored from BlockSuite, but backing Spectre's docs editor slash
+  menu, not the canvas engine) stayed in Spectre. See the BlockSuite MPL
+  provenance section at the end of this file and
   `apps/frontend/src/lib/vendor/blocksuite/NOTICE` in Spectre for the split
   provenance records.
 - `board-design-reference/` (FigJam/AFFiNE reference recordings, pixel
@@ -57,15 +60,15 @@ and `packages/canvas/src/ui/icons/icon-glyph-data.generated.ts`.
 ## Licensing note
 
 This package inherits the same open questions as the pre-extraction code:
-the `vendor/blocksuite/` subdirectory contains MPL-2.0-licensed ports and
-verbatim copies from BlockSuite (https://github.com/toeverything/blocksuite).
-MPL-2.0 is a file-level copyleft license — see
-`packages/canvas/packages/canvas/src/vendor/blocksuite/NOTICE` for the exact
-provenance and modification status of each vendored file, and keep that
-NOTICE in sync if those files are ever modified. The rest of this package
-(the engine, chrome components, sample canvas data, and vendored UI primitives) is
-original Spectre/Codecaine code with no further licensing constraints beyond
-whatever license this repository declares at large.
+several connector pathfinding, cascade, outline-anchor, and snap-distribution
+files are MPL-2.0-licensed ports or verbatim copies from BlockSuite
+(https://github.com/toeverything/blocksuite). MPL-2.0 is a file-level
+copyleft license; see the BlockSuite MPL provenance section below for the
+exact provenance and modification status of each file, and keep it in sync if
+those files are ever modified. The rest of this package (the engine, chrome
+components, sample canvas data, and vendored UI primitives) is original
+Spectre/Codecaine code with no further licensing constraints beyond whatever
+license this repository declares at large.
 
 ## Repo layout at extraction time
 
@@ -81,3 +84,57 @@ packages/canvas/                 (this repo's root)
     canvas/                      (@codecaine-ai/canvas — the engine)
     studio/                      (@codecaine-ai/studio — standalone board editor)
 ```
+
+## BlockSuite MPL provenance
+
+The files listed below are copied or ported from BlockSuite
+(https://github.com/toeverything/blocksuite) under MPL-2.0. This section
+absorbs the former `packages/canvas/src/vendor/blocksuite/NOTICE` content.
+
+- `packages/affine/blocks/surface/src/utils/priority-queue.ts`
+  -> `packages/canvas/src/connectors/pathfinding/priority-queue.ts`
+  (verbatim, MPL-2.0 header added).
+
+- `packages/affine/blocks/surface/src/utils/graph.ts`
+  -> `packages/canvas/src/connectors/pathfinding/graph.ts`
+  (import paths adjusted to local `gfx-types.ts`; algorithm body unmodified).
+
+- `packages/affine/blocks/surface/src/utils/a-star.ts`
+  -> `packages/canvas/src/connectors/pathfinding/a-star.ts`
+  (import paths adjusted to local `graph.ts`, `priority-queue.ts`, and
+  `gfx-types.ts`; algorithm body unmodified).
+
+- `packages/affine/gfx/connector/src/connector-manager.ts`
+  -> `packages/canvas/src/connectors/pathfinding/path-generator.ts`
+  (not verbatim: extracts the pure orthogonal path-generation logic and ports
+  it to plain TypeScript types, removing Lit, signals, BlockSuite controller
+  dependencies, model dependencies, and rendering/overlay code).
+
+- BlockSuite `@blocksuite/global/gfx` primitives
+  -> `packages/canvas/src/connectors/pathfinding/gfx-types.ts`
+  (dependency-free reimplementation of the handful of gfx primitives needed by
+  the pathfinding files: `IVec`, `IVec3`, `Bound`, `Vec`, `PointLocation`,
+  `almostEqual`, `isOverlap`, `lineIntersects`, and
+  `linePolygonIntersects`).
+
+- `packages/affine/gfx/pointer/src/snap/snap-overlay.ts`
+  -> `packages/canvas/src/interaction/snap-distribution.ts`
+  (not verbatim: extracts equal-spacing distribution snap search and 9-way
+  closest-alignment-distance search as plain functions. One documented
+  deviation remains: `alignDistributeVertically` fixes two apparent upstream
+  axis bugs; every other branch/formula is unchanged from upstream).
+
+- `packages/affine/gfx/connector/src/connector-manager.ts` (`getAnchors`,
+  lines 133-159, and `ConnectionOverlay.renderConnector`, lines 958-1061)
+  -> `packages/canvas/src/objects/geometry.ts` and
+  `packages/canvas/src/connectors/connection-cascade.ts`
+  (not verbatim: algorithm-only ports. `getAnchors` is reproduced as
+  `getConnectionAnchors`; the render connector decision cascade is reproduced
+  as `resolveConnectionCascade`; canvas-paint/controller code is omitted).
+
+MPL-2.0 compliance is tracked at file level: each copied or ported file carries
+a header citing its upstream source path and license. Do not modify the copied
+algorithm bodies in `priority-queue.ts`, `graph.ts`, `a-star.ts`,
+`path-generator.ts`, `snap-distribution.ts`, `objects/geometry.ts`, or
+`connectors/connection-cascade.ts` without updating this section and the file
+headers accordingly.

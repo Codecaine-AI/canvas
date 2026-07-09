@@ -21,7 +21,7 @@ import type {
   InteractiveCanvasObject,
 } from "../../state/schema";
 import { connectionBoundsForObject } from "../../objects/geometry";
-import { routeConnection } from "../../routing/routing";
+import { routeConnection } from "../../connectors/routing";
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {

@@ -18,10 +18,10 @@ import type { InteractionOverlay } from "../interaction/interaction";
 import { canvasSurfaceStyle } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
-import { Connector, ConnectorSelectionChrome } from "./connectors/Connector";
-import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
+import { Connector, ConnectorSelectionChrome } from "../connectors/Connector";
+import { ConnectorDragPreview } from "../connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
-import { AnchorDots, type ActivePort } from "./overlays/AnchorDots";
+import { AnchorDots, type ActivePort } from "../connectors/AnchorDots";
 import { HoverHighlight } from "./overlays/HoverHighlight";
 import { Marquee } from "./overlays/Marquee";
 import { PlacePreview } from "./overlays/PlacePreview";
@@ -30,7 +30,7 @@ import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
 import { SpacingChips } from "./overlays/SpacingChips";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import type { CanvasTool } from "../state/actions";
-import { quickConnectClickPoint } from "../interaction/gestures/connectors";
+import { quickConnectClickPoint } from "../connectors/gestures";
 
 // ---------------------------------------------------------------------------
 // Stage surface constants (moved from theme/tokens.ts in the theme dispersal

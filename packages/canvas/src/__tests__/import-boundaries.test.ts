@@ -7,13 +7,13 @@ import { join, relative } from "node:path";
  * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
  * amended 2026-07-07 after the co-location alignment).
  *
- * Layering: theme.ts <- state <- routing <- objects <- render|interaction
- * <- editor. theme is ONE file (src/theme.ts) since the theme dispersal.
+ * Layering: theme.ts <- state <- connector routing/cascade <- objects
+ * <- render|interaction <- editor. theme is ONE file (src/theme.ts) since the theme dispersal.
  * ui/ is app-agnostic primitives + INTERFACE icons only and imports nothing
  * from the rest of src. objects/ holds only defs/data (no ui components, no
- * editor JSX). Nothing outside editor/ imports editor/. vendor/ is an
- * MPL-2.0 boundary: only routing/ and interaction/snapping.ts may import
- * vendor/blocksuite, and vendor imports nothing first-party.
+ * editor JSX). Nothing outside editor/ imports editor/. The BlockSuite
+ * MPL-2.0 pathfinding files live under connectors/pathfinding/, with the
+ * distribution snap port temporarily under interaction/snap-distribution.ts.
  *
  * Known, deliberate exceptions (encoded below so drift is loud):
  *  - interaction/gesture-state.ts may TYPE-import ViewportState from
@@ -96,6 +96,23 @@ function violations(
   return found;
 }
 
+function violationsInFiles(
+  relPaths: string[],
+  forbidden: RegExp,
+  options: { skipTypeOnly?: boolean } = {},
+): string[] {
+  const found: string[] = [];
+  for (const relPath of relPaths) {
+    const file = join(SRC_ROOT, relPath);
+    for (const specifier of importSpecifiers(file, options)) {
+      if (forbidden.test(specifier)) {
+        found.push(`${relPath} -> ${specifier}`);
+      }
+    }
+  }
+  return found;
+}
+
 function allSourceFiles(): string[] {
   return sourceFiles(SRC_ROOT);
 }
@@ -163,28 +180,32 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("state/ does not import routing/", () => {
+  test("state/ does not import connectors/", () => {
     expect(
-      violations(join(SRC_ROOT, "state"), /^(\.\.\/)+routing(\/|$)/),
+      violations(join(SRC_ROOT, "state"), /^(\.\.\/)+connectors(\/|$)/),
     ).toEqual([]);
   });
 
-  test("routing/ imports only state/, vendor/, and objects/geometry (never def components, render/, editor/, interaction/, ui/, or theme)", () => {
+  test("connector routing/cascade helpers import only state/, pathfinding/, and objects/geometry (never def components, render/, editor/, interaction/, ui/, or theme)", () => {
     // P3 (OBJECT-DEF-OVERHAUL.md §3.6, D4): the defs own their outline
-    // geometry, so routing consumes the pure, React-free objects/geometry.ts.
-    // The connection cascade and the main router both need that edge now that
-    // below-slot labels have an external routing footprint; importing any
-    // other objects/ module (def components, registry) stays a layering
-    // inversion. The only allowed objects/ edges from routing are the pure
-    // geometry helpers below.
+    // geometry, so connector routing consumes the pure, React-free
+    // objects/geometry.ts. The connection cascade and the main router both
+    // need that edge now that below-slot labels have an external routing
+    // footprint; importing any other objects/ module (def components,
+    // registry) stays a layering inversion. The only allowed objects/ edges
+    // from these pure connector helpers are the geometry helpers below.
     expect(
-      violations(
-        join(SRC_ROOT, "routing"),
+      violationsInFiles(
+        [
+          join("connectors", "routing.ts"),
+          join("connectors", "connection-cascade.ts"),
+          join("connectors", "bend-editing.ts"),
+        ],
         /^(\.\.\/)+(objects|render|interaction|editor|ui)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
       ),
     ).toEqual([
-      `${join("routing", "routing.ts")} -> ../objects/geometry`,
-      `${join("routing", "connection-overlay.ts")} -> ../objects/geometry`,
+      `${join("connectors", "routing.ts")} -> ../objects/geometry`,
+      `${join("connectors", "connection-cascade.ts")} -> ../objects/geometry`,
     ]);
   });
 
@@ -254,10 +275,10 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("interaction/types.ts is kernel vocabulary with no render/ or routing/ imports", () => {
+  test("interaction/types.ts is kernel vocabulary with no render/ or connectors/ imports", () => {
     expect(
       importSpecifiers(join(SRC_ROOT, "interaction", "types.ts")).filter((specifier) =>
-        /^(\.\.\/)+(render|routing)(\/|$)/.test(specifier),
+        /^(\.\.\/)+(render|connectors)(\/|$)/.test(specifier),
       ),
     ).toEqual([]);
   });
@@ -270,7 +291,7 @@ describe("import boundaries", () => {
     expect(
       violations(
         join(SRC_ROOT, "ui"),
-        /^(\.\.\/)+(objects|render|interaction|editor|state|routing|vendor)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
+        /^(\.\.\/)+(objects|render|interaction|editor|state|connectors)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
       ),
     ).toEqual([]);
   });
@@ -284,22 +305,28 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("vendor/ does not import first-party src code (MPL boundary)", () => {
+  test("connectors/pathfinding does not import first-party src code (MPL boundary)", () => {
     expect(
       violations(
-        join(SRC_ROOT, "vendor"),
-        /^(\.\.\/)+(theme|state|objects|interaction|routing|render|editor|ui|fixtures)(\/|$)/,
+        join(SRC_ROOT, "connectors", "pathfinding"),
+        /^(\.\.\/)+(theme|state|objects|interaction|render|editor|ui|fixtures)(\/|$)/,
       ),
     ).toEqual([]);
   });
 
-  test("only routing/ and interaction/snapping.ts import vendor/blocksuite", () => {
+  test("interaction/snap-distribution.ts reaches only pathfinding gfx types (temporary MPL home)", () => {
+    expect(
+      importSpecifiers(join(SRC_ROOT, "interaction", "snap-distribution.ts")).filter(
+        (specifier) => specifier.startsWith("."),
+      ),
+    ).toEqual(["../connectors/pathfinding/gfx-types"]);
+  });
+
+  test("no source imports legacy vendor/blocksuite paths", () => {
     expect(
       violationsAcrossTree(
         /vendor\/blocksuite/,
-        (relPath) =>
-          relPath.split("/")[0] === "routing" ||
-          relPath === join("interaction", "snapping.ts"),
+        () => false,
       ),
     ).toEqual([]);
   });

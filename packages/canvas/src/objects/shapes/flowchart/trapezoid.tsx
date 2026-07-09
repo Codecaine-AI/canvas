@@ -10,7 +10,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 }
 
 /**
- * Trapezoid (W5) — 4-point true-outline polygon (connection-overlay.ts's
+ * Trapezoid (W5) — 4-point true-outline polygon (connection-cascade.ts's
  * trapezoidPoints, the same generator connector attachment uses) painted
  * behind the label; the button chrome stays fully transparent so only one
  * outline is visible.

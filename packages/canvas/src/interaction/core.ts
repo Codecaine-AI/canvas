@@ -10,8 +10,8 @@
  */
 import type { CanvasAction, CanvasSelection } from "../state/actions";
 import { objectById } from "../state/geometry";
-import { connectorBendSegments } from "../routing/bend-editing";
-import { routeConnection } from "../routing/routing";
+import { connectorBendSegments } from "../connectors/bend-editing";
+import { routeConnection } from "../connectors/routing";
 import { createMoveGesture, stepFromMove } from "./gestures/move";
 import { stepFromResize } from "./gestures/resize";
 import { stepFromMarquee } from "./gestures/marquee";
@@ -26,7 +26,7 @@ import {
   stepFromConnectorBendDrag,
   stepFromConnectorCreate,
   stepFromConnectorEndpointDrag,
-} from "./gestures/connectors";
+} from "../connectors/gestures";
 import {
   DRAG_THRESHOLD,
   selectedObjectIds,

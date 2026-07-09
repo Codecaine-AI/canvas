@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
-import { ConnectorDragPreview } from "../connectors/ConnectorDragPreview";
-import { routeConnection } from "../../routing/routing";
+import { ConnectorDragPreview } from "../../connectors/ConnectorDragPreview";
+import { routeConnection } from "../../connectors/routing";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 afterEach(() => {

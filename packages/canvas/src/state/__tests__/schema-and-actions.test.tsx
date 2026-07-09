@@ -16,7 +16,7 @@ import {
   type InteractiveCanvasObject,
   type InteractiveCanvasObjectType,
 } from "../../index";
-import { routeConnection } from "../../routing/routing";
+import { routeConnection } from "../../connectors/routing";
 import { reconcileSectionMembership } from "../section-membership";
 
 const syntheticCanvasDocument = syntheticCanvas as InteractiveCanvasDocument;

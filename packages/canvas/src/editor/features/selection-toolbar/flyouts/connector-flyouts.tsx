@@ -15,7 +15,7 @@ import {
 import type { CanvasArrowDirection, CanvasConnectionStyle } from "../../../../state/schema";
 
 /**
- * Connector toolbar flyouts, moved verbatim from objects/connector/def.tsx
+ * Connector toolbar flyouts, moved verbatim from the connector def
  * (co-location alignment): flyouts are editor interface JSX, resolved by def
  * kind + action id (see ./index.ts). The connector def keeps only the
  * data-only control list. Color opens the shared 10-pick ColorPickerFlyout

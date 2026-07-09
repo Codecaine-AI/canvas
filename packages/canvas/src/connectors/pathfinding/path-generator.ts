@@ -2,7 +2,7 @@
  * Ported (not verbatim) from BlockSuite.
  *
  * Upstream source: packages/affine/gfx/connector/src/connector-manager.ts
- * License: MPL-2.0 (see ./NOTICE for details)
+ * License: MPL-2.0 (see repo-root PROVENANCE.md for details)
  *
  * This file extracts only the pure, framework-free orthogonal
  * path-generation logic from `connector-manager.ts` — the `PathGenerator`

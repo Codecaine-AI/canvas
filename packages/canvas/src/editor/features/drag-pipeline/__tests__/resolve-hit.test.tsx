@@ -15,7 +15,7 @@ import {
 } from "../../../../interaction/interaction";
 import type { CanvasPoint } from "../../../../state/geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../../state/schema";
-import { anchorScreenPoint, HIT_TARGET_PX } from "../../../../render/overlays/AnchorDots";
+import { anchorScreenPoint, HIT_TARGET_PX } from "../../../../connectors/AnchorDots";
 import { screenToWorld, type ViewportState } from "../../../../render/viewport";
 import { resolveHit } from "../use-interaction-pipeline";
 

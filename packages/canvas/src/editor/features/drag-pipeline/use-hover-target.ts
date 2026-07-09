@@ -7,7 +7,7 @@ import { sectionTitleChipWorldRect } from "../../../objects/section/title-chip-g
 import {
   ANCHOR_DOT_OFFSET_PX,
   HIT_TARGET_PX,
-} from "../../../render/overlays/AnchorDots";
+} from "../../../connectors/AnchorDots";
 import type { CanvasTool } from "../../../state/actions";
 import type { CanvasBounds, CanvasPoint } from "../../../state/geometry";
 import type {

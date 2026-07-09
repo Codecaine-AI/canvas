@@ -9,7 +9,7 @@ import type { InteractiveCanvasObject } from "../../../state/schema";
 
 /**
  * Chevron silhouette geometry (moved from theme/tokens.ts in the theme
- * dispersal). Notch ratio mirrors connection-overlay.ts's true-outline
+ * dispersal). Notch ratio mirrors connection-cascade.ts's true-outline
  * chevron math.
  */
 export const CHEVRON_GEOMETRY = {

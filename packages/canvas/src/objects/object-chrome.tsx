@@ -301,5 +301,5 @@ export function ObjectSlotText({
 }
 
 // (EdgePorts died in P3: connection affordances render as the screen-space
-// AnchorDots overlay — render/overlays/AnchorDots.tsx — at the def-derived
+// AnchorDots overlay - connectors/AnchorDots.tsx - at the def-derived
 // anchor positions, D5/D15.)

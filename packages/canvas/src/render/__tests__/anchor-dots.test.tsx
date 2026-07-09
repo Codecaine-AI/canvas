@@ -3,9 +3,9 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CanvasStage } from "../CanvasStage";
-import { ANCHOR_DOT_OFFSET_PX, ANCHOR_DOTS_MIN_ZOOM } from "../overlays/AnchorDots";
+import { ANCHOR_DOT_OFFSET_PX, ANCHOR_DOTS_MIN_ZOOM } from "../../connectors/AnchorDots";
 import { connectionBoundsForObject } from "../../objects/geometry";
-import { CONNECTOR_END_GAP_PX } from "../../routing/routing";
+import { CONNECTOR_END_GAP_PX } from "../../connectors/routing";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {

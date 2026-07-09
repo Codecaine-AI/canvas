@@ -2,7 +2,7 @@
  * Vendored verbatim from BlockSuite.
  *
  * Upstream source: packages/affine/blocks/surface/src/utils/priority-queue.ts
- * License: MPL-2.0 (see ./NOTICE for details)
+ * License: MPL-2.0 (see repo-root PROVENANCE.md for details)
  *
  * No algorithmic edits — copied as-is.
  */

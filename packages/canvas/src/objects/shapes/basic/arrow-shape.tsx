@@ -35,7 +35,7 @@ export function arrowShapeTextRect(object: InteractiveCanvasObject): LocalRect {
 /**
  * Arrow-shape (W2/W4, fat chevron) — a single SVG polygon tracing the full
  * 7-point silhouette (body + head + notch) — the same outline connector
- * attachment uses (connection-overlay.ts arrowShapePoints) — so an explicit
+ * attachment uses (connection-cascade.ts arrowShapePoints) — so an explicit
  * stroke traces the whole chevron, not just a body rect.
  */
 export const arrowShapeShapeDef: ShapeDef = {

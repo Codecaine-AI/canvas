@@ -11,7 +11,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Pentagon (Basic) — a single SVG polygon tracing the true 5-point outline
- * (point-up, connection-overlay.ts pentagonPoints) so an explicit
+ * (point-up, connection-cascade.ts pentagonPoints) so an explicit
  * stroke/fill traces the actual silhouette, not the bounding box.
  */
 export const pentagonShapeDef: ShapeDef = {

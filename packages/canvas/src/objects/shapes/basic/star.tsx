@@ -10,7 +10,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 }
 
 /**
- * Star (W5) — 5-point star true-outline polygon (connection-overlay.ts's
+ * Star (W5) — 5-point star true-outline polygon (connection-cascade.ts's
  * starPoints, the same generator connector attachment uses) painted behind
  * the label; the button chrome stays fully transparent so only one outline
  * is visible. The label also carries a smaller font-size than the base

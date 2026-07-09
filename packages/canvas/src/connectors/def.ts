@@ -1,4 +1,8 @@
-import type { ConnectorDef, ToolbarSpec } from "../object-def";
+/**
+ * Connector definition metadata for selection toolbar controls, color role,
+ * and routed-label editing.
+ */
+import type { ConnectorDef, ToolbarSpec } from "../objects/object-def";
 
 // ---------------------------------------------------------------------------
 // Connector style constants (moved from theme/tokens.ts in the theme
@@ -38,7 +42,7 @@ const CONNECTOR_TOOLBAR: ToolbarSpec = {
  * aren't objects (no render dispatch, no geometry defaults, no text slot, no
  * outline), so since P4 this carries exactly what connectors have — the
  * selection toolbar, the "connector" palette role their `connection.color`
- * resolves through (render/connectors + resolveConnectorStroke), and the
+ * resolves through (connector render components + resolveConnectorStroke), and the
  * routed-midpoint label contract (labels render and edit at
  * routeConnection().labelPoint — use-text-editing.ts's connection path).
  * It is deliberately absent from OBJECT_DEFS.

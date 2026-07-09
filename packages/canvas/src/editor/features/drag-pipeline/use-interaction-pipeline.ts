@@ -32,7 +32,7 @@ import {
 } from "../../../interaction/interaction";
 import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../state/actions";
 import { type CanvasPoint } from "../../../state/geometry";
-import { type Anchor } from "../../../routing/routing";
+import { type Anchor } from "../../../connectors/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
 import { panBy, worldToScreen, type ViewportState } from "../../../render/viewport";
 import {
@@ -40,7 +40,7 @@ import {
   ANCHOR_NAMES,
   HIT_TARGET_PX as ANCHOR_DOT_HIT_TARGET_PX,
   anchorScreenPoint,
-} from "../../../render/overlays/AnchorDots";
+} from "../../../connectors/AnchorDots";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { animateSectionFitToChildren } from "../section-fit/animate-section-fit";
 import { useHoverTarget } from "./use-hover-target";

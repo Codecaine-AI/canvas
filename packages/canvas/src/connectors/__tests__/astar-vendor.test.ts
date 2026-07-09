@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { PriorityQueue } from "../../vendor/blocksuite/priority-queue";
-import { Graph } from "../../vendor/blocksuite/graph";
-import { AStarRunner } from "../../vendor/blocksuite/a-star";
-import { Bound } from "../../vendor/blocksuite/gfx-types";
-import { PathGenerator } from "../../vendor/blocksuite/path-generator";
+import { PriorityQueue } from "../pathfinding/priority-queue";
+import { Graph } from "../pathfinding/graph";
+import { AStarRunner } from "../pathfinding/a-star";
+import { Bound } from "../pathfinding/gfx-types";
+import { PathGenerator } from "../pathfinding/path-generator";
 
 describe("vendored blocksuite priority-queue", () => {
   it("dequeues in ascending priority order", () => {

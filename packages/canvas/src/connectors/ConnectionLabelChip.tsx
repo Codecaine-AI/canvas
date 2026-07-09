@@ -1,10 +1,14 @@
 "use client";
 
+/**
+ * Connector label chip rendering for routed midpoint labels in the world
+ * overlay layer.
+ */
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
-} from "../../state/schema";
-import { routeConnection } from "../../routing/routing";
+} from "../state/schema";
+import { routeConnection } from "./routing";
 
 /**
  * Pill chip rendered at a connector's routed label point (world layer, so it

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, renderHook } from "@testing-library/react";
-import { routeConnection } from "../../../../routing/routing";
+import { routeConnection } from "../../../../connectors/routing";
 import type { CanvasAction } from "../../../../state/actions";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
 import { useTextEditing } from "../use-text-editing";

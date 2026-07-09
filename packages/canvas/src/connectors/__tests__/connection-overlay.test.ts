@@ -3,7 +3,7 @@ import {
   ANCHOR_SNAP_VIEW_PX,
   OUTLINE_SNAP_WORLD_PX,
   resolveConnectionCascade,
-} from "../connection-overlay";
+} from "../connection-cascade";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 
