@@ -106,9 +106,10 @@ export type ConnectorAnchorCandidate = {
 /**
  * Ephemeral live-preview state for both connector-endpoint-drag (3.2.2, an
  * existing connection's "from"/"to" is reconnected) and connector-create
- * (3.3.2, a brand-new connector is dragged from an object's edge port).
- * `connectionId` is set only for the reconnect case; `fromObjectId`/`fromAnchor`
- * are set only for the create case.
+ * (3.3.2, a brand-new connector is dragged from an object's edge port or
+ * object body). `connectionId` is set only for the reconnect case;
+ * `fromObjectId`/`fromAnchor` are set only for the create case, and
+ * `fromAnchor` is absent when Connector Mode started from an object body.
  */
 export type ConnectorDragOverlay = {
   connectionId?: string;
@@ -228,11 +229,11 @@ export type ConnectorEndpointDragGesture = {
   candidate?: ConnectorAnchorCandidate;
 };
 
-/** Dragging a brand-new connector from an object's edge port (3.3.2). */
+/** Dragging a brand-new connector from an object's edge port or body (3.3.2). */
 export type ConnectorCreateGesture = {
   kind: "connector-create";
   fromObjectId: string;
-  fromAnchor: Anchor;
+  fromAnchor?: Anchor;
   startWorld: CanvasPoint;
   point: CanvasPoint;
   hasDragged: boolean;

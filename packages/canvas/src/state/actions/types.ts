@@ -193,7 +193,7 @@ export type CanvasAction =
   | {
       type: "canvas.quickConnect";
       fromObjectId: string;
-      fromAnchor: Anchor;
+      fromAnchor?: Anchor;
       drop:
         | { objectId: string; anchor: Anchor }
         | { point: { x: number; y: number } };
