@@ -232,6 +232,38 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(dots(container as HTMLElement, "rect").length).toBe(4);
   });
 
+  it("renders connector-mode dots for an unselected hovered object only", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument([triangle, rect])}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        selectedObjectIds={["tri"]}
+        activeTool="connector"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+
+    expect(dots(container as HTMLElement, "rect").length).toBe(4);
+    expect(dots(container as HTMLElement, "tri").length).toBe(0);
+  });
+
+  it("keeps select-mode dots driven by selection rather than hover", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument([triangle, rect])}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        selectedObjectIds={["tri"]}
+        activeTool="select"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+
+    expect(dots(container as HTMLElement, "tri").length).toBe(4);
+    expect(dots(container as HTMLElement, "rect").length).toBe(0);
+  });
+
   it("does not show dots for an unselected object on hover", () => {
     const { container } = render(
       <CanvasStage

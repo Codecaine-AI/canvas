@@ -126,6 +126,8 @@ export interface CanvasStageProps {
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
   /** Ephemeral interaction overlay (marquee, guides, spacing, drop target, connector drag preview). */
   interactionOverlay?: InteractionOverlay;
+  /** Connector-tool hover target whose anchor dots should be shown while idle. */
+  hoveredObjectId?: string | null;
   /** Object whose text is currently being edited in place (D14) — its at-rest text is hidden while the slot editor is the visible copy. */
   editingTextObjectId?: string | null;
   /** Untransformed screen-space overlay (marquee, guides, handles). */
@@ -234,6 +236,7 @@ export function CanvasStage({
   onStagePointerLeave,
   onStageDoubleClick,
   interactionOverlay,
+  hoveredObjectId = null,
   editingTextObjectId = null,
   overlay,
   worldOverlay,
@@ -269,10 +272,20 @@ export function CanvasStage({
   const connectorDragSourceObjectId = interactionOverlay?.connectorDrag?.fromObjectId ?? null;
   const connectorDragSourceAnchor = interactionOverlay?.connectorDrag?.fromAnchor ?? null;
   const documentObjectIds = new Set(document.objects.map((object) => object.id));
-  const anchorDotObjectIds = [...selectedObjectIds];
-  for (const objectId of [connectorDragSourceObjectId]) {
-    if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
-      anchorDotObjectIds.push(objectId);
+  let anchorDotObjectIds: string[];
+  if (activeTool === "connector") {
+    anchorDotObjectIds = [];
+    for (const objectId of [hoveredObjectId, connectorDragSourceObjectId]) {
+      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
+        anchorDotObjectIds.push(objectId);
+      }
+    }
+  } else {
+    anchorDotObjectIds = [...selectedObjectIds];
+    for (const objectId of [connectorDragSourceObjectId]) {
+      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
+        anchorDotObjectIds.push(objectId);
+      }
     }
   }
   const hoveredQuickConnectDrag =
