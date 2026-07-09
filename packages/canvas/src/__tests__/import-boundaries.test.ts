@@ -300,7 +300,11 @@ describe("import boundaries", () => {
     expect(
       violationsAcrossTree(
         /(^|\/)editor\//,
-        (relPath) => relPath.split("/")[0] === "editor" || relPath === "index.ts",
+        (relPath) =>
+          relPath.split("/")[0] === "editor" ||
+          relPath === "index.ts" ||
+          // DOM-equivalence composition harness, queued for retirement.
+          relPath === "zz-dom-fixtures.ts",
       ),
     ).toEqual([]);
   });

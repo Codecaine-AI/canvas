@@ -1,12 +1,15 @@
 "use client";
 
+/**
+ * Document-stage renderer: grid, world transform, persisted objects/connectors,
+ * and caller-owned overlay slots. Editor feedback is composed outside.
+ */
 import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
   type Ref,
-  useState,
 } from "react";
 import {
   documentBounds,
@@ -14,23 +17,12 @@ import {
   type CanvasBounds,
 } from "../state/geometry";
 import { gridBackground } from "./grid";
-import type { InteractionOverlay } from "../interaction/interaction";
 import { canvasSurfaceStyle } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionChrome } from "../connectors/Connector";
-import { ConnectorDragPreview } from "../connectors/ConnectorDragPreview";
-import { SelectionBox } from "./overlays/SelectionBox";
-import { AnchorDots, type ActivePort } from "../connectors/AnchorDots";
-import { HoverHighlight } from "./overlays/HoverHighlight";
-import { Marquee } from "./overlays/Marquee";
-import { PlacePreview } from "./overlays/PlacePreview";
-import { SnapGuideLine } from "./overlays/SnapGuideLine";
-import { DistributionGuideLine } from "./overlays/DistributionGuideLine";
-import { SpacingChips } from "./overlays/SpacingChips";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import type { CanvasTool } from "../state/actions";
-import { quickConnectClickPoint } from "../connectors/gestures";
 
 // ---------------------------------------------------------------------------
 // Stage surface constants (moved from theme/tokens.ts in the theme dispersal
@@ -87,6 +79,8 @@ export interface CanvasStageProps {
   viewport: ViewportState;
   selectedObjectIds?: string[];
   changedObjectIds?: string[];
+  /** Object currently styled as an interaction drop target via ObjectShape props. */
+  dropTargetId?: string | null;
   /** Connection currently selected — renders endpoint handles and bend pills. */
   selectedConnectionId?: string | null;
   compact?: boolean;
@@ -126,10 +120,6 @@ export interface CanvasStageProps {
    * this handler from double-firing for that case).
    */
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
-  /** Ephemeral interaction overlay (marquee, guides, spacing, drop target, connector drag preview). */
-  interactionOverlay?: InteractionOverlay;
-  /** Connector-tool hover target whose anchor dots should be shown while idle. */
-  hoveredObjectId?: string | null;
   /** Object whose text is currently being edited in place (D14) — its at-rest text is hidden while the slot editor is the visible copy. */
   editingTextObjectId?: string | null;
   /** Untransformed screen-space overlay (marquee, guides, handles). */
@@ -142,6 +132,8 @@ export interface CanvasStageProps {
   worldOverlay?: ReactNode;
   /** Current editor tool, used to make canvas content inert while panning with the hand tool. */
   activeTool?: CanvasTool;
+  /** True while connector drag feedback is active; keeps stage/object cursors byte-compatible. */
+  connectorDragActive?: boolean;
   className?: string;
   style?: CSSProperties;
   /** Ref to the root stage element (`[data-canvas-stage="true"]`), e.g. for useCanvasViewport. */
@@ -197,7 +189,8 @@ function annotationTargetLabel(target: CanvasAnnotationTarget): string {
 
 // ObjectShape and SelectionBox moved to sibling modules but were part of this
 // module's public surface (index.ts re-exports * from here) — keep re-exporting.
-export { annotationTargetLabel, renderOrderedObjects, ObjectShape, SelectionBox };
+export { annotationTargetLabel, renderOrderedObjects, ObjectShape };
+export { SelectionBox } from "./overlays/SelectionBox";
 
 /**
  * Shared world-space renderer used by both the read-only viewer (static/fit or
@@ -218,14 +211,14 @@ export { annotationTargetLabel, renderOrderedObjects, ObjectShape, SelectionBox 
  *      - non-section DOM object shapes at z 2
  *      - section title chips at z 3
  *      - world overlays/editors at z 4
- *  - an untransformed screen-space `overlay` slot: SelectionBox (handles),
- *    marquee rect, and (future) snap guides / spacing chips / drop-target glow.
+ *  - an untransformed screen-space `overlay` slot for caller-owned feedback.
  */
 export function CanvasStage({
   document,
   viewport,
   selectedObjectIds = [],
   changedObjectIds = [],
+  dropTargetId = null,
   selectedConnectionId = null,
   compact,
   onObjectSelect,
@@ -237,12 +230,11 @@ export function CanvasStage({
   onStagePointerMove,
   onStagePointerLeave,
   onStageDoubleClick,
-  interactionOverlay,
-  hoveredObjectId = null,
   editingTextObjectId = null,
   overlay,
   worldOverlay,
   activeTool,
+  connectorDragActive,
   className,
   style,
   stageRef,
@@ -250,7 +242,6 @@ export function CanvasStage({
   const selected = new Set(selectedObjectIds);
   const changed = new Set(changedObjectIds);
   const zoom = viewport.zoom;
-  const [hoveredAnchorDot, setHoveredAnchorDot] = useState<ActivePort | null>(null);
   // Bounds passed to interaction callbacks are the document's world bounds.
   // Callers that have migrated to world-space (screenToWorld) can ignore this;
   // it is kept only for backward-compatible callback signatures this checkpoint.
@@ -264,58 +255,21 @@ export function CanvasStage({
   const orderedObjects = renderOrderedObjects(document.objects);
   const orderedSections = orderedObjects.filter((object) => object.type === "section");
 
-  const dropTargetId = interactionOverlay?.dropTargetId;
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
   const connectorToolActive = activeTool === "connector";
   const renderedSelectedConnectionId = connectorToolActive ? null : selectedConnectionId;
-  const activeConnectorDrag = interactionOverlay?.connectorDrag ?? null;
   const stageCursor =
     style?.cursor ??
     (connectorToolActive
       ? CONNECTOR_CURSOR
-      : activeConnectorDrag
+      : connectorDragActive
         ? "default"
         : handToolActive
           ? "grab"
           : selectToolActive
             ? SELECT_CURSOR
             : undefined);
-  const connectorDragSourceObjectId = interactionOverlay?.connectorDrag?.fromObjectId ?? null;
-  const connectorDragSourceAnchor = interactionOverlay?.connectorDrag?.fromAnchor ?? null;
-  const documentObjectIds = new Set(document.objects.map((object) => object.id));
-  let anchorDotObjectIds: string[];
-  if (connectorToolActive) {
-    anchorDotObjectIds = [];
-    for (const objectId of [hoveredObjectId, connectorDragSourceObjectId]) {
-      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
-        anchorDotObjectIds.push(objectId);
-      }
-    }
-  } else {
-    anchorDotObjectIds = [...selectedObjectIds];
-    for (const objectId of [connectorDragSourceObjectId]) {
-      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
-        anchorDotObjectIds.push(objectId);
-      }
-    }
-  }
-  const hoveredQuickConnectDrag =
-    !activeConnectorDrag &&
-    Boolean(onStagePointerEvent) &&
-    !handToolActive &&
-    hoveredAnchorDot &&
-    anchorDotObjectIds.includes(hoveredAnchorDot.objectId)
-      ? (() => {
-          const object = objectById(document, hoveredAnchorDot.objectId);
-          if (!object) return null;
-          return {
-            fromObjectId: hoveredAnchorDot.objectId,
-            fromAnchor: hoveredAnchorDot.anchor,
-            point: quickConnectClickPoint(object, hoveredAnchorDot.anchor),
-          } satisfies NonNullable<InteractionOverlay["connectorDrag"]>;
-        })()
-      : null;
 
   return (
     <div
@@ -325,7 +279,7 @@ export function CanvasStage({
       data-canvas-hand-tool={handToolActive ? "true" : undefined}
       data-canvas-select-tool={selectToolActive ? "true" : undefined}
       data-canvas-connector-tool={connectorToolActive ? "true" : undefined}
-      data-canvas-connector-drag={activeConnectorDrag ? "true" : undefined}
+      data-canvas-connector-drag={connectorDragActive ? "true" : undefined}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -486,8 +440,6 @@ export function CanvasStage({
             const fromObject = objectById(document, connection.from.objectId);
             const toObject = objectById(document, connection.to.objectId);
             if (!fromObject || !toObject) return null;
-            const isDragging =
-              interactionOverlay?.connectorDrag?.connectionId === connection.id;
             return (
               <Connector
                 key={connection.id}
@@ -495,7 +447,6 @@ export function CanvasStage({
                 connection={connection}
                 fromObject={fromObject}
                 toObject={toObject}
-                dimmed={isDragging}
                 zoom={zoom}
                 onDoubleClick={onConnectionDoubleClick}
               />
@@ -594,29 +545,7 @@ export function CanvasStage({
           data-canvas-world-overlay-layer="true"
           style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 4 }}
         >
-          {/*
-            Armed-tool ghost preview: the full draft object the placement will
-            create (overlay.placePreviewObject, built by the same
-            draftPlacedObject the canvas.addObject reducer uses), rendered
-            through the real ObjectShape registry semi-transparent — so the
-            cursor ghost IS the shape (glyph, direction, label), not a generic
-            box. Lives in this pointer-events-none world layer so it pans/zooms
-            with the canvas and can never intercept the placement click.
-          */}
-          {interactionOverlay?.placePreviewObject && (
-            <div data-canvas-place-ghost="true" style={{ opacity: 0.55 }}>
-              <ObjectShape
-                object={interactionOverlay.placePreviewObject}
-                selected={false}
-                changed={false}
-                compact={compact}
-                bounds={bounds}
-                editable={false}
-                zoom={zoom}
-              />
-            </div>
-          )}
-          {!handToolActive && worldOverlay}
+          {worldOverlay}
         </div>
       </div>
       <div
@@ -627,73 +556,6 @@ export function CanvasStage({
           pointerEvents: "none",
         }}
       >
-        {!connectorToolActive && (
-          <SelectionBox
-            document={document}
-            viewport={viewport}
-            selectedObjectIds={selectedObjectIds}
-            interactiveHandles={!handToolActive}
-          />
-        )}
-        {Boolean(onStagePointerEvent) && !handToolActive && (
-          <HoverHighlight
-            document={document}
-            viewport={viewport}
-            objectId={connectorToolActive && !activeConnectorDrag ? hoveredObjectId : null}
-          />
-        )}
-        {/* Connector previews must paint below anchor-dot buttons so hovered dots stay visually solid. */}
-        {hoveredQuickConnectDrag && (
-          <ConnectorDragPreview
-            document={document}
-            viewport={viewport}
-            drag={hoveredQuickConnectDrag}
-          />
-        )}
-        {activeConnectorDrag && (
-          <ConnectorDragPreview
-            document={document}
-            viewport={viewport}
-            drag={activeConnectorDrag}
-          />
-        )}
-        {/* Anchor dots (D5/D15): def-derived connection anchors on every
-            selected object — editor-only (same gate as the old edge ports:
-            pointer events wired + not the hand tool). Rendered in this
-            screen-space overlay, NOT in object chrome: the object button
-            clips overflow, and true-outline anchors sit off the bbox edge. */}
-        {Boolean(onStagePointerEvent) && !handToolActive && (
-          <AnchorDots
-            document={document}
-            viewport={viewport}
-            selectedObjectIds={anchorDotObjectIds}
-            activePort={
-              connectorDragSourceObjectId && connectorDragSourceAnchor
-                ? { objectId: connectorDragSourceObjectId, anchor: connectorDragSourceAnchor }
-                : null
-            }
-            interactive
-            bypassZoomGate={connectorToolActive}
-            onHoveredAnchorChange={setHoveredAnchorDot}
-          />
-        )}
-        {interactionOverlay?.marquee && (
-          <Marquee viewport={viewport} bounds={interactionOverlay.marquee} />
-        )}
-        {/* Dashed-box fallback only when no full draft object accompanies the
-            bounds (all armed-tool paths now provide one — see placePreviewObject). */}
-        {interactionOverlay?.placePreview && !interactionOverlay.placePreviewObject && (
-          <PlacePreview viewport={viewport} bounds={interactionOverlay.placePreview} />
-        )}
-        {interactionOverlay?.guides?.map((guide, index) => (
-          <SnapGuideLine key={`guide-${guide.axis}-${index}`} viewport={viewport} guide={guide} />
-        ))}
-        {interactionOverlay?.distributionGuides?.map((segment, index) => (
-          <DistributionGuideLine key={`distribution-${index}`} viewport={viewport} segment={segment} />
-        ))}
-        {interactionOverlay?.spacing?.map((hint, index) => (
-          <SpacingChips key={`spacing-${hint.axis}-${index}`} viewport={viewport} hint={hint} />
-        ))}
         {overlay}
       </div>
     </div>

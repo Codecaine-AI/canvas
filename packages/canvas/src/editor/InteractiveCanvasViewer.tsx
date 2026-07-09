@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Read-only canvas viewer shell: measures/fits the stage and supplies
+ * viewer-safe selection feedback through the stage overlay slot.
+ */
 import {
   memo,
   useEffect,
@@ -10,6 +14,7 @@ import {
 } from "react";
 import { AlertTriangleIcon, MessageSquareIcon } from "../ui/icons";
 import { annotationTargetLabel, CanvasStage } from "../render/CanvasStage";
+import { InteractionFeedbackScreen } from "./features/drag-pipeline/InteractionFeedback";
 import type { CanvasBounds } from "../state/geometry";
 import { containerViewBounds, fitBounds, fitDocument, type ScreenSize, type ViewportState } from "../render/viewport";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
@@ -113,6 +118,13 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
         onCanvasSelect={onCanvasSelect}
         onCanvasContextMenu={onCanvasContextMenu}
         onObjectContextMenu={onObjectContextMenu}
+        overlay={
+          <InteractionFeedbackScreen
+            document={document}
+            viewport={viewport}
+            selectedObjectIds={selectedObjectIds}
+          />
+        }
       />
     </div>
   );

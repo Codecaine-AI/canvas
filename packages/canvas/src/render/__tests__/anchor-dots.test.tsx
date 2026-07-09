@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CanvasStage } from "../CanvasStage";
+import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
 import { ANCHOR_DOT_OFFSET_PX, ANCHOR_DOTS_MIN_ZOOM } from "../../connectors/AnchorDots";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import { CONNECTOR_END_GAP_PX } from "../../connectors/routing";

@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Full interactive canvas editor shell: state, gestures, chrome, and stage slots.
+ * The stage renders document content; editor-owned feedback is passed as overlays.
+ */
 import {
   useCallback,
   useEffect,
@@ -31,6 +35,10 @@ import { useInteractionPipeline } from "./features/drag-pipeline/use-interaction
 import { Inspector } from "./features/inspector/Inspector";
 import { TextEditingOverlay } from "./features/text-editing/TextEditingOverlay";
 import { useTextEditing } from "./features/text-editing/use-text-editing";
+import {
+  InteractionFeedbackScreen,
+  InteractionFeedbackWorld,
+} from "./features/drag-pipeline/InteractionFeedback";
 import { TopBar } from "./components/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "./use-canvas-viewport";
@@ -367,6 +375,7 @@ export function InteractiveCanvasEditor({
           state.lastChange?.source === "agent" ? state.lastChange.changedObjectIds : undefined
         }
         selectedConnectionId={selectedConnectionId}
+        dropTargetId={interactionOverlay.dropTargetId}
         onCanvasContextMenu={openCanvasContextMenu}
         onObjectContextMenu={openObjectContextMenu}
         onConnectionDoubleClick={openConnectionLabelEditor}
@@ -374,10 +383,9 @@ export function InteractiveCanvasEditor({
         onStagePointerMove={handleStagePointerMove}
         onStagePointerLeave={handleStagePointerLeave}
         onStageDoubleClick={handleStageDoubleClick}
-        interactionOverlay={interactionOverlay}
-        hoveredObjectId={hoveredObjectId}
         editingTextObjectId={objectTextEditId}
         activeTool={state.tool}
+        connectorDragActive={Boolean(interactionOverlay.connectorDrag)}
         className="h-full"
         style={{
           cursor: isPanning
@@ -386,7 +394,27 @@ export function InteractiveCanvasEditor({
               ? "grab"
               : undefined,
         }}
-        worldOverlay={<TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />}
+        overlay={
+          <InteractionFeedbackScreen
+            document={state.document}
+            viewport={viewport}
+            selectedObjectIds={selectedIds}
+            interactionOverlay={interactionOverlay}
+            hoveredObjectId={hoveredObjectId}
+            activeTool={state.tool}
+            interactionEnabled
+          />
+        }
+        worldOverlay={
+          <InteractionFeedbackWorld
+            document={state.document}
+            viewport={viewport}
+            interactionOverlay={interactionOverlay}
+            activeTool={state.tool}
+          >
+            <TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />
+          </InteractionFeedbackWorld>
+        }
       />
 
       <CanvasContextMenu menu={canvasContextMenu} />

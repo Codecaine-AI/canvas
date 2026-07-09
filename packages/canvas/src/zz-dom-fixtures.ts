@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { InteractionFeedbackScreen } from "./editor/features/drag-pipeline/InteractionFeedback";
 import { CanvasStage, type CanvasStageProps } from "./render/CanvasStage";
 import { defaultGeometryFor, shapeForType } from "./state/schema/object-defaults";
 import {
@@ -481,15 +482,25 @@ function stageProps(document: InteractiveCanvasDocument, profile: ProfileName): 
   const ids = document.objects.map((object) => object.id);
   const selectedObjectIds = [ids[0], ids[3]].filter((id): id is string => id !== undefined);
   const changedObjectIds = ids[1] !== undefined ? [ids[1]] : [];
+  const viewport = { x: 12.5, y: -40, zoom: 0.8 };
+  const interactionOverlay = { dropTargetId: ids[4] ?? null };
   return {
     document,
-    viewport: { x: 12.5, y: -40, zoom: 0.8 },
+    viewport,
     selectedObjectIds,
     changedObjectIds,
     selectedConnectionId: document.connections[0]?.id ?? null,
     editingTextObjectId: ids[2] ?? null,
-    interactionOverlay: { dropTargetId: ids[4] ?? null },
+    dropTargetId: interactionOverlay.dropTargetId,
     activeTool: "select",
+    overlay: createElement(InteractionFeedbackScreen, {
+      document,
+      viewport,
+      selectedObjectIds,
+      interactionOverlay,
+      activeTool: "select",
+      interactionEnabled: true,
+    }),
     onObjectSelect: (_objectId: string) => {},
     onStagePointerEvent: (_event: ReactPointerEvent<HTMLElement>) => {},
     onObjectContextMenu: (
