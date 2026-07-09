@@ -1,8 +1,11 @@
 "use client";
 
-import { connectionBoundsForObject } from "../../objects/geometry";
-import type { InteractiveCanvasDocument } from "../../state/schema";
-import { worldToScreen, type ViewportState } from "../viewport";
+/**
+ * Screen-space hover outline for connector-mode object targeting.
+ */
+import { connectionBoundsForObject } from "../../../../objects/geometry";
+import type { InteractiveCanvasDocument } from "../../../../state/schema";
+import { worldToScreen, type ViewportState } from "../../../viewport";
 
 const SELECTION_BLUE = "#0D99FF";
 const HIGHLIGHT_OUTSET_PX = 3;

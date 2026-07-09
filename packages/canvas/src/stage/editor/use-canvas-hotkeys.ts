@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { CanvasAction, CanvasSelection, CanvasTool } from "../../state/actions";
 import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemory } from "../../interaction/clipboard";
 import { CANVAS_GRID_SIZE } from "../../state/geometry";
-import type { InteractionState } from "../../interaction/interaction";
+import type { InteractionState } from "./pipeline/state";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import type { ToolId } from "./components/CanvasDock";
 import { cancelInteraction } from "./pipeline/core";

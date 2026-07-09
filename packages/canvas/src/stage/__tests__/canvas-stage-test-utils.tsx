@@ -3,7 +3,7 @@ import {
   InteractionFeedbackScreen,
   InteractionFeedbackWorld,
 } from "../editor/pipeline/InteractionFeedback";
-import type { InteractionOverlay } from "../../interaction/interaction";
+import type { InteractionOverlay } from "../editor/pipeline/state";
 import { CanvasStage, type CanvasStageProps } from "../CanvasStage";
 
 type CanvasStageWithInteractionProps = Omit<

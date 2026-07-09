@@ -4,8 +4,8 @@ import {
   DISTRIBUTION_GUIDE_COLOR,
   DISTRIBUTION_TICK_BAR,
   type DistributionGuideSegment,
-} from "../../interaction/snapping";
-import { worldToScreen, type ViewportState } from "../viewport";
+} from "./snapping";
+import { worldToScreen, type ViewportState } from "../../../viewport";
 
 /**
  * Equal-spacing ("distribution") guide segment from the ported AFFiNE

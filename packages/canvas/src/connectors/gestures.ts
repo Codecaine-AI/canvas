@@ -31,21 +31,44 @@ import {
   worldDistance,
   type CanvasPointerEvent,
 } from "../interaction/types";
-import {
-  IDLE_INTERACTION_STATE,
-  emptyOverlay,
-  toIdle,
-  type ConnectorAnchorCandidate,
-  type ConnectorBendDragGesture,
-  type ConnectorCreateGesture,
-  type ConnectorEndpointDragGesture,
-  type InteractionContext,
-  type InteractionResult,
-} from "../interaction/gesture-state";
+import type {
+  ConnectorAnchorCandidate,
+  ConnectorBendDragGesture,
+  ConnectorDragOverlay,
+  ConnectorCreateGesture,
+  ConnectorEndpointDragGesture,
+} from "./types";
 
 const QUICK_CONNECT_MIN_GAP_PX = 120;
 const BEND_ENDPOINT_POSITION_EPSILON_PX = 0.5;
 const UNIT_INTERVAL_EPSILON = 0.000001;
+
+type ConnectorGestureContext = {
+  document: InteractiveCanvasDocument;
+  viewport: { zoom: number };
+};
+
+type ConnectorGestureResult = {
+  state:
+    | ConnectorEndpointDragGesture
+    | ConnectorCreateGesture
+    | ConnectorBendDragGesture
+    | { kind: "idle" };
+  dispatch: CanvasAction[];
+  overlay: {
+    connectorDrag?: ConnectorDragOverlay;
+    editObjectTextId?: string;
+    editObjectTextSeed?: string;
+  };
+};
+
+function emptyOverlay(): ConnectorGestureResult["overlay"] {
+  return {};
+}
+
+function toIdle(): ConnectorGestureResult {
+  return { state: { kind: "idle" }, dispatch: [], overlay: emptyOverlay() };
+}
 
 /**
  * Resolves the connect-target under the pointer through the ported AFFiNE
@@ -254,8 +277,8 @@ function worldPointsAlmostEqual(a: CanvasPoint, b: CanvasPoint, epsilon: number)
 export function stepFromConnectorEndpointDrag(
   state: ConnectorEndpointDragGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: ConnectorGestureContext,
+): ConnectorGestureResult {
   if (event.type === "cancel") return toIdle();
 
   if (event.type === "up") {
@@ -285,7 +308,7 @@ export function stepFromConnectorEndpointDrag(
       ...(clearsWaypoints ? { waypoints: undefined } : {}),
     };
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [{ type: "canvas.updateConnection", connectionId: state.connectionId, patch }],
       overlay: emptyOverlay(),
     };
@@ -301,8 +324,8 @@ export function stepFromConnectorEndpointDrag(
 export function stepFromConnectorCreate(
   state: ConnectorCreateGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: ConnectorGestureContext,
+): ConnectorGestureResult {
   if (event.type === "cancel") return toIdle();
 
   if (event.type === "up") {
@@ -321,7 +344,7 @@ export function stepFromConnectorCreate(
         ...(candidate.position ? { toPosition: candidate.position } : {}),
       };
       return {
-        state: IDLE_INTERACTION_STATE,
+        state: { kind: "idle" },
         dispatch: [addConnectionAction],
         overlay: emptyOverlay(),
       };
@@ -343,7 +366,7 @@ export function stepFromConnectorCreate(
       drop: { point },
     };
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [quickConnectAction],
       overlay: editObjectTextId
         ? { editObjectTextId, editObjectTextSeed: "" }
@@ -365,8 +388,8 @@ export function stepFromConnectorCreate(
 export function stepFromConnectorBendDrag(
   state: ConnectorBendDragGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: ConnectorGestureContext,
+): ConnectorGestureResult {
   if (event.type === "cancel") return toIdle();
 
   if (event.type === "up") {
@@ -401,7 +424,7 @@ export function stepFromConnectorBendDrag(
     }
 
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.updateConnection",

@@ -7,10 +7,10 @@ export type StageRect = {
 };
 
 /**
- * Edge auto-pan velocity (checkpoint 1, T1.2.1): while a drag/marquee/endpoint
+ * Edge auto-pan velocity (checkpoint 1, T1.2.1): while a drag/drag-select/endpoint
  * gesture is in progress and the pointer sits inside the `band`-px region near
  * a stage edge, the viewport should pan toward that edge each frame so the
- * user can drag an object (or extend a marquee) past the visible bounds
+ * user can drag an object (or extend a drag-select rect) past the visible bounds
  * without releasing the pointer.
  *
  * Sign convention: the returned `{ dx, dy }` is a suggested delta to ADD to

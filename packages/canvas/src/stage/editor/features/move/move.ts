@@ -8,29 +8,55 @@
  * drag threshold is crossed). On release, section membership is reconciled
  * from the committed geometry without adding another history entry.
  */
-import { boundsForGeometries, type CanvasPoint } from "../../state/geometry";
-import type { CanvasGeometry, InteractiveCanvasDocument } from "../../state/schema";
-import { resolveSectionParent } from "../../state/section-membership";
-import { connectionBoundsForObject } from "../../objects/geometry";
-import { objectDefForType } from "../../objects/object-def";
+import type { CanvasAction } from "../../../../state/actions";
+import { boundsForGeometries, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
+import { resolveSectionParent } from "../../../../state/section-membership";
+import { connectionBoundsForObject } from "../../../../objects/geometry";
+import { objectDefForType } from "../../../../objects/object-def";
 import {
   computeSnapCorrection,
   computeSpacingHints,
   type DistributionGuideSegment,
   type SnapCorrection,
-} from "../snapping";
-import { gatherSnapCandidates, objectGeometryMap } from "../hit-testing";
+  type SnapGuide,
+  type SpacingHint,
+} from "../snapping/snapping";
+import { gatherSnapCandidates, objectGeometryMap } from "../../../../interaction/hit-testing";
 import {
   SNAP_THRESHOLD_SCREEN_PX,
   type CanvasPointerEvent,
-} from "../types";
-import {
-  IDLE_INTERACTION_STATE,
-  emptyOverlay,
-  type InteractionContext,
-  type InteractionResult,
-  type MoveGesture,
-} from "../gesture-state";
+} from "../../../../interaction/types";
+import type { ViewportState } from "../../../viewport";
+
+export type MoveGesture = {
+  kind: "move";
+  startWorld: CanvasPoint;
+  objectIds: string[];
+  startGeometries: Record<string, CanvasGeometry>;
+  hasEmitted: boolean;
+  /** Section that the projected primary object would geometrically adopt. */
+  dropTargetId: string | null;
+};
+
+type MoveContext = {
+  document: InteractiveCanvasDocument;
+  viewport: ViewportState;
+  snapResolver?: (candidateBounds: CanvasBounds, zoom: number) => SnapCorrection | null;
+};
+
+type MoveOverlay = {
+  guides?: SnapGuide[];
+  distributionGuides?: DistributionGuideSegment[];
+  spacing?: SpacingHint[];
+  dropTargetId?: string | null;
+};
+
+type MoveResult = {
+  state: MoveGesture | { kind: "idle" };
+  dispatch: CanvasAction[];
+  overlay: MoveOverlay;
+};
 
 /**
  * Dragging a section also carries its persisted parentId-descendants
@@ -105,11 +131,11 @@ export function createMoveGesture(
 export function stepFromMove(
   state: MoveGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: MoveContext,
+): MoveResult {
   if (event.type === "cancel") {
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.updateObjectGeometries",
@@ -119,19 +145,19 @@ export function stepFromMove(
           summary: "Cancelled drag",
         },
       ],
-      overlay: emptyOverlay(),
+      overlay: {},
     };
   }
 
   if (event.type === "up") {
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [{ type: "canvas.reconcileSectionMembership", recordHistory: false }],
-      overlay: emptyOverlay(),
+      overlay: {},
     };
   }
 
-  if (event.type !== "move") return { state, dispatch: [], overlay: emptyOverlay() };
+  if (event.type !== "move") return { state, dispatch: [], overlay: {} };
 
   const dx = event.world.x - state.startWorld.x;
   const dy = event.world.y - state.startWorld.y;

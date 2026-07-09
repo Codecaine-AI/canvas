@@ -18,21 +18,25 @@ import { outlineContainsPoint } from "../../../objects/geometry";
 import { cancelInteraction, stepInteraction } from "./core";
 import {
   createFrameCoalescer,
-  defaultGeometryForPlacement,
   hitTestObjects,
-  IDLE_INTERACTION_STATE,
+  type CanvasHit,
+  type CanvasPointerEvent,
+  type FrameCoalescer,
+  type ResizeHandle,
+} from "../../../interaction/interaction";
+import {
+  defaultGeometryForPlacement,
   objectTypeForTool,
   placePreviewColorFor,
   placePreviewOverlayFor,
   type ArmedShapeVariant,
-  type CanvasHit,
-  type CanvasPointerEvent,
-  type FrameCoalescer,
+} from "../features/place/place";
+import {
+  IDLE_INTERACTION_STATE,
   type InteractionContext,
   type InteractionOverlay,
   type InteractionState,
-  type ResizeHandle,
-} from "../../../interaction/interaction";
+} from "./state";
 import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../state/actions";
 import { type CanvasPoint } from "../../../state/geometry";
 import { type Anchor } from "../../../connectors/routing";
@@ -61,7 +65,7 @@ const EDGE_PAN_MAX_SPEED_PX = 14;
 const EDGE_PAN_DRAG_KINDS = new Set<InteractionState["kind"]>([
   "move",
   "resize",
-  "marquee",
+  "drag-select",
   "place",
   "connector-endpoint-drag",
   "connector-create",
@@ -150,7 +154,7 @@ function resolvePortProximityHit(
  * through to the world-space hitTestObjects (which applies the same outline
  * rule, so the vetoed object is naturally skipped) and finds the object
  * behind, or resolves to canvas. This one veto covers click-select,
- * drag-start, marquee-from-corner, and double-click-to-edit, since every
+ * drag-start, drag-select-from-corner, and double-click-to-edit, since every
  * pointer path funnels through here. Section title chips bypass this veto:
  * their zoom-counter-scaled DOM may extend outside the section outline, but a
  * chip press still belongs to that section. Exported for unit tests.

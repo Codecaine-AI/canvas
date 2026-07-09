@@ -38,7 +38,7 @@
  * function/branch is control-flow-and-math-identical to upstream.
  */
 
-import { almostEqual } from "../connectors/pathfinding/gfx-types";
+import { almostEqual } from "../../../../connectors/pathfinding/gfx-types";
 
 /** Plain axis-aligned bounds — this repo's `CanvasBounds` shape (`{x, y, width, height}`). */
 export type SnapBounds = {

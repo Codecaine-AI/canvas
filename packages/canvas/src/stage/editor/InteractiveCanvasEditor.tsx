@@ -24,7 +24,7 @@ import {
   type CanvasTool,
 } from "../../state/actions";
 import { CanvasStage } from "../CanvasStage";
-import { objectTypeForTool } from "../../interaction/interaction";
+import { objectTypeForTool } from "./features/place/place";
 import type { ShapeCatalogEntry } from "../../objects/catalog";
 import { CanvasDock, type ToolId } from "./components/CanvasDock";
 import { ShapesPanel } from "./components/ShapesPanel";

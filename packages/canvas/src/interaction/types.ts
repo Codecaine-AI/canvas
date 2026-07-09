@@ -3,7 +3,7 @@
 /**
  * Kernel vocabulary for pointer interaction: hit-test results, normalized
  * pointer events, shared thresholds, resize handles, and tiny pure helpers.
- * Gesture state/result shapes live in ./gesture-state.
+ * Gesture state/result shapes live in the editor pipeline and feature slices.
  */
 import type { CanvasSelection } from "../state/actions";
 import type { CanvasPoint } from "../state/geometry";

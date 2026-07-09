@@ -13,12 +13,9 @@ import { join, relative } from "node:path";
  * from the rest of src. objects/ holds only defs/data (no ui components, no
  * editor JSX). Nothing outside stage/editor/ imports stage/editor/. The BlockSuite
  * MPL-2.0 pathfinding files live under connectors/pathfinding/, with the
- * distribution snap port temporarily under interaction/snap-distribution.ts.
+ * distribution snap port under stage/editor/features/snapping/.
  *
  * Known, deliberate exceptions (encoded below so drift is loud):
- *  - interaction/gesture-state.ts may TYPE-import ViewportState from
- *    stage/viewport (never runtime code) while the gesture machine is split
- *    away from the lower interaction kernel.
  *  - No objects/ -> stage/ exceptions are permitted; the corresponding test
  *    asserts the allowed-violations list stays empty.
  *
@@ -325,12 +322,12 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("interaction/snap-distribution.ts reaches only pathfinding gfx types (temporary MPL home)", () => {
+  test("features/snapping/snap-distribution.ts reaches only pathfinding gfx types (MPL home)", () => {
     expect(
-      importSpecifiers(join(SRC_ROOT, "interaction", "snap-distribution.ts")).filter(
-        (specifier) => specifier.startsWith("."),
-      ),
-    ).toEqual(["../connectors/pathfinding/gfx-types"]);
+      importSpecifiers(
+        join(SRC_ROOT, "stage", "editor", "features", "snapping", "snap-distribution.ts"),
+      ).filter((specifier) => specifier.startsWith(".")),
+    ).toEqual(["../../../../connectors/pathfinding/gfx-types"]);
   });
 
   test("no source imports legacy vendor/blocksuite paths", () => {

@@ -7,19 +7,18 @@
  * InteractiveCanvasEditor.tsx) converts native pointer events into normalized,
  * world-space `CanvasPointerEvent`s; the machine is the pure coordinator that
  * consumes them and emits typed `CanvasAction`s plus ephemeral overlay state
- * (marquee rect, snap guides, spacing hints, drop target). No DOM access —
+ * (drag-select rect, snap guides, spacing hints, drop target). No DOM access —
  * everything is testable with plain objects.
  *
  * This module is the stable entry point (barrel) for shared interaction
- * vocabulary and helpers; the editor pipeline owns the dispatcher assembly.
- * The
- * implementation is split across:
+ * kernel vocabulary and helpers; the editor pipeline owns the dispatcher
+ * assembly and feature slices own gesture logic/visuals. The implementation
+ * is split across:
  *  - ./types           — pointer event/hit model, resize handles, thresholds
- *  - ./gesture-state   — gesture union, overlay, context/result types
  *  - ../stage/editor/pipeline/core
- *                      — stepInteraction dispatcher + idle/press-pending
- *                        routers + cancelInteraction, surfaced by src/index.ts
- *  - ./gestures/*      — move, resize, marquee, place, connectors steppers
+ *                      — stepInteraction dispatcher + state contracts
+ *  - ../stage/editor/features/*
+ *                      — move, resize, drag-select, place, snapping slices
  *  - ./hit-testing     — document hit-tests + snap-candidate gathering
  *  - ./frame-coalescer — rAF coalescing utility for host adapters
  */
@@ -30,27 +29,5 @@ export {
   type CanvasPointerEventType,
   type ResizeHandle,
 } from "./types";
-export {
-  IDLE_INTERACTION_STATE,
-  type ArmedShapeVariant,
-  type ConnectorAnchorCandidate,
-  type ConnectorBendDragGesture,
-  type ConnectorDragOverlay,
-  type InteractionContext,
-  type InteractionOverlay,
-  type InteractionResult,
-  type InteractionState,
-} from "./gesture-state";
 export { hitTestObjects, selectionBounds } from "./hit-testing";
-export { MIN_DIRECT_RESIZE_SIZE, applyResizeHandle, resizeCursorFor } from "./gestures/resize";
-export {
-  defaultGeometryForPlacement,
-  objectTypeForTool,
-  placePreviewColorFor,
-  placePreviewOverlayFor,
-  PLACE_PREVIEW_GHOST_ID,
-} from "./gestures/place";
 export { createFrameCoalescer, type FrameCoalescer, type FrameScheduler } from "./frame-coalescer";
-// SnapGuide/SpacingHint are defined in snapping.ts (the pure computation module);
-// re-exported here so callers of the interaction machine don't need a second import.
-export type { SnapGuide, SpacingHint } from "./snapping";

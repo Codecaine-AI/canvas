@@ -1,9 +1,12 @@
 "use client";
 
-import type { CanvasBounds } from "../../state/geometry";
-import { worldToScreen, type ViewportState } from "../viewport";
+/**
+ * Screen-space rectangle for an active drag-select gesture.
+ */
+import type { CanvasBounds } from "../../../../state/geometry";
+import { worldToScreen, type ViewportState } from "../../../viewport";
 
-export function Marquee({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {
+export function DragSelectRect({ viewport, bounds }: { viewport: ViewportState; bounds: CanvasBounds }) {
   const topLeft = worldToScreen(viewport, { x: bounds.x, y: bounds.y });
   const bottomRight = worldToScreen(viewport, {
     x: bounds.x + bounds.width,
@@ -11,7 +14,7 @@ export function Marquee({ viewport, bounds }: { viewport: ViewportState; bounds:
   });
   return (
     <div
-      data-canvas-marquee="true"
+      data-canvas-drag-select="true"
       style={{
         position: "absolute",
         left: `${topLeft.x}px`,

@@ -9,6 +9,7 @@ import {
   type SnapBounds,
 } from "../snap-distribution";
 
+/** MPL distribution-snap port coverage against upstream constants and cases. */
 function box(x: number, y: number, width: number, height: number): SnapBounds {
   return { x, y, width, height };
 }

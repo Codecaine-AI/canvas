@@ -8,10 +8,10 @@ import type {
 import { cancelInteraction, stepInteraction } from "../../stage/editor/pipeline/core";
 import {
   IDLE_INTERACTION_STATE,
-  type CanvasPointerEvent,
   type InteractionContext,
   type InteractionResult,
-} from "../interaction";
+} from "../../stage/editor/pipeline/state";
+import type { CanvasPointerEvent } from "../interaction";
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {

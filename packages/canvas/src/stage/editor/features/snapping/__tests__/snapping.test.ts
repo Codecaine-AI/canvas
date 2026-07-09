@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../state/geometry";
+import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../../../../state/geometry";
 import {
   applyGridFallback,
   computeSnapGuides,
@@ -7,6 +7,7 @@ import {
   isGridAligned,
 } from "../snapping";
 
+/** Pure snapping math and grid-fallback coverage for the snapping slice. */
 const EPSILON = 1e-6;
 
 function expectClose(actual: number, expected: number): void {

@@ -635,7 +635,7 @@ describe("interactive canvas schema and actions", () => {
     }
   });
 
-  it("pans with the hand tool without starting marquee or changing selection", async () => {
+  it("pans with the hand tool without starting drag-select or changing selection", async () => {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
       if ((this as HTMLElement).dataset.canvasStage === "true") {
@@ -681,7 +681,7 @@ describe("interactive canvas schema and actions", () => {
       fireEvent.pointerUp(stage, { pointerId: 12 });
 
       expect(worldLayer.style.transform).not.toBe(beforeTransform);
-      expect(document.querySelector("[data-canvas-marquee='true']")).toBeNull();
+      expect(document.querySelector("[data-canvas-drag-select='true']")).toBeNull();
       expect(object.getAttribute("data-selected")).toBe("true");
       expect(stage.style.cursor).toBe("grab");
 

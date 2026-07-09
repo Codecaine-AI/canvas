@@ -1,12 +1,15 @@
-import { CANVAS_GRID_SIZE, type CanvasBounds } from "../state/geometry";
+/**
+ * Pure snap math and spacing-guide helpers used by editor gesture slices.
+ */
+import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../../../state/geometry";
 import {
   alignDistributeHorizontally,
   alignDistributeVertically,
   type DistributionGuideSegment,
 } from "./snap-distribution";
 
-// Re-exported for stage/overlays: the MPL-sourced implementation lives in
-// interaction/snap-distribution.ts, so stage code keeps importing the visual
+// Re-exported for snapping visuals: the MPL-sourced implementation lives in
+// this slice's snap-distribution.ts, so stage code keeps importing the visual
 // constants from this local snapping boundary.
 export {
   DISTRIBUTION_GUIDE_COLOR,

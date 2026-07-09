@@ -1,55 +1,47 @@
 "use client";
 
 /**
- * Gesture-machine vocabulary for pointer interaction: per-gesture state,
- * overlays, read-only step context/result shapes, and idle helpers.
+ * Shared editor interaction contracts: pipeline-owned state union, overlay
+ * payload, step context/result shapes, and idle helpers.
  */
-import type { CanvasAction, CanvasColorKind, CanvasSelection, CanvasTool } from "../state/actions";
-import type { CanvasBounds, CanvasPoint } from "../state/geometry";
+import type { CanvasAction, CanvasColorKind, CanvasSelection, CanvasTool } from "../../../state/actions";
+import type { CanvasBounds, CanvasPoint } from "../../../state/geometry";
 import type {
   CanvasColor,
-  CanvasGeometry,
-  CanvasIconGlyph,
-  CanvasShapeDirection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-  InteractiveCanvasObjectType,
-} from "../state/schema";
-import type { ViewportState } from "../stage/viewport";
+} from "../../../state/schema";
+import type { ViewportState } from "../../viewport";
 import type {
   ConnectorBendDragGesture,
   ConnectorCreateGesture,
   ConnectorDragOverlay,
   ConnectorEndpointDragGesture,
-} from "../connectors/types";
-import type { DistributionGuideSegment, SnapCorrection, SnapGuide, SpacingHint } from "./snapping";
-import type { CanvasHit, ResizeHandle } from "./types";
+} from "../../../connectors/types";
+import type { CanvasHit } from "../../../interaction/types";
+import type { MoveGesture } from "../features/move/move";
+import type { ArmedShapeVariant, PlaceGesture } from "../features/place/place";
+import type { DragSelectGesture } from "../features/selection/drag-select";
+import type { ResizeGesture } from "../features/selection/resize";
+import type {
+  DistributionGuideSegment,
+  SnapCorrection,
+  SnapGuide,
+  SpacingHint,
+} from "../features/snapping/snapping";
 
 export type {
-  ConnectorAnchorCandidate,
   ConnectorBendDragGesture,
   ConnectorCreateGesture,
-  ConnectorDragOverlay,
   ConnectorEndpointDragGesture,
-} from "../connectors/types";
-
-/**
- * Catalog-entry variant of the armed creation tool (Shapes panel flow): the
- * tool itself is just an object TYPE, but a panel entry can additionally pin
- * an orientation (triangle up/down, arrow left/right), an Advanced-tier icon
- * glyph, and a label override (the glyph's display name instead of the
- * generic "Icon"). Carried through the place gesture into canvas.addObject
- * and into the ghost preview so both match the picked entry exactly.
- */
-export type ArmedShapeVariant = {
-  direction?: CanvasShapeDirection;
-  icon?: CanvasIconGlyph;
-  /** Seed text for the created object (e.g. an icon entry's glyph name instead of the generic "Icon"). */
-  text?: string;
-};
+} from "../../../connectors/types";
+export type { MoveGesture } from "../features/move/move";
+export type { ArmedShapeVariant, PlaceGesture } from "../features/place/place";
+export type { DragSelectGesture } from "../features/selection/drag-select";
+export type { ResizeGesture } from "../features/selection/resize";
 
 export type InteractionOverlay = {
-  marquee?: CanvasBounds;
+  dragSelect?: CanvasBounds;
   guides?: SnapGuide[];
   /** Equal-spacing ("distribution") guides from the ported AFFiNE snap-overlay algorithm — see snapping.ts's computeSnapCorrection. Rendered in AFFiNE's magenta distribution color, distinct from `guides`' purple alignment color. */
   distributionGuides?: DistributionGuideSegment[];
@@ -100,56 +92,12 @@ export type PressPending = {
   deferredShiftToggle: boolean;
 };
 
-export type MoveGesture = {
-  kind: "move";
-  startWorld: CanvasPoint;
-  objectIds: string[];
-  startGeometries: Record<string, CanvasGeometry>;
-  hasEmitted: boolean;
-  /** Section that the projected primary object would geometrically adopt. */
-  dropTargetId: string | null;
-};
-
-export type ResizeGesture = {
-  kind: "resize";
-  startWorld: CanvasPoint;
-  objectId: string;
-  handle: ResizeHandle;
-  startGeometry: CanvasGeometry;
-  hasEmitted: boolean;
-};
-
-export type MarqueeGesture = {
-  kind: "marquee";
-  startWorld: CanvasPoint;
-  currentWorld: CanvasPoint;
-  additive: boolean;
-};
-
-/**
- * Armed-tool object creation (4.2.2): pointer-down with a creatable tool armed
- * (rectangle/process/decision/sticky/annotation-marker)
- * starts this gesture over empty canvas. A sub-threshold release creates a
- * default-size object centered at the point; a drag creates an object sized
- * to the normalized, min-size-clamped dragged rect. Either way, on completion
- * the tool reverts to "select" and the new object becomes the selection.
- */
-export type PlaceGesture = {
-  kind: "place";
-  tool: CanvasTool;
-  objectType: InteractiveCanvasObjectType;
-  /** Catalog-entry variant (direction/icon/label) captured from ctx.armedShape at gesture start. */
-  variant?: ArmedShapeVariant;
-  startWorld: CanvasPoint;
-  currentWorld: CanvasPoint;
-};
-
 export type InteractionState =
   | { kind: "idle" }
   | PressPending
   | MoveGesture
   | ResizeGesture
-  | MarqueeGesture
+  | DragSelectGesture
   | PlaceGesture
   | ConnectorEndpointDragGesture
   | ConnectorCreateGesture

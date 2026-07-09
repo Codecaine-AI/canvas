@@ -1,13 +1,16 @@
 "use client";
 
+/**
+ * Screen-space selection outline and resize-handle chrome.
+ */
 import {
   RESIZE_HANDLES,
-  resizeCursorFor,
   type ResizeHandle,
-} from "../../interaction/interaction";
-import { worldToScreen, type ViewportState } from "../viewport";
-import type { InteractiveCanvasDocument } from "../../state/schema";
-import { objectDefForType } from "../../objects/object-def";
+} from "../../../../interaction/types";
+import { worldToScreen, type ViewportState } from "../../../viewport";
+import type { InteractiveCanvasDocument } from "../../../../state/schema";
+import { objectDefForType } from "../../../../objects/object-def";
+import { resizeCursorFor } from "./resize";
 
 const HANDLE_SIZE = 12;
 const SELECTION_BLUE = "#0D99FF";

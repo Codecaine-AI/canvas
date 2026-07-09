@@ -135,7 +135,7 @@ export function gatherSnapCandidates(
   return Array.from(candidates.values());
 }
 
-/** Marquee membership. Deliberately stored-geometry intersection: the FigJam selection box for below-slot objects wraps the glyph, not the external text band. */
+/** Drag-select membership. Deliberately stored-geometry intersection: the FigJam selection box for below-slot objects wraps the glyph, not the external text band. */
 export function objectsIntersectingBounds(
   document: InteractiveCanvasDocument,
   bounds: CanvasBounds,

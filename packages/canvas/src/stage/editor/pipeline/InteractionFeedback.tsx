@@ -10,17 +10,17 @@ import { AnchorDots, type ActivePort } from "../../../connectors/AnchorDots";
 import { quickConnectClickPoint } from "../../../connectors/gestures";
 import { objectById, documentBounds } from "../../../state/geometry";
 import type { CanvasTool } from "../../../state/actions";
-import type { InteractionOverlay } from "../../../interaction/interaction";
+import type { InteractionOverlay } from "./state";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { ObjectShape } from "../../ObjectShape";
 import type { ViewportState } from "../../viewport";
-import { SelectionBox } from "../../overlays/SelectionBox";
-import { HoverHighlight } from "../../overlays/HoverHighlight";
-import { Marquee } from "../../overlays/Marquee";
-import { PlacePreview } from "../../overlays/PlacePreview";
-import { SnapGuideLine } from "../../overlays/SnapGuideLine";
-import { DistributionGuideLine } from "../../overlays/DistributionGuideLine";
-import { SpacingChips } from "../../overlays/SpacingChips";
+import { SelectionBox } from "../features/selection/SelectionBox";
+import { HoverHighlight } from "../features/selection/HoverHighlight";
+import { DragSelectRect } from "../features/selection/DragSelectRect";
+import { PlacePreview } from "../features/place/PlacePreview";
+import { SnapGuideLine } from "../features/snapping/SnapGuideLine";
+import { DistributionGuideLine } from "../features/snapping/DistributionGuideLine";
+import { SpacingChips } from "../features/snapping/SpacingChips";
 
 type InteractionFeedbackBaseProps = {
   document: InteractiveCanvasDocument;
@@ -177,8 +177,8 @@ export function InteractionFeedbackScreen({
           onHoveredAnchorChange={setHoveredAnchorDot}
         />
       )}
-      {interactionOverlay?.marquee && (
-        <Marquee viewport={viewport} bounds={interactionOverlay.marquee} />
+      {interactionOverlay?.dragSelect && (
+        <DragSelectRect viewport={viewport} bounds={interactionOverlay.dragSelect} />
       )}
       {/* Dashed-box fallback only when no full draft object accompanies the
           bounds (all armed-tool paths now provide one — see placePreviewObject). */}

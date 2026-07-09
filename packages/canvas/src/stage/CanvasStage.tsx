@@ -122,7 +122,7 @@ export interface CanvasStageProps {
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
   /** Object whose text is currently being edited in place (D14) — its at-rest text is hidden while the slot editor is the visible copy. */
   editingTextObjectId?: string | null;
-  /** Untransformed screen-space overlay (marquee, guides, handles). */
+  /** Untransformed screen-space overlay (drag-select, guides, handles). */
   overlay?: ReactNode;
   /**
    * World-space overlay rendered inside the transformed world layer (e.g. the
@@ -187,10 +187,9 @@ function annotationTargetLabel(target: CanvasAnnotationTarget): string {
   return "region";
 }
 
-// ObjectShape and SelectionBox moved to sibling modules but were part of this
-// module's public surface (index.ts re-exports * from here) — keep re-exporting.
+// ObjectShape moved to a sibling module but remains part of this module's
+// public surface (index.ts re-exports * from here) — keep re-exporting.
 export { annotationTargetLabel, renderOrderedObjects, ObjectShape };
-export { SelectionBox } from "./overlays/SelectionBox";
 
 /**
  * Shared world-space renderer used by both the read-only viewer (static/fit or

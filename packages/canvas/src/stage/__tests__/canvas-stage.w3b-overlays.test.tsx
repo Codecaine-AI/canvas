@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
-import type { InteractionOverlay } from "../../interaction/interaction";
+import type { InteractionOverlay } from "../editor/pipeline/state";
 import type { InteractiveCanvasDocument } from "../../state/schema";
-import { DISTRIBUTION_GUIDE_COLOR } from "../../interaction/snapping";
+import { DISTRIBUTION_GUIDE_COLOR } from "../editor/features/snapping/snapping";
 
 afterEach(() => {
   cleanup();

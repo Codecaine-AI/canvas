@@ -11,23 +11,68 @@ import {
   draftPlacedObject,
   type CanvasAction,
   type CanvasTool,
-} from "../../state/actions";
-import { normalizeBounds, type CanvasPoint } from "../../state/geometry";
-import type { CanvasColor, CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
+} from "../../../../state/actions";
+import { normalizeBounds, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import type {
+  CanvasColor,
+  CanvasGeometry,
+  CanvasIconGlyph,
+  CanvasShapeDirection,
+  InteractiveCanvasObject,
+  InteractiveCanvasObjectType,
+} from "../../../../state/schema";
 import {
   DRAG_THRESHOLD,
   worldDistance,
   type CanvasPointerEvent,
-} from "../types";
-import {
-  IDLE_INTERACTION_STATE,
-  emptyOverlay,
-  type ArmedShapeVariant,
-  type InteractionContext,
-  type InteractionOverlay,
-  type InteractionResult,
-  type PlaceGesture,
-} from "../gesture-state";
+} from "../../../../interaction/types";
+
+/**
+ * Catalog-entry variant of the armed creation tool (Shapes panel flow): the
+ * tool itself is just an object TYPE, but a panel entry can additionally pin
+ * an orientation (triangle up/down, arrow left/right), an Advanced-tier icon
+ * glyph, and a label override (the glyph's display name instead of the
+ * generic "Icon"). Carried through the place gesture into canvas.addObject
+ * and into the ghost preview so both match the picked entry exactly.
+ */
+export type ArmedShapeVariant = {
+  direction?: CanvasShapeDirection;
+  icon?: CanvasIconGlyph;
+  /** Seed text for the created object (e.g. an icon entry's glyph name instead of the generic "Icon"). */
+  text?: string;
+};
+
+/**
+ * Armed-tool object creation (4.2.2): pointer-down with a creatable tool armed
+ * starts this gesture over empty canvas or existing content. A sub-threshold
+ * release creates a default-size object centered at the point; a drag creates
+ * an object sized to the normalized, min-size-clamped dragged rect.
+ */
+export type PlaceGesture = {
+  kind: "place";
+  tool: CanvasTool;
+  objectType: InteractiveCanvasObjectType;
+  /** Catalog-entry variant (direction/icon/label) captured from ctx.armedShape at gesture start. */
+  variant?: ArmedShapeVariant;
+  startWorld: CanvasPoint;
+  currentWorld: CanvasPoint;
+};
+
+type PlaceOverlay = {
+  placePreview?: CanvasBounds;
+  placePreviewObject?: InteractiveCanvasObject;
+};
+
+type PlaceContext = {
+  stickyPlacement?: boolean;
+  lastPickedColor?: Readonly<Record<ReturnType<typeof colorKindForType>, CanvasColor>>;
+};
+
+type PlaceResult = {
+  state: PlaceGesture | { kind: "idle" };
+  dispatch: CanvasAction[];
+  overlay: PlaceOverlay;
+};
 
 /** Synthetic id carried by the ghost-preview draft object — never enters the document. */
 export const PLACE_PREVIEW_GHOST_ID = "__place-preview-ghost__";
@@ -44,7 +89,7 @@ export function placePreviewOverlayFor(
   variant?: ArmedShapeVariant,
   /** Last-picked color for the type's kind (D17) so the ghost matches the object the click will create. */
   color?: CanvasColor,
-): InteractionOverlay {
+): PlaceOverlay {
   return {
     placePreview: geometry,
     placePreviewObject: draftPlacedObject(objectType, geometry, {
@@ -58,7 +103,7 @@ export function placePreviewOverlayFor(
 /** The ghost color for an armed type: the context's last-picked memory for its kind (D17). */
 export function placePreviewColorFor(
   objectType: InteractiveCanvasObjectType,
-  ctx: Pick<InteractionContext, "lastPickedColor">,
+  ctx: Pick<PlaceContext, "lastPickedColor">,
 ): CanvasColor | undefined {
   return ctx.lastPickedColor?.[colorKindForType(objectType)];
 }
@@ -166,16 +211,16 @@ export function placeGeometryFor(state: PlaceGesture): CanvasGeometry {
 export function stepFromPlace(
   state: PlaceGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: PlaceContext,
+): PlaceResult {
   if (event.type === "cancel") {
-    return { state: IDLE_INTERACTION_STATE, dispatch: [], overlay: emptyOverlay() };
+    return { state: { kind: "idle" }, dispatch: [], overlay: {} };
   }
 
   if (event.type === "up") {
     const geometry = placeGeometryFor(state);
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.addObject",
@@ -195,7 +240,7 @@ export function stepFromPlace(
           ? []
           : ([{ type: "canvas.setTool", tool: "select" }] as CanvasAction[])),
       ],
-      overlay: emptyOverlay(),
+      overlay: {},
     };
   }
 

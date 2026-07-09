@@ -2,9 +2,9 @@ import { describe, expect, it } from "bun:test";
 import { stepInteraction } from "../../stage/editor/pipeline/core";
 import {
   IDLE_INTERACTION_STATE,
-  type CanvasPointerEvent,
   type InteractionContext,
-} from "../interaction";
+} from "../../stage/editor/pipeline/state";
+import type { CanvasPointerEvent } from "../interaction";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,

@@ -3,16 +3,16 @@
  * an object button but whose world point sits outside the object's declared
  * outline must NOT resolve to that object — it falls through to the object
  * behind, or to canvas. Downstream, that makes a corner press+drag a
- * marquee and a corner double-click a no-op instead of opening the editor.
+ * drag-select and a corner double-click a no-op instead of opening the editor.
  */
 
 import { describe, expect, it } from "bun:test";
 import { stepInteraction } from "../core";
 import {
   IDLE_INTERACTION_STATE,
-  type CanvasPointerEvent,
   type InteractionContext,
-} from "../../../../interaction/interaction";
+} from "../state";
+import type { CanvasPointerEvent } from "../../../../interaction/interaction";
 import type { CanvasPoint } from "../../../../state/geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../../state/schema";
 import { anchorScreenPoint, HIT_TARGET_PX } from "../../../../connectors/AnchorDots";
@@ -176,7 +176,7 @@ describe("resolveHit outline veto (D16)", () => {
     });
   });
 
-  it("press+drag from a diamond corner becomes a MARQUEE, not an object move", () => {
+  it("press+drag from a diamond corner becomes a drag-select, not an object move", () => {
     const document = doc([diamond]);
     const context = ctx(document);
     const down = stepInteraction(
@@ -190,7 +190,7 @@ describe("resolveHit outline veto (D16)", () => {
       pointerEvent("move", { x: 15, y: 15 }, document, diamondButton()),
       context,
     );
-    expect(move.state.kind).toBe("marquee");
+    expect(move.state.kind).toBe("drag-select");
   });
 
   it("double-click on a diamond corner does NOT open the text editor", () => {

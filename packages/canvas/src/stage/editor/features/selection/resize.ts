@@ -7,22 +7,38 @@
  * (applyResizeHandle) and the handle→CSS-cursor mapping consumed by
  * CanvasStage via the interaction barrel.
  */
-import { computeSnapGuides } from "../snapping";
-import { gatherSnapCandidates } from "../hit-testing";
-import { connectionBoundsForObject } from "../../objects/geometry";
-import type { CanvasGeometry } from "../../state/schema";
+import type { CanvasAction } from "../../../../state/actions";
+import type { CanvasPoint } from "../../../../state/geometry";
+import { computeSnapGuides, type SnapGuide } from "../snapping/snapping";
+import { gatherSnapCandidates } from "../../../../interaction/hit-testing";
+import { connectionBoundsForObject } from "../../../../objects/geometry";
+import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
 import {
   SNAP_THRESHOLD_SCREEN_PX,
   type CanvasPointerEvent,
   type ResizeHandle,
-} from "../types";
-import {
-  IDLE_INTERACTION_STATE,
-  emptyOverlay,
-  type InteractionContext,
-  type InteractionResult,
-  type ResizeGesture,
-} from "../gesture-state";
+} from "../../../../interaction/types";
+import type { ViewportState } from "../../../viewport";
+
+export type ResizeGesture = {
+  kind: "resize";
+  startWorld: CanvasPoint;
+  objectId: string;
+  handle: ResizeHandle;
+  startGeometry: CanvasGeometry;
+  hasEmitted: boolean;
+};
+
+type ResizeContext = {
+  document: InteractiveCanvasDocument;
+  viewport: ViewportState;
+};
+
+type ResizeResult = {
+  state: ResizeGesture | { kind: "idle" };
+  dispatch: CanvasAction[];
+  overlay: { guides?: SnapGuide[] };
+};
 
 /** Minimum object size enforced by direct (handle) resize. */
 export const MIN_DIRECT_RESIZE_SIZE = 48;
@@ -94,11 +110,11 @@ export function resizeCursorFor(handle: ResizeHandle): string {
 export function stepFromResize(
   state: ResizeGesture,
   event: CanvasPointerEvent,
-  ctx: InteractionContext,
-): InteractionResult {
+  ctx: ResizeContext,
+): ResizeResult {
   if (event.type === "cancel") {
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.updateObjectGeometries",
@@ -108,19 +124,19 @@ export function stepFromResize(
           summary: "Cancelled resize",
         },
       ],
-      overlay: emptyOverlay(),
+      overlay: {},
     };
   }
 
   if (event.type === "up") {
     return {
-      state: IDLE_INTERACTION_STATE,
+      state: { kind: "idle" },
       dispatch: [{ type: "canvas.reconcileSectionMembership", recordHistory: false }],
-      overlay: emptyOverlay(),
+      overlay: {},
     };
   }
 
-  if (event.type !== "move") return { state, dispatch: [], overlay: emptyOverlay() };
+  if (event.type !== "move") return { state, dispatch: [], overlay: {} };
 
   const dx = event.world.x - state.startWorld.x;
   const dy = event.world.y - state.startWorld.y;

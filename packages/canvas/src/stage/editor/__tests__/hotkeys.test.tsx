@@ -4,7 +4,10 @@ import { useRef } from "react";
 import syntheticCanvas from "../../../../../../canvases/synthetic.canvas.json";
 import type { CanvasAction, CanvasSelection } from "../../../state/actions";
 import { sectionFitGeometry } from "../../../state/geometry";
-import { IDLE_INTERACTION_STATE, type InteractionState } from "../../../interaction/interaction";
+import {
+  IDLE_INTERACTION_STATE,
+  type InteractionState,
+} from "../pipeline/state";
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
 import type { ToolId } from "../components/CanvasDock";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../state/schema";
@@ -920,7 +923,7 @@ describe("InteractiveCanvasEditor: Inspector color section (P1 — one 10-pick r
       const summarizes = screen.getByRole("button", { name: /Agent summarizes/i });
       const stage = document.querySelector("[data-canvas-stage='true']") as HTMLElement;
 
-      // Marquee-select both objects (identity viewport: screen == world).
+      // Drag-select both objects (identity viewport: screen == world).
       fireEvent.pointerDown(stage, { pointerId: 21, button: 0, clientX: 130, clientY: 160 });
       fireEvent.pointerMove(window, { pointerId: 21, clientX: 660, clientY: 300 });
       fireEvent.pointerUp(window, { pointerId: 21, clientX: 660, clientY: 300 });

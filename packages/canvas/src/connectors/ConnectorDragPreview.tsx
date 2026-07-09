@@ -5,7 +5,6 @@
  * quick-connect ghosts during connector gestures.
  */
 import { objectById, type CanvasPoint } from "../state/geometry";
-import type { InteractionOverlay } from "../interaction/interaction";
 import { connectionBoundsForObject, getConnectionAnchors } from "../objects/geometry";
 import { CONNECTOR_DASH_PATTERN_PX } from "./def";
 import {
@@ -24,6 +23,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
+import type { ConnectorDragOverlay } from "./types";
 /** Selection outline/handle color — inlined from the old CHROME.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
@@ -90,7 +90,7 @@ export function ConnectorDragPreview({
 }: {
   document: InteractiveCanvasDocument;
   viewport: ViewportState;
-  drag: NonNullable<InteractionOverlay["connectorDrag"]>;
+  drag: ConnectorDragOverlay;
 }) {
   if (drag.connectionId && drag.points && drag.points.length >= 2) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
@@ -254,7 +254,7 @@ export function ConnectorDragPreview({
 
 function routedPreviewPath(
   document: InteractiveCanvasDocument,
-  drag: NonNullable<InteractionOverlay["connectorDrag"]>,
+  drag: ConnectorDragOverlay,
   sourceObject: InteractiveCanvasObject | undefined,
   candidateObject: InteractiveCanvasObject | undefined,
   ghostWorldObject: InteractiveCanvasObject | null,
@@ -331,7 +331,7 @@ function routedPreviewPath(
 
 function previewShowsForwardArrowhead(
   document: InteractiveCanvasDocument,
-  drag: NonNullable<InteractionOverlay["connectorDrag"]>,
+  drag: ConnectorDragOverlay,
 ): boolean {
   if (!drag.connectionId) return true;
   if (drag.end !== "to") return false;

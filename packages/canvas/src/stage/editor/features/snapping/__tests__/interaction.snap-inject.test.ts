@@ -1,18 +1,19 @@
 import { describe, expect, it } from "bun:test";
-import { cancelInteraction, stepInteraction } from "../../stage/editor/pipeline/core";
+import { cancelInteraction, stepInteraction } from "../../../pipeline/core";
 import {
   IDLE_INTERACTION_STATE,
-  type CanvasPointerEvent,
   type InteractionContext,
   type InteractionState,
-} from "../interaction";
+} from "../../../pipeline/state";
+import type { CanvasPointerEvent } from "../../../../../interaction/interaction";
 import type { SnapCorrection } from "../snapping";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "../../state/schema";
+} from "../../../../../state/schema";
 
+/** Snapping injection coverage for host-provided snapResolver behavior. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
     type: "process",

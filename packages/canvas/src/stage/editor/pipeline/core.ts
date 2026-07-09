@@ -8,16 +8,16 @@ import type { CanvasAction, CanvasSelection } from "../../../state/actions";
 import { objectById } from "../../../state/geometry";
 import { connectorBendSegments } from "../../../connectors/bend-editing";
 import { routeConnection } from "../../../connectors/routing";
-import { createMoveGesture, stepFromMove } from "../../../interaction/gestures/move";
-import { stepFromResize } from "../../../interaction/gestures/resize";
-import { stepFromMarquee } from "../../../interaction/gestures/marquee";
+import { createMoveGesture, stepFromMove } from "../features/move/move";
+import { stepFromResize } from "../features/selection/resize";
+import { stepFromDragSelect } from "../features/selection/drag-select";
 import {
   defaultGeometryForPlacement,
   objectTypeForTool,
   placePreviewColorFor,
   placePreviewOverlayFor,
   stepFromPlace,
-} from "../../../interaction/gestures/place";
+} from "../features/place/place";
 import {
   stepFromConnectorBendDrag,
   stepFromConnectorCreate,
@@ -39,11 +39,11 @@ import {
   type InteractionContext,
   type InteractionResult,
   type InteractionState,
-  type MarqueeGesture,
+  type DragSelectGesture,
   type PlaceGesture,
   type PressPending,
   type ResizeGesture,
-} from "../../../interaction/gesture-state";
+} from "./state";
 
 function isSelected(selection: CanvasSelection, objectId: string): boolean {
   return selection.kind === "objects" && selection.objectIds.includes(objectId);
@@ -101,8 +101,8 @@ export function stepInteraction(
       return stepFromMove(state, event, ctx);
     case "resize":
       return stepFromResize(state, event, ctx);
-    case "marquee":
-      return stepFromMarquee(state, event, ctx);
+    case "drag-select":
+      return stepFromDragSelect(state, event, ctx);
     case "place":
       return stepFromPlace(state, event, ctx);
     case "connector-endpoint-drag":
@@ -432,20 +432,20 @@ function stepFromPressing(
       return toIdle();
     }
     // Sections carry their persisted parentId-descendants — createMoveGesture
-    // (gestures/move.ts) folds the expansion into the gesture's
+    // folds the expansion into the gesture's
     // objectIds/startGeometries at drag-start.
     const moveState = createMoveGesture(ctx.document, state.startWorld, dragObjectIds);
     return stepFromMove(moveState, event, ctx);
   }
 
   if (state.hit.kind === "canvas" && ctx.tool === "select") {
-    const marqueeState: MarqueeGesture = {
-      kind: "marquee",
+    const dragSelectState: DragSelectGesture = {
+      kind: "drag-select",
       startWorld: state.startWorld,
       currentWorld: event.world,
       additive: state.shiftKey,
     };
-    return stepFromMarquee(marqueeState, event, ctx, /* alreadyEntered */ true);
+    return stepFromDragSelect(dragSelectState, event, ctx, /* alreadyEntered */ true);
   }
 
   return toIdle();
