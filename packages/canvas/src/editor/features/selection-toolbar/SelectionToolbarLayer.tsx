@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
 import { resolveConnectorControlState } from "./connector-control-state";
-import { colorKindForType, FIRST_USE_COLORS, type CanvasAction } from "../../../state/actions";
+import { colorKindForType, FIRST_USE_COLORS, type CanvasAction, type CanvasTool } from "../../../state/actions";
 import { resolveSwatchPreview } from "../../../palette";
 import { positionFlyoutCenteredOnTrigger, type Rect } from "./position";
 import type { SelectionToolbarApi } from "./use-selection-toolbar";
@@ -13,6 +13,8 @@ export interface SelectionToolbarLayerProps {
   toolbar: SelectionToolbarApi;
   selectedConnection: InteractiveCanvasConnection | undefined;
   dispatch: (action: CanvasAction) => void;
+  /** Current canvas tool; connector mode suppresses select-mode toolbar chrome without clearing selection state. */
+  activeTool?: CanvasTool;
   /**
    * Drag-in-progress suppression — the toolbar unmounts during selection drags
    * and remounts on drop, which replays the FigJam entrance animation.
@@ -33,6 +35,7 @@ export function SelectionToolbarLayer({
   toolbar,
   selectedConnection,
   dispatch,
+  activeTool,
   hidden = false,
 }: SelectionToolbarLayerProps) {
   const {
@@ -55,13 +58,14 @@ export function SelectionToolbarLayer({
   } = toolbar;
   const flyoutPositionerRef = useRef<HTMLDivElement | null>(null);
   const [flyoutLeft, setFlyoutLeft] = useState(0);
+  const toolbarHidden = hidden || activeTool === "connector";
 
   useEffect(() => {
-    if (hidden) setOpenFlyout(null);
-  }, [hidden, setOpenFlyout]);
+    if (toolbarHidden) setOpenFlyout(null);
+  }, [toolbarHidden, setOpenFlyout]);
 
   useLayoutEffect(() => {
-    if (hidden || !openFlyout) {
+    if (toolbarHidden || !openFlyout) {
       setFlyoutLeft(0);
       return;
     }
@@ -127,7 +131,7 @@ export function SelectionToolbarLayer({
       resizeObserver?.disconnect();
     };
   }, [
-    hidden,
+    toolbarHidden,
     openFlyout,
     selectionSignature,
     selectionToolbarPosition?.x,
@@ -135,7 +139,7 @@ export function SelectionToolbarLayer({
     selectionToolbarRef,
   ]);
 
-  if (hidden || !selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
+  if (toolbarHidden || !selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
   const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
   const controlState: Partial<Record<SelectionToolbarActionId, ToolbarControlState>> = {};
   // P1/D12 — the toolbar's current-color swatch shows the PICK's preview hex

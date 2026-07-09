@@ -577,7 +577,16 @@
           }
         },
         {
-          "insert": ", and are selected as their own selection kind. They get their own honest, small definition — deliberately absent from "
+          "insert": ", and are selected as their own selection kind. The "
+        },
+        {
+          "insert": "\"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " CanvasTool is a mode, not an object type, so D19 still holds. Connectors get their own honest, small definition — deliberately absent from "
         },
         {
           "insert": "OBJECT_DEFS",
@@ -1358,7 +1367,7 @@
           }
         },
         {
-          "insert": " renders FigJam-style dots (8px white fill, selection-blue ring, 14px grab target) in CanvasStage's screen-space overlay for every SELECTED object, at the "
+          "insert": " renders FigJam-style dots (8px white fill, selection-blue ring, 14px grab target) in CanvasStage's screen-space overlay. In select mode, dots appear for every SELECTED object, at the "
         },
         {
           "insert": "getConnectionAnchors",
@@ -1376,7 +1385,16 @@
           }
         },
         {
-          "insert": ". They replace the old invisible edge ports. Visibility is zoom-gated by "
+          "insert": "; in Connector Mode, dots are hover-driven for the topmost object under the cursor and use "
+        },
+        {
+          "insert": "bypassZoomGate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility is zoom-gated by "
         },
         {
           "insert": "ANCHOR_DOTS_MIN_ZOOM",
@@ -1399,7 +1417,7 @@
           }
         },
         {
-          "insert": " and stay grabbable, so visibility is the ONLY zoom-gated property and the interaction envelope is unchanged. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a dot bubbles to the stage's "
+          "insert": " and stay grabbable, so visibility is the ONLY zoom-gated property and the interaction envelope is unchanged outside Connector Mode. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a dot bubbles to the stage's "
         },
         {
           "insert": "[data-canvas-port]",

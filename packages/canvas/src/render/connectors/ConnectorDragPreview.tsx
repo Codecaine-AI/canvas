@@ -2,9 +2,15 @@
 
 import { objectById, type CanvasPoint } from "../../state/geometry";
 import type { InteractionOverlay } from "../../interaction/interaction";
-import { getConnectionAnchors } from "../../objects/geometry";
+import { connectionBoundsForObject, getConnectionAnchors } from "../../objects/geometry";
 import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
-import { connectorPathFromPoints, routeConnection, routeConnectionToPoint, type Anchor } from "../../routing/routing";
+import {
+  autoPickAnchors,
+  connectorPathFromPoints,
+  routeConnection,
+  routeConnectionToPoint,
+  type Anchor,
+} from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
 import { ObjectShape } from "../ObjectShape";
 import { resolveConnectorStroke } from "../../palette";
@@ -277,12 +283,21 @@ function routedPreviewPath(
     return routeConnectionToPoint(fixedObject, fixedAnchor, drag.point).path;
   }
 
-  if (!sourceObject || !drag.fromAnchor) return null;
+  if (!sourceObject) return null;
+
+  const fromAnchor =
+    drag.fromAnchor ??
+    autoPickAnchors(connectionBoundsForObject(sourceObject), {
+      x: drag.point.x,
+      y: drag.point.y,
+      width: 0,
+      height: 0,
+    }).startAnchor;
 
   if (candidateObject && drag.candidate) {
     const previewConnection: InteractiveCanvasConnection = {
       id: `${sourceObject.id}-${candidateObject.id}-preview`,
-      from: { objectId: sourceObject.id, anchor: drag.fromAnchor },
+      from: { objectId: sourceObject.id, anchor: fromAnchor },
       to: {
         objectId: candidateObject.id,
         anchor: drag.candidate.anchor,
@@ -295,13 +310,13 @@ function routedPreviewPath(
   if (ghostWorldObject) {
     const previewConnection: InteractiveCanvasConnection = {
       id: `${sourceObject.id}-${ghostWorldObject.id}-preview`,
-      from: { objectId: sourceObject.id, anchor: drag.fromAnchor },
+      from: { objectId: sourceObject.id, anchor: fromAnchor },
       to: { objectId: ghostWorldObject.id },
     };
     return routeConnection(sourceObject, ghostWorldObject, previewConnection, document.objects).path;
   }
 
-  return routeConnectionToPoint(sourceObject, drag.fromAnchor, drag.point).path;
+  return routeConnectionToPoint(sourceObject, fromAnchor, drag.point).path;
 }
 
 function previewShowsForwardArrowhead(

@@ -1696,7 +1696,7 @@
           }
         },
         {
-          "insert": " — drag-to-connect gesture: connects to an existing object under the drop point, or duplicates the source object at the drop point with empty text and connects to it, in one history entry."
+          "insert": " — drag-to-connect gesture: connects to an existing object under the drop point, or duplicates the source object at the drop point with empty text and connects to it, in one history entry; fromAnchor is optional, and Connector Mode body-drags omit it so routing auto-picks the facing side at route time."
         }
       ],
       "children": []
@@ -7673,7 +7673,16 @@
           }
         },
         {
-          "insert": ". The reducer then creates a solid/forward/gray connector to it, selects the new object, and records "
+          "insert": ". The reducer then creates a solid/forward/gray connector to it; when "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is absent, the connection stores no source anchor and routing auto-picks the facing side at route time. It selects the new object and records "
         },
         {
           "insert": "Added connected ${objectTypeLabel(fromObject.type)}",

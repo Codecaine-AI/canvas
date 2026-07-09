@@ -25,6 +25,7 @@ import type {
   InteractiveCanvasObject,
 } from "../../state/schema";
 import { paintOrderedObjects } from "../../state/z-order";
+import type { CanvasAction } from "../../state/actions";
 import {
   DRAG_THRESHOLD,
   IDLE_INTERACTION_STATE,
@@ -308,21 +309,23 @@ export function stepFromConnectorCreate(
       !state.hasDragged && worldDistance(state.startWorld, event.world) < DRAG_THRESHOLD;
     const candidate = state.candidate;
     if (!isClick && candidate) {
+      const addConnectionAction: Extract<CanvasAction, { type: "canvas.addConnection" }> = {
+        type: "canvas.addConnection",
+        fromObjectId: state.fromObjectId,
+        toObjectId: candidate.objectId,
+        ...(state.fromAnchor ? { fromAnchor: state.fromAnchor } : {}),
+        toAnchor: candidate.anchor,
+        // Off-anchor drop: store the exact relative attach point (W3b).
+        ...(candidate.position ? { toPosition: candidate.position } : {}),
+      };
       return {
         state: IDLE_INTERACTION_STATE,
-        dispatch: [
-          {
-            type: "canvas.addConnection",
-            fromObjectId: state.fromObjectId,
-            toObjectId: candidate.objectId,
-            fromAnchor: state.fromAnchor,
-            toAnchor: candidate.anchor,
-            // Off-anchor drop: store the exact relative attach point (W3b).
-            ...(candidate.position ? { toPosition: candidate.position } : {}),
-          },
-        ],
+        dispatch: [addConnectionAction],
         overlay: emptyOverlay(),
       };
+    }
+    if (isClick && !state.fromAnchor) {
+      return toIdle();
     }
     // Released on empty canvas: create-and-connect as a single history entry.
     const point = isClick && fromObject
@@ -331,16 +334,15 @@ export function stepFromConnectorCreate(
     const editObjectTextId = fromObject
       ? quickConnectNewObjectId(ctx.document, fromObject)
       : undefined;
+    const quickConnectAction: Extract<CanvasAction, { type: "canvas.quickConnect" }> = {
+      type: "canvas.quickConnect",
+      fromObjectId: state.fromObjectId,
+      ...(state.fromAnchor ? { fromAnchor: state.fromAnchor } : {}),
+      drop: { point },
+    };
     return {
       state: IDLE_INTERACTION_STATE,
-      dispatch: [
-        {
-          type: "canvas.quickConnect",
-          fromObjectId: state.fromObjectId,
-          fromAnchor: state.fromAnchor,
-          drop: { point },
-        },
-      ],
+      dispatch: [quickConnectAction],
       overlay: editObjectTextId
         ? { editObjectTextId, editObjectTextSeed: "" }
         : emptyOverlay(),

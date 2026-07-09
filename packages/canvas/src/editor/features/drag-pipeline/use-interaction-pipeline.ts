@@ -42,6 +42,7 @@ import {
 } from "../../../render/overlays/AnchorDots";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { animateSectionFitToChildren } from "../section-fit/animate-section-fit";
+import { useHoverTarget } from "./use-hover-target";
 
 /** Width of the stage-edge band (screen px) where drag auto-pan kicks in (T1.2.1). */
 const EDGE_PAN_BAND_PX = 36;
@@ -256,6 +257,8 @@ export interface UseInteractionPipelineArgs {
 export interface InteractionPipelineApi {
   /** Mirrored into state so CanvasStage's overlay slot re-renders. */
   interactionOverlay: InteractionOverlay;
+  /** Connector-tool hover target whose anchor dots should be shown while idle. */
+  hoveredObjectId: string | null;
   /**
    * True while the interaction machine is in a gesture that manipulates the
    * current selection's geometry (`move`, `resize`, `connector-endpoint-drag`,
@@ -308,6 +311,16 @@ export function useInteractionPipeline({
   stateRef.current = { document, selection, tool, stickyPlacement, armedShape, lastPickedColor };
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
+  const {
+    hoveredObjectId,
+    hoveredObjectIdRef,
+    updateHoverTarget,
+    clearHoverTarget,
+  } = useHoverTarget({
+    document,
+    tool,
+    zoom: viewport.zoom,
+  });
 
   // Tracks the pointerId + stage element of an in-progress gesture so window-level
   // move/up listeners (attached only while a gesture is active) can keep receiving
@@ -327,9 +340,13 @@ export function useInteractionPipeline({
       const world = screenToWorld(screen);
       const target = nativeEvent.target instanceof Element ? nativeEvent.target : stage;
       const selection = stateRef.current.selection;
+      const currentTool = stateRef.current.tool;
+      const connectorHoverTargetId = hoveredObjectIdRef.current;
       const portProximityObjectIds =
-        stateRef.current.tool === "select" && selection.kind === "objects"
+        currentTool === "select" && selection.kind === "objects"
           ? selection.objectIds
+          : currentTool === "connector" && connectorHoverTargetId
+            ? [connectorHoverTargetId]
           : undefined;
       const hit = resolveHit(target, stateRef.current.document, world, {
         zoom: viewportRef.current.zoom,
@@ -559,8 +576,9 @@ export function useInteractionPipeline({
       lastDragPointerRef.current = { event: event.nativeEvent, stage };
       startEdgePanLoop();
       runInteraction(buildPointerEvent("down", event.nativeEvent, stage));
+      clearHoverTarget();
     },
-    [buildPointerEvent, closeContextMenu, runInteraction, startEdgePanLoop],
+    [buildPointerEvent, clearHoverTarget, closeContextMenu, runInteraction, startEdgePanLoop],
   );
 
   // ——— Armed-tool hover ghost (Shapes panel creation flow) ————————————————
@@ -574,9 +592,14 @@ export function useInteractionPipeline({
   const handleStagePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (interactionStateRef.current.kind !== "idle") return;
+      const stage = event.currentTarget;
+      if (stateRef.current.tool === "connector") {
+        const screen = stageScreenPointFromClient(event.nativeEvent, stage);
+        updateHoverTarget(screenToWorld(screen));
+        return;
+      }
       const armedType = objectTypeForTool(stateRef.current.tool);
       if (!armedType) return;
-      const stage = event.currentTarget;
       const screen = stageScreenPointFromClient(event.nativeEvent, stage);
       const world = screenToWorld(screen);
       setInteractionOverlay(
@@ -588,13 +611,14 @@ export function useInteractionPipeline({
         ),
       );
     },
-    [screenToWorld],
+    [screenToWorld, updateHoverTarget],
   );
 
   const handleStagePointerLeave = useCallback((_event: ReactPointerEvent<HTMLElement>) => {
+    clearHoverTarget();
     if (interactionStateRef.current.kind !== "idle") return;
     setInteractionOverlay((previous) => (previous.placePreview ? {} : previous));
-  }, []);
+  }, [clearHoverTarget]);
 
   // Disarming the tool (Escape, dock tool pick, panel close) while idle must
   // drop any lingering hover ghost — the pointermove that painted it won't
@@ -623,6 +647,7 @@ export function useInteractionPipeline({
 
   return {
     interactionOverlay,
+    hoveredObjectId,
     selectionDragActive,
     interactionStateRef,
     handleStagePointerDown,

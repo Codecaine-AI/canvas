@@ -22,6 +22,7 @@ import { Connector, ConnectorSelectionChrome } from "./connectors/Connector";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
 import { AnchorDots, type ActivePort } from "./overlays/AnchorDots";
+import { HoverHighlight } from "./overlays/HoverHighlight";
 import { Marquee } from "./overlays/Marquee";
 import { PlacePreview } from "./overlays/PlacePreview";
 import { SnapGuideLine } from "./overlays/SnapGuideLine";
@@ -67,6 +68,7 @@ const SELECTION_BLUE = "#0D99FF";
 const SELECT_CURSOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-3 -3 24 24"><filter id="cs" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1" stdDeviation="1.1" flood-color="#000" flood-opacity="0.35"/></filter><path filter="url(#cs)" d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.1" stroke-linejoin="round"/></svg>';
 const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 8 8, default`;
+const CONNECTOR_CURSOR = "crosshair"; // Single sanctioned crosshair use: Connector Mode wiring cursor; pinned by the anchor-dots policy test.
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
@@ -126,6 +128,8 @@ export interface CanvasStageProps {
   onStageDoubleClick?: (event: ReactMouseEvent<HTMLElement>) => void;
   /** Ephemeral interaction overlay (marquee, guides, spacing, drop target, connector drag preview). */
   interactionOverlay?: InteractionOverlay;
+  /** Connector-tool hover target whose anchor dots should be shown while idle. */
+  hoveredObjectId?: string | null;
   /** Object whose text is currently being edited in place (D14) — its at-rest text is hidden while the slot editor is the visible copy. */
   editingTextObjectId?: string | null;
   /** Untransformed screen-space overlay (marquee, guides, handles). */
@@ -234,6 +238,7 @@ export function CanvasStage({
   onStagePointerLeave,
   onStageDoubleClick,
   interactionOverlay,
+  hoveredObjectId = null,
   editingTextObjectId = null,
   overlay,
   worldOverlay,
@@ -262,17 +267,37 @@ export function CanvasStage({
   const dropTargetId = interactionOverlay?.dropTargetId;
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
+  const connectorToolActive = activeTool === "connector";
+  const renderedSelectedConnectionId = connectorToolActive ? null : selectedConnectionId;
   const activeConnectorDrag = interactionOverlay?.connectorDrag ?? null;
   const stageCursor =
     style?.cursor ??
-    (activeConnectorDrag ? "default" : handToolActive ? "grab" : selectToolActive ? SELECT_CURSOR : undefined);
+    (connectorToolActive
+      ? CONNECTOR_CURSOR
+      : activeConnectorDrag
+        ? "default"
+        : handToolActive
+          ? "grab"
+          : selectToolActive
+            ? SELECT_CURSOR
+            : undefined);
   const connectorDragSourceObjectId = interactionOverlay?.connectorDrag?.fromObjectId ?? null;
   const connectorDragSourceAnchor = interactionOverlay?.connectorDrag?.fromAnchor ?? null;
   const documentObjectIds = new Set(document.objects.map((object) => object.id));
-  const anchorDotObjectIds = [...selectedObjectIds];
-  for (const objectId of [connectorDragSourceObjectId]) {
-    if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
-      anchorDotObjectIds.push(objectId);
+  let anchorDotObjectIds: string[];
+  if (connectorToolActive) {
+    anchorDotObjectIds = [];
+    for (const objectId of [hoveredObjectId, connectorDragSourceObjectId]) {
+      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
+        anchorDotObjectIds.push(objectId);
+      }
+    }
+  } else {
+    anchorDotObjectIds = [...selectedObjectIds];
+    for (const objectId of [connectorDragSourceObjectId]) {
+      if (objectId && documentObjectIds.has(objectId) && !anchorDotObjectIds.includes(objectId)) {
+        anchorDotObjectIds.push(objectId);
+      }
     }
   }
   const hoveredQuickConnectDrag =
@@ -299,6 +324,7 @@ export function CanvasStage({
       data-canvas-stage="true"
       data-canvas-hand-tool={handToolActive ? "true" : undefined}
       data-canvas-select-tool={selectToolActive ? "true" : undefined}
+      data-canvas-connector-tool={connectorToolActive ? "true" : undefined}
       data-canvas-connector-drag={activeConnectorDrag ? "true" : undefined}
       style={{
         position: "relative",
@@ -456,7 +482,7 @@ export function CanvasStage({
           {/* SVG paints in document order, so the selected connection renders
               last: its blue endpoint rings/bend pills (and its own line) must
               not be crossed by sibling connector paths drawn after it. */}
-          {orderedConnections(document.connections, selectedConnectionId).map((connection) => {
+          {orderedConnections(document.connections, renderedSelectedConnectionId).map((connection) => {
             const fromObject = objectById(document, connection.from.objectId);
             const toObject = objectById(document, connection.to.objectId);
             if (!fromObject || !toObject) return null;
@@ -514,9 +540,9 @@ export function CanvasStage({
             shape bodies/borders paint over connector lines by design, but must
             never cover the blue selection affordances. */}
         {(() => {
-          if (!selectedConnectionId) return null;
+          if (!renderedSelectedConnectionId) return null;
           const connection = document.connections.find(
-            (item) => item.id === selectedConnectionId,
+            (item) => item.id === renderedSelectedConnectionId,
           );
           if (!connection) return null;
           const fromObject = objectById(document, connection.from.objectId);
@@ -601,12 +627,21 @@ export function CanvasStage({
           pointerEvents: "none",
         }}
       >
-        <SelectionBox
-          document={document}
-          viewport={viewport}
-          selectedObjectIds={selectedObjectIds}
-          interactiveHandles={!handToolActive}
-        />
+        {!connectorToolActive && (
+          <SelectionBox
+            document={document}
+            viewport={viewport}
+            selectedObjectIds={selectedObjectIds}
+            interactiveHandles={!handToolActive}
+          />
+        )}
+        {Boolean(onStagePointerEvent) && !handToolActive && (
+          <HoverHighlight
+            document={document}
+            viewport={viewport}
+            objectId={connectorToolActive && !activeConnectorDrag ? hoveredObjectId : null}
+          />
+        )}
         {/* Connector previews must paint below anchor-dot buttons so hovered dots stay visually solid. */}
         {hoveredQuickConnectDrag && (
           <ConnectorDragPreview
@@ -638,6 +673,7 @@ export function CanvasStage({
                 : null
             }
             interactive
+            bypassZoomGate={connectorToolActive}
             onHoveredAnchorChange={setHoveredAnchorDot}
           />
         )}

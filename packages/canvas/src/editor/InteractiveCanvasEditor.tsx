@@ -232,6 +232,7 @@ export function InteractiveCanvasEditor({
   // state and handlers live in editor/features/drag-pipeline.
   const {
     interactionOverlay,
+    hoveredObjectId,
     selectionDragActive,
     interactionStateRef,
     handleStagePointerDown,
@@ -374,6 +375,7 @@ export function InteractiveCanvasEditor({
         onStagePointerLeave={handleStagePointerLeave}
         onStageDoubleClick={handleStageDoubleClick}
         interactionOverlay={interactionOverlay}
+        hoveredObjectId={hoveredObjectId}
         editingTextObjectId={objectTextEditId}
         activeTool={state.tool}
         className="h-full"
@@ -420,6 +422,7 @@ export function InteractiveCanvasEditor({
         toolbar={selectionToolbar}
         selectedConnection={selectedConnection}
         dispatch={dispatch}
+        activeTool={state.tool}
         hidden={selectionDragActive}
       />
 

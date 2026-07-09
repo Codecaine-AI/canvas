@@ -127,6 +127,7 @@ function stepFromIdle(
   if (ctx.tool === "hand") return toIdle();
 
   if (event.type === "double") {
+    if (ctx.tool === "connector") return toIdle();
     // Double-click on an existing object: start editing its text in place.
     if (event.hit.kind === "object") {
       return {
@@ -135,6 +136,38 @@ function stepFromIdle(
         overlay: { editObjectTextId: event.hit.objectId },
       };
     }
+    return toIdle();
+  }
+
+  if (ctx.tool === "connector") {
+    if (event.type !== "down") return toIdle();
+    if (event.button !== 0) return toIdle();
+
+    if (event.hit.kind === "port") {
+      const hit = event.hit;
+      const pending: ConnectorCreateGesture = {
+        kind: "connector-create",
+        fromObjectId: hit.objectId,
+        fromAnchor: hit.anchor,
+        startWorld: event.world,
+        point: event.world,
+        hasDragged: false,
+      };
+      return { state: pending, dispatch: [], overlay: { connectorDrag: pending } };
+    }
+
+    if (event.hit.kind === "object") {
+      const hit = event.hit;
+      const pending: ConnectorCreateGesture = {
+        kind: "connector-create",
+        fromObjectId: hit.objectId,
+        startWorld: event.world,
+        point: event.world,
+        hasDragged: false,
+      };
+      return { state: pending, dispatch: [], overlay: { connectorDrag: pending } };
+    }
+
     return toIdle();
   }
 
@@ -228,12 +261,11 @@ function stepFromIdle(
     return { state: pending, dispatch: [], overlay: { connectorDrag: pending } };
   }
 
-  // An armed creation tool (4.2.2) takes priority over ordinary object/
-  // connection selection — clicking or dragging anywhere on the canvas while
-  // a shape tool is armed places a new object there, matching FigJam's "tool
-  // stays committed until you draw with it" feel. Resize handles, connector
-  // endpoints, and edge ports (handled above) never render while a creation
-  // tool is armed (those affordances are select-mode-only), so this is safe.
+  // Non-connector creation tools (4.2.2) take priority over ordinary object/
+  // connection selection: clicking or dragging anywhere on the canvas while a
+  // shape tool is armed places a new object there. Connector Mode has its own
+  // branch above because it intentionally exposes anchor affordances and
+  // starts connector drags from ports or object bodies.
   const armedObjectTypeForClick = objectTypeForTool(ctx.tool);
   if (armedObjectTypeForClick && (event.hit.kind === "object" || event.hit.kind === "connection")) {
     const pending: PlaceGesture = {

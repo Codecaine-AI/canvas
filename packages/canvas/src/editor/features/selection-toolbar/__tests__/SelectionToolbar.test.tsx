@@ -366,6 +366,20 @@ describe("SelectionToolbarLayer visibility", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("renders null while the connector tool is active even with a valid toolbar and position", () => {
+    const { container } = render(
+      <SelectionToolbarLayer
+        toolbar={connectorToolbarApi()}
+        selectedConnection={connection()}
+        dispatch={() => undefined}
+        activeTool="connector"
+      />,
+    );
+
+    expect(container.querySelector("[data-selection-toolbar]")).toBeNull();
+    expect(container.firstChild).toBeNull();
+  });
+
   it("closes an open flyout when hidden flips true", () => {
     const setOpenFlyout = mock((_action: Parameters<SelectionToolbarApi["setOpenFlyout"]>[0]) => {});
     const { rerender } = render(

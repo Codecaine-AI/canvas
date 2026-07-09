@@ -39,6 +39,10 @@
         "b-interaction-connector-reconnect-12d",
         "b-interaction-connector-bend-12e",
         "b-interaction-connector-label-edit-12f",
+        "b-interaction-connector-mode-heading-12g",
+        "b-interaction-connector-mode-12h",
+        "b-interaction-connector-mode-12i",
+        "b-interaction-connector-mode-12j",
         "b-interaction-pointer-sm-lock-gate-12a",
         "b-interaction-pointer-sm-coalescer-13",
         "b-interaction-pointer-sm-cancel-14",
@@ -383,7 +387,16 @@
           }
         },
         {
-          "insert": " — each with its own step function dispatched from "
+          "insert": " — no new state kind was added for Connector Mode; it reuses "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Each kind has its own step function dispatched from "
         },
         {
           "insert": "stepInteraction",
@@ -441,7 +454,16 @@
           }
         },
         {
-          "insert": ". A pointer-down here branches on hit-test kind into a resize, connector-endpoint-drag, connector-bend-drag, connector-create, place, pressing, or (for a double-click on an object) an immediate in-place text-edit request ("
+          "insert": ". A pointer-down here first honors the connector-tool branch (port/object starts reuse "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", every other hit is inert), otherwise it branches on hit-test kind into a resize, connector-endpoint-drag, connector-bend-drag, connector-create, place, pressing, or (for a double-click on an object) an immediate in-place text-edit request ("
         },
         {
           "insert": "overlay.editObjectTextId",
@@ -1079,7 +1101,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Anchor-dot connector creation is selection-only and editor/select-tool-only. "
+          "insert": "Anchor-dot connector creation now has two entry surfaces. Select mode remains selection-only and editor/select-tool-only; Connector Mode is the hover-driven exception. "
         },
         {
           "insert": "AnchorDots",
@@ -1124,7 +1146,7 @@
           }
         },
         {
-          "insert": " is 0.5 and gates opacity only; the hit target remains interactive. Hover/press expands the dot into the full 28px arrow button, emits the hovered port for quick-connect preview, and deliberately keeps "
+          "insert": " is 0.5 and gates select-mode visibility only; Connector Mode bypasses it. Hover/press expands the dot into the full 28px arrow button, emits the hovered port for quick-connect preview, and select mode deliberately keeps "
         },
         {
           "insert": "cursor: \"default\"",
@@ -1133,7 +1155,7 @@
           }
         },
         {
-          "insert": " rather than the retired plus/crosshair cursor."
+          "insert": " while the crosshair cursor is restored only for the active connector tool."
         }
       ],
       "children": []
@@ -1197,7 +1219,40 @@
           }
         },
         {
-          "insert": " immediately with a routed live preview and forward arrowhead. Candidate resolution begins only after the 3-world-unit drag threshold, uses topmost-first paint order through "
+          "insert": " immediately with a pinned source anchor, routed live preview, and forward arrowhead. In Connector Mode, pressing an object body also enters "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " but leaves "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " absent, so route-time "
+        },
+        {
+          "insert": "autoPickAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "autoPickAnchors",
+              "label": "autoPickAnchors"
+            }
+          }
+        },
+        {
+          "insert": " keeps choosing the facing side; a body click stays a deliberate no-op. Candidate resolution begins only after the 3-world-unit drag threshold, uses topmost-first paint order through "
         },
         {
           "insert": "resolveConnectionCascade",
@@ -1212,7 +1267,7 @@
           }
         },
         {
-          "insert": ", and excludes the source object; section interiors produce no attach candidate. Release on a candidate adds a connection, release on empty canvas quick-connects at the drop point, and a sub-threshold click quick-connects at the computed spawn point, duplicates the source object's type/style metadata with blank text, and requests label editing for the predicted new object id."
+          "insert": ", and excludes the source object; section interiors produce no attach candidate. Release on a candidate adds a connection, release on empty canvas quick-connects at the drop point, and a port sub-threshold click quick-connects at the computed spawn point, duplicates the source object's type/style metadata with blank text, and requests label editing for the predicted new object id."
         }
       ],
       "children": []
@@ -1381,6 +1436,156 @@
         },
         {
           "insert": " and opens the routed label editor instead of treating the double-click as a drag gesture."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-connector-mode-heading-12g": {
+      "id": "b-interaction-connector-mode-heading-12g",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Connector Mode"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-connector-mode-12h": {
+      "id": "b-interaction-connector-mode-12h",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector Mode is a tool-gated branch inside "
+        },
+        {
+          "insert": "stepFromIdle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/core.ts",
+              "symbol": "stepFromIdle",
+              "label": "stepFromIdle"
+            }
+          }
+        },
+        {
+          "insert": ", not a new state kind. Port hits enter "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a pinned "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; object-body hits enter the same gesture with no "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so stored connections leave "
+        },
+        {
+          "insert": "from.anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " absent and "
+        },
+        {
+          "insert": "routeConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeConnection",
+              "label": "routeConnection"
+            }
+          }
+        },
+        {
+          "insert": " falls back to "
+        },
+        {
+          "insert": "autoPickAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "autoPickAnchors",
+              "label": "autoPickAnchors"
+            }
+          }
+        },
+        {
+          "insert": " on each route pass."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-connector-mode-12i": {
+      "id": "b-interaction-connector-mode-12i",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Non-reachable hits stay suppressed in the branch: empty canvas, connector endpoints, bend pills, existing connector paths, handles, and double-clicks are inert while the tool is active. Section interiors remain free canvas for connection purposes, matching the routing cascade's section-inside exclusion."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-connector-mode-12j": {
+      "id": "b-interaction-connector-mode-12j",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Stickiness lives in reducer tool state: connector-create never dispatches "
+        },
+        {
+          "insert": "canvas.setTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so the tool remains armed across completed lines and quick-connect chains. Escape is handled above the machine in "
+        },
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/editor/InteractiveCanvasEditor.tsx",
+              "label": "InteractiveCanvasEditor.tsx"
+            }
+          }
+        },
+        {
+          "insert": ": cancel an in-flight gesture first, otherwise switch the connector tool back to select, otherwise fall through to selection clearing."
         }
       ],
       "children": []
