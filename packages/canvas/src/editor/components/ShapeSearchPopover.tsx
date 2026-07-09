@@ -28,6 +28,37 @@ export type ShapeSearchPopoverProps = {
 const POPOVER_WIDTH_PX = 232;
 const POPOVER_BG = "#1D1D1D";
 
+/**
+ * Scrollbar restyle for the shape grid: slim rounded translucent thumb on a
+ * transparent track, matching the dark FigJam-style panel (replaces the
+ * chunky default chrome). The @supports block is the Firefox fallback —
+ * it has no ::-webkit-scrollbar, so it gets the standard thin-scrollbar
+ * properties instead.
+ */
+const GRID_SCROLLBAR_STYLES = `
+[data-shape-search-grid]::-webkit-scrollbar {
+  width: 8px;
+}
+[data-shape-search-grid]::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-shape-search-grid]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+[data-shape-search-grid]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+@supports not selector(::-webkit-scrollbar) {
+  [data-shape-search-grid] {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  }
+}
+`;
+
 export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopoverProps) {
   const [query, setQuery] = useState("");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -61,6 +92,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
         ...style,
       }}
     >
+      <style>{GRID_SCROLLBAR_STYLES}</style>
       <div
         style={{
           display: "flex",
@@ -100,6 +132,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
           gap: 4,
           maxHeight: 220,
           overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
         {filtered.map((entry) => {
