@@ -396,10 +396,10 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3611.9216396796764,
-        "y": 884.9880891799219,
-        "width": 308,
-        "height": 508
+        "x": 3600,
+        "y": 880,
+        "width": 320,
+        "height": 512
       },
       "style": {
         "shape": "section"
