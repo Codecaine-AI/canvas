@@ -268,6 +268,7 @@ export function CanvasStage({
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
   const connectorToolActive = activeTool === "connector";
+  const renderedSelectedConnectionId = connectorToolActive ? null : selectedConnectionId;
   const activeConnectorDrag = interactionOverlay?.connectorDrag ?? null;
   const stageCursor =
     style?.cursor ??
@@ -481,7 +482,7 @@ export function CanvasStage({
           {/* SVG paints in document order, so the selected connection renders
               last: its blue endpoint rings/bend pills (and its own line) must
               not be crossed by sibling connector paths drawn after it. */}
-          {orderedConnections(document.connections, selectedConnectionId).map((connection) => {
+          {orderedConnections(document.connections, renderedSelectedConnectionId).map((connection) => {
             const fromObject = objectById(document, connection.from.objectId);
             const toObject = objectById(document, connection.to.objectId);
             if (!fromObject || !toObject) return null;
@@ -539,9 +540,9 @@ export function CanvasStage({
             shape bodies/borders paint over connector lines by design, but must
             never cover the blue selection affordances. */}
         {(() => {
-          if (!selectedConnectionId) return null;
+          if (!renderedSelectedConnectionId) return null;
           const connection = document.connections.find(
-            (item) => item.id === selectedConnectionId,
+            (item) => item.id === renderedSelectedConnectionId,
           );
           if (!connection) return null;
           const fromObject = objectById(document, connection.from.objectId);
@@ -626,12 +627,14 @@ export function CanvasStage({
           pointerEvents: "none",
         }}
       >
-        <SelectionBox
-          document={document}
-          viewport={viewport}
-          selectedObjectIds={selectedObjectIds}
-          interactiveHandles={!handToolActive}
-        />
+        {!connectorToolActive && (
+          <SelectionBox
+            document={document}
+            viewport={viewport}
+            selectedObjectIds={selectedObjectIds}
+            interactiveHandles={!handToolActive}
+          />
+        )}
         {Boolean(onStagePointerEvent) && !handToolActive && (
           <HoverHighlight
             document={document}

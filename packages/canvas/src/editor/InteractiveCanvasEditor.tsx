@@ -422,6 +422,7 @@ export function InteractiveCanvasEditor({
         toolbar={selectionToolbar}
         selectedConnection={selectedConnection}
         dispatch={dispatch}
+        activeTool={state.tool}
         hidden={selectionDragActive}
       />
 

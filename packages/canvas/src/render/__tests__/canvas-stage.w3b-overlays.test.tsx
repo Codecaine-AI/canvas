@@ -199,6 +199,31 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
 });
 
 describe("CanvasStage: selected-connector chrome (W3b)", () => {
+  it("hides selected object handles while connector mode is active", () => {
+    const select = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedObjectIds={["process-a"]}
+        activeTool="select"
+      />,
+    );
+    expect(select.container.querySelector("[data-canvas-selection-box]")).toBeTruthy();
+    expect(select.container.querySelectorAll("[data-canvas-handle]").length).toBeGreaterThan(0);
+    select.unmount();
+
+    const connector = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedObjectIds={["process-a"]}
+        activeTool="connector"
+      />,
+    );
+    expect(connector.container.querySelector("[data-canvas-selection-box]")).toBeNull();
+    expect(connector.container.querySelectorAll("[data-canvas-handle]").length).toBe(0);
+  });
+
   it("renders hollow selection-blue endpoint circles at both terminals", () => {
     const { container } = render(
       <CanvasStage document={makeDocument()} viewport={viewport} selectedConnectionId="connection-a" />,
@@ -212,6 +237,20 @@ describe("CanvasStage: selected-connector chrome (W3b)", () => {
     expect(from!.getAttribute("r")).toBe("7.5");
     expect(from!.getAttribute("stroke-width")).toBe("2.5");
     expect(to!.getAttribute("stroke")).toBe(SELECTION_BLUE);
+  });
+
+  it("hides selected connector chrome while connector mode is active", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument()}
+        viewport={viewport}
+        selectedConnectionId="connection-a"
+        activeTool="connector"
+      />,
+    );
+    expect(container.querySelector("[data-canvas-connection-chrome]")).toBeNull();
+    expect(container.querySelector('[data-canvas-endpoint="from"]')).toBeNull();
+    expect(container.querySelectorAll("[data-canvas-bend-segment]").length).toBe(0);
   });
 
   it("renders segment bend pills for every routed segment with axis cursors", () => {
