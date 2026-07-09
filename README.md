@@ -34,3 +34,10 @@ bun run dev:studio             # standalone board editor, http://localhost:3999
 
 See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite
 (MPL-2.0) vendoring/licensing notes.
+
+## License
+
+MIT — see `LICENSE`.
+
+The files under `packages/canvas/src/vendor/blocksuite/` are vendored from
+BlockSuite and remain under the MPL-2.0; see that directory's `NOTICE`.
