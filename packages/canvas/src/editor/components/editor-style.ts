@@ -40,7 +40,7 @@ export const EDITOR_STYLE = {
   selectionToolbarButtonHeightPx: 36,
   selectionToolbarButtonRadiusPx: 8,
   selectionToolbarSwatchPx: 28,
-  // FigJam-measured recipe (ring / key / ambient) from to_add/black pop up/figjam-popup-animation.html.
+  // FigJam-measured recipe (ring / key / ambient) from board-design-reference/analysis/figjam-popup-animation.html.
   selectionToolbarShadow:
     "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 2px 5px rgba(0, 0, 0, 0.14), 0 6px 18px rgba(0, 0, 0, 0.12)",
   flyoutRadiusPx: 16,

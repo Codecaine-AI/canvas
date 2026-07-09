@@ -61,7 +61,7 @@
         "http.server",
         "4500",
         "--directory",
-        "to_add/black pop up"
+        "board-design-reference/analysis"
       ],
       "port": 4500
     },
