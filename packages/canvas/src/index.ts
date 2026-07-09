@@ -13,7 +13,6 @@ export {
 export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./palette";
 export * from "./render/CanvasStage";
 export * from "./interaction/clipboard";
-export * from "./render/code-tokenizer";
 export * from "./theme";
 export * from "./state/geometry";
 export * from "./interaction/interaction";

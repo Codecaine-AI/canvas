@@ -58,7 +58,6 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "pill" ||
     value === "arrow-shape" ||
     value === "predefined-process" ||
-    value === "code-block" ||
     // W5 — FigJam parity shape set (Wave A):
     value === "ellipse" ||
     value === "triangle" ||
@@ -300,7 +299,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     // D3/D11 — the single unified text field. Required (hard migration: the
     // legacy label/body/title fields are gone from the schema, and documents
     // carrying them without `text` fail validation), but MAY be empty — a
-    // fresh sticky or code block has no text yet.
+    // fresh sticky has no text yet.
     if (typeof rawObject.text !== "string") {
       issues.push({ path: `${path}.text`, message: "Object text is required (a string; may be empty)." });
       continue;
@@ -415,7 +414,6 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         : undefined,
       locked: parseSectionLockMode(rawObject.locked),
       direction,
-      language: typeof rawObject.language === "string" ? rawObject.language : undefined,
       author: typeof rawObject.author === "string" ? rawObject.author : undefined,
       icon,
     });

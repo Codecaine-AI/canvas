@@ -287,21 +287,6 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("renders the code-block with a line-number gutter and tokenized spans", () => {
-    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);
-
-      const codeBlock = container.querySelector('[data-canvas-object-id="captured-code-block"]') as HTMLElement | null;
-      expect(codeBlock).toBeTruthy();
-
-      const lineNumbers = codeBlock!.querySelectorAll(".interactive-canvas-code-block-line-number");
-      expect(lineNumbers.length).toBe(5);
-      expect(lineNumbers[0]?.textContent).toBe("1");
-
-      expect(codeBlock!.textContent).toContain("class Agent(BaseModel):");
-    });
-  });
-
   it("renders arrow-shape objects pointing in their configured direction", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={v2FlowElementsDocument} />);

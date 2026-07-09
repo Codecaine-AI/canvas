@@ -63,7 +63,6 @@ export const OBJECT_TYPE_DEFAULTS: Readonly<
   // logical) at a comfortable placement size.
   "arrow-shape": { geometry: { x: 160, y: 160, width: 361, height: 100 }, shape: "arrow-shape", label: "Arrow" },
   "predefined-process": { geometry: { x: 160, y: 160, width: 200, height: 100 }, shape: "predefined-process", label: "Predefined Process" },
-  "code-block": { geometry: { x: 160, y: 160, width: 320, height: 200 }, shape: "code-block", label: "Code Block" },
   // W5 — FigJam parity shape set (Wave A): sizes per the implementation
   // brief's size table (docs/10-system-design/20-figjam-parity's "Missing
   // shape specs" section, cross-checked against this brief's overrides).
@@ -141,14 +140,14 @@ export function colorKindForType(type: InteractiveCanvasObjectType): CanvasColor
 }
 
 /**
- * Default `text` a freshly created object of `type` carries: sticky and
- * code-block start EMPTY (their text is the whole body — stamping "Sticky"
- * into a fresh note would render it), everything else starts with the
+ * Default `text` a freshly created object of `type` carries: sticky starts
+ * EMPTY (its text is the whole body — stamping "Sticky" into a fresh note
+ * would render it), everything else starts with the
  * human-readable type label (a fresh Process reads "Process", a fresh
  * section chip reads "Section"), matching the pre-unification behavior.
  */
 export function defaultTextFor(type: InteractiveCanvasObjectType): string {
-  if (type === "sticky" || type === "code-block") return "";
+  if (type === "sticky") return "";
   return objectTypeLabel(type);
 }
 

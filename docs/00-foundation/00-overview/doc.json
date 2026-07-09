@@ -163,7 +163,7 @@
       "props": {},
       "text": [
         {
-          "insert": "What it is: a software-diagramming canvas — shapes, connectors, sections, stickies, code blocks — rendered with FigJam-grade polish, backed by a document model that is a first-class, agent-writable artifact rather than an internal implementation detail."
+          "insert": "What it is: a software-diagramming canvas — shapes, connectors, sections, stickies — rendered with FigJam-grade polish, backed by a document model that is a first-class, agent-writable artifact rather than an internal implementation detail."
         }
       ],
       "children": []

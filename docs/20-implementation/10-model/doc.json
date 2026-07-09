@@ -44,7 +44,6 @@
         "b-model-schema-object-types-list-pill",
         "b-model-schema-object-types-list-arrow-shape",
         "b-model-schema-object-types-list-predefined-process",
-        "b-model-schema-object-types-list-code-block",
         "b-model-schema-object-types-list-ellipse",
         "b-model-schema-object-types-list-triangle",
         "b-model-schema-object-types-list-parallelogram",
@@ -111,9 +110,6 @@
         "b-model-type-predefined-process",
         "b-model-type-predefined-process-p1",
         "b-model-type-predefined-process-p2",
-        "b-model-type-code-block",
-        "b-model-type-code-block-p1",
-        "b-model-type-code-block-p2",
         "b-model-type-ellipse",
         "b-model-type-ellipse-p1",
         "b-model-type-ellipse-p2",
@@ -467,15 +463,6 @@
         },
         {
           "insert": "direction",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "language",
           "attributes": {
             "code": true
           }
@@ -893,41 +880,13 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-code-block": {
-      "id": "b-model-schema-object-types-list-code-block",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "code-block",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in W2; carries a "
-        },
-        {
-          "insert": "language",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " used to select a minimal tokenizer."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-p3": {
       "id": "b-model-schema-p3",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "That's 32 object types in total (the early text and source-node types were retired along the way). The D16 wave (document, database) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process, code-block) added FigJam-parity sections plus the V2 Flow shape set; D21 folded the retired Person/Chat/Chip catalog entries into the "
+          "insert": "That's 31 object types in total (the early text and source-node types were retired along the way). The D16 wave (document, database) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process) added FigJam-parity sections plus the V2 Flow shape set; D21 folded the retired Person/Chat/Chip catalog entries into the "
         },
         {
           "insert": "icon",
@@ -2588,7 +2547,7 @@
           }
         },
         {
-          "insert": " (the W2 wave's section capture/tint/title validation and the new V2 Flow shape vocabulary — pill, arrow-shape, predefined-process, code-block, and the CPU icon glyph)."
+          "insert": " (the W2 wave's section capture/tint/title validation and the new V2 Flow shape vocabulary — pill, arrow-shape, predefined-process, and the CPU icon glyph)."
         }
       ],
       "children": []
@@ -5025,295 +4984,6 @@
       ],
       "children": []
     },
-    "b-model-type-code-block": {
-      "id": "b-model-type-code-block",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "code-block"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-code-block-p1": {
-      "id": "b-model-type-code-block-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W2 — an in-canvas syntax-highlighted code snippet. The type-only "
-        },
-        {
-          "insert": "language",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " field selects the tokenizer in "
-        },
-        {
-          "insert": "code-tokenizer.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts"
-            }
-          }
-        },
-        {
-          "insert": " (not "
-        },
-        {
-          "insert": "src/model/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — despite the schema.ts comment's phrasing, the tokenizer actually lives under "
-        },
-        {
-          "insert": "src/render/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 320, height: 200 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"neutral\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (inert — code-block resolves its background from "
-        },
-        {
-          "insert": "CODE_BLOCK",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/code-block/style.ts",
-              "symbol": "CODE_BLOCK"
-            }
-          }
-        },
-        {
-          "insert": " fixed tokens, not the tone system), "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"code-block\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-code-block-p2": {
-      "id": "b-model-type-code-block-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Body text ("
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ") is split on newlines; each line renders as its own row with a right-aligned line-number gutter (24px wide, "
-        },
-        {
-          "insert": "color \"#999999\""
-        },
-        {
-          "insert": ") and a tokenized code span. "
-        },
-        {
-          "insert": "tokenizeCodeBlock",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts",
-              "symbol": "tokenizeCodeBlock"
-            }
-          }
-        },
-        {
-          "insert": " dispatches per line by "
-        },
-        {
-          "insert": "language",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": ": "
-        },
-        {
-          "insert": "\"python\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts"
-            }
-          }
-        },
-        {
-          "insert": " recognizes comments, strings, a fixed keyword set, and capitalized identifiers (colored as a type/class name); "
-        },
-        {
-          "insert": "\"json\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts"
-            }
-          }
-        },
-        {
-          "insert": " splits quoted-string spans from plain spans, coloring a quoted string followed by "
-        },
-        {
-          "insert": ":",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " as a key versus a value, and recognizing "
-        },
-        {
-          "insert": "true",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "false",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "null",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " as keywords; any other language falls back to untokenized plain text. The tokenizer's own header comment is explicit it is \"NOT a real syntax-highlighting engine\" — no grammar, no AST. Rendered on a fixed Dracula-theme background ("
-        },
-        {
-          "insert": "CODE_BLOCK.bg",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/code-block/style.ts",
-              "symbol": "CODE_BLOCK"
-            }
-          }
-        },
-        {
-          "insert": " = "
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"#282A36\""
-        },
-        {
-          "insert": ", 10px corner radius, monospace 13px/1.5) — code-block is the one type that renders body-only: it carries no label chrome at all, even though "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " is still a required field on the object."
-        }
-      ],
-      "children": []
-    },
     "b-model-heading-layout-conventions": {
       "id": "b-model-heading-layout-conventions",
       "flavour": "heading",
@@ -7446,7 +7116,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/state/schema/objects.ts\nexport type CanvasGeometry = {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n};\n\nexport type InteractiveCanvasObject = {\n  id: string;\n  type: InteractiveCanvasObjectType;\n  /** The object's ONE text field (D3/D11) — replaces the legacy `label`/`body`/`title` trio.\n      The kind decides rendering; may be empty. Connections keep their own separate `label`. */\n  text: string;\n  /** The object's ONE color pick (D1/D12/D17) — a swatch id from the closed 10-pick roster\n      (state/schema/colors.ts). Absent = the kind's first-use default. */\n  color?: CanvasColor;\n  parentId?: string | null;\n  geometry: CanvasGeometry;\n  style?: CanvasObjectStyle;\n  layout?: {\n    mode: \"free\" | \"row\" | \"column\" | \"stack\";\n    padding?: number;\n    gap?: number;\n  };\n  /** `type: \"section\"` only (W2) — two-mode section lock. */\n  locked?: \"all\" | \"background\";\n  /** arrow-shape | chevron | parallelogram: \"left\" | \"right\" (default \"right\");\n      triangle: \"up\" | \"down\" (default \"up\"). */\n  direction?: CanvasShapeDirection;\n  /** `type: \"code-block\"` only — selects the minimal tokenizer in code-tokenizer.ts. */\n  language?: string;\n  /** `type: \"sticky\"` only. */\n  author?: string;\n  /** `type: \"icon\"` only (W5) — REQUIRED glyph selector (26 ids in CanvasIconGlyph);\n      missing/unknown is a hard validation error. */\n  icon?: CanvasIconGlyph;\n};"
+          "insert": "// packages/canvas/src/state/schema/objects.ts\nexport type CanvasGeometry = {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n};\n\nexport type InteractiveCanvasObject = {\n  id: string;\n  type: InteractiveCanvasObjectType;\n  /** The object's ONE text field (D3/D11) — replaces the legacy `label`/`body`/`title` trio.\n      The kind decides rendering; may be empty. Connections keep their own separate `label`. */\n  text: string;\n  /** The object's ONE color pick (D1/D12/D17) — a swatch id from the closed 10-pick roster\n      (state/schema/colors.ts). Absent = the kind's first-use default. */\n  color?: CanvasColor;\n  parentId?: string | null;\n  geometry: CanvasGeometry;\n  style?: CanvasObjectStyle;\n  layout?: {\n    mode: \"free\" | \"row\" | \"column\" | \"stack\";\n    padding?: number;\n    gap?: number;\n  };\n  /** `type: \"section\"` only (W2) — two-mode section lock. */\n  locked?: \"all\" | \"background\";\n  /** arrow-shape | chevron | parallelogram: \"left\" | \"right\" (default \"right\");\n      triangle: \"up\" | \"down\" (default \"up\"). */\n  direction?: CanvasShapeDirection;\n  /** `type: \"sticky\"` only. */\n  author?: string;\n  /** `type: \"icon\"` only (W5) — REQUIRED glyph selector (26 ids in CanvasIconGlyph);\n      missing/unknown is a hard validation error. */\n  icon?: CanvasIconGlyph;\n};"
         }
       ],
       "children": []
@@ -7578,7 +7248,7 @@
           }
         },
         {
-          "insert": "; sticky/code-block "
+          "insert": "; sticky "
         },
         {
           "insert": "body",
@@ -7994,7 +7664,7 @@
           }
         },
         {
-          "insert": ", so the new object is a duplicate of the source type, size, color, parent, style/layout, direction/language/author/icon where present, centered on the drop point with "
+          "insert": ", so the new object is a duplicate of the source type, size, color, parent, style/layout, direction/author/icon where present, centered on the drop point with "
         },
         {
           "insert": "text: \"\"",

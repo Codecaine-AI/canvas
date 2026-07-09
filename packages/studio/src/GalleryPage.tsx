@@ -44,13 +44,6 @@ const CONNECTOR_GAP = 96;
 const LONG_LABEL_TEXT = "Adapt Question\nBased on Interview\nHistory";
 const LONG_SECTION_TITLE = "Adapt Question Based on Interview History";
 const LONG_STICKY_TEXT = "# Heading\n- bullet one\n- bullet two\n**bold** text";
-const SHORT_CODE_TEXT = 'print("Label")';
-const LONG_CODE_TEXT = [
-  "def adapt_question(history):",
-  "    if history:",
-  '        return "follow up"',
-  '    return "start"',
-].join("\n");
 const RETIRED_ICON_GALLERY_VARIANTS = [
   { glyph: "person", label: "person" },
   { glyph: "chat", label: "chat" },
@@ -225,11 +218,10 @@ function textForVariant(
   variant: "short" | "long",
 ): string {
   if (variant === "short") {
-    return type === "code-block" ? SHORT_CODE_TEXT : "Label";
+    return "Label";
   }
   if (type === "sticky") return LONG_STICKY_TEXT;
   if (type === "section") return LONG_SECTION_TITLE;
-  if (type === "code-block") return LONG_CODE_TEXT;
   return LONG_LABEL_TEXT;
 }
 
@@ -336,7 +328,6 @@ function makeGalleryObject(
     },
     style: { shape: defaults.shape },
     ...(type === "icon" ? { icon: options?.icon ?? "gear" } : null),
-    ...(type === "code-block" ? { language: "python" } : null),
     ...(type === "section" ? { layout: { mode: "free" as const, padding: 32, gap: 24 } } : null),
   };
 }

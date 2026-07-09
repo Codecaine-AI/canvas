@@ -90,7 +90,7 @@ describe("ShapesPanel sections", () => {
     expect(container.querySelector('[data-shape-grid="basic"]')).toBeTruthy();
   });
 
-  it("renders the correct entry count for each section (Basic=16, Flowchart=16, Advanced=26)", () => {
+  it("renders the correct entry count for each section (Basic=13, Flowchart=16, Advanced=26)", () => {
     const { container } = render(<ShapesPanel />);
     for (const category of SHAPE_CATALOG) {
       const grid = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
@@ -102,7 +102,7 @@ describe("ShapesPanel sections", () => {
     const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
     const flowchart = SHAPE_CATALOG.find((c) => c.id === "flowchart")!;
     const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
-    expect(basic.entries.length).toBe(16);
+    expect(basic.entries.length).toBe(13);
     expect(flowchart.entries.length).toBe(16);
     expect(advanced.entries.length).toBe(26);
   });

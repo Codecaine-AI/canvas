@@ -34,7 +34,6 @@ export type CanvasTool =
   | "pill"
   | "arrow-shape"
   | "predefined-process"
-  | "code-block"
   // Connector Mode — wiring-mode tool, not a placeable object type, so the
   // 1:1 tool<->type pattern documented below does not apply to it.
   | "connector"
@@ -105,7 +104,7 @@ export type CanvasAction =
   | {
       type: "canvas.addObject";
       objectType: InteractiveCanvasObjectType;
-      /** Seed for the object's unified `text` field; omit for the per-type default (type label for shapes/sections, empty for sticky/code-block). */
+      /** Seed for the object's unified `text` field; omit for the per-type default (type label for shapes/sections, empty for sticky). */
       text?: string;
       parentId?: string | null;
       geometry?: CanvasGeometry;

@@ -172,7 +172,7 @@
           },
           {
             "path": "packages/canvas/src/render/",
-            "note": "SVG/DOM presentation layer: CanvasStage, adaptive grid, overlays (SelectionBox/AnchorDots), code tokenizer"
+            "note": "SVG/DOM presentation layer: CanvasStage, adaptive grid, overlays (SelectionBox/AnchorDots)"
           },
           {
             "path": "packages/canvas/src/editor/",
@@ -751,7 +751,7 @@
           }
         },
         {
-          "insert": ", the palette table and role resolvers, clipboard, code tokenizer, geometry, interaction, routing, snapping, both editor/viewer components, schema, "
+          "insert": ", the palette table and role resolvers, clipboard, geometry, interaction, routing, snapping, both editor/viewer components, schema, "
         },
         {
           "insert": "SpectreRef",
@@ -939,7 +939,7 @@
           }
         },
         {
-          "insert": " — CanvasStage, theme + FigJam tokens, code tokenizer."
+          "insert": " — CanvasStage, theme + FigJam tokens."
         }
       ],
       "children": []

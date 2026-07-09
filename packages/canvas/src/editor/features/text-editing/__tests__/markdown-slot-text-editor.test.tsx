@@ -183,19 +183,6 @@ describe("MarkdownSlotTextEditor", () => {
       <TextEditingOverlay textEditing={apiFor(process, process.text, () => undefined)} zoom={1} />,
     );
     expect(processView.container.querySelector("textarea")).not.toBeNull();
-    cleanup();
-
-    const codeBlock = makeObject({
-      id: "code",
-      type: "code-block",
-      text: "const x = 1;",
-      style: { shape: "code-block" },
-      language: "typescript",
-    });
-    const codeView = render(
-      <TextEditingOverlay textEditing={apiFor(codeBlock, codeBlock.text, () => undefined)} zoom={1} />,
-    );
-    expect(codeView.container.querySelector("textarea")).not.toBeNull();
   });
 
   it("renders sticky markdown structure with prefix markers always hidden", () => {

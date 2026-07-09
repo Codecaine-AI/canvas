@@ -17,7 +17,7 @@ Two-tier system, mid-migration:
 
 - **Tier 1 — `ObjectDef`** ([object-def.ts:147](packages/canvas/src/objects/object-def.ts)):
   `kind, render, css, defaults, handles, hitTest, dragCapture, labelEditing, toolbar?`.
-  Special defs for section / sticky / code-block / connector (connector is a
+  Special defs for section / sticky / connector (connector is a
   "selection kind" — its `render` is never dispatched; it exists to carry a toolbar).
 - **Tier 2 — `ShapeDef`** ([shape-def.ts:14](packages/canvas/src/objects/shapes/shape-def.ts)):
   data-only variant spec (`type, shape, outline, text, anchors?, defaultSize, defaultTone,
@@ -65,7 +65,6 @@ bbox** ([LabelEditingOverlay.tsx:140](packages/canvas/src/editor/features/label-
 | Person / chat / icon | `label` below the glyph (bottom band) | full bbox | ✗ |
 | Sticky | `body` in inset area, bullets | full bbox | ≈ ok (target right, rect wrong) |
 | Section | `title` chip, top-left, zoom counter-scale | chip-exact: same position, scale fn, width heuristic | ✓ |
-| Code block | `body` as tokenized lines; label never renders | full bbox editing `label` | ✗ |
 | Connector | label chip at routed midpoint | same routed point, counter-scaled | ✓ |
 
 **Sections and connectors prove the model:** when the editor derives its rect/scale/
@@ -166,9 +165,9 @@ Known problems:
   read path, no explicit-color escape hatch.
 - **D11 — One `text` field, per-kind rendering.** Every object stores its text in a
   single `text` field; the kind decides rendering: sections render it as the top-left
-  title chip, code blocks parse it per `language`, stickies render simple markdown
+  title chip, stickies render simple markdown
   (scope → O15), shapes render it in their text slot. Connections keep their separate
-  `label`. Migration: section `title ?? label` → text; sticky/code `body` → text;
+  `label`. Migration: section `title ?? label` → text; sticky `body` → text;
   shapes `label` → text (non-empty `body` appended on a new line so no content is
   lost). Sticky `author` stays its own field.
 - **D12 — Universal roster: 20 swatches, identical previews for every kind.** Black is
@@ -425,8 +424,6 @@ packages/canvas/src
 │   │   ├── markdown.tsx          NEW — simple-markdown renderer (D18), shared by
 │   │   │                           at-rest render and in-place editor
 │   │   └── colors.ts             DELETED — sticky cells live in palette.ts
-│   ├── code-block/
-│   │   └── def.tsx               CHANGED — tokenizes `text` (was `body`)
 │   ├── connector/
 │   │   └── def.ts                CHANGED — becomes the ConnectorDef instance (D19)
 │   └── shapes/
@@ -488,7 +485,7 @@ OBJECT-DEF-OVERHAUL.md            this doc — retired into docs/ at P4
   legacy fields deleted, no escape hatch (D10).
 - **O6 — Background as a role.** ✓ Not user-changeable; fixed `#F5F5F5` (D9).
 - **O3 — Text migration.** ✓ Unified `text` field with per-kind rendering (D11).
-  Sections `title ?? label`, sticky/code `body`, shapes `label` (+ `body` appended so
+  Sections `title ?? label`, sticky `body`, shapes `label` (+ `body` appended so
   nothing is lost); `author` stays a separate sticky field.
 - **O7 — Catalog unification.** ✓ Yes — `def.catalog` is the single source; the picker
   structure derives from the registry. (Whether preview glyphs can derive from the
@@ -582,7 +579,7 @@ and `objects/` — kills the sticky-hex duplication hazard).
 ### P2 — Text unification + slots + in-place editing (D3, D6, D11, D14, D18)
 
 - Schema: single `text` field; migrate `title ?? label` (section), `body`
-  (sticky/code), `label` + appended `body` (shapes); keep `author`, `language`,
+  (sticky), `label` + appended `body` (shapes); keep `author`, `language`,
   connection `label`; delete the old fields; update validator.
 - TextSlot preset library (`center`, `below`, `inset-body`, `title-chip`, rect escape
   hatch) — presets define at-rest render AND editor placement/typography in one place.

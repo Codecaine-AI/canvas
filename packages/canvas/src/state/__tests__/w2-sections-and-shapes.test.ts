@@ -15,7 +15,6 @@ import {
   sectionCaptureMembers,
   sectionFitGeometry,
 } from "../geometry";
-import { tokenizeCodeBlock, tokenizeCodeLine } from "../../render/code-tokenizer";
 import { validateInteractiveCanvasDocument } from "../schema";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../actions";
 import type {
@@ -105,7 +104,6 @@ describe("schema: W2 object types round-trip", () => {
     expect(types.has("pill")).toBe(true);
     expect(types.has("arrow-shape")).toBe(true);
     expect(types.has("predefined-process")).toBe(true);
-    expect(types.has("code-block")).toBe(true);
     expect(types.has("icon")).toBe(true);
     expect(validation.document.objects.some((object) => object.type === "icon" && object.icon === "cpu")).toBe(true);
     expect(validation.warnings).toBeUndefined();
@@ -122,8 +120,6 @@ describe("schema: W2 object types round-trip", () => {
     expect(byId.get("inner-section")?.color).toBe("blue");
     expect(byId.get("outside-arrow")?.direction).toBe("right");
     expect(byId.get("outside-arrow-left")?.direction).toBe("left");
-    expect(byId.get("captured-code-block")?.language).toBe("python");
-    expect(byId.get("json-code-block")?.language).toBe("json");
     expect(byId.get("partial-overlap-note")?.author).toBe("Ford");
   });
 
@@ -581,7 +577,6 @@ describe("geometry: sectionCaptureMembers (drag-start capture math)", () => {
     );
     expect(members.has("inner-section")).toBe(true);
     expect(members.has("captured-pill")).toBe(true);
-    expect(members.has("captured-code-block")).toBe(true);
     expect(members.has("partial-overlap-note")).toBe(false);
     expect(members.has("outside-arrow")).toBe(false);
   });
@@ -749,29 +744,5 @@ describe("CanvasStage: renderOrderedObjects (z-order)", () => {
   it("returns the original array reference-order unchanged when there are no sections", () => {
     const objects: InteractiveCanvasObject[] = [makeObject({ id: "only" })];
     expect(renderOrderedObjects(objects)).toEqual(objects);
-  });
-});
-
-describe("code-tokenizer: tokenizeCodeBlock integration with the canvas JSON text", () => {
-  it("tokenizes the python code-block text from the canvas JSON without dropping characters", () => {
-    const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "captured-code-block");
-    expect(codeBlock?.text).toBeDefined();
-    const lines = tokenizeCodeBlock(codeBlock!.text, codeBlock!.language);
-    const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
-    expect(rejoined).toBe(codeBlock!.text);
-  });
-
-  it("tokenizes the JSON code-block text from the canvas JSON without dropping characters", () => {
-    const codeBlock = v2FlowElementsDocument.objects.find((object) => object.id === "json-code-block");
-    expect(codeBlock?.text).toBeDefined();
-    const lines = tokenizeCodeBlock(codeBlock!.text, codeBlock!.language);
-    const rejoined = lines.map((line) => line.map((token) => token.text).join("")).join("\n");
-    expect(rejoined).toBe(codeBlock!.text);
-  });
-
-  it("colors the canvas JSON's python class/def line as expected", () => {
-    const tokens = tokenizeCodeLine("class Agent(BaseModel):", "python");
-    expect(tokens.some((token) => token.text === "class")).toBe(true);
-    expect(tokens.some((token) => token.text === "Agent")).toBe(true);
   });
 });

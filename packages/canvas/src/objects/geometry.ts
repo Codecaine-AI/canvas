@@ -24,7 +24,7 @@
  *
  * True-outline anchors are implemented for the shapes whose outline is a
  * simple analytic polygon/curve we already have geometry for; every other
- * object type (icons, sticky, section, code-block, etc.) falls back to its
+ * object type (icons, sticky, section, etc.) falls back to its
  * axis-aligned bounding rect outline — same fallback upstream uses for
  * "diamond, ellipse, triangle" per the `FIXME` at `connector-manager.ts:975`
  * (our fallback is intentionally the same conservative choice, not a gap).

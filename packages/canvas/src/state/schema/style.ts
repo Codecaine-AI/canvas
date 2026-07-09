@@ -23,7 +23,6 @@ export type CanvasObjectStyle = {
     | "section"
     | "arrow-shape"
     | "predefined-process"
-    | "code-block"
     // W5 — FigJam parity shape set (Wave A), one same-named variant per new type:
     | "ellipse"
     | "triangle"

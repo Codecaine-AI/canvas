@@ -25,7 +25,6 @@ const SKIPPED_TEXT_SILHOUETTE_TYPES = new Set<string>([
   // Non-shape text placements.
   "sticky",
   "section",
-  "code-block",
 ]);
 
 const DIRECTION_CASES: Partial<

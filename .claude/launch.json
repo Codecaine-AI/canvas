@@ -66,6 +66,19 @@
       "port": 4500
     },
     {
+      "name": "connector-mode-wt",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "/private/tmp/claude-501/-Users-Ford-Github-Repos-Codecaine-canvas/533ccee6-94dd-4b93-abcf-10212b73fe30/scratchpad/wt-integration/packages/studio",
+        "dev",
+        "--port",
+        "4600"
+      ],
+      "port": 4600
+    },
+    {
       "name": "studio-bun",
       "runtimeExecutable": "bunx",
       "runtimeArgs": [

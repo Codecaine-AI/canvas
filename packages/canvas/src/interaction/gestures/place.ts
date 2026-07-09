@@ -93,7 +93,6 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "pill":
     case "arrow-shape":
     case "predefined-process":
-    case "code-block":
     // W5 — FigJam parity shape set (Wave A added the tools; the Shapes-panel
     // creation-flow work wires them here). Same 1:1 tool<->type pattern as
     // every case above; without these an armed ellipse/triangle/… tool

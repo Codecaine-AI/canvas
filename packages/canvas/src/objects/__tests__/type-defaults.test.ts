@@ -59,7 +59,6 @@ const EXPECTED: Record<
   pill: { geometry: { x: 160, y: 160, width: 200, height: 64 }, label: "Pill", shape: "pill" },
   "arrow-shape": { geometry: { x: 160, y: 160, width: 361, height: 100 }, label: "Arrow", shape: "arrow-shape" },
   "predefined-process": { geometry: { x: 160, y: 160, width: 200, height: 100 }, label: "Predefined Process", shape: "predefined-process" },
-  "code-block": { geometry: { x: 160, y: 160, width: 320, height: 200 }, label: "Code Block", shape: "code-block" },
   ellipse: { geometry: { x: 160, y: 160, width: 160, height: 120 }, label: "Ellipse", shape: "ellipse" },
   triangle: { geometry: { x: 160, y: 160, width: 140, height: 120 }, label: "Triangle", shape: "triangle" },
   parallelogram: { geometry: { x: 160, y: 160, width: 160, height: 100 }, label: "Parallelogram", shape: "parallelogram" },
@@ -104,10 +103,10 @@ describe("type-defaults: value freeze (old switches === leaf table)", () => {
     expect(OBJECT_TYPE_DEFAULTS.process.geometry.x).toBe(160);
   });
 
-  it("defaultTextFor: sticky/code-block start empty, everything else starts with the type label", () => {
+  it("defaultTextFor: sticky starts empty, everything else starts with the type label", () => {
     for (const type of ALL_OBJECT_TYPES) {
       expect(defaultTextFor(type)).toBe(
-        type === "sticky" || type === "code-block" ? "" : EXPECTED[type].label,
+        type === "sticky" ? "" : EXPECTED[type].label,
       );
     }
   });

@@ -11,8 +11,8 @@ import type { ToolbarSpec } from "../object-def";
  * location alignment: the flyout components these controls open live in
  * editor/features/selection-toolbar/flyouts/ (keyed by def kind + action id).
  * Attached by shapes/base.tsx to every shape-family def and explicitly by
- * icon/code-block defs (their types resolved to the "shape" toolbar variant
- * before the registry migration).
+ * icon defs (their type resolved to the "shape" toolbar variant before the
+ * registry migration).
  */
 export const SHAPE_TOOLBAR: ToolbarSpec = {
   controls: [

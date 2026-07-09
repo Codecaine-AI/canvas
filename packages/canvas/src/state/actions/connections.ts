@@ -89,7 +89,6 @@ function duplicateSourceObjectForQuickConnect(
     ...(source.style ? { style: { ...source.style } } : {}),
     ...(source.layout ? { layout: { ...source.layout } } : {}),
     ...(source.direction ? { direction: source.direction } : {}),
-    ...(typeof source.language === "string" ? { language: source.language } : {}),
     ...(typeof source.author === "string" ? { author: source.author } : {}),
     ...(source.icon ? { icon: source.icon } : {}),
   };

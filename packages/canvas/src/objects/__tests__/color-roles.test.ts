@@ -124,7 +124,6 @@ describe("ObjectDef.colorRole (§3.5)", () => {
     expect(objectDefForType("section")?.colorRole).toBe("section");
     expect(objectDefForType("sticky")?.colorRole).toBe("sticky");
     expect(objectDefForType("process")?.colorRole).toBe("shape");
-    expect(objectDefForType("code-block")?.colorRole).toBe("shape");
     expect(objectDefForType("icon")?.colorRole).toBe("shape");
   });
 });

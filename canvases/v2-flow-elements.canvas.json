@@ -62,22 +62,6 @@
       }
     },
     {
-      "id": "captured-code-block",
-      "type": "code-block",
-      "text": "class Agent(BaseModel):\n    name: str\n    # created per session\n    def run(self):\n        return None",
-      "parentId": "inner-section",
-      "geometry": {
-        "x": 100,
-        "y": 140,
-        "width": 260,
-        "height": 180
-      },
-      "style": {
-        "shape": "code-block"
-      },
-      "language": "python"
-    },
-    {
       "id": "partial-overlap-note",
       "type": "sticky",
       "text": "Only a corner of this note overlaps outer-section — must not be captured on drag.\n- bullet one\n- bullet two",
@@ -210,22 +194,6 @@
         "shape": "icon"
       },
       "icon": "person"
-    },
-    {
-      "id": "json-code-block",
-      "type": "code-block",
-      "text": "{\n  \"name\": \"spectre\",\n  \"active\": true,\n  \"deleted\": null\n}",
-      "parentId": null,
-      "geometry": {
-        "x": 1160,
-        "y": 560,
-        "width": 300,
-        "height": 200
-      },
-      "style": {
-        "shape": "code-block"
-      },
-      "language": "json"
     }
   ],
   "connections": [

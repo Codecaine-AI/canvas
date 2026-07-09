@@ -21,10 +21,10 @@ export type InteractiveCanvasObject = {
   /**
    * The object's ONE text field (OBJECT-DEF-OVERHAUL.md D3/D11) — replaces
    * the legacy `label`/`body`/`title` trio. The kind decides rendering:
-   * sections render it as the floating title chip, code blocks tokenize it
-   * per `language`, stickies render simple markdown (D18), shapes render it
-   * in their declared text slot (objects/text-slots.ts). May be empty (a
-   * fresh sticky/code block has no text yet). Connections keep their own
+   * sections render it as the floating title chip, stickies render simple
+   * markdown (D18), shapes render it in their declared text slot
+   * (objects/text-slots.ts). May be empty (a fresh sticky has no text yet).
+   * Connections keep their own
    * separate `label`.
    */
   text: string;
@@ -60,8 +60,6 @@ export type InteractiveCanvasObject = {
    * "up" | "down" (soft-default "up"). Absent/ignored for every other type.
    */
   direction?: CanvasShapeDirection;
-  /** `type: "code-block"` only (W2) — selects the minimal tokenizer in code-tokenizer.ts. */
-  language?: string;
   /** `type: "sticky"` only (W2) — rendered bottom-left at 12px/40% black. */
   author?: string;
   /**

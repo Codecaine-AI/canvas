@@ -10,7 +10,6 @@ import type {
 import type { ObjectTypeDefaults } from "../state/schema/object-defaults";
 import type { OutlineSpec } from "./geometry";
 import type { TextSlot } from "./text-slots";
-import { codeBlockDef } from "./code-block/def";
 import { connectorDef } from "./connector/def";
 import { sectionDef } from "./section/def";
 import { stickyDef } from "./sticky/def";
@@ -47,10 +46,9 @@ import { pillDef } from "./shapes/misc/pill";
 /**
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
  * registry"). An ObjectDef is the behavior contract for one KIND of thing
- * that behaves differently on the canvas — specials (section, sticky,
- * code-block, connector) are first-class; the ~40 uniform
- * shapes share ONE behavior and get their ObjectDef generated from a
- * ShapeDef via `objects/shapes/base.tsx`.
+ * that behaves differently on the canvas — section and sticky are first-class
+ * specials; the ~40 uniform shapes share ONE behavior and get their ObjectDef
+ * generated from a ShapeDef via `objects/shapes/base.tsx`.
  *
  * Every field is CONSUMED from the registry: `render`, `css`, the className
  * carried by the render path, `handles`/`dragCapture` (interaction/core.ts,
@@ -204,7 +202,7 @@ export interface ObjectDef {
   textEditing: TextEditingSpec;
   /** This kind's selection toolbar (step 5): data-only control list. */
   toolbar?: ToolbarSpec;
-  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists (section/sticky/code-block; icon entries derive from the glyph registry). */
+  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists (section/sticky; icon entries derive from the glyph registry). */
   catalog?: ObjectCatalogMeta;
 }
 
@@ -263,7 +261,6 @@ const DEFS_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, ObjectDef>> = {
 
 const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   note: stickyDef,
-  "code-block": codeBlockDef,
   "rounded-rect": processDef,
   ellipse: ellipseDef,
   diamond: decisionDef,
@@ -298,7 +295,6 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
 export const OBJECT_DEFS: readonly ObjectDef[] = [
   sectionDef,
   stickyDef,
-  codeBlockDef,
   processDef,
   ellipseDef,
   rectangleDef,

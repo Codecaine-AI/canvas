@@ -16,7 +16,6 @@ export type InteractiveCanvasObjectType =
   | "pill"
   | "arrow-shape"
   | "predefined-process"
-  | "code-block"
   // W5 — FigJam parity shape set (Wave A): 19 native Basic/Flowchart primitives
   // plus the icon-glyph family, per docs/10-system-design/20-figjam-parity's
   // "Missing shape specs" and the Wave A implementation brief.

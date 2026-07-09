@@ -645,7 +645,7 @@
           }
         },
         {
-          "insert": ", the FigJam visual-parity recreation of the user's own \"V2 Flow\" FigJam board — 42 objects and 24 connections reproducing sections, stickies, pills, icon objects with cpu, chat, and person glyphs, code blocks, arrow-shape chevrons, and the full connector network with per-object palette color picks (migrated to the closed 10-pick roster in the color-prune cutover). This is the sample already embedded live in the "
+          "insert": ", the FigJam visual-parity recreation of the user's own \"V2 Flow\" FigJam board — 40 objects and 24 connections reproducing sections, stickies, pills, icon objects with cpu, chat, and person glyphs, arrow-shape chevrons, and the full connector network with per-object palette color picks (migrated to the closed 10-pick roster in the color-prune cutover). This is the sample already embedded live in the "
         },
         {
           "insert": "canvas-00-overview",
@@ -816,7 +816,7 @@
           }
         },
         {
-          "insert": " swatch id), that its object-type inventory matches expected counts exactly (12 sections, 3 stickies, 7 pills, 5 icons (cpu x3, chat x1, person x1), 5 predefined-process, 2 code-block, 6 arrow-shape, 1 rectangle), that it has at least 20 connections, that every connection endpoint and every object parentId resolves to a real object id, and that every object carries a "
+          "insert": " swatch id), that its object-type inventory matches expected counts exactly (13 sections, 3 stickies, 7 pills, 5 icons (cpu x3, chat x1, person x1), 5 predefined-process, 6 arrow-shape, 1 rectangle), that it has at least 20 connections, that every connection endpoint and every object parentId resolves to a real object id, and that every object carries a "
         },
         {
           "insert": "color",

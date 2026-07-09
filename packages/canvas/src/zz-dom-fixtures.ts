@@ -41,7 +41,6 @@ export const ALL_OBJECT_TYPES = [
   "pill",
   "arrow-shape",
   "predefined-process",
-  "code-block",
   "ellipse",
   "triangle",
   "parallelogram",
@@ -77,7 +76,6 @@ export const ALL_SHAPES = [
   "section",
   "arrow-shape",
   "predefined-process",
-  "code-block",
   "ellipse",
   "triangle",
   "parallelogram",
@@ -199,7 +197,6 @@ function buildAllTypesDoc(): InteractiveCanvasDocument {
       object.color = "blue";
     }
     if (type === "icon") object.icon = "gear";
-    if (type === "code-block") object.language = "python";
     if (type === "sticky") object.author = "zz";
     return object;
   });
@@ -318,7 +315,7 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
 
 // ---------------------------------------------------------------------------
 // Synthetic doc C — "specials": sections (incl. nesting),
-// section parentId membership, sticky/code-block.
+// section parentId membership, sticky.
 // ---------------------------------------------------------------------------
 
 function buildSpecialsDoc(): InteractiveCanvasDocument {
@@ -402,22 +399,12 @@ function buildSpecialsDoc(): InteractiveCanvasDocument {
       style: { shape: "note" },
       author: "zz",
     },
-    // Code block.
-    {
-      id: "c-code-block",
-      type: "code-block",
-      text: "def f():\n    return 1",
-      parentId: null,
-      geometry: { x: 960, y: 480, width: 320, height: 200 },
-      style: { shape: "code-block" },
-      language: "python",
-    },
   ];
   const connections: InteractiveCanvasConnection[] = [
     {
       id: "conn-c-0",
       from: { objectId: "c-sticky", anchor: "right" },
-      to: { objectId: "c-code-block", anchor: "top" },
+      to: { objectId: "c-child-two", anchor: "top" },
       label: "C link",
       style: "solid",
       arrow: "forward",

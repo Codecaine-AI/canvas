@@ -20,11 +20,8 @@ import { join, relative } from "node:path";
  *    render/viewport (never runtime code).
  *  - state/actions/types.ts may TYPE-import Anchor from routing/routing
  *    (the action payload vocabulary; never runtime code).
- *  - objects/code-block/def.tsx still runtime-imports
- *    render/code-tokenizer (a pure lexer whose only dependency is the
- *    co-located objects/code-block/style.ts). This is the one remaining
- *    objects/ -> render/ edge; it goes away if the tokenizer is ever
- *    rehomed with the code-block slice.
+ *  - No objects/ -> render/ exceptions are permitted; the corresponding test
+ *    asserts the allowed-violations list stays empty.
  *
  * The checks are static: they scan import/export specifiers, not runtime
  * behavior, so they run in milliseconds and fail with the offending file.
@@ -234,12 +231,10 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("objects/ does not import from render/ (one documented straggler: code-block's tokenizer)", () => {
+  test("objects/ does not import from render/ (zero permitted exceptions)", () => {
     expect(
       violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+render(\/|$)/),
-    ).toEqual([
-      `${join("objects", "code-block", "def.tsx")} -> ../../render/code-tokenizer`,
-    ]);
+    ).toEqual([]);
   });
 
   test("render/ does not import from editor/ (runtime or type)", () => {

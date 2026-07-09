@@ -299,20 +299,6 @@
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "codeBlockDef",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/code-block/def.tsx",
-              "symbol": "codeBlockDef"
-            }
-          }
-        },
-        {
           "insert": " — are hand-written first-class defs (sections take "
         },
         {
@@ -867,16 +853,7 @@
           }
         },
         {
-          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, code blocks tokenize it per "
-        },
-        {
-          "insert": "language",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", stickies render simple markdown (D18: H1–H3, bullets, bold — "
+          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1–H3, bullets, bold — "
         },
         {
           "insert": "objects/sticky/markdown.tsx",
@@ -925,7 +902,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/text-slots.ts (doc comments trimmed)\n/** Object-local rectangle (px, relative to the object's top-left corner). */\nexport interface LocalRect {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n}\n\nexport type TextPlacement =\n  | \"center\"\n  | \"below\"\n  | \"inset-body\"\n  | \"title-chip\"\n  | { rect: (object: InteractiveCanvasObject) => LocalRect };\n\n/** Applied identically to the at-rest text and the in-place editor (D14). */\nexport interface SlotTypography {\n  fontSizePx: number;\n  fontWeight: number;\n  /** CSS line-height value — unitless (\"1.2\") or px (\"36px\"). */\n  lineHeight: string;\n  textAlign: \"center\" | \"left\";\n  /** One fixed dark text color everywhere (D8) — presets pick their exact value. */\n  color: string;\n  /** Omit to inherit the canvas font (code block sets a mono stack). */\n  fontFamily?: string;\n}\n\nexport interface TextSlot {\n  placement: TextPlacement;\n  typography: SlotTypography;\n  /** \"chip-scale\" counter-scales when zoomed out (title-chip); everything else natural. */\n  zoom: \"natural\" | \"chip-scale\";\n  /** Optional compact cutoff for below-glyph labels. */\n  compactBelowHeightPx?: number;\n  verticalAlign: \"top\" | \"center\" | \"bottom\";\n  multiline: boolean;\n}"
+          "insert": "// packages/canvas/src/objects/text-slots.ts (doc comments trimmed)\n/** Object-local rectangle (px, relative to the object's top-left corner). */\nexport interface LocalRect {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n}\n\nexport type TextPlacement =\n  | \"center\"\n  | \"below\"\n  | \"inset-body\"\n  | \"title-chip\"\n  | { rect: (object: InteractiveCanvasObject) => LocalRect };\n\n/** Applied identically to the at-rest text and the in-place editor (D14). */\nexport interface SlotTypography {\n  fontSizePx: number;\n  fontWeight: number;\n  /** CSS line-height value — unitless (\"1.2\") or px (\"36px\"). */\n  lineHeight: string;\n  textAlign: \"center\" | \"left\";\n  /** One fixed dark text color everywhere (D8) — presets pick their exact value. */\n  color: string;\n  /** Omit to inherit the canvas font for monospace slots. */\n  fontFamily?: string;\n}\n\nexport interface TextSlot {\n  placement: TextPlacement;\n  typography: SlotTypography;\n  /** \"chip-scale\" counter-scales when zoomed out (title-chip); everything else natural. */\n  zoom: \"natural\" | \"chip-scale\";\n  /** Optional compact cutoff for below-glyph labels. */\n  compactBelowHeightPx?: number;\n  verticalAlign: \"top\" | \"center\" | \"bottom\";\n  multiline: boolean;\n}"
         }
       ],
       "children": []
@@ -1083,7 +1060,7 @@
           }
         },
         {
-          "insert": "); arrow-shape, chevron, and code-block declare "
+          "insert": "); arrow-shape and chevron declare "
         },
         {
           "insert": "rectTextSlot",
@@ -2205,10 +2182,6 @@
           {
             "path": "packages/canvas/src/objects/sticky/",
             "note": "stickyDef (inset-body slot, sticky color role) + markdown.tsx simple-markdown renderer (D18)"
-          },
-          {
-            "path": "packages/canvas/src/objects/code-block/",
-            "note": "codeBlockDef — tokenizes object.text per language via render/code-tokenizer.ts"
           },
           {
             "path": "packages/canvas/src/objects/connector/",

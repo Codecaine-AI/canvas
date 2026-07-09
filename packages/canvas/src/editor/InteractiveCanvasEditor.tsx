@@ -92,8 +92,8 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
 /**
  * Every other CanvasTool value (rectangle/process/decision/
  * document/database/pill/arrow-shape/predefined-process/
- * code-block/annotation) is armed exclusively via the Shapes panel
- * or the shape-search swap popover now — the dock's "shapes" button opens
+ * annotation) is armed exclusively via the Shapes panel or the shape-search
+ * swap popover now — the dock's "shapes" button opens
  * that surface (see ShapesPanel wiring below) rather than exposing 16
  * individual per-type buttons as the old toolbar did.
  */

@@ -15,7 +15,7 @@ export type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
  *
  * The sticky special kind only exposes the shared color flyout (no
  * shape-swap). Every other toolbar-carrying kind — the whole shape family
- * plus icon/code-block, which all share the shape toolbar — falls through to
+ * plus icon, which all share the shape toolbar — falls through to
  * SHAPE_FLYOUTS, mirroring the pre-move SHAPE_TOOLBAR.flyouts attachment in
  * objects/shapes/base.tsx. Every kind's `color` action opens the SAME
  * ColorPickerFlyout (P1, D12).

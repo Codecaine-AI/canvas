@@ -207,15 +207,6 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
         expected: 0,
       },
       {
-        label: "code block borderless chrome",
-        object: makeObject({
-          id: "bw-code",
-          type: "code-block",
-          style: { shape: "code-block" },
-        }),
-        expected: 0,
-      },
-      {
         label: "section solid frame",
         object: makeObject({ id: "bw-section", type: "section", style: { shape: "section" } }),
         expected: 2,
@@ -516,23 +507,6 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(label?.style.getPropertyValue("-webkit-box-orient")).toBe("vertical");
     expect(label?.style.textOverflow).toBe("ellipsis");
     expectEditorTypography(object);
-  });
-
-  it("code block: editor sits on the code text area (right of the gutter), mono", () => {
-    const object = makeObject({
-      id: "cb1",
-      type: "code-block",
-      text: "def f():\n    return 1",
-      geometry: { x: 300, y: 400, width: 320, height: 200 },
-      style: { shape: "code-block" },
-      language: "python",
-    });
-    const { editor, resolved } = expectEditorOnSlot(object);
-    // x = sampled code start; y = sampled top padding.
-    expect(resolved.rect).toEqual({ x: 66, y: 25, width: 320 - 66 - 16, height: 200 - 25 - 16 });
-    const textarea = editor.querySelector("textarea")!;
-    expect(textarea.style.fontFamily).toContain("monospace");
-    expect(textarea.value).toBe("def f():\n    return 1");
   });
 
   it("section: chip-exact input at the title-chip slot", () => {

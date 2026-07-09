@@ -42,6 +42,7 @@ describe("v2-flow canvas JSON", () => {
     for (const object of v2FlowDocument.objects) {
       counts.set(object.type, (counts.get(object.type) ?? 0) + 1);
     }
+    expect(v2FlowDocument.objects).toHaveLength(40);
     // Sections: page frame + Interview Inputs + General + Questions + Q1/Q2/QN
     // + Interview Flow + Memory Bank + Memory Actions + Structure
     // + Probing Response = 12
@@ -63,7 +64,6 @@ describe("v2-flow canvas JSON", () => {
     expect(glyphCounts.get("person")).toBe(2);
     // Predefined process: New/Update/Delete/No Change Memory + Get Next Question = 5
     expect(counts.get("predefined-process")).toBe(5);
-    expect(counts.get("code-block")).toBe(2);
     // Arrow shapes (chevrons): 3 left + 3 right = 6
     expect(counts.get("arrow-shape")).toBe(6);
     // Emphasis box modeled as rectangle/rounded-rect
@@ -122,13 +122,6 @@ describe("v2-flow canvas JSON", () => {
     for (const sticky of stickies) {
       expect(sticky.author).toBe("ford");
     }
-  });
-
-  it("code blocks specify a language for the tokenizer", () => {
-    const codeBlocks = v2FlowDocument.objects.filter((object) => object.type === "code-block");
-    expect(codeBlocks.length).toBe(2);
-    const languages = codeBlocks.map((block) => block.language).sort();
-    expect(languages).toEqual(["json", "python"]);
   });
 
   it("pills migrated to the bold white pick (FigJam white fill + gray border)", () => {

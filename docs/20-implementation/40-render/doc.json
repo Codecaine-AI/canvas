@@ -8,7 +8,7 @@
       "id": "b-render-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, selected connector chrome, AnchorDots, ConnectorDragPreview, the theme/FigJam token system, and the code-block tokenizer.",
+        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, selected connector chrome, AnchorDots, ConnectorDragPreview, the theme/FigJam token system.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
@@ -18,8 +18,7 @@
           "selected connector chrome",
           "AnchorDots",
           "ConnectorDragPreview",
-          "FigJam tokens",
-          "code tokenizer"
+          "FigJam tokens"
         ]
       },
       "children": [
@@ -43,8 +42,6 @@
         "b-render-theme-body-12",
         "b-render-figjam-tokens-body-13",
         "b-render-figjam-tokens-provenance-14",
-        "b-render-heading-tokenizer-15",
-        "b-render-tokenizer-body-16",
         "b-render-testing-17",
         "b-render-closing-18"
       ]
@@ -459,34 +456,10 @@
           }
         },
         {
-          "insert": " of every registered def. Code blocks tokenize their own "
+          "insert": " of every registered def. "
         },
         {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " inside the code-block def ("
-        },
-        {
-          "insert": "objects/code-block/def.tsx",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " calling "
-        },
-        {
-          "insert": "tokenizeCodeBlock",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " from render/code-tokenizer.ts). The board background stays a fixed light surface ("
+          "insert": "The board background stays a fixed light surface ("
         },
         {
           "insert": "#F5F5F5",
@@ -1041,127 +1014,6 @@
       ],
       "children": []
     },
-    "b-render-heading-tokenizer-15": {
-      "id": "b-render-heading-tokenizer-15",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Code tokenizer"
-        }
-      ],
-      "children": []
-    },
-    "b-render-tokenizer-body-16": {
-      "id": "b-render-tokenizer-body-16",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "code-tokenizer.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is a small, deliberately non-general syntax highlighter used only to render the in-canvas "
-        },
-        {
-          "insert": "code-block",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " object shape (not related to the docs system's own "
-        },
-        {
-          "insert": "code",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " block flavour). Its own header comment is explicit that it is \"intentionally NOT a real syntax-highlighting engine\" — no grammar, no AST, no language server — just regex rules tuned for the two languages the FigJam reference boards actually show. "
-        },
-        {
-          "insert": "tokenizeCodeLine",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts",
-              "symbol": "tokenizeCodeLine"
-            },
-            "code": true
-          }
-        },
-        {
-          "insert": " dispatches on a language tag: for "
-        },
-        {
-          "insert": "\"python\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " it recognizes comments, strings, a fixed keyword set, and capitalized identifiers (rendered as \"type\" color, mimicking class/type-name highlighting); for "
-        },
-        {
-          "insert": "\"json\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " it splits quoted-string spans from plain spans, coloring a quoted string followed by a colon as a key (\"type\" color) versus a value (\"string\" color), and recognizing "
-        },
-        {
-          "insert": "true",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "false",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "null",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " as keywords. Any other language falls back to untokenized plain text in the base foreground color. "
-        },
-        {
-          "insert": "tokenizeCodeBlock",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render/code-tokenizer.ts",
-              "symbol": "tokenizeCodeBlock"
-            },
-            "code": true
-          }
-        },
-        {
-          "insert": " (the function CanvasStage calls) splits a full code-block body on newlines and tokenizes each line independently. The tokenizer's core invariant — enforced by its test suite — is that concatenating a line's output tokens reproduces the original line exactly; it must never drop or reorder characters."
-        }
-      ],
-      "children": []
-    },
     "b-render-testing-17": {
       "id": "b-render-testing-17",
       "flavour": "testing",
@@ -1206,7 +1058,7 @@
           }
         },
         {
-          "insert": " covers selection-only anchor dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only zoom gating, and the cursor token ban. The grid tests stay focused on tier math and background CSS output; tokenizer tests stay focused on code-block token spans."
+          "insert": " covers selection-only anchor dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only zoom gating, and the cursor token ban. The grid tests stay focused on tier math and background CSS output."
         }
       ],
       "children": []

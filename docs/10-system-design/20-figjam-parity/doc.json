@@ -806,7 +806,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      uses the chat glyph after D21\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       uses the cpu glyph after D21\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      superseded the old code-block-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    uses the person glyph after D21\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
+          "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      uses the chat glyph after D21\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       uses the cpu glyph after D21\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    uses the person glyph after D21\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
         }
       ]
     },
@@ -845,25 +845,6 @@
         },
         {
           "insert": ": same tier mismatch pattern as database — our \"document\" is a Basic/Flowchart-tier shape (and mismapped to ENG_FILE's silhouette rather than DOCUMENT_SINGLE's, see Flowchart table), not a small file-icon chip."
-        }
-      ]
-    },
-    "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32": {
-      "id": "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32",
-      "flavour": "list-item",
-      "children": [],
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Code",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": our code-block is a full syntax-highlighted editor surface (Dracula theme, tokenizer, line numbers), not a small angle-bracket icon chip — same tier mismatch pattern."
         }
       ]
     },
@@ -3565,7 +3546,6 @@
         "b-figjam-parity-advanced-table-28",
         "b-figjam-parity-bold-database-our-database-is-a-true-30",
         "b-figjam-parity-bold-file-document-same-tier-mismatch-31",
-        "b-figjam-parity-bold-code-our-code-block-is-a-full-sy-32",
         "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
         "b-figjam-parity-missing-shape-specs-35",
         "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",
