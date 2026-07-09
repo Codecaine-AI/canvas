@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ColorPicker } from "../ColorPicker";
 import { EDITOR_STYLE } from "../editor-style";
-import { resolveSwatchPreview } from "../../../../palette";
+import { resolveSwatchPreview } from "../../../../theme/palette";
 import { CANVAS_COLORS } from "../../../../state/schema";
 
 afterEach(() => {

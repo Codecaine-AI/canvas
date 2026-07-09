@@ -12,7 +12,7 @@ import type {
 import { connectorBendSegments } from "./bend-editing";
 import { routeConnection } from "./routing";
 import { CONNECTOR_DASH_PATTERN_PX } from "./def";
-import { resolveConnectorStroke } from "../palette";
+import { resolveConnectorStroke } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 
 /** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */

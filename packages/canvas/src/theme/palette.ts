@@ -4,17 +4,17 @@
  * palette.ts — the canonical 10-pick ink/fill/wash color table (P0,
  * OBJECT-DEF-OVERHAUL.md §3.1/§3.2, D1/D2/D7/D12).
  *
- * A top-level leaf module (sibling of theme.ts), deliberately NOT inside
- * `state/` or `objects/`: `theme.ts` and `objects/` must both be able to
+ * A theme leaf module (sibling of tokens.ts), deliberately NOT inside
+ * `state/` or `objects/`: `tokens.ts` and `objects/` must both be able to
  * import it without a layering violation (theme must not import objects/,
  * and objects/ sits above theme) — see OBJECT-DEF-OVERHAUL.md §3.6. This
- * kills the sticky-hex duplication hazard flagged in theme.ts's
+ * kills the sticky-hex duplication hazard flagged in tokens.ts's
  * STICKY_TOKEN_FILL comment and gives every kind (shape / sticky / section /
  * connector) one shared source for "what does color X look like here".
  *
  * Import discipline (enforced by packages/canvas/src/__tests__/boundaries):
  * this file may import ONLY `state/schema/colors.ts` (the id vocabulary). It
- * must NOT import theme.ts or anything under objects/.
+ * must NOT import tokens.ts or anything under objects/.
  *
  * Model:
  *   - ink: line-safe stroke color. Picker swatches use ink, and shapes,
@@ -31,8 +31,8 @@
  * pastel band as its siblings; teal wash #EAFDFB is derived.
  */
 
-import type { CanvasColor, CanvasHue } from "./state/schema/colors";
-import { CANVAS_COLORS } from "./state/schema/colors";
+import type { CanvasColor, CanvasHue } from "../state/schema/colors";
+import { CANVAS_COLORS } from "../state/schema/colors";
 
 export type ShapeColors = {
   fill: string;

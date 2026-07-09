@@ -11,8 +11,8 @@ import {
   resolveShapeColors,
   resolveStickyFill,
   resolveSwatchPreview,
-} from "../palette";
-import type { CanvasColor } from "../palette";
+} from "../theme/palette";
+import type { CanvasColor } from "../theme/palette";
 
 const HEX_RE = /^#[0-9A-F]{6}$/i;
 

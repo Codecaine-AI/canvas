@@ -50,7 +50,7 @@
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { CANVAS_PALETTE } from "../../packages/canvas/src/palette";
+import { CANVAS_PALETTE } from "../../packages/canvas/src/theme/palette";
 import { reconcileSectionMembership } from "../../packages/canvas/src/state/section-membership";
 import type { InteractiveCanvasDocument } from "../../packages/canvas/src/state/schema";
 import type { CanvasColor, CanvasHue } from "../../packages/canvas/src/state/schema/colors";

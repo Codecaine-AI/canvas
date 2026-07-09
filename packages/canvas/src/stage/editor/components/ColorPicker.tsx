@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveSwatchPreview, type CanvasColor } from "../../../palette";
+import { resolveSwatchPreview, type CanvasColor } from "../../../theme/palette";
 import { CANVAS_COLORS } from "../../../state/schema";
 import { EDITOR_STYLE } from "./editor-style";
 

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../viewer/InteractiveCanvasViewer";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
-import { SHAPE_STROKE_WIDTH_PX } from "../../theme";
+import { SHAPE_STROKE_WIDTH_PX } from "../../theme/tokens";
 
 afterEach(() => {
   cleanup();

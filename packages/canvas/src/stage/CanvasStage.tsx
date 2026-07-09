@@ -17,7 +17,7 @@ import {
   type CanvasBounds,
 } from "../state/geometry";
 import { gridBackground } from "./grid";
-import { canvasSurfaceStyle } from "../theme";
+import { canvasSurfaceStyle } from "../theme/tokens";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionChrome } from "../connectors/Connector";

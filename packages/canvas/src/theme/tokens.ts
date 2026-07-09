@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * theme.ts — the ONE global theme module (co-location alignment, 2026-07-07;
+ * tokens.ts — the ONE global theme token module (co-location alignment, 2026-07-07;
  * SHRUNK by the P1 color cutover, OBJECT-DEF-OVERHAUL.md §3.6).
  *
  * The old color-resolution cascade (toneMix / canvasToneStyle /
@@ -21,7 +21,7 @@
  * pull from objects/ (objects sit above theme).
  */
 
-import type { CanvasObjectStyle } from "./state/schema";
+import type { CanvasObjectStyle } from "../state/schema";
 
 export const canvasSurfaceStyle = {
   "--interactive-canvas-grid": "color-mix(in oklab, var(--border) 52%, transparent)",

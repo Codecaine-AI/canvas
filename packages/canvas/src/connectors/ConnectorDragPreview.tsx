@@ -16,7 +16,7 @@ import {
 } from "./routing";
 import { worldToScreen, type ViewportState } from "../stage/viewport";
 import { ObjectShape } from "../stage/ObjectShape";
-import { resolveConnectorStroke } from "../palette";
+import { resolveConnectorStroke } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type {
   InteractiveCanvasConnection,

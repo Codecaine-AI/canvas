@@ -5,8 +5,8 @@ import {
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
 } from "../schema";
-import { resolveShapeColors, resolveStickyFill } from "../../palette";
-import { resolveObjectStrokeWidth } from "../../theme";
+import { resolveShapeColors, resolveStickyFill } from "../../theme/palette";
+import { resolveObjectStrokeWidth } from "../../theme/tokens";
 
 const v2FlowDocument = v2FlowCanvas as InteractiveCanvasDocument;
 

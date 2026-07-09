@@ -10,7 +10,7 @@ import {
   type ResolvedTextSlot,
   type TextSlot,
 } from "../../../../objects/text-slots";
-import { resolveSectionColors } from "../../../../palette";
+import { resolveSectionColors } from "../../../../theme/palette";
 import { FIRST_USE_COLORS } from "../../../../state/actions";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { MarkdownSlotTextEditor } from "./MarkdownSlotTextEditor";

@@ -20,7 +20,7 @@ import {
   type CanvasAction,
   type CanvasChangeSummary,
 } from "../../../../state/actions";
-import { resolveSwatchPreview } from "../../../../palette";
+import { resolveSwatchPreview } from "../../../../theme/palette";
 import { CANVAS_COLORS } from "../../../../state/schema";
 import type {
   CanvasColor,

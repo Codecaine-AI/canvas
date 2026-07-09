@@ -7,8 +7,8 @@ import { join, relative } from "node:path";
  * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
  * amended 2026-07-09 after nesting the display domain under stage/).
  *
- * Layering: theme.ts <- state <- connector routing/cascade <- objects
- * <- stage core|interaction <- stage/editor. theme is ONE file (src/theme.ts) since the theme dispersal.
+ * Layering: theme/ <- state <- connector routing/cascade <- objects
+ * <- stage core|interaction <- stage/editor. Theme is one directory since the theme dispersal.
  * ui/ is app-agnostic primitives + INTERFACE icons only and imports nothing
  * from the rest of src. objects/ holds only defs/data (no ui components, no
  * editor JSX). Nothing outside stage/editor/ imports stage/editor/. The BlockSuite
@@ -132,16 +132,16 @@ function violationsAcrossTree(
 }
 
 describe("import boundaries", () => {
-  test("palette.ts is a leaf (P0): imports only state/schema/colors, never theme.ts or objects/", () => {
-    // OBJECT-DEF-OVERHAUL.md §3.6: palette.ts is a top-level leaf sibling of
-    // theme.ts so both theme.ts and objects/ can import it without a
-    // layering violation. It must not import theme.ts (theme sits below it
+  test("theme/palette.ts is a leaf (P0): imports only state/schema/colors, never tokens.ts or objects/", () => {
+    // OBJECT-DEF-OVERHAUL.md §3.6: palette.ts is a theme leaf sibling of
+    // tokens.ts so both tokens.ts and objects/ can import it without a
+    // layering violation. It must not import tokens.ts (tokens sit below it
     // in this graph) or anything under objects/ (P0 is data-only; rewiring
     // consumers is P1).
-    const specifiers = importSpecifiers(join(SRC_ROOT, "palette.ts"), {
+    const specifiers = importSpecifiers(join(SRC_ROOT, "theme", "palette.ts"), {
       skipTypeOnly: false,
     }).filter((specifier) => specifier.startsWith("."));
-    expect(new Set(specifiers)).toEqual(new Set(["./state/schema/colors"]));
+    expect(new Set(specifiers)).toEqual(new Set(["../state/schema/colors"]));
   });
 
   test("state/schema/object-defaults.ts is a schema-vocabulary leaf (P4): imports only schema siblings", () => {
@@ -156,13 +156,13 @@ describe("import boundaries", () => {
     expect(specifiers.filter((specifier) => !specifier.startsWith("./"))).toEqual([]);
   });
 
-  test("theme.ts is layer 0: no runtime src imports (type-only state/schema imports allowed)", () => {
-    // Since the theme dispersal the theme is ONE file, src/theme.ts, and its
+  test("theme/tokens.ts is layer 0: no runtime src imports (type-only state/schema imports allowed)", () => {
+    // Since the theme move, the theme tokens live in src/theme/tokens.ts, and its
     // only src dependency is type-only state/schema imports (the style
     // unions). The old SECTION_CAPTURE_OVERLAP_THRESHOLD re-export is gone —
     // importers pull it from state/geometry directly.
     expect(
-      importSpecifiers(join(SRC_ROOT, "theme.ts"), { skipTypeOnly: true }).filter((specifier) =>
+      importSpecifiers(join(SRC_ROOT, "theme", "tokens.ts"), { skipTypeOnly: true }).filter((specifier) =>
         specifier.startsWith("."),
       ),
     ).toEqual([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveSectionColors } from "../../palette";
+import { resolveSectionColors } from "../../theme/palette";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
 import { CONNECTOR_DASH_PATTERN_PX } from "../../connectors/def";
 import { BBOX_OUTLINE } from "../geometry";

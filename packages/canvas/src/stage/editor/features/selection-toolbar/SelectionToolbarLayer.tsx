@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
 import { resolveConnectorControlState } from "./connector-control-state";
 import { colorKindForType, FIRST_USE_COLORS, type CanvasAction, type CanvasTool } from "../../../../state/actions";
-import { resolveSwatchPreview } from "../../../../palette";
+import { resolveSwatchPreview } from "../../../../theme/palette";
 import { positionFlyoutCenteredOnTrigger, type Rect } from "./position";
 import type { SelectionToolbarApi } from "./use-selection-toolbar";
 import type { InteractiveCanvasConnection } from "../../../../state/schema";

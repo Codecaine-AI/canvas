@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveObjectStrokeWidth } from "../../theme";
+import { resolveObjectStrokeWidth } from "../../theme/tokens";
 import { objectTypeDefaults } from "../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../geometry";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";

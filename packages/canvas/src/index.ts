@@ -9,11 +9,11 @@ export {
   resolveShapeColors,
   resolveStickyFill,
   resolveSwatchPreview,
-} from "./palette";
-export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./palette";
+} from "./theme/palette";
+export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./theme/palette";
 export * from "./stage/CanvasStage";
 export * from "./interaction/clipboard";
-export * from "./theme";
+export * from "./theme/tokens";
 export * from "./state/geometry";
 export * from "./interaction/interaction";
 export {

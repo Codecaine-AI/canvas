@@ -1,8 +1,8 @@
 "use client";
 
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../palette";
-import { resolveObjectStrokeWidth } from "../theme";
+import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../theme/palette";
+import { resolveObjectStrokeWidth } from "../theme/tokens";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type { InteractiveCanvasObject } from "../state/schema";
 import type {

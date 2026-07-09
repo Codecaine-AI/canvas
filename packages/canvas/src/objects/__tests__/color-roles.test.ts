@@ -11,7 +11,7 @@ import {
   resolveSectionColors,
   resolveShapeColors,
   resolveStickyFill,
-} from "../../palette";
+} from "../../theme/palette";
 
 /**
  * P1 role resolution (OBJECT-DEF-OVERHAUL.md §3.2/§3.5, D8/D12/D17): one

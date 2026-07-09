@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { resolveSectionColors } from "../../palette";
+import { resolveSectionColors } from "../../theme/palette";
 import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
 import type { CanvasBounds } from "../../state/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
