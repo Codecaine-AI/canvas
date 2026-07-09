@@ -51,7 +51,7 @@ import { pillDef } from "./shapes/misc/pill";
  * generated from a ShapeDef via `objects/shapes/base.tsx`.
  *
  * Every field is CONSUMED from the registry: `render`, `css`, the className
- * carried by the render path, `handles`/`dragCapture` (interaction/core.ts,
+ * carried by the stage path, `handles`/`dragCapture` (stage/editor/pipeline/core.ts,
  * hit-testing.ts, gestures/move.ts, SelectionBox — cf3aec8), `toolbar` (the
  * selection-toolbar layer's use-selection-toolbar.ts — 4c0d62d),
  * `textSlot`/`textEditing` (P2: at-rest renderer + in-place editor overlay),
@@ -65,7 +65,7 @@ import { pillDef } from "./shapes/misc/pill";
  * below — ObjectDef carries no connector stub fields.
  */
 
-/** Props every object renderer receives — mirrors render/ObjectShape's public props. */
+/** Props every object renderer receives — mirrors stage/ObjectShape's public props. */
 export interface ObjectRenderProps {
   object: InteractiveCanvasObject;
   selected: boolean;
@@ -116,7 +116,7 @@ export interface TextEditingSpec {
  * alignment): each def owns its ordered control list and nothing else. Specs
  * are ICON-FREE and COMPONENT-FREE — the editor's SelectionToolbar host
  * resolves each action id to its icon, and the flyout components those
- * controls open live in editor/features/selection-toolbar/flyouts/ (keyed by
+ * controls open live in stage/editor/features/selection-toolbar/flyouts/ (keyed by
  * def kind + action id), so objects/ never imports interface JSX.
  */
 export interface ToolbarControlSpec {
@@ -161,7 +161,7 @@ export type ObjectButtonBorderPolicy = "painted" | "suppressed";
 export interface ObjectDef {
   /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */
   kind: string;
-  /** The object's world-layer renderer (receives the same props as render/ObjectShape). */
+  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */
   render: ComponentType<ObjectRenderProps>;
   /**
    * This kind's global-CSS rules, moved verbatim from CanvasStage's embedded
@@ -213,7 +213,7 @@ export interface ObjectDef {
  * therefore honest and small: the selection toolbar it carries, the palette
  * role its `connection.color` pick resolves through, and where its label
  * lives (rendered AND edited at routeConnection().labelPoint — see
- * editor/features/text-editing/use-text-editing.ts).
+ * stage/editor/features/text-editing/use-text-editing.ts).
  */
 export interface ConnectorDef {
   kind: "connector";
@@ -240,7 +240,7 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  * through a registered def; the `undefined` fallback in `objectDefFor` only
  * fires for a render shape with no registered def (today solely an explicit
  * `style.shape: "section"` on a non-section object), reproducing the old
- * generic default chrome (see render/ObjectShape.tsx).
+ * generic default chrome (see stage/ObjectShape.tsx).
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
  *  - `section` is dispatched on `object.type` (the ONLY type the legacy

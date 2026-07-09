@@ -15,8 +15,8 @@ import {
   routeConnectionToPoint,
   type Anchor,
 } from "./routing";
-import { worldToScreen, type ViewportState } from "../render/viewport";
-import { ObjectShape } from "../render/ObjectShape";
+import { worldToScreen, type ViewportState } from "../stage/viewport";
+import { ObjectShape } from "../stage/ObjectShape";
 import { resolveConnectorStroke } from "../palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type {
@@ -24,7 +24,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
-/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
+/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
 const CONNECTOR_PREVIEW_STROKE_WIDTH_PX = 4;

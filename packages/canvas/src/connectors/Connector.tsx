@@ -17,7 +17,7 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 
 /** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
 const CONNECTOR_STROKE_WIDTH_PX = 4;
-/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (render must not import editor/components/editor-style). */
+/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 
 const CONNECTION_HIT_WIDTH = 14;

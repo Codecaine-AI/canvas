@@ -404,7 +404,7 @@ export function rectTextSlot(
 // ---------------------------------------------------------------------------
 // Resolution — the ONE rect/typography source both the at-rest renderer
 // (objects/object-chrome.tsx ObjectSlotText) and the in-place editor
-// (editor/features/text-editing) consume.
+// (stage/editor/features/text-editing) consume.
 // ---------------------------------------------------------------------------
 
 export function resolveTextSlot(

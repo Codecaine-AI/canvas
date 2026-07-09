@@ -34,7 +34,7 @@ describe("shape-catalog data shape", () => {
 
   // Entries are pure data since the co-location alignment — the preview
   // components live editor-side; their coverage is asserted in
-  // editor/components/__tests__/shape-previews.test.tsx.
+  // stage/editor/components/__tests__/shape-previews.test.tsx.
   it("every entry is component-free data with a non-empty label", () => {
     for (const entry of SHAPE_CATALOG_ENTRIES) {
       expect("Icon" in entry).toBe(false);

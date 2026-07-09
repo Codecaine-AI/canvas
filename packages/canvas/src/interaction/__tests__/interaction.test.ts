@@ -1,20 +1,19 @@
 import { describe, expect, it } from "bun:test";
 import type { CanvasAction, CanvasSelection } from "../../state/actions";
+import { cancelInteraction, stepInteraction } from "../../stage/editor/pipeline/core";
 import {
   applyResizeHandle,
-  cancelInteraction,
   hitTestObjects,
   IDLE_INTERACTION_STATE,
   MIN_DIRECT_RESIZE_SIZE,
   RESIZE_HANDLES,
   selectionBounds,
-  stepInteraction,
   type CanvasPointerEvent,
   type InteractionContext,
   type InteractionState,
   type ResizeHandle,
 } from "../interaction";
-import { SELECTION_DRAG_KINDS } from "../../editor/features/drag-pipeline/use-interaction-pipeline";
+import { SELECTION_DRAG_KINDS } from "../../stage/editor/pipeline/use-interaction-pipeline";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,

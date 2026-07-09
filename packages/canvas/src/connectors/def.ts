@@ -25,7 +25,7 @@ export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
  * than individual items. Style controls are flyout-backed, while Text opens
  * the routed-midpoint label editor directly. DATA-ONLY since the co-location
  * alignment: the flyout components live in
- * editor/features/selection-toolbar/flyouts/connector-flyouts.tsx (keyed by
+ * stage/editor/features/selection-toolbar/flyouts/connector-flyouts.tsx (keyed by
  * def kind + action id).
  */
 const CONNECTOR_TOOLBAR: ToolbarSpec = {

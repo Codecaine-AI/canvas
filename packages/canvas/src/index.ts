@@ -11,15 +11,16 @@ export {
   resolveSwatchPreview,
 } from "./palette";
 export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./palette";
-export * from "./render/CanvasStage";
+export * from "./stage/CanvasStage";
 export * from "./interaction/clipboard";
 export * from "./theme";
 export * from "./state/geometry";
 export * from "./interaction/interaction";
+export { cancelInteraction, stepInteraction } from "./stage/editor/pipeline/core";
 export * from "./connectors/routing";
 export * from "./interaction/snapping";
-export * from "./editor/InteractiveCanvasEditor";
-export * from "./editor/InteractiveCanvasViewer";
+export * from "./stage/editor/InteractiveCanvasEditor";
+export * from "./stage/viewer/InteractiveCanvasViewer";
 export * from "./state/schema";
 export { OBJECT_TYPE_DEFAULTS, objectTypeDefaults } from "./state/schema/object-defaults";
 export { objectDefForType } from "./objects/object-def";
@@ -32,5 +33,5 @@ export {
   textPlacementName,
 } from "./objects/text-slots";
 export type { TextPlacement } from "./objects/text-slots";
-export * from "./editor/use-canvas-viewport";
-export * from "./render/viewport";
+export * from "./stage/editor/use-canvas-viewport";
+export * from "./stage/viewport";

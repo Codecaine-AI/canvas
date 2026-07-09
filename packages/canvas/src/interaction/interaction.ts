@@ -10,19 +10,19 @@
  * (marquee rect, snap guides, spacing hints, drop target). No DOM access —
  * everything is testable with plain objects.
  *
- * This module is the stable entry point (barrel) for the machine; the
+ * This module is the stable entry point (barrel) for shared interaction
+ * vocabulary and helpers; the editor pipeline owns the dispatcher assembly.
+ * The
  * implementation is split across:
  *  - ./types           — pointer event/hit model, resize handles, thresholds
  *  - ./gesture-state   — gesture union, overlay, context/result types
- *  - ./core            — stepInteraction dispatcher + idle/press-pending
- *                        routers + cancelInteraction
+ *  - ../stage/editor/pipeline/core
+ *                      — stepInteraction dispatcher + idle/press-pending
+ *                        routers + cancelInteraction, surfaced by src/index.ts
  *  - ./gestures/*      — move, resize, marquee, place, connectors steppers
  *  - ./hit-testing     — document hit-tests + snap-candidate gathering
  *  - ./frame-coalescer — rAF coalescing utility for host adapters
- * The export surface here is unchanged from the pre-split single-file module;
- * consumers (editor/, render/, tests) keep importing from this path.
  */
-export { cancelInteraction, stepInteraction } from "./core";
 export {
   RESIZE_HANDLES,
   type CanvasHit,

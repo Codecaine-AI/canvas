@@ -14,8 +14,8 @@ import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { InteractionFeedbackScreen } from "./editor/features/drag-pipeline/InteractionFeedback";
-import { CanvasStage, type CanvasStageProps } from "./render/CanvasStage";
+import { InteractionFeedbackScreen } from "./stage/editor/pipeline/InteractionFeedback";
+import { CanvasStage, type CanvasStageProps } from "./stage/CanvasStage";
 import { defaultGeometryFor, shapeForType } from "./state/schema/object-defaults";
 import {
   validateInteractiveCanvasDocument,

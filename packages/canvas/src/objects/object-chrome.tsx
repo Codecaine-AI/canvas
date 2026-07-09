@@ -17,7 +17,7 @@ import { OBJECT_TEXT_COLOR, resolveTextSlot, slotLineHeightPx, textPlacementName
  * Shared button chrome for registry-driven object renderers: the outer
  * `<button>` (positioning style, docs-targeting/data attributes, select and
  * context-menu handlers). Extracted from
- * render/ObjectShape's original generic branch so per-kind defs compose it
+ * stage/ObjectShape's original generic branch so per-kind defs compose it
  * instead of re-deriving it; ObjectShape's own generic fallback (for render
  * shapes with no registered def) now composes this same shared code too —
  * there is no separate inline copy left to keep in sync.
@@ -192,7 +192,7 @@ export function textSlotClampLineCount(rectHeightPx: number, lineHeightPx: numbe
 /**
  * At-rest slot text (D3/D6): renders `object.text` absolutely positioned at
  * the def's resolved text-slot rect with the slot's typography. The in-place
- * editor (editor/features/text-editing) positions and styles itself from the
+ * editor (stage/editor/features/text-editing) positions and styles itself from the
  * SAME resolved slot, so editing is WYSIWYG for every kind that renders
  * through this component (D14).
  *

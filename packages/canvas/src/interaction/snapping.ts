@@ -5,8 +5,8 @@ import {
   type DistributionGuideSegment,
 } from "./snap-distribution";
 
-// Re-exported for render/overlays: the MPL-sourced implementation lives in
-// interaction/snap-distribution.ts, so render code keeps importing the visual
+// Re-exported for stage/overlays: the MPL-sourced implementation lives in
+// interaction/snap-distribution.ts, so stage code keeps importing the visual
 // constants from this local snapping boundary.
 export {
   DISTRIBUTION_GUIDE_COLOR,

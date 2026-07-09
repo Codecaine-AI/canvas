@@ -15,7 +15,7 @@ import type {
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../state/schema";
-import type { ViewportState } from "../render/viewport";
+import type { ViewportState } from "../stage/viewport";
 import type {
   ConnectorBendDragGesture,
   ConnectorCreateGesture,

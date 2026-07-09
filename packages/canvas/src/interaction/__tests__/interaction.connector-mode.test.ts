@@ -5,10 +5,9 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../state/schema";
+import { cancelInteraction, stepInteraction } from "../../stage/editor/pipeline/core";
 import {
-  cancelInteraction,
   IDLE_INTERACTION_STATE,
-  stepInteraction,
   type CanvasPointerEvent,
   type InteractionContext,
   type InteractionResult,

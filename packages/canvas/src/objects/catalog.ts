@@ -14,7 +14,7 @@
  * variant, not the def; everything else reads the def's label verbatim.
  *
  * Entries are pure data (no JSX): the preview SVGs live in
- * editor/components/shape-previews.tsx (interface JSX belongs to the editor),
+ * stage/editor/components/shape-previews.tsx (interface JSX belongs to the editor),
  * mapped by entry id / glyph id.
  *
  * Wave C structure preserved: exactly 3 sections mirroring FigJam's actual

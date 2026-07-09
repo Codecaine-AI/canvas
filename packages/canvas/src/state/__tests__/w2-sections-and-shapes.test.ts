@@ -1,14 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import v2FlowElementsDocumentJson from "../../../../../canvases/v2-flow-elements.canvas.json";
+import { cancelInteraction, stepInteraction } from "../../stage/editor/pipeline/core";
 import {
   IDLE_INTERACTION_STATE,
-  cancelInteraction,
-  stepInteraction,
   type CanvasPointerEvent,
   type InteractionContext,
   type InteractionState,
 } from "../../interaction/interaction";
-import { renderOrderedObjects } from "../../render/CanvasStage";
+import { renderOrderedObjects } from "../../stage/CanvasStage";
 import {
   SECTION_CAPTURE_OVERLAP_THRESHOLD,
   SECTION_TITLE_CLEARANCE_PX,

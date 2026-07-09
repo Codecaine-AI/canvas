@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { resolveObjectRoleColors } from "../object-chrome";
 import { OBJECT_DEFS, objectDefForType } from "../object-def";
 import { OBJECT_TEXT_COLOR } from "../text-slots";
-import { ObjectShape } from "../../render/ObjectShape";
+import { ObjectShape } from "../../stage/ObjectShape";
 import type { CanvasObjectColor, InteractiveCanvasObject } from "../../state/schema";
 import {
   resolveConnectorStroke,

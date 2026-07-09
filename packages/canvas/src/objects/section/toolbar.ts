@@ -9,7 +9,7 @@ import type { ToolbarSpec } from "../object-def";
  * boundaries, not individual items.
  *
  * DATA-ONLY since the co-location alignment: the flyout components these
- * controls open live in editor/features/selection-toolbar/flyouts/
+ * controls open live in stage/editor/features/selection-toolbar/flyouts/
  * section-flyouts.tsx (keyed by def kind + action id).
  */
 export const SECTION_TOOLBAR: ToolbarSpec = {

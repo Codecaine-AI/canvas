@@ -25,7 +25,7 @@ export type {
   CanvasShapeDirection,
   InteractiveCanvasObjectType,
 } from "./schema/object-types";
-export { CANVAS_COLORS, CANVAS_HUES, isCanvasColor } from "./schema/colors.ts";
+export { CANVAS_COLORS, CANVAS_HUES, isCanvasColor } from "./schema/colors";
 export type { CanvasColor, CanvasHue } from "./schema/colors";
 export type { CanvasObjectStyle, CanvasSectionStrokeStyle } from "./schema/style";
 export type { CanvasGeometry, InteractiveCanvasObject } from "./schema/objects";
@@ -57,4 +57,4 @@ export {
   validateInteractiveCanvasDocument,
   type CanvasValidationIssue,
   type CanvasValidationResult,
-} from "./schema/validate.ts";
+} from "./schema/validate";

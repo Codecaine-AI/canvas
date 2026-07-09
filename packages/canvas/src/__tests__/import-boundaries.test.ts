@@ -5,21 +5,21 @@ import { join, relative } from "node:path";
 
 /**
  * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
- * amended 2026-07-07 after the co-location alignment).
+ * amended 2026-07-09 after nesting the display domain under stage/).
  *
  * Layering: theme.ts <- state <- connector routing/cascade <- objects
- * <- render|interaction <- editor. theme is ONE file (src/theme.ts) since the theme dispersal.
+ * <- stage core|interaction <- stage/editor. theme is ONE file (src/theme.ts) since the theme dispersal.
  * ui/ is app-agnostic primitives + INTERFACE icons only and imports nothing
  * from the rest of src. objects/ holds only defs/data (no ui components, no
- * editor JSX). Nothing outside editor/ imports editor/. The BlockSuite
+ * editor JSX). Nothing outside stage/editor/ imports stage/editor/. The BlockSuite
  * MPL-2.0 pathfinding files live under connectors/pathfinding/, with the
  * distribution snap port temporarily under interaction/snap-distribution.ts.
  *
  * Known, deliberate exceptions (encoded below so drift is loud):
  *  - interaction/gesture-state.ts may TYPE-import ViewportState from
- *    render/viewport (never runtime code) while the gesture machine is split
+ *    stage/viewport (never runtime code) while the gesture machine is split
  *    away from the lower interaction kernel.
- *  - No objects/ -> render/ exceptions are permitted; the corresponding test
+ *  - No objects/ -> stage/ exceptions are permitted; the corresponding test
  *    asserts the allowed-violations list stays empty.
  *
  * The checks are static: they scan import/export specifiers, not runtime
@@ -171,11 +171,11 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("state/ does not import objects/, render/, interaction/, editor/, or ui/", () => {
+  test("state/ does not import objects/, stage/, interaction/, or ui/", () => {
     expect(
       violations(
         join(SRC_ROOT, "state"),
-        /^(\.\.\/)+(objects|render|interaction|editor|ui)(\/|$)/,
+        /^(\.\.\/)+(objects|stage|interaction|ui)(\/|$)/,
       ),
     ).toEqual([]);
   });
@@ -186,7 +186,7 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("connector routing/cascade helpers import only state/, pathfinding/, and objects/geometry (never def components, render/, editor/, interaction/, ui/, or theme)", () => {
+  test("connector routing/cascade helpers import only state/, pathfinding/, and objects/geometry (never def components, stage/, interaction/, ui/, or theme)", () => {
     // P3 (OBJECT-DEF-OVERHAUL.md §3.6, D4): the defs own their outline
     // geometry, so connector routing consumes the pure, React-free
     // objects/geometry.ts. The connection cascade and the main router both
@@ -201,7 +201,7 @@ describe("import boundaries", () => {
           join("connectors", "connection-cascade.ts"),
           join("connectors", "bend-editing.ts"),
         ],
-        /^(\.\.\/)+(objects|render|interaction|editor|ui)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
+        /^(\.\.\/)+(objects|stage|interaction|ui)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
       ),
     ).toEqual([
       `${join("connectors", "routing.ts")} -> ../objects/geometry`,
@@ -228,9 +228,9 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("objects/ does not import from editor/ (runtime or type)", () => {
+  test("objects/ does not import from stage/editor/ (runtime or type)", () => {
     expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+editor(\/|$)/),
+      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+stage\/editor(\/|$)/),
     ).toEqual([]);
   });
 
@@ -249,59 +249,66 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("objects/ does not import from render/ (zero permitted exceptions)", () => {
+  test("objects/ does not import from stage/ (zero permitted exceptions)", () => {
     expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+render(\/|$)/),
+      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+stage(\/|$)/),
     ).toEqual([]);
   });
 
-  test("render/ does not import from editor/ (runtime or type)", () => {
+  test("stage core does not import from stage/editor/ (runtime or type)", () => {
     expect(
-      violations(join(SRC_ROOT, "render"), /^(\.\.\/)+editor(\/|$)/),
+      violationsAcrossTree(
+        /^(\.\/|\.\.\/)+editor(\/|$)|(^|\/)stage\/editor\//,
+        (relPath) =>
+          !relPath.startsWith("stage/") ||
+          relPath.startsWith("stage/editor/") ||
+          relPath.startsWith("stage/viewer/"),
+      ),
     ).toEqual([]);
   });
 
-  test("interaction/ does not import from editor/", () => {
+  test("interaction/ does not import from stage/editor/", () => {
     expect(
-      violations(join(SRC_ROOT, "interaction"), /^\.\.\/editor(\/|$)/),
+      violations(join(SRC_ROOT, "interaction"), /^\.\.\/stage\/editor(\/|$)/),
     ).toEqual([]);
   });
 
-  test("interaction/ does not runtime-import from render/ (type-only ViewportState from render/viewport allowed)", () => {
+  test("interaction/ does not runtime-import from stage/ (type-only ViewportState from stage/viewport allowed)", () => {
     expect(
-      violations(join(SRC_ROOT, "interaction"), /^\.\.\/render(\/|$)/, {
+      violations(join(SRC_ROOT, "interaction"), /^\.\.\/stage(\/|$)/, {
         skipTypeOnly: true,
       }),
     ).toEqual([]);
   });
 
-  test("interaction/types.ts is kernel vocabulary with no render/ or connectors/ imports", () => {
+  test("interaction/types.ts is kernel vocabulary with no stage/ or connectors/ imports", () => {
     expect(
       importSpecifiers(join(SRC_ROOT, "interaction", "types.ts")).filter((specifier) =>
-        /^(\.\.\/)+(render|connectors)(\/|$)/.test(specifier),
+        /^(\.\.\/)+(stage|connectors)(\/|$)/.test(specifier),
       ),
     ).toEqual([]);
   });
 
   test("ui/ imports nothing from the rest of src (app-agnostic primitives + interface icons only)", () => {
     // Strengthened after the co-location alignment: ColorPalettePopover
-    // (which consumed theme + editor styling) moved to editor/components,
+    // (which consumed theme + editor styling) moved to stage/editor/components,
     // and the canvas glyph registry moved to objects/shapes/icon/ — what
     // remains in ui/ is fully self-contained.
     expect(
       violations(
         join(SRC_ROOT, "ui"),
-        /^(\.\.\/)+(objects|render|interaction|editor|state|connectors)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
+        /^(\.\.\/)+(objects|stage|interaction|state|connectors)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
       ),
     ).toEqual([]);
   });
 
-  test("nothing outside editor/ imports editor/ (root index.ts is the composition entry and is exempt)", () => {
+  test("nothing outside stage/editor/ imports stage/editor/ (root index.ts is the composition entry and is exempt)", () => {
     expect(
       violationsAcrossTree(
-        /(^|\/)editor\//,
+        /(^|\/)stage\/editor\/|^(\.\/|\.\.\/)+editor\//,
         (relPath) =>
-          relPath.split("/")[0] === "editor" ||
+          relPath.startsWith("stage/editor/") ||
+          relPath.startsWith("stage/viewer/") ||
           relPath === "index.ts" ||
           // DOM-equivalence composition harness, queued for retirement.
           relPath === "zz-dom-fixtures.ts",
@@ -313,7 +320,7 @@ describe("import boundaries", () => {
     expect(
       violations(
         join(SRC_ROOT, "connectors", "pathfinding"),
-        /^(\.\.\/)+(theme|state|objects|interaction|render|editor|ui|fixtures)(\/|$)/,
+        /^(\.\.\/)+(theme|state|objects|interaction|stage|ui|fixtures)(\/|$)/,
       ),
     ).toEqual([]);
   });

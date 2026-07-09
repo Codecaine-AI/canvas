@@ -47,7 +47,7 @@ export type InteractiveCanvasObject = {
   };
   /**
    * `type: "section"` only (W2). `locked` is a two-mode section lock,
-   * enforced in interaction/core.ts — `"background"` locks the section frame
+   * enforced in stage/editor/pipeline/core.ts — `"background"` locks the section frame
    * only (children stay movable); `"all"` also locks every descendant object
    * against drag/resize. (The old section `tint` field died in the P1 color
    * cutover — sections color through `color` like every other kind.)
