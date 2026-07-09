@@ -780,7 +780,7 @@
           }
         },
         {
-          "insert": "-colored) with no per-connection choice of cap style. Creation uses selection-only off-bounds anchor dots, supports both click and drag quick-connect, and previews with a routed connector plus source-shaped ghost. At rest, connector labels are 16px/700 midpoint chips."
+          "insert": "-colored) with no per-connection choice of cap style. Creation now has two surfaces: select mode keeps selection-only off-bounds anchor dots, while the dedicated Connector Mode hover-reveals dots on any object, ignores the zoom gate, supports body-drag with auto-picked source anchors, and stays sticky for chained creation. This closes the FigJam-parity gap for FigJam's connector tool behavior. At rest, connector labels are 16px/700 midpoint chips."
         }
       ]
     },

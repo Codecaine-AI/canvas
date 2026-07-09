@@ -266,7 +266,31 @@
           }
         },
         {
-          "insert": " draws selected-object connection ports in the untransformed overlay; and "
+          "insert": " draws selection-driven ports in select mode and hover-driven ports in Connector Mode via "
+        },
+        {
+          "insert": "hoveredObjectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "HoverHighlight",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/overlays/HoverHighlight.tsx",
+              "symbol": "HoverHighlight",
+              "label": "HoverHighlight"
+            }
+          }
+        },
+        {
+          "insert": " draws the connector-tool hover outline in the untransformed overlay; and "
         },
         {
           "insert": "Marquee",
@@ -347,7 +371,7 @@
           }
         },
         {
-          "insert": " paints selection box, anchor dots, marquee/place/guides/spacing, hover "
+          "insert": " paints selection box, anchor dots, hover highlight, marquee/place/guides/spacing, hover "
         },
         {
           "insert": "ConnectorDragPreview",
@@ -1206,7 +1230,7 @@
           }
         },
         {
-          "insert": " covers selection-only anchor dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only zoom gating, and the cursor token ban. The grid tests stay focused on tier math and background CSS output; tokenizer tests stay focused on code-block token spans."
+          "insert": " covers select-mode anchor dots, hover-driven Connector Mode dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only select-mode zoom gating, Connector Mode gate bypass, and the cursor token ban. The grid tests stay focused on tier math and background CSS output; tokenizer tests stay focused on code-block token spans."
         }
       ],
       "children": []
@@ -1457,7 +1481,7 @@
           }
         },
         {
-          "insert": " is selection-only and editor/select-tool-only. Each dot has a 28px screen-space hit target with a 10px resting dot, is placed from "
+          "insert": " has two callers: selected-object ports in select mode, and hovered/drag-source ports in Connector Mode. Each dot has a 28px screen-space hit target with a 10px resting dot, is placed from "
         },
         {
           "insert": "connectionBoundsForObject",
@@ -1485,7 +1509,7 @@
           }
         },
         {
-          "insert": " screen pixels outward from the top/bottom/left/right midpoint. The 0.5 zoom gate controls visibility only: below "
+          "insert": " screen pixels outward from the top/bottom/left/right midpoint. The 0.5 zoom gate remains the select-mode visibility gate: below "
         },
         {
           "insert": "ANCHOR_DOTS_MIN_ZOOM",
@@ -1499,7 +1523,16 @@
           }
         },
         {
-          "insert": " the dots render at opacity 0 but keep their interaction envelope. Hover or press expands the affordance to the 28px arrow button; press fills it selection blue with white arrow strokes and clears the hover quick-connect preview state."
+          "insert": " the dots render at opacity 0 but keep their interaction envelope. Connector Mode passes "
+        },
+        {
+          "insert": "bypassZoomGate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so hover-revealed ports stay visible at any zoom. Hover or press expands the affordance to the 28px arrow button; press fills it selection blue with white arrow strokes and clears the hover quick-connect preview state."
         }
       ],
       "children": []

@@ -688,7 +688,7 @@
           }
         },
         {
-          "insert": " — this is the dock spec's \"modal relinquishing\" rule (fj-053 onward): no dock button shows active/violet while the Shapes panel or another surface owns focus. The consuming editor must derive this prop from the current interaction mode, not from \"last tool used\"; the dock itself must never track sticky/last-selected state internally. Separately, "
+          "insert": " — this is the dock spec's \"modal relinquishing\" rule (fj-053 onward): no dock button shows active/violet while the Shapes panel or another surface owns focus. The consuming editor must derive this prop from the current interaction mode, not from \"last tool used\"; connector is one of the reducer tools the dock reflects. The dock itself must never track sticky/last-selected state internally. Separately, "
         },
         {
           "insert": "onSelectTool(tool)",
@@ -1492,7 +1492,7 @@
           }
         },
         {
-          "insert": " will arm the real connector tool automatically once connector mode lands. Constraint: "
+          "insert": " arms the dedicated Connector Mode tool, and the button lights violet-active like any other armed tool. Constraint: "
         },
         {
           "insert": "Cmd+A",

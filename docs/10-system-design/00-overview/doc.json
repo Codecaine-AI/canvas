@@ -439,7 +439,7 @@
           }
         },
         {
-          "insert": " holds FigJam-parity UI chrome — dock, selection toolbar, color palette, shapes panel — standalone components wired into the live editor."
+          "insert": " holds FigJam-parity UI chrome — dock, first-class connector tool mode, selection toolbar, color palette, shapes panel — standalone components wired into the live editor."
         }
       ],
       "children": []
@@ -985,7 +985,7 @@
           }
         },
         {
-          "insert": " — FigJam-parity UI chrome: dock, toolbar, palette, shapes panel."
+          "insert": " — FigJam-parity UI chrome: dock, first-class connector tool mode, toolbar, palette, shapes panel."
         }
       ],
       "children": []
