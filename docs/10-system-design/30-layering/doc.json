@@ -376,7 +376,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CanvasStage"
             }
           }
@@ -692,7 +692,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/connectors.ts"
+              "path": "packages/canvas/src/connectors/gestures.ts"
             }
           }
         },
@@ -716,7 +716,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/move.ts",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
               "symbol": "stepFromMove"
             }
           }

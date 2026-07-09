@@ -257,7 +257,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -487,7 +487,7 @@
           }
         },
         {
-          "insert": " 0.60 — raised from 0.53 in W5 — in connection-overlay.ts's "
+          "insert": " 0.60 — raised from 0.53 in W5 — in connection-cascade.ts's "
         },
         {
           "insert": "ARROW_SHAPE_GEOMETRY",
@@ -495,7 +495,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -1053,7 +1053,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "outlineShapeFor"
             }
           }
@@ -1745,7 +1745,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -1782,7 +1782,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "chevronPoints"
             }
           }
@@ -2706,7 +2706,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
               "symbol": "EDITOR_STYLE"
             }
           }
@@ -2720,7 +2720,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -2776,7 +2776,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "connectorDef"
             }
           }
@@ -2836,7 +2836,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "CANVAS_PALETTE"
             }
           }
@@ -2987,12 +2987,12 @@
           "insert": " hits are unrelated toolbar-icon and CSS-chevron animations in the chrome layer, not object rendering). This is a deliberate, documented gap: "
         },
         {
-          "insert": "connection-overlay.ts",
+          "insert": "connection-cascade.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts"
+              "path": "packages/canvas/src/connectors/connection-cascade.ts"
             }
           }
         },
@@ -3050,7 +3050,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ANCHOR_OFFSET_PX"
             }
           }
@@ -3073,13 +3073,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "OUTLINE_SNAP_WORLD_PX"
             }
           }
         },
         {
-          "insert": " in connection-overlay.ts). Figma's connector endpoints instead expose a "
+          "insert": " in connection-cascade.ts). Figma's connector endpoints instead expose a "
         },
         {
           "insert": "magnet",
@@ -3303,7 +3303,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_DASH_PATTERN_PX"
             }
           }
@@ -3426,7 +3426,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -3490,7 +3490,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "ObjectShape"
             }
           }

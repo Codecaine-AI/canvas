@@ -19,7 +19,7 @@ asymmetric re-route)"), on 2026-07-05.
   gfx-types,path-generator,snap-distribution}.ts` moved into the canvas
   package and now live at `packages/canvas/src/connectors/pathfinding/`
   (`a-star`, `graph`, `priority-queue`, `gfx-types`, `path-generator`) and
-  `packages/canvas/src/interaction/snap-distribution.ts`. Each still carries
+  `packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts`. Each still carries
   its original BlockSuite (MPL-2.0) provenance header. `slash-menu-model.ts`
   (also vendored from BlockSuite, but backing Spectre's docs editor slash
   menu, not the canvas engine) stayed in Spectre. See the BlockSuite MPL
@@ -34,7 +34,7 @@ asymmetric re-route)"), on 2026-07-05.
 ## What was vendored in (new, not from Spectre's canvas code)
 
 A handful of Spectre's shadcn-style UI primitives and its `cn()` class-name
-helper were duplicated (not re-exported) into `packages/canvas/packages/canvas/src/ui/`
+helper were duplicated (not re-exported) into `packages/canvas/src/ui/`
 so the package has zero dependency on a host app's component library:
 `Button`, `Input`, `Textarea`, `Badge`, and `cn`. These are trimmed copies of
 Spectre's `apps/frontend/src/components/ui/{button,input,textarea,badge}.tsx`
@@ -118,7 +118,7 @@ absorbs the former `packages/canvas/src/vendor/blocksuite/NOTICE` content.
   `linePolygonIntersects`).
 
 - `packages/affine/gfx/pointer/src/snap/snap-overlay.ts`
-  -> `packages/canvas/src/interaction/snap-distribution.ts`
+  -> `packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts`
   (not verbatim: extracts equal-spacing distribution snap search and 9-way
   closest-alignment-distance search as plain functions. One documented
   deviation remains: `alignDistributeVertically` fixes two apparent upstream

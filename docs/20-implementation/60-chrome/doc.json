@@ -83,7 +83,7 @@
           "insert": "The chrome layer lives at "
         },
         {
-          "insert": "packages/canvas/src/editor/components/",
+          "insert": "packages/canvas/src/stage/editor/components/",
           "attributes": {
             "code": true
           }
@@ -92,7 +92,7 @@
           "insert": " and implements the FigJam-parity surface UI for the canvas engine: the bottom tool dock, the selection-aware floating toolbar (hosted from "
         },
         {
-          "insert": "editor/features/selection-toolbar/",
+          "insert": "stage/editor/features/selection-toolbar/",
           "attributes": {
             "code": true
           }
@@ -137,12 +137,12 @@
           "insert": "Every component under "
         },
         {
-          "insert": "the chrome layer (now packages/canvas/src/editor/components/)",
+          "insert": "the chrome layer (now packages/canvas/src/stage/editor/components/)",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components"
+              "path": "packages/canvas/src/stage/editor/components"
             }
           }
         },
@@ -261,7 +261,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
               "symbol": "CanvasDock"
             }
           }
@@ -298,7 +298,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -331,7 +331,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/position.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/position.ts",
               "symbol": "positionSelectionToolbar"
             }
           }
@@ -364,7 +364,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -451,7 +451,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_TOOLBAR"
             }
           }
@@ -475,7 +475,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
@@ -540,7 +540,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ShapeSearchPopover.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ShapeSearchPopover.tsx",
               "symbol": "ShapeSearchPopover"
             }
           }
@@ -578,7 +578,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ShapesPanel.tsx",
               "symbol": "ShapesPanel"
             }
           }
@@ -602,7 +602,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ZoomControls.tsx",
               "symbol": "ZoomControls"
             }
           }
@@ -637,7 +637,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
               "symbol": "CanvasDock"
             }
           }
@@ -780,7 +780,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -898,7 +898,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/use-selection-toolbar.ts",
               "symbol": "useSelectionToolbar"
             }
           }
@@ -912,7 +912,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/position.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/position.ts",
               "symbol": "positionSelectionToolbar"
             }
           }
@@ -926,7 +926,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
               "symbol": "EDITOR_STYLE"
             }
           }
@@ -949,7 +949,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/index.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/flyouts/index.ts",
               "symbol": "toolbarFlyoutsForKind"
             }
           }
@@ -1113,7 +1113,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_TOOLBAR"
             }
           }
@@ -1155,7 +1155,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -1187,7 +1187,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/index.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/flyouts/index.ts",
               "symbol": "toolbarFlyoutsForKind"
             }
           }
@@ -1247,7 +1247,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_TOOLBAR"
             }
           }
@@ -1288,7 +1288,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/connector-control-state.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/connector-control-state.ts",
               "symbol": "resolveConnectorControlState"
             }
           }
@@ -1302,7 +1302,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/use-selection-toolbar.ts",
               "symbol": "openConnectionLabelEditor"
             }
           }
@@ -1447,7 +1447,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts"
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts"
             }
           }
         },
@@ -1469,7 +1469,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/InteractiveCanvasEditor.tsx"
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx"
             }
           }
         },
@@ -1523,7 +1523,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
               "symbol": "EDITOR_STYLE"
             }
           }
@@ -1546,7 +1546,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/flyouts/FlyoutPanel.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/flyouts/FlyoutPanel.tsx",
               "symbol": "FlyoutPanel"
             }
           }
@@ -1569,7 +1569,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
@@ -1634,7 +1634,7 @@
           }
         },
         {
-          "insert": " role) decides how the pick renders via palette.ts's role tables. A section pick sets tint + title-chip colors together (the section border IS the chip fill); there are no separate fill/stroke palettes and no section-specific tint row anymore. The section border-style flyout is icon-only using single-line solid/dashed/none glyphs ("
+          "insert": " role) decides how the pick renders via theme/palette.ts's role tables. A section pick sets tint + title-chip colors together (the section border IS the chip fill); there are no separate fill/stroke palettes and no section-specific tint row anymore. The section border-style flyout is icon-only using single-line solid/dashed/none glyphs ("
         },
         {
           "insert": "ConnectorSolidLineIcon",
@@ -1737,7 +1737,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
               "symbol": "SelectionToolbar"
             }
           }
@@ -1769,7 +1769,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/use-selection-toolbar.ts",
               "symbol": "selectionSignature"
             }
           }
@@ -1783,7 +1783,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/editor-style.ts",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
               "symbol": "EDITOR_STYLE"
             }
           }
@@ -1874,7 +1874,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "symbol": "SELECTION_DRAG_KINDS"
             }
           }
@@ -1897,7 +1897,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
               "symbol": "SelectionToolbarLayer"
             }
           }
@@ -1915,7 +1915,7 @@
           "insert": " only starts past the drag threshold, so plain clicks don't flicker), and "
         },
         {
-          "insert": "marquee",
+          "insert": "drag-select",
           "attributes": {
             "code": true
           }
@@ -1959,7 +1959,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
@@ -1991,7 +1991,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "resolveSwatchPreview"
             }
           }
@@ -2036,7 +2036,7 @@
           "insert": " id. There is no custom-color wheel and no per-kind roster: the old 2x11/22-swatch ColorPalettePopover, its nearest-token mapping, and its row-padding hack are all gone. The picker opens from each toolbar's color control via the shared color flyout in "
         },
         {
-          "insert": "editor/features/selection-toolbar/flyouts/",
+          "insert": "stage/editor/features/selection-toolbar/flyouts/",
           "attributes": {
             "code": true
           }
@@ -2098,7 +2098,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ShapeSearchPopover.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ShapeSearchPopover.tsx",
               "symbol": "ShapeSearchPopover"
             }
           }
@@ -2112,7 +2112,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ShapesPanel.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ShapesPanel.tsx",
               "symbol": "ShapesPanel"
             }
           }
@@ -2228,7 +2228,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ZoomControls.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ZoomControls.tsx",
               "symbol": "ZoomControls"
             }
           }
@@ -2268,12 +2268,12 @@
           "insert": "Each chrome component has a focused jsdom test under "
         },
         {
-          "insert": "src/editor/components/__tests__/",
+          "insert": "src/stage/editor/components/__tests__/",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/__tests__"
+              "path": "packages/canvas/src/stage/editor/components/__tests__"
             }
           }
         },
@@ -2281,13 +2281,13 @@
           "insert": " that asserts measured geometry — stadium radius, background colors, button/control counts, group/divider DOM structure — as style and DOM assertions rather than visual screenshots. This follows from the same no-routes, standalone-component constraint that shaped the build: without a running editor or a rendered page to screenshot, tests instead pin down the concrete numbers and structure a pixel-matched component must produce (e.g. exact swatch counts, exact button groupings) so a regression shows up as a failing assertion rather than a diff someone has to eyeball. Run the suite with "
         },
         {
-          "insert": "bun test src/editor",
+          "insert": "bun test src/stage/editor",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " from the canvas package root (selection-toolbar tests live beside the feature under src/editor/features/selection-toolbar/__tests__/)."
+          "insert": " from the canvas package root (selection-toolbar tests live beside the feature under src/stage/editor/features/selection-toolbar/__tests__/)."
         }
       ],
       "children": []

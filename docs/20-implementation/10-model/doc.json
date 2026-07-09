@@ -1020,12 +1020,12 @@
           "insert": ". The id carries no hex; what a pick looks like per kind is resolved through the role tables in "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "CANVAS_PALETTE"
             }
           }
@@ -2835,7 +2835,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3122,7 +3122,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3135,7 +3135,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts"
+              "path": "packages/canvas/src/theme/tokens.ts"
             }
           }
         },
@@ -3257,7 +3257,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3296,7 +3296,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3511,7 +3511,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3546,7 +3546,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3694,7 +3694,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -3952,7 +3952,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4074,7 +4074,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "isLockedForManipulation"
             }
           }
@@ -4121,7 +4121,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "isLockedForManipulation"
             }
           }
@@ -4287,7 +4287,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "CANVAS_PALETTE"
             }
           }
@@ -4412,7 +4412,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4425,7 +4425,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4438,7 +4438,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4451,7 +4451,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "objectStyle"
             }
           }
@@ -4465,7 +4465,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4478,7 +4478,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "renderOrderedObjects"
             }
           }
@@ -4590,7 +4590,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4715,7 +4715,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4729,7 +4729,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4743,7 +4743,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4757,7 +4757,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4784,7 +4784,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4797,7 +4797,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4823,7 +4823,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -4974,7 +4974,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
             }
           }
         },
@@ -5218,7 +5218,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "GRID_BASE_STEP_PX"
             }
           }
@@ -5749,7 +5749,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ellipsePoints"
             }
           }
@@ -5826,7 +5826,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "trianglePoints"
             }
           }
@@ -5903,7 +5903,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "parallelogramPoints"
             }
           }
@@ -5966,7 +5966,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "pentagonPoints"
             }
           }
@@ -6029,7 +6029,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "octagonPoints"
             }
           }
@@ -6092,7 +6092,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "starPoints"
             }
           }
@@ -6155,7 +6155,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "plusPoints"
             }
           }
@@ -6232,7 +6232,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "chevronPoints"
             }
           }
@@ -6449,7 +6449,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "offPageConnectorPoints"
             }
           }
@@ -6512,7 +6512,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "trapezoidPoints"
             }
           }
@@ -6589,7 +6589,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "manualInputPoints"
             }
           }
@@ -6652,7 +6652,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "hexagonPoints"
             }
           }
@@ -6764,7 +6764,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "ellipsePoints"
             }
           }
@@ -7073,7 +7073,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
               "symbol": "SectionTitleEditor"
             }
           }
@@ -7368,7 +7368,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_DASH_PATTERN_PX"
             }
           }

@@ -8,7 +8,7 @@
       "id": "b-routing-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "How connections between canvas objects compute their visual path: elbow/orthogonal A* routing, anchor resolution, waypoint reconciliation on object move, and the connection overlay.",
+        "covers": "How connections between canvas objects compute their visual path: elbow/orthogonal A* routing, anchor resolution, waypoint reconciliation on object move, and the connection cascade.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
@@ -16,8 +16,8 @@
           "A* pathfinding",
           "anchor resolution",
           "waypoint reconciliation",
-          "connection overlay",
-          "MPL-2.0 vendor boundary"
+          "connection cascade",
+          "MPL-2.0 file provenance"
         ]
       },
       "children": [
@@ -76,7 +76,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnection"
             }
           }
@@ -85,12 +85,12 @@
           "insert": " in "
         },
         {
-          "insert": "packages/canvas/src/routing/routing.ts",
+          "insert": "packages/canvas/src/connectors/routing.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts"
+              "path": "packages/canvas/src/connectors/routing.ts"
             }
           }
         },
@@ -103,7 +103,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "RoutedConnection"
             }
           }
@@ -147,7 +147,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnection"
             }
           }
@@ -179,7 +179,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeWaypoints"
             }
           }
@@ -193,7 +193,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeElbow"
             }
           }
@@ -207,7 +207,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeOrthogonalAStar"
             }
           }
@@ -221,7 +221,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts",
+              "path": "packages/canvas/src/connectors/pathfinding/path-generator.ts",
               "symbol": "PathGenerator"
             }
           }
@@ -241,12 +241,12 @@
           "insert": "The A* algorithm itself lives under "
         },
         {
-          "insert": "packages/canvas/src/vendor/blocksuite/",
+          "insert": "packages/canvas/src/connectors/pathfinding/",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite"
+              "path": "packages/canvas/src/connectors/pathfinding"
             }
           }
         },
@@ -259,7 +259,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/priority-queue.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/priority-queue.ts"
             }
           }
         },
@@ -272,7 +272,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/graph.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/graph.ts"
             }
           }
         },
@@ -285,7 +285,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/a-star.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/a-star.ts"
             }
           }
         },
@@ -316,7 +316,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/gfx-types.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/gfx-types.ts"
             }
           }
         },
@@ -329,7 +329,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/path-generator.ts"
             }
           }
         },
@@ -369,7 +369,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/gfx-types.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/gfx-types.ts"
             }
           }
         },
@@ -383,7 +383,7 @@
           }
         },
         {
-          "insert": " primitives (IVec, Bound, Vec, PointLocation, line/polygon intersection helpers) the other vendored files need, preserving the same math and semantics without pulling in the upstream package."
+          "insert": " primitives (IVec, Bound, Vec, PointLocation, line/polygon intersection helpers) the other BlockSuite-derived files need, preserving the same math and semantics without pulling in the upstream package."
         }
       ],
       "children": []
@@ -402,7 +402,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "dedupeConsecutivePoints"
             }
           }
@@ -416,7 +416,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "roundedPolylinePath"
             }
           }
@@ -472,7 +472,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnection"
             }
           }
@@ -486,7 +486,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "autoPickAnchors"
             }
           }
@@ -518,7 +518,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "explicitAnchor"
             }
           }
@@ -586,7 +586,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "pointForPosition"
             }
           }
@@ -611,7 +611,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "anchorPoints"
             }
           }
@@ -625,7 +625,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "nearestAnchor"
             }
           }
@@ -672,7 +672,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeWaypoints"
             }
           }
@@ -804,7 +804,7 @@
       },
       "text": [
         {
-          "insert": "Connection overlay"
+          "insert": "Connection cascade"
         }
       ],
       "children": []
@@ -815,17 +815,17 @@
       "props": {},
       "text": [
         {
-          "insert": "packages/canvas/src/routing/connection-overlay.ts",
+          "insert": "packages/canvas/src/connectors/connection-cascade.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts"
+              "path": "packages/canvas/src/connectors/connection-cascade.ts"
             }
           }
         },
         {
-          "insert": " is a separate, purely-computational module for the live interaction surface around making and re-pointing connections — it is not the routing algorithm itself, but the logic that decides where a connector endpoint should snap while a person is dragging it. Since the P3 geometry move (OBJECT-DEF-OVERHAUL.md D4) it carries exactly ONE port from BlockSuite's "
+          "insert": " is a separate, purely-computational module for the live interaction surface around making and re-pointing connections — it is not the routing algorithm itself, but the logic that decides where a connector endpoint should snap while a person is dragging it. Since the P3 geometry move (OBJECT-DEF-OVERHAUL.md (retired; see git history), D4) it carries exactly ONE port from BlockSuite's "
         },
         {
           "insert": "connector-manager.ts",
@@ -842,7 +842,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "resolveConnectionCascade"
             }
           }
@@ -851,7 +851,7 @@
           "insert": " (from upstream "
         },
         {
-          "insert": "ConnectionOverlay.renderConnector",
+          "insert": "renderConnector",
           "attributes": {
             "code": true
           }
@@ -870,7 +870,7 @@
           }
         },
         {
-          "insert": " — the defs own their outline geometry now — and routing reaches them through the single allowed boundary edge: the import-boundaries test pins routing's "
+          "insert": " — the defs own their outline geometry now — and the connectors slice reaches them through the single allowed boundary edge: the import-boundaries test pins the connectors slice's "
         },
         {
           "insert": "objects/",
@@ -882,13 +882,13 @@
           "insert": " imports to exactly "
         },
         {
-          "insert": "routing/connection-overlay.ts -> ../objects/geometry",
+          "insert": "connectors/connection-cascade.ts -> ../objects/geometry",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (a pure, React-free module; routing must never import def components). The port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support. Its current behavior also deliberately excludes section interiors from the inside snap tier while keeping section anchors and outlines valid."
+          "insert": " (a pure, React-free module; connectors must never import def components). The port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support. Its current behavior also deliberately excludes section interiors from the inside snap tier while keeping section anchors and outlines valid."
         }
       ],
       "children": []
@@ -992,7 +992,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "AnchorDots"
             }
           }
@@ -1045,7 +1045,7 @@
       "id": "b-routing-constraint-vendor-18",
       "flavour": "constraint",
       "props": {
-        "title": "MPL-2.0 vendor boundary is file-level and must stay demarcated",
+        "title": "MPL-2.0 provenance is file-level and must stay demarcated",
         "severity": "hard"
       },
       "text": [
@@ -1053,30 +1053,30 @@
           "insert": "The A* orthogonal routing algorithm adapted from BlockSuite lives entirely under "
         },
         {
-          "insert": "packages/canvas/src/vendor/blocksuite/",
+          "insert": "packages/canvas/src/connectors/pathfinding/",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite"
+              "path": "packages/canvas/src/connectors/pathfinding"
             }
           }
         },
         {
-          "insert": " precisely so the MPL-2.0 copyleft boundary is file-level and clearly demarcated, per "
+          "insert": " with file-level MPL-2.0 provenance demarcated by "
         },
         {
-          "insert": "packages/canvas/src/vendor/blocksuite/NOTICE",
+          "insert": "PROVENANCE.md",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
+              "path": "PROVENANCE.md"
             }
           }
         },
         {
-          "insert": ". Every file in that directory ("
+          "insert": ". Those pathfinding files ("
         },
         {
           "insert": "priority-queue.ts",
@@ -1121,24 +1121,24 @@
           }
         },
         {
-          "insert": ", "
+          "insert": ") and "
         },
         {
-          "insert": "snap-distribution.ts",
+          "insert": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ") carries a header citing its upstream BlockSuite source path and the MPL-2.0 license, and this file-level attribution is what satisfies MPL-2.0's copyleft obligations without imposing them on the rest of the codebase. The NOTICE file also documents "
+          "insert": " carry headers citing upstream BlockSuite source paths and the MPL-2.0 license, and this file-level attribution is what satisfies MPL-2.0's copyleft obligations without imposing them on the rest of the codebase. PROVENANCE.md also documents "
         },
         {
-          "insert": "packages/canvas/src/routing/connection-overlay.ts",
+          "insert": "packages/canvas/src/connectors/connection-cascade.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts"
+              "path": "packages/canvas/src/connectors/connection-cascade.ts"
             }
           }
         },
@@ -1155,22 +1155,22 @@
           "insert": "), even though it lives outside the "
         },
         {
-          "insert": "vendor/",
+          "insert": "pathfinding/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " directory — it is explicitly called out in NOTICE as one of the files that must not have its ported algorithm body modified without updating NOTICE and its own file header. Do not casually merge code from "
+          "insert": " directory — it is explicitly called out in PROVENANCE.md as one of the files that must not have its ported algorithm body modified without updating PROVENANCE.md and its own file header. Do not casually merge code from "
         },
         {
-          "insert": "vendor/blocksuite/",
+          "insert": "connectors/pathfinding/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " into non-vendor files, and do not casually merge non-vendor logic into it — the directory boundary is the license boundary, and blurring it would obscure which lines in the codebase actually carry BlockSuite's MPL-2.0 provenance."
+          "insert": " into files without matching BlockSuite provenance, and do not casually merge unrelated logic into it — PROVENANCE.md and the file headers mark the license boundary, and blurring it would obscure which lines in the codebase actually carry BlockSuite's MPL-2.0 provenance."
         }
       ],
       "children": []
@@ -1183,20 +1183,20 @@
       },
       "text": [
         {
-          "insert": "The routing test coverage lives across six files in "
+          "insert": "The routing test coverage lives across tests in "
         },
         {
-          "insert": "packages/canvas/src/routing/__tests__",
+          "insert": "packages/canvas/src/connectors/__tests__",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__"
+              "path": "packages/canvas/src/connectors/__tests__"
             }
           }
         },
         {
-          "insert": ": "
+          "insert": " plus related state coverage: "
         },
         {
           "insert": "routing.test.ts",
@@ -1226,16 +1226,16 @@
           "insert": "; "
         },
         {
-          "insert": "astar-vendor.test.ts",
+          "insert": "pathfinding-astar.test.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " keeps the vendored path generator deterministic; "
+          "insert": " keeps the BlockSuite path generator deterministic; "
         },
         {
-          "insert": "connection-overlay.test.ts",
+          "insert": "connection-cascade.test.ts",
           "attributes": {
             "code": true
           }
@@ -1253,7 +1253,7 @@
           "insert": "; "
         },
         {
-          "insert": "waypoint-reconcile.test.ts",
+          "insert": "packages/canvas/src/state/__tests__/waypoint-reconcile.test.ts",
           "attributes": {
             "code": true
           }
@@ -1325,7 +1325,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts"
+              "path": "packages/canvas/src/connectors/routing.ts"
             }
           }
         },
@@ -1338,7 +1338,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "exactStraightAnchoredPoints"
             }
           }
@@ -1360,7 +1360,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnectionToPoint"
             }
           }
@@ -1374,7 +1374,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeFreePointElbow"
             }
           }
@@ -1409,7 +1409,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "connectorBendSegments"
             }
           }
@@ -1434,7 +1434,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "dragOrthogonalSegment"
             }
           }
@@ -1448,7 +1448,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "bendSnapToleranceForZoom"
             }
           }
@@ -1473,7 +1473,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "commitBendPolyline"
             }
           }
@@ -1487,7 +1487,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "simplifyOrthogonalPolyline"
             }
           }

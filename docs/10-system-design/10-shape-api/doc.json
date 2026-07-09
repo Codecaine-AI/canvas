@@ -177,7 +177,7 @@
           "insert": "This is the shipped result of the object-definition overhaul ("
         },
         {
-          "insert": "OBJECT-DEF-OVERHAUL.md",
+          "insert": "OBJECT-DEF-OVERHAUL.md (retired; see git history)",
           "attributes": {
             "code": true
           }
@@ -358,7 +358,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as render/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all (plus / or-junction / summing-junction). */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
+          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all (plus / or-junction / summing-junction). */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
         }
       ],
       "children": []
@@ -510,7 +510,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/ObjectShape.tsx",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
               "symbol": "ObjectShape"
             }
           }
@@ -562,7 +562,7 @@
           "insert": "Connectors are NOT objects (D19): they draw through "
         },
         {
-          "insert": "render/connectors/*",
+          "insert": "connectors/*",
           "attributes": {
             "code": true
           }
@@ -571,7 +571,7 @@
           "insert": ", route through "
         },
         {
-          "insert": "routing/",
+          "insert": "connectors/",
           "attributes": {
             "code": true
           }
@@ -608,7 +608,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/objects/connector/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / dash / routing / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
+          "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through theme/palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/connectors/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / dash / routing / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
         }
       ],
       "children": []
@@ -953,12 +953,12 @@
           "insert": ") and the in-place editor overlay ("
         },
         {
-          "insert": "editor/features/text-editing/TextEditingOverlay.tsx",
+          "insert": "stage/editor/features/text-editing/TextEditingOverlay.tsx",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx"
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx"
             }
           }
         },
@@ -1168,7 +1168,7 @@
           "insert": " surface the routing layer is allowed to import (the boundary test pins the edge list to exactly "
         },
         {
-          "insert": "routing/connection-overlay.ts -> ../objects/geometry",
+          "insert": "connectors/connection-cascade.ts -> ../objects/geometry",
           "attributes": {
             "code": true
           }
@@ -1313,7 +1313,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "resolveConnectionCascade"
             }
           }
@@ -1361,7 +1361,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "AnchorDots"
             }
           }
@@ -1402,7 +1402,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "ANCHOR_DOTS_MIN_ZOOM"
             }
           }
@@ -1501,7 +1501,7 @@
           }
         },
         {
-          "insert": ": marquee membership ("
+          "insert": ": drag-select membership ("
         },
         {
           "insert": "objectsIntersectingBounds",
@@ -1510,7 +1510,7 @@
           }
         },
         {
-          "insert": " — a marquee grabbing a diamond's empty corner still selects it, FigJam-consistent), drop targeting ("
+          "insert": " — a drag-select rectangle grabbing a diamond's empty corner still selects it, FigJam-consistent), drop targeting ("
         },
         {
           "insert": "hitTestDropTarget",
@@ -1538,7 +1538,7 @@
       "flavour": "decision",
       "props": {
         "status": "accepted",
-        "title": "Clicks respect the declared outline; marquee, drop targets, and snapping deliberately stay bbox"
+        "title": "Clicks respect the declared outline; drag-select, drop targets, and snapping deliberately stay bbox"
       },
       "text": [
         {
@@ -1551,7 +1551,7 @@
           }
         },
         {
-          "insert": " so true-outline shapes are only clickable where they actually paint, while marquee selection, section drop-targeting, and snap-candidate gathering remain bounding-box tests on purpose — they are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
+          "insert": " so true-outline shapes are only clickable where they actually paint, while drag-select, section drop-targeting, and snap-candidate gathering remain bounding-box tests on purpose — they are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
         }
       ],
       "children": []
@@ -1676,20 +1676,20 @@
           "insert": "What each id LOOKS like per kind lives in "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts"
+              "path": "packages/canvas/src/theme/palette.ts"
             }
           }
         },
         {
-          "insert": " — the canonical 10-row swatch table, a top-level leaf module (sibling of "
+          "insert": " — the canonical 10-row swatch table, a leaf module in theme/ (sibling of "
         },
         {
-          "insert": "theme.ts",
+          "insert": "theme/tokens.ts",
           "attributes": {
             "code": true
           }
@@ -1716,7 +1716,7 @@
           "insert": " so "
         },
         {
-          "insert": "theme.ts",
+          "insert": "theme/tokens.ts",
           "attributes": {
             "code": true
           }
@@ -1734,7 +1734,7 @@
           "insert": ", and "
         },
         {
-          "insert": "editor/",
+          "insert": "stage/editor/",
           "attributes": {
             "code": true
           }
@@ -1748,7 +1748,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "Swatch"
             }
           }
@@ -1783,7 +1783,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers — one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;"
+          "insert": "// packages/canvas/src/theme/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers — one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;"
         }
       ],
       "children": []
@@ -1833,7 +1833,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
+              "path": "packages/canvas/src/theme/tokens.ts",
               "symbol": "SHAPE_STROKE_WIDTH_PX"
             }
           }
@@ -2004,7 +2004,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
@@ -2140,7 +2140,7 @@
           "insert": " (nearest-swatch mapping) and the old keys are now simply ignored as unknown. There is no custom-color wheel and no explicit-hex escape hatch; changing what a pick looks like means editing "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true
           }
@@ -2171,8 +2171,8 @@
         "title": "Where the shape system lives (post-overhaul)",
         "entries": [
           {
-            "path": "packages/canvas/src/palette.ts",
-            "note": "the canonical 10-pick role table + per-role resolvers; leaf module importable by theme/objects/editor alike"
+            "path": "packages/canvas/src/theme/palette.ts",
+            "note": "the canonical 10-pick role table + per-role resolvers; leaf module importable by theme tokens, objects, and stage editor alike"
           },
           {
             "path": "packages/canvas/src/state/schema/colors.ts",
@@ -2211,7 +2211,7 @@
             "note": "stickyDef (inset-body slot, sticky color role) + markdown.tsx simple-markdown renderer (D18)"
           },
           {
-            "path": "packages/canvas/src/objects/connector/",
+            "path": "packages/canvas/src/connectors/",
             "note": "connectorDef (ConnectorDef, D19) + connector style constants; deliberately not in OBJECT_DEFS"
           },
           {
@@ -2219,19 +2219,19 @@
             "note": "shape-def.ts (ShapeDef) + base.tsx (shapeObjectDef adapter) + basic|flowchart|icon|misc one-file shape defs"
           },
           {
-            "path": "packages/canvas/src/routing/connection-overlay.ts",
+            "path": "packages/canvas/src/connectors/connection-cascade.ts",
             "note": "cascade only (resolveConnectionCascade); consumes objects/geometry.ts through the single allowed boundary edge"
           },
           {
-            "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+            "path": "packages/canvas/src/connectors/AnchorDots.tsx",
             "note": "zoom-gated FigJam-style anchor dots at the def-derived anchor positions (ANCHOR_DOTS_MIN_ZOOM = 0.5)"
           },
           {
-            "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+            "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
             "note": "THE one 10-pick color picker, identical for every kind"
           },
           {
-            "path": "packages/canvas/src/editor/features/text-editing/",
+            "path": "packages/canvas/src/stage/editor/features/text-editing/",
             "note": "in-place text editor (use-text-editing.ts + TextEditingOverlay.tsx) — positioned/styled by the def's text slot; connector labels at the routed midpoint"
           }
         ]
@@ -2322,7 +2322,7 @@
       },
       "text": [
         {
-          "insert": "// 1. state/schema/object-types.ts — add the literal to the closed type union:\n  | \"hexagon\"\n\n// 2. state/schema/style.ts — add the same-named render-shape variant to CanvasObjectStyle[\"shape\"]:\n  | \"hexagon\"\n\n// 3. state/schema/validate.ts — add the branch to the isCanvasObjectType guard:\n  value === \"hexagon\" ||\n\n// 4. state/schema/object-defaults.ts — add the row to OBJECT_TYPE_DEFAULTS\n//    (exhaustive Record — the compiler errors until this exists):\n  hexagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: \"hexagon\", label: \"Hexagon\" },\n\n// 5. objects/object-def.ts — register the def (import + both tables):\nimport { hexagonDef } from \"./shapes/flowchart/hexagon\";\n// in DEFS_BY_RENDER_SHAPE:\n  hexagon: hexagonDef,\n// in OBJECT_DEFS (stylesheet order):\n  hexagonDef,\n\n// 6. objects/catalog.ts — place the entry in a picker section (label/keywords derive from the def):\n  entry(\"flow-hexagon\", \"hexagon\"),\n\n// 7. editor/components/shape-previews.tsx — picker glyph (derives from the outline builder):\nconst HexagonIcon = polygonIcon(hexagonPoints(PREVIEW_BOUNDS));\n  \"flow-hexagon\": HexagonIcon,"
+          "insert": "// 1. state/schema/object-types.ts — add the literal to the closed type union:\n  | \"hexagon\"\n\n// 2. state/schema/style.ts — add the same-named render-shape variant to CanvasObjectStyle[\"shape\"]:\n  | \"hexagon\"\n\n// 3. state/schema/validate.ts — add the branch to the isCanvasObjectType guard:\n  value === \"hexagon\" ||\n\n// 4. state/schema/object-defaults.ts — add the row to OBJECT_TYPE_DEFAULTS\n//    (exhaustive Record — the compiler errors until this exists):\n  hexagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: \"hexagon\", label: \"Hexagon\" },\n\n// 5. objects/object-def.ts — register the def (import + both tables):\nimport { hexagonDef } from \"./shapes/flowchart/hexagon\";\n// in DEFS_BY_RENDER_SHAPE:\n  hexagon: hexagonDef,\n// in OBJECT_DEFS (stylesheet order):\n  hexagonDef,\n\n// 6. objects/catalog.ts — place the entry in a picker section (label/keywords derive from the def):\n  entry(\"flow-hexagon\", \"hexagon\"),\n\n// 7. stage/editor/components/shape-previews.tsx — picker glyph (derives from the outline builder):\nconst HexagonIcon = polygonIcon(hexagonPoints(PREVIEW_BOUNDS));\n  \"flow-hexagon\": HexagonIcon,"
         }
       ],
       "children": []

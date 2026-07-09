@@ -197,7 +197,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CANVAS_BG"
             }
           }
@@ -206,7 +206,7 @@
           "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app chrome is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app chrome around the board is allowed to follow the host theme. See the sourcing comment beside the stage surface constants in "
         },
         {
-          "insert": "render/CanvasStage.tsx",
+          "insert": "stage/CanvasStage.tsx",
           "attributes": {
             "code": true
           }
@@ -256,7 +256,7 @@
           "insert": "), co-located with their consumers since the theme dispersal (every color hex in "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true
           }

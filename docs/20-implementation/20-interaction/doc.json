@@ -31,7 +31,7 @@
         "b-interaction-pointer-sm-pressing-7",
         "b-interaction-pointer-sm-move-8",
         "b-interaction-pointer-sm-resize-9",
-        "b-interaction-pointer-sm-marquee-10",
+        "b-interaction-pointer-sm-drag-select-10",
         "b-interaction-pointer-sm-place-11",
         "b-interaction-pointer-sm-connector-12",
         "b-interaction-connector-anchor-dots-12b",
@@ -85,7 +85,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "label": "use-interaction-pipeline.ts"
             }
           }
@@ -99,7 +99,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "symbol": "buildPointerEvent",
               "label": "buildPointerEvent"
             }
@@ -114,7 +114,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "symbol": "resolveHit",
               "label": "resolveHit"
             }
@@ -183,7 +183,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "label": "core.ts"
             }
           }
@@ -192,13 +192,13 @@
           "insert": " — a pure pointer-interaction state machine modeled on term-draw's draw-state.ts architecture, with gesture/type vocabulary in "
         },
         {
-          "insert": "types.ts",
+          "insert": "state.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/resize.ts",
-              "label": "types.ts"
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
+              "label": "state.ts"
             }
           }
         },
@@ -206,13 +206,13 @@
           "insert": " and connector steppers in "
         },
         {
-          "insert": "gestures/connectors.ts",
+          "insert": "connectors/gestures.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/connectors.ts",
-              "label": "gestures/connectors.ts"
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "label": "connectors/gestures.ts"
             }
           }
         },
@@ -225,7 +225,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "stepInteraction",
               "label": "stepInteraction"
             }
@@ -240,7 +240,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "InteractionState",
               "label": "InteractionState"
             }
@@ -255,7 +255,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "InteractionContext",
               "label": "InteractionContext"
             }
@@ -279,14 +279,14 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "InteractionOverlay",
               "label": "InteractionOverlay"
             }
           }
         },
         {
-          "insert": " to render that frame (marquee rect, snap/distribution guides, spacing hints, drop target, connector-drag preview, in-place text-edit request, place-tool ghost). No DOM access happens anywhere in this module — it is testable with plain objects."
+          "insert": " to render that frame (drag-select rect, snap/distribution guides, spacing hints, drop target, connector-drag preview, in-place text-edit request, place-tool ghost). No DOM access happens anywhere in this module — it is testable with plain objects."
         }
       ],
       "children": []
@@ -345,7 +345,7 @@
           "insert": ", "
         },
         {
-          "insert": "marquee",
+          "insert": "drag-select",
           "attributes": {
             "code": true
           }
@@ -432,7 +432,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "IDLE_INTERACTION_STATE",
               "label": "IDLE_INTERACTION_STATE"
             }
@@ -447,7 +447,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "stepFromIdle",
               "label": "stepFromIdle"
             }
@@ -508,7 +508,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "PressPending",
               "label": "PressPending"
             }
@@ -538,7 +538,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "stepFromPressing",
               "label": "stepFromPressing"
             }
@@ -557,7 +557,7 @@
           "insert": " or "
         },
         {
-          "insert": "marquee",
+          "insert": "drag-select",
           "attributes": {
             "code": true
           }
@@ -571,7 +571,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/move.ts",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
               "symbol": "expandMoveObjectIds",
               "label": "expandMoveObjectIds"
             }
@@ -586,7 +586,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "isLockedForManipulation"
             }
           }
@@ -628,7 +628,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
               "symbol": "MoveGesture",
               "label": "MoveGesture"
             }
@@ -643,7 +643,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/move.ts",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
               "symbol": "stepFromMove",
               "label": "stepFromMove"
             }
@@ -736,7 +736,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
               "symbol": "ResizeGesture",
               "label": "ResizeGesture"
             }
@@ -766,7 +766,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/resize.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
               "symbol": "stepFromResize",
               "label": "stepFromResize"
             }
@@ -790,7 +790,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
               "symbol": "MIN_DIRECT_RESIZE_SIZE",
               "label": "MIN_DIRECT_RESIZE_SIZE"
             }
@@ -805,7 +805,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "isLockedForManipulation"
             }
           }
@@ -825,15 +825,15 @@
       ],
       "children": []
     },
-    "b-interaction-pointer-sm-marquee-10": {
-      "id": "b-interaction-pointer-sm-marquee-10",
+    "b-interaction-pointer-sm-drag-select-10": {
+      "id": "b-interaction-pointer-sm-drag-select-10",
       "flavour": "list-item",
       "props": {
         "ordered": false
       },
       "text": [
         {
-          "insert": "marquee",
+          "insert": "drag-select",
           "attributes": {
             "code": true
           }
@@ -842,14 +842,14 @@
           "insert": " ("
         },
         {
-          "insert": "MarqueeGesture",
+          "insert": "DragSelectGesture",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
-              "symbol": "MarqueeGesture",
-              "label": "MarqueeGesture"
+              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
+              "symbol": "DragSelectGesture",
+              "label": "DragSelectGesture"
             }
           }
         },
@@ -857,19 +857,19 @@
           "insert": ") — rubber-band selection over empty canvas with the select tool, handled by "
         },
         {
-          "insert": "stepFromMarquee",
+          "insert": "stepFromDragSelect",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/marquee.ts",
-              "symbol": "stepFromMarquee",
-              "label": "stepFromMarquee"
+              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
+              "symbol": "stepFromDragSelect",
+              "label": "stepFromDragSelect"
             }
           }
         },
         {
-          "insert": ". Tracks a normalized bounds rect as the pointer moves; on release, every object intersecting the bounds becomes the selection (or is unioned into it, for a shift-additive marquee)."
+          "insert": ". Tracks a normalized bounds rect as the pointer moves; on release, every object intersecting the bounds becomes the selection (or is unioned into it, for a shift-additive drag-select)."
         }
       ],
       "children": []
@@ -896,7 +896,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
               "symbol": "PlaceGesture",
               "label": "PlaceGesture"
             }
@@ -911,7 +911,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/place.ts",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
               "symbol": "stepFromPlace",
               "label": "stepFromPlace"
             }
@@ -935,7 +935,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/place.ts",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
               "symbol": "MIN_PLACE_DRAG_SIZE",
               "label": "MIN_PLACE_DRAG_SIZE"
             }
@@ -996,7 +996,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/connectors/types.ts",
               "symbol": "ConnectorEndpointDragGesture",
               "label": "ConnectorEndpointDragGesture"
             }
@@ -1011,7 +1011,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/connectors/types.ts",
               "symbol": "ConnectorCreateGesture",
               "label": "ConnectorCreateGesture"
             }
@@ -1026,7 +1026,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
+              "path": "packages/canvas/src/connectors/types.ts",
               "symbol": "ConnectorBendDragGesture",
               "label": "ConnectorBendDragGesture"
             }
@@ -1041,7 +1041,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/connectors.ts",
+              "path": "packages/canvas/src/connectors/gestures.ts",
               "symbol": "connectorCandidateAt",
               "label": "connectorCandidateAt"
             }
@@ -1056,7 +1056,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "resolveConnectionCascade",
               "label": "resolveConnectionCascade"
             }
@@ -1109,7 +1109,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "AnchorDots",
               "label": "AnchorDots"
             }
@@ -1139,7 +1139,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "ANCHOR_DOTS_MIN_ZOOM",
               "label": "ANCHOR_DOTS_MIN_ZOOM"
             }
@@ -1174,7 +1174,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "label": "CanvasStage.tsx"
             }
           }
@@ -1188,7 +1188,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview",
               "label": "ConnectorDragPreview"
             }
@@ -1203,7 +1203,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/connectors.ts",
+              "path": "packages/canvas/src/connectors/gestures.ts",
               "symbol": "quickConnectClickPoint",
               "label": "quickConnectClickPoint"
             }
@@ -1245,7 +1245,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "autoPickAnchors",
               "label": "autoPickAnchors"
             }
@@ -1260,7 +1260,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
               "symbol": "resolveConnectionCascade",
               "label": "resolveConnectionCascade"
             }
@@ -1324,7 +1324,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "symbol": "resolveHit",
               "label": "resolveHit"
             }
@@ -1348,7 +1348,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "connectorBendSegments",
               "label": "connectorBendSegments"
             }
@@ -1363,7 +1363,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/gestures/connectors.ts",
+              "path": "packages/canvas/src/connectors/gestures.ts",
               "symbol": "stepFromConnectorBendDrag",
               "label": "stepFromConnectorBendDrag"
             }
@@ -1378,7 +1378,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
               "symbol": "dragOrthogonalSegment",
               "label": "dragOrthogonalSegment"
             }
@@ -1413,7 +1413,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
               "symbol": "Connector",
               "label": "Connector"
             }
@@ -1428,7 +1428,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/use-text-editing.ts",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/use-text-editing.ts",
               "symbol": "openConnectionLabelEditor",
               "label": "openConnectionLabelEditor"
             }
@@ -1467,7 +1467,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "stepFromIdle",
               "label": "stepFromIdle"
             }
@@ -1518,7 +1518,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnection",
               "label": "routeConnection"
             }
@@ -1533,7 +1533,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "autoPickAnchors",
               "label": "autoPickAnchors"
             }
@@ -1579,7 +1579,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/InteractiveCanvasEditor.tsx",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
               "label": "InteractiveCanvasEditor.tsx"
             }
           }
@@ -1604,7 +1604,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "isLockedForManipulation"
             }
           }
@@ -1660,7 +1660,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "label": "use-interaction-pipeline.ts"
             }
           }
@@ -1733,7 +1733,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "symbol": "cancelInteraction",
               "label": "cancelInteraction"
             }
@@ -1804,7 +1804,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/core.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
               "label": "core.ts"
             }
           }
@@ -1870,7 +1870,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "label": "snapping.ts"
             }
           }
@@ -1884,7 +1884,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "computeSnapGuides",
               "label": "computeSnapGuides"
             }
@@ -1899,7 +1899,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "MAX_SNAP_CANDIDATES",
               "label": "MAX_SNAP_CANDIDATES"
             }
@@ -1943,7 +1943,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "computeSpacingHints",
               "label": "computeSpacingHints"
             }
@@ -1958,7 +1958,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "isGridAligned",
               "label": "isGridAligned"
             }
@@ -1973,7 +1973,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "applyGridFallback",
               "label": "applyGridFallback"
             }
@@ -2005,7 +2005,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/snapping.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
               "symbol": "computeSnapCorrection",
               "label": "computeSnapCorrection"
             }
@@ -2020,7 +2020,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/snap-distribution.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
               "symbol": "alignDistributeHorizontally",
               "label": "alignDistributeHorizontally"
             }
@@ -2035,7 +2035,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/snap-distribution.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
               "symbol": "alignDistributeVertically",
               "label": "alignDistributeVertically"
             }
@@ -2166,7 +2166,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
               "label": "use-canvas-hotkeys.ts"
             }
           }
@@ -2284,7 +2284,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/drag-pipeline/use-interaction-pipeline.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
               "symbol": "EDGE_PAN_DRAG_KINDS",
               "label": "EDGE_PAN_DRAG_KINDS"
             }
@@ -2312,7 +2312,7 @@
           "insert": ", "
         },
         {
-          "insert": "marquee",
+          "insert": "drag-select",
           "attributes": {
             "code": true
           }
@@ -2395,7 +2395,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/viewport.ts",
+              "path": "packages/canvas/src/stage/viewport.ts",
               "symbol": "panBy",
               "label": "panBy"
             }
@@ -2410,7 +2410,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/viewport.ts",
+              "path": "packages/canvas/src/stage/viewport.ts",
               "label": "viewport.ts"
             }
           }
@@ -2526,7 +2526,7 @@
           }
         },
         {
-          "insert": " covers the general gesture set (press/click/drag thresholds, move, resize, marquee, place), plus connector endpoint drag, connector bend drag, and connector create; "
+          "insert": " covers the general gesture set (press/click/drag thresholds, move, resize, drag-select, place), plus connector endpoint drag, connector bend drag, and connector create; "
         },
         {
           "insert": "interaction.connection-cascade.test.ts",
@@ -2571,7 +2571,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/__tests__/interaction.snap-inject.test.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/interaction.snap-inject.test.ts",
               "label": "interaction.snap-inject.test.ts"
             }
           }
@@ -2594,7 +2594,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/__tests__/snapping.test.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snapping.test.ts",
               "label": "snapping.test.ts"
             }
           }
@@ -2608,7 +2608,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/__tests__/snap-distribution-vendor.test.ts",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snap-distribution-vendor.test.ts",
               "label": "snap-distribution-vendor.test.ts"
             }
           }
@@ -2656,7 +2656,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview",
               "label": "ConnectorDragPreview"
             }

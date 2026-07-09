@@ -108,7 +108,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CanvasStage"
             }
           }
@@ -159,7 +159,7 @@
           }
         },
         {
-          "insert": " for screen-space overlays including marquee, snap and distribution guides, spacing chips, selection handles, anchor dots, and connector drag previews. Hover quick-connect previews are assembled in "
+          "insert": " for screen-space overlays including the drag-select rect, snap and distribution guides, spacing chips, selection handles, anchor dots, and connector drag previews. Hover quick-connect previews are assembled in "
         },
         {
           "insert": "CanvasStage",
@@ -167,7 +167,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CanvasStage"
             }
           }
@@ -181,7 +181,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview"
             }
           }
@@ -206,7 +206,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/ObjectShape.tsx",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
               "symbol": "ObjectShape"
             }
           }
@@ -220,7 +220,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
               "symbol": "Connector"
             }
           }
@@ -234,7 +234,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview"
             }
           }
@@ -257,7 +257,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "AnchorDots"
             }
           }
@@ -280,7 +280,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/HoverHighlight.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection/HoverHighlight.tsx",
               "symbol": "HoverHighlight",
               "label": "HoverHighlight"
             }
@@ -290,7 +290,7 @@
           "insert": " draws the connector-tool hover outline in the untransformed overlay; and "
         },
         {
-          "insert": "Marquee",
+          "insert": "DragSelectRect",
           "attributes": {
             "code": true
           }
@@ -368,7 +368,7 @@
           }
         },
         {
-          "insert": " paints selection box, anchor dots, hover highlight, marquee/place/guides/spacing, hover "
+          "insert": " paints selection box, anchor dots, hover highlight, drag-select/place/guides/spacing, hover "
         },
         {
           "insert": "ConnectorDragPreview",
@@ -437,13 +437,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
+              "path": "packages/canvas/src/theme/tokens.ts",
               "symbol": "canvasSurfaceStyle"
             }
           }
         },
         {
-          "insert": " from theme.ts for the grid/guide/highlight CSS variables. What it deliberately no longer does is resolve object colors or carry per-shape CSS: each object's colors resolve inside its def via "
+          "insert": " from theme/tokens.ts for the grid/guide/highlight CSS variables. What it deliberately no longer does is resolve object colors or carry per-shape CSS: each object's colors resolve inside its def via "
         },
         {
           "insert": "resolveObjectRoleColors",
@@ -457,7 +457,7 @@
           }
         },
         {
-          "insert": " (palette.ts role tables), and the stage's embedded style tag is composed as a shared base block plus "
+          "insert": " (theme/palette.ts role tables), and the stage's embedded style tag is composed as a shared base block plus "
         },
         {
           "insert": "OBJECT_DEFS_CSS",
@@ -520,7 +520,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "gridBackground"
             },
             "code": true
@@ -561,7 +561,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "GRID_BASE_STEP_PX"
             },
             "code": true
@@ -611,7 +611,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "MIN_DOT_RADIUS_PX"
             },
             "code": true
@@ -625,7 +625,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "MAX_DOT_RADIUS_PX"
             },
             "code": true
@@ -650,7 +650,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/grid.ts",
+              "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "GRID_MIN_SCREEN_STEP_PX"
             },
             "code": true
@@ -749,12 +749,12 @@
       "props": {},
       "text": [
         {
-          "insert": "theme.ts",
+          "insert": "theme/tokens.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts"
+              "path": "packages/canvas/src/theme/tokens.ts"
             }
           }
         },
@@ -776,7 +776,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
+              "path": "packages/canvas/src/theme/tokens.ts",
               "symbol": "SHAPE_STROKE_WIDTH_PX"
             }
           }
@@ -790,7 +790,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
+              "path": "packages/canvas/src/theme/tokens.ts",
               "symbol": "resolveObjectStrokeWidth"
             }
           }
@@ -859,7 +859,7 @@
           }
         },
         {
-          "insert": " all died with the legacy tone/paletteToken/tint vocabularies (OBJECT-DEF-OVERHAUL.md D1/D10). Color resolution now lives in "
+          "insert": " all died with the legacy tone/paletteToken/tint vocabularies (OBJECT-DEF-OVERHAUL.md D1/D10 — retired; see git history). Color resolution now lives in "
         },
         {
           "insert": "resolveObjectRoleColors",
@@ -876,12 +876,12 @@
           "insert": " over the canonical 10-pick role table in "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts",
+              "path": "packages/canvas/src/theme/palette.ts",
               "symbol": "CANVAS_PALETTE"
             }
           }
@@ -924,7 +924,7 @@
           "insert": " constants file no longer exists: the theme dispersal co-located every FigJam pixel-parity constant with its consumer. Grid constants live in "
         },
         {
-          "insert": "render/grid.ts",
+          "insert": "stage/grid.ts",
           "attributes": {
             "code": true
           }
@@ -933,7 +933,7 @@
           "insert": "; board surface variables and universal shape stroke helpers live in "
         },
         {
-          "insert": "theme.ts",
+          "insert": "theme/tokens.ts",
           "attributes": {
             "code": true
           }
@@ -947,7 +947,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_DASH_PATTERN_PX"
             }
           }
@@ -956,7 +956,7 @@
           "insert": " and toolbar metadata in "
         },
         {
-          "insert": "objects/connector/def.ts",
+          "insert": "connectors/def.ts",
           "attributes": {
             "code": true
           }
@@ -970,7 +970,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
               "symbol": "Connector"
             }
           }
@@ -984,7 +984,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview"
             }
           }
@@ -998,7 +998,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CanvasStage"
             }
           }
@@ -1027,13 +1027,13 @@
           "insert": " and figjam-style-spec.md — pixel-sampled measurements from real FigJam exports — now annotated at each site instead of in one file. "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is the strictest example: every one of its 100 hex cells carries an inline comment tagging it as sampled (citing its source table/spec section) or derived (no FigJam sample exists; synthesized in the same visual spirit and flagged for contact-sheet review). Values are logical px / plain hexes, already normalized against the source export's 2x scale factor."
+          "insert": " is the strictest example: every one of its 100 hex cells carries an inline comment tagging it as sampled (citing its source table/spec section) or derived (no FigJam sample exists; synthesized in the same visual spirit and flagged for contact-sheet review; the palette-contact-sheet tool is retired — see git history). Values are logical px / plain hexes, already normalized against the source export's 2x scale factor."
         }
       ],
       "children": []
@@ -1120,7 +1120,7 @@
       },
       "text": [
         {
-          "insert": "Shape labels, section titles, and captions are plain DOM text, so before this guard any drag on the board — marquee select, moving a shape, edge-panning mid-gesture — could sweep a native browser text selection across every label it crossed (nothing called "
+          "insert": "Shape labels, section titles, and captions are plain DOM text, so before this guard any drag on the board — drag-select, moving a shape, edge-panning mid-gesture — could sweep a native browser text selection across every label it crossed (nothing called "
         },
         {
           "insert": "preventDefault()",
@@ -1155,7 +1155,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
               "symbol": "CanvasStage"
             }
           }
@@ -1169,7 +1169,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
               "symbol": "TextEditingOverlay"
             }
           }
@@ -1183,7 +1183,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/MarkdownSlotTextEditor.tsx",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/MarkdownSlotTextEditor.tsx",
               "symbol": "MarkdownSlotTextEditor"
             }
           }
@@ -1235,7 +1235,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
               "symbol": "Connector"
             }
           }
@@ -1249,7 +1249,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
               "symbol": "BEND_HANDLES_MIN_ZOOM"
             }
           }
@@ -1327,7 +1327,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "AnchorDots"
             }
           }
@@ -1355,7 +1355,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "ANCHOR_DOT_OFFSET_PX"
             }
           }
@@ -1369,7 +1369,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
               "symbol": "ANCHOR_DOTS_MIN_ZOOM"
             }
           }
@@ -1400,7 +1400,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
               "symbol": "ConnectorDragPreview"
             }
           }
@@ -1414,7 +1414,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnectionToPoint"
             }
           }
@@ -1428,7 +1428,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
+              "path": "packages/canvas/src/connectors/routing.ts",
               "symbol": "routeConnection"
             }
           }
@@ -1462,7 +1462,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/connector/def.ts",
+              "path": "packages/canvas/src/connectors/def.ts",
               "symbol": "CONNECTOR_DASH_PATTERN_PX"
             }
           }

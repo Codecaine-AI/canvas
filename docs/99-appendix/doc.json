@@ -8,12 +8,12 @@
       "id": "b-appendix-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "Vendor provenance (MPL-2.0), UI-primitive and SpectreRef vendoring, extraction history, board-design-reference provenance, and the package-wide testing approach.",
+        "covers": "BlockSuite provenance (MPL-2.0), UI-primitive and SpectreRef vendoring, extraction history, board-design-reference provenance, and the package-wide testing approach.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
           "MPL-2.0",
-          "vendor boundary",
+          "MPL-2.0 file-level boundary",
           "extraction history",
           "board-design-reference",
           "colocated tests"
@@ -85,7 +85,7 @@
           "insert": " set. It covers cross-cutting concerns that don't belong to any one layer: where vendored code came from and why it's legally isolated, where the package's UI primitives and reference types came from, when and how the engine was extracted into its own repo, where the FigJam pixel-parity constants used throughout "
         },
         {
-          "insert": "render/",
+          "insert": "stage/",
           "attributes": {
             "code": true
           }
@@ -94,7 +94,7 @@
           "insert": " and "
         },
         {
-          "insert": "chrome/",
+          "insert": "stage/editor/",
           "attributes": {
             "code": true
           }
@@ -113,7 +113,7 @@
       },
       "text": [
         {
-          "insert": "Vendor provenance: BlockSuite (MPL-2.0)"
+          "insert": "BlockSuite provenance (MPL-2.0)"
         }
       ],
       "children": []
@@ -124,7 +124,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The A* orthogonal routing algorithm at the heart of the routing layer (see "
+          "insert": "The A* orthogonal routing algorithm at the heart of the connectors slice (see "
         },
         {
           "insert": "canvas-30-routing",
@@ -153,33 +153,73 @@
           "insert": "file-level"
         },
         {
-          "insert": " copyleft, not project-level: only the specific files that carry BlockSuite-derived code inherit its license obligations, not the rest of the codebase they sit alongside. To keep that boundary exact and auditable, every vendored or ported file lives under a single directory, "
+          "insert": " copyleft, not project-level: only the specific files that carry BlockSuite-derived code inherit its license obligations, not the rest of the codebase they sit alongside. The former single vendor directory ("
         },
         {
-          "insert": "packages/canvas/src/vendor/blocksuite/",
+          "insert": "src/vendor/blocksuite/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") was dissolved in the layout overhaul: the pathfinding files now live in "
+        },
+        {
+          "insert": "packages/canvas/src/connectors/pathfinding/",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite"
+              "path": "packages/canvas/src/connectors/pathfinding"
             }
           }
         },
         {
-          "insert": ", and each file there carries a header citing its upstream BlockSuite source path and the MPL-2.0 license, recorded in detail in "
+          "insert": " and "
         },
         {
-          "insert": "packages/canvas/src/vendor/blocksuite/NOTICE",
+          "insert": "snap-distribution.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts"
             }
           }
         },
         {
-          "insert": "."
+          "insert": " in "
+        },
+        {
+          "insert": "packages/canvas/src/stage/editor/features/snapping/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", each still carrying a header citing its upstream BlockSuite source path and the MPL-2.0 license, recorded in detail in the BlockSuite MPL provenance section of "
+        },
+        {
+          "insert": "PROVENANCE.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "PROVENANCE.md"
+            }
+          }
+        },
+        {
+          "insert": " (which absorbed the former "
+        },
+        {
+          "insert": "src/vendor/blocksuite/NOTICE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
         }
       ],
       "children": []
@@ -253,47 +293,60 @@
           }
         },
         {
-          "insert": " math primitives the other files need. A sixth file, "
+          "insert": " math primitives the other files need. A further BlockSuite-derived algorithm-only port (the connector anchor-snap and rendering decision cascade, formerly "
         },
         {
           "insert": "connection-overlay.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", is also a BlockSuite-derived algorithm-only port (the connector anchor-snap and rendering decision cascade) but lives outside "
+          "insert": ") lives outside the pathfinding directory, split across "
         },
         {
-          "insert": "vendor/blocksuite/",
+          "insert": "connection-cascade.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts"
+            }
           }
         },
         {
           "insert": " in "
         },
         {
-          "insert": "src/interaction/",
+          "insert": "src/connectors/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " per the NOTICE's own file list — its provenance is still tracked there even though it sits outside the vendor directory proper. The vendored files enumerated under "
+          "insert": " and the anchor port in "
         },
         {
-          "insert": "src/vendor/blocksuite/",
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " — their provenance is tracked in the same PROVENANCE.md section even though they sit outside "
+        },
+        {
+          "insert": "pathfinding/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " itself are: "
+          "insert": ". The MPL-2.0 files themselves are: "
         },
         {
           "insert": "a-star.ts",
@@ -301,7 +354,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/a-star.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/a-star.ts"
             }
           }
         },
@@ -314,7 +367,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/gfx-types.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/gfx-types.ts"
             }
           }
         },
@@ -327,7 +380,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/graph.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/graph.ts"
             }
           }
         },
@@ -340,20 +393,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "priority-queue.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/priority-queue.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/path-generator.ts"
             }
           }
         },
@@ -361,30 +401,48 @@
           "insert": ", and "
         },
         {
+          "insert": "priority-queue.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/priority-queue.ts"
+            }
+          }
+        },
+        {
+          "insert": " (all under "
+        },
+        {
+          "insert": "connectors/pathfinding/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), plus "
+        },
+        {
           "insert": "snap-distribution.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/snap-distribution.ts"
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts"
             }
           }
         },
         {
-          "insert": ", plus the "
+          "insert": " (under "
         },
         {
-          "insert": "NOTICE",
+          "insert": "stage/editor/features/snapping/",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
-            }
+            "code": true
           }
         },
         {
-          "insert": " record itself."
+          "insert": ")."
         }
       ],
       "children": []
@@ -393,34 +451,34 @@
       "id": "b-appendix-vendor-filetree-6",
       "flavour": "file-tree",
       "props": {
-        "title": "src/vendor/blocksuite/ — the exact MPL-2.0 boundary",
+        "title": "BlockSuite MPL-2.0 files — absorbed into the tree (formerly src/vendor/blocksuite/)",
         "entries": [
           {
-            "path": "NOTICE",
-            "note": "provenance record: upstream path, license, and modification status per file"
+            "path": "PROVENANCE.md",
+            "note": "BlockSuite MPL provenance section: upstream path, license, and modification status per file (absorbed the former NOTICE)"
           },
           {
-            "path": "a-star.ts",
+            "path": "src/connectors/pathfinding/a-star.ts",
             "note": "verbatim; import specifiers rewritten to local graph.ts/priority-queue.ts/gfx-types.ts"
           },
           {
-            "path": "graph.ts",
+            "path": "src/connectors/pathfinding/graph.ts",
             "note": "verbatim; import specifiers rewritten to local gfx-types.ts"
           },
           {
-            "path": "priority-queue.ts",
+            "path": "src/connectors/pathfinding/priority-queue.ts",
             "note": "verbatim, MPL-2.0 header added"
           },
           {
-            "path": "path-generator.ts",
+            "path": "src/connectors/pathfinding/path-generator.ts",
             "note": "labeled port: pure orthogonal path-generation logic extracted from BlockSuite's connector-manager.ts"
           },
           {
-            "path": "snap-distribution.ts",
+            "path": "src/stage/editor/features/snapping/snap-distribution.ts",
             "note": "labeled port: distribution-snap search extracted from BlockSuite's snap-overlay.ts, one documented axis-bug fix"
           },
           {
-            "path": "gfx-types.ts",
+            "path": "src/connectors/pathfinding/gfx-types.ts",
             "note": "no direct upstream file; dependency-free reimplementation of @blocksuite/global math primitives"
           }
         ]
@@ -436,38 +494,25 @@
       },
       "text": [
         {
-          "insert": "Do not move BlockSuite-derived logic out of "
+          "insert": "The MPL-2.0 boundary is per-file: every BlockSuite-derived file carries an MPL-2.0 provenance header, and "
         },
         {
-          "insert": "src/vendor/blocksuite/",
+          "insert": "PROVENANCE.md",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite"
+              "path": "PROVENANCE.md"
             }
           }
         },
         {
-          "insert": " into non-vendor files without legal review, and do not add non-BlockSuite-derived code into "
+          "insert": "'s BlockSuite MPL provenance section enumerates the exact set. Do not blend BlockSuite-derived logic into other files without legal review, do not add unrelated code into the listed files, and do not strip their headers. The header-plus-record set is the license boundary — keep it exact. If a ported file is ever modified, update "
         },
         {
-          "insert": "vendor/blocksuite/",
+          "insert": "PROVENANCE.md",
           "attributes": {
             "code": true
-          }
-        },
-        {
-          "insert": ". The directory boundary is the license boundary — keep it exact. If a vendored file is ever modified, update "
-        },
-        {
-          "insert": "NOTICE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/NOTICE"
-            }
           }
         },
         {
@@ -694,7 +739,7 @@
           "insert": " (also vendored from BlockSuite, but staying in Spectre because it backs the docs editor's slash menu rather than the canvas engine) — lives in "
         },
         {
-          "insert": "packages/canvas/PROVENANCE.md",
+          "insert": "PROVENANCE.md",
           "attributes": {
             "code": true,
             "reference": {
@@ -728,7 +773,7 @@
       "props": {},
       "text": [
         {
-          "insert": "packages/canvas/board-design-reference/",
+          "insert": "board-design-reference/",
           "attributes": {
             "code": true,
             "reference": {
@@ -808,7 +853,7 @@
           "insert": " (an inventory of every chrome surface observed). Every FigJam-derived constant in the engine — dispersed beside its consumer since the theme dispersal, notably the "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/palette.ts",
           "attributes": {
             "code": true
           }
@@ -878,10 +923,28 @@
       "props": {},
       "text": [
         {
-          "insert": "Tests are colocated per layer rather than collected in one top-level suite. Each layer directory — "
+          "insert": "Tests are colocated with the code they cover rather than collected in one big suite. Each slice owns its own "
         },
         {
-          "insert": "model/",
+          "insert": "__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " subdirectory — "
+        },
+        {
+          "insert": "state/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "objects/",
           "attributes": {
             "code": true
           }
@@ -899,7 +962,7 @@
           "insert": ", "
         },
         {
-          "insert": "routing/",
+          "insert": "connectors/",
           "attributes": {
             "code": true
           }
@@ -908,49 +971,22 @@
           "insert": ", "
         },
         {
-          "insert": "render/",
+          "insert": "stage/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
+          "insert": ", and each vertical feature slice under "
         },
         {
-          "insert": "editor/",
+          "insert": "stage/editor/features/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "canvases/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "chrome/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — owns its own "
-        },
-        {
-          "insert": "__tests__/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " subdirectory, dissolving what used to be a single top-level "
+          "insert": " (selection, move, place, snapping, selection-toolbar, context-menu, text-editing, section-fit) — plus a small top-level "
         },
         {
           "insert": "src/__tests__/",
@@ -959,7 +995,20 @@
           }
         },
         {
-          "insert": " directory. Run the full package suite with "
+          "insert": " for cross-cutting suites, notably "
+        },
+        {
+          "insert": "import-boundaries.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__/import-boundaries.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which encodes the layer order of the current tree. Run the full package suite with "
         },
         {
           "insert": "bun test packages/canvas/src",
@@ -968,7 +1017,7 @@
           }
         },
         {
-          "insert": " from the repo root, or scope to a single layer's "
+          "insert": " from the repo root, or scope to a single slice's "
         },
         {
           "insert": "__tests__/",
@@ -993,7 +1042,7 @@
           "insert": "Pure logic layers — "
         },
         {
-          "insert": "model/",
+          "insert": "state/",
           "attributes": {
             "code": true
           }
@@ -1011,7 +1060,7 @@
           "insert": ", "
         },
         {
-          "insert": "routing/",
+          "insert": "connectors/",
           "attributes": {
             "code": true
           }
@@ -1020,7 +1069,7 @@
           "insert": " — get plain unit tests: given inputs, assert outputs, no rendering involved. The "
         },
         {
-          "insert": "render/",
+          "insert": "stage/",
           "attributes": {
             "code": true
           }
@@ -1029,7 +1078,7 @@
           "insert": " and "
         },
         {
-          "insert": "editor/",
+          "insert": "stage/editor/",
           "attributes": {
             "code": true
           }
@@ -1101,7 +1150,7 @@
           }
         },
         {
-          "insert": " engine — start back at the overview for the map of how model, interaction, routing, render, editor, chrome, and studio/canvas JSON files fit together."
+          "insert": " engine — start back at the overview for the map of how state, objects, interaction, connectors, stage, the editor feature slices, and studio/canvas JSON files fit together."
         }
       ],
       "children": []

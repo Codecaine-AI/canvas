@@ -111,7 +111,7 @@
             "bold": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/InteractiveCanvasEditor.tsx",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
               "symbol": "InteractiveCanvasEditor"
             }
           }
@@ -184,13 +184,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
               "symbol": "InteractionState"
             }
           }
         },
         {
-          "insert": " machine (press/move/resize/marquee/connector-drag/etc.) via "
+          "insert": " machine (press/move/resize/drag-select/connector-drag/etc.) via "
         },
         {
           "insert": "stepInteraction",
@@ -245,7 +245,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/CanvasDock.tsx",
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
               "symbol": "CanvasDock"
             }
           }
@@ -259,7 +259,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
               "symbol": "SelectionToolbarLayer"
             }
           }
@@ -273,7 +273,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
@@ -358,7 +358,7 @@
             "bold": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/InteractiveCanvasViewer.tsx",
+              "path": "packages/canvas/src/stage/viewer/InteractiveCanvasViewer.tsx",
               "symbol": "InteractiveCanvasViewer"
             }
           }
@@ -417,7 +417,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/viewport.ts",
+              "path": "packages/canvas/src/stage/viewport.ts",
               "symbol": "containerViewBounds"
             }
           }
@@ -598,7 +598,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/viewport.ts"
+              "path": "packages/canvas/src/stage/viewport.ts"
             }
           }
         },
@@ -611,7 +611,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/viewport.ts",
+              "path": "packages/canvas/src/stage/viewport.ts",
               "symbol": "ViewportState"
             }
           }
@@ -790,7 +790,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-viewport.ts",
+              "path": "packages/canvas/src/stage/editor/use-canvas-viewport.ts",
               "symbol": "useCanvasViewport"
             }
           }
@@ -896,7 +896,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
               "symbol": "createFrameCoalescer"
             }
           }
@@ -978,7 +978,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
               "symbol": "useCanvasHotkeys"
             }
           }
@@ -1467,7 +1467,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-hotkeys.ts",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
               "symbol": "useCanvasHotkeys"
             }
           }
@@ -1508,7 +1508,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/use-canvas-viewport.ts"
+              "path": "packages/canvas/src/stage/editor/use-canvas-viewport.ts"
             }
           }
         },
@@ -1538,12 +1538,12 @@
           "insert": "Editor-layer tests live under "
         },
         {
-          "insert": "packages/canvas/src/editor/__tests__/",
+          "insert": "packages/canvas/src/stage/editor/__tests__/",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/__tests__"
+              "path": "packages/canvas/src/stage/editor/__tests__"
             }
           }
         },
@@ -1556,7 +1556,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/__tests__/hotkeys.test.tsx"
+              "path": "packages/canvas/src/stage/editor/__tests__/hotkeys.test.tsx"
             }
           }
         },
@@ -1578,7 +1578,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/__tests__/viewport.test.ts"
+              "path": "packages/canvas/src/stage/editor/__tests__/viewport.test.ts"
             }
           }
         },
@@ -1627,7 +1627,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/__tests__/use-canvas-viewport.zoom.test.ts"
+              "path": "packages/canvas/src/stage/editor/__tests__/use-canvas-viewport.zoom.test.ts"
             }
           }
         },
@@ -1640,7 +1640,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/__tests__/viewer-view-crop.test.tsx"
+              "path": "packages/canvas/src/stage/editor/__tests__/viewer-view-crop.test.tsx"
             }
           }
         },
@@ -1709,7 +1709,7 @@
           "insert": "Text editing is the "
         },
         {
-          "insert": "editor/features/text-editing/",
+          "insert": "stage/editor/features/text-editing/",
           "attributes": {
             "code": true
           }
@@ -1732,7 +1732,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/use-text-editing.ts",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/use-text-editing.ts",
               "symbol": "useTextEditing"
             }
           }
@@ -1764,7 +1764,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/features/text-editing/TextEditingOverlay.tsx",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
               "symbol": "TextEditingOverlay"
             }
           }
@@ -1824,7 +1824,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/editor/components/ColorPicker.tsx",
+              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
               "symbol": "ColorPicker"
             }
           }
