@@ -176,12 +176,17 @@ describe("AnchorDots (P3 — D5/D15)", () => {
 
     fireEvent.pointerEnter(right!);
 
-    const ghostObject = container.querySelector(
+    const ghostWrapper = container.querySelector(
+      "[data-canvas-quick-connect-ghost]",
+    ) as HTMLElement;
+    const ghostObject = ghostWrapper.querySelector(
       '[data-canvas-object-id="rect-quick-connect-ghost"]',
     ) as HTMLElement;
     const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
     const renderedEnd = lastPointOf(previewPath.getAttribute("d")!);
-    const ghostLeft = Number.parseFloat(ghostObject.style.left);
+    // Screen position lives on the zoom-scaled wrapper; the object inside is
+    // world-sized at 0,0 (zoom is 1 here, so no scale factor to apply).
+    const ghostLeft = Number.parseFloat(ghostWrapper.style.left);
     const ghostCenter = ghostLeft + Number.parseFloat(ghostObject.style.width) / 2;
 
     expectClose(renderedEnd.x, ghostLeft - CONNECTOR_END_GAP_PX);

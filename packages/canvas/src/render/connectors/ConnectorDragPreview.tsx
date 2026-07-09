@@ -52,19 +52,6 @@ function quickConnectGhostWorldGeometry(
   };
 }
 
-function screenGeometryFromWorld(
-  viewport: ViewportState,
-  geometry: InteractiveCanvasObject["geometry"],
-): InteractiveCanvasObject["geometry"] {
-  const topLeft = worldToScreen(viewport, { x: geometry.x, y: geometry.y });
-  return {
-    x: topLeft.x,
-    y: topLeft.y,
-    width: geometry.width * viewport.zoom,
-    height: geometry.height * viewport.zoom,
-  };
-}
-
 function quickConnectGhostObject(
   source: InteractiveCanvasObject,
   geometry: InteractiveCanvasObject["geometry"],
@@ -151,17 +138,36 @@ export function ConnectorDragPreview({
   const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
   const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];
   const snappedWorld = drag.candidate?.snapKind === "outline" ? drag.candidate.point : undefined;
+  // The ghost renders at WORLD size inside a zoom-scaled wrapper (below) —
+  // NOT at pre-multiplied screen size. Size-derived rendering (the icon
+  // glyph stroke step-down, logical-px shape borders) must see the same
+  // dimensions the placed object will have, or the ghost's line weight comes
+  // out 1/zoom heavier than the real thing.
+  const ghostScreenOrigin = ghostWorldObject
+    ? worldToScreen(viewport, { x: ghostWorldObject.geometry.x, y: ghostWorldObject.geometry.y })
+    : null;
   const ghostObject = ghostWorldObject
     ? {
         ...ghostWorldObject,
-        geometry: screenGeometryFromWorld(viewport, ghostWorldObject.geometry),
+        geometry: { ...ghostWorldObject.geometry, x: 0, y: 0 },
       }
     : null;
 
   return (
     <>
-      {ghostObject ? (
-        <div data-canvas-quick-connect-ghost="true" style={{ opacity: 0.35, pointerEvents: "none" }}>
+      {ghostObject && ghostScreenOrigin ? (
+        <div
+          data-canvas-quick-connect-ghost="true"
+          style={{
+            position: "absolute",
+            left: `${ghostScreenOrigin.x}px`,
+            top: `${ghostScreenOrigin.y}px`,
+            transform: `scale(${viewport.zoom})`,
+            transformOrigin: "0 0",
+            opacity: 0.35,
+            pointerEvents: "none",
+          }}
+        >
           <ObjectShape
             object={ghostObject}
             selected={false}

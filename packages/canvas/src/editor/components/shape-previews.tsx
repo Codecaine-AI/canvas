@@ -31,8 +31,9 @@
  */
 
 import type { CanvasBounds } from "../../state/geometry";
+import { defaultGeometryFor } from "../../state/schema/object-defaults";
 import type { ShapeCatalogEntry } from "../../objects/catalog";
-import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphId } from "../../objects/shapes/icon/icon-glyphs";
+import { ICON_GLYPHS, iconGlyphStrokeWidthForSize, type IconGlyphId } from "../../objects/shapes/icon/icon-glyphs";
 import {
   chevronPoints,
   ellipsePoints,
@@ -54,7 +55,7 @@ export type ShapePreviewIcon = (props: { className?: string }) => React.JSX.Elem
 // Preview helpers
 // ---------------------------------------------------------------------------
 
-const S = 1.4; // stroke width for the 20x20 preview grid (matches the pre-existing convention)
+const S = 1.1; // stroke width for the 20x20 preview grid (lightened to match FigJam's icon weight)
 
 /** Shared local bounds every true-outline polygon preview is generated against — a 16x16 box inset 2px inside the 20x20 viewBox. */
 const PREVIEW_BOUNDS: CanvasBounds = { x: 2, y: 2, width: 16, height: 16 };
@@ -84,13 +85,31 @@ function svgIcon(children: string): ShapePreviewIcon {
   };
 }
 
-/** Advanced-tier preview: renders the exact glyph path data from the ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the preview viewBox. */
+/**
+ * Stroke width (viewBox units) for the Advanced-tier picker previews: the
+ * EXACT stroke the on-canvas renderer (IconShapeBody) computes for an icon at
+ * its default placed size, via the same `iconGlyphStrokeWidthForSize`
+ * step-down. Stroke in viewBox units is scale-invariant, so the picker glyph
+ * is a faithful miniature of the icon a click will draw — same line weight
+ * relative to the glyph, no separate hand-tuned preview constant.
+ */
+const iconDefaultGeometry = defaultGeometryFor("icon");
+const ICON_PREVIEW_STROKE_WIDTH = iconGlyphStrokeWidthForSize(
+  Math.min(iconDefaultGeometry.width, iconDefaultGeometry.height),
+);
+
+/** Advanced-tier preview: renders the exact glyph path data from the ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the preview viewBox, stroked with the same width the default-size placed icon draws with (ICON_PREVIEW_STROKE_WIDTH). */
 function iconGlyphPreview(glyphId: IconGlyphId): ShapePreviewIcon {
   const glyph = ICON_GLYPHS[glyphId];
   return function IconGlyphPreview({ className }: { className?: string }) {
     return (
       <svg viewBox={`0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}`} className={className} fill="none" aria-hidden="true">
-        <g stroke="currentColor" strokeWidth={ICON_GLYPH_STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
+        <g
+          stroke="currentColor"
+          strokeWidth={ICON_PREVIEW_STROKE_WIDTH}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           {glyph.elements.map((element, index) => {
             if (element.kind === "path") {
               // eslint-disable-next-line react/no-array-index-key -- glyph element lists are static, position-stable

@@ -127,11 +127,17 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
     const ghost = container.querySelector("[data-canvas-quick-connect-ghost]") as HTMLElement;
     expect(ghost).toBeTruthy();
     expect(ghost.style.opacity).toBe("0.35");
+    // The wrapper carries the screen position + zoom scale; the object inside
+    // renders at WORLD size from 0,0 so size-derived stroke logic matches the
+    // object a click will create.
+    expect(ghost.style.left).toBe("322px");
+    expect(ghost.style.top).toBe("0px");
+    expect(ghost.style.transform).toBe("scale(1)");
 
     const ghostObject = ghost.querySelector('[data-canvas-object-id="process-a-quick-connect-ghost"]') as HTMLElement;
     expect(ghostObject).toBeTruthy();
     expect(ghostObject.getAttribute("data-canvas-object-type")).toBe("process");
-    expect(ghostObject.style.left).toBe("322px");
+    expect(ghostObject.style.left).toBe("0px");
     expect(ghostObject.style.top).toBe("0px");
     expect(ghostObject.style.width).toBe("160px");
     expect(ghostObject.style.height).toBe("96px");

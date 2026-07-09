@@ -19,8 +19,10 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  * interface icons (co-location alignment).
  *
  * Stroke width is NOT baked into the path data — callers apply stroke width
- * in viewBox units. Picker previews keep `ICON_GLYPH_STROKE_WIDTH`; on-canvas
- * glyphs derive a size-aware width via `iconGlyphStrokeWidthForSize()`.
+ * in viewBox units. Every renderer derives it via
+ * `iconGlyphStrokeWidthForSize()`: on-canvas glyphs pass their object size,
+ * and the picker previews pass the icon default placed size — so a preview is
+ * a faithful miniature of the icon a click will draw.
  */
 
 /** The 26 Advanced-tier glyph ids (exact enum from the parity brief). */
@@ -58,8 +60,10 @@ export type IconGlyphId = (typeof ICON_GLYPH_IDS)[number];
 /**
  * Recommended default stroke width, in viewBox units, for a glyph drawn at its
  * native (18x18 Nucleo) viewBox. 1/18 is a deliberately lighter weight than
- * Nucleo's native 1/12; previews use it directly, while on-canvas glyphs use
- * it as the reference stroke in `iconGlyphStrokeWidthForSize()`.
+ * Nucleo's native 1/12. No renderer draws with this constant anymore (the
+ * picker previews now stroke with `iconGlyphStrokeWidthForSize()` at the icon
+ * default placed size, same as on-canvas); it remains the documented
+ * reference weight the canvas stroke is tuned against.
  */
 export const ICON_GLYPH_STROKE_WIDTH = 1.0;
 
