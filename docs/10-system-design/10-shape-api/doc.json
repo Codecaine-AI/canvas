@@ -1394,7 +1394,7 @@
           }
         },
         {
-          "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility is zoom-gated by "
+          "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility and interactivity are zoom-gated by "
         },
         {
           "insert": "ANCHOR_DOTS_MIN_ZOOM",
@@ -1408,7 +1408,7 @@
           }
         },
         {
-          "insert": " (0.5) — below the threshold the dots still render at "
+          "insert": " (0.5) — below 50% zoom, select-mode dots are hidden and inert at "
         },
         {
           "insert": "opacity: 0",
@@ -1417,7 +1417,16 @@
           }
         },
         {
-          "insert": " and stay grabbable, so visibility is the ONLY zoom-gated property and the interaction envelope is unchanged outside Connector Mode. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a dot bubbles to the stage's "
+          "insert": " and "
+        },
+        {
+          "insert": "pointer-events: none",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; Connector Mode bypasses the gate so its dots stay visible and interactive. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a visible, interactive dot bubbles to the stage's "
         },
         {
           "insert": "[data-canvas-port]",

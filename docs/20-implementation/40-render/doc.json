@@ -1082,7 +1082,7 @@
           }
         },
         {
-          "insert": " covers select-mode anchor dots, hover-driven Connector Mode dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only select-mode zoom gating, Connector Mode gate bypass, and the cursor token ban. The grid tests stay focused on tier math and background CSS output."
+          "insert": " covers select-mode anchor dots, hover-driven Connector Mode dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, hidden-and-inert select-mode zoom gating, Connector Mode gate bypass, and the cursor token ban. The grid tests stay focused on tier math and background CSS output."
         }
       ],
       "children": []

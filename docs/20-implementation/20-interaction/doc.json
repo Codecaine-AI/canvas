@@ -1146,7 +1146,7 @@
           }
         },
         {
-          "insert": " is 0.5 and gates select-mode visibility only; Connector Mode bypasses it. Hover/press expands the dot into the full 28px arrow button, emits the hovered port for quick-connect preview, and select mode deliberately keeps "
+          "insert": " is 0.5; below 50% zoom, select-mode dots are hidden and inert, while Connector Mode bypasses the gate. Hover/press expands the dot into the full 28px arrow button, emits the hovered port for quick-connect preview, and select mode deliberately keeps "
         },
         {
           "insert": "cursor: \"default\"",

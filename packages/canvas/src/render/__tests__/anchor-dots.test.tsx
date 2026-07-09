@@ -189,7 +189,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(Math.abs(renderedEnd.x - ghostCenter)).toBeGreaterThan(CONNECTOR_END_GAP_PX);
   });
 
-  it("zoom-gates VISIBILITY only: below the threshold dots are opacity 0 but still present and grabbable", () => {
+  it("makes select-mode dots hidden and inert below the zoom gate", () => {
     const below = render(
       <CanvasStage
         document={makeDocument([triangle])}
@@ -202,7 +202,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(hiddenDots.length).toBe(4);
     for (const dot of hiddenDots) {
       expect(dot.style.opacity).toBe("0");
-      expect(dot.style.pointerEvents).toBe("auto");
+      expect(dot.style.pointerEvents).toBe("none");
     }
     below.unmount();
 
@@ -216,6 +216,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     );
     for (const dot of dots(above.container as HTMLElement, "tri")) {
       expect(dot.style.opacity).toBe("1");
+      expect(dot.style.pointerEvents).toBe("auto");
     }
   });
 
@@ -248,7 +249,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(dots(container as HTMLElement, "tri").length).toBe(0);
   });
 
-  it("keeps connector-mode hovered dots visible below the select-mode zoom gate", () => {
+  it("keeps connector-mode hovered dots visible and interactive below the select-mode zoom gate", () => {
     const { container } = render(
       <CanvasStage
         document={makeDocument([rect])}
@@ -263,6 +264,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(visibleDots.length).toBe(4);
     for (const dot of visibleDots) {
       expect(dot.style.opacity).toBe("1");
+      expect(dot.style.pointerEvents).toBe("auto");
     }
   });
 

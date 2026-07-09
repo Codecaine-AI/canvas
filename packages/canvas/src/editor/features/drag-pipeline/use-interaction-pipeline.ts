@@ -36,6 +36,7 @@ import { type Anchor } from "../../../routing/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
 import { panBy, worldToScreen, type ViewportState } from "../../../render/viewport";
 import {
+  ANCHOR_DOTS_MIN_ZOOM,
   ANCHOR_NAMES,
   HIT_TARGET_PX as ANCHOR_DOT_HIT_TARGET_PX,
   anchorScreenPoint,
@@ -344,7 +345,9 @@ export function useInteractionPipeline({
       const connectorHoverTargetId = hoveredObjectIdRef.current;
       const portProximityObjectIds =
         currentTool === "select" && selection.kind === "objects"
-          ? selection.objectIds
+          ? viewportRef.current.zoom >= ANCHOR_DOTS_MIN_ZOOM
+            ? selection.objectIds
+            : undefined
           : currentTool === "connector" && connectorHoverTargetId
             ? [connectorHoverTargetId]
           : undefined;

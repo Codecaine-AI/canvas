@@ -10,12 +10,10 @@ import { worldToScreen, type ViewportState } from "../viewport";
 const SELECTION_BLUE = "#0D99FF";
 
 /**
- * Zoom threshold below which anchor dots stop being VISIBLE (D15,
- * OBJECT-DEF-OVERHAUL.md §2). In select mode, selected-object dots still
- * render below it (opacity 0) and stay grabbable, preserving the pre-P3
- * interaction envelope exactly. Connector mode bypasses this visibility gate:
- * its hover-driven dots stay visible at every zoom. Resize corners are
- * unaffected (SelectionBox shows at any zoom). TUNABLE.
+ * Zoom threshold below which select-mode anchor dots become hidden and inert
+ * (D15, OBJECT-DEF-OVERHAUL.md §2). Connector mode bypasses this gate: its
+ * hover-driven dots stay visible and interactive at every zoom. Resize corners
+ * are unaffected (SelectionBox shows at any zoom). TUNABLE.
  */
 export const ANCHOR_DOTS_MIN_ZOOM = 0.5;
 
@@ -69,8 +67,8 @@ function arrowTransform(anchor: Anchor): string {
  * (objects/geometry.ts) mapped worldToScreen — so the dots you see, the ports
  * you grab, and the points connections snap to are all the same declared
  * anchors. Select mode supplies selected object ids and keeps the 50% zoom
- * visibility gate; connector mode supplies hovered/drag-source ids and
- * bypasses that gate so the hover affordance remains visible while zoomed out.
+ * visibility/interactivity gate; connector mode supplies hovered/drag-source ids
+ * and bypasses that gate so the hover affordance remains usable while zoomed out.
  * Replaces the old invisible EdgePorts (which sat inside the object button and
  * could only mark bbox midpoints — the button clips overflow, and true-outline
  * anchors sit off the bbox edge).
@@ -160,7 +158,7 @@ export function AnchorDots({
                   justifyContent: "center",
                   cursor: "default",
                   touchAction: "none",
-                  pointerEvents: interactive ? "auto" : "none",
+                  pointerEvents: interactive && visible ? "auto" : "none",
                   opacity: visible ? 1 : 0,
                 }}
               >
