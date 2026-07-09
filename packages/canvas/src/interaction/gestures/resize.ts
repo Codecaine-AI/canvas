@@ -12,15 +12,17 @@ import { gatherSnapCandidates } from "../hit-testing";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import type { CanvasGeometry } from "../../state/schema";
 import {
-  IDLE_INTERACTION_STATE,
   SNAP_THRESHOLD_SCREEN_PX,
-  emptyOverlay,
   type CanvasPointerEvent,
+  type ResizeHandle,
+} from "../types";
+import {
+  IDLE_INTERACTION_STATE,
+  emptyOverlay,
   type InteractionContext,
   type InteractionResult,
   type ResizeGesture,
-  type ResizeHandle,
-} from "../types";
+} from "../gesture-state";
 
 /** Minimum object size enforced by direct (handle) resize. */
 export const MIN_DIRECT_RESIZE_SIZE = 48;

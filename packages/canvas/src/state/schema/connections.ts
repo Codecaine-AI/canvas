@@ -1,6 +1,12 @@
 "use client";
 
+/**
+ * Connection schema vocabulary: endpoint anchors, connector style/arrow
+ * options, and persisted InteractiveCanvasConnection records.
+ */
 import type { CanvasColor } from "./colors";
+
+export type Anchor = "top" | "right" | "bottom" | "left";
 
 export type CanvasConnectionStyle = "solid" | "dashed";
 
@@ -8,7 +14,7 @@ export type CanvasArrowDirection = "none" | "forward" | "back" | "both";
 
 export type CanvasConnectionEndpoint = {
   objectId: string;
-  anchor?: "top" | "right" | "bottom" | "left" | "center";
+  anchor?: Anchor | "center";
   /**
    * Relative anchor point on the endpoint object's bounds, as
    * [0..1, 0..1] fractions of (width, height) from the top-left corner.

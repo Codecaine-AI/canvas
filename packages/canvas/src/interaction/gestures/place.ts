@@ -16,16 +16,18 @@ import { normalizeBounds, type CanvasPoint } from "../../state/geometry";
 import type { CanvasColor, CanvasGeometry, InteractiveCanvasObjectType } from "../../state/schema";
 import {
   DRAG_THRESHOLD,
+  worldDistance,
+  type CanvasPointerEvent,
+} from "../types";
+import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
-  worldDistance,
   type ArmedShapeVariant,
-  type CanvasPointerEvent,
   type InteractionContext,
   type InteractionOverlay,
   type InteractionResult,
   type PlaceGesture,
-} from "../types";
+} from "../gesture-state";
 
 /** Synthetic id carried by the ghost-preview draft object — never enters the document. */
 export const PLACE_PREVIEW_GHOST_ID = "__place-preview-ghost__";

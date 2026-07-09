@@ -12,8 +12,8 @@
  *
  * This module is the stable entry point (barrel) for the machine; the
  * implementation is split across:
- *  - ./types           — state union, pointer event/hit model, overlay,
- *                        context/result types, shared thresholds
+ *  - ./types           — pointer event/hit model, resize handles, thresholds
+ *  - ./gesture-state   — gesture union, overlay, context/result types
  *  - ./core            — stepInteraction dispatcher + idle/press-pending
  *                        routers + cancelInteraction
  *  - ./gestures/*      — move, resize, marquee, place, connectors steppers
@@ -24,12 +24,15 @@
  */
 export { cancelInteraction, stepInteraction } from "./core";
 export {
-  IDLE_INTERACTION_STATE,
   RESIZE_HANDLES,
-  type ArmedShapeVariant,
   type CanvasHit,
   type CanvasPointerEvent,
   type CanvasPointerEventType,
+  type ResizeHandle,
+} from "./types";
+export {
+  IDLE_INTERACTION_STATE,
+  type ArmedShapeVariant,
   type ConnectorAnchorCandidate,
   type ConnectorBendDragGesture,
   type ConnectorDragOverlay,
@@ -37,8 +40,7 @@ export {
   type InteractionOverlay,
   type InteractionResult,
   type InteractionState,
-  type ResizeHandle,
-} from "./types";
+} from "./gesture-state";
 export { hitTestObjects, selectionBounds } from "./hit-testing";
 export { MIN_DIRECT_RESIZE_SIZE, applyResizeHandle, resizeCursorFor } from "./gestures/resize";
 export {

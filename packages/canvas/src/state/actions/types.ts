@@ -1,6 +1,6 @@
 "use client";
 
-import type { Anchor } from "../../routing/routing";
+import type { Anchor } from "../schema/connections";
 import type {
   CanvasAnnotationTarget,
   CanvasArrowDirection,

@@ -16,10 +16,9 @@ import { join, relative } from "node:path";
  * vendor/blocksuite, and vendor imports nothing first-party.
  *
  * Known, deliberate exceptions (encoded below so drift is loud):
- *  - interaction/types.ts may TYPE-import ViewportState from
- *    render/viewport (never runtime code).
- *  - state/actions/types.ts may TYPE-import Anchor from routing/routing
- *    (the action payload vocabulary; never runtime code).
+ *  - interaction/gesture-state.ts may TYPE-import ViewportState from
+ *    render/viewport (never runtime code) while the gesture machine is split
+ *    away from the lower interaction kernel.
  *  - No objects/ -> render/ exceptions are permitted; the corresponding test
  *    asserts the allowed-violations list stays empty.
  *
@@ -164,11 +163,9 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("state/ does not runtime-import routing/ (type-only Anchor from routing/routing allowed)", () => {
+  test("state/ does not import routing/", () => {
     expect(
-      violations(join(SRC_ROOT, "state"), /^(\.\.\/)+routing(\/|$)/, {
-        skipTypeOnly: true,
-      }),
+      violations(join(SRC_ROOT, "state"), /^(\.\.\/)+routing(\/|$)/),
     ).toEqual([]);
   });
 
@@ -178,8 +175,8 @@ describe("import boundaries", () => {
     // The connection cascade and the main router both need that edge now that
     // below-slot labels have an external routing footprint; importing any
     // other objects/ module (def components, registry) stays a layering
-    // inversion. The remaining legal objects -> routing edges are the two
-    // type-only `Anchor` imports (object-chrome.tsx, shapes/shape-def.ts).
+    // inversion. The only allowed objects/ edges from routing are the pure
+    // geometry helpers below.
     expect(
       violations(
         join(SRC_ROOT, "routing"),
@@ -254,6 +251,14 @@ describe("import boundaries", () => {
       violations(join(SRC_ROOT, "interaction"), /^\.\.\/render(\/|$)/, {
         skipTypeOnly: true,
       }),
+    ).toEqual([]);
+  });
+
+  test("interaction/types.ts is kernel vocabulary with no render/ or routing/ imports", () => {
+    expect(
+      importSpecifiers(join(SRC_ROOT, "interaction", "types.ts")).filter((specifier) =>
+        /^(\.\.\/)+(render|routing)(\/|$)/.test(specifier),
+      ),
     ).toEqual([]);
   });
 

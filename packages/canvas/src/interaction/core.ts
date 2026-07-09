@@ -4,8 +4,9 @@
  * Core of the pointer-interaction state machine: the stepInteraction
  * dispatcher, the idle + press-pending routers (the shared entry that decides
  * which gesture a press becomes), and explicit cancellation. The individual
- * gesture steppers live in ./gestures/*; the shared types/constants in
- * ./types. Consumers import everything through ./interaction (the barrel).
+ * gesture steppers live in ./gestures/*; kernel vocabulary lives in ./types
+ * and gesture state in ./gesture-state. Consumers import everything through
+ * ./interaction (the barrel).
  */
 import type { CanvasAction, CanvasSelection } from "../state/actions";
 import { objectById } from "../state/geometry";
@@ -28,12 +29,14 @@ import {
 } from "./gestures/connectors";
 import {
   DRAG_THRESHOLD,
-  IDLE_INTERACTION_STATE,
-  emptyOverlay,
   selectedObjectIds,
-  toIdle,
   worldDistance,
   type CanvasPointerEvent,
+} from "./types";
+import {
+  IDLE_INTERACTION_STATE,
+  emptyOverlay,
+  toIdle,
   type ConnectorBendDragGesture,
   type ConnectorCreateGesture,
   type ConnectorEndpointDragGesture,
@@ -44,7 +47,7 @@ import {
   type PlaceGesture,
   type PressPending,
   type ResizeGesture,
-} from "./types";
+} from "./gesture-state";
 
 function isSelected(selection: CanvasSelection, objectId: string): boolean {
   return selection.kind === "objects" && selection.objectIds.includes(objectId);

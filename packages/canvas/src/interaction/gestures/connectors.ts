@@ -28,18 +28,20 @@ import { paintOrderedObjects } from "../../state/z-order";
 import type { CanvasAction } from "../../state/actions";
 import {
   DRAG_THRESHOLD,
+  worldDistance,
+  type CanvasPointerEvent,
+} from "../types";
+import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
   toIdle,
-  worldDistance,
-  type CanvasPointerEvent,
   type ConnectorAnchorCandidate,
   type ConnectorBendDragGesture,
   type ConnectorCreateGesture,
   type ConnectorEndpointDragGesture,
   type InteractionContext,
   type InteractionResult,
-} from "../types";
+} from "../gesture-state";
 
 const QUICK_CONNECT_MIN_GAP_PX = 120;
 const BEND_ENDPOINT_POSITION_EPSILON_PX = 0.5;

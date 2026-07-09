@@ -2,6 +2,7 @@
 
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
+import type { Anchor } from "../state/schema/connections";
 import { connectionBoundsForObject, getConnectionAnchors, outlinePolygon } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "../vendor/blocksuite/path-generator";
 // Connector routing figures (moved from theme/tokens.ts in the theme
@@ -49,7 +50,7 @@ const STRAIGHT_EDGE_MARGIN_PX = CONNECTOR_END_GAP_PX;
 const ROUTE_EPSILON = 0.01;
 const WAYPOINT_ORTHOGONAL_EPSILON_PX = 0.5;
 
-export type Anchor = "top" | "right" | "bottom" | "left";
+export type { Anchor } from "../state/schema/connections";
 
 export type RoutedConnection = {
   path: string;

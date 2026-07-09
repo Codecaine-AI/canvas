@@ -21,14 +21,16 @@ import {
 } from "../snapping";
 import { gatherSnapCandidates, objectGeometryMap } from "../hit-testing";
 import {
-  IDLE_INTERACTION_STATE,
   SNAP_THRESHOLD_SCREEN_PX,
-  emptyOverlay,
   type CanvasPointerEvent,
+} from "../types";
+import {
+  IDLE_INTERACTION_STATE,
+  emptyOverlay,
   type InteractionContext,
   type InteractionResult,
   type MoveGesture,
-} from "../types";
+} from "../gesture-state";
 
 /**
  * Dragging a section also carries its persisted parentId-descendants

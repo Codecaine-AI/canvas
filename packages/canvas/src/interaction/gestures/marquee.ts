@@ -8,15 +8,17 @@
 import { normalizeBounds } from "../../state/geometry";
 import { objectsIntersectingBounds } from "../hit-testing";
 import {
+  selectedObjectIds,
+  type CanvasPointerEvent,
+} from "../types";
+import {
   IDLE_INTERACTION_STATE,
   emptyOverlay,
-  selectedObjectIds,
   toIdle,
-  type CanvasPointerEvent,
   type InteractionContext,
   type InteractionResult,
   type MarqueeGesture,
-} from "../types";
+} from "../gesture-state";
 
 export function stepFromMarquee(
   state: MarqueeGesture,
