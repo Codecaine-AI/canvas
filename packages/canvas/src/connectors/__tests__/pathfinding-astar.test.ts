@@ -5,7 +5,7 @@ import { AStarRunner } from "../pathfinding/a-star";
 import { Bound } from "../pathfinding/gfx-types";
 import { PathGenerator } from "../pathfinding/path-generator";
 
-describe("vendored blocksuite priority-queue", () => {
+describe("pathfinding priority-queue", () => {
   it("dequeues in ascending priority order", () => {
     const queue = new PriorityQueue<string, number>((a, b) => a - b);
     queue.enqueue("c", 3);
@@ -38,7 +38,7 @@ describe("vendored blocksuite priority-queue", () => {
   });
 });
 
-describe("vendored blocksuite graph", () => {
+describe("pathfinding graph", () => {
   it("finds axis-aligned neighbors on a simple grid with no obstacles", () => {
     const points: [number, number, number][] = [
       [0, 0, 0],
@@ -69,7 +69,7 @@ describe("vendored blocksuite graph", () => {
   });
 });
 
-describe("vendored blocksuite AStarRunner", () => {
+describe("pathfinding AStarRunner", () => {
   // AStarRunner distinguishes the search start/end (sp/ep, must be members of
   // the graph's point set) from the "original" endpoints (originalSp/originalEp,
   // the true connector anchors) — mirroring how PathGenerator always calls it
@@ -106,7 +106,7 @@ describe("vendored blocksuite AStarRunner", () => {
   });
 });
 
-describe("vendored blocksuite PathGenerator", () => {
+describe("pathfinding PathGenerator", () => {
   it("produces a direct path when neither endpoint is bound and there is no obstacle", () => {
     const generator = new PathGenerator();
     const path = generator.generateOrthogonalConnectorPath({

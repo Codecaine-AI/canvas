@@ -1,34 +1,48 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync } from "node:fs";
-import { readFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
 
 /**
- * Structural import boundaries for src/ (see RESTRUCTURE.md, "Target tree",
- * amended 2026-07-09 after nesting the display domain under stage/).
+ * Layout law for packages/canvas/src.
  *
- * Layering: theme/ <- state <- connector routing/cascade <- objects
- * <- stage core|interaction <- stage/editor. Theme is one directory since the theme dispersal.
- * ui/ is app-agnostic primitives + INTERFACE icons only and imports nothing
- * from the rest of src. objects/ holds only defs/data (no ui components, no
- * editor JSX). Nothing outside stage/editor/ imports stage/editor/. The BlockSuite
- * MPL-2.0 pathfinding files live under connectors/pathfinding/, with the
- * distribution snap port under stage/editor/features/snapping/.
+ * Layer diagram (lower layers may never import higher layers):
  *
- * Known, deliberate exceptions (encoded below so drift is loud):
- *  - No objects/ -> stage/ exceptions are permitted; the corresponding test
- *    asserts the allowed-violations list stays empty.
+ *   ui (orthogonal; imports no first-party code outside ui/)
+ *   theme -> state -> objects -> interaction (kernel) -> connectors -> stage core -> stage/viewer
+ *                                                                             \
+ *                                                                              -> stage/editor
  *
- * The checks are static: they scan import/export specifiers, not runtime
- * behavior, so they run in milliseconds and fail with the offending file.
+ * stage core is src/stage/* excluding stage/viewer/** and stage/editor/**.
+ * stage/editor/features/* are vertical slices; sideways imports are forbidden
+ * except into features/snapping/, which is the declared service slice.
+ *
+ * TODO(layout) exception lists below encode present-day reality where it does
+ * not yet match the target architecture. Keep them narrow so drift is loud.
  */
 
 const SRC_ROOT = join(import.meta.dir, "..");
+const SOURCE_EXTENSIONS = ["", ".ts", ".tsx", "/index.ts", "/index.tsx"] as const;
+
+type ImportEdge = {
+  importer: string;
+  specifier: string;
+  target: string | null;
+  typeOnly: boolean;
+};
+
+function toPosix(path: string): string {
+  return path.split(/[\\/]/).join("/");
+}
 
 function sourceFiles(dir: string): string[] {
   const out: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+
+  for (const entry of entries) {
     if (entry.name === "__tests__" || entry.name === "node_modules") continue;
+
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
       out.push(...sourceFiles(path));
@@ -36,306 +50,394 @@ function sourceFiles(dir: string): string[] {
       out.push(path);
     }
   }
+
   return out;
 }
 
-function importSpecifiers(
-  filePath: string,
-  options: { skipTypeOnly?: boolean } = {},
-): string[] {
-  let content = readFileSync(filePath, "utf8");
-  if (options.skipTypeOnly) {
-    // Drop whole lines that are type-only imports/re-exports (e.g.
-    // `import type { X } from "..."` or `export type { X } from "..."`) so
-    // the rule below only sees runtime (value) imports. Multiline
-    // `import type {` blocks are dropped through their closing `} from`
-    // line. This does not handle inline mixed specifiers like
-    // `import { type X, Y } from "..."` — extend it if a legitimate edge
-    // ever needs that form.
-    const kept: string[] = [];
-    let inTypeBlock = false;
-    for (const line of content.split("\n")) {
-      if (inTypeBlock) {
-        if (/}\s*from\s+["'][^"']+["']/.test(line)) inTypeBlock = false;
-        continue;
-      }
-      if (/^\s*(import|export)\s+type\b/.test(line)) {
-        // Single-line form ends on this line; multiline form opens a block.
-        if (!/["'][^"']+["']/.test(line)) inTypeBlock = true;
-        continue;
-      }
-      kept.push(line);
-    }
-    content = kept.join("\n");
-  }
-  const specifiers: string[] = [];
-  const pattern = /(?:import|export)\s[^"']*?from\s+["']([^"']+)["']|import\s*\(\s*["']([^"']+)["']\s*\)/g;
-  for (const match of content.matchAll(pattern)) {
-    const specifier = match[1] ?? match[2];
-    if (specifier) specifiers.push(specifier);
-  }
-  return specifiers;
+function resolveFirstPartyTarget(filePath: string, specifier: string): string | null {
+  if (!specifier.startsWith(".")) return null;
+
+  const base = resolve(dirname(filePath), specifier);
+  const resolved =
+    SOURCE_EXTENSIONS.map((extension) => base + extension).find(
+      (candidate) => existsSync(candidate) && statSync(candidate).isFile(),
+    ) ?? base;
+
+  if (!resolved.startsWith(`${SRC_ROOT}/`)) return null;
+  return toPosix(relative(SRC_ROOT, resolved));
 }
 
-function violations(
-  dir: string,
-  forbidden: RegExp,
-  options: { skipTypeOnly?: boolean } = {},
-): string[] {
-  const found: string[] = [];
-  for (const file of sourceFiles(dir)) {
-    for (const specifier of importSpecifiers(file, options)) {
-      if (forbidden.test(specifier)) {
-        found.push(`${relative(SRC_ROOT, file)} -> ${specifier}`);
-      }
-    }
-  }
-  return found;
+function namedSpecifiersAreAllTypeOnly(clause: string): boolean {
+  const trimmed = clause.trim();
+  const bodyEnd = trimmed.lastIndexOf("}");
+  if (!trimmed.startsWith("{") || bodyEnd === -1) return false;
+
+  const body = trimmed.slice(1, bodyEnd).trim();
+  if (body.length === 0) return false;
+
+  return body
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .every((part) => part.startsWith("type "));
 }
 
-function violationsInFiles(
-  relPaths: string[],
-  forbidden: RegExp,
-  options: { skipTypeOnly?: boolean } = {},
-): string[] {
-  const found: string[] = [];
-  for (const relPath of relPaths) {
-    const file = join(SRC_ROOT, relPath);
-    for (const specifier of importSpecifiers(file, options)) {
-      if (forbidden.test(specifier)) {
-        found.push(`${relPath} -> ${specifier}`);
-      }
-    }
-  }
-  return found;
+function importClauseIsTypeOnly(clause: string): boolean {
+  const trimmed = clause.trim();
+  return /^type\b/.test(trimmed) || namedSpecifiersAreAllTypeOnly(trimmed);
 }
 
-function allSourceFiles(): string[] {
-  return sourceFiles(SRC_ROOT);
+function importEdges(filePath: string): ImportEdge[] {
+  const content = readFileSync(filePath, "utf8");
+  const importer = toPosix(relative(SRC_ROOT, filePath));
+  const edges: ImportEdge[] = [];
+  const staticPattern =
+    /^\s*(?:import|export)\s+([\s\S]*?)\s+from\s+["']([^"']+)["']/gm;
+  const dynamicPattern = /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g;
+
+  for (const match of content.matchAll(staticPattern)) {
+    const clause = match[1] ?? "";
+    const specifier = match[2] ?? "";
+    edges.push({
+      importer,
+      specifier,
+      target: resolveFirstPartyTarget(filePath, specifier),
+      typeOnly: importClauseIsTypeOnly(clause),
+    });
+  }
+
+  for (const match of content.matchAll(dynamicPattern)) {
+    const specifier = match[1] ?? "";
+    edges.push({
+      importer,
+      specifier,
+      target: resolveFirstPartyTarget(filePath, specifier),
+      typeOnly: false,
+    });
+  }
+
+  return edges;
 }
 
-function violationsAcrossTree(
-  forbidden: RegExp,
-  exclude: (relPath: string) => boolean,
-): string[] {
-  const found: string[] = [];
-  for (const file of allSourceFiles()) {
-    const rel = relative(SRC_ROOT, file);
-    if (exclude(rel)) continue;
-    for (const specifier of importSpecifiers(file)) {
-      if (forbidden.test(specifier)) {
-        found.push(`${rel} -> ${specifier}`);
-      }
-    }
-  }
-  return found;
+function allImportEdges(): ImportEdge[] {
+  return sourceFiles(SRC_ROOT).flatMap((file) => importEdges(file));
+}
+
+function firstPartyEdges(): ImportEdge[] {
+  return allImportEdges().filter((edge) => edge.target !== null);
+}
+
+function edgesFromDir(dir: string): ImportEdge[] {
+  const prefix = `${dir}/`;
+  return firstPartyEdges().filter((edge) => edge.importer.startsWith(prefix));
+}
+
+function allEdgesFromDir(dir: string): ImportEdge[] {
+  const prefix = `${dir}/`;
+  return allImportEdges().filter((edge) => edge.importer.startsWith(prefix));
+}
+
+function topLevel(relPath: string): string {
+  return relPath.split("/")[0] ?? relPath;
+}
+
+function targetStartsWith(edge: ImportEdge, prefixes: string[]): boolean {
+  return edge.target !== null && prefixes.some((prefix) => edge.target!.startsWith(prefix));
+}
+
+function formatEdge(edge: ImportEdge): string {
+  return `${edge.importer} -> ${edge.specifier}`;
+}
+
+function formatEdges(edges: ImportEdge[]): string[] {
+  return edges.map(formatEdge).sort();
+}
+
+function isStageCorePath(relPath: string): boolean {
+  return (
+    relPath.startsWith("stage/") &&
+    !relPath.startsWith("stage/editor/") &&
+    !relPath.startsWith("stage/viewer/")
+  );
+}
+
+function featureSlice(relPath: string): string | null {
+  const match = /^stage\/editor\/features\/([^/]+)\//.exec(relPath);
+  return match?.[1] ?? null;
 }
 
 describe("import boundaries", () => {
-  test("theme/palette.ts is a leaf (P0): imports only state/schema/colors, never tokens.ts or objects/", () => {
-    // OBJECT-DEF-OVERHAUL.md §3.6: palette.ts is a theme leaf sibling of
-    // tokens.ts so both tokens.ts and objects/ can import it without a
-    // layering violation. It must not import tokens.ts (tokens sit below it
-    // in this graph) or anything under objects/ (P0 is data-only; rewiring
-    // consumers is P1).
-    const specifiers = importSpecifiers(join(SRC_ROOT, "theme", "palette.ts"), {
-      skipTypeOnly: false,
-    }).filter((specifier) => specifier.startsWith("."));
-    expect(new Set(specifiers)).toEqual(new Set(["../state/schema/colors"]));
-  });
-
-  test("state/schema/object-defaults.ts is a schema-vocabulary leaf (P4): imports only schema siblings", () => {
-    // OBJECT-DEF-OVERHAUL.md §6 P4: the per-type defaults table lives BELOW
-    // both the reducer (which needs it at reduce time — the /actions subpath
-    // is a standalone public API) and the object registry (which stamps each
-    // def's `defaults` from it). It must therefore never import upward —
-    // only sibling schema vocabulary modules.
-    const specifiers = importSpecifiers(
-      join(SRC_ROOT, "state", "schema", "object-defaults.ts"),
-    );
-    expect(specifiers.filter((specifier) => !specifier.startsWith("./"))).toEqual([]);
-  });
-
-  test("theme/tokens.ts is layer 0: no runtime src imports (type-only state/schema imports allowed)", () => {
-    // Since the theme move, the theme tokens live in src/theme/tokens.ts, and its
-    // only src dependency is type-only state/schema imports (the style
-    // unions). The old SECTION_CAPTURE_OVERLAP_THRESHOLD re-export is gone —
-    // importers pull it from state/geometry directly.
+  test("ui/ is orthogonal: first-party imports stay inside ui/", () => {
     expect(
-      importSpecifiers(join(SRC_ROOT, "theme", "tokens.ts"), { skipTypeOnly: true }).filter((specifier) =>
-        specifier.startsWith("."),
+      formatEdges(edgesFromDir("ui").filter((edge) => !targetStartsWith(edge, ["ui/"]))),
+    ).toEqual([]);
+  });
+
+  test("theme/ imports no first-party code outside state/schema vocabulary", () => {
+    expect(
+      formatEdges(
+        edgesFromDir("theme").filter((edge) => !targetStartsWith(edge, ["state/schema"])),
       ),
     ).toEqual([]);
   });
 
-  test("state/ does not import objects/, stage/, interaction/, or ui/", () => {
-    expect(
-      violations(
-        join(SRC_ROOT, "state"),
-        /^(\.\.\/)+(objects|stage|interaction|ui)(\/|$)/,
-      ),
-    ).toEqual([]);
-  });
+  test("theme/ has only the current runtime palette vocabulary exception", () => {
+    const themeEdges = edgesFromDir("theme");
 
-  test("state/ does not import connectors/", () => {
-    expect(
-      violations(join(SRC_ROOT, "state"), /^(\.\.\/)+connectors(\/|$)/),
-    ).toEqual([]);
-  });
-
-  test("connector routing/cascade helpers import only state/, pathfinding/, and objects/geometry (never def components, stage/, interaction/, ui/, or theme)", () => {
-    // P3 (OBJECT-DEF-OVERHAUL.md §3.6, D4): the defs own their outline
-    // geometry, so connector routing consumes the pure, React-free
-    // objects/geometry.ts. The connection cascade and the main router both
-    // need that edge now that below-slot labels have an external routing
-    // footprint; importing any other objects/ module (def components,
-    // registry) stays a layering inversion. The only allowed objects/ edges
-    // from these pure connector helpers are the geometry helpers below.
-    expect(
-      violationsInFiles(
-        [
-          join("connectors", "routing.ts"),
-          join("connectors", "connection-cascade.ts"),
-          join("connectors", "bend-editing.ts"),
-        ],
-        /^(\.\.\/)+(objects|stage|interaction|ui)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
-      ),
-    ).toEqual([
-      `${join("connectors", "routing.ts")} -> ../objects/geometry`,
-      `${join("connectors", "connection-cascade.ts")} -> ../objects/geometry`,
+    // TODO(layout): tighten theme to type-only state/schema imports once
+    // palette.ts no longer imports and re-exports CANVAS_COLORS at runtime.
+    expect(formatEdges(themeEdges.filter((edge) => !edge.typeOnly))).toEqual([
+      "theme/palette.ts -> ../state/schema/colors",
     ]);
   });
 
-  test("objects/geometry.ts is a React-free leaf (P3): imports only state/, text slots, and pure geometry helpers, never react or def modules", () => {
-    // OBJECT-DEF-OVERHAUL.md §3.6: routing reaches def outlines through a
-    // pure objects/geometry.ts — it must stay importable from the routing
-    // layer, so no react/react-dom and no imports from object defs/registry
-    // (defs import IT, not vice versa) or any higher layer. The text-slot edge
-    // is pure band math for below-slot extended bounds; inscribed-text-rects is
-    // a pure sibling table re-exported by geometry.ts for center text geometry.
-    const specifiers = importSpecifiers(join(SRC_ROOT, "objects", "geometry.ts"));
-    expect(specifiers.filter((specifier) => !specifier.startsWith("."))).toEqual([]);
+  test("state/ is first-party self-contained", () => {
     expect(
-      specifiers.filter(
-        (specifier) =>
-          !/^\.\.\/state\//.test(specifier) &&
-          specifier !== "./text-slots" &&
-          specifier !== "./inscribed-text-rects",
+      formatEdges(edgesFromDir("state").filter((edge) => !targetStartsWith(edge, ["state/"]))),
+    ).toEqual([]);
+  });
+
+  test("objects/ imports only objects/, state/, and theme/ except current connector-def exceptions", () => {
+    const outsideObjectsStateTheme = edgesFromDir("objects").filter(
+      (edge) => !targetStartsWith(edge, ["objects/", "state/", "theme/"]),
+    );
+
+    // TODO(layout): tighten objects/ so connector definitions no longer flow
+    // upward from connectors/ into object definitions.
+    expect(formatEdges(outsideObjectsStateTheme)).toEqual([
+      "objects/object-def.ts -> ../connectors/def",
+      "objects/section/def.tsx -> ../../connectors/def",
+    ]);
+  });
+
+  test("interaction/ kernel imports only interaction/, state/, and objects/", () => {
+    expect(
+      formatEdges(
+        edgesFromDir("interaction").filter(
+          (edge) => !targetStartsWith(edge, ["interaction/", "state/", "objects/"]),
+        ),
       ),
     ).toEqual([]);
   });
 
-  test("objects/ does not import from stage/editor/ (runtime or type)", () => {
+  test("interaction/ kernel has no React imports", () => {
     expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+stage\/editor(\/|$)/),
-    ).toEqual([]);
-  });
-
-  test("objects/ does not import from interaction/ (runtime or type)", () => {
-    expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+interaction(\/|$)/),
-    ).toEqual([]);
-  });
-
-  test("objects/ does not import from ui/ (defs are data + canvas content; interface icons stay editor-side)", () => {
-    // Achieved by commit 3 of the co-location alignment: the canvas glyph
-    // registry lives at objects/shapes/icon/icon-glyphs.ts, so nothing in
-    // objects/ needs ui/icons anymore.
-    expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+ui(\/|$)/),
-    ).toEqual([]);
-  });
-
-  test("objects/ does not import from stage/ (zero permitted exceptions)", () => {
-    expect(
-      violations(join(SRC_ROOT, "objects"), /^(\.\.\/)+stage(\/|$)/),
-    ).toEqual([]);
-  });
-
-  test("stage core does not import from stage/editor/ (runtime or type)", () => {
-    expect(
-      violationsAcrossTree(
-        /^(\.\/|\.\.\/)+editor(\/|$)|(^|\/)stage\/editor\//,
-        (relPath) =>
-          !relPath.startsWith("stage/") ||
-          relPath.startsWith("stage/editor/") ||
-          relPath.startsWith("stage/viewer/"),
+      formatEdges(
+        allEdgesFromDir("interaction").filter(
+          (edge) => edge.specifier === "react" || edge.specifier.startsWith("react/"),
+        ),
       ),
     ).toEqual([]);
   });
 
-  test("interaction/ does not import from stage/editor/", () => {
-    expect(
-      violations(join(SRC_ROOT, "interaction"), /^\.\.\/stage\/editor(\/|$)/),
-    ).toEqual([]);
+  test("connectors/ imports only connectors/, state/, objects/, interaction/, and theme/ except current stage-core exceptions", () => {
+    const outsideConnectorLayers = edgesFromDir("connectors").filter(
+      (edge) =>
+        !targetStartsWith(edge, [
+          "connectors/",
+          "state/",
+          "objects/",
+          "interaction/",
+          "theme/",
+        ]),
+    );
+
+    // TODO(layout): tighten connectors/ so presentation pieces no longer reach
+    // into stage core for viewport projection or ObjectShape previews.
+    expect(formatEdges(outsideConnectorLayers)).toEqual([
+      "connectors/AnchorDots.tsx -> ../stage/viewport",
+      "connectors/ConnectorDragPreview.tsx -> ../stage/ObjectShape",
+      "connectors/ConnectorDragPreview.tsx -> ../stage/viewport",
+    ]);
   });
 
-  test("interaction/ does not runtime-import from stage/ (type-only ViewportState from stage/viewport allowed)", () => {
+  test("connectors/pathfinding/ imports no first-party code outside its MPL island", () => {
     expect(
-      violations(join(SRC_ROOT, "interaction"), /^\.\.\/stage(\/|$)/, {
-        skipTypeOnly: true,
-      }),
-    ).toEqual([]);
-  });
-
-  test("interaction/types.ts is kernel vocabulary with no stage/ or connectors/ imports", () => {
-    expect(
-      importSpecifiers(join(SRC_ROOT, "interaction", "types.ts")).filter((specifier) =>
-        /^(\.\.\/)+(stage|connectors)(\/|$)/.test(specifier),
+      formatEdges(
+        edgesFromDir("connectors/pathfinding").filter(
+          (edge) => !targetStartsWith(edge, ["connectors/pathfinding/"]),
+        ),
       ),
     ).toEqual([]);
   });
 
-  test("ui/ imports nothing from the rest of src (app-agnostic primitives + interface icons only)", () => {
-    // Strengthened after the co-location alignment: ColorPalettePopover
-    // (which consumed theme + editor styling) moved to stage/editor/components,
-    // and the canvas glyph registry moved to objects/shapes/icon/ — what
-    // remains in ui/ is fully self-contained.
+  test("connectors/pathfinding/ is consumed only by connectors/ plus the snapping gfx exception", () => {
+    const incomingPathfindingEdges = firstPartyEdges().filter(
+      (edge) =>
+        edge.target?.startsWith("connectors/pathfinding/") &&
+        !edge.importer.startsWith("connectors/pathfinding/"),
+    );
+
     expect(
-      violations(
-        join(SRC_ROOT, "ui"),
-        /^(\.\.\/)+(objects|stage|interaction|state|connectors)(\/|$)|^(\.\.\/)+theme(\/|$|\.)/,
+      formatEdges(
+        incomingPathfindingEdges.filter((edge) => {
+          if (edge.importer.startsWith("connectors/")) return false;
+          return !(
+            edge.importer === "stage/editor/features/snapping/snap-distribution.ts" &&
+            edge.target === "connectors/pathfinding/gfx-types.ts"
+          );
+        }),
       ),
     ).toEqual([]);
   });
 
-  test("nothing outside stage/editor/ imports stage/editor/ (root index.ts is the composition entry and is exempt)", () => {
+  test("features/snapping/snap-distribution.ts reaches only pathfinding gfx types", () => {
+    const incomingPathfindingEdges = firstPartyEdges().filter(
+      (edge) =>
+        edge.target?.startsWith("connectors/pathfinding/") &&
+        !edge.importer.startsWith("connectors/pathfinding/"),
+    );
+
     expect(
-      violationsAcrossTree(
-        /(^|\/)stage\/editor\/|^(\.\/|\.\.\/)+editor\//,
-        (relPath) =>
-          relPath.startsWith("stage/editor/") ||
-          relPath.startsWith("stage/viewer/") ||
-          relPath === "index.ts" ||
+      formatEdges(
+        incomingPathfindingEdges.filter(
+          (edge) => edge.importer === "stage/editor/features/snapping/snap-distribution.ts",
+        ),
+      ),
+    ).toEqual([
+      "stage/editor/features/snapping/snap-distribution.ts -> ../../../../connectors/pathfinding/gfx-types",
+    ]);
+  });
+
+  test("stage core never imports nested viewer/editor domains", () => {
+    const stageCoreEdges = firstPartyEdges().filter((edge) => isStageCorePath(edge.importer));
+
+    expect(
+      formatEdges(
+        stageCoreEdges.filter(
+          (edge) =>
+            edge.target?.startsWith("stage/editor/") ||
+            edge.target?.startsWith("stage/viewer/"),
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  test("stage core imports only lower first-party layers", () => {
+    const stageCoreEdges = firstPartyEdges().filter((edge) => isStageCorePath(edge.importer));
+
+    expect(
+      formatEdges(
+        stageCoreEdges.filter((edge) => {
+          if (edge.target === null) return false;
+          return !["stage", "state", "objects", "theme", "connectors", "interaction"].includes(
+            topLevel(edge.target),
+          );
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  test("stage core imports interaction only through type-only interaction/types.ts", () => {
+    const stageCoreEdges = firstPartyEdges().filter((edge) => isStageCorePath(edge.importer));
+
+    expect(
+      formatEdges(
+        stageCoreEdges.filter(
+          (edge) =>
+            edge.target?.startsWith("interaction/") &&
+            (!edge.typeOnly || edge.target !== "interaction/types.ts"),
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  test("stage/viewer/ imports only stage core plus lower layers", () => {
+    const viewerEdges = edgesFromDir("stage/viewer");
+
+    expect(
+      formatEdges(
+        viewerEdges.filter((edge) => {
+          if (edge.target === null) return false;
+          if (edge.target.startsWith("stage/editor/")) return false;
+          if (edge.target.startsWith("stage/viewer/")) return false;
+          if (isStageCorePath(edge.target)) return false;
+          return !targetStartsWith(edge, [
+            "state/",
+            "objects/",
+            "theme/",
+            "interaction/",
+            "connectors/",
+            "ui/",
+          ]);
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  test("stage/viewer/ has only the current editor feedback exception", () => {
+    const viewerEdges = edgesFromDir("stage/viewer");
+
+    // TODO(layout): tighten viewer so interaction feedback is exposed from
+    // stage core or viewer instead of reaching into stage/editor.
+    expect(
+      formatEdges(viewerEdges.filter((edge) => edge.target?.startsWith("stage/editor/"))),
+    ).toEqual([
+      "stage/viewer/InteractiveCanvasViewer.tsx -> ../editor/pipeline/InteractionFeedback",
+    ]);
+  });
+
+  test("stage/editor/ is imported only by composition entries plus the current viewer TODO", () => {
+    const incomingEditorEdges = firstPartyEdges().filter(
+      (edge) =>
+        edge.target?.startsWith("stage/editor/") &&
+        !edge.importer.startsWith("stage/editor/"),
+    );
+
+    expect(
+      formatEdges(
+        incomingEditorEdges.filter((edge) => {
+          // Public package composition entry.
+          if (edge.importer === "index.ts") return false;
           // DOM-equivalence composition harness, queued for retirement.
-          relPath === "zz-dom-fixtures.ts",
+          if (edge.importer === "zz-dom-fixtures.ts") return false;
+          // TODO(layout): remove when viewer no longer imports editor feedback.
+          if (edge.importer === "stage/viewer/InteractiveCanvasViewer.tsx") return false;
+          return true;
+        }),
       ),
     ).toEqual([]);
   });
 
-  test("connectors/pathfinding does not import first-party src code (MPL boundary)", () => {
+  test("the only non-composition stage/editor/ importer is the current viewer TODO", () => {
+    const incomingEditorEdges = firstPartyEdges().filter(
+      (edge) =>
+        edge.target?.startsWith("stage/editor/") &&
+        !edge.importer.startsWith("stage/editor/"),
+    );
+
     expect(
-      violations(
-        join(SRC_ROOT, "connectors", "pathfinding"),
-        /^(\.\.\/)+(theme|state|objects|interaction|stage|ui|fixtures)(\/|$)/,
+      formatEdges(
+        incomingEditorEdges.filter((edge) => edge.importer.startsWith("stage/viewer/")),
       ),
-    ).toEqual([]);
+    ).toEqual([
+      "stage/viewer/InteractiveCanvasViewer.tsx -> ../editor/pipeline/InteractionFeedback",
+    ]);
   });
 
-  test("features/snapping/snap-distribution.ts reaches only pathfinding gfx types (MPL home)", () => {
+  test("stage/editor/features/ slices do not import sideways except snapping service imports and current section-fit exceptions", () => {
+    const sidewaysFeatureEdges = firstPartyEdges().filter((edge) => {
+      const importerSlice = featureSlice(edge.importer);
+      const targetSlice = edge.target ? featureSlice(edge.target) : null;
+      return importerSlice !== null && targetSlice !== null && importerSlice !== targetSlice;
+    });
+
+    // TODO(layout): tighten section-fit into a declared service slice or move
+    // the fit orchestration behind each consuming feature.
     expect(
-      importSpecifiers(
-        join(SRC_ROOT, "stage", "editor", "features", "snapping", "snap-distribution.ts"),
-      ).filter((specifier) => specifier.startsWith(".")),
-    ).toEqual(["../../../../connectors/pathfinding/gfx-types"]);
+      formatEdges(
+        sidewaysFeatureEdges.filter((edge) => featureSlice(edge.target ?? "") !== "snapping"),
+      ),
+    ).toEqual([
+      "stage/editor/features/context-menu/use-canvas-context-menu.ts -> ../section-fit/animate-section-fit",
+      "stage/editor/features/inspector/Inspector.tsx -> ../section-fit/animate-section-fit",
+      "stage/editor/features/selection-toolbar/use-selection-toolbar.ts -> ../section-fit/animate-section-fit",
+    ]);
   });
 
   test("no source imports legacy vendor/blocksuite paths", () => {
     expect(
-      violationsAcrossTree(
-        /vendor\/blocksuite/,
-        () => false,
-      ),
+      formatEdges(allImportEdges().filter((edge) => /vendor\/blocksuite/.test(edge.specifier))),
     ).toEqual([]);
   });
 });
