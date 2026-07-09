@@ -528,6 +528,41 @@ describe("InteractiveCanvasEditor: double-click inline text editing (4.2.1)", ()
     }
   });
 
+  it("arms Connector Mode from the G hotkey using the dock path and Escape returns to select", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={syntheticCanvasDocument}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
+      const selectButton = container.querySelector('[data-dock-tool="select"]') as HTMLElement;
+      const stage = container.querySelector("[data-canvas-stage]") as HTMLElement;
+
+      act(() => {
+        dispatchKeyDown({ key: "g" });
+      });
+
+      expect(connectorButton.getAttribute("data-active")).toBe("true");
+      expect(selectButton.getAttribute("data-active")).toBe("false");
+      expect(stage.getAttribute("data-canvas-select-tool")).toBeNull();
+
+      act(() => {
+        dispatchKeyDown({ key: "Escape" });
+      });
+
+      expect(connectorButton.getAttribute("data-active")).toBe("false");
+      expect(selectButton.getAttribute("data-active")).toBe("true");
+      expect(stage.getAttribute("data-canvas-select-tool")).toBe("true");
+    } finally {
+      restoreRect();
+    }
+  });
+
   it("plays the Shapes panel exit animation before unmounting it", () => {
     const restoreRect = stubStageRect();
     try {

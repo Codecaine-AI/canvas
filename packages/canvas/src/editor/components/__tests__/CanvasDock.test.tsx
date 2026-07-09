@@ -134,6 +134,16 @@ describe("CanvasDock state rules", () => {
     expect(others.length).toBe(1);
   });
 
+  it("highlights the connector button when activeTool is connector", () => {
+    const { container } = render(<CanvasDock activeTool="connector" />);
+    const active = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
+    expect(active.getAttribute("data-active")).toBe("true");
+    expect(active.style.background).toBe("#8C2EF2");
+
+    const others = container.querySelectorAll('[data-active="true"]');
+    expect(others.length).toBe(1);
+  });
+
   it("shows a light-gray hover background distinct from the active violet", () => {
     const { container } = render(<CanvasDock activeTool="select" />);
     const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;

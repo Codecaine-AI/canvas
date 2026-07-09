@@ -19,7 +19,7 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   S              Shapes panel (same path as the Shapes dock button)
  *   D              select dock tool
  *   F              hand dock tool
- *   G              connector dock tool (quick-connect currently stays select-driven)
+ *   G              connector dock tool (arms dedicated Connector Mode)
  *   C              rectangle tool
  *   P              process tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)

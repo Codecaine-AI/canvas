@@ -68,16 +68,16 @@ type ShapesPanelPhase = "closed" | "open" | "closing";
  * The dock speaks a small fixed vocabulary of chrome-level tool ids
  * (ToolId, from editor/components/CanvasDock.tsx) while the reducer speaks the much
  * larger CanvasTool vocabulary (one entry per placeable object type, plus
- * select/hand/annotation). Most dock ids map 1:1 to an editor tool; "shapes"
- * is special-cased (it opens ShapesPanel instead of arming a single type —
- * see `shapesPanelOpen` state below).
+ * select/hand/annotation/connector). Most dock ids map 1:1 to an editor tool;
+ * "shapes" is special-cased (it opens ShapesPanel instead of arming a single
+ * type — see `shapesPanelOpen` state below).
  */
 const DOCK_TOOL_TO_CANVAS_TOOL: Partial<Record<ToolId, CanvasTool>> = {
   select: "select",
   hand: "hand",
   section: "section",
   sticky: "sticky",
-  connector: "select", // quick-connect is driven by hovering a port while in "select", not a distinct tool.
+  connector: "connector", // The dock button arms the dedicated connector tool.
 };
 
 /** Inverse of DOCK_TOOL_TO_CANVAS_TOOL, for reflecting reducer tool state back onto the dock's activeTool. */
@@ -86,6 +86,7 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
   hand: "hand",
   section: "section",
   sticky: "sticky",
+  connector: "connector",
 };
 
 /**
@@ -323,6 +324,10 @@ export function InteractiveCanvasEditor({
     if (objectTypeForTool(state.tool)) {
       dispatch({ type: "canvas.setTool", tool: "select" });
       setPickedShapeEntry(null);
+      return true;
+    }
+    if (state.tool === "connector") {
+      dispatch({ type: "canvas.setTool", tool: "select" });
       return true;
     }
     if (shapesPanelOpen) {
