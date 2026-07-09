@@ -248,6 +248,24 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(dots(container as HTMLElement, "tri").length).toBe(0);
   });
 
+  it("keeps connector-mode hovered dots visible below the select-mode zoom gate", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument([rect])}
+        viewport={{ x: 0, y: 0, zoom: 0.25 }}
+        activeTool="connector"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+
+    const visibleDots = dots(container as HTMLElement, "rect");
+    expect(visibleDots.length).toBe(4);
+    for (const dot of visibleDots) {
+      expect(dot.style.opacity).toBe("1");
+    }
+  });
+
   it("keeps select-mode dots driven by selection rather than hover", () => {
     const { container } = render(
       <CanvasStage
@@ -262,6 +280,57 @@ describe("AnchorDots (P3 — D5/D15)", () => {
 
     expect(dots(container as HTMLElement, "tri").length).toBe(4);
     expect(dots(container as HTMLElement, "rect").length).toBe(0);
+  });
+
+  it("keeps select-mode selected dots hidden below the zoom gate", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument([rect])}
+        viewport={{ x: 0, y: 0, zoom: 0.25 }}
+        selectedObjectIds={["rect"]}
+        activeTool="select"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+
+    const hiddenDots = dots(container as HTMLElement, "rect");
+    expect(hiddenDots.length).toBe(4);
+    for (const dot of hiddenDots) {
+      expect(dot.style.opacity).toBe("0");
+    }
+  });
+
+  it("renders the hover highlight only for idle connector-mode hover", () => {
+    const connector = render(
+      <CanvasStage
+        document={makeDocument([rect])}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        activeTool="connector"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+
+    const highlight = connector.container.querySelector(
+      "[data-canvas-hover-highlight]",
+    ) as HTMLElement;
+    expect(highlight).toBeTruthy();
+    expect(highlight.getAttribute("data-canvas-object-id")).toBe("rect");
+    expect(highlight.style.left).toBe(`${rect.geometry.x - 3}px`);
+    expect(highlight.style.top).toBe(`${rect.geometry.y - 3}px`);
+    connector.unmount();
+
+    const select = render(
+      <CanvasStage
+        document={makeDocument([rect])}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        activeTool="select"
+        hoveredObjectId="rect"
+        onStagePointerEvent={() => {}}
+      />,
+    );
+    expect(select.container.querySelector("[data-canvas-hover-highlight]")).toBeNull();
   });
 
   it("does not show dots for an unselected object on hover", () => {
@@ -279,9 +348,9 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     expect(dots(container as HTMLElement, "rect").length).toBe(0);
   });
 
-  it("keeps the plus cursor token out of package text assets", () => {
+  it("keeps the connector cursor token confined to CanvasStage's connector-mode cursor", () => {
     const banned = "cross" + "hair";
     const offenders = packageTextFiles().filter((file) => readFileSync(file, "utf8").includes(banned));
-    expect(offenders).toEqual([]);
+    expect(offenders).toEqual([join(import.meta.dir, "../CanvasStage.tsx")]);
   });
 });

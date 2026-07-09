@@ -11,10 +11,11 @@ const SELECTION_BLUE = "#0D99FF";
 
 /**
  * Zoom threshold below which anchor dots stop being VISIBLE (D15,
- * OBJECT-DEF-OVERHAUL.md §2). Below it the dots still render (opacity 0) and
- * stay grabbable, preserving the pre-P3 interaction envelope exactly —
- * visibility is the only zoom-gated property. Resize corners are unaffected
- * (SelectionBox shows at any zoom). TUNABLE.
+ * OBJECT-DEF-OVERHAUL.md §2). In select mode, selected-object dots still
+ * render below it (opacity 0) and stay grabbable, preserving the pre-P3
+ * interaction envelope exactly. Connector mode bypasses this visibility gate:
+ * its hover-driven dots stay visible at every zoom. Resize corners are
+ * unaffected (SelectionBox shows at any zoom). TUNABLE.
  */
 export const ANCHOR_DOTS_MIN_ZOOM = 0.5;
 
@@ -64,12 +65,15 @@ function arrowTransform(anchor: Anchor): string {
 
 /**
  * FigJam-style connection anchor dots (D5): rendered in CanvasStage's
- * screen-space overlay for every SELECTED object, at the def-derived
- * getConnectionAnchors positions (objects/geometry.ts) mapped worldToScreen —
- * so the dots you see, the ports you grab, and the points connections snap
- * to are all the same declared anchors. Replaces the old invisible EdgePorts
- * (which sat inside the object button and could only mark bbox midpoints —
- * the button clips overflow, and true-outline anchors sit off the bbox edge).
+ * screen-space overlay at the def-derived getConnectionAnchors positions
+ * (objects/geometry.ts) mapped worldToScreen — so the dots you see, the ports
+ * you grab, and the points connections snap to are all the same declared
+ * anchors. Select mode supplies selected object ids and keeps the 50% zoom
+ * visibility gate; connector mode supplies hovered/drag-source ids and
+ * bypasses that gate so the hover affordance remains visible while zoomed out.
+ * Replaces the old invisible EdgePorts (which sat inside the object button and
+ * could only mark bbox midpoints — the button clips overflow, and true-outline
+ * anchors sit off the bbox edge).
  *
  * Interaction: each dot carries data-canvas-port + data-canvas-object-id;
  * pointerdown bubbles to the stage root handler, whose resolveHit
@@ -82,6 +86,7 @@ export function AnchorDots({
   selectedObjectIds,
   activePort,
   interactive,
+  bypassZoomGate = false,
   onHoveredAnchorChange,
 }: {
   document: InteractiveCanvasDocument;
@@ -91,6 +96,8 @@ export function AnchorDots({
   activePort?: ActivePort | null;
   /** False renders the dots inert (visual only). */
   interactive: boolean;
+  /** True keeps dots visible regardless of zoom, used by connector-tool hover affordances. */
+  bypassZoomGate?: boolean;
   /** Emits the currently-hovered creation port so preview layers can render outside this overlay. */
   onHoveredAnchorChange?: (port: ActivePort | null) => void;
 }) {
@@ -109,7 +116,7 @@ export function AnchorDots({
   useEffect(() => () => onHoveredAnchorChange?.(null), [onHoveredAnchorChange]);
   if (selectedObjectIds.length === 0) return null;
   const selected = new Set(selectedObjectIds);
-  const visible = viewport.zoom >= ANCHOR_DOTS_MIN_ZOOM;
+  const visible = bypassZoomGate || viewport.zoom >= ANCHOR_DOTS_MIN_ZOOM;
   return (
     <>
       {document.objects
