@@ -7,7 +7,6 @@ import type { ToolbarControlSpec } from "../../../objects/object-def";
 import { EDITOR_STYLE } from "../../components/editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
-  ChevronDownIcon,
   ColorSwatchIcon,
   ConnectorArrowLeftIcon,
   ConnectorArrowRightIcon,
@@ -15,13 +14,10 @@ import {
   ConnectorDashedLineIcon,
   ConnectorNoArrowheadsIcon,
   ConnectorSolidLineIcon,
-  DashIcon,
   FitToContentIcon,
   LockIcon,
   NoStrokeIcon,
-  RenameIcon,
-  ShapeSwapIcon,
-  StrokeIcon,
+  ShapesIcon,
   TypeIcon,
 } from "../../../ui/icons";
 
@@ -61,7 +57,7 @@ export type SelectionToolbarControl = {
   action: SelectionToolbarActionId;
   label: string;
   Icon: Icon;
-  /** Whether this control opens a flyout (renders a chevron affordance). */
+  /** Whether this control opens a flyout. */
   hasFlyout?: boolean;
   /** Rendered as literal text instead of an icon (e.g. "Medium", "B"). */
   text?: string;
@@ -89,11 +85,11 @@ export type ToolbarControlState = {
  * rendering inside ToolbarButton.
  */
 const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
-  "shape-swap": ShapeSwapIcon,
+  "shape-swap": ShapesIcon,
   color: ColorSwatchIcon,
   text: TypeIcon,
-  "section-border-style": StrokeIcon,
-  rename: RenameIcon,
+  "section-border-style": ConnectorSolidLineIcon,
+  rename: TypeIcon,
   "fit-children": FitToContentIcon,
   lock: LockIcon,
   dash: ConnectorSolidLineIcon,
@@ -101,7 +97,11 @@ const ACTION_ICONS: Record<string, SelectionToolbarControl["Icon"]> = {
 };
 
 const ACTION_ICON_VARIANTS: Partial<Record<SelectionToolbarActionId, Record<string, Icon>>> = {
-  "section-border-style": { solid: StrokeIcon, dashed: DashIcon, none: NoStrokeIcon },
+  "section-border-style": {
+    solid: ConnectorSolidLineIcon,
+    dashed: ConnectorDashedLineIcon,
+    none: NoStrokeIcon,
+  },
   dash: { solid: ConnectorSolidLineIcon, dashed: ConnectorDashedLineIcon },
   arrowhead: {
     none: ConnectorNoArrowheadsIcon,
@@ -176,6 +176,13 @@ function ToolbarButton({
   const clearHover = () => setHovered(false);
   const EffectiveIcon = (state?.variant ? ACTION_ICON_VARIANTS[action]?.[state.variant] : undefined) ?? Icon;
   const expanded = activeFlyout !== undefined ? activeFlyout === action : open;
+  const background = state?.active
+    ? EDITOR_STYLE.accentPurple
+    : hasFlyout && expanded
+      ? "rgba(255,255,255,0.16)"
+      : hovered && !disabled
+        ? "rgba(255,255,255,0.12)"
+        : "transparent";
   return (
     <div
       style={{ position: "relative", display: "inline-flex" }}
@@ -210,11 +217,7 @@ function ToolbarButton({
           padding: "0 8px",
           borderRadius: EDITOR_STYLE.selectionToolbarButtonRadiusPx,
           border: "none",
-          background: state?.active
-            ? EDITOR_STYLE.accentPurple
-            : hovered && !disabled
-              ? "rgba(255,255,255,0.12)"
-              : "transparent",
+          background,
           color: "#FFFFFF",
           cursor: disabled ? "default" : "pointer",
         }}
@@ -243,7 +246,6 @@ function ToolbarButton({
             </span>
           )}
           {text ? <span style={{ fontSize: 13, whiteSpace: "nowrap" }}>{text}</span> : null}
-          {hasFlyout ? <ChevronDownIcon className="h-3 w-3" /> : null}
         </span>
       </button>
       <Tooltip label={label} visible={hovered} placement="top" />

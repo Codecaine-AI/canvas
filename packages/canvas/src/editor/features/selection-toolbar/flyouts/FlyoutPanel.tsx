@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from "react";
+import { useState, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { EDITOR_STYLE } from "../../../components/editor-style";
 
-export type FlyoutPanelProps = {
+export type FlyoutPanelProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
 };
 
-export function FlyoutPanel({ children, className, style }: FlyoutPanelProps) {
+export function FlyoutPanel({ children, className, style, ...props }: FlyoutPanelProps) {
   return (
     <div
+      {...props}
       data-toolbar-flyout-panel=""
       className={className}
       style={{

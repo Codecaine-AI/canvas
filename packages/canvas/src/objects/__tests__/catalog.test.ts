@@ -42,7 +42,7 @@ describe("shape-catalog data shape", () => {
     }
   });
 
-  it("Basic has exactly the 16 entries from the brief, in order, with correct directions and icon aliases", () => {
+  it("Basic has exactly the 13 geometric entries, in order, with correct directions (icon glyphs live only in Advanced)", () => {
     const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
     expect(basic.entries.map((e) => e.id)).toEqual([
       "basic-square",
@@ -58,30 +58,13 @@ describe("shape-catalog data shape", () => {
       "basic-arrow-right",
       "basic-chevron",
       "basic-star",
-      "basic-person",
-      "basic-chat",
-      "basic-chip",
     ]);
     expect(basic.entries.find((e) => e.id === "basic-triangle-up")?.direction).toBe("up");
     expect(basic.entries.find((e) => e.id === "basic-triangle-down")?.direction).toBe("down");
     expect(basic.entries.find((e) => e.id === "basic-arrow-left")?.direction).toBe("left");
     expect(basic.entries.find((e) => e.id === "basic-arrow-right")?.direction).toBe("right");
     expect(basic.entries.find((e) => e.id === "basic-chevron")?.direction).toBe("right");
-    expect(basic.entries.find((e) => e.id === "basic-person")).toMatchObject({
-      objectType: "icon",
-      icon: "person",
-      keywords: ["person", "user", "actor", "people"],
-    });
-    expect(basic.entries.find((e) => e.id === "basic-chat")).toMatchObject({
-      objectType: "icon",
-      icon: "chat",
-      keywords: ["chat", "speech", "bubble", "message"],
-    });
-    expect(basic.entries.find((e) => e.id === "basic-chip")).toMatchObject({
-      objectType: "icon",
-      icon: "cpu",
-      keywords: ["chip", "cpu", "processor", "microchip"],
-    });
+    expect(basic.entries.every((e) => e.objectType !== "icon")).toBe(true);
   });
 
   it("Flowchart has exactly the 16 entries from the brief, in order, with correct directions", () => {

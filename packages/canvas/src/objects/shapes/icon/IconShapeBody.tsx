@@ -1,6 +1,6 @@
 "use client";
 
-import { ICON_GLYPHS, ICON_GLYPH_STROKE_WIDTH, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
+import { ICON_GLYPHS, iconGlyphStrokeWidthForSize, type IconGlyphElement, type IconGlyphId } from "./icon-glyphs";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
 /**
@@ -61,6 +61,8 @@ export function IconShapeBody({
   const glyph = glyphId ? ICON_GLYPHS[glyphId] : undefined;
   const stroke = colors?.stroke ?? "#1D1D1D";
   const fill = colors?.fill;
+  const sizePx = Math.min(object.geometry.width, object.geometry.height);
+  const glyphStrokeWidth = iconGlyphStrokeWidthForSize(sizePx);
   // SVG fills open paths by chord-closing them. For mixed glyphs those chords
   // are either overpainted by a later same-color container fill in this layer,
   // hidden under the element's own ink stroke, or are the intended interior
@@ -87,7 +89,7 @@ export function IconShapeBody({
         style={{ width: "100%", height: "100%" }}
         fill="none"
         stroke={stroke}
-        strokeWidth={ICON_GLYPH_STROKE_WIDTH}
+        strokeWidth={glyphStrokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"

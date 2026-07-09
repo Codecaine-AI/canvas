@@ -1,0 +1,1601 @@
+<meta charset="utf-8">
+<title>Selection toolbar redesign — interactive mockup</title>
+<style>
+:root {
+  color-scheme: light;
+  --shell-bg: #f4f4f5;
+  --shell-surface: #ffffff;
+  --shell-surface-2: #f8f8f9;
+  --shell-text: #1f1f23;
+  --shell-muted: #66666f;
+  --shell-border: rgba(0, 0, 0, 0.1);
+  --shell-border-strong: rgba(0, 0, 0, 0.16);
+  --shell-focus: #8c2ef2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --shell-bg: #111113;
+    --shell-surface: #1a1a1d;
+    --shell-surface-2: #202024;
+    --shell-text: #f1f1f3;
+    --shell-muted: #aaaab1;
+    --shell-border: rgba(255, 255, 255, 0.12);
+    --shell-border-strong: rgba(255, 255, 255, 0.2);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --shell-bg: #111113;
+  --shell-surface: #1a1a1d;
+  --shell-surface-2: #202024;
+  --shell-text: #f1f1f3;
+  --shell-muted: #aaaab1;
+  --shell-border: rgba(255, 255, 255, 0.12);
+  --shell-border-strong: rgba(255, 255, 255, 0.2);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --shell-bg: #f4f4f5;
+  --shell-surface: #ffffff;
+  --shell-surface-2: #f8f8f9;
+  --shell-text: #1f1f23;
+  --shell-muted: #66666f;
+  --shell-border: rgba(0, 0, 0, 0.1);
+  --shell-border-strong: rgba(0, 0, 0, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--shell-bg);
+  color: var(--shell-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--shell-focus);
+  outline-offset: 2px;
+}
+
+.mockup-page {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  padding: 28px 18px 42px;
+}
+
+.mockup-header {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mockup-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.mockup-header p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--shell-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.change-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change-list li {
+  border: 1px solid var(--shell-border);
+  border-radius: 999px;
+  background: var(--shell-surface);
+  color: var(--shell-muted);
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.options-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+  margin: 18px 0 20px;
+}
+
+.option-group {
+  min-width: min(100%, 220px);
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  background: var(--shell-surface);
+}
+
+.option-group legend {
+  padding: 0 4px;
+  color: var(--shell-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.segmented label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: var(--shell-surface-2);
+  color: var(--shell-muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 14px;
+  padding: 0 9px;
+}
+
+.segmented input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented label:has(input:checked) {
+  border-color: var(--shell-border-strong);
+  background: #8c2ef2;
+  color: #fff;
+}
+
+.segmented label:has(input:focus-visible) {
+  outline: 2px solid var(--shell-focus);
+  outline-offset: 2px;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.demo-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  background: var(--shell-surface);
+  padding: 12px;
+}
+
+.demo-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 22px;
+  color: var(--shell-text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.stage-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: 2px;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  min-width: 500px;
+  height: 312px;
+  overflow: visible;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background-color: #fafafa;
+  background-image: radial-gradient(circle, #d9d9d9 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #1d1d1d;
+}
+
+.stage--section {
+  height: 354px;
+}
+
+.demo-object {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-object-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.section-title-chip {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip-fill);
+  color: #242424;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  padding: 0 10px;
+}
+
+.section-title-chip.is-pulsing {
+  animation: objectPulse 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.section-title-chip.is-pulsing::after {
+  content: "";
+  width: 1px;
+  height: 14px;
+  margin-left: 5px;
+  background: #0d99ff;
+  animation: caretPulse 640ms step-end;
+}
+
+.lock-badge {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #8c2ef2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.shape-object {
+  width: 150px;
+  height: 95px;
+}
+
+.shape-object svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shape-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #202020;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.shape-label.is-pulsing,
+.sticky-text.is-pulsing {
+  animation: objectPulse 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sticky-object {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  background: var(--sticky-fill);
+  color: #242424;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.12);
+}
+
+.sticky-text {
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+.line-object {
+  width: 230px;
+  height: 128px;
+}
+
+.line-object svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.line-label {
+  font-size: 13px;
+  font-weight: 600;
+  fill: #242424;
+  paint-order: stroke;
+  stroke: #fafafa;
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.selection-box {
+  position: absolute;
+  left: 50%;
+  border: 1.5px solid #0d99ff;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.selection-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid #0d99ff;
+  background: #fff;
+}
+
+.selection-handle--tl {
+  left: -4px;
+  top: -4px;
+}
+
+.selection-handle--tr {
+  right: -4px;
+  top: -4px;
+}
+
+.selection-handle--br {
+  right: -4px;
+  bottom: -4px;
+}
+
+.selection-handle--bl {
+  left: -4px;
+  bottom: -4px;
+}
+
+.toolbar-anchor {
+  position: absolute;
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+}
+
+.selection-toolbar {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  border-radius: 14px;
+  background: #1d1d1d;
+  padding: 0 10px;
+  gap: 6px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 2px 5px rgba(0, 0, 0, 0.14), 0 6px 18px rgba(0, 0, 0, 0.12);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+}
+
+.selection-toolbar.is-entering {
+  animation: toolbarEnter 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes toolbarEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.toolbar-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  min-width: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.toolbar-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.toolbar-button.is-open {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.toolbar-button.is-active {
+  background: #8c2ef2;
+}
+
+.toolbar-button svg {
+  flex: 0 0 auto;
+}
+
+.swatch-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  margin: 0 6px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 40;
+  display: block;
+  width: max-content;
+  max-width: 160px;
+  border-radius: 6px;
+  background: #1d1d1d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  opacity: 0;
+  padding: 4px 8px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 100ms linear;
+  white-space: nowrap;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #1d1d1d;
+  transform: translateX(-50%);
+}
+
+.toolbar-button:hover .tooltip,
+.toolbar-button:focus-visible .tooltip {
+  opacity: 1;
+  transition-delay: 500ms;
+}
+
+.has-flyout .tooltip {
+  display: none;
+}
+
+.flyout-panel {
+  position: fixed;
+  z-index: 100;
+  border-radius: 16px;
+  background: #1d1d1d;
+  color: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.16);
+  padding: 12px;
+}
+
+.color-panel {
+  padding: 14px;
+}
+
+.flyout-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-row {
+  gap: 12px;
+}
+
+.color-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14);
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-swatch.is-current-outline {
+  position: relative;
+}
+
+.color-swatch.is-current-outline::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid #8c2ef2;
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.color-swatch.is-current {
+  background: conic-gradient(from 0deg, #ff3b30, #ff9500, #ffcc00, #34c759, #30b0c7, #0d99ff, #9747ff, #ff2d95, #ff3b30);
+  padding: 2px;
+}
+
+.color-swatch-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.icon-option,
+.menu-row {
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.icon-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.icon-option:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.icon-option.is-active {
+  background: #8c2ef2;
+}
+
+.menu-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.menu-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  line-height: 16px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.menu-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-row.is-active {
+  background: #8c2ef2;
+}
+
+.shape-panel {
+  width: 232px;
+}
+
+.shape-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 6px 8px;
+}
+
+.shape-search svg {
+  flex: 0 0 auto;
+  color: #9a9a9a;
+}
+
+.shape-search input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  line-height: 16px;
+  outline: none;
+  padding: 0;
+}
+
+.shape-search input::placeholder {
+  color: #9a9a9a;
+}
+
+.shape-search:has(input:focus-visible) {
+  outline: 2px solid #8c2ef2;
+  outline-offset: 2px;
+}
+
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 36px);
+  gap: 4px;
+  max-height: 220px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+
+.notes {
+  margin-top: 22px;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  background: var(--shell-surface);
+  padding: 16px;
+}
+
+.notes h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.notes ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--shell-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.notes code {
+  color: var(--shell-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+@keyframes objectPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 153, 255, 0);
+  }
+
+  35% {
+    box-shadow: 0 0 0 4px rgba(13, 153, 255, 0.78);
+  }
+
+  100% {
+    box-shadow: 0 0 0 8px rgba(13, 153, 255, 0);
+  }
+}
+
+@keyframes caretPulse {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .mockup-page {
+    padding-inline: 12px;
+  }
+
+  .option-group {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+
+<main class="mockup-page" data-mockup>
+  <header class="mockup-header">
+    <h1>Selection toolbar — proposed redesign</h1>
+    <p>Interactive mockups of the floating selection toolbars for checking ordering, affordance, flyout placement, and object feedback before implementation.</p>
+    <ul class="change-list" aria-label="Global changes">
+      <li>Unified ordering</li>
+      <li>No dropdown chevrons</li>
+      <li>Grouped separators</li>
+      <li>Flyouts centered above their trigger</li>
+    </ul>
+  </header>
+
+  <section class="options-strip" aria-label="Global comparison toggles">
+    <fieldset class="option-group">
+      <legend>Chevrons</legend>
+      <div class="segmented">
+        <label><input type="radio" name="chevrons" value="hidden" data-toggle="chevrons" checked>Hidden</label>
+        <label><input type="radio" name="chevrons" value="shown" data-toggle="chevrons">Shown</label>
+      </div>
+    </fieldset>
+
+    <fieldset class="option-group">
+      <legend>Separators</legend>
+      <div class="segmented">
+        <label><input type="radio" name="separators" value="grouped" data-toggle="separators" checked>Grouped</label>
+        <label><input type="radio" name="separators" value="every" data-toggle="separators">Every item</label>
+        <label><input type="radio" name="separators" value="none" data-toggle="separators">None</label>
+      </div>
+    </fieldset>
+
+    <fieldset class="option-group">
+      <legend>Flyout position</legend>
+      <div class="segmented">
+        <label><input type="radio" name="flyoutPosition" value="center" data-toggle="flyoutPosition" checked>Centered</label>
+        <label><input type="radio" name="flyoutPosition" value="left" data-toggle="flyoutPosition">Left-aligned</label>
+      </div>
+    </fieldset>
+
+    <fieldset class="option-group">
+      <legend>Selected swatch</legend>
+      <div class="segmented">
+        <label><input type="radio" name="pickerStyle" value="figjam" data-toggle="pickerStyle" checked>FigJam outline</label>
+        <label><input type="radio" name="pickerStyle" value="rainbow" data-toggle="pickerStyle">Rainbow ring</label>
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="demo-grid" aria-label="Toolbar demos">
+    <article class="demo-card">
+      <div class="demo-label">Section</div>
+      <div class="stage-scroll">
+        <div class="stage stage--section" data-stage data-demo="section"></div>
+      </div>
+    </article>
+
+    <article class="demo-card">
+      <div class="demo-label">Shape</div>
+      <div class="stage-scroll">
+        <div class="stage" data-stage data-demo="shape"></div>
+      </div>
+    </article>
+
+    <article class="demo-card">
+      <div class="demo-label">Sticky</div>
+      <div class="stage-scroll">
+        <div class="stage" data-stage data-demo="sticky"></div>
+      </div>
+    </article>
+
+    <article class="demo-card">
+      <div class="demo-label">Line</div>
+      <div class="stage-scroll">
+        <div class="stage" data-stage data-demo="line"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="notes">
+    <h2>Notes &amp; open questions</h2>
+    <ul>
+      <li>Unified prefix: every toolbar starts with the Color + Text pair (never separated — always the same two). Separators divide groups: Line groups Line style + Arrowheads; Section groups Re-scale + Border style, with Lock alone at the end — alternative would be Re-scale | Border style + Lock; confirm which grouping reads best.</li>
+      <li>Section "Rename" now uses the same T glyph as every other text control (was the A-in-brackets rename glyph).</li>
+      <li>"Change shape" now uses the dock's shapes icon (circle/square/triangle) instead of the swap-arrows icon, for consistency with the bottom toolbar.</li>
+      <li>Border style flyout dropped its text labels AND the "None" option (was Solid / Dashed / None with labels) — confirm "None" is really out. Trigger and options now use single-line solid/dashed glyphs instead of the stacked three-line icon.</li>
+      <li>Line toolbar gained a Text button (assumed: adds a midpoint label). Confirm this is the intent of "color, text, line style, arrow style".</li>
+      <li>Open-flyout trigger highlight is <code>rgba(255,255,255,0.16)</code>; alternative is the purple active color — flip if it should read stronger.</li>
+      <li>Flyouts now center on their trigger and clamp to the viewport; previously they were pinned to the toolbar's left edge.</li>
+      <li>Color picker re-tuned to FigJam's measured recipe: 30px swatches, 12px gaps, 14px panel padding, hairline ring on every swatch, and a purple rounded-square outline on the current pick (replacing the rainbow ring — compare via the "Selected swatch" toggle).</li>
+      <li>FigJam's section toolbar also shows a shrink/resize control — decide separately whether we want one; not part of this pass.</li>
+      <li>Section gained a Scale-to-fit button (FigJam parity), placed right after Text, ordered by utility: Re-scale → Border style → Lock. In the demo it toggles the section hugging its title chip.</li>
+    </ul>
+  </section>
+</main>
+
+<div data-flyout-portal></div>
+
+<script>
+(() => {
+  const root = document.querySelector("[data-mockup]");
+  const portal = document.querySelector("[data-flyout-portal]");
+
+  const ICONS = {
+    type: {
+      viewBox: "0 0 18 18",
+      body: '<line x1="9" y1="2.75" x2="9" y2="15.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><line x1="14.25" y1="2.75" x2="3.75" y2="2.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    shapes: {
+      viewBox: "0 0 18 18",
+      body: '<circle cx="13.5" cy="6" r="3.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><rect x="4.75" y="10.75" width="5.5" height="5.5" rx="1" ry="1" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><path d="M3.818,1.99L1.189,6.498c-.194,.333,.046,.752,.432,.752H6.879c.386,0,.626-.419,.432-.752L4.682,1.99c-.193-.331-.671-.331-.864,0Z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    stroke: {
+      viewBox: "0 0 18 18",
+      body: '<line x1="1.75" y1="14.75" x2="16.25" y2="14.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><rect x="1.75" y="9.25" width="14.5" height="2.5" rx=".5" ry=".5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><rect x="1.75" y="2.75" width="14.5" height="3.5" rx=".5" ry=".5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    dash: {
+      viewBox: "0 0 18 18",
+      body: '<line x1="2.75" y1="9" x2="4.75" y2="9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><line x1="8" y1="9" x2="10" y2="9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><line x1="13.25" y1="9" x2="15.25" y2="9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    lock: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M5.75,8.25v-3.25c0-1.795,1.455-3.25,3.25-3.25h0c1.795,0,3.25,1.455,3.25,3.25v3.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><line x1="9" y1="11.75" x2="9" y2="12.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><rect x="3.25" y="8.25" width="11.5" height="8" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    scaleFit: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M15.25 2.75 10.75 7.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><polyline points="10.75 3.75 10.75 7.25 14.25 7.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><path d="M2.75 15.25 7.25 10.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><polyline points="7.25 14.25 7.25 10.75 3.75 10.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    unlock: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M5.75,8.25v-3.25c0-1.795,1.455-3.25,3.25-3.25h0c1.795,0,3.25,1.455,3.25,3.25" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><line x1="9" y1="11.75" x2="9" y2="12.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/><rect x="3.25" y="8.25" width="11.5" height="8" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    chevron: {
+      viewBox: "0 0 18 18",
+      body: '<polyline points="15.25 6.5 9 12.75 2.75 6.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>'
+    },
+    lineSolid: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M3 9H15" stroke-linecap="round"/>',
+      strokeWidth: "1.6"
+    },
+    lineDashed: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M3 9H15" stroke-linecap="round" stroke-dasharray="3 2"/>',
+      strokeWidth: "1.6"
+    },
+    arrowNone: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M3 9H15" stroke-linecap="round"/>',
+      strokeWidth: "1.6"
+    },
+    arrowRight: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M3 9H12.5" stroke-linecap="round"/><path d="M15 9L11 6.5V11.5Z" fill="currentColor" stroke="none"/>',
+      strokeWidth: "1.6"
+    },
+    arrowLeft: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M5.5 9H15" stroke-linecap="round"/><path d="M3 9L7 6.5V11.5Z" fill="currentColor" stroke="none"/>',
+      strokeWidth: "1.6"
+    },
+    arrowBoth: {
+      viewBox: "0 0 18 18",
+      body: '<path d="M5.5 9H12.5" stroke-linecap="round"/><path d="M3 9L7 6.5V11.5Z" fill="currentColor" stroke="none"/><path d="M15 9L11 6.5V11.5Z" fill="currentColor" stroke="none"/>',
+      strokeWidth: "1.6"
+    },
+    search: {
+      viewBox: "0 0 18 18",
+      body: '<circle cx="8" cy="8" r="4.75" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"/><line x1="11.5" y1="11.5" x2="15" y2="15" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"/>'
+    }
+  };
+
+  const PALETTE = [
+    { hue: "gray", ink: "#757575", shapeFill: "#E6E6E6", shapeBorder: "#757575", sectionTint: "#F9F9F9", chipFill: "#E6E6E6", chipBorder: "#757575", sticky: "#E6E6E6", connector: "#757575" },
+    { hue: "red", ink: "#F24822", shapeFill: "#FFC7C2", shapeBorder: "#F24822", sectionTint: "#FFF5F5", chipFill: "#FFC7C2", chipBorder: "#F24822", sticky: "#FFAFA3", connector: "#F24822" },
+    { hue: "orange", ink: "#EB7500", shapeFill: "#FFE0C2", shapeBorder: "#EB7500", sectionTint: "#FFF7F0", chipFill: "#FFE0C2", chipBorder: "#EB7500", sticky: "#FFE0C2", connector: "#EB7500" },
+    { hue: "yellow", ink: "#E8A302", shapeFill: "#FFECBD", shapeBorder: "#E8A302", sectionTint: "#FFFBF0", chipFill: "#FFECBD", chipBorder: "#E8A302", sticky: "#FFE299", connector: "#E8A302" },
+    { hue: "green", ink: "#14AE5C", shapeFill: "#DDF8E2", shapeBorder: "#14AE5C", sectionTint: "#EBFFEE", chipFill: "#DDF8E2", chipBorder: "#14AE5C", sticky: "#DDF8E2", connector: "#14AE5C" },
+    { hue: "teal", ink: "#369E94", shapeFill: "#C6FAF6", shapeBorder: "#369E94", sectionTint: "#EAFDFB", chipFill: "#C6FAF6", chipBorder: "#369E94", sticky: "#C6FAF6", connector: "#369E94" },
+    { hue: "blue", ink: "#0D99FF", shapeFill: "#C2E5FF", shapeBorder: "#0D99FF", sectionTint: "#F5FBFF", chipFill: "#C2E5FF", chipBorder: "#0D99FF", sticky: "#A8DAFF", connector: "#0D99FF" },
+    { hue: "violet", ink: "#9747FF", shapeFill: "#DCCCFF", shapeBorder: "#9747FF", sectionTint: "#F8F5FF", chipFill: "#DCCCFF", chipBorder: "#9747FF", sticky: "#DCCCFF", connector: "#9747FF" },
+    { hue: "pink", ink: "#F849C1", shapeFill: "#FFC2EC", shapeBorder: "#F849C1", sectionTint: "#FFF0FA", chipFill: "#FFC2EC", chipBorder: "#F849C1", sticky: "#FFC2EC", connector: "#F849C1" },
+    { hue: "white", ink: "#FFFFFF", shapeFill: "#FFFFFF", shapeBorder: "#757575", sectionTint: "#FFFFFF", chipFill: "#E6E6E6", chipBorder: "#C4C4C4", sticky: "#FFFFFF", connector: "#757575" }
+  ];
+
+  const SHAPES = [
+    { name: "Square", svg: '<rect x="4" y="4" width="12" height="12" rx="1.5"/>' },
+    { name: "Ellipse", svg: '<ellipse cx="10" cy="10" rx="8" ry="6.5"/>' },
+    { name: "Diamond", svg: '<path d="M10 3.5 16.5 10 10 16.5 3.5 10Z" stroke-linejoin="round"/>' },
+    { name: "Triangle up", svg: '<path d="M10 2.5 18 17.5H2Z" stroke-linejoin="round"/>' },
+    { name: "Triangle down", svg: '<path d="M2 2.5h16L10 17.5Z" stroke-linejoin="round"/>' },
+    { name: "Rounded rectangle", svg: '<rect x="3.5" y="5.5" width="13" height="9" rx="3"/>' },
+    { name: "Pentagon", svg: '<path d="M10 2.25 17.6 8.2 14.7 17.5H5.3L2.4 8.2Z" stroke-linejoin="round"/>' },
+    { name: "Octagon", svg: '<path d="M6 2.5h8L17.5 6v8L14 17.5H6L2.5 14V6Z" stroke-linejoin="round"/>' },
+    { name: "Plus", svg: '<path d="M7.5 2.5h5v5h5v5h-5v5h-5v-5h-5v-5h5Z" stroke-linejoin="round"/>' },
+    { name: "Left arrow", svg: '<path d="M17 12.5H9v2l-6-4.5 6-4.5v2h8Z" stroke-linejoin="round"/>' },
+    { name: "Right arrow", svg: '<path d="M3 7.5h8v-2l6 4.5-6 4.5v-2H3Z" stroke-linejoin="round"/>' },
+    { name: "Chevron", svg: '<path d="M5 2.5 15 10 5 17.5 8.8 10Z" stroke-linejoin="round"/>' },
+    { name: "Star", svg: '<path d="M10 2.25 12.35 7.1 17.7 7.85 13.85 11.6 14.75 16.9 10 14.4 5.25 16.9 6.15 11.6 2.3 7.85 7.65 7.1Z" stroke-linejoin="round"/>' },
+    { name: "Person", svg: '<circle cx="10" cy="7" r="3.2"/><path d="M4.5 17c.8-3.1 2.8-4.7 5.5-4.7S14.7 13.9 15.5 17" fill="none" stroke-linecap="round"/>' },
+    { name: "Chat", svg: '<path d="M4.2 4.5h11.6a2 2 0 0 1 2 2v6.2a2 2 0 0 1-2 2H9.5L5.4 17v-2.3H4.2a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" stroke-linejoin="round"/>' },
+    { name: "Chip", svg: '<rect x="5" y="5" width="10" height="10" rx="1.5"/><path d="M8 2v3M12 2v3M8 15v3M12 15v3M2 8h3M2 12h3M15 8h3M15 12h3" fill="none" stroke-linecap="round"/>' }
+  ];
+
+  const CONFIG = {
+    section: {
+      label: "Section",
+      top: 128,
+      width: 300,
+      height: 170,
+      items: [
+        { id: "color", label: "Color", kind: "flyout", flyout: "color", icon: "color" },
+        { id: "rename", label: "Rename", kind: "button", icon: "type" },
+        { id: "scaleFit", label: "Scale to fit", kind: "button", icon: "scaleFit", pressed: (demo) => demo.fitted, sepBefore: true },
+        { id: "borderStyle", label: "Border style", kind: "flyout", flyout: "borderStyle", icon: (demo) => demo.borderStyle === "dashed" ? "lineDashed" : "lineSolid" },
+        { id: "lock", label: "Lock", kind: "flyout", flyout: "lock", icon: "lock", active: (demo) => demo.locked, pressed: (demo) => demo.locked, sepBefore: true }
+      ]
+    },
+    shape: {
+      label: "Shape",
+      top: 142,
+      width: 150,
+      height: 95,
+      items: [
+        { id: "color", label: "Color", kind: "flyout", flyout: "color", icon: "color" },
+        { id: "editText", label: "Edit text", kind: "button", icon: "type" },
+        { id: "changeShape", label: "Change shape", kind: "flyout", flyout: "shapePicker", icon: "shapes", sepBefore: true }
+      ]
+    },
+    sticky: {
+      label: "Sticky",
+      top: 116,
+      width: 150,
+      height: 150,
+      items: [
+        { id: "color", label: "Color", kind: "flyout", flyout: "color", icon: "color" },
+        { id: "editText", label: "Edit text", kind: "button", icon: "type" }
+      ]
+    },
+    line: {
+      label: "Line",
+      top: 128,
+      width: 230,
+      height: 128,
+      items: [
+        { id: "color", label: "Color", kind: "flyout", flyout: "color", icon: "color" },
+        { id: "text", label: "Add text", kind: "button", icon: "type", pressed: (demo) => demo.label },
+        { id: "lineStyle", label: "Line style", kind: "flyout", flyout: "lineStyle", icon: (demo) => demo.lineStyle === "dashed" ? "lineDashed" : "lineSolid", sepBefore: true },
+        { id: "arrowheads", label: "Arrowheads", kind: "flyout", flyout: "arrowheads", icon: (demo) => `arrow${capitalize(demo.arrow)}` }
+      ]
+    }
+  };
+
+  const state = {
+    toggles: {
+      chevrons: "hidden",
+      separators: "grouped",
+      flyoutPosition: "center",
+      pickerStyle: "figjam"
+    },
+    openFlyout: null,
+    demos: {
+      section: { selected: true, color: "gray", borderStyle: "solid", fitted: false, locked: false, lockMode: null, pulse: null, justEntered: true },
+      shape: { selected: true, color: "gray", shape: "Rounded rectangle", search: "", pulse: null, justEntered: true },
+      sticky: { selected: true, color: "yellow", pulse: null, justEntered: true },
+      line: { selected: true, color: "gray", lineStyle: "solid", arrow: "right", label: false, pulse: null, justEntered: true }
+    }
+  };
+
+  let pulseTimer = 0;
+
+  function capitalize(value) {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function paletteFor(hue) {
+    return PALETTE.find((entry) => entry.hue === hue) || PALETTE[0];
+  }
+
+  function shapeFor(name) {
+    return SHAPES.find((shape) => shape.name === name) || SHAPES[5];
+  }
+
+  function isNearWhite(hex) {
+    return hex.toUpperCase() === "#FFFFFF";
+  }
+
+  function icon(name, size = 20, extraClass = "") {
+    const data = ICONS[name] || ICONS.type;
+    const strokeWidth = data.strokeWidth ? ` stroke-width="${data.strokeWidth}"` : "";
+    const className = extraClass ? ` class="${extraClass}"` : "";
+    return `<svg${className} aria-hidden="true" width="${size}" height="${size}" viewBox="${data.viewBox}" fill="none" stroke="currentColor"${strokeWidth}>${data.body}</svg>`;
+  }
+
+  function colorSwatchIcon(hex) {
+    const stroke = isNearWhite(hex) ? ' stroke="rgba(255,255,255,0.35)" stroke-width="1"' : "";
+    return `<span class="swatch-trigger"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="${hex}"${stroke}/></svg></span>`;
+  }
+
+  function objectColor(demoId) {
+    const pick = paletteFor(state.demos[demoId].color);
+    if (demoId === "shape") {
+      return { swatch: pick.ink, fill: pick.shapeFill, border: pick.shapeBorder };
+    }
+    if (demoId === "section") {
+      return { swatch: pick.ink, tint: pick.sectionTint, chipFill: pick.chipFill, chipBorder: pick.chipBorder };
+    }
+    if (demoId === "sticky") {
+      return { swatch: pick.ink, fill: pick.sticky };
+    }
+    return { swatch: pick.ink, connector: pick.connector };
+  }
+
+  function shouldInsertSeparator(demoId, index) {
+    if (index === 0) {
+      return false;
+    }
+    if (state.toggles.separators === "none") {
+      return false;
+    }
+    if (state.toggles.separators === "every") {
+      return true;
+    }
+    return CONFIG[demoId].items[index].sepBefore === true;
+  }
+
+  function renderSelectionBox(config, demo) {
+    const w = (demo && demo.fitted) ? 210 : config.width;
+    const h = (demo && demo.fitted) ? 120 : config.height;
+    return `
+      <div class="selection-box" aria-hidden="true" style="top:${config.top}px;width:${w}px;height:${h}px;">
+        <span class="selection-handle selection-handle--tl"></span>
+        <span class="selection-handle selection-handle--tr"></span>
+        <span class="selection-handle selection-handle--br"></span>
+        <span class="selection-handle selection-handle--bl"></span>
+      </div>
+    `;
+  }
+
+  function renderSectionObject(demo) {
+    const colors = objectColor("section");
+    const dash = demo.borderStyle === "dashed" ? ' stroke-dasharray="8 6"' : "";
+    const w = demo.fitted ? 210 : 300;
+    const h = demo.fitted ? 120 : 170;
+    return `
+      <div class="demo-object section-object" data-object data-demo="section" style="top:${CONFIG.section.top}px;width:${w}px;height:${h}px;--chip-fill:${colors.chipFill};--chip-border:${colors.chipBorder};" tabindex="0" aria-label="Section object">
+        <svg class="section-object-svg" aria-hidden="true" viewBox="0 0 ${w} ${h}">
+          <rect x="0.75" y="0.75" width="${w - 1.5}" height="${h - 1.5}" rx="8" fill="${colors.tint}" stroke="${colors.swatch}" stroke-width="1.5"${dash}></rect>
+        </svg>
+        <div class="section-title-chip ${demo.pulse === "rename" ? "is-pulsing" : ""}">Section 1</div>
+        ${demo.locked ? `<div class="lock-badge" aria-label="Locked">${icon("lock", 14)}</div>` : ""}
+      </div>
+    `;
+  }
+
+  function renderShapeObject(demo) {
+    const colors = objectColor("shape");
+    const shape = shapeFor(demo.shape);
+    const shapeMarkup = shape.svg.replace(/<(rect|ellipse|circle|path|polygon|polyline)\b/g, '<$1 vector-effect="non-scaling-stroke"');
+    return `
+      <div class="demo-object shape-object" data-object data-demo="shape" style="top:${CONFIG.shape.top}px;" tabindex="0" aria-label="Shape object">
+        <svg aria-hidden="true" viewBox="0 0 20 20" preserveAspectRatio="none">
+          <g fill="${colors.fill}" stroke="${colors.border}" stroke-width="2">${shapeMarkup}</g>
+        </svg>
+        <span class="shape-label ${demo.pulse === "text" ? "is-pulsing" : ""}">Aa</span>
+      </div>
+    `;
+  }
+
+  function renderStickyObject(demo) {
+    const colors = objectColor("sticky");
+    return `
+      <div class="demo-object sticky-object" data-object data-demo="sticky" style="top:${CONFIG.sticky.top}px;--sticky-fill:${colors.fill};" tabindex="0" aria-label="Sticky note object">
+        <span class="sticky-text ${demo.pulse === "text" ? "is-pulsing" : ""}">Note</span>
+      </div>
+    `;
+  }
+
+  function renderLineObject(demo) {
+    const colors = objectColor("line");
+    const markerStart = demo.arrow === "left" || demo.arrow === "both" ? ' marker-start="url(#line-arrow-start)"' : "";
+    const markerEnd = demo.arrow === "right" || demo.arrow === "both" ? ' marker-end="url(#line-arrow-end)"' : "";
+    const dash = demo.lineStyle === "dashed" ? ' stroke-dasharray="8 6"' : "";
+    return `
+      <div class="demo-object line-object" data-object data-demo="line" style="top:${CONFIG.line.top}px;" tabindex="0" aria-label="Line object">
+        <svg aria-hidden="true" viewBox="0 0 230 128">
+          <defs>
+            <marker id="line-arrow-end" markerWidth="8" markerHeight="8" refX="6.8" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M0 0 8 4 0 8Z" fill="${colors.connector}"></path>
+            </marker>
+            <marker id="line-arrow-start" markerWidth="8" markerHeight="8" refX="1.2" refY="4" orient="auto-start-reverse" markerUnits="strokeWidth">
+              <path d="M0 0 8 4 0 8Z" fill="${colors.connector}"></path>
+            </marker>
+          </defs>
+          <polyline points="24,42 96,42 96,86 206,86" fill="none" stroke="${colors.connector}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${dash}${markerStart}${markerEnd}></polyline>
+          ${demo.label ? '<text class="line-label" x="112" y="68" text-anchor="middle">label</text>' : ""}
+        </svg>
+      </div>
+    `;
+  }
+
+  function renderObject(demoId) {
+    const demo = state.demos[demoId];
+    if (demoId === "section") {
+      return renderSectionObject(demo);
+    }
+    if (demoId === "shape") {
+      return renderShapeObject(demo);
+    }
+    if (demoId === "sticky") {
+      return renderStickyObject(demo);
+    }
+    return renderLineObject(demo);
+  }
+
+  function renderToolbar(demoId) {
+    const demo = state.demos[demoId];
+    const config = CONFIG[demoId];
+    const toolbarTop = config.top - 27 - 48;
+    const hasOpen = state.openFlyout && state.openFlyout.demo === demoId;
+    const buttons = config.items.map((item, index) => {
+      const separator = shouldInsertSeparator(demoId, index) ? '<span class="toolbar-separator" aria-hidden="true"></span>' : "";
+      const isOpen = hasOpen && state.openFlyout.item === item.id;
+      const active = typeof item.active === "function" ? item.active(demo) : false;
+      const pressed = typeof item.pressed === "function" ? item.pressed(demo) : active;
+      const iconName = typeof item.icon === "function" ? item.icon(demo) : item.icon;
+      const buttonIcon = iconName === "color" ? colorSwatchIcon(objectColor(demoId).swatch) : icon(iconName, 20);
+      const chevron = item.kind === "flyout" && state.toggles.chevrons === "shown" ? icon("chevron", 12) : "";
+      const ariaExpanded = item.kind === "flyout" ? ` aria-expanded="${isOpen ? "true" : "false"}" aria-haspopup="dialog"` : "";
+      const ariaPressed = pressed || item.id === "text" ? ` aria-pressed="${pressed ? "true" : "false"}"` : "";
+      const classes = ["toolbar-button", isOpen ? "is-open" : "", active ? "is-active" : ""].filter(Boolean).join(" ");
+      return `
+        ${separator}
+        <button type="button" class="${classes}" data-action="${item.kind === "flyout" ? "toggle-flyout" : "button"}" data-demo="${demoId}" data-item="${item.id}" aria-label="${item.label}"${ariaExpanded}${ariaPressed}>
+          ${buttonIcon}
+          ${chevron}
+          <span class="tooltip" role="tooltip">${item.label}</span>
+        </button>
+      `;
+    }).join("");
+
+    return `
+      <div class="toolbar-anchor" style="top:${toolbarTop}px;">
+        <div class="selection-toolbar ${hasOpen ? "has-open" : ""} ${demo.justEntered ? "is-entering" : ""}" role="toolbar" aria-label="${config.label} selection toolbar">
+          ${buttons}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDemo(demoId) {
+    const stage = document.querySelector(`[data-stage][data-demo="${demoId}"]`);
+    const demo = state.demos[demoId];
+    const config = CONFIG[demoId];
+    stage.innerHTML = `
+      ${renderObject(demoId)}
+      ${demo.selected ? renderSelectionBox(config, demo) : ""}
+      ${demo.selected ? renderToolbar(demoId) : ""}
+    `;
+    state.demos[demoId].justEntered = false;
+  }
+
+  function renderAll() {
+    root.classList.toggle("has-flyout", Boolean(state.openFlyout));
+    Object.keys(CONFIG).forEach(renderDemo);
+    renderFlyout();
+  }
+
+  function renderFlyout() {
+    portal.innerHTML = "";
+    if (!state.openFlyout) {
+      return;
+    }
+
+    const { demo, item } = state.openFlyout;
+    const configItem = CONFIG[demo].items.find((entry) => entry.id === item);
+    if (!configItem || !state.demos[demo].selected) {
+      state.openFlyout = null;
+      return;
+    }
+
+    portal.innerHTML = flyoutMarkup(demo, configItem);
+    window.requestAnimationFrame(positionFlyout);
+  }
+
+  function flyoutMarkup(demoId, item) {
+    if (item.flyout === "color") {
+      return renderColorFlyout(demoId, item.label);
+    }
+    if (item.flyout === "borderStyle") {
+      return renderStyleFlyout(demoId, "borderStyle", [
+        { value: "solid", icon: "lineSolid", label: "Solid" },
+        { value: "dashed", icon: "lineDashed", label: "Dashed" }
+      ]);
+    }
+    if (item.flyout === "lock") {
+      return renderLockFlyout();
+    }
+    if (item.flyout === "shapePicker") {
+      return renderShapeFlyout();
+    }
+    if (item.flyout === "lineStyle") {
+      return renderStyleFlyout(demoId, "lineStyle", [
+        { value: "solid", icon: "lineSolid", label: "Solid" },
+        { value: "dashed", icon: "lineDashed", label: "Dashed" }
+      ]);
+    }
+    return renderStyleFlyout(demoId, "arrow", [
+      { value: "none", icon: "arrowNone", label: "No arrowheads" },
+      { value: "right", icon: "arrowRight", label: "Arrow right" },
+      { value: "left", icon: "arrowLeft", label: "Arrow left" },
+      { value: "both", icon: "arrowBoth", label: "Arrows both" }
+    ]);
+  }
+
+  function renderColorFlyout(demoId, label) {
+    const current = state.demos[demoId].color;
+    const swatches = PALETTE.map((entry) => {
+      const isCurrent = current === entry.hue;
+      const currentClass = isCurrent ? (state.toggles.pickerStyle === "figjam" ? " is-current-outline" : " is-current") : "";
+      const inset = entry.ink.startsWith("#F") ? "box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);" : "";
+      const innerInset = entry.ink.startsWith("#F") ? " box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);" : "";
+      if (isCurrent && state.toggles.pickerStyle === "figjam") {
+        return `
+        <button type="button" class="color-swatch${currentClass}" data-action="pick-color" data-demo="${demoId}" data-color="${entry.hue}" aria-label="${entry.hue} color" aria-pressed="true" style="background:${entry.ink};${inset}"></button>
+      `;
+      }
+      return `
+        <button type="button" class="color-swatch${currentClass}" data-action="pick-color" data-demo="${demoId}" data-color="${entry.hue}" aria-label="${entry.hue} color" aria-pressed="${current === entry.hue ? "true" : "false"}" style="${inset}">
+          <span class="color-swatch-inner" style="background:${entry.ink};${innerInset}"></span>
+        </button>
+      `;
+    }).join("");
+    return `<div class="flyout-panel color-panel" data-flyout-panel role="dialog" aria-label="${label}"><div class="flyout-row color-row">${swatches}</div></div>`;
+  }
+
+  function renderStyleFlyout(demoId, key, options) {
+    const current = state.demos[demoId][key];
+    const buttons = options.map((option) => `
+      <button type="button" class="icon-option ${current === option.value ? "is-active" : ""}" data-action="pick-style" data-demo="${demoId}" data-key="${key}" data-value="${option.value}" aria-label="${option.label}" aria-pressed="${current === option.value ? "true" : "false"}">
+        ${icon(option.icon, 20)}
+      </button>
+    `).join("");
+    return `<div class="flyout-panel" data-flyout-panel role="dialog" aria-label="${key}"><div class="flyout-row">${buttons}</div></div>`;
+  }
+
+  function renderLockFlyout() {
+    const demo = state.demos.section;
+    const rows = demo.locked ? `
+      <button type="button" class="menu-row" data-action="unlock-section" aria-label="Unlock">${icon("unlock", 20)}<span>Unlock</span></button>
+    ` : `
+      <button type="button" class="menu-row" data-action="lock-section" data-lock-mode="all" aria-label="Lock all">${icon("lock", 20)}<span>Lock all</span></button>
+      <button type="button" class="menu-row" data-action="lock-section" data-lock-mode="background" aria-label="Lock background only">${icon("lock", 20)}<span>Lock background only</span></button>
+    `;
+    return `<div class="flyout-panel" data-flyout-panel role="menu" aria-label="Lock"><div class="menu-stack">${rows}</div></div>`;
+  }
+
+  function renderShapeFlyout() {
+    const demo = state.demos.shape;
+    const query = demo.search.trim().toLowerCase();
+    const shapes = SHAPES.filter((shape) => shape.name.toLowerCase().includes(query));
+    const cells = shapes.map((shape) => `
+      <button type="button" class="icon-option ${demo.shape === shape.name ? "is-active" : ""}" data-action="pick-shape" data-shape="${shape.name}" aria-label="${shape.name}" aria-pressed="${demo.shape === shape.name ? "true" : "false"}">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">${shape.svg}</svg>
+      </button>
+    `).join("");
+    return `
+      <div class="flyout-panel shape-panel" data-flyout-panel role="dialog" aria-label="Change shape">
+        <label class="shape-search">
+          ${icon("search", 18)}
+          <input type="search" data-shape-search value="${escapeAttribute(demo.search)}" placeholder="Search for a shape" aria-label="Search for a shape" autocomplete="off">
+        </label>
+        <div class="shape-grid" role="grid">${cells}</div>
+      </div>
+    `;
+  }
+
+  function escapeAttribute(value) {
+    return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function positionFlyout() {
+    if (!state.openFlyout) {
+      return;
+    }
+
+    const panel = portal.querySelector("[data-flyout-panel]");
+    const stage = document.querySelector(`[data-stage][data-demo="${state.openFlyout.demo}"]`);
+    const trigger = document.querySelector(`[data-action="toggle-flyout"][data-demo="${state.openFlyout.demo}"][data-item="${state.openFlyout.item}"]`);
+    const toolbar = trigger ? trigger.closest(".selection-toolbar") : null;
+
+    if (!panel || !stage || !trigger || !toolbar) {
+      return;
+    }
+
+    panel.style.visibility = "hidden";
+    panel.style.left = "0px";
+    panel.style.top = "0px";
+
+    const panelRect = panel.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const toolbarRect = toolbar.getBoundingClientRect();
+    const margin = 8;
+    const stageLeft = stageRect.left + margin;
+    const stageRight = stageRect.right - margin;
+    let left;
+
+    if (state.toggles.flyoutPosition === "left") {
+      left = toolbarRect.left;
+    } else {
+      left = triggerRect.left + (triggerRect.width / 2) - (panelRect.width / 2);
+    }
+
+    left = Math.max(stageLeft, Math.min(left, stageRight - panelRect.width));
+    const top = toolbarRect.top - 8 - panelRect.height;
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.visibility = "visible";
+  }
+
+  function closeFlyout() {
+    if (!state.openFlyout) {
+      return;
+    }
+    state.openFlyout = null;
+    renderAll();
+  }
+
+  function selectDemo(demoId) {
+    const hadOpenFlyout = Boolean(state.openFlyout);
+    const wasSelected = state.demos[demoId].selected;
+    state.openFlyout = null;
+    if (!state.demos[demoId].selected || hadOpenFlyout) {
+      if (!wasSelected) {
+        state.demos[demoId].justEntered = true;
+      }
+      state.demos[demoId].selected = true;
+      renderAll();
+    }
+  }
+
+  function deselectDemo(demoId) {
+    state.demos[demoId].selected = false;
+    state.openFlyout = null;
+    renderAll();
+  }
+
+  function pulse(demoId, target) {
+    window.clearTimeout(pulseTimer);
+    state.demos[demoId].pulse = target;
+    renderAll();
+    pulseTimer = window.setTimeout(() => {
+      if (state.demos[demoId].pulse === target) {
+        state.demos[demoId].pulse = null;
+        renderAll();
+      }
+    }, 650);
+  }
+
+  function handleToolbarButton(demoId, itemId) {
+    state.openFlyout = null;
+    if (demoId === "section" && itemId === "rename") {
+      pulse("section", "rename");
+    } else if (demoId === "section" && itemId === "scaleFit") {
+      state.demos.section.fitted = !state.demos.section.fitted;
+      renderAll();
+    } else if (demoId === "shape" && itemId === "editText") {
+      pulse("shape", "text");
+    } else if (demoId === "sticky" && itemId === "editText") {
+      pulse("sticky", "text");
+    } else if (demoId === "line" && itemId === "text") {
+      state.demos.line.label = !state.demos.line.label;
+      renderAll();
+    }
+  }
+
+  function toggleFlyout(demoId, itemId) {
+    const isSame = state.openFlyout && state.openFlyout.demo === demoId && state.openFlyout.item === itemId;
+    state.openFlyout = isSame ? null : { demo: demoId, item: itemId };
+    renderAll();
+  }
+
+  function handleAction(button) {
+    const action = button.dataset.action;
+    if (action === "toggle-flyout") {
+      toggleFlyout(button.dataset.demo, button.dataset.item);
+    } else if (action === "button") {
+      handleToolbarButton(button.dataset.demo, button.dataset.item);
+    } else if (action === "pick-color") {
+      state.demos[button.dataset.demo].color = button.dataset.color;
+      state.openFlyout = null;
+      renderAll();
+    } else if (action === "pick-style") {
+      state.demos[button.dataset.demo][button.dataset.key] = button.dataset.value;
+      state.openFlyout = null;
+      renderAll();
+    } else if (action === "lock-section") {
+      state.demos.section.locked = true;
+      state.demos.section.lockMode = button.dataset.lockMode;
+      state.openFlyout = null;
+      renderAll();
+    } else if (action === "unlock-section") {
+      state.demos.section.locked = false;
+      state.demos.section.lockMode = null;
+      state.openFlyout = null;
+      renderAll();
+    } else if (action === "pick-shape") {
+      state.demos.shape.shape = button.dataset.shape;
+      state.openFlyout = null;
+      renderAll();
+    }
+  }
+
+  function handleShapeSearch(input) {
+    state.demos.shape.search = input.value;
+    renderAll();
+    window.requestAnimationFrame(() => {
+      const nextInput = document.querySelector("[data-shape-search]");
+      if (nextInput) {
+        nextInput.focus();
+        const end = nextInput.value.length;
+        nextInput.setSelectionRange(end, end);
+      }
+    });
+  }
+
+  root.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (button) {
+      event.stopPropagation();
+      handleAction(button);
+      return;
+    }
+
+    const object = event.target.closest("[data-object]");
+    if (object) {
+      event.stopPropagation();
+      selectDemo(object.dataset.demo);
+      return;
+    }
+
+    if (event.target.closest("[data-flyout-panel]") || event.target.closest(".toolbar-anchor")) {
+      event.stopPropagation();
+      return;
+    }
+
+    const stage = event.target.closest("[data-stage]");
+    if (stage) {
+      event.stopPropagation();
+      deselectDemo(stage.dataset.demo);
+      return;
+    }
+
+    closeFlyout();
+  });
+
+  root.addEventListener("keydown", (event) => {
+    const object = event.target.closest("[data-object]");
+    if (object && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      selectDemo(object.dataset.demo);
+    }
+  });
+
+  root.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-toggle]");
+    if (!input) {
+      return;
+    }
+    state.toggles[input.dataset.toggle] = input.value;
+    renderAll();
+  });
+
+  root.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-shape-search]");
+    if (!input) {
+      return;
+    }
+    handleShapeSearch(input);
+  });
+
+  portal.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (button) {
+      event.stopPropagation();
+      handleAction(button);
+      return;
+    }
+
+    if (event.target.closest("[data-flyout-panel]")) {
+      event.stopPropagation();
+    }
+  });
+
+  portal.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-shape-search]");
+    if (!input) {
+      return;
+    }
+    handleShapeSearch(input);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-mockup]") && !event.target.closest("[data-flyout-panel]")) {
+      closeFlyout();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.openFlyout) {
+      event.preventDefault();
+      closeFlyout();
+    }
+  });
+
+  window.addEventListener("resize", positionFlyout);
+  window.addEventListener("scroll", positionFlyout, true);
+
+  renderAll();
+})();
+</script>

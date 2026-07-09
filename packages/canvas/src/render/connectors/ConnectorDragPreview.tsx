@@ -19,28 +19,59 @@ import type {
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
 const CONNECTOR_PREVIEW_STROKE_WIDTH_PX = 4;
+const CONNECTOR_PREVIEW_OPACITY = 0.6;
+
+function quickConnectGhostId(
+  source: InteractiveCanvasObject,
+  objects: ReadonlyArray<InteractiveCanvasObject>,
+): string {
+  const baseId = `${source.id}-quick-connect-ghost`;
+  if (!objects.some((object) => object.id === baseId)) return baseId;
+
+  let suffix = 2;
+  while (objects.some((object) => object.id === `${baseId}-${suffix}`)) {
+    suffix += 1;
+  }
+  return `${baseId}-${suffix}`;
+}
+
+function quickConnectGhostWorldGeometry(
+  source: InteractiveCanvasObject,
+  center: CanvasPoint,
+): InteractiveCanvasObject["geometry"] {
+  return {
+    x: center.x - source.geometry.width / 2,
+    y: center.y - source.geometry.height / 2,
+    width: source.geometry.width,
+    height: source.geometry.height,
+  };
+}
+
+function screenGeometryFromWorld(
+  viewport: ViewportState,
+  geometry: InteractiveCanvasObject["geometry"],
+): InteractiveCanvasObject["geometry"] {
+  const topLeft = worldToScreen(viewport, { x: geometry.x, y: geometry.y });
+  return {
+    x: topLeft.x,
+    y: topLeft.y,
+    width: geometry.width * viewport.zoom,
+    height: geometry.height * viewport.zoom,
+  };
+}
 
 function quickConnectGhostObject(
   source: InteractiveCanvasObject,
-  viewport: ViewportState,
-  center: CanvasPoint,
+  geometry: InteractiveCanvasObject["geometry"],
+  id: string,
 ): InteractiveCanvasObject {
-  const topLeft = worldToScreen(viewport, {
-    x: center.x - source.geometry.width / 2,
-    y: center.y - source.geometry.height / 2,
-  });
   return {
-    id: `${source.id}-quick-connect-ghost`,
+    id,
     type: source.type,
     text: "",
     ...(source.color ? { color: source.color } : {}),
     parentId: null,
-    geometry: {
-      x: topLeft.x,
-      y: topLeft.y,
-      width: source.geometry.width * viewport.zoom,
-      height: source.geometry.height * viewport.zoom,
-    },
+    geometry,
     ...(source.style ? { style: { ...source.style } } : {}),
     ...(source.layout ? { layout: { ...source.layout } } : {}),
     ...(source.direction ? { direction: source.direction } : {}),
@@ -105,7 +136,15 @@ export function ConnectorDragPreview({
 
   const candidateObject = drag.candidate ? objectById(document, drag.candidate.objectId) ?? undefined : undefined;
   const sourceObject = drag.fromObjectId ? objectById(document, drag.fromObjectId) ?? undefined : undefined;
-  const previewPath = routedPreviewPath(document, drag, sourceObject, candidateObject);
+  const ghostWorldObject =
+    !drag.connectionId && !candidateObject && sourceObject
+      ? quickConnectGhostObject(
+          sourceObject,
+          quickConnectGhostWorldGeometry(sourceObject, drag.point),
+          quickConnectGhostId(sourceObject, document.objects),
+        )
+      : null;
+  const previewPath = routedPreviewPath(document, drag, sourceObject, candidateObject, ghostWorldObject);
   if (!previewPath) return null;
   const markerEnd = previewShowsForwardArrowhead(document, drag)
     ? `url(#${document.id}-arrow-forward)`
@@ -116,8 +155,12 @@ export function ConnectorDragPreview({
   const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
   const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];
   const snappedWorld = drag.candidate?.snapKind === "outline" ? drag.candidate.point : undefined;
-  const ghostObject =
-    !candidateObject && sourceObject ? quickConnectGhostObject(sourceObject, viewport, drag.point) : null;
+  const ghostObject = ghostWorldObject
+    ? {
+        ...ghostWorldObject,
+        geometry: screenGeometryFromWorld(viewport, ghostWorldObject.geometry),
+      }
+    : null;
 
   return (
     <>
@@ -145,6 +188,7 @@ export function ConnectorDragPreview({
             strokeWidth={CONNECTOR_PREVIEW_STROKE_WIDTH_PX}
             strokeLinecap="butt"
             markerEnd={markerEnd}
+            opacity={CONNECTOR_PREVIEW_OPACITY}
             data-canvas-connector-preview-path="true"
           />
         </g>
@@ -207,6 +251,7 @@ function routedPreviewPath(
   drag: NonNullable<InteractionOverlay["connectorDrag"]>,
   sourceObject: InteractiveCanvasObject | undefined,
   candidateObject: InteractiveCanvasObject | undefined,
+  ghostWorldObject: InteractiveCanvasObject | null,
 ): string | null {
   if (drag.connectionId) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
@@ -255,6 +300,15 @@ function routedPreviewPath(
       },
     };
     return routeConnection(sourceObject, candidateObject, previewConnection, document.objects).path;
+  }
+
+  if (ghostWorldObject) {
+    const previewConnection: InteractiveCanvasConnection = {
+      id: `${sourceObject.id}-${ghostWorldObject.id}-preview`,
+      from: { objectId: sourceObject.id, anchor: drag.fromAnchor },
+      to: { objectId: ghostWorldObject.id },
+    };
+    return routeConnection(sourceObject, ghostWorldObject, previewConnection, document.objects).path;
   }
 
   return routeConnectionToPoint(sourceObject, drag.fromAnchor, drag.point).path;

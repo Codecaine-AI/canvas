@@ -18,10 +18,9 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  * these glyphs are canvas CONTENT (what an `icon` object draws), not
  * interface icons (co-location alignment).
  *
- * Stroke width is NOT baked into the path data — callers apply
- * `strokeWidth={ICON_GLYPH_STROKE_WIDTH}` in viewBox units. The SVG is
- * re-projected to the object's geometry box so the glyph weight scales
- * proportionally with the object.
+ * Stroke width is NOT baked into the path data — callers apply stroke width
+ * in viewBox units. Picker previews keep `ICON_GLYPH_STROKE_WIDTH`; on-canvas
+ * glyphs derive a size-aware width via `iconGlyphStrokeWidthForSize()`.
  */
 
 /** The 26 Advanced-tier glyph ids (exact enum from the parity brief). */
@@ -58,12 +57,43 @@ export type IconGlyphId = (typeof ICON_GLYPH_IDS)[number];
 
 /**
  * Recommended default stroke width, in viewBox units, for a glyph drawn at its
- * native (18x18 Nucleo) viewBox. 1.5/18 is the same stroke-to-grid ratio
- * as the previous hand-drawn registry's 2/24 (both 1/12 — Nucleo's native
- * weight), so the rendered glyph weight scales proportionally when the SVG
- * is re-projected to the object's geometry box.
+ * native (18x18 Nucleo) viewBox. 1/18 is a deliberately lighter weight than
+ * Nucleo's native 1/12; previews use it directly, while on-canvas glyphs use
+ * it as the reference stroke in `iconGlyphStrokeWidthForSize()`.
  */
-export const ICON_GLYPH_STROKE_WIDTH = 1.5;
+export const ICON_GLYPH_STROKE_WIDTH = 1.0;
+
+export const ICON_GLYPH_REFERENCE_SIZE_PX = 130;
+
+/**
+ * Base stroke width (viewBox units) for ON-CANVAS glyphs at the 130px
+ * reference size — deliberately lighter than ICON_GLYPH_STROKE_WIDTH, which
+ * the small panel/search previews keep for legibility at ~20px.
+ */
+export const ICON_GLYPH_CANVAS_STROKE_WIDTH = 0.65;
+
+/**
+ * Exponent for how strongly glyph stroke width compensates for object size.
+ * 0 = constant viewBox stroke (rendered weight grows linearly with size,
+ * comically thick when large); 1 = constant rendered pixel weight at every
+ * size. Full compensation: every icon draws with the 130px-reference line
+ * weight regardless of how large it is scaled.
+ */
+const ICON_GLYPH_STROKE_FALLOFF = 1;
+
+/**
+ * Returns the on-canvas glyph stroke width in viewBox units for an icon whose
+ * rendered SVG scale is based on `sizePx` (the smaller object dimension).
+ * A constant viewBox stroke makes rendered pixel weight scale linearly with
+ * object size; this falloff keeps the 130px reference identical to today's
+ * look while letting larger icons get heavier only slightly.
+ */
+export function iconGlyphStrokeWidthForSize(sizePx: number): number {
+  if (sizePx <= 0) {
+    return ICON_GLYPH_CANVAS_STROKE_WIDTH;
+  }
+  return ICON_GLYPH_CANVAS_STROKE_WIDTH * (ICON_GLYPH_REFERENCE_SIZE_PX / sizePx) ** ICON_GLYPH_STROKE_FALLOFF;
+}
 
 export type IconGlyphDefinition = {
   /** Stable id — matches the `icon` field enum on an `icon`-type object. */

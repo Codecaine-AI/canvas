@@ -685,7 +685,7 @@ describe("interactive canvas schema and actions", () => {
       expect(object.getAttribute("data-selected")).toBe("true");
       expect(stage.style.cursor).toBe("grab");
 
-      fireEvent.keyDown(window, { key: "v", code: "KeyV" });
+      fireEvent.keyDown(window, { key: "d", code: "KeyD" });
       expect(stage.style.cursor).toContain('url("data:image/svg+xml');
       expect(stage.style.cursor).toContain(", default");
     } finally {

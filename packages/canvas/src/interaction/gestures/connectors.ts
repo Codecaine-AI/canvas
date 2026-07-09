@@ -110,7 +110,10 @@ export function quickConnectClickPoint(
   fromAnchor: ConnectorCreateGesture["fromAnchor"],
 ): CanvasPoint {
   const { x, y, width, height } = connectionBoundsForObject(fromObject);
-  const gap = Math.max(width, QUICK_CONNECT_MIN_GAP_PX);
+  // Half a shape-width edge-to-edge (min 60px): the original full-width gap
+  // read as "way too far" in review — the spawned duplicate should sit close
+  // enough to feel attached to its source.
+  const gap = Math.max(width, QUICK_CONNECT_MIN_GAP_PX) / 2;
   const centerX = x + width / 2;
   const centerY = y + height / 2;
 

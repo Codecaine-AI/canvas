@@ -68,13 +68,14 @@ describe("sticky markdown", () => {
     );
     const bullets = lines.filter((line) => line.getAttribute("data-bullet") === "true");
 
-    expect(bullets).toHaveLength(5);
+    expect(bullets).toHaveLength(6);
     expect(bullets.map((line) => line.getAttribute("data-line-depth"))).toEqual([
       "0",
       "1",
       "2",
       "5",
       "5",
+      "0",
     ]);
     expect(bullets.map((line) => line.getAttribute("data-bullet-glyph"))).toEqual([
       "1",
@@ -82,10 +83,13 @@ describe("sticky markdown", () => {
       "3",
       "3",
       "3",
+      "1",
     ]);
-    expect(lines[5].getAttribute("data-bullet")).toBeNull();
+    // The odd leading space hides with the bullet prefix — " - x" is a
+    // depth-0 bullet whose ink sits exactly on the column, not literal text.
+    expect(lines[5].getAttribute("data-bullet")).toBe("true");
     expect(lines[5].getAttribute("data-line-depth")).toBe("0");
-    expect(lines[5].textContent).toBe(" - x");
+    expect(lines[5].textContent).toBe("x");
   });
 
   it("renders structural depth attributes on paragraphs and headings", () => {

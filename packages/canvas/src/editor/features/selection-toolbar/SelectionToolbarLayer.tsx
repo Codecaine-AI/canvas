@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SelectionToolbar, type SelectionToolbarActionId, type ToolbarControlState } from "./SelectionToolbar";
 import { resolveConnectorControlState } from "./connector-control-state";
 import { colorKindForType, FIRST_USE_COLORS, type CanvasAction } from "../../../state/actions";
-import { resolveSectionColors, resolveSwatchPreview } from "../../../palette";
+import { resolveSwatchPreview } from "../../../palette";
+import { positionFlyoutCenteredOnTrigger, type Rect } from "./position";
 import type { SelectionToolbarApi } from "./use-selection-toolbar";
 import type { InteractiveCanvasConnection } from "../../../state/schema";
 
@@ -52,10 +53,87 @@ export function SelectionToolbarLayer({
     applySectionBorderStyleToSelection,
     swapSelectedShape,
   } = toolbar;
+  const flyoutPositionerRef = useRef<HTMLDivElement | null>(null);
+  const [flyoutLeft, setFlyoutLeft] = useState(0);
 
   useEffect(() => {
     if (hidden) setOpenFlyout(null);
   }, [hidden, setOpenFlyout]);
+
+  useLayoutEffect(() => {
+    if (hidden || !openFlyout) {
+      setFlyoutLeft(0);
+      return;
+    }
+
+    const toolbarElement = selectionToolbarRef.current;
+    const flyoutElement = flyoutPositionerRef.current;
+    if (!toolbarElement || !flyoutElement) {
+      setFlyoutLeft(0);
+      return;
+    }
+
+    let animationFrame: number | null = null;
+    const measure = () => {
+      animationFrame = null;
+      const triggerElement = findToolbarActionElement(toolbarElement, openFlyout);
+      if (!triggerElement) {
+        setFlyoutLeft(0);
+        return;
+      }
+
+      const triggerRect = rectFromDOMRect(triggerElement.getBoundingClientRect());
+      const toolbarRect = rectFromDOMRect(toolbarElement.getBoundingClientRect());
+      const flyoutWidth = flyoutElement.getBoundingClientRect().width;
+      const viewportWidth = getViewportWidth();
+
+      if (triggerRect.width <= 0 || toolbarRect.width <= 0 || flyoutWidth <= 0 || viewportWidth <= 0) {
+        setFlyoutLeft(0);
+        return;
+      }
+
+      const nextLeft = positionFlyoutCenteredOnTrigger(triggerRect, flyoutWidth, toolbarRect, viewportWidth);
+      setFlyoutLeft((currentLeft) => (Math.abs(currentLeft - nextLeft) < 0.5 ? currentLeft : nextLeft));
+    };
+    const scheduleMeasure = () => {
+      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+        animationFrame = window.requestAnimationFrame(measure);
+      } else {
+        measure();
+      }
+    };
+
+    measure();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", scheduleMeasure);
+    }
+
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(scheduleMeasure);
+      resizeObserver.observe(toolbarElement);
+      resizeObserver.observe(flyoutElement);
+    }
+
+    return () => {
+      if (animationFrame !== null && typeof window !== "undefined") {
+        window.cancelAnimationFrame(animationFrame);
+      }
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", scheduleMeasure);
+      }
+      resizeObserver?.disconnect();
+    };
+  }, [
+    hidden,
+    openFlyout,
+    selectionSignature,
+    selectionToolbarPosition?.x,
+    selectionToolbarPosition?.y,
+    selectionToolbarRef,
+  ]);
 
   if (hidden || !selectionToolbarVariant || !selectionToolbarPosition || !selectionToolbarControls) return null;
   const FlyoutComponent = openFlyout ? selectionToolbarFlyouts?.[openFlyout] : undefined;
@@ -69,8 +147,6 @@ export function SelectionToolbarLayer({
     };
     controlState["section-border-style"] = {
       variant: primarySelectedObject.style?.strokeStyle ?? "solid",
-      // The section frame border IS the chip fill (§3.2).
-      color: resolveSectionColors(currentPick).chip.fill,
     };
     if (primarySectionFitted) {
       controlState["fit-children"] = { disabled: true };
@@ -107,17 +183,43 @@ export function SelectionToolbarLayer({
         activeFlyout={openFlyout}
       />
       {FlyoutComponent ? (
-        <FlyoutComponent
-          primaryObject={primarySelectedObject}
-          selectedConnection={selectedConnection}
-          dispatch={dispatch}
-          close={() => setOpenFlyout(null)}
-          applyColorToSelection={applyColorToSelection}
-          applySectionBorderStyleToSelection={applySectionBorderStyleToSelection}
-          setLockForSelection={setLockForSelection}
-          swapSelectedShape={swapSelectedShape}
-        />
+        <div ref={flyoutPositionerRef} className="absolute bottom-full z-50 mb-2" style={{ left: flyoutLeft }}>
+          <FlyoutComponent
+            primaryObject={primarySelectedObject}
+            selectedConnection={selectedConnection}
+            dispatch={dispatch}
+            close={() => setOpenFlyout(null)}
+            applyColorToSelection={applyColorToSelection}
+            applySectionBorderStyleToSelection={applySectionBorderStyleToSelection}
+            setLockForSelection={setLockForSelection}
+            swapSelectedShape={swapSelectedShape}
+          />
+        </div>
       ) : null}
     </div>
   );
+}
+
+function rectFromDOMRect(rect: DOMRect): Rect {
+  return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+}
+
+function getViewportWidth(): number {
+  if (typeof window === "undefined") return 0;
+  return window.innerWidth || window.document.documentElement.clientWidth || 0;
+}
+
+function findToolbarActionElement(
+  toolbarElement: HTMLDivElement,
+  action: SelectionToolbarActionId,
+): HTMLElement | null {
+  const escapedAction = escapeAttributeSelectorValue(action);
+  return toolbarElement.querySelector<HTMLElement>(`[data-toolbar-action="${escapedAction}"]`);
+}
+
+function escapeAttributeSelectorValue(value: string): string {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+  return value.replace(/["\\]/g, "\\$&");
 }

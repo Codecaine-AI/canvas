@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "board-2",
+  "id": "board-3",
   "title": "Untitled board",
   "mode": "diagram",
   "viewport": {
@@ -69,14 +69,14 @@
     {
       "id": "sticky",
       "type": "sticky",
-      "text": "# Test\n This is pretty nice\n- test\n# Testing\n- asdf\n  - asdf\n    - asd\n   odd-space para",
+      "text": "",
       "color": "yellow",
-      "parentId": "diagram-frame",
+      "parentId": null,
       "geometry": {
-        "x": 400,
-        "y": 224,
-        "width": 366,
-        "height": 338
+        "x": 16,
+        "y": 496,
+        "width": 251.2890625,
+        "height": 246.5625
       },
       "style": {
         "shape": "note"

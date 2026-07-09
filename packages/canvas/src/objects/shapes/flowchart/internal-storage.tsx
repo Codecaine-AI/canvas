@@ -9,8 +9,9 @@ import type { ShapeDef } from "../shape-def";
 /**
  * Internal storage — a rect with two inner rule lines (one vertical near the
  * left edge, one horizontal near the top) forming an inset "L" divider. The
- * rules are plain aria-hidden spans (not an SVG silhouette); CSS alone
- * positions and colors them (`background: currentColor`), borrowing
+ * rules are plain aria-hidden spans (not an SVG silhouette); CSS positions
+ * them, and each span is painted inline with the resolved border color,
+ * borrowing
  * PREDEFINED_PROCESS_GEOMETRY.barWidthPx (halved) for their thickness.
  */
 export const internalStorageShapeDef: ShapeDef = {
@@ -18,15 +19,17 @@ export const internalStorageShapeDef: ShapeDef = {
   shape: "internal-storage",
   silhouette: {
     className: "interactive-canvas-object-internal-storage",
-    silhouette: () => (
+    silhouette: ({ colors }) => (
       <>
         <span
           aria-hidden="true"
           className="interactive-canvas-internal-storage-rule interactive-canvas-internal-storage-rule-vertical"
+          style={{ background: colors.border }}
         />
         <span
           aria-hidden="true"
           className="interactive-canvas-internal-storage-rule interactive-canvas-internal-storage-rule-horizontal"
+          style={{ background: colors.border }}
         />
       </>
     ),
@@ -36,8 +39,6 @@ export const internalStorageShapeDef: ShapeDef = {
         }
         .interactive-canvas-internal-storage-rule {
           position: absolute;
-          background: currentColor;
-          opacity: 0.6;
           pointer-events: none;
           z-index: 0;
         }

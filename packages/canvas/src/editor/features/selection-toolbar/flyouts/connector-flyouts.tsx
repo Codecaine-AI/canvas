@@ -26,30 +26,28 @@ function ConnectorDashFlyout({ selectedConnection, dispatch, close }: ToolbarFly
   if (!selectedConnection) return null;
   const currentStyle = selectedConnection.style ?? "solid";
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-2" data-toolbar-flyout="connector-dash">
-      <FlyoutPanel style={{ display: "flex", gap: 4 }}>
-        {CONNECTOR_DASH_OPTIONS.map(({ value, label, Icon }) => (
-          <FlyoutMenuButton
-            key={value}
-            active={currentStyle === value}
-            aria-label={label}
-            aria-pressed={currentStyle === value}
-            title={label}
-            data-connector-line-style={value}
-            leadingIcon={<Icon className="h-5 w-5" />}
-            onClick={() => {
-              dispatch({
-                type: "canvas.updateConnection",
-                connectionId: selectedConnection.id,
-                patch: { style: value },
-              });
-              close();
-            }}
-            style={{ width: 36, justifyContent: "center", padding: 0 }}
-          />
-        ))}
-      </FlyoutPanel>
-    </div>
+    <FlyoutPanel data-toolbar-flyout="connector-dash" style={{ display: "flex", gap: 4 }}>
+      {CONNECTOR_DASH_OPTIONS.map(({ value, label, Icon }) => (
+        <FlyoutMenuButton
+          key={value}
+          active={currentStyle === value}
+          aria-label={label}
+          aria-pressed={currentStyle === value}
+          title={label}
+          data-connector-line-style={value}
+          leadingIcon={<Icon className="h-5 w-5" />}
+          onClick={() => {
+            dispatch({
+              type: "canvas.updateConnection",
+              connectionId: selectedConnection.id,
+              patch: { style: value },
+            });
+            close();
+          }}
+          style={{ width: 36, justifyContent: "center", padding: 0 }}
+        />
+      ))}
+    </FlyoutPanel>
   );
 }
 
@@ -57,30 +55,28 @@ function ConnectorArrowheadFlyout({ selectedConnection, dispatch, close }: Toolb
   if (!selectedConnection) return null;
   const currentArrow = selectedConnection.arrow ?? "forward";
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-2" data-toolbar-flyout="connector-arrowhead">
-      <FlyoutPanel style={{ display: "flex", gap: 4 }}>
-        {CONNECTOR_ARROWHEAD_OPTIONS.map(({ value, label, Icon }) => (
-          <FlyoutMenuButton
-            key={value}
-            active={currentArrow === value}
-            aria-label={label}
-            aria-pressed={currentArrow === value}
-            title={label}
-            data-connector-arrowhead={value}
-            leadingIcon={<Icon className="h-5 w-5" />}
-            onClick={() => {
-              dispatch({
-                type: "canvas.updateConnection",
-                connectionId: selectedConnection.id,
-                patch: { arrow: value },
-              });
-              close();
-            }}
-            style={{ width: 36, justifyContent: "center", padding: 0 }}
-          />
-        ))}
-      </FlyoutPanel>
-    </div>
+    <FlyoutPanel data-toolbar-flyout="connector-arrowhead" style={{ display: "flex", gap: 4 }}>
+      {CONNECTOR_ARROWHEAD_OPTIONS.map(({ value, label, Icon }) => (
+        <FlyoutMenuButton
+          key={value}
+          active={currentArrow === value}
+          aria-label={label}
+          aria-pressed={currentArrow === value}
+          title={label}
+          data-connector-arrowhead={value}
+          leadingIcon={<Icon className="h-5 w-5" />}
+          onClick={() => {
+            dispatch({
+              type: "canvas.updateConnection",
+              connectionId: selectedConnection.id,
+              patch: { arrow: value },
+            });
+            close();
+          }}
+          style={{ width: 36, justifyContent: "center", padding: 0 }}
+        />
+      ))}
+    </FlyoutPanel>
   );
 }
 

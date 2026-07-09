@@ -1476,7 +1476,7 @@ describe("interaction: connector-create from edge ports (3.3.2)", () => {
     ]);
   });
 
-  it("clicking a port quick-connects one source-width gap away in the port direction", () => {
+  it("clicking a port quick-connects half a source-width gap away in the port direction", () => {
     const document = portDoc();
     const ctx = makeContext(document);
     const hit = { kind: "port" as const, objectId: "a", anchor: "right" as const };
@@ -1489,7 +1489,8 @@ describe("interaction: connector-create from edge ports (3.3.2)", () => {
         type: "canvas.quickConnect",
         fromObjectId: "a",
         fromAnchor: "right",
-        drop: { point: { x: 270, y: 50 } },
+        // gap = max(width, 120) / 2 = 60 → x = 0 + 100 + 60 + 50.
+        drop: { point: { x: 210, y: 50 } },
       },
     ]);
     expect(result.overlay).toEqual({ editObjectTextId: "a-2", editObjectTextSeed: "" });
@@ -1507,7 +1508,7 @@ describe("interaction: connector-create from edge ports (3.3.2)", () => {
     const ctx = makeContext(document);
     const hit = { kind: "port" as const, objectId: "icon-a", anchor: "bottom" as const };
     const visualBounds = connectionBoundsForObject(icon);
-    const expectedGap = Math.max(visualBounds.width, 120);
+    const expectedGap = Math.max(visualBounds.width, 120) / 2;
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 53.5, y: 127 }, hit), ctx);
     result = stepInteraction(result.state, up({ x: 54, y: 128 }), ctx);

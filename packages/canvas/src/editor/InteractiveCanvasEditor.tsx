@@ -299,6 +299,21 @@ export function InteractiveCanvasEditor({
   );
 
   const openShapesPanel = useCallback(() => setShapesPanelPhase("open"), []);
+  const toggleShapesPanel = useCallback(() => {
+    if (shapesPanelOpen) {
+      closeShapesPanel();
+      return;
+    }
+    openShapesPanel();
+  }, [closeShapesPanel, openShapesPanel, shapesPanelOpen]);
+
+  const handleDockHotkeyTool = useCallback(
+    (tool: ToolId) => {
+      if (tool === "shapes") toggleShapesPanel();
+      handleDockSelectTool(tool);
+    },
+    [handleDockSelectTool, toggleShapesPanel],
+  );
 
   // Escape (via useCanvasHotkeys, after gesture-cancel and context-menu):
   // first press disarms the creation tool but leaves the panel open for
@@ -321,6 +336,7 @@ export function InteractiveCanvasEditor({
     document: state.document,
     selection: state.selection,
     dispatch,
+    onSelectDockTool: handleDockHotkeyTool,
     isTypingContextActive,
     interactionStateRef,
     onCancelInteraction: applyCancelInteraction,
@@ -421,7 +437,7 @@ export function InteractiveCanvasEditor({
           className="pointer-events-auto"
           activeTool={shapesPanelOpen ? "shapes" : dockToolForCanvasTool(state.tool)}
           onSelectTool={handleDockSelectTool}
-          onOpenShapes={openShapesPanel}
+          onOpenShapes={toggleShapesPanel}
         />
       </div>
 

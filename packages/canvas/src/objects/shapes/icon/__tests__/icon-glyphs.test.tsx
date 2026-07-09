@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
-import { ICON_GLYPHS, ICON_GLYPH_IDS, type IconGlyphId } from "../icon-glyphs";
+import {
+  ICON_GLYPHS,
+  ICON_GLYPH_CANVAS_STROKE_WIDTH,
+  ICON_GLYPH_IDS,
+  ICON_GLYPH_REFERENCE_SIZE_PX,
+  ICON_GLYPH_STROKE_WIDTH,
+  iconGlyphStrokeWidthForSize,
+  type IconGlyphId,
+} from "../icon-glyphs";
 import { IconShapeBody } from "../IconShapeBody";
 
 afterEach(() => {
@@ -79,6 +87,26 @@ describe("ICON_GLYPHS registry", () => {
   }
 });
 
+describe("iconGlyphStrokeWidthForSize", () => {
+  it("keeps the reference size identical to the canvas base glyph stroke", () => {
+    expect(iconGlyphStrokeWidthForSize(ICON_GLYPH_REFERENCE_SIZE_PX)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
+  });
+
+  it("renders a 4x-size icon at the same reference pixel weight (full falloff)", () => {
+    // viewBox stroke * 4 (linear scale-up) = exactly the reference pixel weight
+    expect(iconGlyphStrokeWidthForSize(ICON_GLYPH_REFERENCE_SIZE_PX * 4)).toBeCloseTo(ICON_GLYPH_CANVAS_STROKE_WIDTH / 4);
+  });
+
+  it("stays lighter than the preview stroke that panel previews keep", () => {
+    expect(ICON_GLYPH_CANVAS_STROKE_WIDTH).toBeLessThan(ICON_GLYPH_STROKE_WIDTH);
+  });
+
+  it("falls back to the canvas base glyph stroke for non-positive sizes", () => {
+    expect(iconGlyphStrokeWidthForSize(0)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
+    expect(iconGlyphStrokeWidthForSize(-1)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
+  });
+});
+
 describe("IconShapeBody", () => {
   it("renders only the glyph body; text is rendered by the icon object def", () => {
     const { container } = render(
@@ -96,6 +124,15 @@ describe("IconShapeBody", () => {
     const root = container.querySelector("[data-canvas-icon-shape-body]");
     expect(root).not.toBeNull();
     expect(root?.children.length).toBe(1);
+  });
+
+  it("scales the glyph stroke from the smaller geometry dimension", () => {
+    const { container } = render(
+      <IconShapeBody object={{ icon: "server", geometry: { width: 520, height: 260 } }} />,
+    );
+    const svg = container.querySelector("svg[data-canvas-icon-glyph='server']");
+    expect(svg).not.toBeNull();
+    expect(Number(svg?.getAttribute("stroke-width"))).toBeCloseTo(iconGlyphStrokeWidthForSize(260));
   });
 
   it("renders gracefully with no icon set (unknown glyph)", () => {

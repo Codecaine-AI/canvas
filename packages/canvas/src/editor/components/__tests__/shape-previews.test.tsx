@@ -28,7 +28,8 @@ describe("shape-previews catalog coverage", () => {
   it("icon entries resolve by glyph id to the shared on-canvas glyph data", () => {
     const iconEntries = SHAPE_CATALOG_ENTRIES.filter((entry) => entry.objectType === "icon");
     const advancedIconEntries = SHAPE_CATALOG_ENTRIES.filter((entry) => entry.id.startsWith("adv-"));
-    expect(iconEntries.length).toBe(29);
+    // Icon glyphs live ONLY in the Advanced tier — no Basic-tier duplicates.
+    expect(iconEntries.length).toBe(26);
     expect(advancedIconEntries.length).toBe(26);
     for (const entry of iconEntries) {
       const Icon = shapeCatalogPreview(entry);

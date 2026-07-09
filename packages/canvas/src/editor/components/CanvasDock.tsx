@@ -18,7 +18,7 @@ import {
  * Geometry/behavior source: board-design-reference/analysis/figjam-bottom-dock-spec.md
  *   - Content-fit width, 48px logical height, 13px radius.
  *   - bg #FFFFFF, soft shadow.
- *   - 6 buttons in 3 groups with faint vertical dividers.
+ *   - 6 buttons in 2 groups with faint vertical dividers.
  *   - Rest: charcoal glyphs. Hover: light-gray rounded square (~RGB235).
  *     Active: violet rounded square (EDITOR_STYLE.accentPurple family).
  *   - `activeTool` is nullable — null means no button is highlighted. The
@@ -63,18 +63,15 @@ type DockButtonSpec = {
 };
 
 const GROUP_A: DockButtonSpec[] = [
-  { tool: "select", label: "Select", tooltip: "Select — V", Icon: CursorIcon },
-  { tool: "hand", label: "Hand", tooltip: "Hand — H", Icon: HandIcon },
+  { tool: "sticky", label: "Sticky note", tooltip: "Sticky note — ⌘A", Icon: StickyIcon },
+  { tool: "section", label: "Section", tooltip: "Section — A", Icon: SectionIcon },
+  { tool: "shapes", label: "Shapes", tooltip: "Shapes — S", Icon: ShapesIcon },
 ];
 
 const GROUP_B: DockButtonSpec[] = [
-  { tool: "shapes", label: "Shapes", tooltip: "Shapes", Icon: ShapesIcon },
-  { tool: "connector", label: "Connector", tooltip: "Connector", Icon: ConnectorIcon },
-];
-
-const GROUP_C: DockButtonSpec[] = [
-  { tool: "section", label: "Section", tooltip: "Section — Shift+S", Icon: SectionIcon },
-  { tool: "sticky", label: "Sticky note", tooltip: "Sticky note — S", Icon: StickyIcon },
+  { tool: "select", label: "Select", tooltip: "Select — D", Icon: CursorIcon },
+  { tool: "hand", label: "Hand", tooltip: "Hand — F", Icon: HandIcon },
+  { tool: "connector", label: "Connector", tooltip: "Connector — G", Icon: ConnectorIcon },
 ];
 
 const HOVER_BG = EDITOR_STYLE.dockHoverBg;
@@ -247,18 +244,11 @@ function CanvasDockComponent({
             activeTool={activeTool}
             disabled={disabled}
             onSelectTool={onSelectTool}
-          />
-          <DockDivider />
-          <DockGroup
-            buttons={GROUP_B}
-            activeTool={activeTool}
-            disabled={disabled}
-            onSelectTool={onSelectTool}
             onOpenShapes={onOpenShapes}
           />
           <DockDivider />
           <DockGroup
-            buttons={GROUP_C}
+            buttons={GROUP_B}
             activeTool={activeTool}
             disabled={disabled}
             onSelectTool={onSelectTool}

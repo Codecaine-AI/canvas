@@ -92,21 +92,6 @@ function advancedEntry(glyphId: IconGlyphId): ShapeCatalogEntry {
   };
 }
 
-function basicIconEntry(
-  id: string,
-  label: string,
-  icon: CanvasIconGlyph,
-  keywords: readonly string[],
-): ShapeCatalogEntry {
-  return {
-    id,
-    label,
-    objectType: "icon",
-    icon,
-    keywords,
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Categories (arrangement: grouping + ordering + variant fan-out)
 // ---------------------------------------------------------------------------
@@ -132,9 +117,6 @@ export const SHAPE_CATALOG: ShapeCatalogCategory[] = [
       entry("basic-arrow-right", "arrow-shape", { label: "Right arrow", direction: "right" }),
       entry("basic-chevron", "chevron", { direction: "right" }),
       entry("basic-star", "star"),
-      basicIconEntry("basic-person", "Person", "person", ["person", "user", "actor", "people"]),
-      basicIconEntry("basic-chat", "Chat", "chat", ["chat", "speech", "bubble", "message"]),
-      basicIconEntry("basic-chip", "Chip", "cpu", ["chip", "cpu", "processor", "microchip"]),
     ],
   },
   {

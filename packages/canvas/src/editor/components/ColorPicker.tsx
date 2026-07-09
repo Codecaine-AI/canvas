@@ -9,8 +9,9 @@ import { EDITOR_STYLE } from "./editor-style";
  * a single row of 10 hue picks, identical for every kind (shapes, stickies,
  * sections, connectors). Every swatch renders its `swatch` preview hex
  * regardless of the kind it will color; the kind's role table decides how the
- * pick maps to ink/fill/wash. The current pick wears the rainbow current-color
- * ring, and there is no custom color, ever.
+ * pick maps to ink/fill/wash. The current pick wears a floating 2px
+ * accent-purple rounded-square outline, FigJam-style, and there is no custom
+ * color, ever.
  *
  * Replaces ColorPalettePopover + the section-tint flyout + the connector
  * swatch flyout. Panel styling (dark pill, swatch metrics) carries over from
@@ -18,7 +19,7 @@ import { EDITOR_STYLE } from "./editor-style";
  */
 
 export type ColorPickerProps = {
-  /** The current pick — rendered with the rainbow current-color ring. */
+  /** The current pick — rendered with a floating 2px accent-purple outline. */
   current?: CanvasColor;
   onPick?: (color: CanvasColor) => void;
   className?: string;
@@ -28,7 +29,6 @@ export type ColorPickerProps = {
 const SWATCH_DIAMETER_PX = EDITOR_STYLE.colorPopoverSwatchPx;
 const SWATCH_GAP_PX = EDITOR_STYLE.colorPopoverGapPx;
 const POPOVER_BG = "#1D1D1D";
-const RAINBOW_RING_GRADIENT = EDITOR_STYLE.rainbowRingGradient;
 
 /** Near-white swatches get a faint ring so they read against the dark panel. */
 function needsContrastRing(hex: string): boolean {
@@ -59,29 +59,26 @@ function Swatch({
         height: SWATCH_DIAMETER_PX,
         borderRadius: "50%",
         border: "none",
-        background: isCurrent ? RAINBOW_RING_GRADIENT : hex,
-        padding: isCurrent ? 2 : 0,
+        background: hex,
+        padding: 0,
         cursor: "pointer",
-        backgroundClip: isCurrent ? "border-box" : undefined,
         boxShadow:
-          !isCurrent && needsContrastRing(hex)
+          needsContrastRing(hex)
             ? "inset 0 0 0 1px rgba(255,255,255,0.3)"
-            : undefined,
+            : "inset 0 0 0 1px rgba(255,255,255,0.14)",
         boxSizing: "border-box",
         position: "relative",
       }}
     >
       {isCurrent ? (
         <span
+          data-current-ring=""
           style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            background: hex,
-            boxShadow: needsContrastRing(hex)
-              ? "inset 0 0 0 1px rgba(255,255,255,0.3)"
-              : undefined,
+            position: "absolute",
+            inset: -5,
+            border: `2px solid ${EDITOR_STYLE.accentPurple}`,
+            borderRadius: 9,
+            pointerEvents: "none",
           }}
         />
       ) : null}

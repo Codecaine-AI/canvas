@@ -13,11 +13,7 @@ import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
  */
 
 function ShapeSwapFlyout({ swapSelectedShape }: ToolbarFlyoutProps) {
-  return (
-    <div className="absolute bottom-full left-0 z-50 mb-2">
-      <ShapeSearchPopover onPick={swapSelectedShape} />
-    </div>
-  );
+  return <ShapeSearchPopover onPick={swapSelectedShape} />;
 }
 
 export const SHAPE_FLYOUTS: ToolbarFlyoutTable = {

@@ -27,13 +27,19 @@
         "b-routing-elbow-p1-4",
         "b-routing-elbow-p2-5",
         "b-routing-elbow-p3-6",
+        "b-routing-elbow-p4-21",
         "b-routing-heading-anchor-7",
         "b-routing-anchor-p1-8",
         "b-routing-anchor-p2-9",
+        "b-routing-anchor-p3-22",
         "b-routing-heading-waypoint-10",
         "b-routing-waypoint-p1-11",
         "b-routing-waypoint-p2-12",
         "b-routing-waypoint-p3-13",
+        "b-routing-heading-bends-23",
+        "b-routing-bends-p1-24",
+        "b-routing-bends-p2-25",
+        "b-routing-bends-p3-26",
         "b-routing-heading-overlay-14",
         "b-routing-overlay-p1-15",
         "b-routing-overlay-p2-16",
@@ -89,7 +95,7 @@
           }
         },
         {
-          "insert": " is the single entry point: given a from-object, a to-object, and a connection's own style/anchor/waypoint overrides, it returns a "
+          "insert": " is the single object-to-object routing entry point: given a from-object, a to-object, and a connection's anchor/position/waypoint overrides, it returns a "
         },
         {
           "insert": "RoutedConnection",
@@ -103,16 +109,7 @@
           }
         },
         {
-          "insert": " — an SVG path string, the true start/end anchor points, a label placement point, and (for polyline styles) the route's world-space vertex list. Four connection styles branch out of this one function: solid/dotted straight lines, "
-        },
-        {
-          "insert": "smooth",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " cubic curves, explicit "
+          "insert": " — an SVG path string, the true start/end anchor points, a label placement point, and the route's world-space vertex list. The router is style-agnostic: solid and dashed connectors share the same route, and there are no straight/smooth branches here. Its branches are explicit orthogonal "
         },
         {
           "insert": "waypoints",
@@ -121,16 +118,7 @@
           }
         },
         {
-          "insert": " polylines, and "
-        },
-        {
-          "insert": "elbow",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " orthogonal routing — the last of which is the most involved, and is the focus of this doc."
+          "insert": ", near-straight exact anchoring, simple elbow routing, and an obstacle-triggered orthogonal A* fallback."
         }
       ],
       "children": []
@@ -154,18 +142,6 @@
       "props": {},
       "text": [
         {
-          "insert": "When a connection's style is "
-        },
-        {
-          "insert": "elbow",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
           "insert": "routeConnection",
           "attributes": {
             "code": true,
@@ -177,58 +153,39 @@
           }
         },
         {
-          "insert": " first tries "
+          "insert": " first resolves bounds, anchors, explicit side overrides, and explicit relative "
         },
         {
-          "insert": "routeOrthogonalAStar",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/routing.ts",
-              "symbol": "routeOrthogonalAStar"
-            }
-          }
-        },
-        {
-          "insert": ", which delegates the actual pathfinding to "
-        },
-        {
-          "insert": "PathGenerator.generateOrthogonalConnectorPath",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts",
-              "symbol": "PathGenerator"
-            }
-          }
-        },
-        {
-          "insert": " — an A* pathfinder adapted from BlockSuite (an MPL-2.0 licensed open-source project) that searches an orthogonal (axis-aligned, right-angle-turn-only) grid built around the two endpoint bounds and any other obstacle bounds supplied. Obstacle bounds are built from the caller-supplied "
-        },
-        {
-          "insert": "obstacles",
+          "insert": "position",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " list (typically every other object in the document), with the two endpoint objects' own owners and their section-ancestor chain excluded via "
+          "insert": " overrides. If stored "
         },
         {
-          "insert": "collectAncestorIds",
+          "insert": "connection.waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exist and form an orthogonal polyline, "
+        },
+        {
+          "insert": "routeWaypoints",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/routing/routing.ts",
-              "symbol": "collectAncestorIds"
+              "symbol": "routeWaypoints"
             }
           }
         },
         {
-          "insert": " — a connection touching a nested object necessarily passes through its ancestor sections' bounds, which is containment rather than an obstacle crossing to be routed around. If the A* generator throws or returns fewer than 2 usable points, routing falls back to "
+          "insert": " uses them. Otherwise the router tries an exact straight route when facing anchors are already aligned, then builds a simple "
         },
         {
           "insert": "routeElbow",
@@ -242,7 +199,35 @@
           }
         },
         {
-          "insert": ", a simpler stub-and-midpoint elbow construction with no obstacle awareness."
+          "insert": " path. Only when that simple elbow crosses an extra obstacle does it call "
+        },
+        {
+          "insert": "routeOrthogonalAStar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeOrthogonalAStar"
+            }
+          }
+        },
+        {
+          "insert": ", which delegates pathfinding to "
+        },
+        {
+          "insert": "PathGenerator.generateOrthogonalConnectorPath",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/vendor/blocksuite/path-generator.ts",
+              "symbol": "PathGenerator"
+            }
+          }
+        },
+        {
+          "insert": " — an A* pathfinder adapted from BlockSuite (an MPL-2.0 licensed open-source project). If A* throws, returns fewer than two usable points, or otherwise yields no route, the caller returns the already-computed simple elbow."
         }
       ],
       "children": []
@@ -507,7 +492,7 @@
           }
         },
         {
-          "insert": " compares the two objects' bounds centers and picks facing sides by whichever axis has the larger separation — right/left if the horizontal gap dominates, bottom/top otherwise — a nearest-side heuristic rather than an exhaustive search. This picked pair is only the fallback: an explicit "
+          "insert": " now prefers genuinely facing sides before falling back to center-delta dominance: if the objects' vertical spans overlap within the 8px auto-route alignment tolerance, it chooses right/left or left/right; if their horizontal spans overlap, it chooses bottom/top or top/bottom; otherwise the dominant center separation wins, with horizontal ties going horizontal. This picked pair is only the fallback: an explicit "
         },
         {
           "insert": "connection.from.anchor",
@@ -903,7 +888,7 @@
           }
         },
         {
-          "insert": " (a pure, React-free module; routing must never import def components). The cascade itself, its thresholds, and its behavior are unchanged — the port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support."
+          "insert": " (a pure, React-free module; routing must never import def components). The port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support. Its current behavior also deliberately excludes section interiors from the inside snap tier while keeping section anchors and outlines valid."
         }
       ],
       "children": []
@@ -1024,45 +1009,34 @@
       "props": {},
       "text": [
         {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/connection-overlay.ts",
-              "symbol": "resolveConnectionCascade"
-            }
-          }
+          "insert": "The cascade is intentionally tiered and ordered. It iterates supplied "
         },
         {
-          "insert": " is the live decision cascade evaluated under the pointer while dragging a connector endpoint, in z-order so a later (topmost) candidate can win over an earlier one: only objects whose bound expanded by "
-        },
-        {
-          "insert": "HOVER_HIT_EXPAND_PX",
+          "insert": "candidates",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " contains the pointer are considered; among those, snap to the nearest cardinal anchor if it's within "
+          "insert": " in order, skipping "
         },
         {
-          "insert": "ANCHOR_SNAP_VIEW_PX",
+          "insert": "excludeIds",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " screen-px; else snap to the nearest outline point if within "
+          "insert": " and immediately returning the first candidate that wins. For that candidate it requires the pointer to be inside the hover-expanded bounds; then it tries nearest cardinal anchor strictly within the screen-pixel snap radius, nearest outline point strictly within the world-pixel radius, and finally inside-shape resolution for eligible non-section shapes. If no candidate wins, it returns "
         },
         {
-          "insert": "OUTLINE_SNAP_WORLD_PX",
+          "insert": "{ kind: \"free\", point }",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " world-px; else, if the pointer is inside the shape, connect to its center (id-only, no explicit position); else the candidate loses and the loop continues. If nothing wins, the result is a free-floating point — how a connector endpoint lands on empty canvas rather than any object."
+          "insert": ". Section interiors are intentionally free canvas, but their anchors and outlines still participate in the higher snap tiers."
         }
       ],
       "children": []
@@ -1209,7 +1183,10 @@
       },
       "text": [
         {
-          "insert": "packages/canvas/src/routing/__tests__/",
+          "insert": "The routing test coverage lives across six files in "
+        },
+        {
+          "insert": "packages/canvas/src/routing/__tests__",
           "attributes": {
             "code": true,
             "reference": {
@@ -1219,135 +1196,79 @@
           }
         },
         {
-          "insert": " covers the routing layer across five files. "
+          "insert": ": "
         },
         {
           "insert": "routing.test.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__/routing.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " exercises "
-        },
-        {
-          "insert": "routeConnection",
-          "attributes": {
             "code": true
           }
         },
         {
-          "insert": "'s general behavior across styles, anchor resolution (auto-picked, explicit-override, and explicit-position cases), and end-gap/corner-rounding path construction. "
+          "insert": " covers auto anchors, exact-straight routing, style-agnostic routing, free-point previews, and endpoint gaps; "
         },
         {
           "insert": "routing.astar.test.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__/routing.astar.test.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " focuses on elbow-style routing specifically: obstacle-avoiding detours via "
+          "insert": " covers obstacle avoidance, determinism, 3-arg compatibility, clean no-obstacle elbow routes, explicit waypoint precedence, and endpoint "
         },
         {
-          "insert": "routeOrthogonalAStar",
+          "insert": "position",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", section/ancestor exclusion from the obstacle set, and the fallback to "
-        },
-        {
-          "insert": "routeElbow",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " when the A* generator can't produce a usable path. "
+          "insert": "; "
         },
         {
           "insert": "astar-vendor.test.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__/astar-vendor.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " is a regression suite directly against the vendored BlockSuite algorithm ("
-        },
-        {
-          "insert": "packages/canvas/src/vendor/blocksuite/",
-          "attributes": {
             "code": true
           }
         },
         {
-          "insert": "), guarding against accidental drift from upstream semantics during any future touch-up. "
+          "insert": " keeps the vendored path generator deterministic; "
         },
         {
           "insert": "connection-overlay.test.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__/connection-overlay.test.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " covers "
+          "insert": " covers the cascade layer while outline-polygon and anchor-projection geometry lives under "
         },
         {
-          "insert": "getConnectionAnchors",
+          "insert": "objects/__tests__/geometry.test.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and "
-        },
-        {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "'s decision cascade (anchor snap, outline snap, inside-shape, free-point) across the modeled outline shapes. "
+          "insert": "; "
         },
         {
           "insert": "waypoint-reconcile.test.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/routing/__tests__/waypoint-reconcile.test.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " covers "
+          "insert": " covers rigid waypoint translation/drop behavior across move, resize, undo, and paste paths; and "
         },
         {
-          "insert": "reconcileConnectionWaypoints",
+          "insert": "bend-editing.test.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "'s rigid-translate and asymmetric-drop behavior on object move, including live-preview drag frames, duplicate/paste offset translation, and single-undo restoration of both geometry and waypoints together."
+          "insert": " covers bend handles, drag snapping, simplification, and clear-only-when-straight commits."
         }
       ],
       "children": []
@@ -1358,20 +1279,244 @@
       "props": {},
       "text": [
         {
-          "insert": "Once a connection's waypoints are computed here, they still need to become pixels: see "
+          "insert": "The net boundary is: routing computes world-space route "
         },
         {
-          "insert": "canvas-40-render",
+          "insert": "points",
           "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and an SVG "
+        },
+        {
+          "insert": "path",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from endpoint geometry; rendering decides how to draw that path; interaction decides when a user-authored bend should become persistent "
+        },
+        {
+          "insert": "connection.waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". That separation keeps automatic routing disposable while preserving explicitly edited orthogonal bends until a reconnect, asymmetric move, resize, or straightening simplification makes them invalid."
+        }
+      ],
+      "children": []
+    },
+    "b-routing-elbow-p4-21": {
+      "id": "b-routing-elbow-p4-21",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The straightening path preserves the no-diagonals invariant. Stored waypoints are converted from tuples, deduped with the start/end points, and accepted only when every segment is orthogonal within "
+        },
+        {
+          "insert": "WAYPOINT_ORTHOGONAL_EPSILON_PX",
+          "attributes": {
+            "code": true,
             "reference": {
-              "kind": "doc",
-              "path": "20-implementation/40-render",
-              "label": "Canvas Engine — Render Layer"
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts"
             }
           }
         },
         {
-          "insert": " for how routed waypoints get drawn as SVG paths on the canvas stage."
+          "insert": " = 0.5px; diagonal waypoint edits are ignored and auto-routing resumes. A* output that is nearly straight is flattened through "
+        },
+        {
+          "insert": "exactStraightAnchoredPoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "exactStraightAnchoredPoints"
+            }
+          }
+        },
+        {
+          "insert": ": the anchor may slide along the object edge overlap span, trimmed by the connector end gap, so aligned objects get an exact two-point route instead of a tiny dogleg."
+        }
+      ],
+      "children": []
+    },
+    "b-routing-anchor-p3-22": {
+      "id": "b-routing-anchor-p3-22",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "routeConnectionToPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeConnectionToPoint"
+            }
+          }
+        },
+        {
+          "insert": " handles the free-point preview used while creating a connector toward empty canvas. It anchors from the source object, picks the free endpoint side by dominant delta, returns a straight two-point route when the pointer is exactly outward from the source anchor, and otherwise uses "
+        },
+        {
+          "insert": "routeFreePointElbow",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeFreePointElbow"
+            }
+          }
+        },
+        {
+          "insert": ". Preview routing intentionally avoids the A* obstacle pass, but it still uses the same rounded-corner and end-gap path construction as committed routes."
+        }
+      ],
+      "children": []
+    },
+    "b-routing-heading-bends-23": {
+      "id": "b-routing-heading-bends-23",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Bend editing"
+        }
+      ],
+      "children": []
+    },
+    "b-routing-bends-p1-24": {
+      "id": "b-routing-bends-p1-24",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "connectorBendSegments",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "symbol": "connectorBendSegments"
+            }
+          }
+        },
+        {
+          "insert": " exposes every orthogonal connector segment as a draggable bend handle, including its segment index, midpoint, handle point, and horizontal/vertical axis. Non-orthogonal and degenerate segments are ignored; when a label lies on a segment, the handle point is shifted away from the label so the pill affordance remains reachable."
+        }
+      ],
+      "children": []
+    },
+    "b-routing-bends-p2-25": {
+      "id": "b-routing-bends-p2-25",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Dragging is constrained by "
+        },
+        {
+          "insert": "dragOrthogonalSegment",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "symbol": "dragOrthogonalSegment"
+            }
+          }
+        },
+        {
+          "insert": ": horizontal segments move only by pointer dy, vertical segments only by pointer dx, and direct one-segment connectors expand into a stub-run-stub polyline instead of disappearing. During drag, same-orientation segment snaps and endpoint-straightening use "
+        },
+        {
+          "insert": "bendSnapToleranceForZoom",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "symbol": "bendSnapToleranceForZoom"
+            }
+          }
+        },
+        {
+          "insert": " and immediately simplify the preview when a snap lands."
+        }
+      ],
+      "children": []
+    },
+    "b-routing-bends-p3-26": {
+      "id": "b-routing-bends-p3-26",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "On release, "
+        },
+        {
+          "insert": "commitBendPolyline",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "symbol": "commitBendPolyline"
+            }
+          }
+        },
+        {
+          "insert": " runs "
+        },
+        {
+          "insert": "simplifyOrthogonalPolyline",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/bend-editing.ts",
+              "symbol": "simplifyOrthogonalPolyline"
+            }
+          }
+        },
+        {
+          "insert": " with the zoom-scaled tolerance. It normalizes nearly orthogonal segments, collapses tiny hooks and near duplicates, and merges collinear triples. Persistent "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are cleared only when the simplified route is straight; otherwise the interior corners are stored. Endpoint reconnects also clear existing waypoints through "
+        },
+        {
+          "insert": "handleUpdateConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "handleUpdateConnection"
+            }
+          }
+        },
+        {
+          "insert": " so old bends cannot survive after either endpoint changes."
         }
       ],
       "children": []

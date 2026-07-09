@@ -49,15 +49,9 @@ export const EDITOR_STYLE = {
     "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.16)",
   flyoutItemHeightPx: 36,
   flyoutItemRadiusPx: 8,
-  colorPopoverSwatchPx: 34,
-  colorPopoverGapPx: 10,
-  colorPopoverPaddingPx: 12,
+  colorPopoverSwatchPx: 30,
+  colorPopoverGapPx: 12,
+  colorPopoverPaddingPx: 14,
   colorPopoverRadiusPx: 16,
   accentPurple: "#8C2EF2",
-  /**
-   * Rainbow/conic gradient ring drawn around the color popover's
-   * "current color" swatch.
-   */
-  rainbowRingGradient:
-    "conic-gradient(from 0deg, #FF3B30, #FF9500, #FFCC00, #34C759, #30B0C7, #0D99FF, #9747FF, #FF2D95, #FF3B30)",
 } as const;

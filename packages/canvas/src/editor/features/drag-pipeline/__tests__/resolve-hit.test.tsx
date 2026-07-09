@@ -15,6 +15,8 @@ import {
 } from "../../../../interaction/interaction";
 import type { CanvasPoint } from "../../../../state/geometry";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../../state/schema";
+import { anchorScreenPoint, HIT_TARGET_PX } from "../../../../render/overlays/AnchorDots";
+import { screenToWorld, type ViewportState } from "../../../../render/viewport";
 import { resolveHit } from "../use-interaction-pipeline";
 
 const diamond: InteractiveCanvasObject = {
@@ -39,6 +41,13 @@ const section: InteractiveCanvasObject = {
   geometry: { x: 0, y: 0, width: 20, height: 20 },
 };
 
+const process: InteractiveCanvasObject = {
+  id: "process",
+  type: "process",
+  text: "Process",
+  geometry: { x: 100, y: 100, width: 100, height: 100 },
+};
+
 function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
   return {
     schemaVersion: 1,
@@ -53,6 +62,26 @@ function doc(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
 function diamondButton(): HTMLElement {
   const el = window.document.createElement("button");
   el.setAttribute("data-canvas-object-id", "diamond");
+  return el;
+}
+
+function objectButton(objectId: string): HTMLElement {
+  const el = window.document.createElement("button");
+  el.setAttribute("data-canvas-object-id", objectId);
+  return el;
+}
+
+function resizeHandle(objectId: string): HTMLElement {
+  const el = window.document.createElement("div");
+  el.setAttribute("data-canvas-object-id", objectId);
+  el.setAttribute("data-canvas-handle", "nw");
+  return el;
+}
+
+function endpointHandle(): SVGCircleElement {
+  const el = window.document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  el.setAttribute("data-canvas-connection-id", "connection-a");
+  el.setAttribute("data-canvas-endpoint", "from");
   return el;
 }
 
@@ -182,5 +211,78 @@ describe("resolveHit outline veto (D16)", () => {
       ctx(document),
     );
     expect(result.overlay.editObjectTextId).toBe("diamond");
+  });
+});
+
+describe("resolveHit anchor-dot proximity", () => {
+  const viewport: ViewportState = { x: 0, y: 0, zoom: 1 };
+
+  function hitAtScreen(screen: CanvasPoint, options: { portProximityObjectIds?: readonly string[] } = {}) {
+    return resolveHit(objectButton("process"), doc([process]), screenToWorld(viewport, screen), {
+      viewport,
+      screen,
+      ...options,
+    });
+  }
+
+  function selectedDotScreen() {
+    const center = anchorScreenPoint(viewport, process, "top");
+    return { x: center.x, y: center.y + 10 };
+  }
+
+  it("resolves to the selected object's port inside the rendered dot hit target", () => {
+    const screen = selectedDotScreen();
+
+    expect(hitAtScreen(screen, { portProximityObjectIds: ["process"] })).toEqual({
+      kind: "port",
+      objectId: "process",
+      anchor: "top",
+    });
+  });
+
+  it("keeps object resolution when the pointer is outside the dot hit target", () => {
+    const center = anchorScreenPoint(viewport, process, "top");
+    const screen = { x: center.x, y: center.y + HIT_TARGET_PX / 2 + 7 };
+
+    expect(hitAtScreen(screen, { portProximityObjectIds: ["process"] })).toEqual({
+      kind: "object",
+      objectId: "process",
+    });
+  });
+
+  it("does not resolve an unselected object's nearby dot", () => {
+    const screen = selectedDotScreen();
+
+    expect(hitAtScreen(screen, { portProximityObjectIds: ["other"] })).toEqual({ kind: "canvas" });
+  });
+
+  it("keeps existing behavior when port proximity is not enabled", () => {
+    const screen = selectedDotScreen();
+
+    expect(hitAtScreen(screen)).toEqual({ kind: "canvas" });
+  });
+
+  it("keeps resize handles above anchor-dot proximity", () => {
+    const screen = selectedDotScreen();
+
+    expect(
+      resolveHit(resizeHandle("process"), doc([process]), screenToWorld(viewport, screen), {
+        viewport,
+        screen,
+        portProximityObjectIds: ["process"],
+      }),
+    ).toEqual({ kind: "handle", objectId: "process", handle: "nw" });
+  });
+
+  it("keeps connector endpoints above anchor-dot proximity", () => {
+    const screen = selectedDotScreen();
+
+    expect(
+      resolveHit(endpointHandle(), doc([process]), screenToWorld(viewport, screen), {
+        viewport,
+        screen,
+        portProximityObjectIds: ["process"],
+      }),
+    ).toEqual({ kind: "endpoint", connectionId: "connection-a", end: "from" });
   });
 });

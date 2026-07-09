@@ -137,7 +137,7 @@
           }
         },
         {
-          "insert": " (solid/dotted/elbow/smooth) and "
+          "insert": " (solid/dashed) and "
         },
         {
           "insert": "CanvasArrowDirection",
@@ -722,7 +722,7 @@
       },
       "text": [
         {
-          "insert": "FigJam name               line type            verdict         our mapping                            notes\n------------------------  -------------------  --------------  -------------------------------------  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nStraight line (no arrow)  line, no arrowheads  HAVE            connection style:solid, arrow:none     true straight routing, zero arrowhead markers\nStraight arrow            line, one arrowhead  HAVE-BUT-WRONG  connection style:solid, arrow:forward  routes straight but arrowhead is FigJam's ONLY arrowhead option too (solid filled triangle) — actually a full HAVE on shape; flagged only because Figma exposes 12 ConnectorStrokeCap variants (ARROW_LINES, TRIANGLE_FILLED, DIAMOND_FILLED, etc.) we don't expose per-connection, so \"arrow\" here always means the one style we have\nElbow arrow               ELBOWED connector    HAVE            connection style:elbow                 genuine right-angle routing algorithm (CONNECTOR_ELBOW_CORNER_RADIUS_PX 21.5 rounded corners), not a CSS trick"
+          "insert": "FigJam name               line type            verdict              our mapping                            notes\n------------------------  -------------------  -------------------  -------------------------------------  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nStraight line (no arrow)  line, no arrowheads  HAVE                 connection style:solid, arrow:none     orthogonal router snaps aligned endpoints to an exact straight run; zero arrowhead markers\nStraight arrow            line, one arrowhead  HAVE-BUT-DEVIATES    connection style:solid, arrow:forward  routing and the single filled triangle arrowhead are solid, but Figma exposes 12 ConnectorStrokeCap variants and independent start/end caps; we expose only none/forward/back/both using that one marker\nElbow arrow               ELBOWED connector    HAVE-BUT-DEVIATES    routed orthogonal connector            elbow-only routing is now the default router behavior, not a style value; bend pills edit persisted waypoints, snap-to-straight clears them, reconnect resets bends, and default connector color deliberately stays gray rather than tinting from the source object"
         }
       ]
     },
@@ -735,7 +735,7 @@
       },
       "text": [
         {
-          "insert": "Straight arrow: The routing and arrow placement are fully correct — the only gap is stroke-cap variety: Figma exposes 12 "
+          "insert": "Straight arrow: The routing and arrow placement are fully correct — the remaining gaps are cap variety and a few deliberate interaction/style differences. Figma exposes 12 "
         },
         {
           "insert": "ConnectorStrokeCap",
@@ -780,7 +780,7 @@
           }
         },
         {
-          "insert": "-colored) with no per-connection choice of cap style."
+          "insert": "-colored) with no per-connection choice of cap style. Creation uses selection-only off-bounds anchor dots, supports both click and drag quick-connect, and previews with a routed connector plus source-shaped ghost. At rest, connector labels are 16px/700 midpoint chips."
         }
       ]
     },
@@ -1981,7 +1981,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Default size 150x110. Text slot centered in the upper two-thirds (above the wave). Connection anchors: bbox fallback, matching the existing precedent for non-rectangular icon-silhouette shapes ("
+          "insert": "Default size 150x110. Text slot centered in the upper two-thirds (above the wave). Connection anchors: bbox fallback for the wavy silhouette; "
         },
         {
           "insert": "database",
@@ -2009,7 +2009,7 @@
           }
         },
         {
-          "insert": ", and our current "
+          "insert": " and "
         },
         {
           "insert": "document",
@@ -2018,7 +2018,7 @@
           }
         },
         {
-          "insert": ", all use bbox fallback despite true SVG paths). Style surface: standard. Suggested name: rename/re-tag is out of scope for a MISSING spec (that's a fix to the existing "
+          "insert": " remain bbox-fallback precedents. Style surface: standard. Current status: "
         },
         {
           "insert": "document",
@@ -2027,7 +2027,7 @@
           }
         },
         {
-          "insert": " type, tracked as a HAVE-BUT-WRONG spec-delta in the Flowchart section, not a new type) — but if a genuinely separate \"page with folded corner, ENG_FILE\" shape is ALSO wanted later, call it "
+          "insert": " is now the wavy-bottom DOCUMENT_SINGLE shape, and the folded-corner ENG_FILE shape is the separate "
         },
         {
           "insert": "type: \"page-corner\"",
@@ -2045,7 +2045,7 @@
           }
         },
         {
-          "insert": " rather than overloading "
+          "insert": " rather than an overload of "
         },
         {
           "insert": "document",
@@ -2664,43 +2664,25 @@
           }
         },
         {
-          "insert": ". Connection anchors: circular true-outline (depends on the Ellipse spec's outline math landing first, since a circle is just a 1:1-aspect ellipse). Style surface: fill/stroke only, no strokeStyle variation needed (junction glyphs are always solid). Per-type field: "
+          "insert": ". Connection anchors: circular true-outline. Style surface: fill/stroke only, no strokeStyle variation needed (junction glyphs are always solid). Shipped types: "
         },
         {
-          "insert": "variant: \"or\" | \"summing\"",
+          "insert": "type: \"or-junction\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", same enum-field pattern as "
+          "insert": " and "
         },
         {
-          "insert": "direction",
+          "insert": "type: \"summing-junction\"",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " elsewhere. Suggested name: new "
-        },
-        {
-          "insert": "type: \"junction\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape: \"junction\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
+          "insert": "; no shared "
         },
         {
           "insert": "variant",
@@ -2735,7 +2717,7 @@
       },
       "text": [
         {
-          "insert": "The selection toolbar is a 48px-tall rounded rect (radius 14) with 36px controls — deliberately larger than the measured 29px FigJam pill it supersedes. Flyouts open above the toolbar, and the color popover's swatches are enlarged to 34px. The scaled-up values live in "
+          "insert": "The selection toolbar is a 48px-tall rounded rect (radius 14) with 36px controls — deliberately larger than the measured 29px FigJam pill it supersedes. Flyouts open above the toolbar centered on their trigger button, and the color popover's swatches are 30px. The scaled-up values live in "
         },
         {
           "insert": "EDITOR_STYLE",
@@ -2777,7 +2759,7 @@
       },
       "text": [
         {
-          "insert": "One typeface and one text size everywhere: FigJam's bold/strikethrough/link/bullet-list/font/size/alignment controls are intentionally absent. Emphasis is planned to arrive via markdown-style body rendering instead (sticky \"- \" bullet lines exist today). Per-type control sets: shape — shape-swap / color / text ("
+          "insert": "One typeface and one text size everywhere: FigJam's bold/strikethrough/link/bullet-list/font/size/alignment controls are intentionally absent. Emphasis is planned to arrive via markdown-style body rendering instead (sticky \"- \" bullet lines exist today). Per-type control sets: shape — color / text / shape-swap ("
         },
         {
           "insert": "SHAPE_TOOLBAR",
@@ -2805,7 +2787,7 @@
           }
         },
         {
-          "insert": "); connector — color / dash / routing / arrowhead ("
+          "insert": "); connector — color / text / dash / arrowhead ("
         },
         {
           "insert": "connectorDef",
@@ -2819,7 +2801,7 @@
           }
         },
         {
-          "insert": "); section — color / border-style / rename / visibility / lock ("
+          "insert": "); section — color / rename / fit-children / border-style / lock ("
         },
         {
           "insert": "SECTION_TOOLBAR",
@@ -2833,7 +2815,7 @@
           }
         },
         {
-          "insert": ")."
+          "insert": "). Connector toolbar buttons are icon-row controls; dash and arrowhead buttons reflect the selected connector's current value, and the color button reflects the current swatch."
         }
       ],
       "children": []
@@ -2879,7 +2861,7 @@
           }
         },
         {
-          "insert": "): ink is the picker swatch plus every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Every shape is bordered, white keeps gray strokes, and legacy `-soft` ids migrate to the bare hue id. This replaced the earlier palette-token/tint split described elsewhere in this doc's history."
+          "insert": "): ink is the picker swatch plus every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Every shape is bordered, white keeps gray strokes, and legacy `-soft` ids migrate to the bare hue id. Connectors deliberately deviate from source-color tinting: new connectors are always stamped gray, and a connector color pick updates only that connector. This replaced the earlier palette-token/tint split described elsewhere in this doc's history."
         },
         {
           "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
@@ -3211,7 +3193,7 @@
           }
         },
         {
-          "insert": ", falls back to its axis-aligned bounding-box outline for anchor projection."
+          "insert": ", falls back to its axis-aligned bounding-box outline for anchor projection. Since W5, that true-outline tier is much broader than the old four-shape note: ellipse, triangle, pentagon, octagon, star, off-page-connector, trapezoid, manual-input, hexagon, or-junction, and summing-junction also participate. Section interiors are intentionally not inside-tier connector targets, but their anchors and outlines still snap."
         }
       ]
     },
@@ -3317,13 +3299,13 @@
           "insert": ", and others per the research report), settable independently per connector endpoint (start cap vs. end cap can differ). Our "
         },
         {
-          "insert": "dotted",
+          "insert": "dashed",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " connection style is also worth noting here as a routing-level simplification: it's the same straight-line path as "
+          "insert": " connection style is also worth noting here as a stroke-level simplification: it uses the same routed path as "
         },
         {
           "insert": "solid",
@@ -3346,7 +3328,16 @@
           }
         },
         {
-          "insert": "), not a distinct routing algorithm — whereas "
+          "insert": "), applied when "
+        },
+        {
+          "insert": "connection.style === \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". There are no "
         },
         {
           "insert": "elbow",
@@ -3355,7 +3346,7 @@
           }
         },
         {
-          "insert": " and "
+          "insert": " or "
         },
         {
           "insert": "smooth",
@@ -3364,7 +3355,7 @@
           }
         },
         {
-          "insert": " genuinely are distinct path-computation algorithms, not just stroke styling."
+          "insert": " schema style values; the router itself is elbow/orthogonal by default, with explicit waypoints from bend editing as the override."
         }
       ]
     },

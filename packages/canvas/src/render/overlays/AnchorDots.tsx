@@ -19,21 +19,21 @@ const SELECTION_BLUE = "#0D99FF";
 export const ANCHOR_DOTS_MIN_ZOOM = 0.5;
 
 /** Cardinal port names in the DOM attribute vocabulary the drag pipeline resolves. */
-const ANCHOR_NAMES: readonly Anchor[] = ["top", "bottom", "left", "right"];
+export const ANCHOR_NAMES: readonly Anchor[] = ["top", "bottom", "left", "right"];
 
 /** Screen-space distance from the object bounds to the port affordance center. */
 export const ANCHOR_DOT_OFFSET_PX = 20;
 /** At-rest visible dot diameter. */
 const DOT_DIAMETER_PX = 10;
 /** Grab-target diameter around each dot. Also matches the hover button size. */
-const HIT_TARGET_PX = 28;
+export const HIT_TARGET_PX = 28;
 
 export type ActivePort = {
   objectId: string;
   anchor: Anchor;
 };
 
-function anchorScreenPoint(
+export function anchorScreenPoint(
   viewport: ViewportState,
   object: InteractiveCanvasDocument["objects"][number],
   anchor: Anchor,

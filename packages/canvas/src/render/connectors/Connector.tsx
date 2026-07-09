@@ -42,16 +42,17 @@ function connectionLabelWidth(label: string): number {
 
 /**
  * One routed connector: an invisible wide hit path (for click-to-select),
- * the visible routed path (elbow, with forward/back/both arrowheads), and —
- * when selected — small endpoint handles at the routed start/end so 3.2.2's
- * endpoint-drag gesture has a hit target.
+ * the visible routed path (elbow, with forward/back/both arrowheads), and an
+ * optional label chip. Selection chrome (endpoint handles, bend pills) is NOT
+ * rendered here — CanvasStage mounts ConnectorSelectionChrome in a dedicated
+ * layer ABOVE the object layer, so shape bodies/borders can never paint over
+ * the blue affordances.
  */
 export function Connector({
   document,
   connection,
   fromObject,
   toObject,
-  selected,
   dimmed,
   zoom,
   onDoubleClick,
@@ -60,14 +61,12 @@ export function Connector({
   connection: InteractiveCanvasConnection;
   fromObject: InteractiveCanvasObject;
   toObject: InteractiveCanvasObject;
-  selected: boolean;
   /** True while this connector's own endpoint is mid-drag — visible path dims, hit path stays inert. */
   dimmed?: boolean;
   zoom: number;
   onDoubleClick?: (connectionId: string) => void;
 }) {
   const routed = routeConnection(fromObject, toObject, connection, document.objects);
-  const safeZoom = Math.max(zoom, 0.001);
   // FigJam's dash pattern (theme/tokens.ts, CONNECTOR_DASH_PATTERN_PX).
   const strokeDasharray =
     connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
@@ -79,19 +78,7 @@ export function Connector({
   // Arrowheads inherit via the markers' fill="context-stroke" (see <defs>).
   const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
   const label = connection.label?.trim() ? connection.label : null;
-  const endpointRadius = ENDPOINT_HANDLE_RADIUS_PX / safeZoom;
-  const endpointStrokeWidth = ENDPOINT_HANDLE_STROKE_WIDTH_PX / safeZoom;
-  const bendHandleLength = BEND_HANDLE_LENGTH_PX / safeZoom;
-  const bendHandleThickness = BEND_HANDLE_THICKNESS_PX / safeZoom;
-  const bendHandleRadius = BEND_HANDLE_RADIUS_PX / safeZoom;
   const labelWidth = label ? connectionLabelWidth(label) : 0;
-  const bendSegments =
-    selected && safeZoom >= BEND_HANDLES_MIN_ZOOM
-      ? connectorBendSegments(routed.points ?? [], {
-          labelPoint: label ? routed.labelPoint : null,
-          labelClearancePx: label ? labelWidth / 2 + bendHandleLength / 2 : undefined,
-        })
-      : [];
 
   return (
     <g data-canvas-connection-group={connection.id}>
@@ -102,7 +89,8 @@ export function Connector({
         strokeWidth={CONNECTION_HIT_WIDTH}
         strokeLinecap="round"
         data-canvas-connection-id={connection.id}
-        style={{ pointerEvents: "stroke", cursor: "pointer" }}
+        // No cursor override: hovering a line keeps the stage's own cursor.
+        style={{ pointerEvents: "stroke" }}
         onDoubleClick={(event) => {
           event.stopPropagation();
           onDoubleClick?.(connection.id);
@@ -126,7 +114,7 @@ export function Connector({
           data-canvas-connection-id={connection.id}
           transform={`translate(${routed.labelPoint.x} ${routed.labelPoint.y})`}
           opacity={dimmed ? 0.35 : 1}
-          style={{ pointerEvents: "all", cursor: "pointer" }}
+          style={{ pointerEvents: "all" }}
           onDoubleClick={(event) => {
             event.stopPropagation();
             onDoubleClick?.(connection.id);
@@ -154,54 +142,93 @@ export function Connector({
           </text>
         </g>
       ) : null}
-      {selected && (
-        <>
-          {bendSegments.map((segment) => (
-            <rect
-              key={`bend-segment-${segment.index}`}
-              x={segment.handlePoint.x - bendHandleLength / 2}
-              y={segment.handlePoint.y - bendHandleThickness / 2}
-              width={bendHandleLength}
-              height={bendHandleThickness}
-              rx={bendHandleRadius}
-              fill={SELECTION_BLUE}
-              data-canvas-bend-segment={segment.index}
-              data-canvas-connection-id={connection.id}
-              transform={
-                segment.axis === "vertical"
-                  ? `rotate(90 ${segment.handlePoint.x} ${segment.handlePoint.y})`
-                  : undefined
-              }
-              style={{
-                pointerEvents: "all",
-                cursor: segment.axis === "horizontal" ? "ns-resize" : "ew-resize",
-              }}
-            />
-          ))}
-          <circle
-            cx={routed.start.x}
-            cy={routed.start.y}
-            r={endpointRadius}
-            fill="#FFFFFF"
-            stroke={SELECTION_BLUE}
-            strokeWidth={endpointStrokeWidth}
-            data-canvas-endpoint="from"
-            data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "default" }}
-          />
-          <circle
-            cx={routed.end.x}
-            cy={routed.end.y}
-            r={endpointRadius}
-            fill="#FFFFFF"
-            stroke={SELECTION_BLUE}
-            strokeWidth={endpointStrokeWidth}
-            data-canvas-endpoint="to"
-            data-canvas-connection-id={connection.id}
-            style={{ pointerEvents: "all", cursor: "default" }}
-          />
-        </>
-      )}
+    </g>
+  );
+}
+
+/**
+ * Selection chrome for the selected connection: blue bend pills on every
+ * segment plus endpoint handles at the routed start/end (3.2.2's endpoint-drag
+ * hit targets). Rendered by CanvasStage in its own world-space SVG layer ABOVE
+ * the object layer — shapes paint over connector LINES by design (W4 z-cake),
+ * but the selection affordances must never be covered by a shape body/border.
+ */
+export function ConnectorSelectionChrome({
+  document,
+  connection,
+  fromObject,
+  toObject,
+  zoom,
+}: {
+  document: InteractiveCanvasDocument;
+  connection: InteractiveCanvasConnection;
+  fromObject: InteractiveCanvasObject;
+  toObject: InteractiveCanvasObject;
+  zoom: number;
+}) {
+  const routed = routeConnection(fromObject, toObject, connection, document.objects);
+  const safeZoom = Math.max(zoom, 0.001);
+  const label = connection.label?.trim() ? connection.label : null;
+  const endpointRadius = ENDPOINT_HANDLE_RADIUS_PX / safeZoom;
+  const endpointStrokeWidth = ENDPOINT_HANDLE_STROKE_WIDTH_PX / safeZoom;
+  const bendHandleLength = BEND_HANDLE_LENGTH_PX / safeZoom;
+  const bendHandleThickness = BEND_HANDLE_THICKNESS_PX / safeZoom;
+  const bendHandleRadius = BEND_HANDLE_RADIUS_PX / safeZoom;
+  const labelWidth = label ? connectionLabelWidth(label) : 0;
+  const bendSegments =
+    safeZoom >= BEND_HANDLES_MIN_ZOOM
+      ? connectorBendSegments(routed.points ?? [], {
+          labelPoint: label ? routed.labelPoint : null,
+          labelClearancePx: label ? labelWidth / 2 + bendHandleLength / 2 : undefined,
+        })
+      : [];
+
+  return (
+    <g data-canvas-connection-chrome={connection.id}>
+      {bendSegments.map((segment) => (
+        <rect
+          key={`bend-segment-${segment.index}`}
+          x={segment.handlePoint.x - bendHandleLength / 2}
+          y={segment.handlePoint.y - bendHandleThickness / 2}
+          width={bendHandleLength}
+          height={bendHandleThickness}
+          rx={bendHandleRadius}
+          fill={SELECTION_BLUE}
+          data-canvas-bend-segment={segment.index}
+          data-canvas-connection-id={connection.id}
+          transform={
+            segment.axis === "vertical"
+              ? `rotate(90 ${segment.handlePoint.x} ${segment.handlePoint.y})`
+              : undefined
+          }
+          style={{
+            pointerEvents: "all",
+            cursor: segment.axis === "horizontal" ? "ns-resize" : "ew-resize",
+          }}
+        />
+      ))}
+      <circle
+        cx={routed.start.x}
+        cy={routed.start.y}
+        r={endpointRadius}
+        fill="#FFFFFF"
+        stroke={SELECTION_BLUE}
+        strokeWidth={endpointStrokeWidth}
+        data-canvas-endpoint="from"
+        data-canvas-connection-id={connection.id}
+        style={{ pointerEvents: "all", cursor: "default" }}
+      />
+      <circle
+        cx={routed.end.x}
+        cy={routed.end.y}
+        r={endpointRadius}
+        fill="#FFFFFF"
+        stroke={SELECTION_BLUE}
+        strokeWidth={endpointStrokeWidth}
+        data-canvas-endpoint="to"
+        data-canvas-connection-id={connection.id}
+        style={{ pointerEvents: "all", cursor: "default" }}
+      />
     </g>
   );
 }

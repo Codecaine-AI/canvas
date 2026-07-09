@@ -372,7 +372,7 @@ describe("MarkdownSlotTextEditor", () => {
     );
     expect(stickyDef.css).toContain(
       `.interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="5"]::before {
-          left: 5em;
+          left: 4em;
         }`,
     );
     expect(stickyDef.css).toContain('[data-bullet-glyph="1"]::before');
@@ -384,8 +384,8 @@ describe("MarkdownSlotTextEditor", () => {
     expect(stickyDef.css).toContain(
       `.interactive-canvas-sticky-line[data-bullet="true"]::before {
           position: absolute;
-          width: 1em;
-          text-align: center;
+          width: 0.75em;
+          text-align: left;
         }`,
     );
   });

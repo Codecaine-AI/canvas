@@ -73,13 +73,15 @@ describe("sticky markdown editing model", () => {
     expect(twoDeep.prefix?.text).toBe("    - ");
     expect(twoDeep.contentStart).toBe(6);
 
+    // The odd third space is hidden with the pair — visible ink always starts
+    // exactly on a depth column, never a stray half-step right of it.
     const paragraph = parseStickyMarkdown("   x").lines[0];
     expect(paragraph.kind).toBe("text");
     expect(paragraph.depth).toBe(1);
     expect(paragraph.prefix?.markerKind).toBe("indent-prefix");
-    expect(paragraph.prefix?.text).toBe("  ");
-    expect(paragraph.contentStart).toBe(2);
-    expect(paragraph.inline[0]?.kind === "text" ? paragraph.inline[0].leaf.text : "").toBe(" x");
+    expect(paragraph.prefix?.text).toBe("   ");
+    expect(paragraph.contentStart).toBe(3);
+    expect(paragraph.inline[0]?.kind === "text" ? paragraph.inline[0].leaf.text : "").toBe("x");
 
     const emptyIndented = parseStickyMarkdown("  ").lines[0];
     expect(emptyIndented.kind).toBe("text");
@@ -87,10 +89,13 @@ describe("sticky markdown editing model", () => {
     expect(emptyIndented.prefix?.text).toBe("  ");
     expect(emptyIndented.placeholder?.sourceStart).toBe(2);
 
+    // Markers parse after ANY leading spaces (the odd space hides with the
+    // marker prefix) — " - a" is a depth-0 bullet, not literal text.
     const oddLeadingSpace = parseStickyMarkdown(" - a").lines[0];
-    expect(oddLeadingSpace.kind).toBe("text");
+    expect(oddLeadingSpace.kind).toBe("bullet");
     expect(oddLeadingSpace.depth).toBe(0);
-    expect(oddLeadingSpace.prefix).toBeUndefined();
+    expect(oddLeadingSpace.prefix?.text).toBe(" - ");
+    expect(oddLeadingSpace.contentStart).toBe(3);
 
     const deepBullet = parseStickyMarkdown("            - deep").lines[0];
     expect(deepBullet.kind).toBe("bullet");

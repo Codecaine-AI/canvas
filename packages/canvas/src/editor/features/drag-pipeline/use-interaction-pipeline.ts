@@ -34,7 +34,12 @@ import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../state/a
 import { type CanvasPoint } from "../../../state/geometry";
 import { type Anchor } from "../../../routing/routing";
 import { stageFromEventTarget, stageScreenPointFromClient } from "../../stage-dom";
-import { panBy, type ViewportState } from "../../../render/viewport";
+import { panBy, worldToScreen, type ViewportState } from "../../../render/viewport";
+import {
+  ANCHOR_NAMES,
+  HIT_TARGET_PX as ANCHOR_DOT_HIT_TARGET_PX,
+  anchorScreenPoint,
+} from "../../../render/overlays/AnchorDots";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { animateSectionFitToChildren } from "../section-fit/animate-section-fit";
 
@@ -66,6 +71,13 @@ export const SELECTION_DRAG_KINDS: ReadonlySet<string> = new Set([
   "connector-create",
 ]);
 
+type ResolveHitOptions = {
+  zoom?: number;
+  viewport?: ViewportState;
+  screen?: CanvasPoint;
+  portProximityObjectIds?: readonly string[];
+};
+
 /**
  * Latest raw pointer sample for the active gesture: enough of the native event
  * for buildPointerEvent (position/buttons/modifiers/DOM target for hit
@@ -81,12 +93,45 @@ type DragPointerSnapshot = {
   stage: HTMLElement;
 };
 
+function resolvePortProximityHit(
+  document: InteractiveCanvasDocument,
+  world: CanvasPoint,
+  options: ResolveHitOptions,
+): CanvasHit | null {
+  const objectIds = options.portProximityObjectIds;
+  if (!objectIds?.length || !options.viewport) return null;
+
+  const screen = options.screen ?? worldToScreen(options.viewport, world);
+  const selected = new Set(objectIds);
+  const radius = ANCHOR_DOT_HIT_TARGET_PX / 2;
+  const radiusSq = radius * radius;
+  let nearest: { objectId: string; anchor: Anchor; distanceSq: number } | null = null;
+
+  for (const object of document.objects) {
+    if (!selected.has(object.id)) continue;
+    for (const anchor of ANCHOR_NAMES) {
+      const center = anchorScreenPoint(options.viewport, object, anchor);
+      const dx = screen.x - center.x;
+      const dy = screen.y - center.y;
+      const distanceSq = dx * dx + dy * dy;
+      if (distanceSq > radiusSq) continue;
+      if (!nearest || distanceSq < nearest.distanceSq) {
+        nearest = { objectId: object.id, anchor, distanceSq };
+      }
+    }
+  }
+
+  return nearest ? { kind: "port", objectId: nearest.objectId, anchor: nearest.anchor } : null;
+}
+
 /**
  * Resolves a raw pointer event's target into a CanvasHit by walking the DOM:
  * resize handles carry data-canvas-handle + data-canvas-object-id; connector
  * endpoint handles carry data-canvas-endpoint + data-canvas-connection-id;
- * object edge ports carry data-canvas-port + data-canvas-object-id; connector
- * bend pills carry data-canvas-bend-segment + data-canvas-connection-id;
+ * object edge ports carry data-canvas-port + data-canvas-object-id; selected
+ * objects also get a screen-space anchor-dot proximity pass for their rendered
+ * 28px hit targets; connector bend pills carry data-canvas-bend-segment +
+ * data-canvas-connection-id;
  * connector hit paths carry data-canvas-connection-id (checked after chrome
  * elements, since they render as siblings, not inside, the hit path); section
  * title chips carry data-canvas-section-title-chip + data-canvas-object-id;
@@ -109,7 +154,7 @@ export function resolveHit(
   target: Element,
   document: InteractiveCanvasDocument,
   world: CanvasPoint,
-  options: { zoom?: number } = {},
+  options: ResolveHitOptions = {},
 ): CanvasHit {
   const handleElement = target.closest("[data-canvas-handle]");
   if (handleElement instanceof HTMLElement) {
@@ -140,6 +185,8 @@ export function resolveHit(
       return { kind: "port", objectId, anchor };
     }
   }
+  const proximityPort = resolvePortProximityHit(document, world, options);
+  if (proximityPort) return proximityPort;
   const bendSegmentElement = target.closest("[data-canvas-bend-segment]");
   if (bendSegmentElement instanceof Element) {
     const connectionId = bendSegmentElement.getAttribute("data-canvas-connection-id");
@@ -279,7 +326,17 @@ export function useInteractionPipeline({
       const screen = stageScreenPointFromClient(nativeEvent, stage);
       const world = screenToWorld(screen);
       const target = nativeEvent.target instanceof Element ? nativeEvent.target : stage;
-      const hit = resolveHit(target, stateRef.current.document, world, { zoom: viewportRef.current.zoom });
+      const selection = stateRef.current.selection;
+      const portProximityObjectIds =
+        stateRef.current.tool === "select" && selection.kind === "objects"
+          ? selection.objectIds
+          : undefined;
+      const hit = resolveHit(target, stateRef.current.document, world, {
+        zoom: viewportRef.current.zoom,
+        viewport: viewportRef.current,
+        screen,
+        portProximityObjectIds,
+      });
       return {
         type,
         world,

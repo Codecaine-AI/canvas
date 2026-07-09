@@ -86,8 +86,9 @@ export const stickyDef: ObjectDef = {
         /*
          * D14 line layout is keyed by the shared renderer/editor attrs.
          * Visual padding clamps at depth 5; bullet glyphs bucket depth 2+
-         * together. Center markers in a 1em gutter so glyph side bearings do
-         * not shift gaps.
+         * together. Markers sit FLUSH LEFT in their 1em gutter (FigJam
+         * parity): a depth-d glyph starts exactly at the depth-(d-1) text
+         * column, so dots visibly align with the text grid above them.
          */
         .interactive-canvas-sticky-line[data-line-depth="0"] {
           padding-left: 0;
@@ -107,49 +108,80 @@ export const stickyDef: ObjectDef = {
         .interactive-canvas-sticky-line[data-line-depth="5"] {
           padding-left: 5em;
         }
+        /*
+         * Plain paragraphs nest 0.125em under their heading (headings anchor
+         * the left margin as section titles; body text reads as their child,
+         * sitting between the heading (0) and bullet text (1em)). Bullets
+         * and headings keep the whole-em grid above.
+         */
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="0"] {
+          padding-left: 0.125em;
+        }
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="1"] {
+          padding-left: 1.125em;
+        }
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="2"] {
+          padding-left: 2.125em;
+        }
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="3"] {
+          padding-left: 3.125em;
+        }
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="4"] {
+          padding-left: 4.125em;
+        }
+        .interactive-canvas-sticky-line:not([data-bullet="true"]):not([data-heading])[data-line-depth="5"] {
+          padding-left: 5.125em;
+        }
         .interactive-canvas-sticky-line[data-bullet="true"] {
           position: relative;
         }
+        /*
+         * Bullet geometry: the whole list block starts 0.25em in (mirroring
+         * the paragraph nest), the glyph gutter is 0.75em wide, and each
+         * nesting level steps by that same 0.75em so a depth-d glyph still
+         * starts exactly at the depth-(d-1) text column.
+         * glyph left = 0.25em + d*0.75em; text = glyph + 0.75em.
+         */
         .interactive-canvas-sticky-line[data-bullet="true"]::before {
           position: absolute;
-          width: 1em;
-          text-align: center;
+          width: 0.75em;
+          text-align: left;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="0"] {
           padding-left: 1em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="0"]::before {
-          left: 0;
+          left: 0.25em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="1"] {
-          padding-left: 2em;
+          padding-left: 1.75em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="1"]::before {
           left: 1em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="2"] {
-          padding-left: 3em;
+          padding-left: 2.5em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="2"]::before {
-          left: 2em;
+          left: 1.75em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="3"] {
-          padding-left: 4em;
+          padding-left: 3.25em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="3"]::before {
-          left: 3em;
+          left: 2.5em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="4"] {
-          padding-left: 5em;
+          padding-left: 4em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="4"]::before {
-          left: 4em;
+          left: 3.25em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="5"] {
-          padding-left: 6em;
+          padding-left: 4.75em;
         }
         .interactive-canvas-sticky-line[data-bullet="true"][data-line-depth="5"]::before {
-          left: 5em;
+          left: 4em;
         }
         .interactive-canvas-sticky-line[data-bullet-glyph="1"]::before {
           content: "•";

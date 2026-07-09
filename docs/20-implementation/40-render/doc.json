@@ -8,13 +8,16 @@
       "id": "b-render-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, the theme/FigJam token system, and the code-block tokenizer.",
+        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, selected connector chrome, AnchorDots, ConnectorDragPreview, the theme/FigJam token system, and the code-block tokenizer.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
           "CanvasStage",
           "adaptive grid",
           "screen-pixel band",
+          "selected connector chrome",
+          "AnchorDots",
+          "ConnectorDragPreview",
           "FigJam tokens",
           "code tokenizer"
         ]
@@ -26,6 +29,11 @@
         "b-render-canvasstage-body-4",
         "b-render-canvasstage-helpers-5",
         "b-render-canvasstage-imports-6",
+        "b-render-connector-chrome-6a",
+        "b-render-connector-labels-6b",
+        "b-render-anchor-dots-6c",
+        "b-render-drag-preview-6d",
+        "b-render-dash-rendering-6e",
         "b-render-canvasstage-user-select-decision",
         "b-render-heading-grid-7",
         "b-render-grid-mechanism-8",
@@ -100,16 +108,16 @@
         {
           "insert": "CanvasStage",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/CanvasStage.tsx",
               "symbol": "CanvasStage"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": " is the top-level exported component (a large, ~1800-line file). It takes the document, the viewport (pan/zoom), selection and interaction state, and a couple of slot props ("
+          "insert": " is the top-level exported component, now about 600 lines and delegated into sibling render modules. It takes the document, viewport, selection and interaction state, and slot props ("
         },
         {
           "insert": "overlay",
@@ -127,7 +135,7 @@
           }
         },
         {
-          "insert": " for things like the inline connector-label editor input the editor injects) and renders the whole scene. It applies the camera transform — translate by "
+          "insert": " for world-space editor additions such as the inline connector-label input) and renders the scene. It applies the camera transform — translate by "
         },
         {
           "insert": "-viewport.x * zoom, -viewport.y * zoom",
@@ -154,7 +162,35 @@
           }
         },
         {
-          "insert": " for every screen-space overlay (marquee, snap guides, distribution guides, selection handles)."
+          "insert": " for screen-space overlays including marquee, snap and distribution guides, spacing chips, selection handles, anchor dots, and connector drag previews. Hover quick-connect previews are assembled in "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " and rendered through "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -165,7 +201,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Structurally it is one large render tree assembled from many small, single-purpose sub-renderers rather than one deeply nested component. Notable pieces: "
+          "insert": "Structurally it is one render tree assembled from small, single-purpose sub-renderers. Notable pieces: "
         },
         {
           "insert": "ObjectShape",
@@ -179,66 +215,35 @@
           }
         },
         {
-          "insert": " (also exported) is a thin registry dispatcher since the def conversion — it resolves the object's registered ObjectDef via "
-        },
-        {
-          "insert": "objectDefFor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "objectDefFor"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " by type, everything else by effective render shape) and renders "
-        },
-        {
-          "insert": "def.render",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; its generic fallback only fires for a render shape with no registered def. "
+          "insert": " is the object-def dispatcher; "
         },
         {
           "insert": "Connector",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "symbol": "Connector"
+            }
           }
         },
         {
-          "insert": " draws one routed connector (hit path, visible path, arrowhead markers, dashed styles, bend-affordance stubs, endpoint handles), paired with "
-        },
-        {
-          "insert": "ConnectionLabelChip",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
+          "insert": " draws a routed connector as an invisible hit path, visible path, inline SVG label chip, and selected endpoint/bend chrome; "
         },
         {
           "insert": "ConnectorDragPreview",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
+            }
           }
         },
         {
-          "insert": "; "
+          "insert": " renders hover/create/reconnect/bend previews; "
         },
         {
           "insert": "SelectionBox",
@@ -247,7 +252,7 @@
           }
         },
         {
-          "insert": " (also exported) draws the screen-space selection outline and resize handles; "
+          "insert": " draws the screen-space selection outline and resize handles; "
         },
         {
           "insert": "AnchorDots",
@@ -261,16 +266,7 @@
           }
         },
         {
-          "insert": " draws the FigJam-style connection anchor dots on selected objects at the def-derived anchor positions, visibility-gated below "
-        },
-        {
-          "insert": "ANCHOR_DOTS_MIN_ZOOM",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (0.5 — the dots stay grabbable at opacity 0); "
+          "insert": " draws selected-object connection ports in the untransformed overlay; and "
         },
         {
           "insert": "Marquee",
@@ -315,7 +311,7 @@
           }
         },
         {
-          "insert": " render selection-rectangle, tool-placement ghost, and alignment/distribution guide overlays. "
+          "insert": " render the remaining interaction overlays. "
         },
         {
           "insert": "renderOrderedObjects",
@@ -324,7 +320,7 @@
           }
         },
         {
-          "insert": " computes the geometric layer-cake order before the scene is drawn: sections first by containment depth, then area descending, then stable schema index; non-sections keep schema order. CanvasStage splits the world-space tiers into section bodies at z 0, connector SVG at z 1, objects at z 2, the floating "
+          "insert": " computes the geometric layer-cake order before drawing: section bodies at z 0, connector SVG at z 1, objects at z 2, the floating "
         },
         {
           "insert": "data-canvas-section-header-layer",
@@ -342,7 +338,43 @@
           }
         },
         {
-          "insert": " at z 4. Section title chips are emitted into that header layer, not inline inside the section body renderer. See "
+          "insert": " at z 4. After the world layer, the screen-space "
+        },
+        {
+          "insert": "interactive-canvas-overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " paints selection box, anchor dots, marquee/place/guides/spacing, hover "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", active "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", then the caller "
+        },
+        {
+          "insert": "overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Section title chips are emitted into the header layer, not inline inside the section body renderer. See "
         },
         {
           "insert": "canvas-10-system-design-30-layering",
@@ -901,16 +933,30 @@
           }
         },
         {
-          "insert": "; the stage surface/background constants in "
+          "insert": "; board surface variables and universal shape stroke helpers live in "
         },
         {
-          "insert": "render/CanvasStage.tsx",
+          "insert": "theme.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "; connector stroke/dash/arrowhead/elbow constants in "
+          "insert": "; object chrome metrics live with object defs; connector dash metadata lives in "
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": " and toolbar metadata in "
         },
         {
           "insert": "objects/connector/def.ts",
@@ -919,73 +965,49 @@
           }
         },
         {
-          "insert": " and the connector renderers; arrow-shape proportions in "
+          "insert": "; connector stroke width, hit width, selected endpoint/bend metrics, label chip metrics, and preview stroke metrics live in "
         },
         {
-          "insert": "ARROW_SHAPE_GEOMETRY",
+          "insert": "Connector",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "ARROW_SHAPE_GEOMETRY"
+              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "symbol": "Connector"
             }
           }
         },
         {
-          "insert": "; section title-chip geometry in "
+          "insert": " and "
         },
         {
-          "insert": "TITLE_CHIP",
+          "insert": "ConnectorDragPreview",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "TITLE_CHIP"
+              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
             }
           }
         },
         {
-          "insert": "; per-shape geometry constants in each shape's def file; the code-block (Dracula) palette in "
+          "insert": "; and arrowhead ratios live in "
         },
         {
-          "insert": "objects/code-block/style.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; and every color hex in "
-        },
-        {
-          "insert": "palette.ts",
+          "insert": "CanvasStage",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/palette.ts"
+              "path": "packages/canvas/src/render/CanvasStage.tsx",
+              "symbol": "CanvasStage"
             }
           }
         },
         {
-          "insert": "."
-        },
-        {
-          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
-        },
-        {
-          "insert": "board-design-reference/analysis/palette-sheet.html",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "board-design-reference/analysis/palette-sheet.html"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": ". The rule is locality: constants sit beside the renderer that consumes them unless they are part of shared schema/tooling vocabulary."
         }
       ],
       "children": []
@@ -1144,83 +1166,11 @@
       "id": "b-render-testing-17",
       "flavour": "testing",
       "props": {
-        "title": "Render-layer test suite"
+        "title": "Render-layer coverage"
       },
       "text": [
         {
-          "insert": "Render-layer tests live under "
-        },
-        {
-          "insert": "packages/canvas/src/render/__tests__/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and split cleanly by concern. "
-        },
-        {
-          "insert": "grid.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is a pure math suite against "
-        },
-        {
-          "insert": "gridBackground",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ": it checks the step stays at the base at scale 1, that zooming out past the min threshold doubles the effective step, that zooming in past the max threshold halves it, that the on-screen step and dot radius stay within their respective bands across a wide sweep of zoom levels (0.05x to 8x), and that "
-        },
-        {
-          "insert": "backgroundPosition",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " tracks translate proportionally to scale. "
-        },
-        {
-          "insert": "code-tokenizer.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " covers "
-        },
-        {
-          "insert": "tokenizeCodeLine",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "tokenizeCodeBlock",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " token-boundary and reconstruction correctness. "
-        },
-        {
-          "insert": "w2-render-smoke.test.tsx",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is a broad rendering smoke test that mounts a full sample document through the viewer and asserts it renders without throwing. "
+          "insert": "Render tests pin the pixel and DOM contracts that editors rely on. "
         },
         {
           "insert": "canvas-stage.w3b-overlays.test.tsx",
@@ -1229,7 +1179,16 @@
           }
         },
         {
-          "insert": " targets CanvasStage's interaction overlays directly: hover ports and snapped-anchor highlighting during connector drags, hollow selection-blue endpoint circles on selected connectors, distribution guides, the bend-affordance stub, and per-connection color rendering. "
+          "insert": " covers the stage/overlay stack, arrow markers, selected endpoint circles, bend pills, and the absence of the retired "
+        },
+        {
+          "insert": "data-canvas-bend-stub",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " path. "
         },
         {
           "insert": "connector-rendering.test.tsx",
@@ -1238,25 +1197,16 @@
           }
         },
         {
-          "insert": " and "
+          "insert": " covers routed connector paths and labels, selected-only endpoint and bend handles, bend-handle label avoidance/layering, 16/700 label text, palette stroke preservation while selected, and solid/dashed path behavior. "
         },
         {
-          "insert": "connection-color.test.tsx",
+          "insert": "anchor-dots.test.tsx",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " round out connector coverage — routed connector paths/labels, and the additive per-connection "
-        },
-        {
-          "insert": "color",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field round-tripping through schema validation, state actions, and the rendered stroke/arrowhead color."
+          "insert": " covers selection-only anchor dots, 20px offset geometry, below-label visual bounds, hover quick-connect ghost/path, opacity-only zoom gating, and the cursor token ban. The grid tests stay focused on tier math and background CSS output; tokenizer tests stay focused on code-block token spans."
         }
       ],
       "children": []
@@ -1391,6 +1341,258 @@
         },
         {
           "insert": " in the stage pointerdown handler. The CSS already covers the bug, and the default mousedown drives focus/blur — clicking the canvas must keep blurring (and thereby committing) an open text editor."
+        }
+      ],
+      "children": []
+    },
+    "b-render-connector-chrome-6a": {
+      "id": "b-render-connector-chrome-6a",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Selected connector chrome is additive: "
+        },
+        {
+          "insert": "Connector",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "symbol": "Connector"
+            }
+          }
+        },
+        {
+          "insert": " keeps the visible path stroke resolved from the connector palette color, so selection never recolors the line to primary blue. Selection adds hollow endpoint circles at the routed start/end and blue bend-segment pills. The pills render for selected connectors only when zoom is at least "
+        },
+        {
+          "insert": "BEND_HANDLES_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/Connector.tsx",
+              "symbol": "BEND_HANDLES_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " (0.4), scale by "
+        },
+        {
+          "insert": "1 / zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", use horizontal/vertical resize cursors by segment axis, and are emitted as "
+        },
+        {
+          "insert": "data-canvas-bend-segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rects. Bend segments include straight single-segment connectors too; when a label is present, segment generation reserves clearance around the label so pills sit away from the chip rather than covering it."
+        }
+      ],
+      "children": []
+    },
+    "b-render-connector-labels-6b": {
+      "id": "b-render-connector-labels-6b",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector labels are inline SVG, not a separate chip component. A trimmed non-empty "
+        },
+        {
+          "insert": "connection.label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renders a rounded chip centered at the routed label point, which is the route's arc-length midpoint. The chip uses a canvas-colored backing ("
+        },
+        {
+          "insert": "#F5F5F5",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "#D9D9D9",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " border, 30px height, 12px horizontal padding, 16px text, and font weight 700. In document order the hit path paints first, then the visible path, then the label chip, then selected bend pills/endpoints, so bend chrome is layered above labels when they compete."
+        }
+      ],
+      "children": []
+    },
+    "b-render-anchor-dots-6c": {
+      "id": "b-render-anchor-dots-6c",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "AnchorDots",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "symbol": "AnchorDots"
+            }
+          }
+        },
+        {
+          "insert": " is selection-only and editor/select-tool-only. Each dot has a 28px screen-space hit target with a 10px resting dot, is placed from "
+        },
+        {
+          "insert": "connectionBoundsForObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "connectionBoundsForObject"
+            }
+          }
+        },
+        {
+          "insert": " rather than raw object geometry, and is offset exactly "
+        },
+        {
+          "insert": "ANCHOR_DOT_OFFSET_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOT_OFFSET_PX"
+            }
+          }
+        },
+        {
+          "insert": " screen pixels outward from the top/bottom/left/right midpoint. The 0.5 zoom gate controls visibility only: below "
+        },
+        {
+          "insert": "ANCHOR_DOTS_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/overlays/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " the dots render at opacity 0 but keep their interaction envelope. Hover or press expands the affordance to the 28px arrow button; press fills it selection blue with white arrow strokes and clears the hover quick-connect preview state."
+        }
+      ],
+      "children": []
+    },
+    "b-render-drag-preview-6d": {
+      "id": "b-render-drag-preview-6d",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
+            }
+          }
+        },
+        {
+          "insert": " keeps previews routed instead of drawing raw diagonals: create/reconnect-to-point uses "
+        },
+        {
+          "insert": "routeConnectionToPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeConnectionToPoint"
+            }
+          }
+        },
+        {
+          "insert": ", candidate previews use "
+        },
+        {
+          "insert": "routeConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/routing/routing.ts",
+              "symbol": "routeConnection"
+            }
+          }
+        },
+        {
+          "insert": ", and bend previews route through live polyline waypoints. Create previews always show a forward arrow marker; reconnect previews show one only when the dragged end and arrow setting imply it. Empty-canvas quick-connect previews add a low-opacity duplicate object shaped from the source, then a simple routed stroke and any candidate/outline snap dots. The layering stays deliberately sparse and pointer-events-free so anchor dots, hover previews, active previews, and caller overlays do not fight for input."
+        }
+      ],
+      "children": []
+    },
+    "b-render-dash-rendering-6e": {
+      "id": "b-render-dash-rendering-6e",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector dash rendering has one shared pattern. Solid connectors omit "
+        },
+        {
+          "insert": "strokeDasharray",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; dashed connectors join "
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": " as "
+        },
+        {
+          "insert": "\"19 7\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in both the normal connector renderer and connector previews, so selected, hovered, and actively dragged paths preserve the same solid/dashed vocabulary."
         }
       ],
       "children": []

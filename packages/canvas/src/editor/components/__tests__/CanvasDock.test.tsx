@@ -81,22 +81,24 @@ describe("CanvasDock button inventory", () => {
       el.getAttribute("data-dock-tool"),
     );
     expect(buttons).toEqual([
+      "sticky",
+      "section",
+      "shapes",
       "select",
       "hand",
-      "shapes",
       "connector",
-      "section",
-      "sticky",
     ]);
   });
 
-  it("groups buttons into 3 clusters separated by 2 vertical dividers", () => {
+  it("groups buttons into 2 clusters separated by 1 vertical divider", () => {
     const { container } = render(<CanvasDock />);
     const groups = container.querySelectorAll("[data-dock-group]");
-    // A(2) + B(2) + C(2) = 3 grouped clusters.
-    expect(groups.length).toBe(3);
+    expect(groups.length).toBe(2);
+    for (const group of groups) {
+      expect(group.querySelectorAll("[data-dock-tool]").length).toBe(3);
+    }
     const dividers = container.querySelectorAll("[data-divider]");
-    expect(dividers.length).toBe(2);
+    expect(dividers.length).toBe(1);
     for (const divider of dividers) {
       const dividerEl = divider as HTMLElement;
       expect(dividerEl.style.width).toBe("1.5px");
@@ -147,7 +149,7 @@ describe("CanvasDock state rules", () => {
     const handButton = container.querySelector('[data-dock-tool="hand"]') as HTMLElement;
     expect(queryByRole("tooltip")).toBeNull();
     fireEvent.pointerEnter(handButton);
-    expect(queryByRole("tooltip")?.textContent).toBe("Hand — H");
+    expect(queryByRole("tooltip")?.textContent).toBe("Hand — F");
     fireEvent.pointerLeave(handButton);
     expect(queryByRole("tooltip")).toBeNull();
   });
@@ -160,7 +162,7 @@ describe("CanvasDock state rules", () => {
     fireEvent.pointerEnter(stickyButton);
     const tooltips = container.querySelectorAll('[role="tooltip"]');
     expect(tooltips.length).toBe(1);
-    expect(tooltips[0].textContent).toBe("Sticky note — S");
+    expect(tooltips[0].textContent).toBe("Sticky note — ⌘A");
   });
 });
 

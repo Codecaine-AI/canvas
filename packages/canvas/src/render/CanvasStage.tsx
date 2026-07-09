@@ -18,7 +18,7 @@ import type { InteractionOverlay } from "../interaction/interaction";
 import { canvasSurfaceStyle } from "../theme";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
-import { Connector } from "./connectors/Connector";
+import { Connector, ConnectorSelectionChrome } from "./connectors/Connector";
 import { ConnectorDragPreview } from "./connectors/ConnectorDragPreview";
 import { SelectionBox } from "./overlays/SelectionBox";
 import { AnchorDots, type ActivePort } from "./overlays/AnchorDots";
@@ -69,6 +69,7 @@ const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSO
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
+  InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
@@ -161,6 +162,24 @@ export interface CanvasStageProps {
  * sections are depth 0). Sections are the only legal parent type, so every
  * ancestor on the chain is a section.
  */
+/**
+ * Connections in render order: the selected one moves to the end so its
+ * selection chrome (endpoint rings, bend pills) and line paint above every
+ * sibling connector path — SVG stacks strictly by document order.
+ */
+function orderedConnections(
+  connections: readonly InteractiveCanvasConnection[],
+  selectedConnectionId: string | null | undefined,
+): readonly InteractiveCanvasConnection[] {
+  if (!selectedConnectionId) return connections;
+  const selected = connections.filter((connection) => connection.id === selectedConnectionId);
+  if (selected.length === 0) return connections;
+  return [
+    ...connections.filter((connection) => connection.id !== selectedConnectionId),
+    ...selected,
+  ];
+}
+
 function renderOrderedObjects(objects: InteractiveCanvasObject[]): InteractiveCanvasObject[] {
   return paintOrderedObjects(objects);
 }
@@ -433,11 +452,13 @@ export function CanvasStage({
               />
             </marker>
           </defs>
-          {document.connections.map((connection) => {
+          {/* SVG paints in document order, so the selected connection renders
+              last: its blue endpoint rings/bend pills (and its own line) must
+              not be crossed by sibling connector paths drawn after it. */}
+          {orderedConnections(document.connections, selectedConnectionId).map((connection) => {
             const fromObject = objectById(document, connection.from.objectId);
             const toObject = objectById(document, connection.to.objectId);
             if (!fromObject || !toObject) return null;
-            const isSelected = selectedConnectionId === connection.id;
             const isDragging =
               interactionOverlay?.connectorDrag?.connectionId === connection.id;
             return (
@@ -447,7 +468,6 @@ export function CanvasStage({
                 connection={connection}
                 fromObject={fromObject}
                 toObject={toObject}
-                selected={isSelected}
                 dimmed={isDragging}
                 zoom={zoom}
                 onDoubleClick={onConnectionDoubleClick}
@@ -488,6 +508,42 @@ export function CanvasStage({
             />
           ))}
         </div>
+        {/* Selected-connection chrome (endpoint rings + bend pills) in its own
+            SVG layer ABOVE the object layer (z2) and below section headers:
+            shape bodies/borders paint over connector lines by design, but must
+            never cover the blue selection affordances. */}
+        {(() => {
+          if (!selectedConnectionId) return null;
+          const connection = document.connections.find(
+            (item) => item.id === selectedConnectionId,
+          );
+          if (!connection) return null;
+          const fromObject = objectById(document, connection.from.objectId);
+          const toObject = objectById(document, connection.to.objectId);
+          if (!fromObject || !toObject) return null;
+          return (
+            <svg
+              className="interactive-canvas-layer"
+              data-canvas-connection-chrome-layer="true"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                overflow: "visible",
+                zIndex: 3,
+                pointerEvents: handToolActive ? "none" : undefined,
+              }}
+            >
+              <ConnectorSelectionChrome
+                document={document}
+                connection={connection}
+                fromObject={fromObject}
+                toObject={toObject}
+                zoom={zoom}
+              />
+            </svg>
+          );
+        })()}
         <div
           className="interactive-canvas-layer"
           data-canvas-section-header-layer="true"
@@ -550,6 +606,21 @@ export function CanvasStage({
           selectedObjectIds={selectedObjectIds}
           interactiveHandles={!handToolActive}
         />
+        {/* Connector previews must paint below anchor-dot buttons so hovered dots stay visually solid. */}
+        {hoveredQuickConnectDrag && (
+          <ConnectorDragPreview
+            document={document}
+            viewport={viewport}
+            drag={hoveredQuickConnectDrag}
+          />
+        )}
+        {activeConnectorDrag && (
+          <ConnectorDragPreview
+            document={document}
+            viewport={viewport}
+            drag={activeConnectorDrag}
+          />
+        )}
         {/* Anchor dots (D5/D15): def-derived connection anchors on every
             selected object — editor-only (same gate as the old edge ports:
             pointer events wired + not the hand tool). Rendered in this
@@ -586,20 +657,6 @@ export function CanvasStage({
         {interactionOverlay?.spacing?.map((hint, index) => (
           <SpacingChips key={`spacing-${hint.axis}-${index}`} viewport={viewport} hint={hint} />
         ))}
-        {hoveredQuickConnectDrag && (
-          <ConnectorDragPreview
-            document={document}
-            viewport={viewport}
-            drag={hoveredQuickConnectDrag}
-          />
-        )}
-        {activeConnectorDrag && (
-          <ConnectorDragPreview
-            document={document}
-            viewport={viewport}
-            drag={activeConnectorDrag}
-          />
-        )}
         {overlay}
       </div>
     </div>

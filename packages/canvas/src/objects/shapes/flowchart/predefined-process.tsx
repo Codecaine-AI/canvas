@@ -20,15 +20,16 @@ export const PREDEFINED_PROCESS_GEOMETRY = {
  * Predefined process — a rect with two inner vertical bars near each end
  * (figjam-style-spec.md: corner radius 5 logical, two 4px-wide bars inset
  * PREDEFINED_PROCESS_GEOMETRY.barInsetRatio of total width from each edge).
- * The bars are plain aria-hidden spans (not an SVG silhouette) — CSS alone
- * positions and colors them (`background: currentColor`).
+ * The bars are plain aria-hidden spans (not an SVG silhouette) — CSS
+ * positions them, and each span is painted inline with the resolved border
+ * color.
  */
 export const predefinedProcessShapeDef: ShapeDef = {
   type: "predefined-process",
   shape: "predefined-process",
   silhouette: {
     className: "interactive-canvas-object-predefined-process",
-    silhouette: () => {
+    silhouette: ({ colors }) => {
       // W2 — predefined-process: rect with two inner vertical bars inset from
       // each edge (PREDEFINED_PROCESS_GEOMETRY.barInsetRatio of total width).
       const barInsetPct = PREDEFINED_PROCESS_GEOMETRY.barInsetRatio * 100;
@@ -37,12 +38,12 @@ export const predefinedProcessShapeDef: ShapeDef = {
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ left: `${barInsetPct}%` }}
+            style={{ left: `${barInsetPct}%`, background: colors.border }}
           />
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ right: `${barInsetPct}%`, left: "auto" }}
+            style={{ right: `${barInsetPct}%`, left: "auto", background: colors.border }}
           />
         </>
       );
@@ -58,8 +59,6 @@ export const predefinedProcessShapeDef: ShapeDef = {
           top: 0;
           bottom: 0;
           width: ${PREDEFINED_PROCESS_GEOMETRY.barWidthPx}px;
-          background: currentColor;
-          opacity: 0.6;
         }
 `,
   catalog: { label: "Predefined process", keywords: ["predefined-process", "predefined process", "subroutine"] },

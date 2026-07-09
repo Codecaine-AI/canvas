@@ -28,6 +28,10 @@
         "b-model-schema-records-intro",
         "b-model-code-object",
         "b-model-code-connection",
+        "b-model-schema-connection-style-overhaul",
+        "b-model-schema-connection-style-migration",
+        "b-model-schema-connection-color-creation",
+        "b-model-schema-connection-waypoints",
         "b-model-schema-object-types-heading",
         "b-model-schema-object-types-list-container",
         "b-model-schema-object-types-list-process",
@@ -202,6 +206,8 @@
         "b-model-actions-list-redo",
         "b-model-actions-list-reset",
         "b-model-actions-p2",
+        "b-model-actions-updateConnection-semantics",
+        "b-model-actions-quickConnect-duplicate-source",
         "b-model-decision-single-reducer",
         "b-model-decision-waypoints",
         "b-model-heading-geometry",
@@ -345,7 +351,7 @@
           }
         },
         {
-          "insert": " exists today), an optional viewport (pan/zoom) and canvas size, and four collections: "
+          "insert": " exists today), an optional viewport (pan/zoom) and canvas size, and the validated document collections: "
         },
         {
           "insert": "objects",
@@ -363,16 +369,7 @@
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "links",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
+          "insert": ", and optional "
         },
         {
           "insert": "annotations",
@@ -381,7 +378,16 @@
           }
         },
         {
-          "insert": "."
+          "insert": ". There is no current "
+        },
+        {
+          "insert": "links",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " collection in the validated document."
         }
       ],
       "children": []
@@ -430,34 +436,7 @@
           }
         },
         {
-          "insert": " field (the kind decides where and how it renders — the legacy "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "title",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " trio died in the P2 text unification, OBJECT-DEF-OVERHAUL.md D3/D11), an optional "
+          "insert": " field (the kind decides where and how it renders), an optional "
         },
         {
           "insert": "color",
@@ -466,7 +445,7 @@
           }
         },
         {
-          "insert": " swatch pick from the closed 10-pick roster (see below), an optional "
+          "insert": " swatch pick from the closed 10-pick roster, an optional "
         },
         {
           "insert": "parentId",
@@ -475,7 +454,7 @@
           }
         },
         {
-          "insert": " recording section membership (auto-managed; a section is the only legal parent), required world-space "
+          "insert": " recording section membership, required world-space "
         },
         {
           "insert": "geometry",
@@ -552,7 +531,7 @@
           }
         },
         {
-          "insert": "), carry style/arrow, their own separate "
+          "insert": "), carry line style/arrow, their own separate "
         },
         {
           "insert": "label",
@@ -570,7 +549,7 @@
           }
         },
         {
-          "insert": " swatch pick, and may carry an explicit "
+          "insert": " swatch pick, and may carry explicit "
         },
         {
           "insert": "waypoints",
@@ -579,70 +558,7 @@
           }
         },
         {
-          "insert": " world-space polyline override that wins over auto-routing when present. "
-        },
-        {
-          "insert": "links",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " attach a "
-        },
-        {
-          "insert": "SpectreRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " cross-reference target to an object, with a resolution "
-        },
-        {
-          "insert": "status",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "resolved",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "stale",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "missing",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "unresolved",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). "
+          "insert": " as a world-space polyline override that wins over auto-routing when present. "
         },
         {
           "insert": "annotations",
@@ -1142,7 +1058,7 @@
           }
         },
         {
-          "insert": " (10 FigJam hues × bold/soft; black dropped, D12). The id carries no hex; what a pick looks like per kind is resolved through the role tables in "
+          "insert": ". The id carries no hex; what a pick looks like per kind is resolved through the role tables in "
         },
         {
           "insert": "palette.ts",
@@ -1206,16 +1122,16 @@
           }
         },
         {
-          "insert": "), and new objects take the per-kind last-picked color (D17, "
+          "insert": "). New objects take the per-kind last-picked color, but connectors do not: every connector creation path stamps "
         },
         {
-          "insert": "state.lastPickedColor",
+          "insert": "FIRST_USE_COLORS.connector",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "). All object text is one fixed dark color (D8) — there is no per-color text derivation. The full model is specified in "
+          "insert": ", and connector color picks update only that connection. All object text is one fixed dark color (D8). The full model is specified in "
         },
         {
           "insert": "canvas-10-system-design-10-shape-api",
@@ -1229,10 +1145,7 @@
           }
         },
         {
-          "insert": "."
-        },
-        {
-          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+          "insert": ". The design-intent palette sheet lives at "
         },
         {
           "insert": "board-design-reference/analysis/palette-sheet.html",
@@ -1289,7 +1202,7 @@
           }
         },
         {
-          "insert": " input — no schema library, just explicit type-guard functions per field. It returns a discriminated "
+          "insert": " input. It returns a discriminated "
         },
         {
           "insert": "CanvasValidationResult",
@@ -1325,7 +1238,7 @@
           }
         },
         {
-          "insert": " that isn't one of the 20 "
+          "insert": " that is not one of the closed 10 "
         },
         {
           "insert": "CanvasColor",
@@ -1343,70 +1256,16 @@
           }
         },
         {
-          "insert": ") and normalization continues — same treatment as an invalid "
+          "insert": ") and normalization continues, while invalid geometry, required text, duplicate ids, unknown object types, invalid section parenting, invalid connection endpoints, invalid endpoint positions, or malformed connection "
         },
         {
-          "insert": "style.strokeWidth",
+          "insert": "waypoints",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "/"
-        },
-        {
-          "insert": "strokeStyle",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — while a missing "
-        },
-        {
-          "insert": "geometry",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", a missing "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (required, may be empty), a duplicate id, an unknown object "
-        },
-        {
-          "insert": "type",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", a non-section "
-        },
-        {
-          "insert": "parentId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " target, or an "
-        },
-        {
-          "insert": "icon",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "-typed object without a valid glyph is a hard error that fails the whole document. "
+          "insert": " fail validation. "
         },
         {
           "insert": "assertInteractiveCanvasDocument",
@@ -1415,7 +1274,7 @@
           }
         },
         {
-          "insert": " is the one place that turns a failed validation into a thrown error, for callers that want fail-fast semantics instead of handling the result union themselves."
+          "insert": " is the one place that turns a failed validation into a thrown error."
         }
       ],
       "children": []
@@ -1758,10 +1617,19 @@
           }
         },
         {
-          "insert": " — creates a connection between two existing objects, optionally with anchors and a precise relative "
+          "insert": " — creates a solid/forward/gray connection between two existing objects, optionally with anchors, a label/style/arrow, and a precise relative "
         },
         {
           "insert": "toPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; it selects the new connection and records "
+        },
+        {
+          "insert": "Added connector",
           "attributes": {
             "code": true
           }
@@ -1786,7 +1654,52 @@
           }
         },
         {
-          "insert": " — patches a connection's fields, validating that any new endpoints reference real objects and aren't self-loops."
+          "insert": " — patches a connection after validating endpoints/anchors and rejecting self-loops. Endpoint object/anchor/position changes clear existing "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; history says "
+        },
+        {
+          "insert": "Edited connector label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " only when the patch key is exactly "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "Reconnected connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for endpoint changes, and "
+        },
+        {
+          "insert": "Updated connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " otherwise."
         }
       ],
       "children": []
@@ -1824,7 +1737,7 @@
           }
         },
         {
-          "insert": " — drag-to-connect gesture: connects to an existing object under the drop point, or creates a new process object at the drop point and connects to it, in one history entry."
+          "insert": " — drag-to-connect gesture: connects to an existing object under the drop point, or duplicates the source object at the drop point with empty text and connects to it, in one history entry."
         }
       ],
       "children": []
@@ -3152,11 +3065,7 @@
         {
           "insert": "\"rounded-rect\"",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
+            "code": true
           }
         },
         {
@@ -3165,15 +3074,11 @@
         {
           "insert": "\"process\"",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " for any type they don't special-case, and "
+          "insert": " for any type they do not special-case, and "
         },
         {
           "insert": "process",
@@ -3199,16 +3104,7 @@
           }
         },
         {
-          "insert": "'s drag-to-empty-space gesture also creates a "
-        },
-        {
-          "insert": "process",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " object specifically when the drop point isn't over an existing object."
+          "insert": " no longer creates a process specifically on empty-space drops; it duplicates the source object type instead."
         }
       ],
       "children": []
@@ -3674,7 +3570,7 @@
           }
         },
         {
-          "insert": " emits data-line-depth (clamped at 5) so all line kinds share one em-based indent column grid; bullets offset one extra column for the glyph gutter and choose "
+          "insert": " emits data-line-depth (clamped at 5) for the indent grid. The tuned geometry (hand-calibrated with design, 2026-07-08): headings anchor the left margin at 0; plain paragraphs nest 0.125em (3px) under them so body text reads as a child of its heading; bullet blocks start at 0.25em (6px) with a 0.75em glyph gutter, and each nesting level steps by that same 0.75em so a depth-d glyph starts exactly at the depth-(d-1) text column (dot/text at 24px type: 6/24, 24/42, 42/60px). Paragraph structural indent still steps a full 1em per depth on top of its 0.125em nest. Bullets choose "
         },
         {
           "insert": "•",
@@ -4139,74 +4035,43 @@
           }
         },
         {
-          "insert": " (see the constraint below). Requires "
+          "insert": ". Sections use the same required "
         },
         {
-          "insert": "title",
+          "insert": "text",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " (the text shown in the section's floating title chip — distinct from "
+          "insert": " field as other objects for their title chip, plus optional "
         },
         {
-          "insert": "label",
+          "insert": "color?: CanvasColor",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", which every object still carries but which sections don't separately render) and a known "
+          "insert": " for the section palette role; fresh sections default to "
         },
         {
-          "insert": "tint",
+          "insert": "FIRST_USE_COLORS.section",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " family from "
+          "insert": " ("
         },
         {
-          "insert": "CanvasSectionTint",
+          "insert": "\"gray\"",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasSectionTint"
-            }
+            "code": true
           }
         },
         {
-          "insert": " (green/purple/orange/yellow/gray/white/pink/red/blue/teal); both are hard validation errors when missing, per "
-        },
-        {
-          "insert": "validateInteractiveCanvasDocument",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/validate.ts",
-              "symbol": "validateInteractiveCanvasDocument"
-            }
-          }
-        },
-        {
-          "insert": ". "
+          "insert": "). "
         },
         {
           "insert": "locked",
@@ -4256,7 +4121,7 @@
           }
         },
         {
-          "insert": " in the interaction layer: \"background\" means the section frame itself refuses drag/resize while its children stay movable; \"all\" additionally locks every parentId-descendant against drag/resize. See the decision below for the validation/migration story."
+          "insert": ": \"background\" means the section frame itself refuses drag/resize while children stay movable; \"all\" additionally locks every parentId-descendant. See the decision below for the validation/migration story."
         }
       ],
       "children": []
@@ -4372,59 +4237,25 @@
           }
         },
         {
-          "insert": " seeds a fresh section's "
+          "insert": " seeds a fresh section through the unified object defaults: required "
         },
         {
-          "insert": "title",
+          "insert": "text",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " to its "
+          "insert": " is present, and "
         },
         {
-          "insert": "label",
+          "insert": "color",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " and its "
-        },
-        {
-          "insert": "tint",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " to "
-        },
-        {
-          "insert": "\"gray\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " so it validates immediately. "
+          "insert": " uses the section first-use color. "
         },
         {
           "insert": "canvas.setObjectType",
@@ -4437,33 +4268,25 @@
           }
         },
         {
-          "insert": " (shape-swap) seeds the same defaults when swapping an existing object INTO a section, and clears "
+          "insert": " keeps the same unified text/color model when swapping object types; there are no current "
         },
         {
           "insert": "title",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": "/"
+          "insert": " or "
         },
         {
           "insert": "tint",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": " when swapping away from one, since every other type's renderer ignores those fields anyway."
+          "insert": " schema fields to seed or clear."
         }
       ],
       "children": []
@@ -4477,7 +4300,7 @@
           "insert": "Rendered by a dedicated "
         },
         {
-          "insert": "SectionShape",
+          "insert": "SectionObjectView",
           "attributes": {
             "code": true,
             "reference": {
@@ -4488,48 +4311,48 @@
           }
         },
         {
-          "insert": " component, not the generic button/label/body layout every other shape shares: no centered label, no shadow, and the visible \"border\" is literally the title chip's fill color ("
+          "insert": " component, not the generic centered-label layout every other shape shares: no centered label, no shadow, and a floating title chip inside the section frame. Section fill/chip colors resolve from the shared "
         },
         {
-          "insert": "borderColor = family.chipBorder ?? \"transparent\"",
+          "insert": "CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pick through the section cells in "
+        },
+        {
+          "insert": "CANVAS_PALETTE",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/CanvasStage.tsx"
+              "path": "packages/canvas/src/palette.ts",
+              "symbol": "CANVAS_PALETTE"
             }
           }
         },
         {
-          "insert": "). The title chip is absolutely positioned near the top-left corner ("
+          "insert": ", rather than legacy "
         },
         {
-          "insert": "SECTION_GEOMETRY.titleChip",
+          "insert": "CanvasSectionTint",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "SECTION_GEOMETRY"
-            }
+            "code": true
           }
         },
         {
-          "insert": ": 3px inset, 27px tall, 16px/700-weight (bold) text, 10px horizontal padding). Section fill/chip colors resolve against "
+          "insert": " or "
         },
         {
           "insert": "SECTION_FAMILIES",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme.ts",
-              "symbol": "SECTION_FAMILIES"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", a separate palette from the tone/paletteToken ladder every other type uses."
+          "insert": " fields."
         }
       ],
       "children": []
@@ -7636,7 +7459,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/state/schema/connections.ts\nexport type CanvasConnectionStyle = \"solid\" | \"dotted\" | \"elbow\" | \"smooth\";\n\nexport type CanvasArrowDirection = \"none\" | \"forward\" | \"back\" | \"both\";\n\nexport type CanvasConnectionEndpoint = {\n  objectId: string;\n  anchor?: \"top\" | \"right\" | \"bottom\" | \"left\" | \"center\";\n  /** Relative anchor point on the endpoint object's bounds, [0..1, 0..1] fractions of\n      (width, height) from the top-left corner. When present, routing uses it as a more\n      precise anchor than the coarse `anchor` side. */\n  position?: [number, number];\n};\n\nexport type InteractiveCanvasConnection = {\n  id: string;\n  from: CanvasConnectionEndpoint;\n  to: CanvasConnectionEndpoint;\n  label?: string;\n  style?: CanvasConnectionStyle;\n  arrow?: CanvasArrowDirection;\n  role?: string;\n  /** Stroke color pick (P1, D1/D12) — a swatch id from the closed 10-pick roster, resolved\n      to the palette ink hex via the connector role. Absent = the default \"gray\". */\n  color?: CanvasColor;\n  /** Optional world-space polyline override. When present, `routeConnection` honors these\n      points verbatim instead of recomputing an obstacle-avoiding route. */\n  waypoints?: Array<[number, number]>;\n};"
+          "insert": "// packages/canvas/src/state/schema/connections.ts\nexport type CanvasConnectionStyle = \"solid\" | \"dashed\";\n\nexport type CanvasArrowDirection = \"none\" | \"forward\" | \"back\" | \"both\";\n\nexport type CanvasConnectionEndpoint = {\n  objectId: string;\n  anchor?: \"top\" | \"right\" | \"bottom\" | \"left\" | \"center\";\n  /**\n   * Relative anchor point on the endpoint object's bounds, as\n   * [0..1, 0..1] fractions of (width, height) from the top-left corner.\n   * Optional — when present, used by A* routing as a more precise anchor\n   * than the coarse `anchor` side; when absent, routing falls back to\n   * `anchor` / auto-picked sides.\n   */\n  position?: [number, number];\n};\n\nexport type InteractiveCanvasConnection = {\n  id: string;\n  from: CanvasConnectionEndpoint;\n  to: CanvasConnectionEndpoint;\n  label?: string;\n  style?: CanvasConnectionStyle;\n  arrow?: CanvasArrowDirection;\n  role?: string;\n  /** Stroke color pick — a swatch id from the closed 10-id roster. */\n  color?: CanvasColor;\n  /** Optional world-space polyline override. */\n  waypoints?: Array<[number, number]>;\n};"
         }
       ],
       "children": []
@@ -7819,6 +7642,377 @@
         },
         {
           "insert": "; where this section and that doc disagree, that doc (and the code it cites) wins."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-connection-style-overhaul": {
+      "id": "b-model-schema-connection-style-overhaul",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasConnectionStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/connections.ts",
+              "symbol": "CanvasConnectionStyle"
+            }
+          }
+        },
+        {
+          "insert": " is now only line style: "
+        },
+        {
+          "insert": "export type CanvasConnectionStyle = \"solid\" | \"dashed\";",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " Routing is always elbow/orthogonal through the routing layer; the style field no longer selects "
+        },
+        {
+          "insert": "elbow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "smooth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " path algorithms. The dashed renderer applies "
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/connector/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": " only when "
+        },
+        {
+          "insert": "connection.style === \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-connection-style-migration": {
+      "id": "b-model-schema-connection-style-migration",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Load-time validation is migration-aware for old connector styles: "
+        },
+        {
+          "insert": "validate.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts"
+            }
+          }
+        },
+        {
+          "insert": " maps legacy "
+        },
+        {
+          "insert": "\"dotted\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "\"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", maps legacy "
+        },
+        {
+          "insert": "\"elbow\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "\"smooth\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "\"solid\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and defaults any other style to "
+        },
+        {
+          "insert": "\"solid\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Existing documents keep loading while the runtime schema stays collapsed to the two current values."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-connection-color-creation": {
+      "id": "b-model-schema-connection-color-creation",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector creation is intentionally always gray. "
+        },
+        {
+          "insert": "handleAddConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "handleAddConnection"
+            }
+          }
+        },
+        {
+          "insert": " and both "
+        },
+        {
+          "insert": "quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " paths stamp "
+        },
+        {
+          "insert": "color: FIRST_USE_COLORS.connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; connector color flyouts later dispatch "
+        },
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with just that connection's "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Unlike object color edits, connector color edits do not update "
+        },
+        {
+          "insert": "state.lastPickedColor.connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so a picked connector color is not remembered for future connectors."
+        }
+      ],
+      "children": []
+    },
+    "b-model-schema-connection-waypoints": {
+      "id": "b-model-schema-connection-waypoints",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are the user-bend mechanism for connectors: when present, routing honors the stored world-space polyline instead of recomputing around obstacles. Reducer-wide waypoint reconciliation translates bends during rigid moves and drops them after asymmetric moves/resizes; "
+        },
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " also clears waypoints when an endpoint object, anchor, or precise endpoint "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " changes, so reconnecting an endpoint returns the connector to auto-routing."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-updateConnection-semantics": {
+      "id": "b-model-actions-updateConnection-semantics",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "handleUpdateConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "handleUpdateConnection"
+            }
+          }
+        },
+        {
+          "insert": " derives history from the patch shape after validation: endpoint changes record "
+        },
+        {
+          "insert": "Reconnected connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a patch whose only key is "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records "
+        },
+        {
+          "insert": "Edited connector label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and style/arrow/color/role/waypoint edits record "
+        },
+        {
+          "insert": "Updated connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Endpoint changes also clear any explicit "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " unless the patch supplies replacement waypoints."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-quickConnect-duplicate-source": {
+      "id": "b-model-actions-quickConnect-duplicate-source",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " empty-space drops call "
+        },
+        {
+          "insert": "duplicateSourceObjectForQuickConnect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "duplicateSourceObjectForQuickConnect"
+            }
+          }
+        },
+        {
+          "insert": ", so the new object is a duplicate of the source type, size, color, parent, style/layout, direction/language/author/icon where present, centered on the drop point with "
+        },
+        {
+          "insert": "text: \"\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The reducer then creates a solid/forward/gray connector to it, selects the new object, and records "
+        },
+        {
+          "insert": "Added connected ${objectTypeLabel(fromObject.type)}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []

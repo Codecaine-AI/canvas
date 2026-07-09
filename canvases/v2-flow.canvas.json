@@ -32,13 +32,13 @@
     {
       "id": "sticky-overall-context",
       "type": "sticky",
-      "text": "# Test\nThis is pretty nice\n- test\n## Testing\n- asdf\n  - asdf\n  - asd\n    - asdf\n### Testing\n\n- testing this\n- testing\n  - esketit\n\n\n- testing this new setup\n\n- Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n- Who the client is, etc\n- EX “We are doing this interview to understand why someone would change pharmacies",
+      "text": "# Test\nThis is pretty nice\n- The UI is starting to feel very clean\n\nasdf\nasdf\n- test\n## Testing\n- asdf\n  - asdf\n  - asd\n    - asdf\n### Testing\n\n- testing this\n- testing\n  - esketit\n\n\n- testing this new setup\n\n- Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n- Who the client is, etc\n- EX “We are doing this interview to understand why someone would change pharmacies",
       "color": "yellow",
       "parentId": "page-frame",
       "geometry": {
-        "x": 797.9683514553637,
-        "y": 497.9422944306086,
-        "width": 414,
+        "x": 802.6361052743564,
+        "y": 494.75376544860944,
+        "width": 497.1659436489356,
         "height": 418.5
       },
       "style": {
@@ -102,8 +102,8 @@
       "color": "white",
       "parentId": "card-general",
       "geometry": {
-        "x": 1383.972033972668,
-        "y": 678.6689728418376,
+        "x": 1382.9738303402025,
+        "y": 675.5010153385231,
         "width": 363,
         "height": 57
       },
@@ -278,8 +278,8 @@
       "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 2163.4020961193232,
-        "y": 1006.3120070271481,
+        "x": 1991.0666631282174,
+        "y": 1108.9905262201123,
         "width": 115.63728061962729,
         "height": 114.52014974952954
       },
@@ -295,9 +295,9 @@
       "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 2159.9196991281815,
-        "y": 1412.2453985387233,
-        "width": 131.9115328506541,
+        "x": 1978.2795804864618,
+        "y": 1423.9967693200329,
+        "width": 140.47953241993946,
         "height": 144
       },
       "style": {
@@ -309,12 +309,13 @@
       "id": "chat-ai-asks-question",
       "type": "icon",
       "text": "AI Asks Question",
+      "color": "violet",
       "parentId": "section",
       "geometry": {
-        "x": 3204.4116165661508,
-        "y": 580.3711009734172,
-        "width": 114,
-        "height": 114
+        "x": 2967.9767316092825,
+        "y": 584.9173503696609,
+        "width": 233.61305719057918,
+        "height": 150.70939869672236
       },
       "style": {
         "shape": "icon"
@@ -328,8 +329,8 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3123.0397283801944,
-        "y": 1028.6186560545143,
+        "x": 2946.40300081298,
+        "y": 1029.8658233288754,
         "width": 276.75403010225455,
         "height": 229.7540974149913
       },
@@ -342,12 +343,13 @@
       "id": "chip-generate-probing-question",
       "type": "icon",
       "text": "Generate Probing Question",
+      "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 5236.619569863951,
-        "y": 1084.576799441073,
-        "width": 96,
-        "height": 108
+        "x": 4905.515260771035,
+        "y": 1053.048393033407,
+        "width": 209.27302563198737,
+        "height": 182.18744835316227
       },
       "style": {
         "shape": "icon"
@@ -361,10 +363,10 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3778.47886928408,
-        "y": 684.621410798547,
-        "width": 1129.5,
-        "height": 906
+        "x": 3631.3632724327854,
+        "y": 705.2471672743611,
+        "width": 1088,
+        "height": 864
       },
       "style": {
         "shape": "section"
@@ -377,8 +379,8 @@
       "color": "red",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3825.474690783733,
-        "y": 756.7415182320756,
+        "x": 3648.8379632165183,
+        "y": 757.9886855064367,
         "width": 414,
         "height": 223.5
       },
@@ -394,8 +396,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3825.47886928408,
-        "y": 1028.621410798547,
+        "x": 3648.842141716865,
+        "y": 1029.8685780729081,
         "width": 308,
         "height": 508
       },
@@ -410,8 +412,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3845.47886928408,
-        "y": 1078.621410798547,
+        "x": 3668.842141716865,
+        "y": 1079.8685780729081,
         "width": 268,
         "height": 66
       },
@@ -426,8 +428,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3845.47886928408,
-        "y": 1203.621410798547,
+        "x": 3668.842141716865,
+        "y": 1204.8685780729081,
         "width": 268,
         "height": 66
       },
@@ -442,8 +444,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3845.47886928408,
-        "y": 1328.621410798547,
+        "x": 3668.842141716865,
+        "y": 1329.8685780729081,
         "width": 268,
         "height": 66
       },
@@ -458,8 +460,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3845.47886928408,
-        "y": 1453.621410798547,
+        "x": 3668.842141716865,
+        "y": 1454.8685780729081,
         "width": 268,
         "height": 66
       },
@@ -474,8 +476,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4193.4788692840775,
-        "y": 1028.621410798547,
+        "x": 4020.335036753305,
+        "y": 1029.8661672635983,
         "width": 666,
         "height": 514
       },
@@ -489,8 +491,8 @@
       "text": "class Memory(BaseModel):\n    id: str = Field(description=\"mem_0, mem_1, mem_n\")\n    content: str = Field(description=\"text of the memory\")",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4213.478869284079,
-        "y": 1068.621410798547,
+        "x": 4040.3350367533067,
+        "y": 1069.8661672635983,
         "width": 626,
         "height": 170
       },
@@ -505,8 +507,8 @@
       "text": "{\n  \"id\": \"mem_0\",\n  \"content\": \"Likes pizza\"\n},\n{\n  \"id\": \"mem_1\",\n  \"content\": \"Doesn't like the cold\"\n},",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4213.478869284079,
-        "y": 1258.621410798547,
+        "x": 4040.3350367533067,
+        "y": 1259.8661672635983,
         "width": 626,
         "height": 260
       },
@@ -522,8 +524,8 @@
       "color": "blue",
       "parentId": "section",
       "geometry": {
-        "x": 2132.870407406531,
-        "y": 2021.5792709697207,
+        "x": 1956.2336798393162,
+        "y": 2022.8264382440818,
         "width": 176,
         "height": 66
       },
@@ -538,8 +540,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2528.8715854459006,
-        "y": 1869.0862235306033,
+        "x": 2352.234857878686,
+        "y": 1870.3333908049644,
         "width": 348,
         "height": 100
       },
@@ -555,8 +557,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2528.870965501185,
-        "y": 2003.5549880521335,
+        "x": 2352.2342379339702,
+        "y": 2004.8021553264946,
         "width": 348,
         "height": 102.06166899741811
       },
@@ -572,8 +574,8 @@
       "color": "yellow",
       "parentId": "section",
       "geometry": {
-        "x": 2528.870965501185,
-        "y": 2155.6166570495525,
+        "x": 2352.2342379339702,
+        "y": 2156.863824323914,
         "width": 348,
         "height": 100
       },
@@ -589,8 +591,8 @@
       "color": "red",
       "parentId": "section",
       "geometry": {
-        "x": 3031.915734729717,
-        "y": 1969.0815981552296,
+        "x": 2855.2790071625022,
+        "y": 1970.3287654295907,
         "width": 459,
         "height": 171
       },
@@ -605,10 +607,10 @@
       "color": "white",
       "parentId": "section",
       "geometry": {
-        "x": 3621.870965501185,
-        "y": 1808.6166570495532,
-        "width": 430,
-        "height": 528
+        "x": 3519.3632724327854,
+        "y": 1809.2471672743611,
+        "width": 384,
+        "height": 480
       },
       "style": {
         "shape": "section"
@@ -621,8 +623,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3658.870965501185,
-        "y": 1855.6166570495523,
+        "x": 3550.4102910424212,
+        "y": 1857.9648233927187,
         "width": 331,
         "height": 100
       },
@@ -638,8 +640,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3658.870965501185,
-        "y": 2005.6166570495516,
+        "x": 3550.4102910424212,
+        "y": 2007.964823392718,
         "width": 331,
         "height": 100
       },
@@ -655,8 +657,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3658.870965501185,
-        "y": 2155.6166570495525,
+        "x": 3550.4102910424212,
+        "y": 2157.964823392719,
         "width": 331,
         "height": 100
       },
@@ -669,102 +671,18 @@
       "id": "section",
       "type": "section",
       "text": "Section",
-      "color": "red",
+      "color": "blue",
       "parentId": "page-frame",
       "geometry": {
-        "x": 2064,
-        "y": 528,
-        "width": 3296,
+        "x": 1935.3632724327854,
+        "y": 529.2471672743611,
+        "width": 3200,
         "height": 1840
       },
       "style": {
-        "shape": "section"
+        "shape": "section",
+        "strokeStyle": "solid"
       }
-    },
-    {
-      "id": "icon",
-      "type": "icon",
-      "text": "Icon",
-      "color": "gray",
-      "parentId": "section",
-      "geometry": {
-        "x": 2699.3430592548434,
-        "y": 746.9856069186744,
-        "width": 268.90181050103456,
-        "height": 288.3141351017505
-      },
-      "style": {
-        "shape": "icon"
-      },
-      "icon": "database"
-    },
-    {
-      "id": "icon-2",
-      "type": "icon",
-      "text": "Icon",
-      "color": "gray",
-      "parentId": "section",
-      "geometry": {
-        "x": 2559.5201688609855,
-        "y": 898.4892441342156,
-        "width": 225.3920472907589,
-        "height": 282.6242476461332
-      },
-      "style": {
-        "shape": "icon"
-      },
-      "icon": "file"
-    },
-    {
-      "id": "icon-3",
-      "type": "icon",
-      "text": "Icon",
-      "color": "gray",
-      "parentId": "section",
-      "geometry": {
-        "x": 2341.7932008100765,
-        "y": 1368.003591910323,
-        "width": 233.57627231692913,
-        "height": 238.47774875318942
-      },
-      "style": {
-        "shape": "icon"
-      },
-      "icon": "cpu"
-    },
-    {
-      "id": "icon-4",
-      "type": "icon",
-      "text": "Icon",
-      "color": "gray",
-      "parentId": "section",
-      "geometry": {
-        "x": 2720.908216043393,
-        "y": 1390.6240913942343,
-        "width": 128,
-        "height": 128
-      },
-      "style": {
-        "shape": "icon"
-      },
-      "icon": "person"
-    },
-    {
-      "id": "icon-5",
-      "type": "icon",
-      "text": "Icon",
-      "color": "gray",
-      "parentId": "section",
-      "geometry": {
-        "x": 3010.6160838033643,
-        "y": 1390.6270817686122,
-        "width": 128,
-        "height": 128
-      },
-      "style": {
-        "shape": "icon"
-      },
-      "icon": "chat"
     }
   ],
   "connections": [
@@ -817,11 +735,7 @@
       "id": "conn-questions-to-ai-asks-question",
       "from": {
         "objectId": "card-questions",
-        "anchor": "right",
-        "position": [
-          1,
-          0.05
-        ]
+        "anchor": "right"
       },
       "to": {
         "objectId": "chip-generate-transition-response",
@@ -830,7 +744,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "gray"
+      "color": "violet",
+      "waypoints": [
+        [
+          1883.4218453370959,
+          1579.247213189265
+        ],
+        [
+          1883.4218453370959,
+          1166.250601094877
+        ]
+      ]
     },
     {
       "id": "conn-adapt-question-to-generate-transition-response",
@@ -875,7 +799,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "orange"
+      "color": "orange",
+      "waypoints": [
+        [
+          5010.151773587029,
+          675.8763164173052
+        ],
+        [
+          3225.5897887998617,
+          675.8763164173052
+        ]
+      ]
     },
     {
       "id": "conn-ai-asks-question-to-interviewee-response",
@@ -1119,20 +1053,6 @@
       "color": "gray"
     },
     {
-      "id": "connection-1",
-      "from": {
-        "objectId": "icon-4",
-        "anchor": "right"
-      },
-      "to": {
-        "objectId": "icon-5",
-        "anchor": "left"
-      },
-      "style": "solid",
-      "arrow": "forward",
-      "color": "gray"
-    },
-    {
       "id": "connection-2",
       "from": {
         "objectId": "chip-generate-transition-response",
@@ -1144,7 +1064,17 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "color": "gray"
+      "color": "gray",
+      "waypoints": [
+        [
+          2048.885303438031,
+          824.300109980045
+        ],
+        [
+          2943.9767316092825,
+          824.300109980045
+        ]
+      ]
     }
   ],
   "annotations": []

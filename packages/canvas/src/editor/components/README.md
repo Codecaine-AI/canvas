@@ -24,7 +24,7 @@ INTERFACE icons only.
 
 | File | Component | Purpose |
 |---|---|---|
-| `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 37, 7 buttons / 3 whitespace groups. |
+| `CanvasDock.tsx` | `CanvasDock` | White stadium bottom dock, content-fit x 53, 6 buttons / 2 groups / 1 divider. |
 | `ShapesPanel.tsx` | `ShapesPanel` | Full-height left-docked white Shapes sidebar (Panel B). |
 | `ShapeSearchPopover.tsx` | `ShapeSearchPopover` | Compact dark "Search for a shape" popover (Panel A), opened by the shape-swap flyout. |
 | `ColorPicker.tsx` | `ColorPicker` | THE one 10-pick color picker (P1, D12): the closed hue roster, identical previews for every kind, current-color ring, no custom color. |

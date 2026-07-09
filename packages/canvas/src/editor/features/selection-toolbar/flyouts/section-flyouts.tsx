@@ -1,6 +1,6 @@
 "use client";
 
-import { DashIcon, LockIcon, NoStrokeIcon, StrokeIcon, UnlockIcon } from "../../../../ui/icons";
+import { ConnectorDashedLineIcon, ConnectorSolidLineIcon, LockIcon, UnlockIcon } from "../../../../ui/icons";
 import { ColorPickerFlyout } from "./color-flyout";
 import { FlyoutMenuButton, FlyoutPanel } from "./FlyoutPanel";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
@@ -20,80 +20,75 @@ function SectionBorderStyleFlyout({
   if (primaryObject?.type !== "section") return null;
   const currentStyle = primaryObject.style?.strokeStyle ?? "solid";
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-2" data-toolbar-flyout="section-border">
-      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
-        {(
-          [
-            ["solid", "Solid", StrokeIcon],
-            ["dashed", "Dashed", DashIcon],
-            ["none", "None", NoStrokeIcon],
-          ] as const
-        ).map(([value, label, Icon]) => (
-          <FlyoutMenuButton
-            key={value}
-            active={currentStyle === value}
-            aria-label={label}
-            data-section-border-style={value}
-            leadingIcon={<Icon className="h-5 w-5" />}
-            onClick={() => {
-              applySectionBorderStyleToSelection(value);
-              close();
-            }}
-            style={{ width: "100%" }}
-          >
-            {label}
-          </FlyoutMenuButton>
-        ))}
-      </FlyoutPanel>
-    </div>
+    <FlyoutPanel data-toolbar-flyout="section-border" style={{ display: "flex", gap: 4 }}>
+      {(
+        [
+          ["solid", "Solid", ConnectorSolidLineIcon],
+          ["dashed", "Dashed", ConnectorDashedLineIcon],
+        ] as const
+      ).map(([value, label, Icon]) => (
+        <FlyoutMenuButton
+          key={value}
+          active={currentStyle === value}
+          aria-label={label}
+          aria-pressed={currentStyle === value}
+          title={label}
+          data-section-border-style={value}
+          leadingIcon={<Icon className="h-5 w-5" />}
+          onClick={() => {
+            applySectionBorderStyleToSelection(value);
+            close();
+          }}
+          style={{ width: 36, justifyContent: "center", padding: 0 }}
+        />
+      ))}
+    </FlyoutPanel>
   );
 }
 
 function SectionLockFlyout({ primaryObject, setLockForSelection, close }: ToolbarFlyoutProps) {
   const locked = primaryObject?.locked;
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-2">
-      <FlyoutPanel style={{ display: "grid", gap: 4 }}>
-        {locked ? (
+    <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+      {locked ? (
+        <FlyoutMenuButton
+          aria-label="Unlock"
+          leadingIcon={<UnlockIcon className="h-5 w-5" />}
+          onClick={() => {
+            setLockForSelection(undefined);
+            close();
+          }}
+          style={{ width: "100%" }}
+        >
+          Unlock
+        </FlyoutMenuButton>
+      ) : (
+        <>
           <FlyoutMenuButton
-            aria-label="Unlock"
-            leadingIcon={<UnlockIcon className="h-5 w-5" />}
+            aria-label="Lock all"
+            leadingIcon={<LockIcon className="h-5 w-5" />}
             onClick={() => {
-              setLockForSelection(undefined);
+              setLockForSelection("all");
               close();
             }}
             style={{ width: "100%" }}
           >
-            Unlock
+            Lock all
           </FlyoutMenuButton>
-        ) : (
-          <>
-            <FlyoutMenuButton
-              aria-label="Lock all"
-              leadingIcon={<LockIcon className="h-5 w-5" />}
-              onClick={() => {
-                setLockForSelection("all");
-                close();
-              }}
-              style={{ width: "100%" }}
-            >
-              Lock all
-            </FlyoutMenuButton>
-            <FlyoutMenuButton
-              aria-label="Lock background only"
-              leadingIcon={<LockIcon className="h-5 w-5" />}
-              onClick={() => {
-                setLockForSelection("background");
-                close();
-              }}
-              style={{ width: "100%" }}
-            >
-              Lock background only
-            </FlyoutMenuButton>
-          </>
-        )}
-      </FlyoutPanel>
-    </div>
+          <FlyoutMenuButton
+            aria-label="Lock background only"
+            leadingIcon={<LockIcon className="h-5 w-5" />}
+            onClick={() => {
+              setLockForSelection("background");
+              close();
+            }}
+            style={{ width: "100%" }}
+          >
+            Lock background only
+          </FlyoutMenuButton>
+        </>
+      )}
+    </FlyoutPanel>
   );
 }
 

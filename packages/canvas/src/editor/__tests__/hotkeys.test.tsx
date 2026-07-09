@@ -6,6 +6,7 @@ import type { CanvasAction, CanvasSelection } from "../../state/actions";
 import { sectionFitGeometry } from "../../state/geometry";
 import { IDLE_INTERACTION_STATE, type InteractionState } from "../../interaction/interaction";
 import { InteractiveCanvasEditor } from "../InteractiveCanvasEditor";
+import type { ToolId } from "../components/CanvasDock";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { useCanvasHotkeys } from "../use-canvas-hotkeys";
 import { TITLE_CHIP } from "../../objects/text-slots";
@@ -65,8 +66,10 @@ function setup(overrides: {
   isTypingContextActive?: () => boolean;
   isContextMenuOpen?: () => boolean;
   interactionState?: InteractionState;
+  onSelectDockTool?: (tool: ToolId) => void;
 } = {}) {
   const dispatch = mock((_action: CanvasAction) => {});
+  const onSelectDockTool = overrides.onSelectDockTool;
   const onCancelInteraction = mock((_result: unknown) => {});
   const onCloseContextMenu = mock(() => {});
   const controls = {
@@ -85,6 +88,7 @@ function setup(overrides: {
       document,
       selection,
       dispatch: dispatch as unknown as (action: CanvasAction) => void,
+      onSelectDockTool,
       isTypingContextActive: overrides.isTypingContextActive ?? (() => false),
       interactionStateRef,
       onCancelInteraction,
@@ -95,7 +99,7 @@ function setup(overrides: {
     return { interactionStateRef };
   });
 
-  return { view, dispatch, onCancelInteraction, onCloseContextMenu, controls, document, selection };
+  return { view, dispatch, onCancelInteraction, onCloseContextMenu, controls, document, selection, onSelectDockTool };
 }
 
 function sectionRenameDocument(): InteractiveCanvasDocument {
@@ -141,7 +145,8 @@ describe("useCanvasHotkeys", () => {
   });
 
   it("dispatches canvas.duplicateSelection on cmd/ctrl-D and prevents default", () => {
-    const { dispatch } = setup();
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
 
     let notCancelled = true;
     act(() => {
@@ -150,16 +155,19 @@ describe("useCanvasHotkeys", () => {
 
     expect(notCancelled).toBe(false); // false means preventDefault() was called
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.duplicateSelection" });
+    expect(onSelectDockTool).not.toHaveBeenCalled();
   });
 
   it("also triggers duplicate with ctrlKey (non-mac modifier)", () => {
-    const { dispatch } = setup();
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
 
     act(() => {
       dispatchKeyDown({ key: "d", ctrlKey: true });
     });
 
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.duplicateSelection" });
+    expect(onSelectDockTool).not.toHaveBeenCalled();
   });
 
   it("nudges selection by 1 world unit with snap: false on a plain arrow key", () => {
@@ -197,26 +205,39 @@ describe("useCanvasHotkeys", () => {
     window.document.body.appendChild(input);
     input.focus();
 
-    const { dispatch } = setup();
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
+    let notCancelled = false;
 
     act(() => {
-      const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "d", metaKey: true });
-      input.dispatchEvent(event);
+      const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "a", metaKey: true });
+      notCancelled = input.dispatchEvent(event);
     });
 
     expect(dispatch).not.toHaveBeenCalled();
+    expect(onSelectDockTool).not.toHaveBeenCalled();
+    expect(notCancelled).toBe(true);
     input.remove();
   });
 
   it("ignores all bindings while isTypingContextActive() is true", () => {
-    const { dispatch } = setup({ isTypingContextActive: () => true });
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ isTypingContextActive: () => true, onSelectDockTool });
+    let notCancelled = false;
 
     act(() => {
       dispatchKeyDown({ key: "Delete" });
-      dispatchKeyDown({ key: "v" });
+      dispatchKeyDown({ key: "a" });
+      dispatchKeyDown({ key: "s" });
+      dispatchKeyDown({ key: "d" });
+      dispatchKeyDown({ key: "f" });
+      dispatchKeyDown({ key: "g" });
+      notCancelled = dispatchKeyDown({ key: "a", metaKey: true });
     });
 
     expect(dispatch).not.toHaveBeenCalled();
+    expect(onSelectDockTool).not.toHaveBeenCalled();
+    expect(notCancelled).toBe(true);
   });
 
   it("dispatches canvas.deleteSelection for a selected connection on Delete", () => {
@@ -239,57 +260,106 @@ describe("useCanvasHotkeys", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.deleteSelection" });
   });
 
-  it("maps single-letter keys to canvas.setTool", () => {
-    const { dispatch } = setup();
+  it("maps positional home-row keys through the dock selection callback", () => {
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
 
     act(() => {
-      dispatchKeyDown({ key: "v" });
+      dispatchKeyDown({ key: "a" });
+      dispatchKeyDown({ key: "s" });
+      dispatchKeyDown({ key: "d" });
+      dispatchKeyDown({ key: "f" });
+      dispatchKeyDown({ key: "g" });
     });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "select" });
+
+    expect(onSelectDockTool.mock.calls.map((call) => call[0])).toEqual([
+      "section",
+      "shapes",
+      "select",
+      "hand",
+      "connector",
+    ]);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("maps cmd/ctrl-A to sticky and prevents browser select-all", () => {
+    const { dispatch } = setup();
+    let metaNotCancelled = true;
+    let ctrlNotCancelled = true;
+
+    act(() => {
+      metaNotCancelled = dispatchKeyDown({ key: "a", metaKey: true });
+      ctrlNotCancelled = dispatchKeyDown({ key: "a", ctrlKey: true });
+    });
+
+    expect(metaNotCancelled).toBe(false);
+    expect(ctrlNotCancelled).toBe(false);
+    expect(dispatch.mock.calls.map((call) => call[0])).toEqual([
+      { type: "canvas.setTool", tool: "sticky" },
+      { type: "canvas.setTool", tool: "sticky" },
+    ]);
+  });
+
+  it("maps the direct shape vocabulary letters (C/P/O/B) to canvas.setTool", () => {
+    const { dispatch } = setup();
 
     act(() => {
       dispatchKeyDown({ key: "c" });
-    });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "rectangle" });
-  });
-
-  it("maps plain S to sticky and Shift+S to section", () => {
-    const { dispatch } = setup();
-
-    act(() => {
-      dispatchKeyDown({ key: "s" });
-    });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "sticky" });
-
-    act(() => {
-      dispatchKeyDown({ key: "S", shiftKey: true });
-    });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "section" });
-  });
-
-  it("maps the remaining checkpoint-5 expanded-vocabulary letters (O/B) to canvas.setTool", () => {
-    const { dispatch } = setup();
-
-    act(() => {
+      dispatchKeyDown({ key: "p" });
       dispatchKeyDown({ key: "o" });
-    });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "document" });
-
-    act(() => {
       dispatchKeyDown({ key: "b" });
     });
-    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "database" });
+
+    expect(dispatch.mock.calls.map((call) => call[0])).toEqual([
+      { type: "canvas.setTool", tool: "rectangle" },
+      { type: "canvas.setTool", tool: "process" },
+      { type: "canvas.setTool", tool: "document" },
+      { type: "canvas.setTool", tool: "database" },
+    ]);
   });
 
-  it("does not dispatch for retired person/chat hotkeys", () => {
-    const { dispatch } = setup();
+  it("does not treat modified letters as plain dock or shape-tool hotkeys", () => {
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
+    act(() => {
+      dispatchKeyDown({ key: "a", altKey: true });
+      dispatchKeyDown({ key: "f", ctrlKey: true });
+      dispatchKeyDown({ key: "c", altKey: true });
+      dispatchKeyDown({ key: "p", shiftKey: true });
+    });
+
+    expect(onSelectDockTool).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("does not fire retired tool bindings", () => {
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
 
     act(() => {
+      dispatchKeyDown({ key: "v" });
+      dispatchKeyDown({ key: "h" });
+      dispatchKeyDown({ key: "S", shiftKey: true });
       dispatchKeyDown({ key: "u" });
       dispatchKeyDown({ key: "m" });
     });
 
     expect(dispatch).not.toHaveBeenCalled();
+    expect(onSelectDockTool).not.toHaveBeenCalled();
+  });
+
+  it("retires the old S-sticky and D-decision meanings", () => {
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { dispatch } = setup({ onSelectDockTool });
+
+    act(() => {
+      dispatchKeyDown({ key: "s" });
+      dispatchKeyDown({ key: "d" });
+    });
+
+    expect(onSelectDockTool.mock.calls.map((call) => call[0])).toEqual(["shapes", "select"]);
+    expect(dispatch).not.toHaveBeenCalledWith({ type: "canvas.setTool", tool: "sticky" });
+    expect(dispatch).not.toHaveBeenCalledWith({ type: "canvas.setTool", tool: "decision" });
   });
 
   it("cancels the active interaction machine gesture on Escape instead of clearing selection", () => {
@@ -421,6 +491,38 @@ describe("InteractiveCanvasEditor: double-click inline text editing (4.2.1)", ()
       expect(container.querySelector("[data-shapes-panel]")).toBeTruthy();
       expect(shapesButton.getAttribute("data-active")).toBe("true");
       expect(shapesButton.getAttribute("aria-pressed")).toBe("true");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("toggles the Shapes panel from the S hotkey using the dock path", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const { container } = render(
+        <InteractiveCanvasEditor
+          document={syntheticCanvasDocument}
+          onSave={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+
+      const shapesButton = container.querySelector('[data-dock-tool="shapes"]') as HTMLElement;
+
+      act(() => {
+        dispatchKeyDown({ key: "s" });
+      });
+
+      expect(container.querySelector("[data-shapes-panel]")).toBeTruthy();
+      expect(shapesButton.getAttribute("data-active")).toBe("true");
+
+      act(() => {
+        dispatchKeyDown({ key: "s" });
+      });
+
+      const closingPanel = container.querySelector("[data-shapes-panel]") as HTMLElement;
+      expect(closingPanel).toBeTruthy();
+      expect(closingPanel.getAttribute("data-state")).toBe("closing");
     } finally {
       restoreRect();
     }

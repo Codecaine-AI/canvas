@@ -44,9 +44,5 @@ export function ColorPickerFlyout({
   } else {
     return null;
   }
-  return (
-    <div className="absolute bottom-full left-0 z-50 mb-2">
-      <ColorPicker current={current} onPick={onPick} />
-    </div>
-  );
+  return <ColorPicker current={current} onPick={onPick} />;
 }

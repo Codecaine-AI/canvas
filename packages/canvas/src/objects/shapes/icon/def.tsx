@@ -72,7 +72,7 @@ export const iconDef: ObjectDef = {
           background: transparent !important;
           box-shadow: none;
           overflow: visible;
-          padding: 8px;
+          padding: 2px;
         }
 `,
   // Stamped from the schema-vocabulary defaults leaf (P4) like every def.

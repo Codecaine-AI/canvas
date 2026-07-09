@@ -6,6 +6,7 @@ import { buildPastePayload, copySelection, getClipboardMemory, setClipboardMemor
 import { CANVAS_GRID_SIZE } from "../state/geometry";
 import { cancelInteraction, type InteractionState } from "../interaction/interaction";
 import type { InteractiveCanvasDocument } from "../state/schema";
+import type { ToolId } from "./components/CanvasDock";
 import type { CanvasViewportControls } from "./use-canvas-viewport";
 
 /**
@@ -14,16 +15,18 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  * Binding map (documented here as the single source of truth — keep this list
  * in sync with any UI hint text, e.g. toolbar button titles):
  *
- *   V              select tool
- *   H              hand tool
+ *   A              section dock tool
+ *   S              Shapes panel (same path as the Shapes dock button)
+ *   D              select dock tool
+ *   F              hand dock tool
+ *   G              connector dock tool (quick-connect currently stays select-driven)
  *   C              rectangle tool
  *   P              process tool
- *   D              decision tool
- *   S              sticky tool
- *   Shift+S        section tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)
  *   B              database tool (checkpoint 5 — D16 expanded vocabulary)
  *   Delete/Backspace   canvas.deleteSelection (objects AND selected connections)
+ *   Cmd/Ctrl-A     sticky dock tool (preventDefault — beats the browser's
+ *                  select-all shortcut)
  *   Cmd/Ctrl-D     canvas.duplicateSelection (preventDefault — beats the browser's
  *                  bookmark-page shortcut)
  *   Cmd/Ctrl-C     copy selection to the in-memory clipboard (clipboard.ts)
@@ -47,13 +50,25 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  * intentionally NOT bound here — useCanvasViewport owns space-drag panning.
  */
 
-const TOOL_KEY_MAP: Record<string, CanvasTool> = {
-  v: "select",
-  h: "hand",
+type HotkeyDockTool = Extract<ToolId, "section" | "shapes" | "select" | "hand" | "connector">;
+
+const DOCK_TOOL_KEY_MAP: Partial<Record<string, HotkeyDockTool>> = {
+  a: "section",
+  s: "shapes",
+  d: "select",
+  f: "hand",
+  g: "connector",
+};
+
+const DIRECT_DOCK_TOOL_FALLBACK_MAP: Partial<Record<HotkeyDockTool, CanvasTool>> = {
+  section: "section",
+  select: "select",
+  hand: "hand",
+};
+
+const TOOL_KEY_MAP: Partial<Record<string, CanvasTool>> = {
   c: "rectangle",
   p: "process",
-  d: "decision",
-  s: "sticky",
   // Checkpoint 5 (D16 expanded vocabulary) — chosen to avoid colliding with
   // the letters above: O(dOcument), B(dataBase).
   o: "document",
@@ -65,6 +80,8 @@ export type UseCanvasHotkeysArgs = {
   document: InteractiveCanvasDocument;
   selection: CanvasSelection;
   dispatch: (action: CanvasAction) => void;
+  /** Activates a bottom-dock tool through the same editor path used by a dock button click. */
+  onSelectDockTool?: (tool: ToolId) => void;
   /** True while an inline text/label editor or the inspector has keyboard focus — suppresses all bindings. */
   isTypingContextActive: () => boolean;
   /** Current interaction machine state (ref-backed) so Escape can cancel an in-progress gesture. */
@@ -102,6 +119,7 @@ export function useCanvasHotkeys({
   document: canvasDocument,
   selection,
   dispatch,
+  onSelectDockTool,
   isTypingContextActive,
   interactionStateRef,
   onCancelInteraction,
@@ -120,6 +138,8 @@ export function useCanvasHotkeys({
   selectionRef.current = selection;
   const dispatchRef = useRef(dispatch);
   dispatchRef.current = dispatch;
+  const onSelectDockToolRef = useRef(onSelectDockTool);
+  onSelectDockToolRef.current = onSelectDockTool;
   const isTypingContextActiveRef = useRef(isTypingContextActive);
   isTypingContextActiveRef.current = isTypingContextActive;
   const onCancelInteractionRef = useRef(onCancelInteraction);
@@ -170,6 +190,18 @@ export function useCanvasHotkeys({
       if (meta && event.key.toLowerCase() === "z") {
         event.preventDefault();
         dispatchRef.current({ type: event.shiftKey ? "canvas.redo" : "canvas.undo" });
+        return;
+      }
+
+      // Sticky note. Bound to Cmd/Ctrl-A to preserve the positional dock row
+      // while avoiding plain-A's new section-tool role.
+      if (meta && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        if (onSelectDockToolRef.current) {
+          onSelectDockToolRef.current("sticky");
+        } else {
+          dispatchRef.current({ type: "canvas.setTool", tool: "sticky" });
+        }
         return;
       }
 
@@ -247,18 +279,28 @@ export function useCanvasHotkeys({
         return;
       }
 
-      if (event.altKey) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 
-      if (event.shiftKey && event.key.toLowerCase() === "s") {
+      const key = event.key.toLowerCase();
+
+      // Dock hotkeys (single letter, no modifier).
+      const dockTool = DOCK_TOOL_KEY_MAP[key];
+      if (dockTool) {
         event.preventDefault();
-        dispatchRef.current({ type: "canvas.setTool", tool: "section" });
+        const onSelectDockTool = onSelectDockToolRef.current;
+        if (onSelectDockTool) {
+          onSelectDockTool(dockTool);
+          return;
+        }
+        const fallbackTool = DIRECT_DOCK_TOOL_FALLBACK_MAP[dockTool];
+        if (fallbackTool) {
+          dispatchRef.current({ type: "canvas.setTool", tool: fallbackTool });
+        }
         return;
       }
 
-      if (event.shiftKey) return;
-
       // Tool hotkeys (single letter, no modifier).
-      const tool = TOOL_KEY_MAP[event.key.toLowerCase()];
+      const tool = TOOL_KEY_MAP[key];
       if (tool) {
         event.preventDefault();
         dispatchRef.current({ type: "canvas.setTool", tool });

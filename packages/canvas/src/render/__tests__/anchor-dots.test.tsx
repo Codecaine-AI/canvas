@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { CanvasStage } from "../CanvasStage";
 import { ANCHOR_DOT_OFFSET_PX, ANCHOR_DOTS_MIN_ZOOM } from "../overlays/AnchorDots";
 import { connectionBoundsForObject } from "../../objects/geometry";
+import { CONNECTOR_END_GAP_PX } from "../../routing/routing";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {
@@ -48,6 +49,15 @@ function dots(container: HTMLElement, objectId: string): HTMLElement[] {
   return Array.from(
     container.querySelectorAll(`[data-canvas-object-id="${objectId}"][data-canvas-port]`),
   ) as HTMLElement[];
+}
+
+function lastPointOf(path: string): { x: number; y: number } {
+  const numbers = [...path.matchAll(/-?\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
+  return { x: numbers[numbers.length - 2]!, y: numbers[numbers.length - 1]! };
+}
+
+function expectClose(actual: number, expected: number): void {
+  expect(Math.abs(actual - expected)).toBeLessThan(1e-6);
 }
 
 function packageTextFiles(dir = join(import.meta.dir, "../../../..")): string[] {
@@ -138,13 +148,45 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
     expect(previewPath).toBeTruthy();
     expect(previewPath.getAttribute("stroke")).toBe("#757575");
-    expect(previewPath.getAttribute("d")).toBe("M 410 50 L 560 50");
+    expect(previewPath.getAttribute("opacity")).toBe("0.6");
+    // Ghost sits half a source-width away (quickConnectClickPoint gap / 2);
+    // the drawn end stops CONNECTOR_END_GAP_PX short of its near edge.
+    expect(previewPath.getAttribute("d")).toBe("M 410 50 L 450 50");
     expect(previewPath.getAttribute("marker-end")).toBe("url(#anchor-dots-doc-arrow-forward)");
 
     fireEvent.pointerLeave(right!);
 
     expect(container.querySelector("[data-canvas-quick-connect-ghost]")).toBeNull();
     expect(container.querySelector("[data-canvas-connector-preview-path]")).toBeNull();
+  });
+
+  it("terminates quick-connect hover preview at the ghost's near edge", () => {
+    const { container } = render(
+      <CanvasStage
+        document={makeDocument([rect])}
+        viewport={{ x: 0, y: 0, zoom: 1 }}
+        selectedObjectIds={["rect"]}
+        onStagePointerEvent={() => {}}
+      />,
+    );
+    const right = dots(container, "rect").find(
+      (dot) => dot.getAttribute("data-canvas-port") === "right",
+    );
+    expect(right).toBeDefined();
+
+    fireEvent.pointerEnter(right!);
+
+    const ghostObject = container.querySelector(
+      '[data-canvas-object-id="rect-quick-connect-ghost"]',
+    ) as HTMLElement;
+    const previewPath = container.querySelector("[data-canvas-connector-preview-path]") as SVGPathElement;
+    const renderedEnd = lastPointOf(previewPath.getAttribute("d")!);
+    const ghostLeft = Number.parseFloat(ghostObject.style.left);
+    const ghostCenter = ghostLeft + Number.parseFloat(ghostObject.style.width) / 2;
+
+    expectClose(renderedEnd.x, ghostLeft - CONNECTOR_END_GAP_PX);
+    expectClose(renderedEnd.y, rect.geometry.y + rect.geometry.height / 2);
+    expect(Math.abs(renderedEnd.x - ghostCenter)).toBeGreaterThan(CONNECTOR_END_GAP_PX);
   });
 
   it("zoom-gates VISIBILITY only: below the threshold dots are opacity 0 but still present and grabbable", () => {

@@ -14,18 +14,22 @@ import type { ConnectorDef, ToolbarSpec } from "../object-def";
 export const CONNECTOR_DASH_PATTERN_PX: readonly [number, number] = [19, 7];
 
 /**
- * The connector selection toolbar: style controls are flyout-backed, while
- * Text opens the routed-midpoint label editor directly. DATA-ONLY since
- * the co-location alignment: the flyout components live in
+ * The connector selection toolbar reads left-to-right by expected usage
+ * frequency: the universal Color + Text pair comes first (adjacent, never
+ * separated), type-specific modifiers follow, state controls such as Lock
+ * belong last when present, and dividerAfter marks group boundaries rather
+ * than individual items. Style controls are flyout-backed, while Text opens
+ * the routed-midpoint label editor directly. DATA-ONLY since the co-location
+ * alignment: the flyout components live in
  * editor/features/selection-toolbar/flyouts/connector-flyouts.tsx (keyed by
  * def kind + action id).
  */
 const CONNECTOR_TOOLBAR: ToolbarSpec = {
   controls: [
     { action: "color", label: "Line color", hasFlyout: true },
+    { action: "text", label: "Text", dividerAfter: true },
     { action: "dash", label: "Line style", hasFlyout: true },
     { action: "arrowhead", label: "Arrowhead style", hasFlyout: true },
-    { action: "text", label: "Text" },
   ],
 };
 

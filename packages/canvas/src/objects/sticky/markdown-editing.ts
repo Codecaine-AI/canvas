@@ -267,12 +267,16 @@ function parseLine(raw: string, index: number, sourceStart: number): StickyMarkd
   let kind: StickyMarkdownLineKind = "text";
   let headingLevel: 1 | 2 | 3 | undefined;
   let prefix: StickyMarkdownLeaf | undefined;
+  // ALL leading spaces belong to the hidden structural prefix — depth counts
+  // whole two-space pairs, and an odd remainder space is hidden with them
+  // rather than left as literal content. Visible ink therefore always starts
+  // exactly on a depth column; stray spaces can never produce a sub-grid
+  // left-edge wobble (and `- `/`# ` markers still parse after any indent).
   const leadingSpaces = raw.match(/^ */)?.[0].length ?? 0;
-  const indentLength = leadingSpaces - (leadingSpaces % INDENT_UNIT.length);
-  const depth = indentLength / INDENT_UNIT.length;
-  const indent = raw.slice(0, indentLength);
-  const remainder = raw.slice(indentLength);
-  let contentStart = sourceStart + indentLength;
+  const depth = Math.floor(leadingSpaces / INDENT_UNIT.length);
+  const indent = raw.slice(0, leadingSpaces);
+  const remainder = raw.slice(leadingSpaces);
+  let contentStart = sourceStart + leadingSpaces;
   let content = remainder;
 
   const heading = HEADING_PATTERN.exec(remainder);
@@ -305,7 +309,9 @@ function parseLine(raw: string, index: number, sourceStart: number): StickyMarkd
       });
       contentStart = prefix.sourceEnd;
       content = bullet[1];
-    } else if (depth >= 1) {
+    } else if (leadingSpaces >= 1) {
+      // Depth-0 paragraphs with a lone stray space still get a hidden prefix
+      // so that space never renders (backspace at contentStart strips it).
       prefix = leaf(index, "block", {
         role: "marker",
         style: "plain",

@@ -162,7 +162,8 @@ describe("SelectionToolbar registry-driven control sets", () => {
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["shape-swap", "color", "text"]);
+    expect(actions).toEqual(["color", "text", "shape-swap"]);
+    expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
   it("sticky controls render color and text in registry order", () => {
@@ -171,15 +172,16 @@ describe("SelectionToolbar registry-driven control sets", () => {
       el.getAttribute("data-toolbar-action"),
     );
     expect(actions).toEqual(["color", "text"]);
+    expect(container.querySelectorAll("[data-divider]").length).toBe(0);
   });
 
-  it("section controls render the FigJam v2 controls in order with one divider", () => {
+  it("section controls render the FigJam v2 controls in order with two dividers", () => {
     const { container } = render(<SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" />);
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "section-border-style", "rename", "fit-children", "lock"]);
-    expect(container.querySelectorAll("[data-divider]").length).toBe(1);
+    expect(actions).toEqual(["color", "rename", "fit-children", "section-border-style", "lock"]);
+    expect(container.querySelectorAll("[data-divider]").length).toBe(2);
   });
 
   it("connector controls render the 4 connector controls", () => {
@@ -187,7 +189,8 @@ describe("SelectionToolbar registry-driven control sets", () => {
     const actions = Array.from(container.querySelectorAll("[data-toolbar-action]")).map((el) =>
       el.getAttribute("data-toolbar-action"),
     );
-    expect(actions).toEqual(["color", "dash", "arrowhead", "text"]);
+    expect(actions).toEqual(["color", "text", "dash", "arrowhead"]);
+    expect(container.querySelectorAll("[data-divider]").length).toBe(1);
   });
 
   it("every selection kind resolves a non-empty control list (incl. the multi intersection)", () => {
@@ -310,11 +313,13 @@ describe("SelectionToolbar interaction", () => {
     const { container } = render(<SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" />);
     const renameButton = container.querySelector('[data-toolbar-action="rename"]') as HTMLElement;
     expect(renameButton.getAttribute("aria-expanded")).toBeNull();
+    expect(renameButton.style.background.replace(/\s/g, "")).not.toBe("rgba(255,255,255,0.16)");
 
     const colorButton = container.querySelector('[data-toolbar-action="color"]') as HTMLElement;
     expect(colorButton.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(colorButton);
     expect(colorButton.getAttribute("aria-expanded")).toBe("true");
+    expect(colorButton.style.background.replace(/\s/g, "")).toBe("rgba(255,255,255,0.16)");
   });
 
   it("shows a tooltip with the control's label on hover", () => {
@@ -674,5 +679,13 @@ describe("SelectionToolbar section fit disabled state", () => {
       '[data-toolbar-action="fit-children"]',
     ) as HTMLButtonElement;
     expect(undersizedButton.disabled).toBe(false);
+  });
+
+  it("renders the section border-style icon without a color override", () => {
+    const { container } = renderSectionToolbarLayer(sectionToolbarDocument());
+    const borderIcon = actionIconSvg(container, "section-border-style");
+    const iconColorWrapper = borderIcon.parentElement as HTMLElement;
+
+    expect(iconColorWrapper.style.color).toBe("");
   });
 });
