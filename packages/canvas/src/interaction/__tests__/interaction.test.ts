@@ -21,6 +21,7 @@ import type {
   InteractiveCanvasObject,
 } from "../../state/schema";
 import { connectionBoundsForObject } from "../../objects/geometry";
+import { routeConnection } from "../../routing/routing";
 
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
   return {
@@ -93,6 +94,16 @@ function updateGeometriesActions(actions: CanvasAction[]) {
     (action): action is Extract<CanvasAction, { type: "canvas.updateObjectGeometries" }> =>
       action.type === "canvas.updateObjectGeometries",
   );
+}
+
+function expectOrthogonalPolyline(points: ReadonlyArray<{ x: number; y: number }>) {
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const dx = Math.abs(current.x - previous.x);
+    const dy = Math.abs(current.y - previous.y);
+    expect(dx <= 0.01 || dy <= 0.01).toBe(true);
+  }
 }
 
 function reconcileSectionActions(actions: CanvasAction[]) {
@@ -1301,6 +1312,38 @@ describe("interaction: connector-bend-drag", () => {
     );
   }
 
+  function slidStraightBendDoc() {
+    return makeDocument(
+      [
+        makeObject({ id: "a", geometry: { x: 0, y: 230, width: 100, height: 60 } }),
+        makeObject({ id: "b", geometry: { x: 240, y: 234, width: 100, height: 60 } }),
+      ],
+      [
+        makeConnection({
+          id: "c1",
+          from: { objectId: "a" },
+          to: { objectId: "b" },
+        }),
+      ],
+    );
+  }
+
+  function offAxisElbowBendDoc() {
+    return makeDocument(
+      [
+        makeObject({ id: "a", geometry: { x: 0, y: 0, width: 100, height: 100 } }),
+        makeObject({ id: "b", geometry: { x: 300, y: 20, width: 100, height: 100 } }),
+      ],
+      [
+        makeConnection({
+          id: "c1",
+          from: { objectId: "a", anchor: "right" },
+          to: { objectId: "b", anchor: "left" },
+        }),
+      ],
+    );
+  }
+
   it("commits immediately to connector-bend-drag on a segment pill hit", () => {
     const document = bendDoc();
     const ctx = makeContext(document);
@@ -1376,6 +1419,122 @@ describe("interaction: connector-bend-drag", () => {
         },
       },
     ]);
+  });
+
+  it("persists endpoint contacts when bending a slid straight connector", () => {
+    const document = slidStraightBendDoc();
+    const ctx = makeContext(document);
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 0 };
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 170, y: 262 }, hit), ctx);
+    expect(result.state.kind).toBe("connector-bend-drag");
+
+    result = stepInteraction(result.state, move({ x: 170, y: 302 }), ctx);
+    const draggedPoints = [
+      { x: 100, y: 262 },
+      { x: 100, y: 302 },
+      { x: 240, y: 302 },
+      { x: 240, y: 262 },
+    ];
+    expect(result.dispatch).toEqual([]);
+    expect(result.overlay.connectorDrag?.points).toEqual(draggedPoints);
+
+    result = stepInteraction(result.state, up({ x: 170, y: 302 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    const action = result.dispatch[0];
+    expect(action?.type).toBe("canvas.updateConnection");
+    if (action?.type !== "canvas.updateConnection") throw new Error("expected updateConnection");
+
+    expect(action.patch.waypoints).toEqual([
+      [100, 302],
+      [240, 302],
+    ]);
+    expect(action.patch.from?.position?.[0]).toBeCloseTo(1, 6);
+    expect(action.patch.from?.position?.[1]).toBeCloseTo(32 / 60, 6);
+    expect(action.patch.to?.position?.[0]).toBeCloseTo(0, 6);
+    expect(action.patch.to?.position?.[1]).toBeCloseTo(28 / 60, 6);
+
+    const connection = document.connections[0]!;
+    const committedConnection: InteractiveCanvasConnection = {
+      ...connection,
+      ...action.patch,
+      from: action.patch.from ?? connection.from,
+      to: action.patch.to ?? connection.to,
+    };
+    const routed = routeConnection(
+      document.objects[0]!,
+      document.objects[1]!,
+      committedConnection,
+      document.objects,
+    );
+    expect(routed.points).toEqual(draggedPoints);
+  });
+
+  it("honors a committed bend on an auto elbow with collinear neighbor segments", () => {
+    const document = offAxisElbowBendDoc();
+    const ctx = makeContext(document);
+    const connection = document.connections[0]!;
+    const fromObject = document.objects[0]!;
+    const toObject = document.objects[1]!;
+    const initial = routeConnection(fromObject, toObject, connection, document.objects);
+    const initialPoints = [
+      { x: 100, y: 50 },
+      { x: 124, y: 50 },
+      { x: 200, y: 50 },
+      { x: 200, y: 70 },
+      { x: 276, y: 70 },
+      { x: 300, y: 70 },
+    ];
+    expect(initial.points).toEqual(initialPoints);
+
+    const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 1 };
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 162, y: 50 }, hit), ctx);
+    expect(result.state.kind).toBe("connector-bend-drag");
+
+    result = stepInteraction(result.state, move({ x: 162, y: 121 }), ctx);
+    const draggedPoints = [
+      { x: 100, y: 50 },
+      { x: 124, y: 50 },
+      { x: 124, y: 121 },
+      { x: 200, y: 121 },
+      { x: 200, y: 70 },
+      { x: 276, y: 70 },
+      { x: 300, y: 70 },
+    ];
+    expect(result.dispatch).toEqual([]);
+    expect(result.overlay.connectorDrag?.points).toEqual(draggedPoints);
+    expectOrthogonalPolyline(draggedPoints);
+
+    result = stepInteraction(result.state, up({ x: 162, y: 121 }), ctx);
+    expect(result.state.kind).toBe("idle");
+    const action = result.dispatch[0];
+    expect(action?.type).toBe("canvas.updateConnection");
+    if (action?.type !== "canvas.updateConnection") throw new Error("expected updateConnection");
+
+    expect(action.patch.waypoints).toEqual([
+      [124, 50],
+      [124, 121],
+      [200, 121],
+      [200, 70],
+    ]);
+
+    const committedConnection: InteractiveCanvasConnection = {
+      ...connection,
+      ...action.patch,
+      from: action.patch.from ?? connection.from,
+      to: action.patch.to ?? connection.to,
+    };
+    const routed = routeConnection(fromObject, toObject, committedConnection, document.objects);
+    expect(routed.points).toEqual([
+      { x: 100, y: 50 },
+      { x: 124, y: 50 },
+      { x: 124, y: 121 },
+      { x: 200, y: 121 },
+      { x: 200, y: 70 },
+      { x: 300, y: 70 },
+    ]);
+    expect(routed.points).not.toEqual(initialPoints);
+    expectOrthogonalPolyline(routed.points ?? []);
   });
 
   it("snaps a bent straight connector back within tolerance and clears waypoints", () => {

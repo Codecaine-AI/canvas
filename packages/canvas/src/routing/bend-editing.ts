@@ -113,15 +113,19 @@ function dragTranslatedSegment(
     return dragEndStub(points, axis, offset);
   }
 
-  const next = clonePoints(points);
-  if (axis === "horizontal") {
-    next[segmentIndex] = { ...next[segmentIndex], y: next[segmentIndex].y + offset };
-    next[segmentIndex + 1] = { ...next[segmentIndex + 1], y: next[segmentIndex + 1].y + offset };
-  } else {
-    next[segmentIndex] = { ...next[segmentIndex], x: next[segmentIndex].x + offset };
-    next[segmentIndex + 1] = { ...next[segmentIndex + 1], x: next[segmentIndex + 1].x + offset };
-  }
-  return next;
+  const movedStart = offsetPoint(points[segmentIndex], axis, offset);
+  const movedEnd = offsetPoint(points[segmentIndex + 1], axis, offset);
+  const previousIsCollinear = segmentAxis(points[segmentIndex - 1], points[segmentIndex]) === axis;
+  const nextIsCollinear = segmentAxis(points[segmentIndex + 1], points[segmentIndex + 2]) === axis;
+
+  return [
+    ...clonePoints(points.slice(0, segmentIndex)),
+    ...(previousIsCollinear ? [clonePoint(points[segmentIndex])] : []),
+    movedStart,
+    movedEnd,
+    ...(nextIsCollinear ? [clonePoint(points[segmentIndex + 1])] : []),
+    ...clonePoints(points.slice(segmentIndex + 2)),
+  ];
 }
 
 export function simplifyOrthogonalPolyline(
@@ -159,7 +163,7 @@ export function simplifyOrthogonalPolyline(
     simplified = compactDegenerateSegments(next, tolerance);
   }
 
-  return simplified;
+  return orthogonalizePolyline(simplified);
 }
 
 export function commitBendPolyline(
@@ -212,13 +216,24 @@ function dragStartStub(
   offset: number,
 ): CanvasPoint[] {
   const start = clonePoint(points[0]);
-  const movedEnd = clonePoint(points[1]);
+  const movedEnd = offsetPoint(points[1], axis, offset);
+  const nextIsCollinear = segmentAxis(points[1], points[2]) === axis;
   if (axis === "horizontal") {
-    movedEnd.y += offset;
-    return [start, { x: start.x, y: movedEnd.y }, movedEnd, ...clonePoints(points.slice(2))];
+    return [
+      start,
+      { x: start.x, y: movedEnd.y },
+      movedEnd,
+      ...(nextIsCollinear ? [clonePoint(points[1])] : []),
+      ...clonePoints(points.slice(2)),
+    ];
   }
-  movedEnd.x += offset;
-  return [start, { x: movedEnd.x, y: start.y }, movedEnd, ...clonePoints(points.slice(2))];
+  return [
+    start,
+    { x: movedEnd.x, y: start.y },
+    movedEnd,
+    ...(nextIsCollinear ? [clonePoint(points[1])] : []),
+    ...clonePoints(points.slice(2)),
+  ];
 }
 
 function dragEndStub(
@@ -227,13 +242,35 @@ function dragEndStub(
   offset: number,
 ): CanvasPoint[] {
   const last = clonePoint(points[points.length - 1]);
-  const movedStart = clonePoint(points[points.length - 2]);
+  const movedStartIndex = points.length - 2;
+  const movedStart = offsetPoint(points[movedStartIndex], axis, offset);
+  const previousIsCollinear = segmentAxis(points[movedStartIndex - 1], points[movedStartIndex]) === axis;
   if (axis === "horizontal") {
-    movedStart.y += offset;
-    return [...clonePoints(points.slice(0, -2)), movedStart, { x: last.x, y: movedStart.y }, last];
+    return [
+      ...clonePoints(points.slice(0, -2)),
+      ...(previousIsCollinear ? [clonePoint(points[movedStartIndex])] : []),
+      movedStart,
+      { x: last.x, y: movedStart.y },
+      last,
+    ];
   }
-  movedStart.x += offset;
-  return [...clonePoints(points.slice(0, -2)), movedStart, { x: movedStart.x, y: last.y }, last];
+  return [
+    ...clonePoints(points.slice(0, -2)),
+    ...(previousIsCollinear ? [clonePoint(points[movedStartIndex])] : []),
+    movedStart,
+    { x: movedStart.x, y: last.y },
+    last,
+  ];
+}
+
+function offsetPoint(
+  point: CanvasPoint,
+  axis: BendSegmentAxis,
+  offset: number,
+): CanvasPoint {
+  return axis === "horizontal"
+    ? { ...point, y: point.y + offset }
+    : { ...point, x: point.x + offset };
 }
 
 function snapDraggedSegment(
@@ -486,7 +523,48 @@ function isStraightRun(points: ReadonlyArray<CanvasPoint>, tolerance: number): b
   if (points.length <= 2) return true;
   const start = points[0];
   const end = points[points.length - 1];
+  if (!isOrthogonalSegment(start, end, AXIS_EPSILON)) return false;
   return points.slice(1, -1).every((point) => distanceToSegment(point, start, end) <= tolerance);
+}
+
+function orthogonalizePolyline(points: ReadonlyArray<CanvasPoint>): CanvasPoint[] {
+  const first = points[0];
+  if (!first) return [];
+
+  const result: CanvasPoint[] = [clonePoint(first)];
+  for (let index = 1; index < points.length; index += 1) {
+    const current = points[index];
+    const previous = result[result.length - 1];
+    if (isOrthogonalSegment(previous, current, AXIS_EPSILON)) {
+      pushDistinctPoint(result, current);
+      continue;
+    }
+
+    const followingAxis = segmentAxis(current, points[index + 1]);
+    const previousAxis = result.length >= 2
+      ? segmentAxis(result[result.length - 2], previous)
+      : null;
+    const joint = followingAxis === "horizontal" || previousAxis === "horizontal"
+      ? { x: current.x, y: previous.y }
+      : { x: previous.x, y: current.y };
+    pushDistinctPoint(result, joint);
+    pushDistinctPoint(result, current);
+  }
+  return result;
+}
+
+function isOrthogonalSegment(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  tolerance: number,
+): boolean {
+  return Math.abs(end.x - start.x) <= tolerance || Math.abs(end.y - start.y) <= tolerance;
+}
+
+function pushDistinctPoint(points: CanvasPoint[], point: CanvasPoint): void {
+  const previous = points[points.length - 1];
+  if (previous && distance(previous, point) <= AXIS_EPSILON) return;
+  points.push(clonePoint(point));
 }
 
 function distanceToSegment(point: CanvasPoint, start: CanvasPoint, end: CanvasPoint): number {

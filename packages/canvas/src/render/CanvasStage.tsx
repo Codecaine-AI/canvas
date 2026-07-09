@@ -60,12 +60,13 @@ const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
 // maps-location/pointer), filled for cursor use — the tool icon and the
 // on-canvas cursor are literally the same form. Inlined from the old
 // CHROME.selectCursor (render must not import editor/components/editor-style).
+// Rendered with a soft drop shadow (padded viewBox so it is not clipped).
 /** FigJam selection blue — matches SelectionBox and the connector chrome. */
 const SELECTION_BLUE = "#0D99FF";
 
 const SELECT_CURSOR_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>';
-const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 3 3, default`;
+  '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-3 -3 24 24"><filter id="cs" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1" stdDeviation="1.1" flood-color="#000" flood-opacity="0.35"/></filter><path filter="url(#cs)" d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 8 8, default`;
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,

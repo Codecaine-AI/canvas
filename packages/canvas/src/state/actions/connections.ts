@@ -225,9 +225,11 @@ export function handleUpdateConnection(
   const endpointsChanged =
     endpointChanged(existing.from, mergedFrom) ||
     endpointChanged(existing.to, mergedTo);
+  const patchIncludesWaypoints = Object.prototype.hasOwnProperty.call(action.patch, "waypoints");
   const patch =
     endpointsChanged &&
-    (existing.waypoints !== undefined || action.patch.waypoints !== undefined)
+    existing.waypoints !== undefined &&
+    !patchIncludesWaypoints
       ? { ...action.patch, waypoints: undefined }
       : action.patch;
   const updatedConnection: InteractiveCanvasConnection = {

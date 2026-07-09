@@ -4,8 +4,7 @@ import { objectById, type CanvasPoint } from "../../state/geometry";
 import type { InteractionOverlay } from "../../interaction/interaction";
 import { getConnectionAnchors } from "../../objects/geometry";
 import { CONNECTOR_DASH_PATTERN_PX } from "../../objects/connector/def";
-import { polylineInteriorWaypoints } from "../../routing/bend-editing";
-import { routeConnection, routeConnectionToPoint, type Anchor } from "../../routing/routing";
+import { connectorPathFromPoints, routeConnection, routeConnectionToPoint, type Anchor } from "../../routing/routing";
 import { worldToScreen, type ViewportState } from "../viewport";
 import { ObjectShape } from "../ObjectShape";
 import { resolveConnectorStroke } from "../../palette";
@@ -100,16 +99,8 @@ export function ConnectorDragPreview({
   if (drag.connectionId && drag.points && drag.points.length >= 2) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
     if (!connection) return null;
-    const fromObject = objectById(document, connection.from.objectId);
-    const toObject = objectById(document, connection.to.objectId);
-    if (!fromObject || !toObject) return null;
 
-    const routed = routeConnection(
-      fromObject,
-      toObject,
-      { ...connection, waypoints: polylineInteriorWaypoints(drag.points) },
-      document.objects,
-    );
+    const previewPath = connectorPathFromPoints(drag.points);
     const strokeDasharray =
       connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
     const transform = worldSvgTransform(viewport);
@@ -121,7 +112,7 @@ export function ConnectorDragPreview({
       >
         <g transform={transform}>
           <path
-            d={routed.path}
+            d={previewPath}
             fill="none"
             stroke={SELECTION_BLUE}
             strokeWidth={4}

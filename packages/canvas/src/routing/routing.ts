@@ -66,6 +66,10 @@ export type RoutedConnection = {
   points?: CanvasPoint[];
 };
 
+export function connectorPathFromPoints(points: ReadonlyArray<CanvasPoint>): string {
+  return roundedPolylinePath(dedupeConsecutivePoints(points.map((point) => ({ ...point }))));
+}
+
 /** Picks facing side anchors from relative object centers and overlapping spans. */
 export function autoPickAnchors(
   fromBounds: CanvasBounds,
@@ -148,7 +152,12 @@ export function routeConnection(
 
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
-    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor);
+    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, {
+      fromObject,
+      toObject,
+      canSlideStart: !connection.from.position,
+      canSlideEnd: !connection.to.position,
+    });
     if (waypointRoute) return waypointRoute;
   }
 
@@ -237,21 +246,121 @@ function routeWaypoints(
   waypoints: CanvasPoint[],
   startAnchor: Anchor,
   endAnchor: Anchor,
+  endpointContext?: WaypointEndpointContext,
 ): RoutedConnection | null {
-  const points = dedupeConsecutivePoints([start, ...waypoints, end]);
-  if (!isOrthogonalPolyline(points, WAYPOINT_ORTHOGONAL_EPSILON_PX)) return null;
-  return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
+  for (const endpoints of waypointEndpointCandidates(
+    start,
+    end,
+    waypoints,
+    startAnchor,
+    endAnchor,
+    endpointContext,
+  )) {
+    const points = dedupeConsecutivePoints([endpoints.start, ...waypoints, endpoints.end]);
+    if (!isOrthogonalPolyline(points, WAYPOINT_ORTHOGONAL_EPSILON_PX)) continue;
+    return routedConnectionFromPoints(points, endpoints.start, endpoints.end, startAnchor, endAnchor);
+  }
+  return null;
+}
+
+type WaypointEndpointContext = {
+  fromObject: InteractiveCanvasObject;
+  toObject: InteractiveCanvasObject;
+  canSlideStart: boolean;
+  canSlideEnd: boolean;
+};
+
+function waypointEndpointCandidates(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  waypoints: CanvasPoint[],
+  startAnchor: Anchor,
+  endAnchor: Anchor,
+  endpointContext?: WaypointEndpointContext,
+): Array<{ start: CanvasPoint; end: CanvasPoint }> {
+  const candidates: Array<{ start: CanvasPoint; end: CanvasPoint }> = [];
+  const addCandidate = (candidateStart: CanvasPoint, candidateEnd: CanvasPoint) => {
+    if (
+      candidates.some(
+        (candidate) =>
+          pointsAlmostEqual(candidate.start, candidateStart, ROUTE_EPSILON) &&
+          pointsAlmostEqual(candidate.end, candidateEnd, ROUTE_EPSILON),
+      )
+    ) {
+      return;
+    }
+    candidates.push({ start: candidateStart, end: candidateEnd });
+  };
+
+  if (endpointContext?.canSlideStart && endpointContext.canSlideEnd) {
+    const straightEndpoints = exactStraightAnchoredPoints(
+      endpointContext.fromObject,
+      endpointContext.toObject,
+      start,
+      end,
+      startAnchor,
+      endAnchor,
+      AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+    );
+    if (straightEndpoints) addCandidate(straightEndpoints[0], straightEndpoints[1]);
+  }
+
+  addCandidate(start, end);
+
+  if (endpointContext) {
+    const firstWaypoint = waypoints[0];
+    const lastWaypoint = waypoints[waypoints.length - 1];
+    addCandidate(
+      endpointContext.canSlideStart && firstWaypoint
+        ? reconcileWaypointEndpoint(start, firstWaypoint, endpointContext.fromObject, startAnchor)
+        : start,
+      endpointContext.canSlideEnd && lastWaypoint
+        ? reconcileWaypointEndpoint(end, lastWaypoint, endpointContext.toObject, endAnchor)
+        : end,
+    );
+  }
+
+  return candidates;
+}
+
+function reconcileWaypointEndpoint(
+  endpoint: CanvasPoint,
+  adjacent: CanvasPoint,
+  object: InteractiveCanvasObject,
+  anchor: Anchor,
+): CanvasPoint {
+  if (isOrthogonalSegment(endpoint, adjacent, WAYPOINT_ORTHOGONAL_EPSILON_PX)) {
+    return endpoint;
+  }
+
+  const span = edgeSlideSpan(object, anchor);
+  if (!span) return endpoint;
+  const candidate = isHorizontalAnchor(anchor)
+    ? { x: span.fixed, y: adjacent.y }
+    : { x: adjacent.x, y: span.fixed };
+  const slideCoordinate = isHorizontalAnchor(anchor) ? candidate.y : candidate.x;
+  if (
+    slideCoordinate < span.min - WAYPOINT_ORTHOGONAL_EPSILON_PX ||
+    slideCoordinate > span.max + WAYPOINT_ORTHOGONAL_EPSILON_PX
+  ) {
+    return endpoint;
+  }
+  return candidate;
 }
 
 function isOrthogonalPolyline(points: ReadonlyArray<CanvasPoint>, epsilon: number): boolean {
   for (let index = 1; index < points.length; index += 1) {
     const previous = points[index - 1]!;
     const current = points[index]!;
-    const dx = Math.abs(current.x - previous.x);
-    const dy = Math.abs(current.y - previous.y);
-    if (dx > epsilon && dy > epsilon) return false;
+    if (!isOrthogonalSegment(previous, current, epsilon)) return false;
   }
   return true;
+}
+
+function isOrthogonalSegment(start: CanvasPoint, end: CanvasPoint, epsilon: number): boolean {
+  const dx = Math.abs(end.x - start.x);
+  const dy = Math.abs(end.y - start.y);
+  return dx <= epsilon || dy <= epsilon;
 }
 
 /**
@@ -949,4 +1058,8 @@ function distanceToSegment(point: CanvasPoint, start: CanvasPoint, end: CanvasPo
 
 function distance(a: CanvasPoint, b: CanvasPoint): number {
   return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+function pointsAlmostEqual(a: CanvasPoint, b: CanvasPoint, epsilon: number): boolean {
+  return Math.abs(a.x - b.x) <= epsilon && Math.abs(a.y - b.y) <= epsilon;
 }

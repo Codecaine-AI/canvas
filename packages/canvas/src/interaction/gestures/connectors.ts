@@ -41,6 +41,8 @@ import {
 } from "../types";
 
 const QUICK_CONNECT_MIN_GAP_PX = 120;
+const BEND_ENDPOINT_POSITION_EPSILON_PX = 0.5;
+const UNIT_INTERVAL_EPSILON = 0.000001;
 
 /**
  * Resolves the connect-target under the pointer through the ported AFFiNE
@@ -174,6 +176,78 @@ function endpointChanged(
   );
 }
 
+function bendEndpointPatch(
+  endpoint: InteractiveCanvasConnection["from"],
+  object: InteractiveCanvasObject,
+  point: CanvasPoint,
+): InteractiveCanvasConnection["from"] | undefined {
+  const existingPoint = endpoint.position
+    ? pointForEndpointPosition(object, endpoint.position)
+    : pointForCanonicalEndpoint(object, endpoint.anchor, point);
+  if (existingPoint && worldPointsAlmostEqual(existingPoint, point, BEND_ENDPOINT_POSITION_EPSILON_PX)) {
+    return undefined;
+  }
+
+  const position = relativeEndpointPosition(object, point);
+  return position ? { ...endpoint, position } : undefined;
+}
+
+function pointForEndpointPosition(
+  object: InteractiveCanvasObject,
+  position: [number, number],
+): CanvasPoint {
+  const bounds = connectionBoundsForObject(object);
+  return {
+    x: bounds.x + position[0] * bounds.width,
+    y: bounds.y + position[1] * bounds.height,
+  };
+}
+
+function pointForCanonicalEndpoint(
+  object: InteractiveCanvasObject,
+  anchor: InteractiveCanvasConnection["from"]["anchor"],
+  point: CanvasPoint,
+): CanvasPoint | undefined {
+  const explicit = explicitEndpointAnchor(anchor);
+  if (explicit) return pointForObjectAnchor(object, explicit);
+
+  const anchors = ["top", "right", "bottom", "left"] as const;
+  return anchors
+    .map((candidate) => pointForObjectAnchor(object, candidate))
+    .find((candidate) => worldPointsAlmostEqual(candidate, point, BEND_ENDPOINT_POSITION_EPSILON_PX));
+}
+
+function explicitEndpointAnchor(
+  anchor: InteractiveCanvasConnection["from"]["anchor"],
+): "top" | "right" | "bottom" | "left" | null {
+  return anchor === "top" || anchor === "right" || anchor === "bottom" || anchor === "left"
+    ? anchor
+    : null;
+}
+
+function relativeEndpointPosition(
+  object: InteractiveCanvasObject,
+  point: CanvasPoint,
+): [number, number] | undefined {
+  const bounds = connectionBoundsForObject(object);
+  if (Math.abs(bounds.width) <= UNIT_INTERVAL_EPSILON || Math.abs(bounds.height) <= UNIT_INTERVAL_EPSILON) {
+    return undefined;
+  }
+  return [
+    clampUnit((point.x - bounds.x) / bounds.width),
+    clampUnit((point.y - bounds.y) / bounds.height),
+  ];
+}
+
+function clampUnit(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
+}
+
+function worldPointsAlmostEqual(a: CanvasPoint, b: CanvasPoint, epsilon: number): boolean {
+  return Math.abs(a.x - b.x) <= epsilon && Math.abs(a.y - b.y) <= epsilon;
+}
+
 export function stepFromConnectorEndpointDrag(
   state: ConnectorEndpointDragGesture,
   event: CanvasPointerEvent,
@@ -301,15 +375,34 @@ export function stepFromConnectorBendDrag(
     if (polylinesAlmostEqual(commit.points, state.startPoints)) {
       return toIdle();
     }
+    const connection = ctx.document.connections.find((candidate) => candidate.id === state.connectionId);
+    const fromObject = connection
+      ? ctx.document.objects.find((object) => object.id === connection.from.objectId)
+      : undefined;
+    const toObject = connection
+      ? ctx.document.objects.find((object) => object.id === connection.to.objectId)
+      : undefined;
+    if (!connection || !fromObject || !toObject) return toIdle();
+
+    const patch: Partial<Omit<InteractiveCanvasConnection, "id">> = commit.clearedWaypoints
+      ? { waypoints: undefined }
+      : { waypoints: commit.waypoints };
+    if (!commit.clearedWaypoints) {
+      const firstPoint = commit.points[0];
+      const lastPoint = commit.points[commit.points.length - 1];
+      const from = firstPoint ? bendEndpointPatch(connection.from, fromObject, firstPoint) : undefined;
+      const to = lastPoint ? bendEndpointPatch(connection.to, toObject, lastPoint) : undefined;
+      if (from) patch.from = from;
+      if (to) patch.to = to;
+    }
+
     return {
       state: IDLE_INTERACTION_STATE,
       dispatch: [
         {
           type: "canvas.updateConnection",
           connectionId: state.connectionId,
-          patch: commit.clearedWaypoints
-            ? { waypoints: undefined }
-            : { waypoints: commit.waypoints },
+          patch,
         },
       ],
       overlay: emptyOverlay(),

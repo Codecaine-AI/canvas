@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import type { CanvasPoint } from "../../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
+import { dragOrthogonalSegment, polylineInteriorWaypoints } from "../bend-editing";
 import { autoPickAnchors, routeConnection, routeConnectionToPoint, type Anchor } from "../routing";
 import { CONNECTOR_END_GAP_PX } from "../routing";
 
@@ -300,6 +301,64 @@ describe("routing", () => {
 
       expect(nonOrthogonalSegments(routed.points ?? [])).toEqual([]);
       expect(routed.points).not.toContainEqual({ x: 140, y: 80 });
+    });
+
+    it("round-trips interior waypoints from a stub drag on slid straight endpoints", () => {
+      const from = object("from", 0, 230);
+      const to = object("to", 240, 234);
+      const base = routeConnection(from, to, connection("solid"), [from, to]);
+      const firstBend = dragOrthogonalSegment(base.points ?? [], 0, { dx: 0, dy: 40 });
+      const stubDrag = dragOrthogonalSegment(firstBend, 0, { dx: 30, dy: 0 });
+
+      const routed = routeConnection(
+        from,
+        to,
+        {
+          ...connection("solid"),
+          waypoints: polylineInteriorWaypoints(stubDrag),
+        },
+        [from, to],
+      );
+
+      expect(stubDrag).toEqual([
+        { x: 100, y: 262 },
+        { x: 130, y: 262 },
+        { x: 130, y: 302 },
+        { x: 240, y: 302 },
+        { x: 240, y: 262 },
+      ]);
+      expect(routed.points).toEqual(stubDrag);
+    });
+
+    it("honors detoured waypoint polylines whose endpoint contacts slid off anchor midpoints", () => {
+      const from = object("from", 0, 230);
+      const to = object("to", 360, 234);
+      const obstacle: InteractiveCanvasObject = {
+        id: "obstacle",
+        type: "process",
+        text: "Obstacle",
+        geometry: { x: 190, y: 180, width: 80, height: 150 },
+      };
+      const detoured = [
+        { x: 100, y: 262 },
+        { x: 130, y: 262 },
+        { x: 130, y: 160 },
+        { x: 330, y: 160 },
+        { x: 330, y: 262 },
+        { x: 360, y: 262 },
+      ];
+
+      const routed = routeConnection(
+        from,
+        to,
+        {
+          ...connection("solid", { from: "right", to: "left" }),
+          waypoints: polylineInteriorWaypoints(detoured),
+        },
+        [from, to, obstacle],
+      );
+
+      expect(routed.points).toEqual(detoured);
     });
 
     it("respects explicit anchors and uses their border midpoints", () => {

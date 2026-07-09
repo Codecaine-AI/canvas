@@ -11,6 +11,16 @@ function p(x: number, y: number): CanvasPoint {
   return { x, y };
 }
 
+function expectOrthogonalPolyline(points: ReadonlyArray<CanvasPoint>) {
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const dx = Math.abs(current.x - previous.x);
+    const dy = Math.abs(current.y - previous.y);
+    expect(dx <= 0.01 || dy <= 0.01).toBe(true);
+  }
+}
+
 describe("connector bend editing", () => {
   it("finds every straight segment with midpoint and axis metadata", () => {
     const segments = connectorBendSegments([p(0, 0), p(80, 0), p(80, 60), p(160, 60)]);
@@ -130,6 +140,70 @@ describe("connector bend editing", () => {
     expect(commit.points).toEqual(preview);
     expect(commit.clearedWaypoints).toBe(false);
     expect(commit.waypoints).toEqual([[160, 0]]);
+  });
+
+  it("keeps every segment orthogonal when dragging an h,h,v,h,h route", () => {
+    const points = [p(0, 0), p(40, 0), p(80, 0), p(80, 60), p(120, 60), p(160, 60)];
+    const cases = [
+      {
+        segmentIndex: 0,
+        expected: [p(0, 0), p(0, 30), p(40, 30), p(40, 0), p(80, 0), p(80, 60), p(120, 60), p(160, 60)],
+      },
+      {
+        segmentIndex: 1,
+        expected: [p(0, 0), p(40, 0), p(40, 30), p(80, 30), p(80, 60), p(120, 60), p(160, 60)],
+      },
+      {
+        segmentIndex: 2,
+        expected: [p(0, 0), p(40, 0), p(100, 0), p(100, 60), p(120, 60), p(160, 60)],
+      },
+      {
+        segmentIndex: 3,
+        expected: [p(0, 0), p(40, 0), p(80, 0), p(80, 90), p(120, 90), p(120, 60), p(160, 60)],
+      },
+      {
+        segmentIndex: 4,
+        expected: [p(0, 0), p(40, 0), p(80, 0), p(80, 60), p(120, 60), p(120, 90), p(160, 90), p(160, 60)],
+      },
+    ];
+
+    for (const { segmentIndex, expected } of cases) {
+      const preview = dragOrthogonalSegment(points, segmentIndex, { dx: 20, dy: 30 });
+      expect(preview).toEqual(expected);
+      expectOrthogonalPolyline(preview);
+      expectOrthogonalPolyline(commitBendPolyline(preview, 8).points);
+    }
+  });
+
+  it("inserts orthogonal joints on both sides of a dragged middle segment", () => {
+    const preview = dragOrthogonalSegment(
+      [p(0, 0), p(40, 0), p(80, 0), p(120, 0)],
+      1,
+      { dx: 0, dy: 30 },
+    );
+
+    expect(preview).toEqual([p(0, 0), p(40, 0), p(40, 30), p(80, 30), p(80, 0), p(120, 0)]);
+    expectOrthogonalPolyline(preview);
+    expectOrthogonalPolyline(commitBendPolyline(preview, 8).points);
+  });
+
+  it("keeps a dragged tiny off-axis jog orthogonal instead of clearing it to auto-route", () => {
+    const points = [p(0, 0), p(24, 0), p(100, 0), p(100, 1), p(176, 1), p(200, 1)];
+    const preview = dragOrthogonalSegment(points, 2, { dx: 71, dy: 0 }, {
+      snapTolerance: 8,
+      simplifyTolerance: 8,
+    });
+
+    expect(preview).toEqual([p(0, 0), p(24, 0), p(171, 0), p(171, 1), p(176, 1), p(200, 1)]);
+    expectOrthogonalPolyline(preview);
+
+    const commit = commitBendPolyline(preview, 8);
+    expectOrthogonalPolyline(commit.points);
+    expect(commit.clearedWaypoints).toBe(false);
+    expect(commit.waypoints).toEqual([
+      [171, 0],
+      [171, 1],
+    ]);
   });
 
   it("snaps a dragged middle run back to one straight route and clears waypoints", () => {

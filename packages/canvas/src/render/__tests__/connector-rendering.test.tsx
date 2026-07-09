@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
+import { ConnectorDragPreview } from "../connectors/ConnectorDragPreview";
 import { routeConnection } from "../../routing/routing";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
@@ -33,6 +34,27 @@ function makeDocument(): InteractiveCanvasDocument {
         from: { objectId: "process-a", anchor: "right" },
         to: { objectId: "process-b", anchor: "left" },
         label: "handles",
+        style: "solid",
+        arrow: "forward",
+      },
+    ],
+  };
+}
+
+function bendPreviewDocument(): InteractiveCanvasDocument {
+  return {
+    schemaVersion: 1,
+    id: "connector-drag-preview-doc",
+    mode: "diagram",
+    objects: [
+      { id: "process-a", type: "process", text: "A", geometry: { x: 0, y: 230, width: 100, height: 60 } },
+      { id: "process-b", type: "process", text: "B", geometry: { x: 240, y: 234, width: 100, height: 60 } },
+    ],
+    connections: [
+      {
+        id: "connection-a",
+        from: { objectId: "process-a" },
+        to: { objectId: "process-b" },
         style: "solid",
         arrow: "forward",
       },
@@ -128,6 +150,35 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
 
     expect(bendHandle).toBeTruthy();
     expect(rectCenter(bendHandle!)).toEqual(routed.labelPoint);
+  });
+
+  it("renders bend previews from the dragged polyline instead of re-routing from interior waypoints", () => {
+    const { container } = render(
+      <ConnectorDragPreview
+        document={bendPreviewDocument()}
+        viewport={viewport}
+        drag={{
+          connectionId: "connection-a",
+          bendSegmentIndex: 0,
+          point: { x: 130, y: 302 },
+          points: [
+            { x: 100, y: 262 },
+            { x: 130, y: 262 },
+            { x: 130, y: 302 },
+            { x: 240, y: 302 },
+            { x: 240, y: 262 },
+          ],
+        }}
+      />,
+    );
+
+    const previewPath = container.querySelector(
+      "[data-canvas-connector-bend-preview-path]",
+    ) as SVGPathElement;
+    expect(previewPath).toBeTruthy();
+    expect(previewPath.getAttribute("d")).toContain("Q 130 262");
+    expect(previewPath.getAttribute("d")).toContain("Q 130 302");
+    expect(previewPath.getAttribute("d")).not.toBe("M 110 262 L 230 262");
   });
 
   it("renders a label chip at the connector's label point", () => {

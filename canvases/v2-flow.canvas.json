@@ -278,8 +278,8 @@
       "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 1991.0666631282174,
-        "y": 1108.9905262201123,
+        "x": 1987.1511886170256,
+        "y": 1124.2453333421656,
         "width": 115.63728061962729,
         "height": 114.52014974952954
       },
@@ -295,8 +295,8 @@
       "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 1978.2795804864618,
-        "y": 1423.9967693200329,
+        "x": 1974.36410597527,
+        "y": 1439.2515764420862,
         "width": 140.47953241993946,
         "height": 144
       },
@@ -312,8 +312,8 @@
       "color": "violet",
       "parentId": "section",
       "geometry": {
-        "x": 2967.9767316092825,
-        "y": 584.9173503696609,
+        "x": 2964.0612570980907,
+        "y": 600.1721574917142,
         "width": 233.61305719057918,
         "height": 150.70939869672236
       },
@@ -329,8 +329,8 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 2946.40300081298,
-        "y": 1029.8658233288754,
+        "x": 2942.487526301788,
+        "y": 1045.1206304509287,
         "width": 276.75403010225455,
         "height": 229.7540974149913
       },
@@ -346,8 +346,8 @@
       "color": "orange",
       "parentId": "section",
       "geometry": {
-        "x": 4905.515260771035,
-        "y": 1053.048393033407,
+        "x": 4901.599786259843,
+        "y": 1068.3032001554602,
         "width": 209.27302563198737,
         "height": 182.18744835316227
       },
@@ -363,8 +363,8 @@
       "color": "green",
       "parentId": "section",
       "geometry": {
-        "x": 3631.3632724327854,
-        "y": 705.2471672743611,
+        "x": 3627.4477979215935,
+        "y": 720.5019743964144,
         "width": 1088,
         "height": 864
       },
@@ -379,8 +379,8 @@
       "color": "red",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3648.8379632165183,
-        "y": 757.9886855064367,
+        "x": 3644.9224887053265,
+        "y": 773.24349262849,
         "width": 414,
         "height": 223.5
       },
@@ -396,8 +396,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 3648.842141716865,
-        "y": 1029.8685780729081,
+        "x": 3644.9266672056733,
+        "y": 1045.1233851949614,
         "width": 308,
         "height": 508
       },
@@ -412,8 +412,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3668.842141716865,
-        "y": 1079.8685780729081,
+        "x": 3664.9266672056733,
+        "y": 1095.1233851949614,
         "width": 268,
         "height": 66
       },
@@ -428,8 +428,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3668.842141716865,
-        "y": 1204.8685780729081,
+        "x": 3664.9266672056733,
+        "y": 1220.1233851949614,
         "width": 268,
         "height": 66
       },
@@ -444,8 +444,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3668.842141716865,
-        "y": 1329.8685780729081,
+        "x": 3664.9266672056733,
+        "y": 1345.1233851949614,
         "width": 268,
         "height": 66
       },
@@ -460,8 +460,8 @@
       "color": "blue",
       "parentId": "card-memory-actions",
       "geometry": {
-        "x": 3668.842141716865,
-        "y": 1454.8685780729081,
+        "x": 3664.9266672056733,
+        "y": 1470.1233851949614,
         "width": 268,
         "height": 66
       },
@@ -476,8 +476,8 @@
       "color": "gray",
       "parentId": "section-memory-bank",
       "geometry": {
-        "x": 4020.335036753305,
-        "y": 1029.8661672635983,
+        "x": 4016.419562242113,
+        "y": 1045.1209743856516,
         "width": 666,
         "height": 514
       },
@@ -491,8 +491,8 @@
       "text": "class Memory(BaseModel):\n    id: str = Field(description=\"mem_0, mem_1, mem_n\")\n    content: str = Field(description=\"text of the memory\")",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4040.3350367533067,
-        "y": 1069.8661672635983,
+        "x": 4036.419562242115,
+        "y": 1085.1209743856516,
         "width": 626,
         "height": 170
       },
@@ -507,8 +507,8 @@
       "text": "{\n  \"id\": \"mem_0\",\n  \"content\": \"Likes pizza\"\n},\n{\n  \"id\": \"mem_1\",\n  \"content\": \"Doesn't like the cold\"\n},",
       "parentId": "card-structure",
       "geometry": {
-        "x": 4040.3350367533067,
-        "y": 1259.8661672635983,
+        "x": 4036.419562242115,
+        "y": 1275.1209743856516,
         "width": 626,
         "height": 260
       },
@@ -524,8 +524,8 @@
       "color": "blue",
       "parentId": "section",
       "geometry": {
-        "x": 1956.2336798393162,
-        "y": 2022.8264382440818,
+        "x": 1952.3182053281243,
+        "y": 2038.0812453661351,
         "width": 176,
         "height": 66
       },
@@ -538,10 +538,10 @@
       "type": "arrow-shape",
       "text": "Enough Context",
       "color": "yellow",
-      "parentId": "section",
+      "parentId": "section-2",
       "geometry": {
-        "x": 2352.234857878686,
-        "y": 1870.3333908049644,
+        "x": 2336.763287999156,
+        "y": 1886.7534285854133,
         "width": 348,
         "height": 100
       },
@@ -555,10 +555,10 @@
       "type": "arrow-shape",
       "text": "Null Response",
       "color": "yellow",
-      "parentId": "section",
+      "parentId": "section-2",
       "geometry": {
-        "x": 2352.2342379339702,
-        "y": 2004.8021553264946,
+        "x": 2336.7626680544404,
+        "y": 2021.2221931069435,
         "width": 348,
         "height": 102.06166899741811
       },
@@ -572,10 +572,10 @@
       "type": "arrow-shape",
       "text": "User Safety Refusal",
       "color": "yellow",
-      "parentId": "section",
+      "parentId": "section-2",
       "geometry": {
-        "x": 2352.2342379339702,
-        "y": 2156.863824323914,
+        "x": 2353.181649535922,
+        "y": 2173.285098340599,
         "width": 348,
         "height": 100
       },
@@ -591,8 +591,8 @@
       "color": "red",
       "parentId": "section",
       "geometry": {
-        "x": 2855.2790071625022,
-        "y": 1970.3287654295907,
+        "x": 2851.3635326513104,
+        "y": 1985.583572551644,
         "width": 459,
         "height": 171
       },
@@ -607,8 +607,8 @@
       "color": "white",
       "parentId": "section",
       "geometry": {
-        "x": 3519.3632724327854,
-        "y": 1809.2471672743611,
+        "x": 3515.4477979215935,
+        "y": 1824.5019743964144,
         "width": 384,
         "height": 480
       },
@@ -623,8 +623,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3550.4102910424212,
-        "y": 1857.9648233927187,
+        "x": 3546.4948165312294,
+        "y": 1873.219630514772,
         "width": 331,
         "height": 100
       },
@@ -640,8 +640,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3550.4102910424212,
-        "y": 2007.964823392718,
+        "x": 3546.4948165312294,
+        "y": 2023.2196305147713,
         "width": 331,
         "height": 100
       },
@@ -657,8 +657,8 @@
       "color": "yellow",
       "parentId": "card-probing-response",
       "geometry": {
-        "x": 3550.4102910424212,
-        "y": 2157.964823392719,
+        "x": 3546.4948165312294,
+        "y": 2173.2196305147727,
         "width": 331,
         "height": 100
       },
@@ -674,14 +674,30 @@
       "color": "blue",
       "parentId": "page-frame",
       "geometry": {
-        "x": 1935.3632724327854,
-        "y": 529.2471672743611,
+        "x": 1931.4477979215935,
+        "y": 544.5019743964144,
         "width": 3200,
         "height": 1840
       },
       "style": {
         "shape": "section",
         "strokeStyle": "solid"
+      }
+    },
+    {
+      "id": "section-2",
+      "type": "section",
+      "text": "Next Question Response",
+      "color": "gray",
+      "parentId": "section",
+      "geometry": {
+        "x": 2325.406119539894,
+        "y": 1837.8290000600655,
+        "width": 413.7676745133267,
+        "height": 451.6224357677406
+      },
+      "style": {
+        "shape": "section"
       }
     }
   ],
@@ -747,12 +763,12 @@
       "color": "violet",
       "waypoints": [
         [
-          1883.4218453370959,
+          1876.0470430539833,
           1579.247213189265
         ],
         [
-          1883.4218453370959,
-          1166.250601094877
+          1876.0470430539833,
+          1181.5054082169304
         ]
       ]
     },
@@ -802,12 +818,12 @@
       "color": "orange",
       "waypoints": [
         [
-          5010.151773587029,
-          675.8763164173052
+          4900.866364971254,
+          1044.3032001554602
         ],
         [
-          3225.5897887998617,
-          675.8763164173052
+          4900.866364971254,
+          675.5268568400754
         ]
       ]
     },
@@ -921,16 +937,34 @@
       "id": "conn-emphasis-box-to-null-response",
       "from": {
         "objectId": "emphasis-box-research-objective",
-        "anchor": "left"
+        "anchor": "left",
+        "position": [
+          0,
+          0.5034194592222451
+        ]
       },
       "to": {
         "objectId": "chevron-null-response",
-        "anchor": "right"
+        "anchor": "right",
+        "position": [
+          1,
+          0.4942708410243675
+        ]
       },
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red"
+      "color": "red",
+      "waypoints": [
+        [
+          2851.3635326513104,
+          2015.841635445889
+        ],
+        [
+          2684.7626680544404,
+          2015.841635445889
+        ]
+      ]
     },
     {
       "id": "conn-emphasis-box-to-user-safety-refusal",
@@ -945,7 +979,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "decision",
-      "color": "red"
+      "color": "red",
+      "waypoints": [
+        [
+          2772.047053184277,
+          2071.083572551644
+        ],
+        [
+          2772.047053184277,
+          2223.285098340599
+        ]
+      ]
     },
     {
       "id": "conn-emphasis-box-to-not-enough-context",
@@ -1005,7 +1049,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "gray"
+      "color": "gray",
+      "waypoints": [
+        [
+          3901.4948165312294,
+          1805.1558612746624
+        ],
+        [
+          5006.236299075838,
+          1805.1558612746624
+        ]
+      ]
     },
     {
       "id": "conn-unclear-message-to-generate-probing-question",
@@ -1020,7 +1074,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "gray"
+      "color": "gray",
+      "waypoints": [
+        [
+          3901.4948165312294,
+          1966.7246451328708
+        ],
+        [
+          5006.236299075838,
+          1966.7246451328708
+        ]
+      ]
     },
     {
       "id": "conn-possible-user-refusal-to-generate-probing-question",
@@ -1035,7 +1099,17 @@
       "style": "solid",
       "arrow": "forward",
       "role": "flow",
-      "color": "gray"
+      "color": "gray",
+      "waypoints": [
+        [
+          3901.4948165312294,
+          2102.4690611847527
+        ],
+        [
+          5006.236299075838,
+          2102.4690611847527
+        ]
+      ]
     },
     {
       "id": "conn-memory-bank-to-generate-probing-question",
@@ -1067,12 +1141,8 @@
       "color": "gray",
       "waypoints": [
         [
-          2048.885303438031,
-          824.300109980045
-        ],
-        [
-          2943.9767316092825,
-          824.300109980045
+          2044.9698289268392,
+          675.5268568400754
         ]
       ]
     }
