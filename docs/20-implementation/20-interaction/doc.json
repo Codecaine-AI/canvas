@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "canvas-20-interaction",
-  "title": "Canvas Engine — Interaction Layer",
+  "title": "Canvas Engine — Interaction Kernel",
   "root": "b-interaction-root",
   "blocks": {
     "b-interaction-root": {
@@ -9,47 +9,28 @@
       "flavour": "paragraph",
       "props": {
         "concepts": [
-          "pointer state machine",
-          "interaction gestures",
-          "snapping",
-          "distribution guides",
+          "pointer vocabulary",
+          "hit-testing",
+          "frame coalescer",
+          "edge pan",
           "clipboard",
-          "edge panning",
-          "frame coalescing"
+          "kernel vs pipeline split"
         ],
-        "covers": "The pure pointer-interaction state machine, alignment/distribution snapping, in-memory clipboard, and edge-pan auto-scroll that sit between raw pointer events and the model-layer reducer.",
+        "covers": "The pointer kernel at packages/canvas/src/interaction/: normalized pointer events, the hit vocabulary and shared thresholds, pure DOM-free hit-testing, the frame coalescer, edge-pan math, and the in-memory clipboard. The gesture machine itself assembles above the stage in the editor pipeline; feature slices own gesture logic.",
         "format": "mdx",
         "type": "overview"
       },
       "children": [
         "b-interaction-title-1",
         "b-interaction-intro-2",
-        "b-interaction-heading-pointer-sm-3",
-        "b-interaction-pointer-sm-intro-4",
-        "b-interaction-pointer-sm-states-5",
-        "b-interaction-pointer-sm-idle-6",
-        "b-interaction-pointer-sm-pressing-7",
-        "b-interaction-pointer-sm-move-8",
-        "b-interaction-pointer-sm-resize-9",
-        "b-interaction-pointer-sm-drag-select-10",
-        "b-interaction-pointer-sm-place-11",
-        "b-interaction-pointer-sm-connector-12",
-        "b-interaction-connector-anchor-dots-12b",
-        "b-interaction-connector-create-12c",
-        "b-interaction-connector-reconnect-12d",
-        "b-interaction-connector-bend-12e",
-        "b-interaction-connector-label-edit-12f",
-        "b-interaction-connector-mode-heading-12g",
-        "b-interaction-connector-mode-12h",
-        "b-interaction-connector-mode-12i",
-        "b-interaction-connector-mode-12j",
-        "b-interaction-pointer-sm-lock-gate-12a",
-        "b-interaction-pointer-sm-coalescer-13",
-        "b-interaction-pointer-sm-cancel-14",
-        "b-interaction-decision-pure-sm-15",
-        "b-interaction-heading-snapping-16",
-        "b-interaction-snapping-body-17",
-        "b-interaction-snapping-distribution-18",
+        "b-interaction-heading-vocabulary-25",
+        "b-interaction-vocabulary-body-26",
+        "b-interaction-vocabulary-thresholds-27",
+        "b-interaction-heading-hit-testing-28",
+        "b-interaction-hit-testing-body-29",
+        "b-interaction-hit-testing-outline-30",
+        "b-interaction-heading-frame-coalescer-31",
+        "b-interaction-frame-coalescer-body-32",
         "b-interaction-heading-clipboard-19",
         "b-interaction-clipboard-body-20",
         "b-interaction-heading-edge-pan-21",
@@ -66,7 +47,7 @@
       },
       "text": [
         {
-          "insert": "Interaction Layer"
+          "insert": "Interaction Kernel"
         }
       ],
       "children": []
@@ -77,105 +58,7 @@
       "props": {},
       "text": [
         {
-          "insert": "This layer sits between raw pointer events and the model-layer reducer. The drag pipeline in "
-        },
-        {
-          "insert": "use-interaction-pipeline.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
-              "label": "use-interaction-pipeline.ts"
-            }
-          }
-        },
-        {
-          "insert": " converts native pointer events with "
-        },
-        {
-          "insert": "buildPointerEvent",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
-              "symbol": "buildPointerEvent",
-              "label": "buildPointerEvent"
-            }
-          }
-        },
-        {
-          "insert": ", resolves DOM hits through "
-        },
-        {
-          "insert": "resolveHit",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
-              "symbol": "resolveHit",
-              "label": "resolveHit"
-            }
-          }
-        },
-        {
-          "insert": ", and feeds normalized, world-space "
-        },
-        {
-          "insert": "CanvasPointerEvent",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
-              "symbol": "CanvasPointerEvent",
-              "label": "CanvasPointerEvent"
-            }
-          }
-        },
-        {
-          "insert": "s; everything downstream of that — the pointer state machine, snapping math, in-memory clipboard, and edge-pan auto-scroll — is plain, DOM-free logic that consumes normalized events and document/selection state and emits typed "
-        },
-        {
-          "insert": "CanvasAction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/types.ts",
-              "symbol": "CanvasAction",
-              "label": "CanvasAction"
-            }
-          }
-        },
-        {
-          "insert": "s for the model-layer reducer to apply."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-heading-pointer-sm-3": {
-      "id": "b-interaction-heading-pointer-sm-3",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Pointer state machine"
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-intro-4": {
-      "id": "b-interaction-pointer-sm-intro-4",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The core reducer for this layer is "
+          "insert": "interaction/ is the pure-TS floor under every gesture: it defines what a pointer event IS, what a hit IS, and the shared thresholds that decide when a press becomes a drag — and it implements the DOM-free utilities (hit-testing, frame coalescing, edge-pan velocity, the clipboard) that everything above consumes. What it deliberately does NOT contain is the machine: the gesture-state union and the dispatcher assemble in "
         },
         {
           "insert": "core.ts",
@@ -184,141 +67,107 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "label": "core.ts"
+              "label": "core.ts",
+              "symbol": "stepInteraction"
             }
           }
         },
         {
-          "insert": " — a pure pointer-interaction state machine modeled on term-draw's draw-state.ts architecture, with gesture/type vocabulary in "
+          "insert": " (see "
         },
         {
-          "insert": "state.ts",
+          "insert": "20-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": "), each editor feature slice owns its own gesture logic, and connector gestures live in the connector slice (see "
+        },
+        {
+          "insert": "20-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/30-connectors",
+              "label": "20-implementation/30-connectors"
+            }
+          }
+        },
+        {
+          "insert": "). The barrel "
+        },
+        {
+          "insert": "interaction.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "label": "state.ts"
+              "path": "packages/canvas/src/interaction/interaction.ts",
+              "label": "interaction.ts"
             }
           }
         },
         {
-          "insert": " and connector steppers in "
-        },
-        {
-          "insert": "connectors/gestures.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/gestures.ts",
-              "label": "connectors/gestures.ts"
-            }
-          }
-        },
-        {
-          "insert": ". Its entry point, "
-        },
-        {
-          "insert": "stepInteraction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "stepInteraction",
-              "label": "stepInteraction"
-            }
-          }
-        },
-        {
-          "insert": ", takes the current "
-        },
-        {
-          "insert": "InteractionState",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "InteractionState",
-              "label": "InteractionState"
-            }
-          }
-        },
-        {
-          "insert": ", a normalized pointer event, and a read-only "
-        },
-        {
-          "insert": "InteractionContext",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "InteractionContext",
-              "label": "InteractionContext"
-            }
-          }
-        },
-        {
-          "insert": " (document, selection, tool, viewport, and an optional snap resolver hook) and returns the next state plus any "
-        },
-        {
-          "insert": "CanvasAction",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "s to dispatch and an ephemeral "
-        },
-        {
-          "insert": "InteractionOverlay",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "InteractionOverlay",
-              "label": "InteractionOverlay"
-            }
-          }
-        },
-        {
-          "insert": " to render that frame (drag-select rect, snap/distribution guides, spacing hints, drop target, connector-drag preview, in-place text-edit request, place-tool ghost). No DOM access happens anywhere in this module — it is testable with plain objects."
+          "insert": " says exactly this in its header — it re-exports kernel vocabulary and nothing else."
         }
       ],
       "children": []
     },
-    "b-interaction-pointer-sm-states-5": {
-      "id": "b-interaction-pointer-sm-states-5",
+    "b-interaction-heading-vocabulary-25": {
+      "id": "b-interaction-heading-vocabulary-25",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The vocabulary: types.ts"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-vocabulary-body-26": {
+      "id": "b-interaction-vocabulary-body-26",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "The "
-        },
-        {
-          "insert": "InteractionState",
+          "insert": "CanvasPointerEvent",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "CanvasPointerEvent",
+              "symbol": "CanvasPointerEvent"
+            }
           }
         },
         {
-          "insert": " union has nine kinds — "
+          "insert": " / "
         },
         {
-          "insert": "idle",
+          "insert": "CanvasPointerEventType",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "CanvasPointerEventType",
+              "symbol": "CanvasPointerEventType"
+            }
           }
         },
         {
-          "insert": ", "
+          "insert": " is the normalized event shape: "
         },
         {
-          "insert": "pressing",
+          "insert": "down",
           "attributes": {
             "code": true
           }
@@ -336,7 +185,7 @@
           "insert": ", "
         },
         {
-          "insert": "resize",
+          "insert": "up",
           "attributes": {
             "code": true
           }
@@ -345,177 +194,144 @@
           "insert": ", "
         },
         {
-          "insert": "drag-select",
+          "insert": "cancel",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
+          "insert": ", or "
         },
         {
-          "insert": "place",
+          "insert": "double",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
+          "insert": ", carrying "
         },
         {
-          "insert": "connector-endpoint-drag",
+          "insert": "world",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
+          "insert": " and "
         },
         {
-          "insert": "connector-create",
+          "insert": "screen",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", and "
+          "insert": " coordinates, mouse button/modifier state, and a "
         },
         {
-          "insert": "connector-bend-drag",
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "CanvasHit",
+              "symbol": "CanvasHit"
+            }
+          }
+        },
+        {
+          "insert": " so the dispatcher and feature slices consume normalized data instead of raw DOM events. The "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "CanvasHit",
+              "symbol": "CanvasHit"
+            }
+          }
+        },
+        {
+          "insert": " union currently has seven kinds: "
+        },
+        {
+          "insert": "canvas",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " — no new state kind was added for Connector Mode; it reuses "
+          "insert": " when no target wins; "
         },
         {
-          "insert": "connector-create",
+          "insert": "object",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ". Each kind has its own step function dispatched from "
+          "insert": " when an object body or section title chip wins; "
         },
         {
-          "insert": "stepInteraction",
+          "insert": "handle",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "'s switch:"
+          "insert": " for resize handles; "
+        },
+        {
+          "insert": "connection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector paths; "
+        },
+        {
+          "insert": "endpoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector endpoint handles; "
+        },
+        {
+          "insert": "bend-segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for selected connector bend pills; and "
+        },
+        {
+          "insert": "port",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for anchor-dot or port-proximity hits."
         }
       ],
       "children": []
     },
-    "b-interaction-pointer-sm-idle-6": {
-      "id": "b-interaction-pointer-sm-idle-6",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
+    "b-interaction-vocabulary-thresholds-27": {
+      "id": "b-interaction-vocabulary-thresholds-27",
+      "flavour": "paragraph",
+      "props": {},
       "text": [
         {
-          "insert": "idle",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — the resting state ("
-        },
-        {
-          "insert": "IDLE_INTERACTION_STATE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "IDLE_INTERACTION_STATE",
-              "label": "IDLE_INTERACTION_STATE"
-            }
-          }
-        },
-        {
-          "insert": "), handled by "
-        },
-        {
-          "insert": "stepFromIdle",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "stepFromIdle",
-              "label": "stepFromIdle"
-            }
-          }
-        },
-        {
-          "insert": ". A pointer-down here first honors the connector-tool branch (port/object starts reuse "
-        },
-        {
-          "insert": "connector-create",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", every other hit is inert), otherwise it branches on hit-test kind into a resize, connector-endpoint-drag, connector-bend-drag, connector-create, place, pressing, or (for a double-click on an object) an immediate in-place text-edit request ("
-        },
-        {
-          "insert": "overlay.editObjectTextId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", honored only when the def's "
-        },
-        {
-          "insert": "textEditing.editable",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " allows it — pure glyph shapes refuse the editor); a double-click on empty canvas is a no-op since the free-text object type was retired."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-pressing-7": {
-      "id": "b-interaction-pointer-sm-pressing-7",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "pressing",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "PressPending",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "PressPending",
-              "label": "PressPending"
-            }
-          }
-        },
-        {
-          "insert": ") — a deferred zone below the 3-world-unit "
+          "insert": "The shared thresholds are "
         },
         {
           "insert": "DRAG_THRESHOLD",
@@ -524,1389 +340,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/types.ts",
-              "symbol": "DRAG_THRESHOLD",
-              "label": "DRAG_THRESHOLD"
+              "label": "DRAG_THRESHOLD",
+              "symbol": "DRAG_THRESHOLD"
             }
           }
         },
         {
-          "insert": ", handled by "
-        },
-        {
-          "insert": "stepFromPressing",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "stepFromPressing",
-              "label": "stepFromPressing"
-            }
-          }
-        },
-        {
-          "insert": ". A sub-threshold release resolves as a click (applying a deferred shift-toggle, or clearing selection on empty canvas); crossing the threshold promotes the gesture into "
-        },
-        {
-          "insert": "move",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " or "
-        },
-        {
-          "insert": "drag-select",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". This is also where a section drag picks up its members: promotion to move expands the dragged id set to the section's recorded parentId descendants (recursively, via "
-        },
-        {
-          "insert": "expandMoveObjectIds",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
-              "symbol": "expandMoveObjectIds",
-              "label": "expandMoveObjectIds"
-            }
-          }
-        },
-        {
-          "insert": "), folded into the same move gesture rather than a separate mechanism. Promotion is also lock-gated: before entering move, every id in the dragged set is checked with "
-        },
-        {
-          "insert": "isLockedForManipulation",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "isLockedForManipulation"
-            }
-          }
-        },
-        {
-          "insert": " — if any dragged object is itself a locked section, or sits under a parentId-ancestor section with "
-        },
-        {
-          "insert": "locked === \"all\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", the gesture returns to idle instead of promoting."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-move-8": {
-      "id": "b-interaction-pointer-sm-move-8",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "move",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "MoveGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
-              "symbol": "MoveGesture",
-              "label": "MoveGesture"
-            }
-          }
-        },
-        {
-          "insert": ") — dragging one or more selected objects, handled by "
-        },
-        {
-          "insert": "stepFromMove",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
-              "symbol": "stepFromMove",
-              "label": "stepFromMove"
-            }
-          }
-        },
-        {
-          "insert": ". Each move computes live snap correction (via "
-        },
-        {
-          "insert": "ctx.snapResolver",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " if the host supplies one, otherwise zero correction), applies it uniformly across the dragged set, tracks a live drop-target section by running the same projected-bounds overlap resolver the reducer uses at commit time, and dispatches "
-        },
-        {
-          "insert": "canvas.updateObjectGeometries",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " every frame. On release it commits membership with "
-        },
-        {
-          "insert": "canvas.reconcileSectionMembership",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " using "
-        },
-        {
-          "insert": "recordHistory: false",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", so bounds-based section adoption or release shares the drag's undo entry. See "
-        },
-        {
-          "insert": "canvas-10-system-design-30-layering",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/30-layering",
-              "label": "canvas-10-system-design-30-layering"
-            }
-          }
-        },
-        {
-          "insert": " for the membership predicate. Escape/pointercancel restores "
-        },
-        {
-          "insert": "startGeometries",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " captured before any snap correction ran, so a snap can never leak into cancelled-drag geometry."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-resize-9": {
-      "id": "b-interaction-pointer-sm-resize-9",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "resize",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "ResizeGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
-              "symbol": "ResizeGesture",
-              "label": "ResizeGesture"
-            }
-          }
-        },
-        {
-          "insert": ") — dragging one of the 8 "
-        },
-        {
-          "insert": "ResizeHandle",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/types.ts",
-              "symbol": "ResizeHandle",
-              "label": "ResizeHandle"
-            }
-          }
-        },
-        {
-          "insert": " directions (n/ne/e/se/s/sw/w/nw), handled by "
-        },
-        {
-          "insert": "stepFromResize",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
-              "symbol": "stepFromResize",
-              "label": "stepFromResize"
-            }
-          }
-        },
-        {
-          "insert": ". Resize handles skip the "
-        },
-        {
-          "insert": "pressing",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " deferral (small targets, no click semantics) and commit to the gesture immediately; the anchored opposite edge/corner never moves, and both dimensions clamp to "
-        },
-        {
-          "insert": "MIN_DIRECT_RESIZE_SIZE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
-              "symbol": "MIN_DIRECT_RESIZE_SIZE",
-              "label": "MIN_DIRECT_RESIZE_SIZE"
-            }
-          }
-        },
-        {
-          "insert": " (48 world units). Only the edges the active handle actually moves are snap-corrected. The handle-down entry path is gated by the same "
-        },
-        {
-          "insert": "isLockedForManipulation",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "isLockedForManipulation"
-            }
-          }
-        },
-        {
-          "insert": " check — a locked section (either mode), or any object under a locked-"
-        },
-        {
-          "insert": "\"all\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " section, refuses resize and the pointer-down falls back to idle."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-drag-select-10": {
-      "id": "b-interaction-pointer-sm-drag-select-10",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "drag-select",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "DragSelectGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
-              "symbol": "DragSelectGesture",
-              "label": "DragSelectGesture"
-            }
-          }
-        },
-        {
-          "insert": ") — rubber-band selection over empty canvas with the select tool, handled by "
-        },
-        {
-          "insert": "stepFromDragSelect",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
-              "symbol": "stepFromDragSelect",
-              "label": "stepFromDragSelect"
-            }
-          }
-        },
-        {
-          "insert": ". Tracks a normalized bounds rect as the pointer moves; on release, every object intersecting the bounds becomes the selection (or is unioned into it, for a shift-additive drag-select)."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-place-11": {
-      "id": "b-interaction-pointer-sm-place-11",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "place",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "PlaceGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
-              "symbol": "PlaceGesture",
-              "label": "PlaceGesture"
-            }
-          }
-        },
-        {
-          "insert": ") — armed-tool object creation, handled by "
-        },
-        {
-          "insert": "stepFromPlace",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
-              "symbol": "stepFromPlace",
-              "label": "stepFromPlace"
-            }
-          }
-        },
-        {
-          "insert": ". Starts when a creatable tool (one per placeable object type — rectangle through icon, per "
-        },
-        {
-          "insert": "objectTypeForTool",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "'s switch) is armed and the pointer goes down. A sub-threshold release creates a default-size object centered at the point; a drag creates an object sized to the normalized, "
-        },
-        {
-          "insert": "MIN_PLACE_DRAG_SIZE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
-              "symbol": "MIN_PLACE_DRAG_SIZE",
-              "label": "MIN_PLACE_DRAG_SIZE"
-            }
-          }
-        },
-        {
-          "insert": "-clamped dragged rect. Either way the tool reverts to "
-        },
-        {
-          "insert": "select",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and the new object becomes the selection; the reducer resolves its parentId from the final placement geometry."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-connector-12": {
-      "id": "b-interaction-pointer-sm-connector-12",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "connector-endpoint-drag",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "connector-create",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "connector-bend-drag",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "ConnectorEndpointDragGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/types.ts",
-              "symbol": "ConnectorEndpointDragGesture",
-              "label": "ConnectorEndpointDragGesture"
-            }
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "ConnectorCreateGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/types.ts",
-              "symbol": "ConnectorCreateGesture",
-              "label": "ConnectorCreateGesture"
-            }
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "ConnectorBendDragGesture",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/types.ts",
-              "symbol": "ConnectorBendDragGesture",
-              "label": "ConnectorBendDragGesture"
-            }
-          }
-        },
-        {
-          "insert": ") — reconnecting an existing connection's endpoint, dragging a brand-new connector from one of a selected object's anchor dots, or dragging a selected connector's bend segment. Endpoint and create gestures resolve the live connect-target via "
-        },
-        {
-          "insert": "connectorCandidateAt",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/gestures.ts",
-              "symbol": "connectorCandidateAt",
-              "label": "connectorCandidateAt"
-            }
-          }
-        },
-        {
-          "insert": ", which calls the ported AFFiNE connection cascade — "
-        },
-        {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
-              "symbol": "resolveConnectionCascade",
-              "label": "resolveConnectionCascade"
-            }
-          }
-        },
-        {
-          "insert": " — to pick, in priority order, an anchor snap (within 8 view px), a nearest-outline-point snap (within 8 world px), or a coarse inside-the-shape candidate. On release, an endpoint drag dispatches "
-        },
-        {
-          "insert": "canvas.updateConnection",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; a create gesture dispatches "
-        },
-        {
-          "insert": "canvas.addConnection",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " when dropped on a candidate, or "
-        },
-        {
-          "insert": "canvas.quickConnect",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (create-and-connect as one history entry) when dropped on empty canvas; a bend drag dispatches a single waypoint update or clears waypoints when the drag snaps back to straight."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-anchor-dots-12b": {
-      "id": "b-interaction-connector-anchor-dots-12b",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Anchor-dot connector creation now has two entry surfaces. Select mode remains selection-only and editor/select-tool-only; Connector Mode is the hover-driven exception. "
-        },
-        {
-          "insert": "AnchorDots",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "AnchorDots",
-              "label": "AnchorDots"
-            }
-          }
-        },
-        {
-          "insert": " places four 28px hit targets with 10px resting dots, centered 20 screen px outside "
-        },
-        {
-          "insert": "connectionBoundsForObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "connectionBoundsForObject",
-              "label": "connectionBoundsForObject"
-            }
-          }
-        },
-        {
-          "insert": " so below-glyph text bands count as visual bounds. "
-        },
-        {
-          "insert": "ANCHOR_DOTS_MIN_ZOOM",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "ANCHOR_DOTS_MIN_ZOOM",
-              "label": "ANCHOR_DOTS_MIN_ZOOM"
-            }
-          }
-        },
-        {
-          "insert": " is 0.5; below 50% zoom, select-mode dots are hidden and inert, while Connector Mode bypasses the gate. Hover/press expands the dot into the full 28px arrow button, emits the hovered port for quick-connect preview, and select mode deliberately keeps "
-        },
-        {
-          "insert": "cursor: \"default\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " while the crosshair cursor is restored only for the active connector tool."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-create-12c": {
-      "id": "b-interaction-connector-create-12c",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Hovering an anchor dot, with no active connector drag, asks "
-        },
-        {
-          "insert": "CanvasStage",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx",
-              "label": "CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " to render a quick-connect "
-        },
-        {
-          "insert": "ConnectorDragPreview",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
-              "symbol": "ConnectorDragPreview",
-              "label": "ConnectorDragPreview"
-            }
-          }
-        },
-        {
-          "insert": " at "
-        },
-        {
-          "insert": "quickConnectClickPoint",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/gestures.ts",
-              "symbol": "quickConnectClickPoint",
-              "label": "quickConnectClickPoint"
-            }
-          }
-        },
-        {
-          "insert": ". Pressing a port enters "
-        },
-        {
-          "insert": "connector-create",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " immediately with a pinned source anchor, routed live preview, and forward arrowhead. In Connector Mode, pressing an object body also enters "
-        },
-        {
-          "insert": "connector-create",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " but leaves "
-        },
-        {
-          "insert": "fromAnchor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " absent, so route-time "
-        },
-        {
-          "insert": "autoPickAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/routing.ts",
-              "symbol": "autoPickAnchors",
-              "label": "autoPickAnchors"
-            }
-          }
-        },
-        {
-          "insert": " keeps choosing the facing side; a body click stays a deliberate no-op. Candidate resolution begins only after the 3-world-unit drag threshold, uses topmost-first paint order through "
-        },
-        {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
-              "symbol": "resolveConnectionCascade",
-              "label": "resolveConnectionCascade"
-            }
-          }
-        },
-        {
-          "insert": ", and excludes the source object; section interiors produce no attach candidate. Release on a candidate adds a connection, release on empty canvas quick-connects at the drop point, and a port sub-threshold click quick-connects at the computed spawn point, duplicates the source object's type/style metadata with blank text, and requests label editing for the predicted new object id."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-reconnect-12d": {
-      "id": "b-interaction-connector-reconnect-12d",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Endpoint reconnect also starts immediately from an endpoint hit, excluding the unmoved endpoint object while it resolves candidates. Release with no candidate reverts silently; release with a candidate dispatches "
-        },
-        {
-          "insert": "canvas.updateConnection",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". If the endpoint's object, anchor, or relative position changed, existing connector "
-        },
-        {
-          "insert": "waypoints",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " are cleared so the rerouted connection does not keep stale bend geometry."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-bend-12e": {
-      "id": "b-interaction-connector-bend-12e",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Selected connector bends are hit through SVG pills carrying "
-        },
-        {
-          "insert": "data-canvas-bend-segment",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; "
-        },
-        {
-          "insert": "resolveHit",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
-              "symbol": "resolveHit",
-              "label": "resolveHit"
-            }
-          }
-        },
-        {
-          "insert": " resolves them before generic connection hits. "
-        },
-        {
-          "insert": "stepFromIdle",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " validates the segment against "
-        },
-        {
-          "insert": "connectorBendSegments",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/bend-editing.ts",
-              "symbol": "connectorBendSegments",
-              "label": "connectorBendSegments"
-            }
-          }
-        },
-        {
-          "insert": " for the current routed path, then "
-        },
-        {
-          "insert": "stepFromConnectorBendDrag",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/gestures.ts",
-              "symbol": "stepFromConnectorBendDrag",
-              "label": "stepFromConnectorBendDrag"
-            }
-          }
-        },
-        {
-          "insert": " axis-locks the segment with "
-        },
-        {
-          "insert": "dragOrthogonalSegment",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/bend-editing.ts",
-              "symbol": "dragOrthogonalSegment",
-              "label": "dragOrthogonalSegment"
-            }
-          }
-        },
-        {
-          "insert": ", shows routed live preview points, snaps back to straight when within zoom-scaled tolerance, and commits exactly one history update with new waypoints or "
-        },
-        {
-          "insert": "waypoints: undefined",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " when simplification clears them."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-label-edit-12f": {
-      "id": "b-interaction-connector-label-edit-12f",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Connector label editing enters through double-click as well: "
-        },
-        {
-          "insert": "Connector",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/Connector.tsx",
-              "symbol": "Connector",
-              "label": "Connector"
-            }
-          }
-        },
-        {
-          "insert": " forwards connector double-clicks to the stage callback, which calls "
-        },
-        {
-          "insert": "openConnectionLabelEditor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/text-editing/use-text-editing.ts",
-              "symbol": "openConnectionLabelEditor",
-              "label": "openConnectionLabelEditor"
-            }
-          }
-        },
-        {
-          "insert": " and opens the routed label editor instead of treating the double-click as a drag gesture."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-mode-heading-12g": {
-      "id": "b-interaction-connector-mode-heading-12g",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "Connector Mode"
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-mode-12h": {
-      "id": "b-interaction-connector-mode-12h",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Connector Mode is a tool-gated branch inside "
-        },
-        {
-          "insert": "stepFromIdle",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "stepFromIdle",
-              "label": "stepFromIdle"
-            }
-          }
-        },
-        {
-          "insert": ", not a new state kind. Port hits enter "
-        },
-        {
-          "insert": "connector-create",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " with a pinned "
-        },
-        {
-          "insert": "fromAnchor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; object-body hits enter the same gesture with no "
-        },
-        {
-          "insert": "fromAnchor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", so stored connections leave "
-        },
-        {
-          "insert": "from.anchor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " absent and "
-        },
-        {
-          "insert": "routeConnection",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/routing.ts",
-              "symbol": "routeConnection",
-              "label": "routeConnection"
-            }
-          }
-        },
-        {
-          "insert": " falls back to "
-        },
-        {
-          "insert": "autoPickAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/routing.ts",
-              "symbol": "autoPickAnchors",
-              "label": "autoPickAnchors"
-            }
-          }
-        },
-        {
-          "insert": " on each route pass."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-mode-12i": {
-      "id": "b-interaction-connector-mode-12i",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Non-reachable hits stay suppressed in the branch: empty canvas, connector endpoints, bend pills, existing connector paths, handles, and double-clicks are inert while the tool is active. Section interiors remain free canvas for connection purposes, matching the routing cascade's section-inside exclusion."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-connector-mode-12j": {
-      "id": "b-interaction-connector-mode-12j",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Stickiness lives in reducer tool state: connector-create never dispatches "
-        },
-        {
-          "insert": "canvas.setTool",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", so the tool remains armed across completed lines and quick-connect chains. Escape is handled above the machine in "
-        },
-        {
-          "insert": "InteractiveCanvasEditor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
-              "label": "InteractiveCanvasEditor.tsx"
-            }
-          }
-        },
-        {
-          "insert": ": cancel an in-flight gesture first, otherwise switch the connector tool back to select, otherwise fall through to selection clearing."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-lock-gate-12a": {
-      "id": "b-interaction-pointer-sm-lock-gate-12a",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Both lock gates above share "
-        },
-        {
-          "insert": "isLockedForManipulation",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "isLockedForManipulation"
-            }
-          }
-        },
-        {
-          "insert": " — an exported pure helper that answers \"may this object be dragged or resized?\": true when the object itself carries "
-        },
-        {
-          "insert": "locked",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts"
-            }
-          }
-        },
-        {
-          "insert": " (either mode), or when the walk up its "
-        },
-        {
-          "insert": "parentId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " chain reaches a section with "
-        },
-        {
-          "insert": "locked === \"all\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". The walk is cycle-safe — a visited set plus an iteration cap bounded by the document's object count — so a corrupt parent cycle degrades to \"not locked\" rather than hanging the pointer pipeline."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-coalescer-13": {
-      "id": "b-interaction-pointer-sm-coalescer-13",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Move events during active gestures are rAF-coalesced in the drag pipeline. "
-        },
-        {
-          "insert": "use-interaction-pipeline.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
-              "label": "use-interaction-pipeline.ts"
-            }
-          }
-        },
-        {
-          "insert": " keeps a "
-        },
-        {
-          "insert": "moveCoalescerRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " built with "
-        },
-        {
-          "insert": "createFrameCoalescer",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/interaction.ts",
-              "symbol": "createFrameCoalescer",
-              "label": "createFrameCoalescer"
-            }
-          }
-        },
-        {
-          "insert": ": pointermove records the latest "
-        },
-        {
-          "insert": "DragPointerSnapshot",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "push",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "es it, pointerup/pointercancel "
-        },
-        {
-          "insert": "flush",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " any pending move before stepping the end event, and edge-pan re-steps feed the same coalescer so viewport-following drags still commit at most once per frame."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-pointer-sm-cancel-14": {
-      "id": "b-interaction-pointer-sm-cancel-14",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "cancelInteraction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "symbol": "cancelInteraction",
-              "label": "cancelInteraction"
-            }
-          }
-        },
-        {
-          "insert": " is the host-initiated cancel path used by Escape-key handling elsewhere in the editor: given the current "
-        },
-        {
-          "insert": "InteractionState",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", it restores the pre-gesture geometry for an in-progress "
-        },
-        {
-          "insert": "move",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " or "
-        },
-        {
-          "insert": "resize",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (dispatching "
-        },
-        {
-          "insert": "canvas.updateObjectGeometries",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " with "
-        },
-        {
-          "insert": "recordHistory: false",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and returns to idle — the same restore path a pointercancel event triggers, just reachable without a corresponding pointer event."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-decision-pure-sm-15": {
-      "id": "b-interaction-decision-pure-sm-15",
-      "flavour": "decision",
-      "props": {
-        "status": "accepted",
-        "title": "The interaction core is a pure state machine, decoupled from React/DOM"
-      },
-      "text": [
-        {
-          "insert": "core.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
-              "label": "core.ts"
-            }
-          }
-        },
-        {
-          "insert": " takes only normalized pointer events and plain data (document, selection, tool, viewport) as input, and returns only data (next state, actions, overlay) as output — it never touches the DOM, React state, or refs directly. This buys two concrete things. First, gesture logic that would otherwise require a real browser and pointer-event simulation — most notably the connection cascade resolved by "
-        },
-        {
-          "insert": "connectorCandidateAt",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " during a connector drag, and section drop-targeting during a move — becomes unit-testable with plain objects and a fake clock/scheduler, which is exactly what the interaction test suite below exercises. Second, and more fundamentally, it means every "
-        },
-        {
-          "insert": "CanvasAction",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " the editor ever dispatches can originate from either a live pointer gesture stepped through this machine, or from external automation (tests, scripted samples, an agent) constructing the same actions directly — both paths converge on the identical reducer the model layer exposes, so there is exactly one way a document ever actually changes. This mirrors the model layer's own single-reducer decision: the interaction core is the pointer-driven producer of actions, but never a second mutation authority alongside it."
-        },
-        {
-          "insert": " canvas-10-model",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/10-model",
-              "label": "canvas-10-model"
-            }
-          }
-        },
-        {
-          "insert": " describes that reducer and its action vocabulary in full."
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-heading-snapping-16": {
-      "id": "b-interaction-heading-snapping-16",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Snapping"
-        }
-      ],
-      "children": []
-    },
-    "b-interaction-snapping-body-17": {
-      "id": "b-interaction-snapping-body-17",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "snapping.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "label": "snapping.ts"
-            }
-          }
-        },
-        {
-          "insert": " computes alignment guides for dragged/resized objects against other objects' edges and centers. "
-        },
-        {
-          "insert": "computeSnapGuides",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "computeSnapGuides",
-              "label": "computeSnapGuides"
-            }
-          }
-        },
-        {
-          "insert": " compares each of the moving bounds' three lines per axis (near edge, center, far edge) against the same three lines on up to "
-        },
-        {
-          "insert": "MAX_SNAP_CANDIDATES",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "MAX_SNAP_CANDIDATES",
-              "label": "MAX_SNAP_CANDIDATES"
-            }
-          }
-        },
-        {
-          "insert": " (100) nearest candidates — siblings sharing the dragged set's parent, plus every section regardless of nesting — within a caller-supplied screen-space threshold (6px, divided by zoom so the snap feels constant at any zoom level, per "
+          "insert": " = 3 world units before a press promotes into a drag gesture, and "
         },
         {
           "insert": "SNAP_THRESHOLD_SCREEN_PX",
@@ -1915,52 +355,125 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/types.ts",
-              "symbol": "SNAP_THRESHOLD_SCREEN_PX",
-              "label": "SNAP_THRESHOLD_SCREEN_PX"
+              "label": "SNAP_THRESHOLD_SCREEN_PX",
+              "symbol": "SNAP_THRESHOLD_SCREEN_PX"
             }
           }
         },
         {
-          "insert": " in "
+          "insert": " = 6 screen px for zoom-normalized snapping. "
         },
         {
-          "insert": "types.ts",
+          "insert": "ResizeHandle",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/types.ts",
-              "label": "types.ts"
+              "label": "ResizeHandle",
+              "symbol": "ResizeHandle"
             }
           }
         },
         {
-          "insert": "). The closest match per axis wins; if multiple candidates tie at that closest distance on the same guide line, their spans merge into one visual guide. "
+          "insert": " names the eight cardinal/intercardinal handles, "
         },
         {
-          "insert": "computeSpacingHints",
+          "insert": "RESIZE_HANDLES",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "computeSpacingHints",
-              "label": "computeSpacingHints"
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "RESIZE_HANDLES",
+              "symbol": "RESIZE_HANDLES"
             }
           }
         },
         {
-          "insert": " separately detects equal-gap runs of objects along an axis and surfaces a spacing hint chip when the moving object touches one end of an equal-gap group — a FigJam-style \"these three are evenly spaced\" affordance. Grid alignment is handled by "
+          "insert": " stores them in "
         },
         {
-          "insert": "isGridAligned",
+          "insert": "n",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ne",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "e",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "se",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "s",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "sw",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "w",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "nw",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " order, and the small pure helpers "
+        },
+        {
+          "insert": "selectedObjectIds",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "isGridAligned",
-              "label": "isGridAligned"
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "selectedObjectIds",
+              "symbol": "selectedObjectIds"
             }
           }
         },
@@ -1968,99 +481,251 @@
           "insert": " and "
         },
         {
-          "insert": "applyGridFallback",
+          "insert": "worldDistance",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "applyGridFallback",
-              "label": "applyGridFallback"
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "worldDistance",
+              "symbol": "worldDistance"
             }
           }
         },
         {
-          "insert": ": hard grid snap (to "
-        },
-        {
-          "insert": "CANVAS_GRID_SIZE",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") only applies when the drag started grid-aligned; otherwise values round to clean integers so objects avoid sub-pixel drift, a PD5-era fallback rule."
+          "insert": " keep selection extraction and pointer-distance math out of DOM code."
         }
       ],
       "children": []
     },
-    "b-interaction-snapping-distribution-18": {
-      "id": "b-interaction-snapping-distribution-18",
+    "b-interaction-heading-hit-testing-28": {
+      "id": "b-interaction-heading-hit-testing-28",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Hit-testing"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-hit-testing-body-29": {
+      "id": "b-interaction-hit-testing-body-29",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "computeSnapCorrection",
+          "insert": "hit-testing.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
-              "symbol": "computeSnapCorrection",
-              "label": "computeSnapCorrection"
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "hit-testing.ts"
             }
           }
         },
         {
-          "insert": " composes point/edge alignment with the ported AFFiNE equal-spacing (\"distribution\") snap — "
+          "insert": " is pure, DOM-free hit-testing and geometry gathering. "
         },
         {
-          "insert": "alignDistributeHorizontally",
+          "insert": "hitTestObjects",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
-              "symbol": "alignDistributeHorizontally",
-              "label": "alignDistributeHorizontally"
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "hitTestObjects",
+              "symbol": "hitTestObjects"
             }
           }
         },
         {
-          "insert": " / "
+          "insert": " walks the stage paint order from topmost to bottommost, with section title chips checked before ordinary object outlines. "
         },
         {
-          "insert": "alignDistributeVertically",
+          "insert": "selectionBounds",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
-              "symbol": "alignDistributeVertically",
-              "label": "alignDistributeVertically"
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "selectionBounds",
+              "symbol": "selectionBounds"
             }
           }
         },
         {
-          "insert": " — using AFFiNE's own priority rule: on a given axis, point alignment wins if it produced a non-zero correction, and the distribution search only runs (and can win) on an axis where alignment found nothing. This is the function "
+          "insert": " computes selected-object union bounds, "
         },
         {
-          "insert": "stepFromMove",
+          "insert": "gatherSnapCandidates",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "gatherSnapCandidates",
+              "symbol": "gatherSnapCandidates"
+            }
+          }
+        },
+        {
+          "insert": " gathers sibling and section bounds for snapping, "
+        },
+        {
+          "insert": "objectsIntersectingBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "objectsIntersectingBounds",
+              "symbol": "objectsIntersectingBounds"
+            }
+          }
+        },
+        {
+          "insert": " answers drag-select membership by stored-geometry intersection, "
+        },
+        {
+          "insert": "descendantIds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "descendantIds",
+              "symbol": "descendantIds"
+            }
+          }
+        },
+        {
+          "insert": " returns transitive descendants, and "
+        },
+        {
+          "insert": "objectGeometryMap",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "objectGeometryMap",
+              "symbol": "objectGeometryMap"
+            }
+          }
+        },
+        {
+          "insert": " projects object ids to geometries. The editor pipeline falls back to these helpers during hit resolution, and feature slices reuse the same geometry vocabulary for selection, move, and snapping workflows."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-hit-testing-outline-30": {
+      "id": "b-interaction-hit-testing-outline-30",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "outline-hit-testing.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/outline-hit-testing.test.ts",
+              "label": "outline-hit-testing.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " verifies the outline behavior: true-outline shapes such as diamonds reject empty bbox corners and fall through to the object behind or canvas, bbox-outline objects keep full-box hits, below-slot text stays clickable, and zoom-scaled section title chips win before overlapping objects."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-frame-coalescer-31": {
+      "id": "b-interaction-heading-frame-coalescer-31",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The frame coalescer"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-frame-coalescer-body-32": {
+      "id": "b-interaction-frame-coalescer-body-32",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "label": "createFrameCoalescer",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " is the kernel rAF coalescer: callers provide a commit function and may inject the tiny request/cancel scheduler shape, so tests can drive frames deterministically with a fake scheduler. Its contract is "
+        },
+        {
+          "insert": "push",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " can call through a host-supplied "
+          "insert": " (record latest value and schedule one frame if needed), "
         },
         {
-          "insert": "ctx.snapResolver",
+          "insert": "flush",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " when it wants alignment and distribution snapping composed identically."
+          "insert": " (cancel the pending frame and synchronously commit the queued value), "
+        },
+        {
+          "insert": "cancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (drop the pending value without committing), and "
+        },
+        {
+          "insert": "isPending",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (whether a frame is scheduled). The editor pipeline batches pointer-move work through it; see "
+        },
+        {
+          "insert": "20-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -2100,13 +765,7 @@
         {
           "insert": "clipboardMemory",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "clipboardMemory",
-              "label": "clipboardMemory"
-            }
+            "code": true
           }
         },
         {
@@ -2119,8 +778,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "copySelection",
-              "label": "copySelection"
+              "label": "copySelection",
+              "symbol": "copySelection"
             }
           }
         },
@@ -2130,13 +789,7 @@
         {
           "insert": "collectDescendantIds",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "collectDescendantIds",
-              "label": "collectDescendantIds"
-            }
+            "code": true
           }
         },
         {
@@ -2181,8 +834,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "setClipboardMemory",
-              "label": "setClipboardMemory"
+              "label": "setClipboardMemory",
+              "symbol": "setClipboardMemory"
             }
           }
         },
@@ -2196,8 +849,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "getClipboardMemory",
-              "label": "getClipboardMemory"
+              "label": "getClipboardMemory",
+              "symbol": "getClipboardMemory"
             }
           }
         },
@@ -2211,13 +864,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/interaction/clipboard.ts",
-              "symbol": "buildPastePayload",
-              "label": "buildPastePayload"
+              "label": "buildPastePayload",
+              "symbol": "buildPastePayload"
             }
           }
         },
         {
-          "insert": ", which re-clones the objects and connections and translates every geometry — and every explicit connection waypoint, since W4 waypoints are stored as absolute world coordinates — by the delta between a target drop point (or a default 24-unit offset when pasting without one) and the recorded "
+          "insert": ", which re-clones the objects and connections and translates every geometry — and every explicit connection waypoint, because waypoints are stored as absolute world coordinates, so paste offsets translate them explicitly — by the delta between a target drop point (or a default 24-unit offset when pasting without one) and the recorded "
         },
         {
           "insert": "sourcePoint",
@@ -2235,8 +888,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/actions/objects.ts",
-              "symbol": "canvas.addObjects",
-              "label": "canvas.addObjects"
+              "label": "canvas.addObjects",
+              "symbol": "canvas.addObjects"
             }
           }
         },
@@ -2512,7 +1165,7 @@
           }
         },
         {
-          "insert": " exercises this layer purely at the data level, with no browser: "
+          "insert": " contains the local interaction coverage: "
         },
         {
           "insert": "interaction.test.ts",
@@ -2526,7 +1179,7 @@
           }
         },
         {
-          "insert": " covers the general gesture set (press/click/drag thresholds, move, resize, drag-select, place), plus connector endpoint drag, connector bend drag, and connector create; "
+          "insert": ", "
         },
         {
           "insert": "interaction.connection-cascade.test.ts",
@@ -2540,7 +1193,21 @@
           }
         },
         {
-          "insert": " remains cascade-specific for connector create/reconnect candidate resolution against the AFFiNE cascade (anchor/outline/inside priority); "
+          "insert": ", "
+        },
+        {
+          "insert": "interaction.connector-mode.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.connector-mode.test.ts",
+              "label": "interaction.connector-mode.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
         },
         {
           "insert": "interaction.frame-coalescer.test.ts",
@@ -2554,67 +1221,7 @@
           }
         },
         {
-          "insert": " drives "
-        },
-        {
-          "insert": "createFrameCoalescer",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " with a fake scheduler to verify collapse-to-latest, synchronous flush, and cancel-without-commit; "
-        },
-        {
-          "insert": "interaction.snap-inject.test.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/interaction.snap-inject.test.ts",
-              "label": "interaction.snap-inject.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " verifies the "
-        },
-        {
-          "insert": "ctx.snapResolver",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " injection hook overrides the default snap computation during a move gesture without ever affecting cancelled-drag restoration; "
-        },
-        {
-          "insert": "snapping.test.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snapping.test.ts",
-              "label": "snapping.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "snap-distribution-vendor.test.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snap-distribution-vendor.test.ts",
-              "label": "snap-distribution-vendor.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " cover alignment-guide and equal-spacing/distribution snap math respectively; and "
+          "insert": ", "
         },
         {
           "insert": "edge-pan.test.ts",
@@ -2628,16 +1235,50 @@
           }
         },
         {
-          "insert": " covers "
+          "insert": ", and "
         },
         {
-          "insert": "computeEdgePan",
+          "insert": "outline-hit-testing.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/outline-hit-testing.test.ts",
+              "label": "outline-hit-testing.test.ts"
+            }
           }
         },
         {
-          "insert": "'s velocity ramp and corner/out-of-bounds cases. Because none of this layer touches the DOM, every one of these suites runs as fast, deterministic unit tests rather than browser-driven component tests."
+          "insert": ". The frame coalescer suite drives "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "label": "createFrameCoalescer",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " with a fake scheduler; the edge-pan and outline suites cover the kernel utilities directly, while the remaining suites keep interaction-level regressions visible from this package root. The snapping suite lives with its slice at "
+        },
+        {
+          "insert": "packages/canvas/src/stage/editor/features/snapping/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__",
+              "label": "snapping/__tests__/"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -2648,35 +1289,33 @@
       "props": {},
       "text": [
         {
-          "insert": "Connector routing is closely related to this layer: connections get re-routed live during the move, resize, connector create/reconnect, and selected connector bend-drag gestures described above. Bend-drag preview uses routed "
+          "insert": "What used to be narrated here as one interaction layer now reads in three places: the gesture-state union, dispatcher, and the selection/move/place/snapping slices in "
         },
         {
-          "insert": "ConnectorDragPreview",
+          "insert": "20-implementation/50-editor",
           "attributes": {
-            "code": true,
             "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
-              "symbol": "ConnectorDragPreview",
-              "label": "ConnectorDragPreview"
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
             }
           }
         },
         {
-          "insert": " points and commits waypoints through the connector gesture stepper. See "
+          "insert": "; connector gestures, Connector Mode, and the connection cascade in "
         },
         {
-          "insert": "canvas-30-connectors",
+          "insert": "20-implementation/30-connectors",
           "attributes": {
             "reference": {
               "kind": "doc",
               "path": "20-implementation/30-connectors",
-              "label": "canvas-30-connectors"
+              "label": "20-implementation/30-connectors"
             }
           }
         },
         {
-          "insert": " for the connector routing and cascade-resolution behavior itself."
+          "insert": "; and this kernel underneath both."
         }
       ],
       "children": []
