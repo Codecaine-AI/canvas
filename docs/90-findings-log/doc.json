@@ -41,7 +41,9 @@
         "b-flog-f9-h",
         "b-flog-f9-p",
         "b-flog-f10-h",
-        "b-flog-f10-p"
+        "b-flog-f10-p",
+        "b-flog-f11-h",
+        "b-flog-f11-p"
       ]
     },
     "b-flog-title-1": {
@@ -328,6 +330,30 @@
       "text": [
         {
           "insert": "stage/viewer/InteractiveCanvasViewer.tsx passes only document/viewport/selectedObjectIds into InteractionFeedbackScreen, so every interaction-gated overlay collapses — except SelectionBox, which renders with interactiveHandles=true. The read-only surface therefore draws resize handles with pointer-events:auto that are wired to nothing. Related open design question from the layout session's boundary gaps: should the viewer show a selection box at all (stage/viewer importing the editor's InteractionFeedback is the recorded TODO(layout) exception)? Queued alongside that decision."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f11-h": {
+      "id": "b-flog-f11-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F11 — v2-flow fixture drifted from its parity test (lane 3, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f11-p": {
+      "id": "b-flog-f11-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The 70-studio audit confirmed v2-flow.canvas.json was edited after v2-flow-figjam-canvas.test.ts's assertions were written: the test expects 40 objects (file has 39), a 10-icon roster (file has 5), an 8px emphasis strokeWidth and explicit waypoints that are gone. These are the '3x v2-flow JSON' failures in the frozen red baseline. Queued for a code session: update the assertions to the current scene (prune, don't regenerate). The studio doc now tells the honest version of the drift story instead of claiming the test catches drift."
         }
       ],
       "children": []

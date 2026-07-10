@@ -1,22 +1,23 @@
 {
   "schemaVersion": 1,
   "id": "canvas-70-studio-and-canvases",
-  "title": "Canvas Engine — Studio App and Canvas JSON Files",
+  "title": "Canvas Engine — Studio and the Canvas Files",
   "root": "b-studio-root",
   "blocks": {
     "b-studio-root": {
       "id": "b-studio-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The standalone studio app for creating/editing boards without a host app, and the stored InteractiveCanvasDocument canvas JSON files used across tests, demos, and doc embeds.",
+        "covers": "The studio dev app (packages/studio): a Vite+React shell whose /api/canvases middleware persists boards as canvases/*.canvas.json files at the repo root — list/create/save/delete plus debounced autosave — and the canvases/ corpus those files form: the studio's boards, the object gallery, and the fixtures the test suite imports directly.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
-          "studio app",
-          "board persistence",
-          "canvas JSON files",
-          "InteractiveCanvasDocument",
-          "board-design-reference"
+          "/api/canvases file API",
+          "autosave",
+          "canvas JSON fixtures",
+          "object gallery",
+          "starter document",
+          "fixture double-duty"
         ]
       },
       "children": [
@@ -29,9 +30,13 @@
         "b-studio-app-para-7",
         "b-studio-heading-canvases-8",
         "b-studio-canvases-intro-9",
+        "b-studio-sample-item-board-1",
+        "b-studio-sample-item-board-2",
+        "b-studio-sample-item-board-3",
+        "b-studio-sample-item-layer-cake",
         "b-studio-sample-item-synthetic-10",
-        "b-studio-sample-item-v2-flow-11",
         "b-studio-sample-item-v2-flow-elements-12",
+        "b-studio-sample-item-v2-flow-11",
         "b-studio-sample-item-v2-flow-figjam-13",
         "b-studio-heading-double-duty-14",
         "b-studio-double-duty-observation-15",
@@ -49,7 +54,7 @@
       },
       "text": [
         {
-          "insert": "Studio App and Canvas JSON Files"
+          "insert": "Canvas Engine — Studio and the Canvas Files"
         }
       ],
       "children": []
@@ -60,7 +65,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Two pieces of the canvas engine's monorepo exist to make the engine tangible without a host app: the "
+          "insert": "The studio app is the repo-local way to edit canvas files without a host app: "
         },
         {
           "insert": "packages/studio/",
@@ -73,29 +78,16 @@
           }
         },
         {
-          "insert": " standalone board editor, and the "
+          "insert": " is a Vite+React shell, and its dev-server middleware persists boards as "
         },
         {
-          "insert": "canvases/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases"
-            }
-          }
-        },
-        {
-          "insert": " sample-document module bundled with "
-        },
-        {
-          "insert": "@codecaine-ai/canvas",
+          "insert": "canvases/*.canvas.json",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " itself. Together they let a person open a real board in a browser and let tests, demos, and this doc bundle set all draw on the same known-good sample data."
+          "insert": " files at the repo root. That same corpus is also fixture data: the studio lists and loads it over HTTP, the object gallery exercises the canvas renderer, and the test suite imports individual JSON files directly."
         }
       ],
       "children": []
@@ -138,20 +130,7 @@
           }
         },
         {
-          "insert": ", described in the top-level "
-        },
-        {
-          "insert": "README.md",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "README.md"
-            }
-          }
-        },
-        {
-          "insert": " as \"a minimal standalone Vite+React app for creating/editing boards without a host app.\" It runs on port 3999 via "
+          "insert": ", a thin Vite+React dev app. It runs on port 3999 via "
         },
         {
           "insert": "bun run dev:studio",
@@ -160,16 +139,7 @@
           }
         },
         {
-          "insert": " from the repo root, or "
-        },
-        {
-          "insert": "vite",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " directly inside the package. Its "
+          "insert": " from the repo root. Its "
         },
         {
           "insert": "package.json",
@@ -200,7 +170,29 @@
           }
         },
         {
-          "insert": " dependency — the app is otherwise a thin React shell (Radix UI primitives, lucide-react icons, Tailwind) plus four source files: "
+          "insert": " dependency; Radix UI is a direct dependency and Tailwind is a direct dev dependency. Icons come from the canvas package's "
+        },
+        {
+          "insert": "@codecaine-ai/canvas/ui/icons",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " barrel rather than a studio "
+        },
+        {
+          "insert": "lucide-react",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " dependency. The source set is exactly four files: "
         },
         {
           "insert": "main.tsx",
@@ -229,9 +221,13 @@
           "insert": ", "
         },
         {
-          "insert": "board-store.ts",
+          "insert": "GalleryPage.tsx",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/GalleryPage.tsx"
+            }
           }
         },
         {
@@ -248,7 +244,16 @@
           }
         },
         {
-          "insert": "."
+          "insert": "; "
+        },
+        {
+          "insert": "board-store.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is gone."
         }
       ],
       "children": []
@@ -269,42 +274,19 @@
           }
         },
         {
-          "insert": " imports everything it needs from the package specifier "
+          "insert": " owns the client routes "
         },
         {
-          "insert": "@codecaine-ai/canvas",
+          "insert": "/",
           "attributes": {
             "code": true
-          }
-        },
-        {
-          "insert": " (and its "
-        },
-        {
-          "insert": "@codecaine-ai/canvas/ui/*",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " subpaths for "
-        },
-        {
-          "insert": "Button",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src",
-              "symbol": "Button"
-            }
           }
         },
         {
           "insert": ", "
         },
         {
-          "insert": "Badge",
+          "insert": "/gallery",
           "attributes": {
             "code": true
           }
@@ -313,27 +295,49 @@
           "insert": ", and "
         },
         {
-          "insert": "cn",
+          "insert": "/canvas/:id",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "), never via relative paths into the sibling package — the repo-wide convention for cross-package imports in this monorepo. The landing screen renders two grids: \"Bundled samples\" (the three canvas JSON files below, opened read-write via "
+          "insert": " via "
         },
         {
-          "insert": "InteractiveCanvasEditor",
+          "insert": "history.pushState",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src",
-              "symbol": "InteractiveCanvasEditor"
-            }
+            "code": true
           }
         },
         {
-          "insert": ") and \"Your boards\" (locally persisted drafts). A \"New board\" action creates a fresh document via "
+          "insert": " plus "
+        },
+        {
+          "insert": "popstate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The landing screen is one \"Canvas files\" list fed by "
+        },
+        {
+          "insert": "GET /api/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; the header actions are Object Gallery and New board. New board chooses the first free "
+        },
+        {
+          "insert": "board-N",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " id, builds a starter document through "
         },
         {
           "insert": "createStarterCanvasDocument",
@@ -347,6 +351,124 @@
           }
         },
         {
+          "insert": " (schemaVersion 1, diagram mode, one section, two process objects, one connection), POSTs it, and navigates to the editor. Delete uses "
+        },
+        {
+          "insert": "window.confirm",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " before "
+        },
+        {
+          "insert": "DELETE /api/canvases/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The "
+        },
+        {
+          "insert": "/canvas/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " route mounts "
+        },
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/index.ts",
+              "symbol": "InteractiveCanvasEditor"
+            }
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "editableTitle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "showInspector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " persisted behind the single "
+        },
+        {
+          "insert": "studio.showInspector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " localStorage key (the app's only localStorage use), a Cmd/Ctrl+I toggle, and topBar slots for Back, save status, and Inspector. "
+        },
+        {
+          "insert": "GalleryPage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/GalleryPage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " renders every "
+        },
+        {
+          "insert": "OBJECT_TYPE_DEFAULTS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/index.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": " type through the read-only "
+        },
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/index.ts",
+              "symbol": "InteractiveCanvasViewer"
+            }
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "compact",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
           "insert": "."
         }
       ],
@@ -354,130 +476,13 @@
     },
     "b-studio-app-para-6": {
       "id": "b-studio-app-para-6",
-      "flavour": "paragraph",
-      "props": {},
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
       "text": [
         {
-          "insert": "board-store.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the persistence layer, and by its own header comment it is deliberately simple: \"Studio v1 persistence: local drafts only (localStorage), no backend.\" Each draft is a full "
-        },
-        {
-          "insert": "InteractiveCanvasDocument",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/document.ts",
-              "symbol": "InteractiveCanvasDocument"
-            }
-          }
-        },
-        {
-          "insert": " wrapped in a "
-        },
-        {
-          "insert": "StudioDraft",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " record ("
-        },
-        {
-          "insert": "id",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "title",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "updatedAt",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and stored as a plain id-keyed map under a single "
-        },
-        {
-          "insert": "codecaine-studio-drafts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "window.localStorage",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " key. "
-        },
-        {
-          "insert": "listDrafts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "saveDraft",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "deleteDraft",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " read/write that map in full each call, and all localStorage access is guarded against a missing "
-        },
-        {
-          "insert": "window",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (SSR-safety) and wrapped in a try/catch that falls back to an empty draft set on parse failure."
+          "insert": "Persistence: the /api/canvases file API"
         }
       ],
       "children": []
@@ -488,7 +493,201 @@
       "props": {},
       "text": [
         {
-          "insert": "There is no backend, sync, or multi-user concern here — the store's own comment is explicit that the studio app exists so boards can be created and edited without a host app, not to replace a real backend. Opening a bundled sample or an existing draft always clones the document (deep "
+          "insert": "The backend is the Vite middleware in "
+        },
+        {
+          "insert": "vite.config.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/vite.config.ts",
+              "symbol": "canvasFileApiPlugin"
+            }
+          }
+        },
+        {
+          "insert": ". Documents at rest are "
+        },
+        {
+          "insert": "canvases/*.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " files at the repo root; ids must match "
+        },
+        {
+          "insert": "CANVAS_ID_PATTERN",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and resolve to "
+        },
+        {
+          "insert": "${id}.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " under that directory. "
+        },
+        {
+          "insert": "GET /api/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " reads the directory, filters "
+        },
+        {
+          "insert": "*.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", returns "
+        },
+        {
+          "insert": "{id, title, updated_at}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "updated_at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from mtime, and sorts newest first; "
+        },
+        {
+          "insert": "GET /api/canvases/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " streams the file without validating it on read. "
+        },
+        {
+          "insert": "POST",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns 409 if the file exists, and both "
+        },
+        {
+          "insert": "POST",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " validate through "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": "; invalid documents get 422 with issues, valid documents are written as pretty-printed JSON, and "
+        },
+        {
+          "insert": "DELETE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " unlinks the file. On the client side, "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/App.tsx"
+            }
+          }
+        },
+        {
+          "insert": " queues a save on every "
+        },
+        {
+          "insert": "onDocumentChange",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", skips writes unchanged from the loaded snapshot, debounces 800ms into a "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and flushes on "
+        },
+        {
+          "insert": "popstate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", Back, and "
+        },
+        {
+          "insert": "beforeunload",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "keepalive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The editor chrome shows Saved or Save failed — retry. Opening a board deep-clones the fetched document ("
         },
         {
           "insert": "JSON.parse(JSON.stringify(...))",
@@ -497,7 +696,7 @@
           }
         },
         {
-          "insert": ") before handing it to the editor, so editing a sample never mutates the original canvas JSON file in memory."
+          "insert": "), snapshots it for the dirty check, and maps an unknown id to the not-found state."
         }
       ],
       "children": []
@@ -510,7 +709,7 @@
       },
       "text": [
         {
-          "insert": "synthetic-canvas.ts",
+          "insert": "synthetic.canvas.json",
           "attributes": {
             "code": true,
             "reference": {
@@ -520,21 +719,7 @@
           }
         },
         {
-          "insert": " — exports "
-        },
-        {
-          "insert": "synthetic.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/synthetic.canvas.json",
-              "symbol": "synthetic.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": ", a small \"Synthetic Interview Flow\" board (nested grouping boxes, processes) used as a minimal validation sample for the first interactive-canvas slice."
+          "insert": " — \"Synthetic Interview Flow\": 13 objects (processes, rectangles, icons, a sticky, and the database/decision/document/annotation-marker types) and five connections."
         }
       ],
       "children": []
@@ -547,7 +732,7 @@
       },
       "text": [
         {
-          "insert": "v2-flow-canvas.ts",
+          "insert": "v2-flow-interactive.canvas.json",
           "attributes": {
             "code": true,
             "reference": {
@@ -557,21 +742,7 @@
           }
         },
         {
-          "insert": " — exports "
-        },
-        {
-          "insert": "v2-flow-interactive.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow-interactive.canvas.json",
-              "symbol": "v2-flow-interactive.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": ", the original \"V2 Interview Agent Flow\" sample built from generic shape vocabulary (stickies, grouping boxes, processes) predating the FigJam-styled object types. Left untouched as its own distinct sample even after the FigJam-parity recreation below was added."
+          "insert": " — \"V2 Interview Agent Flow\": 27 objects and 16 connections built from the older generic flow vocabulary (rectangles, processes, decisions, stickies, icons, database, document)."
         }
       ],
       "children": []
@@ -584,7 +755,7 @@
       },
       "text": [
         {
-          "insert": "v2-flow-elements.ts",
+          "insert": "v2-flow-elements.canvas.json",
           "attributes": {
             "code": true,
             "reference": {
@@ -594,21 +765,7 @@
           }
         },
         {
-          "insert": " — exports "
-        },
-        {
-          "insert": "v2-flow-elements.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow-elements.canvas.json",
-              "symbol": "v2-flow-elements.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": ", a reference board exercising every FigJam-section and V2-Flow shape type introduced in one wave (nested sections, a partial-overlap note, an outside arrow) in one small board, purpose-built for the schema round-trip, section-capture, z-order, and silhouette smoke tests."
+          "insert": " — \"V2 Flow — element vocabulary reference\": 11 objects and two connections covering sections, stickies, pills, icons, predefined-process, and arrow-shape objects."
         }
       ],
       "children": []
@@ -621,7 +778,7 @@
       },
       "text": [
         {
-          "insert": "v2-flow-figjam.ts",
+          "insert": "v2-flow.canvas.json",
           "attributes": {
             "code": true,
             "reference": {
@@ -631,21 +788,7 @@
           }
         },
         {
-          "insert": " — exports "
-        },
-        {
-          "insert": "v2-flow.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow.canvas.json",
-              "symbol": "v2-flow.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": ", the FigJam visual-parity recreation of the user's own \"V2 Flow\" FigJam board — 40 objects and 24 connections reproducing sections, stickies, pills, icon objects with cpu, chat, and person glyphs, arrow-shape chevrons, and the full connector network with per-object palette color picks (migrated to the closed 10-pick roster in the color-prune cutover). This is the sample already embedded live in the "
+          "insert": " — \"V2 Flow (FigJam parity)\": 39 objects and 24 connections, with 12 sections, 3 stickies, 7 pills, 5 icons (cpu 3, chat 1, person 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle; it is the live sample embedded in "
         },
         {
           "insert": "canvas-00-overview",
@@ -653,19 +796,6 @@
             "reference": {
               "kind": "doc",
               "path": "10-system-design/00-overview"
-            }
-          }
-        },
-        {
-          "insert": " doc via a serialized sidecar at "
-        },
-        {
-          "insert": "canvases/v2-flow.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow.canvas.json"
             }
           }
         },
@@ -692,7 +822,7 @@
       "id": "b-studio-double-duty-observation-15",
       "flavour": "observation",
       "props": {
-        "title": "One sample, two consumers, zero drift"
+        "title": "One sample, two consumers, recorded drift"
       },
       "text": [
         {
@@ -701,16 +831,15 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "canvases/v2-flow.canvas.json",
-              "symbol": "v2-flow.canvas.json"
+              "path": "canvases/v2-flow.canvas.json"
             }
           }
         },
         {
-          "insert": " specifically serves double duty. It is imported directly by "
+          "insert": " does double duty as editor content and test fixture. The parity test "
         },
         {
-          "insert": "v2-flow-figjam.test.ts",
+          "insert": "v2-flow-figjam-canvas.test.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -720,19 +849,7 @@
           }
         },
         {
-          "insert": ", which asserts on its exact object-type inventory (13 sections, 3 stickies, 7 pills, 3 cpu-glyph icons, 6 arrow-shape chevrons, and so on) and its connector count. It is also, unchanged, the literal source object serialized into the sidecar that "
-        },
-        {
-          "insert": "canvas-00-overview",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/00-overview"
-            }
-          }
-        },
-        {
-          "insert": "'s live canvas block renders — the same TypeScript value, not a hand-maintained copy. Because both consumers point at one module, a change to the sample can't silently diverge into \"what the docs show\" versus \"what the tests check\": edit the sample and both the schema-validation test suite and the doc's embedded demonstration move together, or the test fails and catches the drift before it ships."
+          "insert": " asserts scene composition, but it is currently part of the repo's FROZEN red baseline: the fixture was edited after the assertions were written (object count, icon roster, an emphasis strokeWidth, waypoints), and repo policy is to keep the failure set byte-stable rather than regenerate baselines mid-overhaul. Updating those assertions is queued work; until then, \"the test catches drift\" reads the other way around — the red tests are the recorded drift."
         }
       ],
       "children": []
@@ -771,11 +888,28 @@
         {
           "insert": "v2-flow.canvas.json",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/v2-flow.canvas.json"
+            }
           }
         },
         {
-          "insert": "'s own header comment cites it directly as the coordinate and color source for that sample's recreation of the user's \"V2 Flow.png\" FigJam board. Full provenance detail for this material belongs in the appendix doc, not here."
+          "insert": " is plain JSON, so it has no header comment; the linkage is provenance, not syntax: the v2-flow scene reproduces the reference diagram captured under "
+        },
+        {
+          "insert": "board-design-reference/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference"
+            }
+          }
+        },
+        {
+          "insert": ". Full provenance detail for this material belongs in the appendix doc, not here."
         }
       ],
       "children": []
@@ -784,11 +918,11 @@
       "id": "b-studio-testing-block-18",
       "flavour": "testing",
       "props": {
-        "title": "Sample self-consistency tests"
+        "title": "Frozen red baseline for v2-flow drift"
       },
       "text": [
         {
-          "insert": "packages/canvas/src/state/__tests__/v2-flow-figjam-canvas.test.ts",
+          "insert": "v2-flow-figjam-canvas.test.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -798,34 +932,32 @@
           }
         },
         {
-          "insert": " holds tests that validate the sample's own internal consistency rather than exercising other engine subsystems: it asserts that v2-flow.canvas.json passes "
+          "insert": " still asserts scene composition for "
         },
         {
-          "insert": "validateInteractiveCanvasDocument",
+          "insert": "v2-flow.canvas.json",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/v2-flow.canvas.json"
+            }
           }
         },
         {
-          "insert": " with no hard errors and no unexpected warnings (e.g. an unknown "
+          "insert": ", but the verified fixture now has 39 objects and 24 connections: 12 sections, 3 stickies, 7 pills, 5 icons (cpu 3, chat 1, person 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle. The mismatch is intentional baseline bookkeeping, not a green guardrail: the test's older expectations record the drift until a code session updates the assertions to the current scene. Keep this aligned with the testing policy in "
         },
         {
-          "insert": "color",
+          "insert": "99-appendix",
           "attributes": {
-            "code": true
+            "reference": {
+              "kind": "doc",
+              "path": "99-appendix"
+            }
           }
         },
         {
-          "insert": " swatch id), that its object-type inventory matches expected counts exactly (13 sections, 3 stickies, 7 pills, 5 icons (cpu x3, chat x1, person x1), 5 predefined-process, 6 arrow-shape, 1 rectangle), that it has at least 20 connections, that every connection endpoint and every object parentId resolves to a real object id, and that every object carries a "
-        },
-        {
-          "insert": "color",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " pick from the closed roster. These checks guard the sample's own shape, independent of whatever else in the engine happens to consume it."
+          "insert": "."
         }
       ],
       "children": []
@@ -841,14 +973,18 @@
         {
           "insert": "board-design-reference/",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "board-design-reference"
+            }
           }
         },
         {
           "insert": " and other appendix-level material, see "
         },
         {
-          "insert": "canvas-99-appendix",
+          "insert": "99-appendix",
           "attributes": {
             "reference": {
               "kind": "doc",
@@ -870,7 +1006,7 @@
       },
       "text": [
         {
-          "insert": "Canvas JSON store"
+          "insert": "canvases/ corpus"
         }
       ],
       "children": []
@@ -891,7 +1027,7 @@
           }
         },
         {
-          "insert": " holds sample "
+          "insert": " is not a TypeScript sample module and has no barrel re-export. It is the repo-root store of plain "
         },
         {
           "insert": "InteractiveCanvasDocument",
@@ -905,19 +1041,28 @@
           }
         },
         {
-          "insert": " values bundled directly with the "
+          "insert": " "
         },
         {
-          "insert": "@codecaine-ai/canvas",
+          "insert": ".canvas.json",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " package. Every file in the directory is re-exported from the package barrel, "
+          "insert": " data files: tests import individual JSON files by relative path, the studio loads them over HTTP through "
         },
         {
-          "insert": "src/index.ts",
+          "insert": "/api/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "packages/canvas/src/index.ts",
           "attributes": {
             "code": true,
             "reference": {
@@ -927,7 +1072,171 @@
           }
         },
         {
-          "insert": ", so any consumer of the package — tests, the studio app, or a doc's canvas embed — can import a sample the same way it imports any other engine export."
+          "insert": " contains none of them. The current corpus is "
+        },
+        {
+          "insert": "board-1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "board-2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "board-3",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "layer-cake",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "synthetic",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "v2-flow-elements",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "v2-flow-interactive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "v2-flow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-sample-item-board-1": {
+      "id": "b-studio-sample-item-board-1",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "board-1.canvas.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/board-1.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": " — an \"Untitled board\" studio-created board with four objects (two sections, two processes) and two connections."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-sample-item-board-2": {
+      "id": "b-studio-sample-item-board-2",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "board-2.canvas.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/board-2.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": " — an \"Untitled board\" studio-created board with four objects (one section, two processes, one sticky) and one connection."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-sample-item-board-3": {
+      "id": "b-studio-sample-item-board-3",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "board-3.canvas.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/board-3.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": " — an \"Untitled board\" studio-created board with four objects (one section, two processes, one sticky) and one connection."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-sample-item-layer-cake": {
+      "id": "b-studio-sample-item-layer-cake",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "layer-cake.canvas.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/layer-cake.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": " — \"Layer cake - geometric section layering\": eight objects (four sections plus a decision, pill, process, and sticky) and one connection."
         }
       ],
       "children": []
