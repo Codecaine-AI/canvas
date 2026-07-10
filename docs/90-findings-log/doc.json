@@ -37,7 +37,11 @@
         "b-flog-f7-h",
         "b-flog-f7-p",
         "b-flog-f8-h",
-        "b-flog-f8-p"
+        "b-flog-f8-p",
+        "b-flog-f9-h",
+        "b-flog-f9-p",
+        "b-flog-f10-h",
+        "b-flog-f10-p"
       ]
     },
     "b-flog-title-1": {
@@ -276,6 +280,54 @@
       "text": [
         {
           "insert": "10-shape-api claims the span D1–D19 and restates/cites 17 of the 19 decision ids inline, but D2 and D9 never appear. The cross-cutting D1–D19 audit will verify their rationale survives somewhere in docs/ and recover it from OBJECT-DEF-OVERHAUL.md's git history if not."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f9-h": {
+      "id": "b-flog-f9-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F9 — ConnectionLabelChip is dead code (lane 3, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f9-p": {
+      "id": "b-flog-f9-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "While widening the connectors doc, Codex verified that packages/canvas/src/connectors/ConnectionLabelChip.tsx is exported but never imported or mounted anywhere under packages/canvas/src — connection labels render exclusively through Connector.tsx's inline SVG label group. A host-supplied worldOverlay could mount the chip and double-render labels. Queued for a code pass: delete the component or wire it as the intended world-overlay label. The tree is frozen this session; the connectors doc documents the inline label as the one live renderer."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f10-h": {
+      "id": "b-flog-f10-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F10 — The read-only viewer mounts pointer-capturing resize handles (lane 3, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f10-p": {
+      "id": "b-flog-f10-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "stage/viewer/InteractiveCanvasViewer.tsx passes only document/viewport/selectedObjectIds into InteractionFeedbackScreen, so every interaction-gated overlay collapses — except SelectionBox, which renders with interactiveHandles=true. The read-only surface therefore draws resize handles with pointer-events:auto that are wired to nothing. Related open design question from the layout session's boundary gaps: should the viewer show a selection box at all (stage/viewer importing the editor's InteractionFeedback is the recorded TODO(layout) exception)? Queued alongside that decision."
         }
       ],
       "children": []
