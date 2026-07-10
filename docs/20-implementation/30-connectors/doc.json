@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "canvas-30-connectors",
-  "title": "Canvas Engine — Routing Layer",
+  "title": "Canvas Engine — Connectors",
   "root": "b-routing-root",
   "blocks": {
     "b-routing-root": {
       "id": "b-routing-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "How connections between canvas objects compute their visual path: elbow/orthogonal A* routing, anchor resolution, waypoint reconciliation on object move, and the connection cascade.",
+        "covers": "The complete connector slice at packages/canvas/src/connectors/: the def (connectors are not objects), elbow routing and anchor resolution, waypoint reconciliation, bend editing, the connection cascade, creation/reconnect gestures and the Connector Mode tool, the gesture/overlay vocabulary, the MPL pathfinding island, and the four render components.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
@@ -17,12 +17,21 @@
           "anchor resolution",
           "waypoint reconciliation",
           "connection cascade",
-          "MPL-2.0 file provenance"
+          "connector gestures",
+          "Connector Mode",
+          "quick connect",
+          "bend editing",
+          "anchor dots"
         ]
       },
       "children": [
         "b-routing-title-1",
         "b-routing-intro-2",
+        "b-connectors-heading-def-27",
+        "b-connectors-def-p1-28",
+        "b-connectors-def-p2-29",
+        "b-connectors-def-p3-30",
+        "b-connectors-def-p4-31",
         "b-routing-heading-elbow-3",
         "b-routing-elbow-p1-4",
         "b-routing-elbow-p2-5",
@@ -40,6 +49,25 @@
         "b-routing-bends-p1-24",
         "b-routing-bends-p2-25",
         "b-routing-bends-p3-26",
+        "b-connectors-heading-gestures-32",
+        "b-connectors-gestures-p1-33",
+        "b-connectors-gestures-p2-34",
+        "b-connectors-gestures-p3-35",
+        "b-connectors-heading-mode-36",
+        "b-connectors-mode-p1-37",
+        "b-connectors-mode-p2-38",
+        "b-connectors-mode-p3-39",
+        "b-connectors-heading-vocabulary-40",
+        "b-connectors-vocabulary-p1-41",
+        "b-connectors-vocabulary-p2-42",
+        "b-connectors-vocabulary-p3-43",
+        "b-connectors-heading-rendering-44",
+        "b-connectors-rendering-p1-45",
+        "b-connectors-rendering-p2-46",
+        "b-connectors-heading-preview-47",
+        "b-connectors-preview-p1-48",
+        "b-connectors-preview-p2-49",
+        "b-connectors-preview-p3-50",
         "b-routing-heading-overlay-14",
         "b-routing-overlay-p1-15",
         "b-routing-overlay-p2-16",
@@ -57,7 +85,7 @@
       },
       "text": [
         {
-          "insert": "Routing Layer"
+          "insert": "Connectors"
         }
       ],
       "children": []
@@ -68,7 +96,20 @@
       "props": {},
       "text": [
         {
-          "insert": "A connection's visual path is never stored as a fixed drawing — it is computed from the current geometry of its two endpoint objects every time either side moves. "
+          "insert": "The connector slice runs from def to route math to gestures to pixels in one folder: "
+        },
+        {
+          "insert": "packages/canvas/src/connectors/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors"
+            }
+          }
+        },
+        {
+          "insert": " owns the non-object connector def, elbow routing and anchor resolution, waypoint reconciliation helpers, bend editing, the connection cascade, gesture steppers, the pathfinding island, overlays, and render components. A connection's visual path is never stored as a fixed drawing — it is computed from the current geometry of its two endpoint objects every time either side moves. "
         },
         {
           "insert": "routeConnection",
@@ -492,7 +533,21 @@
           }
         },
         {
-          "insert": " now prefers genuinely facing sides before falling back to center-delta dominance: if the objects' vertical spans overlap within the 8px auto-route alignment tolerance, it chooses right/left or left/right; if their horizontal spans overlap, it chooses bottom/top or top/bottom; otherwise the dominant center separation wins, with horizontal ties going horizontal. This picked pair is only the fallback: an explicit "
+          "insert": " now prefers genuinely facing sides before falling back to center-delta dominance: if the objects' vertical spans overlap within the 8px auto-route span-overlap tolerance, it chooses right/left or left/right; if their horizontal spans overlap, it chooses bottom/top or top/bottom; otherwise the dominant center separation wins, with horizontal ties going horizontal. This 8px value is "
+        },
+        {
+          "insert": "AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX"
+            }
+          }
+        },
+        {
+          "insert": " in the router, not the cascade's screen-pixel snap radius. This picked pair is only the fallback: an explicit "
         },
         {
           "insert": "connection.from.anchor",
@@ -870,7 +925,38 @@
           }
         },
         {
-          "insert": " — the defs own their outline geometry now — and the connectors slice reaches them through the single allowed boundary edge: the import-boundaries test pins the connectors slice's "
+          "insert": " — the defs own their outline geometry now — and the connector boundary is broader than the old single-edge claim: "
+        },
+        {
+          "insert": "import-boundaries.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__/import-boundaries.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " allows connectors to import "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "state/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
         },
         {
           "insert": "objects/",
@@ -879,16 +965,65 @@
           }
         },
         {
-          "insert": " imports to exactly "
+          "insert": ", "
         },
         {
-          "insert": "connectors/connection-cascade.ts -> ../objects/geometry",
+          "insert": "interaction/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (a pure, React-free module; connectors must never import def components). The port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support. Its current behavior also deliberately excludes section interiors from the inside snap tier while keeping section anchors and outlines valid."
+          "insert": ", and "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", with only the current stage-core exceptions pinned to "
+        },
+        {
+          "insert": "AnchorDots.tsx -> ../stage/viewport",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "ConnectorDragPreview.tsx -> ../stage/ObjectShape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus "
+        },
+        {
+          "insert": "../stage/viewport",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The tight pin is the MPL island: "
+        },
+        {
+          "insert": "connectors/pathfinding/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding"
+            }
+          }
+        },
+        {
+          "insert": " imports no first-party code outside itself. The port remains algorithm-only: no canvas-paint, no GfxController/grid search, no rotation support. Its current behavior also deliberately excludes section interiors from the inside snap tier while keeping section anchors and outlines valid."
         }
       ],
       "children": []
@@ -1050,10 +1185,10 @@
       },
       "text": [
         {
-          "insert": "The A* orthogonal routing algorithm adapted from BlockSuite lives entirely under "
+          "insert": "The "
         },
         {
-          "insert": "packages/canvas/src/connectors/pathfinding/",
+          "insert": "connectors/pathfinding/",
           "attributes": {
             "code": true,
             "reference": {
@@ -1063,114 +1198,86 @@
           }
         },
         {
-          "insert": " with file-level MPL-2.0 provenance demarcated by "
-        },
-        {
-          "insert": "PROVENANCE.md",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "PROVENANCE.md"
-            }
-          }
-        },
-        {
-          "insert": ". Those pathfinding files ("
-        },
-        {
-          "insert": "priority-queue.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "graph.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
+          "insert": " island is BlockSuite-derived under MPL-2.0: "
         },
         {
           "insert": "a-star.ts",
           "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "path-generator.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "gfx-types.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") and "
-        },
-        {
-          "insert": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " carry headers citing upstream BlockSuite source paths and the MPL-2.0 license, and this file-level attribution is what satisfies MPL-2.0's copyleft obligations without imposing them on the rest of the codebase. PROVENANCE.md also documents "
-        },
-        {
-          "insert": "packages/canvas/src/connectors/connection-cascade.ts",
-          "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts"
+              "path": "packages/canvas/src/connectors/pathfinding/a-star.ts"
             }
           }
         },
         {
-          "insert": " as a labeled algorithm-only port from the same upstream file (BlockSuite's "
+          "insert": "/"
         },
         {
-          "insert": "connector-manager.ts",
+          "insert": "graph.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/graph.ts"
+            }
           }
         },
         {
-          "insert": "), even though it lives outside the "
+          "insert": "/"
         },
         {
-          "insert": "pathfinding/",
+          "insert": "priority-queue.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/priority-queue.ts"
+            }
           }
         },
         {
-          "insert": " directory — it is explicitly called out in PROVENANCE.md as one of the files that must not have its ported algorithm body modified without updating PROVENANCE.md and its own file header. Do not casually merge code from "
+          "insert": " carry verbatim BlockSuite algorithm bodies, "
         },
         {
-          "insert": "connectors/pathfinding/",
+          "insert": "path-generator.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/path-generator.ts"
+            }
           }
         },
         {
-          "insert": " into files without matching BlockSuite provenance, and do not casually merge unrelated logic into it — PROVENANCE.md and the file headers mark the license boundary, and blurring it would obscure which lines in the codebase actually carry BlockSuite's MPL-2.0 provenance."
+          "insert": " is ported, "
+        },
+        {
+          "insert": "gfx-types.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/gfx-types.ts"
+            }
+          }
+        },
+        {
+          "insert": " is reimplemented, and each file keeps its MPL header. The full license/provenance story lives in "
+        },
+        {
+          "insert": "99-appendix",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "99-appendix",
+              "label": "99-appendix"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1179,11 +1286,11 @@
       "id": "b-routing-testing-19",
       "flavour": "testing",
       "props": {
-        "title": "Routing test suite"
+        "title": "Connector test suite"
       },
       "text": [
         {
-          "insert": "The routing test coverage lives across tests in "
+          "insert": "The connector slice keeps five in-slice tests under "
         },
         {
           "insert": "packages/canvas/src/connectors/__tests__",
@@ -1196,12 +1303,16 @@
           }
         },
         {
-          "insert": " plus related state coverage: "
+          "insert": ": "
         },
         {
           "insert": "routing.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/__tests__/routing.test.ts"
+            }
           }
         },
         {
@@ -1210,7 +1321,11 @@
         {
           "insert": "routing.astar.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/__tests__/routing.astar.test.ts"
+            }
           }
         },
         {
@@ -1228,7 +1343,11 @@
         {
           "insert": "pathfinding-astar.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/__tests__/pathfinding-astar.test.ts"
+            }
           }
         },
         {
@@ -1237,7 +1356,11 @@
         {
           "insert": "connection-cascade.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/__tests__/connection-cascade.test.ts"
+            }
           }
         },
         {
@@ -1246,29 +1369,54 @@
         {
           "insert": "objects/__tests__/geometry.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/__tests__/geometry.test.ts"
+            }
           }
         },
         {
-          "insert": "; "
-        },
-        {
-          "insert": "packages/canvas/src/state/__tests__/waypoint-reconcile.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " covers rigid waypoint translation/drop behavior across move, resize, undo, and paste paths; and "
+          "insert": "; and "
         },
         {
           "insert": "bend-editing.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/__tests__/bend-editing.test.ts"
+            }
           }
         },
         {
-          "insert": " covers bend handles, drag snapping, simplification, and clear-only-when-straight commits."
+          "insert": " covers bend handles, drag snapping, simplification, and clear-only-when-straight commits. Related state and kernel coverage lives in "
+        },
+        {
+          "insert": "packages/canvas/src/state/__tests__/waypoint-reconcile.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/__tests__/waypoint-reconcile.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for rigid waypoint translation/drop behavior and "
+        },
+        {
+          "insert": "interaction.connector-mode.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.connector-mode.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " for Connector Mode behavior. The four render components have no dedicated in-slice component tests today; DOM coverage rides on the stage-level suites."
         }
       ],
       "children": []
@@ -1306,7 +1454,35 @@
           }
         },
         {
-          "insert": ". That separation keeps automatic routing disposable while preserving explicitly edited orthogonal bends until a reconnect, asymmetric move, resize, or straightening simplification makes them invalid."
+          "insert": ". That separation keeps automatic routing disposable while preserving explicitly edited orthogonal bends until a reconnect, asymmetric move, resize, or straightening simplification makes them invalid. The editor pipeline that dispatches these gestures is covered in "
+        },
+        {
+          "insert": "20-implementation/50-editor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": ", and the kernel vocabulary underneath is covered in "
+        },
+        {
+          "insert": "20-implementation/20-interaction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/20-interaction",
+              "label": "20-implementation/20-interaction"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1517,6 +1693,1462 @@
         },
         {
           "insert": " so old bends cannot survive after either endpoint changes."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-def-27": {
+      "id": "b-connectors-heading-def-27",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The def: connectors are not objects"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-def-p1-28": {
+      "id": "b-connectors-def-p1-28",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "connectorDef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "connectorDef"
+            }
+          }
+        },
+        {
+          "insert": " is a "
+        },
+        {
+          "insert": "ConnectorDef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "ConnectorDef"
+            }
+          }
+        },
+        {
+          "insert": ", not an "
+        },
+        {
+          "insert": "ObjectDef",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "ObjectDef"
+            }
+          }
+        },
+        {
+          "insert": ", and is deliberately absent from "
+        },
+        {
+          "insert": "OBJECT_DEFS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "OBJECT_DEFS"
+            }
+          }
+        },
+        {
+          "insert": ": connections are a separate document collection with "
+        },
+        {
+          "insert": "kind: \"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "colorRole: \"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "labelEditing: \"routed-midpoint\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-def-p2-29": {
+      "id": "b-connectors-def-p2-29",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CONNECTOR_TOOLBAR",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "CONNECTOR_TOOLBAR"
+            }
+          }
+        },
+        {
+          "insert": " orders the toolbar controls as color, text, dash, and arrowhead; color, dash, and arrowhead are flyout-backed, while text opens the routed-midpoint label editor directly."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-def-p3-30": {
+      "id": "b-connectors-def-p3-30",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "[19, 7]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " logical px, consumed by "
+        },
+        {
+          "insert": "Connector",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "Connector"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
+            }
+          }
+        },
+        {
+          "insert": " when "
+        },
+        {
+          "insert": "style === \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The style domain is "
+        },
+        {
+          "insert": "CanvasConnectionStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/connections.ts",
+              "symbol": "CanvasConnectionStyle"
+            }
+          }
+        },
+        {
+          "insert": " = "
+        },
+        {
+          "insert": "\"solid\" | \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; style never selects routing."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-def-p4-31": {
+      "id": "b-connectors-def-p4-31",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Strokes resolve via "
+        },
+        {
+          "insert": "resolveConnectorStroke",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveConnectorStroke"
+            }
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "connection.color ?? FIRST_USE_COLORS.connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "FIRST_USE_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "FIRST_USE_COLORS"
+            }
+          }
+        },
+        {
+          "insert": ".connector is "
+        },
+        {
+          "insert": "\"gray\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "handleAddConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "handleAddConnection"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "handleQuickConnect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/connections.ts",
+              "symbol": "handleQuickConnect"
+            }
+          }
+        },
+        {
+          "insert": " stamp new connectors with that gray pick. The old "
+        },
+        {
+          "insert": "CONNECTOR_COLORS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set died in the P1 cutover."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-gestures-32": {
+      "id": "b-connectors-heading-gestures-32",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Gestures: create, reconnect, quick connect"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-gestures-p1-33": {
+      "id": "b-connectors-gestures-p1-33",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The connector slice owns three gesture steppers in "
+        },
+        {
+          "insert": "gestures.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "stepFromConnectorEndpointDrag",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "stepFromConnectorEndpointDrag"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "stepFromConnectorCreate",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "stepFromConnectorCreate"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "stepFromConnectorBendDrag",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "stepFromConnectorBendDrag"
+            }
+          }
+        },
+        {
+          "insert": ". The editor pipeline dispatcher calls them from "
+        },
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-gestures-p2-34": {
+      "id": "b-connectors-gestures-p2-34",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "connectorCandidateAt",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "connectorCandidateAt"
+            }
+          }
+        },
+        {
+          "insert": " resolves the hover target by running "
+        },
+        {
+          "insert": "resolveConnectionCascade",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "symbol": "resolveConnectionCascade"
+            }
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "paintOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts",
+              "symbol": "paintOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " reversed to topmost-first, excluding the other endpoint's object. It emits an explicit stored "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " only when the snapped anchor/outline point is not a plain bounding-box canonical anchor."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-gestures-p3-35": {
+      "id": "b-connectors-gestures-p3-35",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A dragged create release on a candidate object dispatches "
+        },
+        {
+          "insert": "canvas.addConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; release on empty canvas dispatches "
+        },
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a sub-threshold port click quick-connects from its pinned anchor while a sub-threshold body click is a no-op. The quick-connect path also seeds inline text editing for the newly duplicated object, and "
+        },
+        {
+          "insert": "quickConnectClickPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "quickConnectClickPoint"
+            }
+          }
+        },
+        {
+          "insert": " places that ghost at an edge-to-edge gap of "
+        },
+        {
+          "insert": "max(width, ",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "QUICK_CONNECT_MIN_GAP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "QUICK_CONNECT_MIN_GAP_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 120) / 2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the source. Endpoint reconnect commits "
+        },
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and clears stored waypoints whenever the endpoint actually changed by object id, anchor, or position."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-mode-36": {
+      "id": "b-connectors-heading-mode-36",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Connector Mode"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-mode-p1-37": {
+      "id": "b-connectors-mode-p1-37",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The dock tool "
+        },
+        {
+          "insert": "\"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a wiring mode, not a placeable object type: "
+        },
+        {
+          "insert": "CanvasTool",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts",
+              "symbol": "CanvasTool"
+            }
+          }
+        },
+        {
+          "insert": " includes it as the Connector Mode exception, and "
+        },
+        {
+          "insert": "CanvasDock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
+            }
+          }
+        },
+        {
+          "insert": " exposes the dock entry with tooltip "
+        },
+        {
+          "insert": "\"Connector — G\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-mode-p2-38": {
+      "id": "b-connectors-mode-p2-38",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Entry logic in "
+        },
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": " is mode-specific: pointer-down on a port starts a "
+        },
+        {
+          "insert": "ConnectorCreateGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorCreateGesture"
+            }
+          }
+        },
+        {
+          "insert": " with pinned "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; pointer-down on an object body starts one without "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; anything else stays idle. Double-click is a no-op in connector mode, and completing or canceling a connection does not switch the tool back because the connector-create paths never dispatch "
+        },
+        {
+          "insert": "canvas.setTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-mode-p3-39": {
+      "id": "b-connectors-mode-p3-39",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "While the mode is active, "
+        },
+        {
+          "insert": "AnchorDots",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "AnchorDots"
+            }
+          }
+        },
+        {
+          "insert": " renders with "
+        },
+        {
+          "insert": "bypassZoomGate",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so ports stay live at any zoom; select mode keeps the "
+        },
+        {
+          "insert": "ANCHOR_DOTS_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " = 0.5 gate. The behavior spec is "
+        },
+        {
+          "insert": "interaction.connector-mode.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.connector-mode.test.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-vocabulary-40": {
+      "id": "b-connectors-heading-vocabulary-40",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The vocabulary: types.ts"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-vocabulary-p1-41": {
+      "id": "b-connectors-vocabulary-p1-41",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ConnectorAnchorCandidate",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorAnchorCandidate"
+            }
+          }
+        },
+        {
+          "insert": " is the connect-target record with "
+        },
+        {
+          "insert": "snapKind",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values "
+        },
+        {
+          "insert": "\"anchor\" | \"outline\" | \"inside\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Its "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " always carries the coarse side; "
+        },
+        {
+          "insert": "point",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are only for anchor/outline snaps, and "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the "
+        },
+        {
+          "insert": "[0..1, 0..1]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value stored on drop."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-vocabulary-p2-42": {
+      "id": "b-connectors-vocabulary-p2-42",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ConnectorDragOverlay",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorDragOverlay"
+            }
+          }
+        },
+        {
+          "insert": " is the live-preview payload: "
+        },
+        {
+          "insert": "connectionId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " appears only for reconnects; "
+        },
+        {
+          "insert": "fromObjectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " appear only for creates; and "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is absent when the create started from an object body."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-vocabulary-p3-43": {
+      "id": "b-connectors-vocabulary-p3-43",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The gesture-state types "
+        },
+        {
+          "insert": "ConnectorEndpointDragGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorEndpointDragGesture"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ConnectorCreateGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorCreateGesture"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "ConnectorBendDragGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorBendDragGesture"
+            }
+          }
+        },
+        {
+          "insert": " are slice-owned and assembled into the editor's "
+        },
+        {
+          "insert": "InteractionState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
+              "symbol": "InteractionState"
+            }
+          }
+        },
+        {
+          "insert": " union by the pipeline."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-rendering-44": {
+      "id": "b-connectors-heading-rendering-44",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Rendering: Connector.tsx"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-rendering-p1-45": {
+      "id": "b-connectors-rendering-p1-45",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "Connector"
+            }
+          }
+        },
+        {
+          "insert": " renders an invisible "
+        },
+        {
+          "insert": "CONNECTION_HIT_WIDTH",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "CONNECTION_HIT_WIDTH"
+            }
+          }
+        },
+        {
+          "insert": " = 14px hit path plus the visible "
+        },
+        {
+          "insert": "routeConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "routeConnection"
+            }
+          }
+        },
+        {
+          "insert": " path at "
+        },
+        {
+          "insert": "CONNECTOR_STROKE_WIDTH_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "CONNECTOR_STROKE_WIDTH_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 4. Stroke color comes from "
+        },
+        {
+          "insert": "resolveConnectorStroke",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveConnectorStroke"
+            }
+          }
+        },
+        {
+          "insert": " with the gray fallback; dashed style uses "
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": "; and "
+        },
+        {
+          "insert": "connection.arrow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values "
+        },
+        {
+          "insert": "forward",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "back",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "both",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attach SVG markers."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-rendering-p2-46": {
+      "id": "b-connectors-rendering-p2-46",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ConnectorSelectionChrome",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "ConnectorSelectionChrome"
+            }
+          }
+        },
+        {
+          "insert": " renders bend pills from "
+        },
+        {
+          "insert": "connectorBendSegments",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
+              "symbol": "connectorBendSegments"
+            }
+          }
+        },
+        {
+          "insert": " plus endpoint handles, gated by "
+        },
+        {
+          "insert": "BEND_HANDLES_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "BEND_HANDLES_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " = 0.4. "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " mounts it in a layer above the object layer so shape bodies never cover affordances; see "
+        },
+        {
+          "insert": "10-system-design/30-layering",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "10-system-design/30-layering"
+            }
+          }
+        },
+        {
+          "insert": " for the z cake."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-heading-preview-47": {
+      "id": "b-connectors-heading-preview-47",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Preview, ports, and labels"
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-preview-p1-48": {
+      "id": "b-connectors-preview-p1-48",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
+              "symbol": "ConnectorDragPreview"
+            }
+          }
+        },
+        {
+          "insert": " renders the dragged polyline during bend drags; otherwise it builds a routed preview through "
+        },
+        {
+          "insert": "routeConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "routeConnection"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "routeConnectionToPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "routeConnectionToPoint"
+            }
+          }
+        },
+        {
+          "insert": ". Candidate-object port dots come from "
+        },
+        {
+          "insert": "getConnectionAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "getConnectionAnchors"
+            }
+          }
+        },
+        {
+          "insert": " in top/bottom/left/right order with the snapped anchor emphasized; outline snaps add a dot at the candidate point. Quick-connect preview adds a ghost clone of the source object rendered through "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " at world size; the preview connector stroke is gray at opacity 0.6, while the ghost object itself renders at opacity 0.35."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-preview-p2-49": {
+      "id": "b-connectors-preview-p2-49",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "AnchorDots",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "AnchorDots"
+            }
+          }
+        },
+        {
+          "insert": " renders screen-space dots at bounding-box side midpoints offset by "
+        },
+        {
+          "insert": "ANCHOR_DOT_OFFSET_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOT_OFFSET_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 20 for selected objects. "
+        },
+        {
+          "insert": "ANCHOR_DOTS_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " = 0.5 gates select-mode visibility and interactivity, bypassed in Connector Mode; each dot is a DOM target with "
+        },
+        {
+          "insert": "data-canvas-port",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "data-canvas-object-id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", sized by "
+        },
+        {
+          "insert": "HIT_TARGET_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "HIT_TARGET_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 28, and the stage hit resolution turns it into a "
+        },
+        {
+          "insert": "ConnectorCreateGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "symbol": "ConnectorCreateGesture"
+            }
+          }
+        },
+        {
+          "insert": ". This replaced the old invisible edge-port scheme."
+        }
+      ],
+      "children": []
+    },
+    "b-connectors-preview-p3-50": {
+      "id": "b-connectors-preview-p3-50",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "There are two connector label components in the slice: "
+        },
+        {
+          "insert": "Connector",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/Connector.tsx",
+              "symbol": "Connector"
+            }
+          }
+        },
+        {
+          "insert": " renders the at-rest inline SVG label group in "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": "'s connector layer, while "
+        },
+        {
+          "insert": "ConnectionLabelChip",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/ConnectionLabelChip.tsx",
+              "symbol": "ConnectionLabelChip"
+            }
+          }
+        },
+        {
+          "insert": " is a world-overlay pill positioned at the routed "
+        },
+        {
+          "insert": "labelPoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " but is not imported or mounted anywhere under "
+        },
+        {
+          "insert": "packages/canvas/src",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src"
+            }
+          }
+        },
+        {
+          "insert": " today. The current editor world overlay mounts "
+        },
+        {
+          "insert": "TextEditingOverlay",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
+              "symbol": "TextEditingOverlay"
+            }
+          }
+        },
+        {
+          "insert": " only for active inline editing, so the current editor/viewer composition does not render both label components for the same connection."
         }
       ],
       "children": []
