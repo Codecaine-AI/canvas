@@ -28,10 +28,21 @@ inside the submodule are live immediately. No symlinks, no second checkout.
 
 ```bash
 git submodule update --init tools/docs-framework   # NOT --recursive: docs-system
-                                                   # embeds canvas back at external/canvas
-cd tools/docs-framework && bun install && cd -
+                                                   # embeds canvas back (circular)
+cd tools/docs-framework
+git submodule update --init packages/canvas        # ONE level only — docs-system's
+                                                   # workspace needs its canvas snapshot;
+                                                   # never use --recursive anywhere
+bun install && cd -
 bun run docs serve                                  # workbench at http://127.0.0.1:4800
 ```
+
+Setup state as of 2026-07-09 (already done in the layout session): submodule
+initialized at `c7d635b`, nested canvas snapshot at `c828780` (pre-overhaul —
+the pointer-bump in "Land in dependency order" will refresh it), deps
+installed, workbench verified serving. Dogfood finding #0, pre-logged: the
+original setup instructions here lacked the one-level nested init;
+`bun install` fails without it.
 
 Confirm the workbench renders the existing canvas docs (already migrated:
 `doc.json` bundles under `docs/00-foundation`, `10-system-design`,
