@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-05-theme",
+  "title": "Canvas Engine — Theme",
+  "root": "b-theme-root",
+  "blocks": {
+    "b-theme-root": {
+      "id": "b-theme-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "The theme domain: packages/canvas/src/theme/ — palette.ts (the closed 10-pick color table and per-role resolvers) and tokens.ts (board surface variables, universal shape stroke width, text hierarchy).",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "10-pick color roster",
+          "palette roles (ink/fill/wash)",
+          "FigJam-sampled tokens",
+          "theme dispersal"
+        ]
+      },
+      "children": [
+        "b-theme-title-1",
+        "b-theme-placeholder-2"
+      ]
+    },
+    "b-theme-title-1": {
+      "id": "b-theme-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Theme"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-placeholder-2": {
+      "id": "b-theme-placeholder-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Structure shell created 2026-07-10 in the docs-overhaul session; content pass pending. Scope: packages/canvas/src/theme/ — palette.ts (the 10-pick color table and role resolvers) and tokens.ts (board surface variables, universal stroke width, text hierarchy), plus the theme-dispersal story currently smeared across 10-shape-api and the stage doc."
+        }
+      ],
+      "children": []
+    }
+  }
+}

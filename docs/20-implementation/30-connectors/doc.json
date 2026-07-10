@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "canvas-30-routing",
+  "id": "canvas-30-connectors",
   "title": "Canvas Engine — Routing Layer",
   "root": "b-routing-root",
   "blocks": {

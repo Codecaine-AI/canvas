@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "canvas-40-render",
+  "id": "canvas-40-stage",
   "title": "Canvas Engine — Render Layer",
   "root": "b-render-root",
   "blocks": {

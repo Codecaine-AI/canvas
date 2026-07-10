@@ -8,9 +8,6 @@
       "id": "b-interaction-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The pure pointer-interaction state machine, alignment/distribution snapping, in-memory clipboard, and edge-pan auto-scroll that sit between raw pointer events and the model-layer reducer.",
-        "format": "mdx",
-        "type": "overview",
         "concepts": [
           "pointer state machine",
           "interaction gestures",
@@ -19,7 +16,10 @@
           "clipboard",
           "edge panning",
           "frame coalescing"
-        ]
+        ],
+        "covers": "The pure pointer-interaction state machine, alignment/distribution snapping, in-memory clipboard, and edge-pan auto-scroll that sit between raw pointer events and the model-layer reducer.",
+        "format": "mdx",
+        "type": "overview"
       },
       "children": [
         "b-interaction-title-1",
@@ -2666,12 +2666,12 @@
           "insert": " points and commits waypoints through the connector gesture stepper. See "
         },
         {
-          "insert": "canvas-30-routing",
+          "insert": "canvas-30-connectors",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-routing",
-              "label": "canvas-30-routing"
+              "path": "20-implementation/30-connectors",
+              "label": "canvas-30-connectors"
             }
           }
         },

@@ -8,16 +8,16 @@
       "id": "b-overview-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "Architecture map for @codecaine-ai/canvas: layer layout, data flow, public surfaces, and the FigJam-parity design decisions behind it.",
-        "format": "mdx",
-        "type": "overview",
         "concepts": [
           "typed-action reducer",
           "single mutation authority",
           "world-space canvas",
           "connector routing",
           "FigJam parity"
-        ]
+        ],
+        "covers": "Architecture map for @codecaine-ai/canvas: layer layout, data flow, public surfaces, and the FigJam-parity design decisions behind it.",
+        "format": "mdx",
+        "type": "overview"
       },
       "children": [
         "b-overview-title-1",
@@ -148,7 +148,6 @@
       "id": "b-overview-layer-tree-6",
       "flavour": "file-tree",
       "props": {
-        "title": "Engine layer layout",
         "entries": [
           {
             "path": "packages/canvas/src/state/",
@@ -198,7 +197,8 @@
             "path": "packages/canvas/src/index.ts",
             "note": "public barrel — the package's stable import surface"
           }
-        ]
+        ],
+        "title": "Engine layer layout"
       },
       "children": []
     },
@@ -656,6 +656,29 @@
       ],
       "children": []
     },
+    "b-overview-surfaces-list-canvases-18": {
+      "id": "b-overview-surfaces-list-canvases-18",
+      "flavour": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases"
+            }
+          }
+        },
+        {
+          "insert": " holds sample documents — e.g. the V2 Flow FigJam sample embedded below — useful for tests and demos."
+        }
+      ],
+      "children": []
+    },
     "b-overview-surfaces-exports-body-19": {
       "id": "b-overview-surfaces-exports-body-19",
       "flavour": "paragraph",
@@ -834,8 +857,8 @@
       "id": "b-overview-sample-canvas-23",
       "flavour": "canvas",
       "props": {
-        "title": "V2 Flow (FigJam parity) — bundled sample",
-        "canvasId": "v2-flow"
+        "canvasId": "v2-flow",
+        "title": "V2 Flow (FigJam parity) — bundled sample"
       },
       "children": []
     },
@@ -906,12 +929,12 @@
       },
       "text": [
         {
-          "insert": "canvas-30-routing",
+          "insert": "canvas-30-connectors",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-routing",
-              "label": "canvas-30-routing"
+              "path": "20-implementation/30-connectors",
+              "label": "canvas-30-connectors"
             }
           }
         },
@@ -929,12 +952,12 @@
       },
       "text": [
         {
-          "insert": "canvas-40-render",
+          "insert": "canvas-40-stage",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/40-render",
-              "label": "canvas-40-render"
+              "path": "20-implementation/40-stage",
+              "label": "canvas-40-stage"
             }
           }
         },
@@ -1002,7 +1025,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/70-studio-and-canvas JSON files",
+              "path": "20-implementation/70-studio-and-canvases",
               "label": "canvas-70-studio-and-canvas JSON files"
             }
           }
@@ -1064,29 +1087,6 @@
         },
         {
           "insert": " — the full extraction history: what moved from Spectre, what was vendored in, and the BlockSuite (MPL-2.0) licensing notes."
-        }
-      ],
-      "children": []
-    },
-    "b-overview-surfaces-list-canvases-18": {
-      "id": "b-overview-surfaces-list-canvases-18",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "canvases/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases"
-            }
-          }
-        },
-        {
-          "insert": " holds sample documents — e.g. the V2 Flow FigJam sample embedded below — useful for tests and demos."
         }
       ],
       "children": []

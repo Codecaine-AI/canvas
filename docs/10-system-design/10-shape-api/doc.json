@@ -8,9 +8,6 @@
       "id": "b-shape-api-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The shipped shape contract after the object-definition overhaul: ObjectDef v2 and the two-tier ShapeDef registry, the text-slot preset library, def-declared outlines/anchors/hit-testing, the 10-pick ink/fill/wash color role system, and the end-to-end recipe for adding a shape.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "ObjectDef",
           "ShapeDef",
@@ -18,7 +15,10 @@
           "OutlineSpec",
           "CanvasColor",
           "getConnectionAnchors"
-        ]
+        ],
+        "covers": "The shipped shape contract after the object-definition overhaul: ObjectDef v2 and the two-tier ShapeDef registry, the text-slot preset library, def-declared outlines/anchors/hit-testing, the 10-pick ink/fill/wash color role system, and the end-to-end recipe for adding a shape.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
         "b-sapi-title-1",
@@ -1322,13 +1322,13 @@
           "insert": " — anchor snap within 8 view px, else outline snap within 8 world px, else inside, else free; unchanged from the pre-overhaul cascade, see "
         },
         {
-          "insert": "canvas-30-routing",
+          "insert": "canvas-30-connectors",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-routing",
-              "label": "canvas-30-routing"
+              "path": "20-implementation/30-connectors",
+              "label": "canvas-30-connectors"
             }
           }
         },
@@ -2046,8 +2046,8 @@
       "id": "b-sapi-constraint-closed-roster",
       "flavour": "constraint",
       "props": {
-        "title": "The color roster is closed: 10 picks, no custom colors, ever",
-        "severity": "hard"
+        "severity": "hard",
+        "title": "The color roster is closed: 10 picks, no custom colors, ever"
       },
       "text": [
         {
@@ -2168,7 +2168,6 @@
       "id": "b-sapi-filetree",
       "flavour": "file-tree",
       "props": {
-        "title": "Where the shape system lives (post-overhaul)",
         "entries": [
           {
             "path": "packages/canvas/src/theme/palette.ts",
@@ -2234,7 +2233,8 @@
             "path": "packages/canvas/src/stage/editor/features/text-editing/",
             "note": "in-place text editor (use-text-editing.ts + TextEditingOverlay.tsx) — positioned/styled by the def's text slot; connector labels at the routed midpoint"
           }
-        ]
+        ],
+        "title": "Where the shape system lives (post-overhaul)"
       },
       "text": [],
       "children": []
@@ -2436,8 +2436,8 @@
       "id": "b-sapi-constraint-closed-vocab",
       "flavour": "constraint",
       "props": {
-        "title": "Shape vocabulary is closed and typed, not freeform SVG",
-        "severity": "hard"
+        "severity": "hard",
+        "title": "Shape vocabulary is closed and typed, not freeform SVG"
       },
       "text": [
         {
@@ -2497,13 +2497,13 @@
           "insert": ". For the A*/anchor routing pipeline that consumes the outline/anchor contract, see "
         },
         {
-          "insert": "canvas-30-routing",
+          "insert": "canvas-30-connectors",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-routing",
-              "label": "canvas-30-routing"
+              "path": "20-implementation/30-connectors",
+              "label": "canvas-30-connectors"
             }
           }
         },

@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-90-findings-log",
+  "title": "Docs Overhaul — Findings Log",
+  "root": "b-flog-root",
+  "blocks": {
+    "b-flog-root": {
+      "id": "b-flog-root",
+      "flavour": "paragraph",
+      "props": {
+        "covers": "Transient dogfood log for the 2026-07-10 docs-content session: every friction point found while authoring, tagged with its lane (1 = docs content, 2 = docs-system, 3 = canvas code) and its resolution. Deliverable back to the docs-system project; retired when the session lands.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "dogfooding",
+          "docs-system findings",
+          "session log"
+        ]
+      },
+      "children": [
+        "b-flog-title-1",
+        "b-flog-intro-2",
+        "b-flog-f0-h",
+        "b-flog-f0-p",
+        "b-flog-f1-h",
+        "b-flog-f1-p",
+        "b-flog-f2-h",
+        "b-flog-f2-p",
+        "b-flog-f3-h",
+        "b-flog-f3-p",
+        "b-flog-f4-h",
+        "b-flog-f4-p"
+      ]
+    },
+    "b-flog-title-1": {
+      "id": "b-flog-title-1",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Findings Log (docs-content session, 2026-07-10)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-intro-2": {
+      "id": "b-flog-intro-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "One entry per friction point, in discovery order. Lanes: 1 = canvas docs content (fixed here), 2 = docs-system (fix in the docs-system session/batch pass), 3 = canvas code (queued only — the tree is frozen)."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f0-h": {
+      "id": "b-flog-f0-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F0 — Submodule setup needs a one-level nested init (lane 2, resolved)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f0-p": {
+      "id": "b-flog-f0-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Pre-logged from the layout session: the original setup instructions lacked the one-level `git submodule update --init packages/canvas` inside tools/docs-framework, and `bun install` fails without it (and recursive init is forbidden — the embedding is circular). DOCS-OVERHAUL.md now records the correct sequence."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f1-h": {
+      "id": "b-flog-f1-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F1 — links check rejects directory references (lane 2, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f1-p": {
+      "id": "b-flog-f1-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "`bun run docs links check` reports ~22 source references as \"Source file not found\" even though the targets exist on disk — they are directories (packages/canvas/src/connectors/pathfinding, packages/canvas/src/ui, canvases, board-design-reference, several __tests__ dirs). The checker only accepts files, so legitimate directory citations can never go green. Needs either directory support in the checker or a documented rule that references must point at files."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f2-h": {
+      "id": "b-flog-f2-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F2 — Two migration-era doc links used a title as a path (lane 1, fixed)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f2-p": {
+      "id": "b-flog-f2-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "10-system-design/00-overview and 20-implementation/60-chrome both linked to \"20-implementation/70-studio-and-canvas JSON files\" — a space-containing doc TITLE fragment where a bundle PATH belongs, presumably minted by the .mdx migration. Fixed in this session's structure pass; worth a migrate-time validation that doc-link paths resolve."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f3-h": {
+      "id": "b-flog-f3-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F3 — Running server does not pick up new route code (lane 2, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f3-p": {
+      "id": "b-flog-f3-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A workbench started the same morning 404s on GET /api/blocks — the agent edit-surface discovery route — because the submodule checkout advanced after boot and `docs serve` runs route code as-of-boot. An agent probing a live server cannot tell \"route missing\" from \"server stale\". Wants either a version/route manifest on /api, or serve --dev watching server source, or restart guidance in the workbench."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f4-h": {
+      "id": "b-flog-f4-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F4 — No way to create a new doc bundle through the system (lane 2, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f4-p": {
+      "id": "b-flog-f4-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Neither the CLI nor the API exposes a create-bundle operation (POST /api/ops mutates existing bundles; migrate only converts .mdx twins). The 05-theme and 90-findings-log shells in this session had to be hand-authored doc.json files. Wants a `docs new <path> --title` CLI command or a POST create route, seeding the root/overview block shape."
+        }
+      ],
+      "children": []
+    }
+  }
+}
