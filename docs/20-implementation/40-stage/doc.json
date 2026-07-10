@@ -1,24 +1,23 @@
 {
   "schemaVersion": 1,
   "id": "canvas-40-stage",
-  "title": "Canvas Engine — Render Layer",
+  "title": "Canvas Engine — Stage",
   "root": "b-render-root",
   "blocks": {
     "b-render-root": {
       "id": "b-render-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The presentation layer that draws an InteractiveCanvasDocument to screen: CanvasStage, the adaptive dot grid, selected connector chrome, AnchorDots, ConnectorDragPreview, the theme/FigJam token system.",
+        "covers": "The display domain at packages/canvas/src/stage/: CanvasStage draws the DOCUMENT — grid surface, world transform, the z-tiered object/connector/section layers — and exposes two overlay slots for everything ephemeral; ObjectShape, grid.ts, and viewport.ts are its core; the read-only viewer face proves the core by construction.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
-          "CanvasStage",
-          "adaptive grid",
-          "screen-pixel band",
-          "selected connector chrome",
-          "AnchorDots",
-          "ConnectorDragPreview",
-          "FigJam tokens"
+          "stage core",
+          "overlay slots",
+          "z tiers",
+          "grid",
+          "viewport math",
+          "viewer face"
         ]
       },
       "children": [
@@ -28,16 +27,20 @@
         "b-render-canvasstage-body-4",
         "b-render-canvasstage-helpers-5",
         "b-render-canvasstage-imports-6",
-        "b-render-connector-chrome-6a",
-        "b-render-connector-labels-6b",
-        "b-render-anchor-dots-6c",
-        "b-render-drag-preview-6d",
-        "b-render-dash-rendering-6e",
+        "b-stage-connectors-pointer",
         "b-render-canvasstage-user-select-decision",
         "b-render-heading-grid-7",
         "b-render-grid-mechanism-8",
         "b-render-grid-band-9",
         "b-render-grid-decision-10",
+        "b-stage-heading-viewport",
+        "b-stage-viewport-body-1",
+        "b-stage-viewport-body-2",
+        "b-stage-heading-viewer",
+        "b-stage-viewer-props",
+        "b-stage-viewer-fit",
+        "b-stage-viewer-feedback",
+        "b-stage-viewer-chrome",
         "b-render-heading-theme-11",
         "b-render-theme-body-12",
         "b-render-figjam-tokens-body-13",
@@ -54,7 +57,7 @@
       },
       "text": [
         {
-          "insert": "Render Layer"
+          "insert": "Stage"
         }
       ],
       "children": []
@@ -114,91 +117,39 @@
           }
         },
         {
-          "insert": " is the top-level exported component, now about 600 lines and delegated into sibling render modules. It takes the document, viewport, selection and interaction state, and slot props ("
+          "insert": " is the stage-core renderer for the persisted "
         },
         {
-          "insert": "overlay",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for screen-space UI, "
-        },
-        {
-          "insert": "worldOverlay",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for world-space editor additions such as the inline connector-label input) and renders the scene. It applies the camera transform — translate by "
-        },
-        {
-          "insert": "-viewport.x * zoom, -viewport.y * zoom",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " then scale by "
-        },
-        {
-          "insert": "zoom",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — to a single world layer, and projects world coordinates to screen coordinates via "
-        },
-        {
-          "insert": "worldToScreen",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for screen-space overlays including the drag-select rect, snap and distribution guides, spacing chips, selection handles, anchor dots, and connector drag previews. Hover quick-connect previews are assembled in "
-        },
-        {
-          "insert": "CanvasStage",
+          "insert": "InteractiveCanvasDocument",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx",
-              "symbol": "CanvasStage"
+              "path": "packages/canvas/src/state/schema/document.ts",
+              "symbol": "InteractiveCanvasDocument"
             }
           }
         },
         {
-          "insert": " and rendered through "
+          "insert": ". It owns the grid surface and the transformed world layer, applies "
         },
         {
-          "insert": "ConnectorDragPreview",
+          "insert": "translate(-viewport.x * zoom, -viewport.y * zoom) scale(zoom)",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
-              "symbol": "ConnectorDragPreview"
-            }
+            "code": true
           }
         },
         {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-render-canvasstage-helpers-5": {
-      "id": "b-render-canvasstage-helpers-5",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
+          "insert": " with transform origin "
+        },
         {
-          "insert": "Structurally it is one render tree assembled from small, single-purpose sub-renderers. Notable pieces: "
+          "insert": "0 0",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and draws document content rather than assembling editor feedback: section fills, connector paths, non-section objects through "
         },
         {
           "insert": "ObjectShape",
@@ -212,145 +163,7 @@
           }
         },
         {
-          "insert": " is the object-def dispatcher; "
-        },
-        {
-          "insert": "Connector",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/Connector.tsx",
-              "symbol": "Connector"
-            }
-          }
-        },
-        {
-          "insert": " draws a routed connector as an invisible hit path, visible path, inline SVG label chip, and selected endpoint/bend chrome; "
-        },
-        {
-          "insert": "ConnectorDragPreview",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/ConnectorDragPreview.tsx",
-              "symbol": "ConnectorDragPreview"
-            }
-          }
-        },
-        {
-          "insert": " renders hover/create/reconnect/bend previews; "
-        },
-        {
-          "insert": "SelectionBox",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " draws the screen-space selection outline and resize handles; "
-        },
-        {
-          "insert": "AnchorDots",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "AnchorDots"
-            }
-          }
-        },
-        {
-          "insert": " draws selection-driven ports in select mode and hover-driven ports in Connector Mode via "
-        },
-        {
-          "insert": "hoveredObjectId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; "
-        },
-        {
-          "insert": "HoverHighlight",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/selection/HoverHighlight.tsx",
-              "symbol": "HoverHighlight",
-              "label": "HoverHighlight"
-            }
-          }
-        },
-        {
-          "insert": " draws the connector-tool hover outline in the untransformed overlay; and "
-        },
-        {
-          "insert": "DragSelectRect",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "PlacePreview",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "SnapGuideLine",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "DistributionGuideLine",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "SpacingChips",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " render the remaining interaction overlays. "
-        },
-        {
-          "insert": "renderOrderedObjects",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " computes the geometric layer-cake order before drawing: section bodies at z 0, connector SVG at z 1, objects at z 2, the floating "
-        },
-        {
-          "insert": "data-canvas-section-header-layer",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " at z 3, and "
+          "insert": ", selected-connection chrome, floating section header chips, and the "
         },
         {
           "insert": "worldOverlay",
@@ -359,34 +172,7 @@
           }
         },
         {
-          "insert": " at z 4. After the world layer, the screen-space "
-        },
-        {
-          "insert": "interactive-canvas-overlay",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " paints selection box, anchor dots, hover highlight, drag-select/place/guides/spacing, hover "
-        },
-        {
-          "insert": "ConnectorDragPreview",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", active "
-        },
-        {
-          "insert": "ConnectorDragPreview",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", then the caller "
+          "insert": " slot. The untransformed "
         },
         {
           "insert": "overlay",
@@ -395,21 +181,166 @@
           }
         },
         {
-          "insert": ". Section title chips are emitted into the header layer, not inline inside the section body renderer. See "
+          "insert": " slot sits after the world layer for caller-owned screen-space feedback."
+        }
+      ],
+      "children": []
+    },
+    "b-render-canvasstage-helpers-5": {
+      "id": "b-render-canvasstage-helpers-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Structurally the stage keeps document rendering in a small set of core pieces: "
         },
         {
-          "insert": "canvas-10-system-design-30-layering",
+          "insert": "ObjectShape",
           "attributes": {
             "code": true,
             "reference": {
-              "kind": "doc",
-              "path": "10-system-design/30-layering",
-              "label": "canvas-10-system-design-30-layering"
+              "kind": "source",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
+              "symbol": "ObjectShape"
             }
           }
         },
         {
-          "insert": " for the full model."
+          "insert": " dispatches each object through its registered def, and "
+        },
+        {
+          "insert": "renderOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "renderOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " delegates to "
+        },
+        {
+          "insert": "paintOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts",
+              "symbol": "paintOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " so sections form the backdrop layer while non-sections preserve schema order above them. The z cake remains the five named tiers described by "
+        },
+        {
+          "insert": "10-system-design/30-layering",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "10-system-design/30-layering"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ": section 0, connector 1, object 2, section header 3, world overlay 4. The selected-connection chrome is a separate "
+        },
+        {
+          "insert": "data-canvas-connection-chrome-layer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " SVG at z3, co-planar with "
+        },
+        {
+          "insert": "data-canvas-section-header-layer",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so object bodies can cover connector lines without covering the blue selection affordances. "
+        },
+        {
+          "insert": "worldOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is inside the transformed world layer at z4; "
+        },
+        {
+          "insert": "overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is untransformed screen space. The stage core imports none of the editor feedback components and does not call "
+        },
+        {
+          "insert": "worldToScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "worldToScreen"
+            }
+          }
+        },
+        {
+          "insert": " to assemble overlays; the editor face injects the pipeline's "
+        },
+        {
+          "insert": "InteractionFeedbackWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackWorld"
+            }
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "InteractionFeedbackScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
+            }
+          }
+        },
+        {
+          "insert": " pair through those slots (see "
+        },
+        {
+          "insert": "20-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
         }
       ],
       "children": []
@@ -518,25 +449,16 @@
         {
           "insert": "gridBackground",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "gridBackground"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": " (in "
-        },
-        {
-          "insert": "grid.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") computes the CSS "
+          "insert": " computes the CSS "
         },
         {
           "insert": "backgroundSize",
@@ -554,21 +476,21 @@
           }
         },
         {
-          "insert": "/dot-radius for a zoom-aware dot grid pinned to world coordinates. The mechanism: starting from a world-space base step ("
+          "insert": "/dot-radius for a zoom-aware dot grid pinned to world coordinates. Starting from "
         },
         {
           "insert": "GRID_BASE_STEP_PX",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "GRID_BASE_STEP_PX"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": " = 8 logical px), the function computes the on-screen step as "
+          "insert": " = 8 logical px, it computes the projected step as "
         },
         {
           "insert": "effectiveStep * scale",
@@ -577,7 +499,21 @@
           }
         },
         {
-          "insert": ". If that on-screen size is below the minimum band, it repeatedly doubles "
+          "insert": ". While that projected step is below "
+        },
+        {
+          "insert": "GRID_MIN_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_MIN_SCREEN_STEP_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 6.5px, the function doubles "
         },
         {
           "insert": "effectiveStep",
@@ -586,35 +522,31 @@
           }
         },
         {
-          "insert": " (a "
+          "insert": " by powers of two until the grid is legible again. It intentionally does not halve below the base step at high zoom; zooming in lets dots spread out naturally instead of subdividing into a dense screen-space pattern. Dot radius is handled separately from the density tier: it starts from "
         },
         {
-          "insert": "while",
+          "insert": "GRID_DOT_DIAMETER_PX",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_DOT_DIAMETER_PX"
+            }
           }
         },
         {
-          "insert": " loop) until the on-screen step is back at or above the minimum; if it's above the maximum band, it repeatedly halves "
-        },
-        {
-          "insert": "effectiveStep",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " until it falls back at or below the maximum. Because the step only ever changes by powers of two, the grid's on-screen density shifts in discrete tiers as zoom changes, while background size and pan position still move continuously within each tier — panning and continuous zoom inside one tier never causes a visible grid \"pop,\" only crossing a tier boundary does. Dot radius is handled separately: it scales continuously with zoom (not tiered) and is clamped between "
+          "insert": " / 2 and clamps between "
         },
         {
           "insert": "MIN_DOT_RADIUS_PX",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "MIN_DOT_RADIUS_PX"
-            },
-            "code": true
+            }
           }
         },
         {
@@ -623,16 +555,16 @@
         {
           "insert": "MAX_DOT_RADIUS_PX",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "MAX_DOT_RADIUS_PX"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": " so dots stay visible when zoomed far out and stop growing past a fixed size when zoomed far in — FigJam's dots read as a constant fine size on screen regardless of the current density tier."
+          "insert": "."
         }
       ],
       "children": []
@@ -643,48 +575,49 @@
       "props": {},
       "text": [
         {
-          "insert": "The screen-space band the effective step must stay inside is "
+          "insert": "The enforced screen-space bound is the minimum: "
         },
         {
-          "insert": "[GRID_MIN_SCREEN_STEP_PX, GRID_MAX_SCREEN_STEP_PX]",
+          "insert": "GRID_MIN_SCREEN_STEP_PX",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
               "symbol": "GRID_MIN_SCREEN_STEP_PX"
-            },
-            "code": true
+            }
           }
         },
         {
-          "insert": ", currently ~[6.5, 13] px ("
+          "insert": " = 6.5px is what triggers the doubling loop. "
         },
         {
-          "insert": "grid.ts",
+          "insert": "GRID_MAX_SCREEN_STEP_PX",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_MAX_SCREEN_STEP_PX"
+            }
           }
         },
         {
-          "insert": " re-exports these as "
-        },
-        {
-          "insert": "MIN_SCREEN_STEP_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
+          "insert": " = 13px is a reference comfort max; high zoom may exceed it because the implementation deliberately avoids high-zoom halving or subdivision. "
         },
         {
           "insert": "MAX_SCREEN_STEP_PX",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "MAX_SCREEN_STEP_PX"
+            }
           }
         },
         {
-          "insert": "). This band and the base step of 8 logical px were chosen to reproduce two pixel-sampled ground-truth observations from the FigJam reference captures: at zoom 0.305, the base step lands on tier n=2 (8 × 4 = 32 world px), giving 32 × 0.305 ≈ 9.8px on screen, matching the measured 9.8px; at zoom 0.21, the same tier gives 32 × 0.21 ≈ 6.7px, matching the measured 6.9px. Both observations resolve to the same underlying logical spacing (32px), which is what validated choosing 8 as the base step and powers-of-two as the step law rather than some other base."
+          "insert": " survives only as a deprecated re-export. The base step and doubling law still reproduce the FigJam observations in the file comment: zoom 0.305 lands on 32 world px for about 9.8px on screen, and zoom 0.21 stays on the same tier for about 6.7px, matching the measured 6.9px within sampling noise."
         }
       ],
       "children": []
@@ -698,21 +631,17 @@
       },
       "text": [
         {
-          "insert": "A fixed world-space grid step would either become imperceptibly dense (many sub-pixel dots merging into noise) when zoomed far out, or absurdly sparse (a single dot every few screen-feet) when zoomed far in. Instead, the grid's world-space step doubles or halves as needed to keep the on-screen step within a legible band (currently ~6.5–13px, "
+          "insert": "A fixed world-space grid step would collapse into sub-pixel noise when zoomed far out. Instead, the grid doubles its world-space step only when the projected pitch would fall below "
         },
         {
           "insert": "GRID_MIN_SCREEN_STEP_PX",
           "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "GRID_MAX_SCREEN_STEP_PX",
-          "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_MIN_SCREEN_STEP_PX"
+            }
           }
         },
         {
@@ -725,7 +654,21 @@
           }
         },
         {
-          "insert": "), so the dot grid stays visually useful across the entire zoom range instead of only near 100%."
+          "insert": ". It does not halve at high zoom; dots are allowed to spread farther apart rather than forcing a tight subdivision. "
+        },
+        {
+          "insert": "GRID_MAX_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_MAX_SCREEN_STEP_PX"
+            }
+          }
+        },
+        {
+          "insert": " remains a comfort reference, not an enforced band."
         }
       ],
       "children": []
@@ -1093,20 +1036,49 @@
       "props": {},
       "text": [
         {
-          "insert": "CanvasStage is a pure renderer over props — it is wired into live interaction state, pointer handling, and the surrounding editor chrome in "
+          "insert": "CanvasStage is the stage core. The editor face that wires live interaction state, pointer handling, and chrome is covered in "
         },
         {
-          "insert": "Canvas Engine — Editor",
+          "insert": "20-implementation/50-editor",
           "attributes": {
             "reference": {
               "kind": "doc",
               "path": "20-implementation/50-editor",
-              "label": "Canvas Engine — Editor"
-            }
+              "label": "20-implementation/50-editor"
+            },
+            "code": true
           }
         },
         {
-          "insert": ", which covers how the editor's React components mount and drive it."
+          "insert": "; connector components are covered in "
+        },
+        {
+          "insert": "20-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/30-connectors",
+              "label": "20-implementation/30-connectors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": "; and the reason for the five-tier z cake is covered in "
+        },
+        {
+          "insert": "10-system-design/30-layering",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "10-system-design/30-layering"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1221,13 +1193,27 @@
       ],
       "children": []
     },
-    "b-render-connector-chrome-6a": {
-      "id": "b-render-connector-chrome-6a",
+    "b-stage-connectors-pointer": {
+      "id": "b-stage-connectors-pointer",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Selected connector chrome is additive: "
+          "insert": "At the stage boundary, connectors are mounted as document content, not as editor feedback: "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " emits "
         },
         {
           "insert": "Connector",
@@ -1241,159 +1227,31 @@
           }
         },
         {
-          "insert": " keeps the visible path stroke resolved from the connector palette color, so selection never recolors the line to primary blue. Selection adds hollow endpoint circles at the routed start/end and blue bend-segment pills. The pills render for selected connectors only when zoom is at least "
+          "insert": " paths in the connector tier at z1 and "
         },
         {
-          "insert": "BEND_HANDLES_MIN_ZOOM",
+          "insert": "ConnectorSelectionChrome",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/Connector.tsx",
-              "symbol": "BEND_HANDLES_MIN_ZOOM"
+              "symbol": "ConnectorSelectionChrome"
             }
           }
         },
         {
-          "insert": " (0.4), scale by "
+          "insert": " in "
         },
         {
-          "insert": "1 / zoom",
+          "insert": "data-canvas-connection-chrome-layer",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", use horizontal/vertical resize cursors by segment axis, and are emitted as "
+          "insert": " at z3. "
         },
-        {
-          "insert": "data-canvas-bend-segment",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " rects. Bend segments include straight single-segment connectors too; when a label is present, segment generation reserves clearance around the label so pills sit away from the chip rather than covering it."
-        }
-      ],
-      "children": []
-    },
-    "b-render-connector-labels-6b": {
-      "id": "b-render-connector-labels-6b",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Connector labels are inline SVG, not a separate chip component. A trimmed non-empty "
-        },
-        {
-          "insert": "connection.label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " renders a rounded chip centered at the routed label point, which is the route's arc-length midpoint. The chip uses a canvas-colored backing ("
-        },
-        {
-          "insert": "#F5F5F5",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), "
-        },
-        {
-          "insert": "#D9D9D9",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " border, 30px height, 12px horizontal padding, 16px text, and font weight 700. In document order the hit path paints first, then the visible path, then the label chip, then selected bend pills/endpoints, so bend chrome is layered above labels when they compete."
-        }
-      ],
-      "children": []
-    },
-    "b-render-anchor-dots-6c": {
-      "id": "b-render-anchor-dots-6c",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "AnchorDots",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "AnchorDots"
-            }
-          }
-        },
-        {
-          "insert": " has two callers: selected-object ports in select mode, and hovered/drag-source ports in Connector Mode. Each dot has a 28px screen-space hit target with a 10px resting dot, is placed from "
-        },
-        {
-          "insert": "connectionBoundsForObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "connectionBoundsForObject"
-            }
-          }
-        },
-        {
-          "insert": " rather than raw object geometry, and is offset exactly "
-        },
-        {
-          "insert": "ANCHOR_DOT_OFFSET_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "ANCHOR_DOT_OFFSET_PX"
-            }
-          }
-        },
-        {
-          "insert": " screen pixels outward from the top/bottom/left/right midpoint. The 0.5 zoom gate remains the select-mode visibility gate: below "
-        },
-        {
-          "insert": "ANCHOR_DOTS_MIN_ZOOM",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
-            }
-          }
-        },
-        {
-          "insert": " the dots render at opacity 0 but keep their interaction envelope. Connector Mode passes "
-        },
-        {
-          "insert": "bypassZoomGate",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so hover-revealed ports stay visible at any zoom. Hover or press expands the affordance to the 28px arrow button; press fills it selection blue with white arrow strokes and clears the hover quick-connect preview state."
-        }
-      ],
-      "children": []
-    },
-    "b-render-drag-preview-6d": {
-      "id": "b-render-drag-preview-6d",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
         {
           "insert": "ConnectorDragPreview",
           "attributes": {
@@ -1406,78 +1264,668 @@
           }
         },
         {
-          "insert": " keeps previews routed instead of drawing raw diagonals: create/reconnect-to-point uses "
+          "insert": " and "
         },
         {
-          "insert": "routeConnectionToPoint",
+          "insert": "AnchorDots",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/routing.ts",
-              "symbol": "routeConnectionToPoint"
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "AnchorDots"
             }
           }
         },
         {
-          "insert": ", candidate previews use "
+          "insert": " are editor-slot content emitted through "
         },
         {
-          "insert": "routeConnection",
+          "insert": "InteractionFeedbackScreen",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/routing.ts",
-              "symbol": "routeConnection"
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
             }
           }
         },
         {
-          "insert": ", and bend previews route through live polyline waypoints. Create previews always show a forward arrow marker; reconnect previews show one only when the dragged end and arrow setting imply it. Empty-canvas quick-connect previews add a low-opacity duplicate object shaped from the source, then a simple routed stroke and any candidate/outline snap dots. The layering stays deliberately sparse and pointer-events-free so anchor dots, hover previews, active previews, and caller overlays do not fight for input."
+          "insert": "; the dash, label, anchor-dot, preview, and chrome component story lives in "
+        },
+        {
+          "insert": "20-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/30-connectors",
+              "label": "20-implementation/30-connectors"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
     },
-    "b-render-dash-rendering-6e": {
-      "id": "b-render-dash-rendering-6e",
+    "b-stage-heading-viewport": {
+      "id": "b-stage-heading-viewport",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Viewport math"
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewport-body-1": {
+      "id": "b-stage-viewport-body-1",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Connector dash rendering has one shared pattern. Solid connectors omit "
-        },
-        {
-          "insert": "strokeDasharray",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; dashed connectors join "
-        },
-        {
-          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "insert": "viewport.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+              "path": "packages/canvas/src/stage/viewport.ts"
             }
           }
         },
         {
-          "insert": " as "
+          "insert": " is the pure stage-core math shared by the viewer and editor faces. "
         },
         {
-          "insert": "\"19 7\"",
+          "insert": "ViewportState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "ViewportState"
+            }
+          }
+        },
+        {
+          "insert": " stores the world point shown at screen origin as "
+        },
+        {
+          "insert": "x",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " in both the normal connector renderer and connector previews, so selected, hovered, and actively dragged paths preserve the same solid/dashed vocabulary."
+          "insert": "/"
+        },
+        {
+          "insert": "y",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus "
+        },
+        {
+          "insert": "zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "worldToScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "worldToScreen"
+            }
+          }
+        },
+        {
+          "insert": " applies "
+        },
+        {
+          "insert": "(worldPoint - { x, y }) * zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "screenToWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "screenToWorld"
+            }
+          }
+        },
+        {
+          "insert": " is the inverse. "
+        },
+        {
+          "insert": "clampZoom",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "clampZoom"
+            }
+          }
+        },
+        {
+          "insert": " clamps to "
+        },
+        {
+          "insert": "MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " = 0.1 and "
+        },
+        {
+          "insert": "MAX_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "MAX_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": " = 4. The editor's stateful pan/zoom hook wraps the same helpers; see "
+        },
+        {
+          "insert": "20-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/50-editor",
+              "label": "20-implementation/50-editor"
+            },
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewport-body-2": {
+      "id": "b-stage-viewport-body-2",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitBounds"
+            }
+          }
+        },
+        {
+          "insert": " pads the target bounds by 48px by default, computes zoom as "
+        },
+        {
+          "insert": "min(screen.width / paddedWidth, screen.height / paddedHeight, 1)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " through "
+        },
+        {
+          "insert": "clampZoom",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "clampZoom"
+            }
+          }
+        },
+        {
+          "insert": ", and centers the bounds in the screen, so fitting never requests zoom past 1.0. "
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitDocument"
+            }
+          }
+        },
+        {
+          "insert": " calls "
+        },
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitBounds"
+            }
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "documentBounds(document, 0)",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "documentBounds"
+            }
+          }
+        },
+        {
+          "insert": " to avoid double padding. "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "containerViewBounds"
+            }
+          }
+        },
+        {
+          "insert": " is the D4 view-crop input: it finds one section, gathers that section plus transitive "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " descendants, and returns their bounds with 32px padding by default. The name predates the W6 container-type removal."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-heading-viewer": {
+      "id": "b-stage-heading-viewer",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The viewer face"
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewer-props": {
+      "id": "b-stage-viewer-props",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewer/InteractiveCanvasViewer.tsx",
+              "symbol": "InteractiveCanvasViewer"
+            }
+          }
+        },
+        {
+          "insert": " is display-only by construction. Its props are the document, "
+        },
+        {
+          "insert": "selectedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "changedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "compact",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", selection and context-menu callbacks, and "
+        },
+        {
+          "insert": "className",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; there is no tool prop, pointer pipeline, or interaction machine."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewer-fit": {
+      "id": "b-stage-viewer-fit",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The viewer measures its shell with "
+        },
+        {
+          "insert": "ResizeObserver",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and computes a fit viewport from the measured size. If "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is set, it calls "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "containerViewBounds"
+            }
+          }
+        },
+        {
+          "insert": " and then "
+        },
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitBounds"
+            }
+          }
+        },
+        {
+          "insert": "; otherwise it uses "
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitDocument"
+            }
+          }
+        },
+        {
+          "insert": ". Before measurement, the fallback screen is 960 × 360, or 760 × 320 in compact mode. A "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " id that resolves to no section renders a warning badge instead of a crop."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewer-feedback": {
+      "id": "b-stage-viewer-feedback",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The viewer mounts "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set to "
+        },
+        {
+          "insert": "InteractionFeedbackScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
+            }
+          }
+        },
+        {
+          "insert": " and passes only "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "viewport",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "selectedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". With no "
+        },
+        {
+          "insert": "interactionOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", no hover id, no active tool, and default "
+        },
+        {
+          "insert": "interactionEnabled",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " false, every interaction-gated branch collapses; the only overlay content that can render is "
+        },
+        {
+          "insert": "SelectionBox",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/SelectionBox.tsx",
+              "symbol": "SelectionBox"
+            }
+          }
+        },
+        {
+          "insert": ". That import is the recorded layout boundary gap: "
+        },
+        {
+          "insert": "stage/viewer/InteractiveCanvasViewer.tsx -> ../editor/pipeline/InteractionFeedback",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__/import-boundaries.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the current "
+        },
+        {
+          "insert": "TODO(layout)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exception. The open design question is whether the viewer should show a selection box at all. The latent inconsistency is plain: "
+        },
+        {
+          "insert": "SelectionBox",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/SelectionBox.tsx",
+              "symbol": "SelectionBox"
+            }
+          }
+        },
+        {
+          "insert": " defaults "
+        },
+        {
+          "insert": "interactiveHandles",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to true, so the read-only surface draws pointer-capturing resize handles that are inert because nothing is wired to them."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-viewer-chrome": {
+      "id": "b-stage-viewer-chrome",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The outer viewer chrome is a "
+        },
+        {
+          "insert": "section[data-mdx-block=\"Canvas\"]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " shell with header badges for object count, connector count, annotation count, and document id. It also renders the annotations panel when annotations exist, and the stage shell uses an aspect ratio from "
+        },
+        {
+          "insert": "document.size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with 16:9 fallback."
         }
       ],
       "children": []
