@@ -174,7 +174,7 @@
       "children": [],
       "text": [
         {
-          "insert": "A per-shape visual and connection reference: every one of the 32 "
+          "insert": "A per-shape visual and connection reference: every one of the 31 "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -430,7 +430,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -553,27 +553,27 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "shapeForType"
             }
           }
         },
         {
-          "insert": " and "
+          "insert": " reads its explicit "
         },
         {
-          "insert": "toneForType",
+          "insert": "OBJECT_TYPE_DEFAULTS",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "toneForType"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
         {
-          "insert": " both fall through to its values). No dedicated "
+          "insert": " row). "
         },
         {
           "insert": "defaultGeometryFor",
@@ -581,13 +581,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": " case — it takes the catch-all "
+          "insert": " returns that row's explicit "
         },
         {
           "insert": "{ width: 184, height: 96 }",
@@ -596,7 +596,7 @@
           }
         },
         {
-          "insert": ". Label renders top-left at the 15px shape-text size ("
+          "insert": " geometry. Label renders top-left at the 15px shape-text size ("
         },
         {
           "insert": "TEXT_SIZES_PX",
@@ -705,7 +705,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1016,7 +1016,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1116,7 +1116,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1219,13 +1219,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", drawn as an SVG cylinder silhouette. Unlike the icon glyph family, it keeps tone-driven pastel styling and renders its label centered over the silhouette rather than below it."
+          "insert": ", drawn as an SVG cylinder silhouette. Unlike the icon glyph family, its colors resolve through the shape pick's role cells (resolveShapeColors over CANVAS_PALETTE) and its label renders centered over the silhouette rather than below it."
         }
       ]
     },
@@ -1457,7 +1457,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1613,7 +1613,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1727,7 +1727,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
@@ -1842,13 +1842,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"ellipse\"; label renders centered."
+          "insert": ", style.shape \"ellipse\"; label renders centered."
         }
       ]
     },
@@ -1914,13 +1914,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"triangle\"; label renders centered in the lower two-thirds (the apex carries no text)."
+          "insert": ", style.shape \"triangle\"; label renders centered in the lower two-thirds (the apex carries no text)."
         }
       ]
     },
@@ -1986,13 +1986,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"parallelogram\"; label renders centered. Skew is a fixed fraction of width — approximate, pending a pixel-reference check against FigJam."
+          "insert": ", style.shape \"parallelogram\"; label renders centered. Skew is a fixed fraction of width — approximate, pending a pixel-reference check against FigJam."
         }
       ]
     },
@@ -2044,13 +2044,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"pentagon\"; label renders centered."
+          "insert": ", style.shape \"pentagon\"; label renders centered."
         }
       ]
     },
@@ -2102,13 +2102,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"octagon\"; label renders centered."
+          "insert": ", style.shape \"octagon\"; label renders centered."
         }
       ]
     },
@@ -2160,13 +2160,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"star\"; label renders small and centered. Inner radius is a fixed fraction of outer — approximate, pending a pixel-reference check."
+          "insert": ", style.shape \"star\"; label renders small and centered. Inner radius is a fixed fraction of outer — approximate, pending a pixel-reference check."
         }
       ]
     },
@@ -2218,13 +2218,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"plus\"; renders no visible label text (accessibility-only — hidesVisibleText — the cross's usable text area is too small)."
+          "insert": ", style.shape \"plus\"; renders no visible label text (accessibility-only — hidesVisibleText — the cross's usable text area is too small)."
         }
       ]
     },
@@ -2290,13 +2290,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"chevron\"; label renders centered, offset away from the notch."
+          "insert": ", style.shape \"chevron\"; label renders centered, offset away from the notch."
         }
       ]
     },
@@ -2348,13 +2348,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"folder\", tab width proportioned by FOLDER_GEOMETRY's tabWidthRatio (0.38); label renders centered in the main body, below the tab."
+          "insert": ", style.shape \"folder\", tab width proportioned by FOLDER_GEOMETRY's tabWidthRatio (0.38); label renders centered in the main body, below the tab."
         }
       ]
     },
@@ -2406,13 +2406,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"document-stack\", offset proportioned by DOCUMENT_STACK_GEOMETRY's offsetPx (6); label renders centered on the front-most silhouette."
+          "insert": ", style.shape \"document-stack\", offset proportioned by DOCUMENT_STACK_GEOMETRY's offsetPx (6); label renders centered on the front-most silhouette."
         }
       ]
     },
@@ -2464,13 +2464,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"off-page-connector\", point proportioned by OFF_PAGE_CONNECTOR_GEOMETRY's shoulderRatio (0.6); label renders centered in the upper rectangular band, above the point."
+          "insert": ", style.shape \"off-page-connector\", point proportioned by OFF_PAGE_CONNECTOR_GEOMETRY's shoulderRatio (0.6); label renders centered in the upper rectangular band, above the point."
         }
       ]
     },
@@ -2522,13 +2522,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"trapezoid\"; label renders centered."
+          "insert": ", style.shape \"trapezoid\"; label renders centered."
         }
       ]
     },
@@ -2580,13 +2580,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"manual-input\", drop proportioned by MANUAL_INPUT_GEOMETRY's dropRatio (0.25); label renders centered in the lower rectangular band, below the slanted edge."
+          "insert": ", style.shape \"manual-input\", drop proportioned by MANUAL_INPUT_GEOMETRY's dropRatio (0.25); label renders centered in the lower rectangular band, below the slanted edge."
         }
       ]
     },
@@ -2638,13 +2638,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"hexagon\"; label renders centered."
+          "insert": ", style.shape \"hexagon\"; label renders centered."
         }
       ]
     },
@@ -2696,13 +2696,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"internal-storage\"; label renders in the main cell, right of the left rule and below the top rule."
+          "insert": ", style.shape \"internal-storage\"; label renders in the main cell, right of the left rule and below the top rule."
         }
       ]
     },
@@ -2754,13 +2754,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"or-junction\"; renders no visible label text (accessibility-only)."
+          "insert": ", style.shape \"or-junction\"; renders no visible label text (accessibility-only)."
         }
       ]
     },
@@ -2812,13 +2812,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"summing-junction\"; renders no visible label text (accessibility-only)."
+          "insert": ", style.shape \"summing-junction\"; renders no visible label text (accessibility-only)."
         }
       ]
     },
@@ -2870,13 +2870,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"cylinder-horizontal\"; label renders centered on the silhouette."
+          "insert": ", style.shape \"cylinder-horizontal\"; label renders centered on the silhouette."
         }
       ]
     },
@@ -2928,13 +2928,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"page-corner\"; rendered with the same CSS clip-path notch document used to carry (polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%), asymmetric border radius 2px 8px 8px 8px); label renders centered on the silhouette."
+          "insert": ", style.shape \"page-corner\"; rendered with the same CSS clip-path notch document used to carry (polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%), asymmetric border radius 2px 8px 8px 8px); label renders centered on the silhouette."
         }
       ]
     },
@@ -3000,13 +3000,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"icon\"; rendered via IconShapeBody with the label-below-glyph layout used by every icon glyph. This embed uses glyph \"cpu\"; the same icon type also covers the retired Person and Chat catalog entries through glyphs \"person\" and \"chat\" — 26 glyphs exist in total (activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe)."
+          "insert": ", style.shape \"icon\"; rendered via IconShapeBody with the label-below-glyph layout used by every icon glyph. This embed uses glyph \"cpu\"; the same icon type also covers the retired Person and Chat catalog entries through glyphs \"person\" and \"chat\" — 26 glyphs exist in total (activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe)."
         }
       ]
     },
@@ -3038,7 +3038,7 @@
       },
       "text": [
         {
-          "insert": "The per-type prose below predates the object-definition overhaul in places: mentions of label/body fields, default tones, labelEditing targets, and section title/tint families are historical (the anchor positions and outline tiers remain accurate). For the shipped contract — the single "
+          "insert": "The per-type prose below predates the object-definition overhaul in places: mentions of label/body fields, labelEditing targets, and section title/tint families are historical (the anchor positions and outline tiers remain accurate). For the shipped contract — the single "
         },
         {
           "insert": "text",
