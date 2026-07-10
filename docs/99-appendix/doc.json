@@ -15,7 +15,7 @@
           "board-design-reference",
           "colocated tests"
         ],
-        "covers": "BlockSuite provenance (MPL-2.0), UI-primitive and SpectreRef vendoring, extraction history, board-design-reference provenance, and the package-wide testing approach.",
+        "covers": "BlockSuite provenance (MPL-2.0), UI primitives and icons, extraction history, board-design-reference provenance, and the package-wide testing approach.",
         "format": "mdx",
         "type": "overview"
       },
@@ -82,7 +82,7 @@
           }
         },
         {
-          "insert": " set. It covers cross-cutting concerns that don't belong to any one layer: where vendored code came from and why it's legally isolated, where the package's UI primitives and reference types came from, when and how the engine was extracted into its own repo, where the FigJam pixel-parity constants used throughout "
+          "insert": " set. It covers cross-cutting concerns that don't belong to any one layer: where vendored code came from and why it's legally isolated, where the package's UI primitives and icons came from, when and how the engine was extracted into its own repo, where the FigJam pixel-parity constants used throughout "
         },
         {
           "insert": "stage/",
@@ -175,7 +175,7 @@
           }
         },
         {
-          "insert": " and "
+          "insert": ", while "
         },
         {
           "insert": "snap-distribution.ts",
@@ -188,13 +188,7 @@
           }
         },
         {
-          "insert": " in "
-        },
-        {
-          "insert": "packages/canvas/src/stage/editor/features/snapping/",
-          "attributes": {
-            "code": true
-          }
+          "insert": " remains in the snapping feature directory"
         },
         {
           "insert": ", each still carrying a header citing its upstream BlockSuite source path and the MPL-2.0 license, recorded in detail in the BlockSuite MPL provenance section of "
@@ -529,7 +523,7 @@
       },
       "text": [
         {
-          "insert": "UI primitives and SpectreRef vendoring"
+          "insert": "UI primitives and icons"
         }
       ],
       "children": []
@@ -576,7 +570,7 @@
           }
         },
         {
-          "insert": ", and the "
+          "insert": ", the "
         },
         {
           "insert": "cn()",
@@ -585,7 +579,16 @@
           }
         },
         {
-          "insert": " class-name helper — were duplicated (not re-exported) into "
+          "insert": " class-name helper, and "
+        },
+        {
+          "insert": "Tooltip",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — were duplicated (not re-exported) into "
         },
         {
           "insert": "packages/canvas/src/ui/",
@@ -598,7 +601,7 @@
           }
         },
         {
-          "insert": " so the package has zero dependency on a host app's component library. None of this carries MPL-2.0 obligations — it's ordinary Spectre/Codecaine code, just copied for self-containment rather than imported. Alongside it, a type-only copy of Spectre's "
+          "insert": " so the package has zero dependency on a host app's component library. None of this carries MPL-2.0 obligations — it's ordinary Spectre/Codecaine code, just copied for self-containment rather than imported. A type-only "
         },
         {
           "insert": "SpectreRef",
@@ -607,25 +610,7 @@
           }
         },
         {
-          "insert": " type (the doc/canvas shared reference-link shape) was copied into "
-        },
-        {
-          "insert": "packages/canvas/src/model/spectre-ref.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " rather than depending on Spectre's "
-        },
-        {
-          "insert": "docs-model",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " package — only the type is needed here, so the runtime validator was intentionally left behind. As part of the same self-containment move, "
+          "insert": " copy vendored for code-block references died with the code-block object kind (deleted 2026-07-09); nothing Spectre-shaped remains in the package. The old "
         },
         {
           "insert": "lucide-react",
@@ -634,16 +619,107 @@
           }
         },
         {
-          "insert": " was promoted from a transitive dependency (pulled in via the host app) to a direct dependency of "
+          "insert": " dependency is gone from "
         },
         {
-          "insert": "@codecaine-ai/canvas",
+          "insert": "packages/canvas/package.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/package.json"
+            }
+          }
+        },
+        {
+          "insert": " entirely. Icons now come from the licensed Nucleo SVG set through "
+        },
+        {
+          "insert": "tools/nucleo-icons/generate.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "tools/nucleo-icons/generate.ts"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "manifest.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/manifest.json"
+            }
+          }
+        },
+        {
+          "insert": " selects the icons, the generator emits one component per icon under "
+        },
+        {
+          "insert": "ui/icons/nucleo",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/nucleo"
+            }
+          }
+        },
+        {
+          "insert": " with a generated "
+        },
+        {
+          "insert": "index.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "."
+          "insert": " barrel, the source SVGs are vendored used-assets-only under "
+        },
+        {
+          "insert": "nucleo/svg/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/nucleo/svg"
+            }
+          }
+        },
+        {
+          "insert": ", and hand-authored extras live in "
+        },
+        {
+          "insert": "custom-icons.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/custom-icons.tsx"
+            }
+          }
+        },
+        {
+          "insert": ". The "
+        },
+        {
+          "insert": "icons barrel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " re-exports both generated and custom icons, matching the repo's vendored-assets policy: only referenced assets get copied in, one file per icon, and barrels define the import surface."
         }
       ],
       "children": []
@@ -1026,7 +1102,69 @@
           }
         },
         {
-          "insert": " directory when iterating on one part of the engine."
+          "insert": " directory when iterating on one part of the engine. Bun runs those tests on "
+        },
+        {
+          "insert": "happy-dom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via "
+        },
+        {
+          "insert": "bunfig.toml",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "bunfig.toml"
+            }
+          }
+        },
+        {
+          "insert": " preloading "
+        },
+        {
+          "insert": "happydom.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "happydom.ts"
+            }
+          }
+        },
+        {
+          "insert": " (which registers "
+        },
+        {
+          "insert": "@happy-dom/global-registrator",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "); the same Bun config sets "
+        },
+        {
+          "insert": "root = \"packages\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so the docs-framework submodule's vendored tests stay out of "
+        },
+        {
+          "insert": "bun test",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " discovery."
         }
       ],
       "children": []
@@ -1084,7 +1222,7 @@
           }
         },
         {
-          "insert": " layers instead get jsdom-based DOM and geometry assertion tests — checking computed styles, element positions, class names, and attribute values against expectations derived from "
+          "insert": " layers instead get happy-dom DOM and geometry assertion tests — checking computed styles, element positions, class names, and attribute values against expectations derived from "
         },
         {
           "insert": "board-design-reference/",
@@ -1107,7 +1245,59 @@
           }
         },
         {
-          "insert": ") and carried through the rest of the package: assertions are made on concrete, diffable values (a computed pixel width, a hex color, a DOM attribute) rather than on rendered pixels, so failures are legible and don't require a human to eyeball an image diff."
+          "insert": ") and carried through the rest of the package: assertions are made on concrete, diffable values (a computed pixel width, a hex color, a DOM attribute) rather than on rendered pixels, so failures are legible and don't require a human to eyeball an image diff. The DOM-equivalence gate in "
+        },
+        {
+          "insert": "zz-dom-equivalence.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/zz-dom-equivalence.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "zz-dom-fixtures.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/zz-dom-fixtures.ts"
+            }
+          }
+        },
+        {
+          "insert": " re-renders a fixed corpus (repo fixtures plus synthetic docs, three prop profiles each) and compares it against "
+        },
+        {
+          "insert": "packages/canvas/zz-dom-baseline.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/zz-dom-baseline.json"
+            }
+          }
+        },
+        {
+          "insert": ": HTML outside the style block must be byte-identical, the style block is compared structurally, and adversarial docs are reported but never auto-fail. The capture script is "
+        },
+        {
+          "insert": "packages/canvas/zz-dom-capture.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/zz-dom-capture.ts"
+            }
+          }
+        },
+        {
+          "insert": ". It was the layout overhaul's DOM gate and stays active pending the registry refactor's retirement decision. The suite is deliberately red at HEAD: a frozen set of 6 failures (as of 2026-07-10 — the zz-dom baseline, the outline-anchor cascade baseline, three v2-flow fixture-parity assertions, and one below-slot text fixture) is kept byte-stable as a drift detector while overhaul work is in flight. The policy is prune, never regenerate: fixing a failure means updating the test or pruning the stale baseline entry, not re-capturing a green baseline over unexplained drift. \"Suite green\" is therefore not a gate in this repo; \"failure set identical\" is."
         }
       ],
       "children": []

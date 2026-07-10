@@ -36,13 +36,12 @@ asymmetric re-route)"), on 2026-07-05.
 A handful of Spectre's shadcn-style UI primitives and its `cn()` class-name
 helper were duplicated (not re-exported) into `packages/canvas/src/ui/`
 so the package has zero dependency on a host app's component library:
-`Button`, `Input`, `Textarea`, `Badge`, and `cn`. These are trimmed copies of
-Spectre's `apps/frontend/src/components/ui/{button,input,textarea,badge}.tsx`
-and `apps/frontend/src/lib/utils.ts` (`cn` export only). `SpectreRef` (the
-doc/canvas shared reference-link type) was similarly copied as a
-type-only local file (`src/spectre-ref.ts`) rather than depending on
-Spectre's `docs-model` package — the runtime `validateSpectreRef` validator
-was intentionally left behind since only the type is needed here.
+`Button`, `Input`, `Textarea`, `Badge`, `Tooltip`, and `cn`. These are trimmed
+copies of Spectre's `apps/frontend/src/components/ui/{button,input,textarea,badge}.tsx`
+and `apps/frontend/src/lib/utils.ts` (`cn` export only), plus the local canvas
+chrome tooltip primitive. The type-only `SpectreRef` copy vendored for
+code-block references was removed with the code-block object kind on
+2026-07-09.
 
 `lucide-react` moved from an app dependency to a direct dependency of
 `@codecaine-ai/canvas` at extraction time. It has since been removed
@@ -55,7 +54,8 @@ library and vendors only the SVGs actually used into
 `packages/canvas/src/ui/icons/nucleo/svg/` (so CI and library-less machines
 regenerate identically). It outputs one component per file under
 `packages/canvas/src/ui/icons/nucleo/` (plus a generated `index.ts` barrel)
-and `packages/canvas/src/ui/icons/icon-glyph-data.generated.ts`.
+and emits canvas-object glyph data to
+`packages/canvas/src/objects/shapes/icon/icon-glyph-data.generated.ts`.
 
 ## Licensing note
 
