@@ -12,7 +12,7 @@
           "InteractiveCanvasDocument",
           "CanvasAction",
           "reduceInteractiveCanvasState",
-          "SpectreRef",
+          "historical code-ref object",
           "connection waypoints"
         ],
         "covers": "The data model at the core of the interactive canvas engine: the document schema, the typed action vocabulary, the single reducer that mutates it, and the pure geometry helpers it relies on.",
@@ -179,10 +179,12 @@
         "b-model-actions-p1",
         "b-model-actions-list-select",
         "b-model-actions-list-setTool",
+        "b-model-actions-list-updateDocumentTitle",
         "b-model-actions-list-addObject",
         "b-model-actions-list-addObjects",
         "b-model-actions-list-updateObject",
         "b-model-actions-list-updateObjectGeometries",
+        "b-model-actions-list-reconcileSectionMembership",
         "b-model-actions-list-resizeObject",
         "b-model-actions-list-moveSelection",
         "b-model-actions-list-duplicateSelection",
@@ -197,7 +199,6 @@
         "b-model-actions-list-alignSelection",
         "b-model-actions-list-distributeSelection",
         "b-model-actions-list-fitContainerToChildren",
-        "b-model-actions-list-resolveLinkStatuses",
         "b-model-actions-list-undo",
         "b-model-actions-list-redo",
         "b-model-actions-list-reset",
@@ -211,7 +212,6 @@
         "b-model-geometry-p2",
         "b-model-heading-spectre-ref",
         "b-model-spectre-ref-p1",
-        "b-model-spectre-ref-p2",
         "b-model-constraint-single-authority",
         "b-model-testing-coverage",
         "b-model-closing-p1"
@@ -1978,7 +1978,7 @@
           }
         },
         {
-          "insert": ", label per type; the old defaultGeometryFor/toneForType/shapeForType switches are gone) — and rendering dispatches through each type's registered ObjectDef ("
+          "insert": ", label per type; the old parallel switch file is gone and the defaults helpers read this table) — and rendering dispatches through each type's registered ObjectDef ("
         },
         {
           "insert": "objectDefFor",
@@ -2001,43 +2001,48 @@
       "id": "b-model-object-ref-stale",
       "flavour": "observation",
       "props": {
-        "title": "STALE NOTICE — pre-overhaul content below"
+        "title": "Walkthrough maintenance note"
       },
       "text": [
         {
-          "insert": "The per-type walkthrough below predates the object-definition overhaul: mentions of label/body/title fields, tones, palette tokens, section tint families, and CanvasStage-resident per-shape layout are historical. For the shipped contract — the single "
+          "insert": "The per-type walkthrough below is maintained against "
         },
         {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field, the "
-        },
-        {
-          "insert": "color?: CanvasColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " 10-pick color model and per-kind role tables, def-declared text slots, and def-declared outlines — see "
-        },
-        {
-          "insert": "canvas-10-system-design-10-shape-api",
+          "insert": "state/schema/object-defaults.ts",
           "attributes": {
             "code": true,
             "reference": {
-              "kind": "doc",
-              "path": "10-system-design/10-shape-api",
-              "label": "canvas-10-system-design-10-shape-api"
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
         {
-          "insert": "; where this section and that doc disagree, that doc (and the code it cites) wins."
+          "insert": " and the object-def registry ("
+        },
+        {
+          "insert": "objectDefFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "symbol": "objectDefFor"
+            }
+          }
+        },
+        {
+          "insert": "). Any remaining mentions of legacy "
+        },
+        {
+          "insert": "label/body/title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " text fields or palette tokens are explicitly historical and marked as such."
         }
       ],
       "children": []
@@ -2137,7 +2142,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -2151,20 +2156,7 @@
           }
         },
         {
-          "insert": " — sized to comfortably hold a few default-sized shapes at creation time. Default tone is "
-        },
-        {
-          "insert": "\"neutral\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " and "
+          "insert": " — sized to comfortably hold a few default-sized shapes at creation time. The rectangle row explicitly sets "
         },
         {
           "insert": "style.shape",
@@ -2177,7 +2169,7 @@
           }
         },
         {
-          "insert": " resolves to "
+          "insert": " to "
         },
         {
           "insert": "\"rounded-rect\"",
@@ -2198,13 +2190,27 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "shapeForType"
             }
           }
         },
         {
-          "insert": " has no dedicated rectangle case, so it falls through to the function's default). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
+          "insert": " reads the rectangle entry in "
+        },
+        {
+          "insert": "OBJECT_TYPE_DEFAULTS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": "). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
         },
         {
           "insert": "align-items: flex-start",
@@ -2355,20 +2361,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A rounded-rect flow step — the generic "
-        },
-        {
-          "insert": "addObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " fallback shape and tone: "
+          "insert": "A rounded-rect flow step. "
         },
         {
           "insert": "shapeForType",
@@ -2376,45 +2369,36 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "shapeForType"
             }
           }
         },
         {
-          "insert": " and "
+          "insert": " is an exhaustive "
         },
         {
-          "insert": "toneForType",
+          "insert": "Record",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lookup in "
+        },
+        {
+          "insert": "object-defaults.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
-              "symbol": "toneForType"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
             }
           }
         },
         {
-          "insert": " both fall through their if-chains to "
-        },
-        {
-          "insert": "\"rounded-rect\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "\"process\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for any type they do not special-case, and "
+          "insert": "; the "
         },
         {
           "insert": "process",
@@ -2427,7 +2411,16 @@
           }
         },
         {
-          "insert": " is the type that fallback was written for. "
+          "insert": " row is explicit and returns "
+        },
+        {
+          "insert": "\"rounded-rect\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — no if-chain, no fall-through, and no catch-all. "
         },
         {
           "insert": "canvas.quickConnect",
@@ -2451,7 +2444,21 @@
       "props": {},
       "text": [
         {
-          "insert": "Default geometry falls through to "
+          "insert": "Default geometry comes from the explicit "
+        },
+        {
+          "insert": "OBJECT_TYPE_DEFAULTS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": " process row returned by "
         },
         {
           "insert": "defaultGeometryFor",
@@ -2459,13 +2466,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": "'s catch-all: "
+          "insert": ": "
         },
         {
           "insert": "{ x: 160, y: 160, width: 184, height: 96 }",
@@ -2473,12 +2480,12 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
         {
-          "insert": ". "
+          "insert": ". Every type has a row; there is no catch-all. "
         },
         {
           "insert": "label",
@@ -2530,16 +2537,7 @@
           }
         },
         {
-          "insert": " (when present and not "
-        },
-        {
-          "insert": "compact",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") renders below it, clamped to 3 lines."
+          "insert": " (when present and not compact) renders below it, clamped to 3 lines."
         }
       ],
       "children": []
@@ -2571,20 +2569,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"decision\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -2710,7 +2695,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -2736,25 +2721,12 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
         {
-          "insert": "'s seed size). Default tone "
-        },
-        {
-          "insert": "\"warning\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
+          "insert": "'s seed size). "
         },
         {
           "insert": "style.shape",
@@ -2767,7 +2739,7 @@
           }
         },
         {
-          "insert": " "
+          "insert": " is "
         },
         {
           "insert": "\"note\"",
@@ -2780,34 +2752,39 @@
           }
         },
         {
-          "insert": ". Sticky is the only object type with a "
+          "insert": ". The sticky fill is the "
         },
         {
-          "insert": "paletteToken",
+          "insert": "sticky",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " role hex of the pick's swatch via "
+        },
+        {
+          "insert": "resolveStickyFill",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveStickyFill"
             }
           }
         },
         {
-          "insert": " role in color resolution that uses the palette's sticky fill instead of the shape fill, preserving an exact "
+          "insert": " in "
         },
         {
-          "insert": "STICKY_COLORS",
+          "insert": "packages/canvas/src/theme/palette.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/colors.ts",
-              "symbol": "STICKY_COLORS"
-            }
+            "code": true
           }
         },
         {
-          "insert": " hex per hue while shapes use their own fill + ink border role."
+          "insert": ", while shapes use their own fill + ink border role."
         }
       ],
       "children": []
@@ -3019,20 +2996,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"annotation\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -3108,39 +3072,12 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
         {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"memory\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": " (documents/intents/memory per the "
-        },
-        {
-          "insert": "CanvasPaletteToken",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasPaletteToken"
-            }
-          }
-        },
-        {
-          "insert": " doc comment), "
+          "insert": ", "
         },
         {
           "insert": "style.shape",
@@ -3251,20 +3188,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"memory\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -3315,13 +3239,7 @@
           }
         },
         {
-          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike the icon glyph family — it was "
-        },
-        {
-          "insert": "not part of the W2 restyle's \"label below icon\" treatment: database keeps the older tone-driven pastel-pair styling, and its label/body render "
-        },
-        {
-          "insert": "centered over the silhouette ("
+          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike the icon glyph family's \"label below icon\" treatment — its label/body render centered over the silhouette ("
         },
         {
           "insert": "justify-content: center; padding-top: 14%",
@@ -3555,7 +3473,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -3699,17 +3617,35 @@
       "props": {},
       "text": [
         {
-          "insert": "The chip is zoom-adaptive (the FigJam “big section names when zoomed out” behavior): below zoom 1 it counter-scales by "
+          "insert": "The chip is zoom-adaptive (the FigJam “big section names when zoomed out” behavior): "
         },
         {
-          "insert": "(1 / zoom) ** zoomOutGrowth",
+          "insert": "resolveSectionTitleChipSlot",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "sectionTitleScale"
+              "path": "packages/canvas/src/objects/section/title-chip-geometry.ts",
+              "symbol": "resolveSectionTitleChipSlot"
             }
+          }
+        },
+        {
+          "insert": " computes a "
+        },
+        {
+          "insert": "resolved.scale",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " result that, below zoom 1, counter-scales by "
+        },
+        {
+          "insert": "(1 / zoom) ** zoomOutGrowth",
+          "attributes": {
+            "code": true
           }
         },
         {
@@ -3725,13 +3661,13 @@
           "insert": " (6) and uniform across every section regardless of its width. A scaled chip is width-budgeted to its section's inner width ("
         },
         {
-          "insert": "sectionTitleMaxWidthPx",
+          "insert": "titleChipMaxWidthPx",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "sectionTitleMaxWidthPx"
+              "path": "packages/canvas/src/objects/section/title-chip-geometry.ts",
+              "symbol": "titleChipMaxWidthPx"
             }
           }
         },
@@ -3913,7 +3849,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "path": "packages/canvas/src/objects/object-shell.tsx",
               "symbol": "objectStyle"
             }
           }
@@ -4000,20 +3936,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"input\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -4143,13 +4066,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": " matches the measured reference proportions (361x100 logical px), default tone \"process\", style.shape \"arrow-shape\"."
+          "insert": " matches the measured reference proportions (361x100 logical px), style.shape \"arrow-shape\"."
         }
       ],
       "children": []
@@ -4177,7 +4100,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4191,7 +4114,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4205,7 +4128,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4219,7 +4142,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ARROW_SHAPE_GEOMETRY"
             }
           }
@@ -4322,20 +4245,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", default tone "
-        },
-        {
-          "insert": "\"memory\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts"
+              "path": "packages/canvas/src/state/schema/object-defaults.ts"
             }
           }
         },
@@ -4473,13 +4383,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\" (inert — ellipse resolves color from figjam-tokens directly), style.shape \"ellipse\"."
+          "insert": ", style.shape \"ellipse\"."
         }
       ],
       "children": []
@@ -4498,7 +4408,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ellipsePoints"
             }
           }
@@ -4550,13 +4460,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"triangle\"."
+          "insert": ", style.shape \"triangle\"."
         }
       ],
       "children": []
@@ -4575,7 +4485,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "trianglePoints"
             }
           }
@@ -4627,13 +4537,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"parallelogram\"."
+          "insert": ", style.shape \"parallelogram\"."
         }
       ],
       "children": []
@@ -4652,7 +4562,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "parallelogramPoints"
             }
           }
@@ -4690,13 +4600,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"pentagon\"."
+          "insert": ", style.shape \"pentagon\"."
         }
       ],
       "children": []
@@ -4715,7 +4625,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "pentagonPoints"
             }
           }
@@ -4753,13 +4663,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"octagon\"."
+          "insert": ", style.shape \"octagon\"."
         }
       ],
       "children": []
@@ -4778,7 +4688,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "octagonPoints"
             }
           }
@@ -4816,13 +4726,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"star\"."
+          "insert": ", style.shape \"star\"."
         }
       ],
       "children": []
@@ -4841,7 +4751,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "starPoints"
             }
           }
@@ -4879,13 +4789,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"plus\"."
+          "insert": ", style.shape \"plus\"."
         }
       ],
       "children": []
@@ -4904,7 +4814,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "plusPoints"
             }
           }
@@ -4956,13 +4866,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"chevron\"."
+          "insert": ", style.shape \"chevron\"."
         }
       ],
       "children": []
@@ -4981,7 +4891,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "chevronPoints"
             }
           }
@@ -5033,13 +4943,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"folder\", tab width proportioned by "
+          "insert": ", style.shape \"folder\", tab width proportioned by "
         },
         {
           "insert": "FOLDER_GEOMETRY",
@@ -5096,13 +5006,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"document-stack\", offset proportioned by "
+          "insert": ", style.shape \"document-stack\", offset proportioned by "
         },
         {
           "insert": "DOCUMENT_STACK_GEOMETRY",
@@ -5159,13 +5069,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"off-page-connector\", point proportioned by "
+          "insert": ", style.shape \"off-page-connector\", point proportioned by "
         },
         {
           "insert": "OFF_PAGE_CONNECTOR_GEOMETRY",
@@ -5198,7 +5108,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "offPageConnectorPoints"
             }
           }
@@ -5236,13 +5146,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"trapezoid\"."
+          "insert": ", style.shape \"trapezoid\"."
         }
       ],
       "children": []
@@ -5261,7 +5171,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "trapezoidPoints"
             }
           }
@@ -5299,13 +5209,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"manual-input\", drop proportioned by "
+          "insert": ", style.shape \"manual-input\", drop proportioned by "
         },
         {
           "insert": "MANUAL_INPUT_GEOMETRY",
@@ -5338,7 +5248,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "manualInputPoints"
             }
           }
@@ -5376,13 +5286,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"hexagon\"."
+          "insert": ", style.shape \"hexagon\"."
         }
       ],
       "children": []
@@ -5401,7 +5311,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "hexagonPoints"
             }
           }
@@ -5439,13 +5349,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"internal-storage\"."
+          "insert": ", style.shape \"internal-storage\"."
         }
       ],
       "children": []
@@ -5488,13 +5398,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"or-junction\"."
+          "insert": ", style.shape \"or-junction\"."
         }
       ],
       "children": []
@@ -5513,7 +5423,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "path": "packages/canvas/src/objects/geometry.ts",
               "symbol": "ellipsePoints"
             }
           }
@@ -5551,13 +5461,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"summing-junction\"."
+          "insert": ", style.shape \"summing-junction\"."
         }
       ],
       "children": []
@@ -5600,13 +5510,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"cylinder-horizontal\"."
+          "insert": ", style.shape \"cylinder-horizontal\"."
         }
       ],
       "children": []
@@ -5649,13 +5559,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"page-corner\"."
+          "insert": ", style.shape \"page-corner\"."
         }
       ],
       "children": []
@@ -5712,13 +5622,13 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/defaults.ts",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
               "symbol": "defaultGeometryFor"
             }
           }
         },
         {
-          "insert": ", default tone \"neutral\", style.shape \"icon\"."
+          "insert": ", style.shape \"icon\"."
         }
       ],
       "children": []
@@ -6257,7 +6167,7 @@
           }
         },
         {
-          "insert": ", is a single discriminated union with exactly 22 variants, every one prefixed "
+          "insert": ", is a single discriminated union with exactly 26 variants, every one prefixed "
         },
         {
           "insert": "canvas.",
@@ -6350,6 +6260,29 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-updateDocumentTitle": {
+      "id": "b-model-actions-list-updateDocumentTitle",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.updateDocumentTitle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts"
+            }
+          }
+        },
+        {
+          "insert": " — Sets the document's top-level title. Recorded in history like any other document mutation."
         }
       ],
       "children": []
@@ -6458,6 +6391,61 @@
         },
         {
           "insert": " — bulk geometry patch for many objects at once (drag/section-carry), with an opt-out of history recording for live-preview frames."
+        }
+      ],
+      "children": []
+    },
+    "b-model-actions-list-reconcileSectionMembership": {
+      "id": "b-model-actions-list-reconcileSectionMembership",
+      "flavour": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "canvas.reconcileSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts"
+            }
+          }
+        },
+        {
+          "insert": " — Re-derives every object's "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from geometry (the ≥60% containment rule) via the shared reconciler; dispatched by move/resize gestures on pointer-up with "
+        },
+        {
+          "insert": "recordHistory: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". See "
+        },
+        {
+          "insert": "10-system-design/30-layering",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "10-system-design/30-layering"
+            }
+          }
+        },
+        {
+          "insert": " for the full lifecycle."
         }
       ],
       "children": []
@@ -6837,25 +6825,6 @@
         },
         {
           "insert": " assigns parentId to parentless objects overlapping the section by ≥60%."
-        }
-      ],
-      "children": []
-    },
-    "b-model-actions-list-resolveLinkStatuses": {
-      "id": "b-model-actions-list-resolveLinkStatuses",
-      "flavour": "list-item",
-      "props": {
-        "ordered": true
-      },
-      "text": [
-        {
-          "insert": "canvas.resolveLinkStatuses",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — re-derives every link's resolved/stale/missing/unresolved status against a set of known and stale paths."
         }
       ],
       "children": []
@@ -7373,7 +7342,7 @@
       },
       "text": [
         {
-          "insert": "Self-containment: SpectreRef"
+          "insert": "Historical code-ref note"
         }
       ],
       "children": []
@@ -7384,159 +7353,43 @@
       "props": {},
       "text": [
         {
+          "insert": "Historical note: earlier versions of this package vendored a type-only "
+        },
+        {
+          "insert": "SpectreRef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " copy ("
+        },
+        {
           "insert": "spectre-ref.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is a type-only vendored copy of "
+          "insert": ") to type code-block references into Spectre. The code-block object kind was deleted on 2026-07-09 and took the vendored type with it; the "
         },
         {
-          "insert": "SpectreRef",
+          "insert": "icon",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " — the same cross-reference shape ("
+          "insert": " glyph "
         },
         {
-          "insert": "kind",
+          "insert": "code",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "\"doc\" | \"source\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", plus "
-        },
-        {
-          "insert": "path",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "symbol",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "line",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") originally defined in the host Spectre application's own docs-model. It exists here purely so this package has zero runtime dependency back on that host app: the canvas engine only needs the "
-        },
-        {
-          "insert": "type",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " to type "
-        },
-        {
-          "insert": "InteractiveCanvasLink.target",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", not the host's runtime "
-        },
-        {
-          "insert": "validateSpectreRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " validator, which stays host-side. The file's own comment is explicit that the two copies must be kept in sync by hand if either evolves — there is no build-time link between them, by design."
-        }
-      ],
-      "children": []
-    },
-    "b-model-spectre-ref-p2": {
-      "id": "b-model-spectre-ref-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "There's a fitting irony here: this very doc.json's own "
-        },
-        {
-          "insert": "reference",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " span attributes — the ones wrapping every "
-        },
-        {
-          "insert": "InteractiveCanvasDocument",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "CanvasAction",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " mention above — use exactly this "
-        },
-        {
-          "insert": "SpectreRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " shape. The one cross-reference type this package vendors to stay decoupled from its host is the same type structuring the prose that documents it."
+          "insert": " covers the visual concept. If a Spectre code-ref object returns, it will be built fresh against the current schema rather than reviving the old type."
         }
       ],
       "children": []
