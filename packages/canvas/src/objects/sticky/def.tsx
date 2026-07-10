@@ -2,7 +2,7 @@
 
 import { objectTypeDefaults } from "../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../geometry";
-import { ObjectButtonChrome, ObjectSlotText } from "../object-chrome";
+import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
 import { StickyMarkdown } from "./markdown";
@@ -29,7 +29,7 @@ export const STICKY_GEOMETRY = {
 function StickyObjectView(props: ObjectRenderProps) {
   const { object, hideText } = props;
   return (
-    <ObjectButtonChrome
+    <ObjectShell
       object={object}
       renderShape="note"
       className="interactive-canvas-object interactive-canvas-object-note"
@@ -56,7 +56,7 @@ function StickyObjectView(props: ObjectRenderProps) {
           <StickyMarkdown text={object.text} />
         </ObjectSlotText>
       )}
-    </ObjectButtonChrome>
+    </ObjectShell>
   );
 }
 

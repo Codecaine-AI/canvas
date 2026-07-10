@@ -5,7 +5,7 @@ import {
   renderShapeFor,
   type ObjectRenderProps,
 } from "../objects/object-def";
-import { ObjectButtonChrome, ObjectSlotText } from "../objects/object-chrome";
+import { ObjectShell, ObjectSlotText } from "../objects/object-shell";
 import { CENTER_TEXT_SLOT } from "../objects/text-slots";
 
 /**
@@ -29,7 +29,7 @@ export function ObjectShape(props: ObjectRenderProps) {
 function GenericObjectShape(props: ObjectRenderProps) {
   const { object, hideText } = props;
   return (
-    <ObjectButtonChrome
+    <ObjectShell
       object={object}
       renderShape={renderShapeFor(object)}
       className="interactive-canvas-object"
@@ -42,6 +42,6 @@ function GenericObjectShape(props: ObjectRenderProps) {
       onObjectContextMenu={props.onObjectContextMenu}
     >
       {!hideText && <ObjectSlotText object={object} slot={CENTER_TEXT_SLOT} />}
-    </ObjectButtonChrome>
+    </ObjectShell>
   );
 }

@@ -12,7 +12,7 @@ import { objectDefFor } from "../../../../../objects/object-def";
 import {
   resolveObjectBorderWidth,
   textSlotClampLineCount,
-} from "../../../../../objects/object-chrome";
+} from "../../../../../objects/object-shell";
 import {
   BELOW_BAND_GAP_PX,
   resolveTextSlot,

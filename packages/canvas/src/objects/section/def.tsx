@@ -4,7 +4,7 @@ import { resolveSectionColors } from "../../theme/palette";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
 import { CONNECTOR_DASH_PATTERN_PX } from "../../connectors/def";
 import { BBOX_OUTLINE } from "../geometry";
-import { resolveObjectBorderWidth } from "../object-chrome";
+import { resolveObjectBorderWidth } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { TITLE_CHIP, TITLE_CHIP_TEXT_SLOT } from "../text-slots";
 import { SECTION_TOOLBAR } from "./toolbar";

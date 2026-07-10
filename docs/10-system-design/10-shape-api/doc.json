@@ -944,7 +944,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/object-chrome.tsx",
+              "path": "packages/canvas/src/objects/object-shell.tsx",
               "symbol": "ObjectSlotText"
             }
           }
@@ -1892,7 +1892,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/object-chrome.tsx",
+              "path": "packages/canvas/src/objects/object-shell.tsx",
               "symbol": "resolveObjectRoleColors"
             }
           }
@@ -2199,7 +2199,7 @@
             "note": "Shapes-panel ARRANGEMENT only; entry labels/keywords derive from each def's catalog metadata"
           },
           {
-            "path": "packages/canvas/src/objects/object-chrome.tsx",
+            "path": "packages/canvas/src/objects/object-shell.tsx",
             "note": "shared object button chrome, ObjectSlotText, resolveObjectRoleColors (color role resolution)"
           },
           {

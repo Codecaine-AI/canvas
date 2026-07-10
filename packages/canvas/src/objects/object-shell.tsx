@@ -14,9 +14,10 @@ import type {
 import { OBJECT_TEXT_COLOR, resolveTextSlot, slotLineHeightPx, textPlacementName, type TextSlot } from "./text-slots";
 
 /**
- * Shared button chrome for registry-driven object renderers: the outer
- * `<button>` (positioning style, docs-targeting/data attributes, select and
- * context-menu handlers). Extracted from
+ * Shared shell for registry-driven object renderers: the outer `<button>`,
+ * style resolvers, and slot text helpers every object kind renders through.
+ * Includes positioning style, docs-targeting/data attributes, select and
+ * context-menu handlers. Extracted from
  * stage/ObjectShape's original generic branch so per-kind defs compose it
  * instead of re-deriving it; ObjectShape's own generic fallback (for render
  * shapes with no registered def) now composes this same shared code too —
@@ -109,7 +110,7 @@ export function objectStyle(
  * byte-identical DOM. `renderShape` is the effective render shape stamped on
  * `data-canvas-object-shape`.
  */
-export function ObjectButtonChrome({
+export function ObjectShell({
   object,
   renderShape,
   className,
@@ -136,7 +137,7 @@ export function ObjectButtonChrome({
 > & {
   renderShape: RenderObjectShape;
   className: string;
-  /** Palette role table the chrome's fill/border resolve through (defaults to "shape"). */
+  /** Palette role table the shell's fill/border resolve through (defaults to "shape"). */
   colorRole?: ObjectColorRole;
   /** Whether the outer button itself contributes a CSS border/padding-box inset. */
   buttonBorder?: ObjectButtonBorderPolicy;

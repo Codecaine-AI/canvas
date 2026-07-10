@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
 import { render } from "@testing-library/react";
-import { resolveObjectRoleColors } from "../object-chrome";
+import { resolveObjectRoleColors } from "../object-shell";
 import { OBJECT_DEFS, objectDefForType } from "../object-def";
 import { OBJECT_TEXT_COLOR } from "../text-slots";
 import { ObjectShape } from "../../stage/ObjectShape";

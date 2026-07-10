@@ -4,7 +4,7 @@ import { resolveObjectStrokeWidth } from "../../theme/tokens";
 import { objectTypeDefaults } from "../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../geometry";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
-import { ObjectButtonChrome, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../object-chrome";
+import { ObjectShell, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../object-shell";
 import {
   CENTER_TEXT_SLOT,
   textPlacementName,
@@ -39,7 +39,7 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
     const strokeWidth = resolveObjectStrokeWidth(object.style);
     const silhouette = shape.silhouette.silhouette?.({ object, colors, strokeWidth });
     return (
-      <ObjectButtonChrome
+      <ObjectShell
         object={object}
         renderShape={shape.shape}
         className={className}
@@ -65,7 +65,7 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
             }
           />
         )}
-      </ObjectButtonChrome>
+      </ObjectShell>
     );
   }
   ShapeObjectView.displayName = `ShapeObjectView(${shape.shape})`;

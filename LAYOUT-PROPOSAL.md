@@ -314,3 +314,9 @@ Commits: `461a0a4` `1172162` `7490d4a` `08c9be9` (Part 1) · `d3f1994`
   50-editor) still carry old layer names.
 - interaction/interaction.ts barrel: reassess whether it still earns its
   keep now that the kernel is small.
+
+## Post-freeze amendments
+
+- 2026-07-09: `objects/object-chrome.tsx` → `objects/object-shell.tsx`
+  (`ObjectButtonChrome` → `ObjectShell`), per Ford — "chrome" is now reserved
+  for editor UI. Full gates held.

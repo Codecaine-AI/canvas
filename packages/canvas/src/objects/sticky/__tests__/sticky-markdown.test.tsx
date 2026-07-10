@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { ObjectShape } from "../../../stage/ObjectShape";
-import { ObjectSlotText, textSlotClampLineCount } from "../../object-chrome";
+import { ObjectSlotText, textSlotClampLineCount } from "../../object-shell";
 import { CENTER_TEXT_SLOT } from "../../text-slots";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import {

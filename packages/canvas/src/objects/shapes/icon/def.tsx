@@ -3,7 +3,7 @@
 import { IconShapeBody } from "./IconShapeBody";
 import { objectTypeDefaults } from "../../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../../geometry";
-import { ObjectButtonChrome, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../../object-chrome";
+import { ObjectShell, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
 import { BELOW_TEXT_SLOT } from "../../text-slots";
 import { SHAPE_TOOLBAR } from "../toolbar";
@@ -21,7 +21,7 @@ function IconObjectView(props: ObjectRenderProps) {
   const colors = resolveObjectRoleColors(object, "shape") as ResolvedShapeObjectColors;
 
   return (
-    <ObjectButtonChrome
+    <ObjectShell
       object={object}
       renderShape="icon"
       className="interactive-canvas-object interactive-canvas-object-icon"
@@ -52,7 +52,7 @@ function IconObjectView(props: ObjectRenderProps) {
           className="interactive-canvas-label-below-icon"
         />
       )}
-    </ObjectButtonChrome>
+    </ObjectShell>
   );
 }
 

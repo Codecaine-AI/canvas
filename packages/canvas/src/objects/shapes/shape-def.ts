@@ -8,7 +8,7 @@ import type {
 } from "../../state/schema";
 import type { OutlineSpec } from "../geometry";
 import type { ObjectButtonBorderPolicy, ObjectCatalogMeta } from "../object-def";
-import type { ResolvedShapeObjectColors } from "../object-chrome";
+import type { ResolvedShapeObjectColors } from "../object-shell";
 import type { TextSlot } from "../text-slots";
 
 /**
@@ -24,7 +24,7 @@ export interface ShapeOutlineArgs {
   object: InteractiveCanvasObject;
   /**
    * The object's color pick resolved through the "shape" palette role
-   * (object-chrome.tsx resolveObjectRoleColors): fill + ink border + the
+   * (object-shell.tsx resolveObjectRoleColors): fill + ink border + the
    * fixed dark text color (D8). D13: no silhouette carries fixed colors
    * anymore — this is the ONLY color input.
    */
