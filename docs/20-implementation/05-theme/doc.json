@@ -8,7 +8,7 @@
       "id": "b-theme-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The theme domain: packages/canvas/src/theme/ — palette.ts (the closed 10-pick color table and per-role resolvers) and tokens.ts (board surface variables, universal shape stroke width, text hierarchy).",
+        "covers": "The theme domain: packages/canvas/src/theme/ — palette.ts (the closed 10-pick ink/fill/wash color table and per-role resolvers) and tokens.ts (canvas surface variables, the universal shape stroke, the text size hierarchy) — plus the dispersal story that put every other FigJam constant beside its consumer.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
@@ -20,7 +20,19 @@
       },
       "children": [
         "b-theme-title-1",
-        "b-theme-placeholder-2"
+        "b-theme-intro-2",
+        "b-theme-palette-heading-3",
+        "b-theme-palette-table-4",
+        "b-theme-palette-roles-5",
+        "b-theme-palette-resolvers-6",
+        "b-theme-palette-decision-7",
+        "b-theme-tokens-heading-8",
+        "b-theme-tokens-body-9",
+        "b-theme-dispersal-heading-10",
+        "b-theme-dispersal-body-11",
+        "b-theme-layering-heading-12",
+        "b-theme-layering-body-13",
+        "b-theme-closing-14"
       ]
     },
     "b-theme-title-1": {
@@ -36,13 +48,721 @@
       ],
       "children": []
     },
-    "b-theme-placeholder-2": {
-      "id": "b-theme-placeholder-2",
+    "b-theme-intro-2": {
+      "id": "b-theme-intro-2",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Structure shell created 2026-07-10 in the docs-overhaul session; content pass pending. Scope: packages/canvas/src/theme/ — palette.ts (the 10-pick color table and role resolvers) and tokens.ts (board surface variables, universal stroke width, text hierarchy), plus the theme-dispersal story currently smeared across 10-shape-api and the stage doc."
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the bottom of the layer cake: two leaf modules that answer \"what does the board look like\" for every layer above them. "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns what a color pick looks like; "
+        },
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the non-color remainder — canvas surface variables, the universal shape stroke, the text size hierarchy. Theme depends on nothing but "
+        },
+        {
+          "insert": "state/schema",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " types, and everything visual — "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — resolves through it rather than hardcoding hexes."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-palette-heading-3": {
+      "id": "b-theme-palette-heading-3",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "palette.ts — the 10-pick color table"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-palette-table-4": {
+      "id": "b-theme-palette-table-4",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CANVAS_PALETTE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "CANVAS_PALETTE"
+            }
+          }
+        },
+        {
+          "insert": " is the canonical swatch table: one row per pick in the closed 10-color roster, each row a "
+        },
+        {
+          "insert": "Swatch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "Swatch"
+            }
+          }
+        },
+        {
+          "insert": " carrying every expression a pick can have — the picker-preview hex, the shape fill/border pair, the section tint + title-chip pair, the exact sticky fill, and the connector stroke. Documents store swatch IDS ("
+        },
+        {
+          "insert": "CanvasColor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts",
+              "symbol": "CanvasColor"
+            }
+          }
+        },
+        {
+          "insert": "), never hexes; changing what a pick looks like means editing table cells, not documents."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-palette-roles-5": {
+      "id": "b-theme-palette-roles-5",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The model is three roles per hue. "
+        },
+        {
+          "insert": "Ink",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " is the line-safe stroke color: picker swatches use it, and shapes, connectors, and section title-chip borders all stroke with it. "
+        },
+        {
+          "insert": "Fill",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " is the object/chip body color, with stickies keeping their own hue-specific fill from the same family. "
+        },
+        {
+          "insert": "Wash",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " is the lightest expression — the section background tint, kept lighter than any object so contained objects stay legible. Line-safety is why the inks deviate from naive saturation: yellow, orange, and gray reuse FigJam's sampled connector strokes (#E8A302, #EB7500, #757575) so a 2px line still reads against the #F5F5F5 board."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-palette-resolvers-6": {
+      "id": "b-theme-palette-resolvers-6",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Consumers never index the table directly; they go through the per-role resolvers — "
+        },
+        {
+          "insert": "resolveShapeColors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveShapeColors"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveSectionColors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveSectionColors"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveStickyFill",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveStickyFill"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveConnectorStroke",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveConnectorStroke"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "resolveSwatchPreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "resolveSwatchPreview"
+            }
+          }
+        },
+        {
+          "insert": " — each a total function over the roster that throws on an unknown id. The full hex table with its role columns is reproduced and kept authoritative in "
+        },
+        {
+          "insert": "10-system-design/10-shape-api",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "10-system-design/10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": "; this doc deliberately doesn't duplicate it."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-palette-decision-7": {
+      "id": "b-theme-palette-decision-7",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Every hex is provenance-annotated, sampled or derived"
+      },
+      "text": [
+        {
+          "insert": "Each of the table's cells carries an inline comment tagging it as sampled (citing its FigJam source table or spec section in board-design-reference/analysis/) or derived (no FigJam sample exists; synthesized in the same pastel band and flagged at the cell). Teal is the honest example: its fill was lightened from the sampled #5AD8CC to #C6FAF6 to sit with its pastel siblings, and its wash #EAFDFB is derived outright. New picks or cell changes must keep this discipline — the annotation IS the review trail."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-tokens-heading-8": {
+      "id": "b-theme-tokens-heading-8",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "tokens.ts — the global remainder"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-tokens-body-9": {
+      "id": "b-theme-tokens-body-9",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " is deliberately small after the color cutover: "
+        },
+        {
+          "insert": "canvasSurfaceStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts",
+              "symbol": "canvasSurfaceStyle"
+            }
+          }
+        },
+        {
+          "insert": " (the grid, guide, and highlight CSS variables the stage surface consumes), "
+        },
+        {
+          "insert": "SHAPE_STROKE_WIDTH_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts",
+              "symbol": "SHAPE_STROKE_WIDTH_PX"
+            }
+          }
+        },
+        {
+          "insert": " (the universal 4px FigJam shape stroke) with "
+        },
+        {
+          "insert": "resolveObjectStrokeWidth",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts",
+              "symbol": "resolveObjectStrokeWidth"
+            }
+          }
+        },
+        {
+          "insert": " honoring a per-object "
+        },
+        {
+          "insert": "style.strokeWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " override, and "
+        },
+        {
+          "insert": "TEXT_SIZES_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts",
+              "symbol": "TEXT_SIZES_PX"
+            }
+          }
+        },
+        {
+          "insert": " (the logical-px text hierarchy: chip labels 16, sticky body 24 on 36 line-height, sticky author 12, bold labels 20, shape text 15). Every "
+        },
+        {
+          "insert": "*Px",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " figure is logical px, independent of canvas zoom. The old color-resolution cascade that used to live here — "
+        },
+        {
+          "insert": "canvasToneStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "paletteTokenStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveObjectColors",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "STICKY_TOKEN_FILL",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SECTION_FAMILIES",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — died with the legacy tone/paletteToken/tint vocabularies; see git history, not this module, for that archaeology."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-dispersal-heading-10": {
+      "id": "b-theme-dispersal-heading-10",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The dispersal: why theme/ holds so little"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-dispersal-body-11": {
+      "id": "b-theme-dispersal-body-11",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "There used to be one "
+        },
+        {
+          "insert": "figjam-tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " constants module mirroring every pixel-sampled FigJam measurement. The theme dispersal inverted that: constants now sit beside the renderer that consumes them — grid constants in "
+        },
+        {
+          "insert": "grid.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts"
+            }
+          }
+        },
+        {
+          "insert": ", object chrome metrics with the object defs, connector stroke/dash/chip metrics in the connector slice, arrowhead ratios in "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — and "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " keeps only what is genuinely global and shared. The provenance discipline survived the dispersal intact: each dispersed constant remains a hand-written, typed mirror of board-design-reference/analysis measurements, annotated at its new site."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-layering-heading-12": {
+      "id": "b-theme-layering-heading-12",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Layering and the one boundary gap"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-layering-body-13": {
+      "id": "b-theme-layering-body-13",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sits below everything visual: "
+        },
+        {
+          "insert": "ui",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "theme",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " feed "
+        },
+        {
+          "insert": "state",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", then "
+        },
+        {
+          "insert": "objects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connectors",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "stage",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The import discipline for "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the strictest in the tree — it may import ONLY "
+        },
+        {
+          "insert": "state/schema/colors.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the id vocabulary, and must never import "
+        },
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or anything under "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (objects sit above theme; both need to import the palette without a cycle). That one runtime import of "
+        },
+        {
+          "insert": "CANVAS_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts",
+              "symbol": "CANVAS_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " from state is the recorded boundary reality gap from the layout session (TODO(layout): tighten) — a deliberate, whitelisted exception rather than an accident, and the candidate fix (moving the roster into theme/) is queued, not owed here."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-closing-14": {
+      "id": "b-theme-closing-14",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For how a pick becomes pixels per kind — "
+        },
+        {
+          "insert": "colorRole",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "object-shell.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-shell.tsx"
+            }
+          }
+        },
+        {
+          "insert": " as the one resolver every object renderer goes through, and the no-custom-colors constraint — see "
+        },
+        {
+          "insert": "10-system-design/10-shape-api",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "10-system-design/10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": ". For the picker chrome that offers the roster, see "
+        },
+        {
+          "insert": "20-implementation/60-chrome",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/60-chrome",
+              "label": "20-implementation/60-chrome"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
