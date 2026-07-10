@@ -40,6 +40,8 @@
         "b-chrome-list-zoom-controls-16",
         "b-chrome-heading-figjamdock-17",
         "b-chrome-para-figjamdock-18",
+        "b-chrome-heading-topbar-38",
+        "b-chrome-para-topbar-39",
         "b-chrome-heading-context-toolbar-19",
         "b-chrome-para-context-toolbar-20",
         "b-chrome-constraint-multi-variant-21",
@@ -209,7 +211,7 @@
       },
       "text": [
         {
-          "insert": "ChromeTooltip.tsx",
+          "insert": "Tooltip.tsx",
           "attributes": {
             "code": true,
             "reference": {
@@ -233,7 +235,7 @@
       },
       "text": [
         {
-          "insert": "dock-icons.tsx",
+          "insert": "ui/icons",
           "attributes": {
             "code": true,
             "reference": {
@@ -243,7 +245,133 @@
           }
         },
         {
-          "insert": " — 13 icon components plus 2 zoom glyphs: inline SVG glyphs for the bottom dock and the zoom pill."
+          "insert": " — chrome icons come from the generated Nucleo set: one generated component per icon under "
+        },
+        {
+          "insert": "nucleo/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/nucleo"
+            }
+          }
+        },
+        {
+          "insert": " plus hand-authored "
+        },
+        {
+          "insert": "custom-icons.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/custom-icons.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", re-exported through the icons barrel. "
+        },
+        {
+          "insert": "CanvasDock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
+            }
+          }
+        },
+        {
+          "insert": " consumes six tool glyphs — "
+        },
+        {
+          "insert": "StickyIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SectionIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ShapesIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "CursorIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "HandIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "ConnectorIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "ZoomControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/ZoomControls.tsx",
+              "symbol": "ZoomControls"
+            }
+          }
+        },
+        {
+          "insert": " uses "
+        },
+        {
+          "insert": "MinusIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "PlusIcon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -443,21 +571,21 @@
           }
         },
         {
-          "insert": "), and "
+          "insert": "), and the connector def's toolbar spec ("
         },
         {
-          "insert": "CONNECTOR_TOOLBAR",
+          "insert": "connectorDef",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "CONNECTOR_TOOLBAR"
+              "symbol": "connectorDef"
             }
           }
         },
         {
-          "insert": "."
+          "insert": ")."
         }
       ],
       "children": []
@@ -546,7 +674,7 @@
           }
         },
         {
-          "insert": " — the compact dark \"search for a shape\" popover (Panel A), 232px wide, anchored above a selected object's shape-swap control; it lists the 30 geometric/flowchart "
+          "insert": " — the compact dark \"search for a shape\" popover (Panel A), 232px wide, anchored above a selected object's shape-swap control; it lists the 29 geometric/flowchart entries from "
         },
         {
           "insert": "SHAPE_SEARCH_ENTRIES",
@@ -560,7 +688,7 @@
           }
         },
         {
-          "insert": " (icon glyphs excluded, since swap changes an existing object's type)."
+          "insert": " (13 Basic + 16 Flowchart; icon glyphs excluded, since swap changes an existing object's type)."
         }
       ],
       "children": []
@@ -752,6 +880,200 @@
         },
         {
           "insert": "), since the \"+\" button is not a \"tool\" in the schema sense."
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-heading-topbar-38": {
+      "id": "b-chrome-heading-topbar-38",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "TopBar"
+        }
+      ],
+      "children": []
+    },
+    "b-chrome-para-topbar-39": {
+      "id": "b-chrome-para-topbar-39",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "TopBar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/TopBar.tsx",
+              "symbol": "TopBar"
+            }
+          }
+        },
+        {
+          "insert": " is a light utility overlay, not FigJam-parity furniture. It renders the board title from "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "documentTitle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "documentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; when "
+        },
+        {
+          "insert": "editableTitle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is true, the title becomes an inline "
+        },
+        {
+          "insert": "Input",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/input.tsx",
+              "symbol": "Input"
+            }
+          }
+        },
+        {
+          "insert": " and committing dispatches "
+        },
+        {
+          "insert": "canvas.updateDocumentTitle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Undo/redo dispatch "
+        },
+        {
+          "insert": "canvas.undo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "canvas.redo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and are disabled when "
+        },
+        {
+          "insert": "historyPastLength",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "historyFutureLength",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are zero. Optional "
+        },
+        {
+          "insert": "onSave",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "onCancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " render Save/Cancel actions, and host slots "
+        },
+        {
+          "insert": "topBarLeading",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "topBarActions",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " flank the title/actions groups. It is built on the "
+        },
+        {
+          "insert": "Button",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/button.tsx",
+              "symbol": "Button"
+            }
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "Input",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/input.tsx",
+              "symbol": "Input"
+            }
+          }
+        },
+        {
+          "insert": " UI primitives, a different visual family from the dark dock/selection-toolbar chrome."
         }
       ],
       "children": []
@@ -1105,21 +1427,21 @@
           }
         },
         {
-          "insert": "), connectors color/text/dash/arrowhead ("
+          "insert": "), connectors color/text/dash/arrowhead via the toolbar spec on "
         },
         {
-          "insert": "CONNECTOR_TOOLBAR",
+          "insert": "connectorDef",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "CONNECTOR_TOOLBAR"
+              "symbol": "connectorDef"
             }
           }
         },
         {
-          "insert": "), and sections color/rename/fit-children/border-style/lock ("
+          "insert": ", and sections color/rename/fit-children/border-style/lock ("
         },
         {
           "insert": "SECTION_TOOLBAR",
@@ -1207,7 +1529,7 @@
       },
       "text": [
         {
-          "insert": "Toolbar controls read left-to-right by expected usage frequency. Every object's toolbar starts with the universal Color + Text pair, the most-used actions, always adjacent and never separated; type-specific modifiers come next; state controls such as Lock sit last. Concrete orders are: Section: Color, Rename | Fit to content, Border style | Lock; Shape: Fill color, Edit text | Change shape; Sticky: Color, Edit text; Connector: Line color, Text | Line style, Arrowheads. Separators divide usage groups, not individual items: "
+          "insert": "Toolbar controls read left-to-right by expected usage frequency. Every object's toolbar starts with the universal Color + Text pair, the most-used actions, always adjacent and never separated; type-specific modifiers come next; state controls such as Lock sit last. Concrete orders are: Section: Color, Rename | Fit to content, Border style | Lock; Shape: Fill color, Edit text | Change shape; Sticky: Sticky color, Edit text; Connector: Line color, Text | Line style, Arrowheads. Separators divide usage groups, not individual items: "
         },
         {
           "insert": "dividerAfter",
@@ -1239,21 +1561,21 @@
       },
       "text": [
         {
-          "insert": "The connector toolbar is exactly Line color, Text, Line style, Arrowhead style from "
+          "insert": "The connector toolbar spec on "
         },
         {
-          "insert": "CONNECTOR_TOOLBAR",
+          "insert": "connectorDef",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "CONNECTOR_TOOLBAR"
+              "symbol": "connectorDef"
             }
           }
         },
         {
-          "insert": "; the earlier corner-style/routing control is gone. The dash and arrowhead flyouts are compact icon rows: solid/dashed pictures for "
+          "insert": " is exactly Line color, Text, Line style, Arrowhead style; the earlier corner-style/routing control is gone. The dash and arrowhead flyouts are compact icon rows: solid/dashed pictures for "
         },
         {
           "insert": "style",
@@ -1997,7 +2319,7 @@
           }
         },
         {
-          "insert": " — previews are identical for every kind (D12: a pick is a direction; the kind's role table decides rendering). "
+          "insert": " — previews are identical for every kind (D12 — retired decision record; see git history): a pick is a direction; the kind's role table decides rendering. "
         },
         {
           "insert": "current",
@@ -2130,13 +2452,44 @@
           "insert": " (Panel A) is a compact dark \"search for a shape\" popover that anchors above a selected object's shape-swap control. "
         },
         {
+          "insert": "It lists the 29 Basic/Flowchart entries from "
+        },
+        {
+          "insert": "SHAPE_SEARCH_ENTRIES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/catalog.ts",
+              "symbol": "SHAPE_SEARCH_ENTRIES"
+            }
+          }
+        },
+        {
+          "insert": " (13 Basic + 16 Flowchart; Advanced icon glyphs excluded because swap changes an existing object's type). "
+        },
+        {
           "insert": "ShapesPanel",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (Panel B) is a full-height, left-docked white sidebar invoked from the bottom dock's shape-tool button. Both are backed by the same "
+          "insert": " (Panel B) is a full-height, left-docked white sidebar invoked from the bottom dock's shape-tool button; the width export in "
+        },
+        {
+          "insert": "SHAPES_PANEL_WIDTH_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/ShapesPanel.tsx",
+              "symbol": "SHAPES_PANEL_WIDTH_PX"
+            }
+          }
+        },
+        {
+          "insert": " is 252. Both are backed by the same "
         },
         {
           "insert": "catalog.ts",
@@ -2149,10 +2502,21 @@
           }
         },
         {
-          "insert": " data. "
+          "insert": " data: the catalog export "
         },
         {
-          "insert": "Every catalog entry now maps to a live schema type — the old \"coming soon\" disabled state is gone, and "
+          "insert": "SHAPE_CATALOG",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/catalog.ts",
+              "symbol": "SHAPE_CATALOG"
+            }
+          }
+        },
+        {
+          "insert": " has exactly three sections, Basic / Flowchart / Advanced. Every catalog entry now maps to a live schema type — the old \"coming soon\" disabled state is gone, and the enabled predicate in "
         },
         {
           "insert": "isShapeEntryEnabled",
@@ -2166,10 +2530,7 @@
           }
         },
         {
-          "insert": " always returns true (kept as a function so call sites did not need to change). "
-        },
-        {
-          "insert": "The \"Other libraries\" (AWS/Azure/Cisco) footer rows in "
+          "insert": " always returns true (kept as a function so call sites did not need to change). In "
         },
         {
           "insert": "ShapesPanel",
@@ -2178,25 +2539,105 @@
           }
         },
         {
-          "insert": " are intentionally static and non-interactive (\""
+          "insert": ", "
         },
         {
-          "insert": "aria-disabled=\"true\"",
+          "insert": "selectedEntryId",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "\", no "
+          "insert": " marks the armed entry with the violet-wash highlight, "
         },
         {
-          "insert": "onClick",
+          "insert": "onPickEntry",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "\") — they exist only for visual parity with the reference frames."
+          "insert": " carries the full entry including "
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " payloads, and "
+        },
+        {
+          "insert": "exiting",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "onExitComplete",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " drive the slide enter/exit animation. "
+        },
+        {
+          "insert": "shape-previews.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/shape-previews.tsx"
+            }
+          }
+        },
+        {
+          "insert": " maps catalog entries to preview SVGs consumed by both "
+        },
+        {
+          "insert": "ShapesPanel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "ShapeSearchPopover",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and it has its own "
+        },
+        {
+          "insert": "shape-previews.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/__tests__/shape-previews.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " coverage."
         }
       ],
       "children": []
