@@ -43,7 +43,11 @@
         "b-flog-f10-h",
         "b-flog-f10-p",
         "b-flog-f11-h",
-        "b-flog-f11-p"
+        "b-flog-f11-p",
+        "b-flog-f12-h",
+        "b-flog-f12-p",
+        "b-flog-f13-h",
+        "b-flog-f13-p"
       ]
     },
     "b-flog-title-1": {
@@ -257,7 +261,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The decision record OBJECT-DEF-OVERHAUL.md was retired in the layout session, but code comments still cite it as live: state/schema/colors.ts, theme/palette.ts, theme/tokens.ts, state/schema/object-types.ts, objects/geometry.ts, objects/object-defaults.ts, objects/object-def.ts, state/actions/reducer.ts (D17), among others. Queued for a code pass: repoint those comments at the docs/ sections that now own the rationale. No code changes this session — the tree is frozen."
+          "insert": "The decision record OBJECT-DEF-OVERHAUL.md was retired in the layout session, but code comments still cite it as live: state/schema/colors.ts, theme/palette.ts, theme/tokens.ts, state/schema/object-types.ts, objects/geometry.ts, objects/object-defaults.ts, objects/object-def.ts, state/actions/reducer.ts (D17). The full inventory: 26 citations across 20 files (24 in packages/canvas/src, 2 in tools/migrate-canvas-docs/migrate.ts); 12 cite both § sections and D-ids, 8 cite D-ids only, 6 cite §/phase only. state/schema/colors.ts and theme/palette.ts are the only two places anywhere that keep D2 anchored to its §3.1 source — preserve those two citations' content when repointing. Queued for a code pass: repoint those comments at the docs/ sections that now own the rationale. No code changes this session — the tree is frozen."
         }
       ],
       "children": []
@@ -270,7 +274,7 @@
       },
       "text": [
         {
-          "insert": "F8 — D2 and D9 rationale not cited anywhere in 10-shape-api (lane 1, in progress)"
+          "insert": "F8 — D2 and D9 rationale not cited anywhere in 10-shape-api (lane 1, resolved)"
         }
       ],
       "children": []
@@ -281,7 +285,7 @@
       "props": {},
       "text": [
         {
-          "insert": "10-shape-api claims the span D1–D19 and restates/cites 17 of the 19 decision ids inline, but D2 and D9 never appear. The cross-cutting D1–D19 audit will verify their rationale survives somewhere in docs/ and recover it from OBJECT-DEF-OVERHAUL.md's git history if not."
+          "insert": "RESOLVED 2026-07-10: the cross-cutting audit recovered OBJECT-DEF-OVERHAUL.md from git history (deleted in 7490d4a; the file actually defines D1–D21) and verified every decision's rationale survives in docs/ — nothing needed recovery. D2 was the one labeling gap (rationale lived in 05-theme unlabeled; the id is now anchored there); D9 was already id-cited in 40-stage and is now also anchored in 10-shape-api. Reading hazard recorded: 'D4' in the editor/stage docs means the view-crop feature and 'D16' in the model/editor/shape docs means a vocabulary wave — separate decision logs that collide with the overhaul's D4 (outline primitive) and D16 (outline hit-testing)."
         }
       ],
       "children": []
@@ -354,6 +358,54 @@
       "text": [
         {
           "insert": "The 70-studio audit confirmed v2-flow.canvas.json was edited after v2-flow-figjam-canvas.test.ts's assertions were written: the test expects 40 objects (file has 39), a 10-icon roster (file has 5), an 8px emphasis strokeWidth and explicit waypoints that are gone. These are the '3x v2-flow JSON' failures in the frozen red baseline. Queued for a code session: update the assertions to the current scene (prune, don't regenerate). The studio doc now tells the honest version of the drift story instead of claiming the test catches drift."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f12-h": {
+      "id": "b-flog-f12-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F12 — PROVENANCE.md drifted (lane 1, fixed this session)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f12-p": {
+      "id": "b-flog-f12-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The appendix audit found PROVENANCE.md still describing the dead SpectreRef vendoring and claiming the icon generator emits ui/icons/icon-glyph-data.generated.ts (a path that does not exist). Both fixed in this session's appendix pass. Lesson for the docs system: root meta files like PROVENANCE.md sit outside links check's coverage, so their citations rot silently."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f13-h": {
+      "id": "b-flog-f13-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F13 — Small lane-3 queue from the section walk (lane 3, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f13-p": {
+      "id": "b-flog-f13-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Collected while auditing, no code changes this session: (1) CanvasDock.tsx's header comment still says 48px/13px radius — EDITOR_STYLE and the shipped chrome are 53px/radius 15; (2) zz-dom-fixtures.ts's docstring says the baseline is UNCOMMITTED — it is committed and active at packages/canvas/zz-dom-baseline.json; (3) CONNECTOR_TOOLBAR in connectors/def.ts is module-private while SHAPE_TOOLBAR/SECTION_TOOLBAR are exported — docs must cite connectorDef instead; export it or accept the asymmetry; (4) CanvasStage.tsx still carries an internal 'halving/doubling' grid comment — grid.ts only doubles."
         }
       ],
       "children": []

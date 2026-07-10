@@ -223,7 +223,7 @@
           }
         },
         {
-          "insert": " is the lightest expression — the section background tint, kept lighter than any object so contained objects stay legible. Line-safety is why the inks deviate from naive saturation: yellow, orange, and gray reuse FigJam's sampled connector strokes (#E8A302, #EB7500, #757575) so a 2px line still reads against the #F5F5F5 board."
+          "insert": " is the lightest expression — the section background tint, kept lighter than any object so contained objects stay legible. Line-safety is why the inks deviate from naive saturation: yellow, orange, and gray reuse FigJam's sampled connector strokes (#E8A302, #EB7500, #757575) so a 2px line still reads against the #F5F5F5 board (D2 — retired decision record; see git history)."
         }
       ],
       "children": []
