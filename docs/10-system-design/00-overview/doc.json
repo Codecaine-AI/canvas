@@ -80,7 +80,7 @@
           }
         },
         {
-          "insert": " is a FigJam-parity, typed-action, world-space interactive canvas engine, extracted from the Spectre monorepo into its own git submodule at "
+          "insert": " is a FigJam-parity, typed-action, world-space interactive canvas engine, extracted from the Spectre monorepo into this standalone repo, where it lives as the workspace package "
         },
         {
           "insert": "packages/canvas",
@@ -163,7 +163,7 @@
           },
           {
             "path": "packages/canvas/src/interaction/",
-            "note": "pointer state machine, clipboard, edge-pan (pure)"
+            "note": "pointer kernel: hit vocabulary, hit-testing, thresholds, clipboard, edge-pan (pure); the machine assembles in stage/editor/pipeline"
           },
           {
             "path": "packages/canvas/src/connectors/",
@@ -307,7 +307,7 @@
       "props": {},
       "text": [
         {
-          "insert": "interaction.ts",
+          "insert": "interaction/",
           "attributes": {
             "code": true,
             "reference": {
@@ -317,7 +317,30 @@
           }
         },
         {
-          "insert": " is a pure pointer state machine, and "
+          "insert": " is the pointer-vocabulary KERNEL — pointer/hit vocabulary and thresholds, hit-testing, the frame coalescer, edge-pan, clipboard, all pure TS. The gesture-state union and the dispatcher ("
+        },
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": ") assemble above the stage in "
+        },
+        {
+          "insert": "stage/editor/pipeline/core.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and feature slices own their gesture logic. "
         },
         {
           "insert": "viewport.ts",
@@ -554,25 +577,7 @@
           }
         },
         {
-          "insert": ", plus a type-only copy of "
-        },
-        {
-          "insert": "SpectreRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (in "
-        },
-        {
-          "insert": "spectre-ref.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), so it has zero dependency back on the host Spectre app it was extracted from."
+          "insert": ", so it has zero dependency back on the host Spectre app it was extracted from."
         }
       ],
       "children": []
@@ -698,7 +703,16 @@
           }
         },
         {
-          "insert": " exports map exposes granular subpath imports beyond the root barrel — "
+          "insert": " exports map exposes the root "
+        },
+        {
+          "insert": ".",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus granular subpath imports — "
         },
         {
           "insert": "./schema",
@@ -725,25 +739,16 @@
           }
         },
         {
-          "insert": ", "
+          "insert": ", and explicit "
         },
         {
-          "insert": "./connection-cascade",
+          "insert": "./ui/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", and the individual vendored UI primitives under "
-        },
-        {
-          "insert": "./ui/*",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — while "
+          "insert": " entries (cn, icons, button, input, textarea, badge) — while "
         },
         {
           "insert": "src/index.ts",
@@ -765,7 +770,7 @@
           }
         },
         {
-          "insert": " export) re-exports the full public barrel: actions, "
+          "insert": " export) re-exports the public barrel: actions, "
         },
         {
           "insert": "CanvasStage",
@@ -774,16 +779,7 @@
           }
         },
         {
-          "insert": ", the palette table and role resolvers, clipboard, geometry, interaction, routing, snapping, both editor/viewer components, schema, "
-        },
-        {
-          "insert": "SpectreRef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", theme, viewport (and its hook), and the canvas JSON files."
+          "insert": ", the palette table and role resolvers, clipboard, geometry, interaction, routing, snapping, both editor/viewer components, schema, theme, and viewport (and its hook)."
         }
       ],
       "children": []

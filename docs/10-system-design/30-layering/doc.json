@@ -157,7 +157,7 @@
       },
       "text": [
         {
-          "insert": "The model treats section order as a consequence of containment, not as independent document state. If two documents have the same object geometries and section lock/visibility flags, reconcile should produce the same "
+          "insert": "The model treats section order as a consequence of containment, not as independent document state. If two documents have the same object geometries and section lock flags, reconcile should produce the same "
         },
         {
           "insert": "parentId",
@@ -241,7 +241,7 @@
           }
         },
         {
-          "insert": " exists so drag capture, hidden-content filtering, validation, and persistence have a cheap membership answer. It is not an authoring surface. Geometry-mutating actions reconcile it instead of asking callers to maintain it manually."
+          "insert": " exists so drag capture, validation, and persistence have a cheap membership answer. It is not an authoring surface. Geometry-mutating actions reconcile it instead of asking callers to maintain it manually."
         }
       ]
     },
@@ -301,7 +301,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Paint order lives in "
+          "insert": "Paint order for the objects array lives in "
         },
         {
           "insert": "state/z-order.ts",
@@ -314,7 +314,20 @@
           }
         },
         {
-          "insert": ". Every section paints before every non-section. Among sections, containment depth sorts ascending, then area sorts descending so bigger same-depth sections sink behind smaller ones, then the original schema index is the stable final tie-breaker. Non-sections keep schema order. The CSS tiers are: section bodies at z 0, connector SVG at z 1, objects at z 2, section headers at z 3, and world overlay at z 4."
+          "insert": ". Every section paints before every non-section. Among sections, containment depth sorts ascending, then area sorts descending so bigger same-depth sections sink behind smaller ones, then the original schema index is the stable final tie-breaker. Non-sections keep schema order. The CSS z-index tiers themselves live in "
+        },
+        {
+          "insert": "stage/CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ": section bodies at z 0, connector SVG at z 1, objects at z 2, section headers at z 3, and world overlay at z 4."
         }
       ]
     },
@@ -525,7 +538,7 @@
       },
       "text": [
         {
-          "insert": "Document load and reset call "
+          "insert": "Document LOAD enters through "
         },
         {
           "insert": "createInteractiveCanvasState",
@@ -539,7 +552,16 @@
           }
         },
         {
-          "insert": ", which reconciles the incoming document before it becomes editor state."
+          "insert": ", which reconciles the incoming document before it becomes editor state; undo, redo, and "
+        },
+        {
+          "insert": "canvas.reset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are explicitly exempt and restore stored documents verbatim."
         }
       ]
     },
@@ -578,7 +600,7 @@
       },
       "text": [
         {
-          "insert": "Move and resize gestures dispatch "
+          "insert": "Move and resize gestures dispatch the "
         },
         {
           "insert": "canvas.reconcileSectionMembership",
@@ -586,15 +608,24 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/types.ts"
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts"
             }
           }
         },
         {
-          "insert": " on pointer-up with "
+          "insert": " action with "
         },
         {
           "insert": "recordHistory: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on pointer-up; the referenced dispatch site is "
+        },
+        {
+          "insert": "stage/editor/features/move/move.ts",
           "attributes": {
             "code": true
           }
@@ -841,9 +872,6 @@
         "ordered": false
       },
       "text": [
-        {
-          "insert": "Hidden and "
-        },
         {
           "insert": "locked: \"all\"",
           "attributes": {

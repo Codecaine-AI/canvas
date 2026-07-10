@@ -113,7 +113,7 @@
           }
         },
         {
-          "insert": " union (32 types), carrying an axis-aligned "
+          "insert": " union (31 types), carrying an axis-aligned "
         },
         {
           "insert": "geometry",
@@ -358,7 +358,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all (plus / or-junction / summing-junction). */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
+          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n  markdown?: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\nexport type ObjectButtonBorderPolicy = \"painted\" | \"suppressed\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  buttonBorder: ObjectButtonBorderPolicy;   // \"painted\" | \"suppressed\"\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all (plus / or-junction / summing-junction). */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
         }
       ],
       "children": []
@@ -383,7 +383,7 @@
           }
         },
         {
-          "insert": " (all 32 registered defs, in stylesheet order — "
+          "insert": " (all 31 registered defs, in stylesheet order — "
         },
         {
           "insert": "OBJECT_DEFS_CSS",
@@ -608,7 +608,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through theme/palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/connectors/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / dash / routing / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
+          "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through theme/palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/connectors/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / text / dash / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
         }
       ],
       "children": []
@@ -659,7 +659,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role: fill + border\n      (null = borderless bold pick) + the fixed dark text color (D8). */\n  colors: ResolvedObjectColors;\n  /** Resolved stroke width — 0 when the pick is borderless (border: null). */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky → \"note\", process → \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Geometric outline (D4) — omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot — omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
+          "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role:\n      fill + border (border is always a hex; every pick renders a bordered shape)\n      + the fixed dark text color (D8). */\n  colors: ResolvedShapeObjectColors;\n  /** Resolved stroke width. */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky → \"note\", process → \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Whether the outer button itself paints the shape border. Defaults to \"painted\". */\n  buttonBorder?: ObjectButtonBorderPolicy;\n  /** Geometric outline (D4) — omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot — omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
         }
       ],
       "children": []
@@ -862,7 +862,7 @@
           }
         },
         {
-          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1–H3, bullets, bold — "
+          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1–H3, bullets, bold, inline code — "
         },
         {
           "insert": "objects/sticky/markdown.tsx",
@@ -1156,7 +1156,16 @@
           }
         },
         {
-          "insert": " — a pure, React-free leaf module, the ONLY "
+          "insert": " — a pure, React-free leaf module. The import-boundaries test allows "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to import all of "
         },
         {
           "insert": "objects/",
@@ -1165,16 +1174,7 @@
           }
         },
         {
-          "insert": " surface the routing layer is allowed to import (the boundary test pins the edge list to exactly "
-        },
-        {
-          "insert": "connectors/connection-cascade.ts -> ../objects/geometry",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). A silhouette is how the shape paints; the outline is where connectors attach and clicks land — the two should trace the same curve, cross-checked by "
+          "insert": "; geometry.ts is where the connector-relevant outline math lives, but no single edge is pinned. A silhouette is how the shape paints; the outline is where connectors attach and clicks land — the two should trace the same curve, cross-checked by "
         },
         {
           "insert": "objects/__tests__/geometry-def-agreement.test.ts",
@@ -1593,7 +1593,7 @@
           }
         },
         {
-          "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids migrate to the bare hue id. The ids are schema vocabulary in "
+          "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue; at runtime the validator simply drops unknown ids, so there is no live normalization path in isCanvasColor(). The ids are schema vocabulary in "
         },
         {
           "insert": "state/schema/colors.ts",
@@ -1662,7 +1662,7 @@
       },
       "text": [
         {
-          "insert": "The 10-pick roster in picker order (CANVAS_COLORS — the single row every kind renders):\n\n  gray  red  orange  yellow  green  teal  blue  violet  pink  white\n\nLegacy ids ending in `-soft` normalize to the matching bare hue."
+          "insert": "The 10-pick roster in picker order (CANVAS_COLORS — the single row every kind renders):\n\n  gray  red  orange  yellow  green  teal  blue  violet  pink  white\n\nLegacy ids ending in `-soft` were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue. At runtime, isCanvasColor drops unknown ids; there is no live normalization path."
         }
       ],
       "children": []
@@ -1912,7 +1912,7 @@
           }
         },
         {
-          "insert": " dark (D8) — no per-color text derivation and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
+          "insert": " dark (D8) (one deviation: the sticky inset-body preset uses rgba(0, 0, 0, 0.8)) — no per-color text derivation and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
         }
       ],
       "children": []
@@ -2190,8 +2190,20 @@
             "note": "text-slot preset library (center / below / inset-body / title-chip / rect) + resolveTextSlot — renderer and editor both consume it"
           },
           {
+            "path": "packages/canvas/src/objects/shape-geometry-constants.ts",
+            "note": "shared silhouette constants"
+          },
+          {
+            "path": "packages/canvas/src/objects/text-slot-constants.ts",
+            "note": "CENTER_TEXT_INSET_PX and friends"
+          },
+          {
+            "path": "packages/canvas/src/objects/inscribed-text-rects.ts",
+            "note": "per-silhouette inscribed text rects used by the center slot"
+          },
+          {
             "path": "packages/canvas/src/objects/geometry.ts",
-            "note": "pure React-free outline builders, OutlineSpec consts + dispatch, getConnectionAnchors, outlineContainsPoint — the one objects/ surface routing may import"
+            "note": "pure React-free outline builders, OutlineSpec consts + dispatch, getConnectionAnchors, outlineContainsPoint — connector-relevant outline math lives here"
           },
           {
             "path": "packages/canvas/src/objects/catalog.ts",
@@ -2219,7 +2231,7 @@
           },
           {
             "path": "packages/canvas/src/connectors/connection-cascade.ts",
-            "note": "cascade only (resolveConnectionCascade); consumes objects/geometry.ts through the single allowed boundary edge"
+            "note": "cascade only (resolveConnectionCascade); consumes objects/geometry.ts for connector-relevant outline math"
           },
           {
             "path": "packages/canvas/src/connectors/AnchorDots.tsx",

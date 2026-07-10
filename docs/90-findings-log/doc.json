@@ -29,7 +29,15 @@
         "b-flog-f3-h",
         "b-flog-f3-p",
         "b-flog-f4-h",
-        "b-flog-f4-p"
+        "b-flog-f4-p",
+        "b-flog-f5-h",
+        "b-flog-f5-p",
+        "b-flog-f6-h",
+        "b-flog-f6-p",
+        "b-flog-f7-h",
+        "b-flog-f7-p",
+        "b-flog-f8-h",
+        "b-flog-f8-p"
       ]
     },
     "b-flog-title-1": {
@@ -172,6 +180,102 @@
       "text": [
         {
           "insert": "Neither the CLI nor the API exposes a create-bundle operation (POST /api/ops mutates existing bundles; migrate only converts .mdx twins). The 05-theme and 90-findings-log shells in this session had to be hand-authored doc.json files. Wants a `docs new <path> --title` CLI command or a POST create route, seeding the root/overview block shape."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f5-h": {
+      "id": "b-flog-f5-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F5 — Markdown render emits an empty code fence for the root overview block (lane 2, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f5-p": {
+      "id": "b-flog-f5-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "GET /api/markdown renders the root overview block (covers/concepts props) as an empty ``` fence right after the H1 — seen on 00-foundation/00-overview. The overview metadata should either render as a proper summary block or be skipped in markdown output."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f6-h": {
+      "id": "b-flog-f6-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F6 — Markdown render flattens inline source references to raw paths (lane 2, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f6-p": {
+      "id": "b-flog-f6-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "In /api/markdown output, a rich-text run like [schema.ts -> reference to document.ts] renders as the raw path inline ('schema.ts defines packages/canvas/src/state/schema/document.ts, the persisted shape…'), and embedded canvases render as '<!-- canvas: (missing src) -->'. Fine for grep, but it makes rendered markdown awkward to read and audit; references deserve a label-preserving markdown form."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f7-h": {
+      "id": "b-flog-f7-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F7 — Source comments still cite the deleted OBJECT-DEF-OVERHAUL.md (lane 3, queued)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f7-p": {
+      "id": "b-flog-f7-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The decision record OBJECT-DEF-OVERHAUL.md was retired in the layout session, but code comments still cite it as live: state/schema/colors.ts, theme/palette.ts, theme/tokens.ts, state/schema/object-types.ts, objects/geometry.ts, objects/object-defaults.ts, objects/object-def.ts, state/actions/reducer.ts (D17), among others. Queued for a code pass: repoint those comments at the docs/ sections that now own the rationale. No code changes this session — the tree is frozen."
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f8-h": {
+      "id": "b-flog-f8-h",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "F8 — D2 and D9 rationale not cited anywhere in 10-shape-api (lane 1, in progress)"
+        }
+      ],
+      "children": []
+    },
+    "b-flog-f8-p": {
+      "id": "b-flog-f8-p",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "10-shape-api claims the span D1–D19 and restates/cites 17 of the 19 decision ids inline, but D2 and D9 never appear. The cross-cutting D1–D19 audit will verify their rationale survives somewhere in docs/ and recover it from OBJECT-DEF-OVERHAUL.md's git history if not."
         }
       ],
       "children": []
