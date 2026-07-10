@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "canvas-50-editor",
-  "title": "Canvas Engine — Editor Layer",
+  "title": "Canvas Engine — Editor",
   "root": "b-editor-root",
   "blocks": {
     "b-editor-root": {
@@ -10,27 +10,59 @@
       "props": {
         "format": "mdx",
         "type": "overview",
-        "covers": "The editor layer of the interactive canvas engine: the full editing entrypoint vs the read-only viewer, the pan/zoom viewport model, and the scoped hotkey vocabulary.",
+        "covers": "The editing face at packages/canvas/src/stage/editor/: the composition root (InteractiveCanvasEditor), the interaction pipeline (a pure nine-state dispatcher with effects quarantined at the hook edge, DOM hit resolution, two rAF loops, and slot-injected feedback visuals), the nine feature slices, the viewport hook, and the hotkey map.",
         "concepts": [
-          "viewport",
-          "hotkeys",
-          "InteractiveCanvasEditor",
-          "InteractiveCanvasViewer",
-          "view-crop"
+          "interaction pipeline",
+          "pure dispatcher",
+          "vertical feature slices",
+          "slot-injected overlays",
+          "hit resolution",
+          "frame coalescing",
+          "hotkeys"
         ]
       },
       "children": [
+        "b-editor-heading-title-0",
         "b-editor-intro-1",
         "b-editor-heading-editor-vs-viewer-2",
         "b-editor-editor-desc-3",
         "b-editor-editor-composition-4",
+        "b-editor-heading-pipeline-40",
+        "b-editor-heading-pipeline-pure-41",
+        "b-editor-pipeline-pure-42",
+        "b-editor-pipeline-decision-43",
+        "b-editor-heading-pipeline-dom-44",
+        "b-editor-pipeline-dom-45",
+        "b-editor-heading-pipeline-hit-46",
+        "b-editor-pipeline-hit-47",
+        "b-editor-heading-pipeline-raf-48",
+        "b-editor-pipeline-raf-49",
+        "b-editor-heading-pipeline-feedback-50",
+        "b-editor-pipeline-feedback-51",
+        "b-editor-heading-pipeline-hover-52",
+        "b-editor-pipeline-hover-53",
+        "b-editor-heading-feature-slices-60",
+        "b-editor-feature-slices-intro-61",
+        "b-editor-heading-slice-selection-62",
+        "b-editor-slice-selection-63",
+        "b-editor-heading-slice-move-64",
+        "b-editor-slice-move-65",
+        "b-editor-heading-slice-place-66",
+        "b-editor-slice-place-67",
+        "b-editor-heading-slice-snapping-68",
+        "b-editor-slice-snapping-69",
+        "b-editor-heading-slice-toolbar-70",
+        "b-editor-slice-toolbar-71",
+        "b-editor-heading-slice-context-72",
+        "b-editor-slice-context-73",
+        "b-editor-heading-slice-text-74",
         "b-editor-text-editing-para",
+        "b-editor-heading-slice-inspector-75",
+        "b-editor-slice-inspector-76",
+        "b-editor-heading-slice-section-fit-77",
+        "b-editor-slice-section-fit-78",
         "b-editor-color-para",
-        "b-editor-viewer-desc-5",
-        "b-editor-viewer-relationship-6",
         "b-editor-heading-viewport-7",
-        "b-editor-viewport-ts-desc-8",
-        "b-editor-viewport-formula-9",
         "b-editor-use-canvas-viewport-desc-10",
         "b-editor-use-canvas-viewport-wheel-11",
         "b-editor-use-canvas-viewport-pan-12",
@@ -68,21 +100,46 @@
       "props": {},
       "text": [
         {
-          "insert": "The editor layer is where the interactive canvas engine becomes an actual interactive editor: it composes the pure render layer, the interaction state machine, viewport/camera control, and keyboard shortcuts into a single component tree, and dispatches every user gesture as a typed "
+          "insert": "The editor is a layer on top of the stage core: "
         },
         {
-          "insert": "CanvasAction",
+          "insert": "InteractiveCanvasEditor.tsx",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/state/actions/types.ts",
-              "symbol": "CanvasAction"
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx"
             }
           }
         },
         {
-          "insert": " through the model's reducer. This doc covers the four files that make up that layer — the editor entrypoint, the read-only viewer, the viewport math, and the hotkey binding table."
+          "insert": " owns the document reducer, composes "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " with the viewport and hotkey hooks, runs every gesture through the interaction pipeline, and mounts the chrome. Everything ephemeral the editor draws — selection boxes, drag rectangles, snap guides, ghosts — arrives in the stage through its overlay slots; the stage itself only ever draws the document (see "
+        },
+        {
+          "insert": "20-implementation/40-stage",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/40-stage"
+            }
+          }
+        },
+        {
+          "insert": ", which also owns the read-only viewer face). Inside the editor every feature is a vertical slice: its gesture logic and its visuals live in one folder named after the feature."
         }
       ],
       "children": []
@@ -95,7 +152,7 @@
       },
       "text": [
         {
-          "insert": "InteractiveCanvasEditor vs InteractiveCanvasViewer"
+          "insert": "The editor entrypoint"
         }
       ],
       "children": []
@@ -108,7 +165,7 @@
         {
           "insert": "InteractiveCanvasEditor",
           "attributes": {
-            "bold": true,
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
@@ -117,43 +174,7 @@
           }
         },
         {
-          "insert": " (~2000 lines) is the full interactive editing entrypoint. Its props are minimal — "
-        },
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "onSave",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "onCancel",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and an optional "
-        },
-        {
-          "insert": "title",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — but internally it owns the entire editing session: it holds document state via "
+          "insert": " is the editing composition root. It accepts the document plus save/cancel/change and shell props, then owns the live editing session with "
         },
         {
           "insert": "useReducer",
@@ -176,30 +197,91 @@
           }
         },
         {
-          "insert": ", drives the pointer-driven "
+          "insert": ". It wires "
         },
         {
-          "insert": "InteractionState",
+          "insert": "useCanvasViewport",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
-              "symbol": "InteractionState"
+              "path": "packages/canvas/src/stage/editor/use-canvas-viewport.ts",
+              "symbol": "useCanvasViewport"
             }
           }
         },
         {
-          "insert": " machine (press/move/resize/drag-select/connector-drag/etc.) via "
+          "insert": ", "
         },
         {
-          "insert": "stepInteraction",
+          "insert": "useCanvasHotkeys",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "symbol": "useCanvasHotkeys"
+            }
           }
         },
         {
-          "insert": ", and wires up edge-pan-while-dragging, clipboard copy/paste, and every chrome affordance around the stage."
+          "insert": ", "
+        },
+        {
+          "insert": "useInteractionPipeline",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "useInteractionPipeline"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "useTextEditing",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/use-text-editing.ts",
+              "symbol": "useTextEditing"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "useCanvasContextMenu",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/context-menu/use-canvas-context-menu.ts",
+              "symbol": "useCanvasContextMenu"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "useSelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "useSelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": " around one stage instance."
         }
       ],
       "children": []
@@ -210,43 +292,58 @@
       "props": {},
       "text": [
         {
-          "insert": "Structurally it composes: the render layer ("
+          "insert": "Structurally it composes "
         },
         {
           "insert": "CanvasStage",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
           }
         },
         {
-          "insert": ") for pixels, the viewport hook ("
+          "insert": " for document pixels; "
         },
         {
-          "insert": "useCanvasViewport",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") for pan/zoom, the hotkey hook ("
-        },
-        {
-          "insert": "useCanvasHotkeys",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") for keyboard, and the editor chrome around that stage — "
-        },
-        {
-          "insert": "CanvasDock",
+          "insert": "CanvasContextMenu",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
-              "symbol": "CanvasDock"
+              "path": "packages/canvas/src/stage/editor/features/context-menu/CanvasContextMenu.tsx",
+              "symbol": "CanvasContextMenu"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "TopBar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/TopBar.tsx",
+              "symbol": "TopBar"
+            }
+          }
+        },
+        {
+          "insert": ", optional "
+        },
+        {
+          "insert": "Inspector",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/inspector/Inspector.tsx",
+              "symbol": "Inspector"
             }
           }
         },
@@ -265,311 +362,109 @@
           }
         },
         {
-          "insert": " (whose flyouts include the one "
-        },
-        {
-          "insert": "ColorPicker",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
-              "symbol": "ColorPicker"
-            }
-          }
-        },
-        {
-          "insert": "), "
+          "insert": ", "
         },
         {
           "insert": "ShapesPanel",
           "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "ZoomControls",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "TopBar",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "Inspector",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and the context menu. A small mapping translates the dock's fixed "
-        },
-        {
-          "insert": "ToolId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " vocabulary onto the reducer's larger "
-        },
-        {
-          "insert": "CanvasTool",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " vocabulary (one entry per placeable object type, plus select/hand/connector/annotation); the dock's connector button now maps to the real "
-        },
-        {
-          "insert": "\"connector\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " tool rather than aliasing select."
-        }
-      ],
-      "children": []
-    },
-    "b-editor-viewer-desc-5": {
-      "id": "b-editor-viewer-desc-5",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "InteractiveCanvasViewer",
-          "attributes": {
-            "bold": true,
+            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/viewer/InteractiveCanvasViewer.tsx",
-              "symbol": "InteractiveCanvasViewer"
+              "path": "packages/canvas/src/stage/editor/components/ShapesPanel.tsx",
+              "symbol": "ShapesPanel"
             }
           }
         },
         {
-          "insert": " is the read-only counterpart, and much smaller (under 200 lines). It takes a "
+          "insert": ", "
         },
         {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", optional "
-        },
-        {
-          "insert": "selectedObjectIds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "changedObjectIds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (for highlight state), a "
-        },
-        {
-          "insert": "compact",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " flag, and an optional "
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (a section object id to crop the viewport to, per "
-        },
-        {
-          "insert": "containerViewBounds",
+          "insert": "CanvasDock",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/stage/viewport.ts",
-              "symbol": "containerViewBounds"
+              "path": "packages/canvas/src/stage/editor/components/CanvasDock.tsx",
+              "symbol": "CanvasDock"
             }
           }
         },
         {
-          "insert": "). There is no reducer, no interaction state machine, no hotkey hook, and no chrome — it renders "
+          "insert": ", and "
         },
         {
-          "insert": "CanvasStage",
+          "insert": "ZoomControls",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/ZoomControls.tsx",
+              "symbol": "ZoomControls"
+            }
+          }
+        },
+        {
+          "insert": ". The stage receives "
+        },
+        {
+          "insert": "InteractionFeedbackScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
+            }
+          }
+        },
+        {
+          "insert": " through its screen "
+        },
+        {
+          "insert": "overlay",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " directly inside a measured, fixed-aspect shell, computing a one-shot "
+          "insert": " prop and "
         },
         {
-          "insert": "ViewportState",
+          "insert": "InteractionFeedbackWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackWorld"
+            }
+          }
+        },
+        {
+          "insert": " through "
+        },
+        {
+          "insert": "worldOverlay",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " via "
+          "insert": ", with "
         },
         {
-          "insert": "fitBounds",
+          "insert": "TextEditingOverlay",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
+              "symbol": "TextEditingOverlay"
+            }
           }
         },
         {
-          "insert": "/"
-        },
-        {
-          "insert": "fitDocument",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " rather than owning a live pannable/zoomable camera. It still surfaces click callbacks ("
-        },
-        {
-          "insert": "onObjectSelect",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "onCanvasSelect",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", context-menu hooks) and a small header bar with object/connector/annotation counts and a warning badge when a requested "
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " id can't be found — but it is fundamentally a display component, not an editing surface."
-        }
-      ],
-      "children": []
-    },
-    "b-editor-viewer-relationship-6": {
-      "id": "b-editor-viewer-relationship-6",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "This is the component a "
-        },
-        {
-          "insert": "canvas",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " doc-flavour block renders through: a doc's "
-        },
-        {
-          "insert": "canvas",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " block props ("
-        },
-        {
-          "insert": "src",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "title",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") map directly onto "
-        },
-        {
-          "insert": "InteractiveCanvasViewer",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "'s "
-        },
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " props — an embedded canvas inside a doc is read-only by construction, which is why the viewer has no hotkeys or reducer to begin with rather than merely having them disabled."
+          "insert": " nested in the transformed world slot."
         }
       ],
       "children": []
@@ -582,199 +477,7 @@
       },
       "text": [
         {
-          "insert": "Viewport model"
-        }
-      ],
-      "children": []
-    },
-    "b-editor-viewport-ts-desc-8": {
-      "id": "b-editor-viewport-ts-desc-8",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "viewport.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/viewport.ts"
-            }
-          }
-        },
-        {
-          "insert": " is the pure viewport/camera model — no React, no side effects, just coordinate math over a "
-        },
-        {
-          "insert": "ViewportState",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/viewport.ts",
-              "symbol": "ViewportState"
-            }
-          }
-        },
-        {
-          "insert": " of "
-        },
-        {
-          "insert": "{ x, y, zoom }",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", where "
-        },
-        {
-          "insert": "(x, y)",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the world point shown at screen origin "
-        },
-        {
-          "insert": "(0, 0)",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". It exports "
-        },
-        {
-          "insert": "worldToScreen",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "screenToWorld",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " conversions, "
-        },
-        {
-          "insert": "clampZoom",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (bounds "
-        },
-        {
-          "insert": "MIN_ZOOM = 0.1",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "MAX_ZOOM = 4",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), "
-        },
-        {
-          "insert": "zoomAtPoint",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (zoom while keeping a given screen point fixed in world space), "
-        },
-        {
-          "insert": "panBy",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (screen-delta pan), and "
-        },
-        {
-          "insert": "fitBounds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "fitDocument",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (compute the viewport that centers and scales a set of bounds — or the whole document — into a given screen size, with padding). "
-        },
-        {
-          "insert": "containerViewBounds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " rounds this out (the exported name predates the W6 container-type removal): given a section object id, it walks "
-        },
-        {
-          "insert": "parentId",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " chains to find every descendant and returns the padded bounds of just that subtree — this is the D4 \"view-crop\" feature "
-        },
-        {
-          "insert": "InteractiveCanvasViewer",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "'s "
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " prop relies on."
-        }
-      ],
-      "children": []
-    },
-    "b-editor-viewport-formula-9": {
-      "id": "b-editor-viewport-formula-9",
-      "flavour": "code",
-      "props": {
-        "language": "text"
-      },
-      "text": [
-        {
-          "insert": "screenPoint = (worldPoint - { x, y }) * zoom\nworldPoint = screenPoint / zoom + { x, y }"
+          "insert": "The viewport hook"
         }
       ],
       "children": []
@@ -796,7 +499,19 @@
           }
         },
         {
-          "insert": " is the React hook wrapping that pure model with real pointer/wheel event handling. It owns "
+          "insert": " is the editor-owned React hook wrapping the stage viewport helpers documented in "
+        },
+        {
+          "insert": "20-implementation/40-stage",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/40-stage"
+            }
+          }
+        },
+        {
+          "insert": " with real pointer and wheel handling. It owns "
         },
         {
           "insert": "ViewportState",
@@ -814,7 +529,7 @@
           }
         },
         {
-          "insert": ", fits to document content once on mount (as soon as the stage element is measurable), and exposes "
+          "insert": ", fits to document content once on mount when the stage is measurable, and exposes "
         },
         {
           "insert": "controls",
@@ -868,7 +583,7 @@
           }
         },
         {
-          "insert": " helper, all bound to the current stage size via a ref rather than re-subscribing listeners on every render (mirrors term-draw's pointer-adapter pattern, per the file's own comment)."
+          "insert": " helper, all kept current through refs rather than listener churn."
         }
       ],
       "children": []
@@ -902,7 +617,30 @@
           }
         },
         {
-          "insert": " into at most one viewport commit per animation frame: each event accumulates into a pending pan-delta/zoom-factor frame, and the coalescer applies the accumulated frame using the latest cursor point, so the point under the cursor stays exactly fixed even when several wheel deltas were merged."
+          "insert": " into at most one viewport commit per animation frame: the hook accumulates pan deltas and multiplicative zoom factors into a pending frame, then applies the accumulated frame using the latest cursor point. This wheel coalescer is separate from the pipeline's drag coalescer — both are "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " instances, but the viewport hook accumulates wheel deltas while the pipeline coalesces latest "
+        },
+        {
+          "insert": "DragPointerSnapshot",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " samples."
         }
       ],
       "children": []
@@ -931,7 +669,7 @@
           }
         },
         {
-          "insert": " listeners for space state, and pointer capture for the drag itself), or via plain left-drag when the hook is constructed with "
+          "insert": " listeners for space state, focus/visibility reset guards, and pointer capture for the drag itself), or via plain left-drag when the hook is constructed with "
         },
         {
           "insert": "panOnPlainDrag: true",
@@ -940,12 +678,17 @@
           }
         },
         {
-          "insert": " (the editor's \"hand\" tool). This hook — not "
+          "insert": " (the editor's hand tool). This hook — not "
         },
         {
           "insert": "useCanvasHotkeys",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "symbol": "useCanvasHotkeys"
+            }
           }
         },
         {
@@ -993,7 +736,116 @@
           }
         },
         {
-          "insert": " listener for the editor's whole hotkey vocabulary, kept in sync with any UI hint text (toolbar button titles) per the file's own header comment. The full binding table, reproduced from that header:"
+          "insert": " listener for the editor's whole hotkey vocabulary, kept in sync with UI hint text by the file header. The dock keys are the left-hand homerow ("
+        },
+        {
+          "insert": "DOCK_TOOL_KEY_MAP",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "symbol": "DOCK_TOOL_KEY_MAP"
+            }
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "a→section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "s→shapes",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "d→select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "f→hand",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "g→connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", plus Cmd/Ctrl-A for the sticky tool), so tool switching never leaves the keyboard's left hand; "
+        },
+        {
+          "insert": "TOOL_KEY_MAP",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "symbol": "TOOL_KEY_MAP"
+            }
+          }
+        },
+        {
+          "insert": " layers "
+        },
+        {
+          "insert": "C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "P",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "O",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "B",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object tools on top. The full binding table, reproduced from that header:"
         }
       ],
       "children": []
@@ -1535,20 +1387,7 @@
       },
       "text": [
         {
-          "insert": "Editor-layer tests live under "
-        },
-        {
-          "insert": "packages/canvas/src/stage/editor/__tests__/",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/__tests__"
-            }
-          }
-        },
-        {
-          "insert": " and split cleanly along the four files this doc covers: "
+          "insert": "Real editor-level tests are "
         },
         {
           "insert": "hotkeys.test.tsx",
@@ -1561,65 +1400,7 @@
           }
         },
         {
-          "insert": " exercises the "
-        },
-        {
-          "insert": "useCanvasHotkeys",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " binding table (tool keys, delete/duplicate/copy/paste, arrow nudge with and without Shift, undo/redo, Escape's cancel-gesture/close-menu/clear-selection fallthrough, and the editable-target/typing-context no-op guard); "
-        },
-        {
-          "insert": "viewport.test.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/__tests__/viewport.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " covers the pure coordinate math in "
-        },
-        {
-          "insert": "viewport.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (world/screen conversion round-trips, "
-        },
-        {
-          "insert": "fitBounds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "fitDocument",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " sizing, "
-        },
-        {
-          "insert": "containerViewBounds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " descendant walking); "
+          "insert": ", "
         },
         {
           "insert": "use-canvas-viewport.zoom.test.ts",
@@ -1632,7 +1413,7 @@
           }
         },
         {
-          "insert": " focuses specifically on the hook's zoom behavior — wheel-with-modifier zoom-toward-cursor, zoom clamping, and the rAF wheel-event coalescing; and "
+          "insert": ", "
         },
         {
           "insert": "viewer-view-crop.test.tsx",
@@ -1645,25 +1426,241 @@
           }
         },
         {
-          "insert": " covers "
+          "insert": ", and "
         },
         {
-          "insert": "InteractiveCanvasViewer",
+          "insert": "viewport.test.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/__tests__/viewport.test.ts"
+            }
           }
         },
         {
-          "insert": "'s D4 view-cropping behavior — fitting the viewport to a named section's bounds via the "
+          "insert": "; pipeline tests are "
         },
         {
-          "insert": "view",
+          "insert": "resolve-hit.test.tsx",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/__tests__/resolve-hit.test.tsx"
+            }
           }
         },
         {
-          "insert": " prop, and surfacing the \"view not found\" warning badge when the requested section id doesn't resolve."
+          "insert": " and "
+        },
+        {
+          "insert": "use-hover-target.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/__tests__/use-hover-target.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Feature-slice suites from the requested glob are "
+        },
+        {
+          "insert": "context-menu-retarget.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/context-menu/__tests__/context-menu-retarget.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/__tests__/move.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "place.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/__tests__/place.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "animate-section-fit.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/__tests__/animate-section-fit.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "SelectionToolbar.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/__tests__/SelectionToolbar.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "position.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/__tests__/position.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/__tests__/resize.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "selection.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/__tests__/selection.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction.snap-inject.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/interaction.snap-inject.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move-snapping.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/move-snapping.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "snap-distribution-vendor.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snap-distribution-vendor.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "snapping.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__/snapping.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "editing-position.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/__tests__/editing-position.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "markdown-slot-text-editor.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/__tests__/markdown-slot-text-editor.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "use-text-editing.test.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/__tests__/use-text-editing.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": ". Dedicated suites cover selection, resize, move, place, snapping, section-fit, selection-toolbar, text-editing, and context-menu; the machine's spec-level tests live mostly in those slice suites plus the pipeline hit/hover tests."
         }
       ],
       "children": []
@@ -1674,23 +1671,52 @@
       "props": {},
       "text": [
         {
-          "insert": "For the dock, toolbars, palettes, and other chrome components wired into "
+          "insert": "For dock, toolbar, palette, and other chrome components wired into "
         },
         {
           "insert": "InteractiveCanvasEditor",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
+              "symbol": "InteractiveCanvasEditor"
+            }
           }
         },
         {
-          "insert": " above this layer, see "
+          "insert": ", see "
         },
         {
-          "insert": "canvas-60-chrome",
+          "insert": "20-implementation/60-chrome",
           "attributes": {
             "reference": {
               "kind": "doc",
               "path": "20-implementation/60-chrome"
+            }
+          }
+        },
+        {
+          "insert": ". Connector gesture internals live in "
+        },
+        {
+          "insert": "20-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/30-connectors"
+            }
+          }
+        },
+        {
+          "insert": ", and the lower-level pointer/hit-test vocabulary lives in "
+        },
+        {
+          "insert": "20-implementation/20-interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/20-interaction"
             }
           }
         },
@@ -1706,27 +1732,6 @@
       "props": {},
       "text": [
         {
-          "insert": "Text editing is the "
-        },
-        {
-          "insert": "stage/editor/features/text-editing/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " feature (renamed from the old label-editing feature when the schema collapsed to one "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field). "
-        },
-        {
           "insert": "useTextEditing",
           "attributes": {
             "code": true,
@@ -1738,7 +1743,7 @@
           }
         },
         {
-          "insert": " owns two editor states: the in-place OBJECT text editor (opened by double-click for any def whose "
+          "insert": " owns both the object text editor and the connector-label editor. Existing-object entry is double-click driven and gated by the effective def's "
         },
         {
           "insert": "textEditing.editable",
@@ -1747,30 +1752,16 @@
           }
         },
         {
-          "insert": " is true — pure glyphs like plus/or-junction/summing-junction refuse it) and the connector-label editor (an input at "
+          "insert": "; connector labels open from connector double-click and anchor at "
         },
         {
-          "insert": "routeConnection().labelPoint",
+          "insert": "routeConnection(...).labelPoint",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", per the ConnectorDef's routed-midpoint contract). The object editor is in-place by construction (D14): "
-        },
-        {
-          "insert": "TextEditingOverlay",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx",
-              "symbol": "TextEditingOverlay"
-            }
-          }
-        },
-        {
-          "insert": " positions and styles its textarea from the SAME "
+          "insert": ". The editor overlay reuses the def's "
         },
         {
           "insert": "resolveTextSlot",
@@ -1784,7 +1775,7 @@
           }
         },
         {
-          "insert": " descriptor the at-rest renderer uses — same rect, same typography, chip counter-scale included — while the def's renderer receives "
+          "insert": " descriptor so mid-edit and at-rest text are pixel-identical under the D14 principle, while "
         },
         {
           "insert": "hideText",
@@ -1793,10 +1784,7 @@
           }
         },
         {
-          "insert": " so at rest and mid-edit are pixel-identical, caret aside."
-        },
-        {
-          "insert": " All four editing surfaces also set an explicit inline "
+          "insert": " suppresses the at-rest render underneath and the active editors opt back into "
         },
         {
           "insert": "user-select: text",
@@ -1805,7 +1793,39 @@
           }
         },
         {
-          "insert": ": the stage root disables text selection wholesale (see the render-layer decision — board text is chrome, drags must never sweep a native selection across labels), and the active editor is the one place selection is re-enabled."
+          "insert": ". "
+        },
+        {
+          "insert": "MarkdownSlotTextEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/text-editing/MarkdownSlotTextEditor.tsx",
+              "symbol": "MarkdownSlotTextEditor"
+            }
+          }
+        },
+        {
+          "insert": " is the sticky live-markdown path with a native "
+        },
+        {
+          "insert": "beforeinput",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " listener that maps edits back to markdown source. The pipeline's "
+        },
+        {
+          "insert": "editObjectTextId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " one-shot lets gestures such as double-click and quick connect request an editor session, including predicted IDs for objects that do not exist in React state yet."
         }
       ],
       "children": []
@@ -1816,33 +1836,364 @@
       "props": {},
       "text": [
         {
-          "insert": "Color editing is likewise one surface: every kind's toolbar color control opens the same "
+          "insert": "Color controls stay out of this bundle: palette UI lives in "
         },
         {
-          "insert": "ColorPicker",
+          "insert": "20-implementation/60-chrome",
           "attributes": {
-            "code": true,
             "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
-              "symbol": "ColorPicker"
+              "kind": "doc",
+              "path": "20-implementation/60-chrome"
             }
           }
         },
         {
-          "insert": " (the 10-pick "
+          "insert": ", while object-def color semantics belong with "
         },
         {
-          "insert": "CanvasColor",
+          "insert": "10-system-design/10-shape-api",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-title-0": {
+      "id": "b-editor-heading-title-0",
+      "flavour": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Editor"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-40": {
+      "id": "b-editor-heading-pipeline-40",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The pipeline"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-pure-41": {
+      "id": "b-editor-heading-pipeline-pure-41",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "A pure machine"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-pure-42": {
+      "id": "b-editor-pipeline-pure-42",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": " is a pure switch over the nine-kind "
+        },
+        {
+          "insert": "InteractionState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
+              "symbol": "InteractionState"
+            }
+          }
+        },
+        {
+          "insert": " union: "
+        },
+        {
+          "insert": "idle",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " row) through the shared color flyout; a pick dispatches a plain "
+          "insert": ", "
         },
         {
-          "insert": "canvas.updateObject",
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "drag-select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "place",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-endpoint-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "connector-bend-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It delegates one-for-one to the per-slice "
+        },
+        {
+          "insert": "stepFrom*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " functions and returns "
+        },
+        {
+          "insert": "{ state, dispatch: CanvasAction[], overlay }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the sub-threshold gate: a press becomes a click on release, a move when an object drag reaches "
+        },
+        {
+          "insert": "DRAG_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "DRAG_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "3",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " world px), or a drag-select from empty canvas. "
+        },
+        {
+          "insert": "cancelInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "cancelInteraction"
+            }
+          }
+        },
+        {
+          "insert": " is pure as well; it returns restore actions for active move/resize and otherwise idles with no dispatch."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-decision-43": {
+      "id": "b-editor-pipeline-decision-43",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "The dispatcher is pure; effects live at the hook edge"
+      },
+      "text": [
+        {
+          "insert": "Decision (accepted): The dispatcher is pure; effects live at the hook edge — "
+        },
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": " and every "
+        },
+        {
+          "insert": "stepFrom*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " take (state, event, read-only ctx) and return a result object; no I/O, no React, no refs. The only place effects happen is "
+        },
+        {
+          "insert": "runInteraction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "use-interaction-pipeline.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts"
+            }
+          }
+        },
+        {
+          "insert": ": assign the state ref, publish the overlay, loop the dispatch array into the reducer, and fire the "
+        },
+        {
+          "insert": "editObjectTextId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " one-shot. That keeps every gesture unit-testable as data in → data out, and it is why the gesture suites run without DOM."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-dom-44": {
+      "id": "b-editor-heading-pipeline-dom-44",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "From DOM event to CanvasPointerEvent"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-dom-45": {
+      "id": "b-editor-pipeline-dom-45",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Stage pointer-down records "
+        },
+        {
+          "insert": "{ pointerId, stage }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", seeds the latest pointer snapshot, starts edge-pan, and steps a normalized "
+        },
+        {
+          "insert": "down",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " event. The hook installs window-level "
+        },
+        {
+          "insert": "pointermove",
           "attributes": {
             "code": true
           }
@@ -1851,31 +2202,1632 @@
           "insert": "/"
         },
         {
-          "insert": "canvas.updateConnection",
+          "insert": "pointerup",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " color patch, which the reducer also records into its per-kind last-picked memory ("
+          "insert": "/"
         },
         {
-          "insert": "state.lastPickedColor",
+          "insert": "pointercancel",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", D17) so the next created object of that kind takes the remembered color. The editor threads "
+          "insert": " listeners for its lifetime and guards them with the active pointer ref, so fast drags outside the stage still land. "
         },
         {
-          "insert": "lastPickedColor",
+          "insert": "buildPointerEvent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "buildPointerEvent"
+            }
+          }
+        },
+        {
+          "insert": " normalizes native events into screen coordinates via "
+        },
+        {
+          "insert": "stageScreenPointFromClient",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/stage-dom.ts",
+              "symbol": "stageScreenPointFromClient"
+            }
+          }
+        },
+        {
+          "insert": ", world coordinates via "
+        },
+        {
+          "insert": "screenToWorld",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " into the interaction pipeline so the place-tool ghost previews the color the object will actually be created with."
+          "insert": ", and a "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via "
+        },
+        {
+          "insert": "resolveHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "resolveHit"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-hit-46": {
+      "id": "b-editor-heading-pipeline-hit-46",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Hit resolution"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-hit-47": {
+      "id": "b-editor-pipeline-hit-47",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "resolveHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "resolveHit"
+            }
+          }
+        },
+        {
+          "insert": " walks DOM attributes in priority order: "
+        },
+        {
+          "insert": "data-canvas-handle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " → endpoint → port → screen-space anchor-dot proximity → bend-segment → connection-id → section-title-chip → object-id → the world-space "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "hitTestObjects"
+            }
+          }
+        },
+        {
+          "insert": " fallback → canvas. Source nuance: endpoint, bend-segment, and connection branches use "
+        },
+        {
+          "insert": "instanceof Element",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " because those targets can be SVG nodes; ports are HTML elements in this DOM. A DOM-matched object is vetoed when the pointer is outside its true outline ("
+        },
+        {
+          "insert": "outlineContainsPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "outlineContainsPoint"
+            }
+          }
+        },
+        {
+          "insert": ", the D16 rule), falling through to the world hit-test; section title chips bypass that veto."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-raf-48": {
+      "id": "b-editor-heading-pipeline-raf-48",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Two rAF loops"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-raf-49": {
+      "id": "b-editor-pipeline-raf-49",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The drag coalescer is "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "DragPointerSnapshot",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": window "
+        },
+        {
+          "insert": "pointermove",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records the latest snapshot, commits at most once per frame, uses latest-wins semantics, flushes before pointer-up/cancel so the final position is never dropped, and cancels on unmount or Escape. The second loop is a self-rescheduling edge-pan tick: it engages only for "
+        },
+        {
+          "insert": "EDGE_PAN_DRAG_KINDS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (never "
+        },
+        {
+          "insert": "idle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), pans the viewport with "
+        },
+        {
+          "insert": "panBy",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "panBy"
+            }
+          }
+        },
+        {
+          "insert": ", then re-pushes the last snapshot so the gesture re-steps against the moved viewport. Both rAF closures read refs updated every render, so once-created callbacks see current document, selection, tool, viewport, and callbacks."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-feedback-50": {
+      "id": "b-editor-heading-pipeline-feedback-50",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "InteractionFeedback: slice visuals through the stage slots"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-feedback-51": {
+      "id": "b-editor-pipeline-feedback-51",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractionFeedbackWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackWorld"
+            }
+          }
+        },
+        {
+          "insert": " renders in the transformed world layer: the placement ghost is the drafted object rendered through the real "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " at reduced opacity. "
+        },
+        {
+          "insert": "InteractionFeedbackScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
+            }
+          }
+        },
+        {
+          "insert": " renders the screen-space set — "
+        },
+        {
+          "insert": "SelectionBox",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/SelectionBox.tsx",
+              "symbol": "SelectionBox"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "HoverHighlight",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/HoverHighlight.tsx",
+              "symbol": "HoverHighlight"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "AnchorDots",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ConnectorDragPreview",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DragSelectRect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/DragSelectRect.tsx",
+              "symbol": "DragSelectRect"
+            }
+          }
+        },
+        {
+          "insert": ", the dashed "
+        },
+        {
+          "insert": "PlacePreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/PlacePreview.tsx",
+              "symbol": "PlacePreview"
+            }
+          }
+        },
+        {
+          "insert": " fallback, "
+        },
+        {
+          "insert": "SnapGuideLine",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/SnapGuideLine.tsx",
+              "symbol": "SnapGuideLine"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DistributionGuideLine",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/DistributionGuideLine.tsx",
+              "symbol": "DistributionGuideLine"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "SpacingChips",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/SpacingChips.tsx",
+              "symbol": "SpacingChips"
+            }
+          }
+        },
+        {
+          "insert": " — each gated on its overlay field. The editor mirrors the pipeline overlay into React state so the slots re-render; this composition is the stage slot conversion."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-pipeline-hover-52": {
+      "id": "b-editor-heading-pipeline-hover-52",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Hover target"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-pipeline-hover-53": {
+      "id": "b-editor-pipeline-hover-53",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "useHoverTarget",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-hover-target.ts",
+              "symbol": "useHoverTarget"
+            }
+          }
+        },
+        {
+          "insert": " tracks hover for the connector tool only. "
+        },
+        {
+          "insert": "resolveHoverTarget",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " combines "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "hitTestObjects"
+            }
+          }
+        },
+        {
+          "insert": " with a section-outline tolerance and a sticky expanded-bounds halo, so a hovered object keeps its anchor dots while the cursor travels to them; the result feeds port-proximity hits and the anchor-dot set."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-feature-slices-60": {
+      "id": "b-editor-heading-feature-slices-60",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Feature slices"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-feature-slices-intro-61": {
+      "id": "b-editor-feature-slices-intro-61",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every slice under "
+        },
+        {
+          "insert": "stage/editor/features/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features"
+            }
+          }
+        },
+        {
+          "insert": " owns a feature end to end: gesture steppers, slice-local state types, and the visuals that render through InteractionFeedback. Slices export a small surface and never import each other sideways — the one declared exception is "
+        },
+        {
+          "insert": "snapping/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a service slice whose math "
+        },
+        {
+          "insert": "move/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " consumes."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-selection-62": {
+      "id": "b-editor-heading-slice-selection-62",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "selection/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-selection-63": {
+      "id": "b-editor-slice-selection-63",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "DragSelectGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
+              "symbol": "DragSelectGesture"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "stepFromDragSelect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/drag-select.ts",
+              "symbol": "stepFromDragSelect"
+            }
+          }
+        },
+        {
+          "insert": " are entered from "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on empty canvas with the select tool; Shift makes the marquee additive, and "
+        },
+        {
+          "insert": "DragSelectRect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/DragSelectRect.tsx",
+              "symbol": "DragSelectRect"
+            }
+          }
+        },
+        {
+          "insert": " is the visual. "
+        },
+        {
+          "insert": "ResizeGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
+              "symbol": "ResizeGesture"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "stepFromResize",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
+              "symbol": "stepFromResize"
+            }
+          }
+        },
+        {
+          "insert": " enter immediately from a handle hit with no click semantics; "
+        },
+        {
+          "insert": "applyResizeHandle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
+              "symbol": "applyResizeHandle"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resizeCursorFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
+              "symbol": "resizeCursorFor"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "MIN_DIRECT_RESIZE_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/resize.ts",
+              "symbol": "MIN_DIRECT_RESIZE_SIZE"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "48",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and handle-aware snap through "
+        },
+        {
+          "insert": "computeSnapGuides",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSnapGuides"
+            }
+          }
+        },
+        {
+          "insert": " all live there. "
+        },
+        {
+          "insert": "SelectionBox",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/SelectionBox.tsx",
+              "symbol": "SelectionBox"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "HoverHighlight",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection/HoverHighlight.tsx",
+              "symbol": "HoverHighlight"
+            }
+          }
+        },
+        {
+          "insert": " are the screen overlay selection visuals."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-move-64": {
+      "id": "b-editor-heading-slice-move-64",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "move/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-move-65": {
+      "id": "b-editor-slice-move-65",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "MoveGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
+              "symbol": "MoveGesture"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "createMoveGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
+              "symbol": "createMoveGesture"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "stepFromMove",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
+              "symbol": "stepFromMove"
+            }
+          }
+        },
+        {
+          "insert": " take over when object "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " crosses the drag threshold. "
+        },
+        {
+          "insert": "expandMoveObjectIds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts",
+              "symbol": "expandMoveObjectIds"
+            }
+          }
+        },
+        {
+          "insert": " folds section descendants into the moved set, "
+        },
+        {
+          "insert": "dropTargetId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " flows through the overlay into the "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " drop-target prop, and live snapping imports "
+        },
+        {
+          "insert": "computeSnapCorrection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSnapCorrection"
+            }
+          }
+        },
+        {
+          "insert": " plus spacing/candidate math from "
+        },
+        {
+          "insert": "../snapping/snapping",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the declared service-slice edge."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-place-66": {
+      "id": "b-editor-heading-slice-place-66",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "place/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-place-67": {
+      "id": "b-editor-slice-place-67",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "PlaceGesture",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "PlaceGesture"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "stepFromPlace",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "stepFromPlace"
+            }
+          }
+        },
+        {
+          "insert": " handle armed tools. "
+        },
+        {
+          "insert": "objectTypeForTool",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "objectTypeForTool"
+            }
+          }
+        },
+        {
+          "insert": " maps tools to object types; click placement uses default centered geometry, while drag placement clamps each dimension to "
+        },
+        {
+          "insert": "MIN_PLACE_DRAG_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "MIN_PLACE_DRAG_SIZE"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "24",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "PLACE_PREVIEW_GHOST_ID",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "PLACE_PREVIEW_GHOST_ID"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "placePreviewOverlayFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/place.ts",
+              "symbol": "placePreviewOverlayFor"
+            }
+          }
+        },
+        {
+          "insert": " feed the world ghost; "
+        },
+        {
+          "insert": "PlacePreview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/place/PlacePreview.tsx",
+              "symbol": "PlacePreview"
+            }
+          }
+        },
+        {
+          "insert": " is only the dashed screen fallback when no draft object is present."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-snapping-68": {
+      "id": "b-editor-heading-slice-snapping-68",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "snapping/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-snapping-69": {
+      "id": "b-editor-slice-snapping-69",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "snapping.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts"
+            }
+          }
+        },
+        {
+          "insert": " exports "
+        },
+        {
+          "insert": "computeSnapGuides",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSnapGuides"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "computeSnapCorrection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSnapCorrection"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "computeSpacingHints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSpacingHints"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "isGridAligned",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "isGridAligned"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "applyGridFallback",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "applyGridFallback"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "snap-distribution.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the MPL-headered AFFiNE distribution port with "
+        },
+        {
+          "insert": "alignDistributeHorizontally",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+              "symbol": "alignDistributeHorizontally"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "alignDistributeVertically",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+              "symbol": "alignDistributeVertically"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "calculateClosestDistances",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+              "symbol": "calculateClosestDistances"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "ALIGN_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+              "symbol": "ALIGN_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "8",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "); licensing context lives in "
+        },
+        {
+          "insert": "99-appendix",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "99-appendix"
+            }
+          }
+        },
+        {
+          "insert": ". Visuals are "
+        },
+        {
+          "insert": "SnapGuideLine",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/SnapGuideLine.tsx",
+              "symbol": "SnapGuideLine"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "DistributionGuideLine",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/DistributionGuideLine.tsx",
+              "symbol": "DistributionGuideLine"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "SpacingChips",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/SpacingChips.tsx",
+              "symbol": "SpacingChips"
+            }
+          }
+        },
+        {
+          "insert": ". Important nuance: "
+        },
+        {
+          "insert": "InteractionContext.snapResolver",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
+              "symbol": "InteractionContext"
+            }
+          }
+        },
+        {
+          "insert": " is a host-injection seam that production does not supply; only the snap-inject test uses it, and live drag snapping runs "
+        },
+        {
+          "insert": "move.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/move/move.ts"
+            }
+          }
+        },
+        {
+          "insert": "'s built-in "
+        },
+        {
+          "insert": "computeSnapCorrection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snapping.ts",
+              "symbol": "computeSnapCorrection"
+            }
+          }
+        },
+        {
+          "insert": " path."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-toolbar-70": {
+      "id": "b-editor-heading-slice-toolbar-70",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "selection-toolbar/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-toolbar-71": {
+      "id": "b-editor-slice-toolbar-71",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "useSelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/use-selection-toolbar.ts",
+              "symbol": "useSelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": " resolves the toolbar from the current selection and anchors it with "
+        },
+        {
+          "insert": "positionSelectionToolbar",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/position.ts",
+              "symbol": "positionSelectionToolbar"
+            }
+          }
+        },
+        {
+          "insert": "; flyouts use "
+        },
+        {
+          "insert": "positionFlyoutCenteredOnTrigger",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/position.ts",
+              "symbol": "positionFlyoutCenteredOnTrigger"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "SelectionToolbarLayer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbarLayer.tsx",
+              "symbol": "SelectionToolbarLayer"
+            }
+          }
+        },
+        {
+          "insert": " hides during "
+        },
+        {
+          "insert": "SELECTION_DRAG_KINDS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "SELECTION_DRAG_KINDS"
+            }
+          }
+        },
+        {
+          "insert": " for FigJam parity, and also hides in connector mode; toolbar content and flyout chrome belong to "
+        },
+        {
+          "insert": "20-implementation/60-chrome",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/60-chrome"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-context-72": {
+      "id": "b-editor-heading-slice-context-72",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "context-menu/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-context-73": {
+      "id": "b-editor-slice-context-73",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "useCanvasContextMenu",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/context-menu/use-canvas-context-menu.ts",
+              "symbol": "useCanvasContextMenu"
+            }
+          }
+        },
+        {
+          "insert": " owns "
+        },
+        {
+          "insert": "CanvasContextMenuState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/context-menu/use-canvas-context-menu.ts",
+              "symbol": "CanvasContextMenuState"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "resolveContextMenuTarget",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/context-menu/use-canvas-context-menu.ts",
+              "symbol": "resolveContextMenuTarget"
+            }
+          }
+        },
+        {
+          "insert": ", which retargets right-clicks through the true outline before falling back to the canvas menu. Any primary stage pointer-down closes an open menu on the select/connector paths; Escape closes it after gesture cancellation. The fit-section item is section-only and disabled/no-ops when "
+        },
+        {
+          "insert": "isSectionFitted",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/animate-section-fit.ts",
+              "symbol": "isSectionFitted"
+            }
+          }
+        },
+        {
+          "insert": " already returns true."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-text-74": {
+      "id": "b-editor-heading-slice-text-74",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "text-editing/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-inspector-75": {
+      "id": "b-editor-heading-slice-inspector-75",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "inspector/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-inspector-76": {
+      "id": "b-editor-slice-inspector-76",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Inspector.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/inspector/Inspector.tsx"
+            }
+          }
+        },
+        {
+          "insert": " is the optional right-side panel rendered by "
+        },
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
+              "symbol": "InteractiveCanvasEditor"
+            }
+          }
+        },
+        {
+          "insert": " when "
+        },
+        {
+          "insert": "showInspector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is true. It exposes object text, geometry nudges/sizing, color, annotations, connection details, delete, and the same section-fit affordance as toolbar and context menu, gated by "
+        },
+        {
+          "insert": "isSectionFitted",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/animate-section-fit.ts",
+              "symbol": "isSectionFitted"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-editor-heading-slice-section-fit-77": {
+      "id": "b-editor-heading-slice-section-fit-77",
+      "flavour": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "section-fit/"
+        }
+      ],
+      "children": []
+    },
+    "b-editor-slice-section-fit-78": {
+      "id": "b-editor-slice-section-fit-78",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "animateSectionFitToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/animate-section-fit.ts",
+              "symbol": "animateSectionFitToChildren"
+            }
+          }
+        },
+        {
+          "insert": " is an rAF tween from the section's current geometry to "
+        },
+        {
+          "insert": "sectionFitGeometry",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "sectionFitGeometry"
+            }
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "SECTION_FIT_ANIMATION_MS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/animate-section-fit.ts",
+              "symbol": "SECTION_FIT_ANIMATION_MS"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "180ms",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") unless reduced motion or missing frame APIs force an immediate commit. "
+        },
+        {
+          "insert": "isSectionFitted",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/section-fit/animate-section-fit.ts",
+              "symbol": "isSectionFitted"
+            }
+          }
+        },
+        {
+          "insert": " disables every fit affordance when the section already fits, and the pipeline triggers the animation from double-click on a section body. There is no section dimming visual here."
         }
       ],
       "children": []
