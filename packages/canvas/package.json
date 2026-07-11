@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
     "./actions": "./src/actions.ts",
+    "./agent-schema": "./src/agent-schema.ts",
     "./geometry": "./src/geometry.ts",
     "./theme": "./src/theme.ts",
     "./figjam-tokens": "./src/figjam-tokens.ts",
@@ -26,6 +27,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.34",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
