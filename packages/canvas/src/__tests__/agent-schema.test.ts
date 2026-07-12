@@ -142,6 +142,16 @@ describe("canvas agent patch schemas", () => {
 
   it("accepts a valid addConnection envelope and rejects malformed variants", () => {
     expect(Value.Check(schemaFor("addConnection"), ADD_CONNECTION)).toBe(true);
+    expect(
+      Value.Check(schemaFor("addConnection"), {
+        type: "addConnection",
+        connection: {
+          id: "defaulted-connection",
+          from: { objectId: "agent-draft" },
+          to: { objectId: "write-spec" },
+        },
+      }),
+    ).toBe(true);
 
     expectInvalid("addConnection", [
       {
@@ -167,11 +177,39 @@ describe("canvas agent patch schemas", () => {
           to: { objectId: "write-spec" },
         },
       },
+      {
+        type: "addConnection",
+        connection: {
+          id: "bad-style",
+          from: { objectId: "agent-draft" },
+          to: { objectId: "write-spec" },
+          style: "zigzag",
+        },
+      },
+      {
+        type: "addConnection",
+        connection: {
+          id: "bad-arrow",
+          from: { objectId: "agent-draft" },
+          to: { objectId: "write-spec" },
+          arrow: "sideways",
+        },
+      },
     ]);
   });
 
   it("accepts a valid addAnnotation envelope and rejects malformed variants", () => {
     expect(Value.Check(schemaFor("addAnnotation"), ADD_ANNOTATION)).toBe(true);
+    expect(
+      Value.Check(schemaFor("addAnnotation"), {
+        type: "addAnnotation",
+        annotation: {
+          id: "defaulted-annotation",
+          target: { kind: "object", objectId: "agent-draft" },
+          body: "Use validator defaults.",
+        },
+      }),
+    ).toBe(true);
 
     expectInvalid("addAnnotation", [
       {
@@ -182,6 +220,13 @@ describe("canvas agent patch schemas", () => {
           intent: "note",
           status: "open",
           createdBy: "human",
+        },
+      },
+      {
+        type: "addAnnotation",
+        annotation: {
+          ...ADD_ANNOTATION.annotation,
+          intent: "question",
         },
       },
       {
@@ -204,6 +249,13 @@ describe("canvas agent patch schemas", () => {
           body: "Unknown status",
           status: "pending",
           createdBy: "human",
+        },
+      },
+      {
+        type: "addAnnotation",
+        annotation: {
+          ...ADD_ANNOTATION.annotation,
+          createdBy: "reviewer",
         },
       },
     ]);
@@ -281,6 +333,9 @@ describe("CANVAS_AGENT_PATCH_OPERATIONS", () => {
       expect(entry.description.trim().length).toBeGreaterThan(0);
       expect(TypeGuard.IsObject(entry.params)).toBe(true);
     }
+
+    expect(CANVAS_AGENT_PATCH_OPERATIONS[0].description).toContain("section requires");
+    expect(CANVAS_AGENT_PATCH_OPERATIONS[1].description).toContain("section requires");
   });
 
   it("accepts one CanvasAgentPatchOperation-typed value for every variant", () => {

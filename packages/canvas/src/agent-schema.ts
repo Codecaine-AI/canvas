@@ -119,6 +119,11 @@ export const CanvasGeometrySchema = Type.Object({
   height: Type.Number({ exclusiveMinimum: 0 }),
 });
 
+/*
+ * The hand validator tolerates any string for tone/shape, but the exported TS
+ * contract deliberately pins their literal vocabulary. Keep these schemas
+ * narrow so agents discover and use that supported vocabulary.
+ */
 export const CanvasObjectStyleSchema = Type.Object({
   tone: Type.Optional(CanvasToneSchema),
   shape: Type.Optional(CanvasObjectShapeSchema),
@@ -146,10 +151,11 @@ const CanvasObjectSourceSchema = Type.Object({
 });
 
 /*
- * The hand validator normalizes or drops several invalid optional values and
- * conditionally requires title/tint for sections. Those behaviors cannot be
- * represented while remaining mutually assignable with InteractiveCanvasObject,
- * whose exported contract uses exact literals and keeps title/tint optional.
+ * The hand validator normalizes or drops several invalid optional values. Its
+ * object validation is also state-dependent: type === "section" hard-requires
+ * a nonblank title and known tint. That condition cannot be represented by a
+ * single per-operation object schema while updateObject may preserve existing
+ * state, so the operation descriptions advertise it explicitly.
  */
 export const CanvasObjectSchema = Type.Object({
   id: StableIdSchema,
@@ -190,8 +196,8 @@ export const CanvasConnectionEndpointSchema = Type.Object({
 
 const CanvasWaypointSchema = Type.Tuple([Type.Number(), Type.Number()]);
 
-/* Invalid style/arrow/color values are normalized by the hand validator; the
- * runtime schema follows the narrower exported connection type instead. */
+/* Missing style/arrow values are accepted and defaulted by the hand validator;
+ * when present, their schemas retain the exported contract's literal vocabulary. */
 export const CanvasConnectionSchema = Type.Object({
   id: StableIdSchema,
   from: CanvasConnectionEndpointSchema,
@@ -219,19 +225,21 @@ export const CanvasAnnotationTargetSchema = Type.Union([
   }),
 ]);
 
-/* intent, status, and createdBy are defaulted when absent/invalid by the hand
- * validator, but they remain required here because the exported TS type does. */
+/* Missing intent/status/createdBy values are accepted and defaulted by the hand
+ * validator; when present, they retain the exported contract's vocabulary. */
 export const CanvasAnnotationSchema = Type.Object({
   id: StableIdSchema,
   target: CanvasAnnotationTargetSchema,
-  intent: CanvasAnnotationIntentSchema,
+  intent: Type.Optional(CanvasAnnotationIntentSchema),
   body: Type.String(),
-  status: CanvasAnnotationStatusSchema,
-  createdBy: Type.Union([
-    Type.Literal("human"),
-    Type.Literal("agent"),
-    Type.Literal("system"),
-  ]),
+  status: Type.Optional(CanvasAnnotationStatusSchema),
+  createdBy: Type.Optional(
+    Type.Union([
+      Type.Literal("human"),
+      Type.Literal("agent"),
+      Type.Literal("system"),
+    ]),
+  ),
   createdAt: Type.Optional(Type.String()),
 });
 
@@ -273,16 +281,17 @@ export type CanvasAgentPatchOperationDescriptor = {
   params: TObject;
 };
 
-export const CANVAS_AGENT_PATCH_OPERATIONS: readonly CanvasAgentPatchOperationDescriptor[] = [
+export const CANVAS_AGENT_PATCH_OPERATIONS = [
   {
     type: "addObject",
-    description: "Add a fully specified canvas object at its provided geometry.",
+    description:
+      "Add a fully specified canvas object at its provided geometry; a section requires a nonblank title and known tint.",
     params: AddObjectParamsSchema,
   },
   {
     type: "updateObject",
     description:
-      "Update an existing canvas object by ID, shallow-merging fields and deep-merging style fields.",
+      "Update an existing canvas object by ID, shallow-merging fields and deep-merging style fields; a resulting section requires a nonblank title and known tint.",
     params: UpdateObjectParamsSchema,
   },
   {
@@ -301,14 +310,22 @@ export const CANVAS_AGENT_PATCH_OPERATIONS: readonly CanvasAgentPatchOperationDe
     description: "Resize a container to enclose its current child objects with optional padding.",
     params: FitContainerToChildrenParamsSchema,
   },
-];
+] as const satisfies readonly CanvasAgentPatchOperationDescriptor[];
 
 type MutuallyAssignable<Left, Right> = [Left] extends [Right]
   ? [Right] extends [Left]
     ? true
     : false
   : false;
+type Assignable<Left, Right> = [Left] extends [Right] ? true : false;
 type Assert<Condition extends true> = Condition;
+
+type _OperationDescriptorsAreExhaustive = Assert<
+  MutuallyAssignable<
+    (typeof CANVAS_AGENT_PATCH_OPERATIONS)[number]["type"],
+    CanvasAgentPatchOperation["type"]
+  >
+>;
 
 type _AddObjectSchemaMatchesContract = Assert<
   MutuallyAssignable<
@@ -328,10 +345,15 @@ type _AddConnectionSchemaMatchesContract = Assert<
     Extract<CanvasAgentPatchOperation, { type: "addConnection" }>
   >
 >;
-type _AddAnnotationSchemaMatchesContract = Assert<
-  MutuallyAssignable<
-    Static<typeof AddAnnotationParamsSchema>,
-    Extract<CanvasAgentPatchOperation, { type: "addAnnotation" }>
+/*
+ * The annotation wire schema is deliberately looser than the TS contract so
+ * agents may omit fields that the hand validator defaults. Guard the remaining
+ * direction: every TS-typed operation must still be accepted by the schema.
+ */
+type _AddAnnotationContractIsAcceptedBySchema = Assert<
+  Assignable<
+    Extract<CanvasAgentPatchOperation, { type: "addAnnotation" }>,
+    Static<typeof AddAnnotationParamsSchema>
   >
 >;
 type _FitContainerToChildrenSchemaMatchesContract = Assert<
