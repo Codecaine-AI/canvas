@@ -17,6 +17,10 @@ import { annotationTargetLabel, CanvasStage } from "../CanvasStage";
 import { InteractionFeedbackScreen } from "../editor/pipeline/InteractionFeedback";
 import type { CanvasBounds } from "../../state/geometry";
 import { containerViewBounds, fitBounds, fitDocument, type ScreenSize, type ViewportState } from "../viewport";
+import {
+  useCanvasViewport,
+  type CanvasViewportControls,
+} from "../../navigation/use-canvas-viewport";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 export interface InteractiveCanvasViewerProps {
@@ -26,6 +30,12 @@ export interface InteractiveCanvasViewerProps {
   compact?: boolean;
   /** When set, fits the viewport to this section object's bounds (D4 view-cropping). */
   view?: string;
+  /** Enables wheel/pinch zoom and drag/trackpad panning without enabling edits. */
+  interactive?: boolean;
+  /** Removes the document card chrome and makes the stage fill its parent. */
+  bare?: boolean;
+  /** Shows compact fit/zoom controls over an interactive stage. */
+  showNavigationControls?: boolean;
   onObjectSelect?: (objectId: string) => void;
   onCanvasSelect?: () => void;
   onCanvasContextMenu?: (
@@ -42,6 +52,66 @@ export interface InteractiveCanvasViewerProps {
 
 const MIN_STAGE_HEIGHT = 360;
 const COMPACT_MIN_HEIGHT = 320;
+
+function ViewerNavigationControls({
+  zoom,
+  controls,
+}: {
+  zoom: number;
+  controls: CanvasViewportControls;
+}) {
+  const buttonStyle = {
+    border: 0,
+    borderRadius: 7,
+    background: "transparent",
+    color: "#242424",
+    cursor: "pointer",
+    height: 26,
+    minWidth: 26,
+    padding: "0 7px",
+    fontSize: 12,
+  } as const;
+
+  return (
+    <div
+      role="group"
+      aria-label="Canvas navigation"
+      data-canvas-viewer-controls="true"
+      style={{
+        position: "absolute",
+        right: 12,
+        bottom: 12,
+        zIndex: 10,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 2,
+        padding: "3px 5px",
+        border: "1px solid rgba(0, 0, 0, 0.12)",
+        borderRadius: 10,
+        background: "rgba(255, 255, 255, 0.94)",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+      }}
+    >
+      <button type="button" aria-label="Fit canvas" onClick={controls.fit} style={buttonStyle}>
+        Fit
+      </button>
+      <button type="button" aria-label="Zoom out" onClick={controls.zoomOut} style={buttonStyle}>
+        −
+      </button>
+      <button
+        type="button"
+        aria-label={`Zoom level ${Math.round(zoom * 100)}%`}
+        onClick={controls.zoomTo100}
+        style={{ ...buttonStyle, minWidth: 46 }}
+      >
+        {Math.round(zoom * 100)}%
+      </button>
+      <button type="button" aria-label="Zoom in" onClick={controls.zoomIn} style={buttonStyle}>
+        +
+      </button>
+    </div>
+  );
+}
 
 function useMeasuredSize(): [React.RefObject<HTMLDivElement | null>, ScreenSize | null] {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -75,6 +145,9 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
   changedObjectIds = [],
   compact,
   view,
+  interactive = false,
+  bare = false,
+  showNavigationControls = interactive,
   onObjectSelect,
   onCanvasSelect,
   onCanvasContextMenu,
@@ -82,16 +155,28 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
   className,
 }: InteractiveCanvasViewerProps) {
   const [measureRef, measuredSize] = useMeasuredSize();
-  const viewNotFound = Boolean(view) && !containerViewBounds(document, view!);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const viewBounds = useMemo(
+    () => (view ? containerViewBounds(document, view) : null),
+    [document, view],
+  );
+  const viewNotFound = Boolean(view) && !viewBounds;
 
-  const viewport: ViewportState = useMemo(() => {
+  const fittedViewport: ViewportState = useMemo(() => {
     const screen: ScreenSize = measuredSize ?? { width: compact ? 760 : 960, height: compact ? COMPACT_MIN_HEIGHT : MIN_STAGE_HEIGHT };
-    if (view) {
-      const bounds = containerViewBounds(document, view);
-      if (bounds) return fitBounds(bounds, screen);
-    }
+    if (viewBounds) return fitBounds(viewBounds, screen);
     return fitDocument(document, screen);
-  }, [document, view, measuredSize, compact]);
+  }, [document, viewBounds, measuredSize, compact]);
+
+  const navigation = useCanvasViewport({
+    document,
+    stageRef,
+    enabled: interactive,
+    panOnPlainDrag: interactive,
+    fitTarget: viewBounds,
+    fitTargetKey: `${document.id}:${view ?? ""}`,
+  });
+  const viewport = interactive ? navigation.viewport : fittedViewport;
 
   const minHeight = compact ? COMPACT_MIN_HEIGHT : MIN_STAGE_HEIGHT;
 
@@ -102,13 +187,16 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
       style={{
         position: "relative",
         overflow: "hidden",
-        border: "1px solid var(--border)",
-        borderRadius: "8px",
-        minHeight: `${minHeight}px`,
-        aspectRatio: `${document.size?.width ?? 16} / ${document.size?.height ?? 9}`,
+        border: bare ? 0 : "1px solid var(--border)",
+        borderRadius: bare ? 0 : "8px",
+        minHeight: bare ? 0 : `${minHeight}px`,
+        width: "100%",
+        height: bare ? "100%" : undefined,
+        aspectRatio: bare ? undefined : `${document.size?.width ?? 16} / ${document.size?.height ?? 9}`,
       }}
     >
       <CanvasStage
+        stageRef={stageRef}
         document={document}
         viewport={viewport}
         selectedObjectIds={selectedObjectIds}
@@ -118,6 +206,11 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
         onCanvasSelect={onCanvasSelect}
         onCanvasContextMenu={onCanvasContextMenu}
         onObjectContextMenu={onObjectContextMenu}
+        className="h-full"
+        style={{
+          cursor: navigation.isPanning ? "grabbing" : interactive ? "grab" : undefined,
+          touchAction: interactive ? "none" : undefined,
+        }}
         overlay={
           <InteractionFeedbackScreen
             document={document}
@@ -126,8 +219,46 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
           />
         }
       />
+      {interactive && showNavigationControls ? (
+        <ViewerNavigationControls zoom={viewport.zoom} controls={navigation.controls} />
+      ) : null}
     </div>
   );
+
+  if (bare) {
+    return (
+      <section
+        className={className}
+        data-mdx-block="Canvas"
+        data-docs-block-type="canvas"
+        data-source-id={document.id}
+        data-canvas-viewer-interactive={interactive ? "true" : undefined}
+        style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
+      >
+        {stage}
+        {view && viewNotFound ? (
+          <div
+            role="status"
+            style={{
+              position: "absolute",
+              left: 12,
+              bottom: 12,
+              zIndex: 10,
+              border: "1px solid rgba(159, 29, 29, 0.28)",
+              borderRadius: 999,
+              background: "rgba(255, 255, 255, 0.94)",
+              color: "#9f1d1d",
+              padding: "5px 9px",
+              fontSize: 11,
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            View not found: {view}
+          </div>
+        ) : null}
+      </section>
+    );
+  }
 
   return (
     <section
@@ -135,6 +266,7 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
       data-mdx-block="Canvas"
       data-docs-block-type="canvas"
       data-source-id={document.id}
+      data-canvas-viewer-interactive={interactive ? "true" : undefined}
     >
       <div className="not-prose my-4 overflow-hidden rounded-md border bg-background shadow-sm">
         <div className="flex flex-wrap items-center gap-2 border-b bg-background px-3 py-2">

@@ -12,6 +12,13 @@ export {
 } from "./theme/palette";
 export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./theme/palette";
 export * from "./stage/CanvasStage";
+export {
+  exportDocumentAsPng,
+  exportDocumentAsSvg,
+  exportFilenameFor,
+  sanitizeExportFilename,
+} from "./render/download";
+export type { ExportPngOptions } from "./render/download";
 export * from "./interaction/clipboard";
 export * from "./theme/tokens";
 export * from "./state/geometry";
@@ -63,5 +70,11 @@ export {
   textPlacementName,
 } from "./objects/text-slots";
 export type { TextPlacement } from "./objects/text-slots";
-export * from "./stage/editor/use-canvas-viewport";
+export * from "./navigation/use-canvas-viewport";
 export * from "./stage/viewport";
+export { renderDocumentToSvg } from "./render/static-svg";
+export type {
+  RenderDocumentToSvg,
+  RenderedSvg,
+  RenderStaticSvgOptions,
+} from "./render/types";

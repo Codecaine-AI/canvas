@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "id": "interaction-surfaces",
+  "title": "One state, two readers",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1280,
+    "height": 720
+  },
+  "objects": [
+    {
+      "id": "one-state-two-readers",
+      "type": "section",
+      "text": "One state, two readers",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 835.9534374999998,
+        "y": 439.39937499999996,
+        "width": 1120,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      },
+      "layout": {
+        "mode": "free",
+        "padding": 36,
+        "gap": 28
+      }
+    },
+    {
+      "id": "human-surface",
+      "type": "process",
+      "text": "Human surface\nDirect manipulation",
+      "color": "blue",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 915.9534374999998,
+        "y": 589.399375,
+        "width": 250,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "canonical-state",
+      "type": "database",
+      "text": "Canonical document state\nStable, validated, addressable",
+      "color": "violet",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 1265.9534374999998,
+        "y": 569.399375,
+        "width": 260,
+        "height": 160
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "agent-surface",
+      "type": "document",
+      "text": "Agent surface\nRendered markdown + typed actions",
+      "color": "green",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 1625.9534374999998,
+        "y": 589.399375,
+        "width": 250,
+        "height": 120
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "human-detail",
+      "type": "sticky",
+      "text": "Workbench\nRich blocks\nComments + themes",
+      "color": "yellow",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 945.9534374999998,
+        "y": 799.399375,
+        "width": 190,
+        "height": 120
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "agent-detail",
+      "type": "sticky",
+      "text": "CLI\nGreppable projection\nBlock-id operations",
+      "color": "green",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 1655.9534374999998,
+        "y": 799.399375,
+        "width": 190,
+        "height": 120
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "shared-contract",
+      "type": "pill",
+      "text": "Both renders must read correctly",
+      "color": "red",
+      "parentId": "one-state-two-readers",
+      "geometry": {
+        "x": 1235.9534374999998,
+        "y": 834.399375,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "state-to-human",
+      "from": {
+        "objectId": "canonical-state",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "human-surface",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "state-to-agent",
+      "from": {
+        "objectId": "canonical-state",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "agent-surface",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "human-to-detail",
+      "from": {
+        "objectId": "human-surface",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "human-detail",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "agent-to-detail",
+      "from": {
+        "objectId": "agent-surface",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "agent-detail",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

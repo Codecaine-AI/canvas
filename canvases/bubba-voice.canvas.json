@@ -1,0 +1,1490 @@
+{
+  "schemaVersion": 1,
+  "id": "bubba-voice",
+  "title": "Bubba Voice — Workflow Design",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 5264,
+    "height": 3552
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Bubba Voice — Workflow Design",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 5200,
+        "height": 3488
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "section-multilayer",
+      "type": "section",
+      "text": "Multi Layer Session State",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 832,
+        "y": 96,
+        "width": 768,
+        "height": 1392
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "icon-conversation-history",
+      "type": "icon",
+      "text": "Conversation History",
+      "color": "green",
+      "parentId": "section-multilayer",
+      "geometry": {
+        "x": 1120,
+        "y": 176,
+        "width": 192,
+        "height": 160
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "section-ml-session-tasks",
+      "type": "section",
+      "text": "Session Tasks",
+      "color": "gray",
+      "parentId": "section-multilayer",
+      "geometry": {
+        "x": 880,
+        "y": 416,
+        "width": 672,
+        "height": 1024
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-ml-pending",
+      "type": "section",
+      "text": "Pending",
+      "color": "yellow",
+      "parentId": "section-ml-session-tasks",
+      "geometry": {
+        "x": 912,
+        "y": 480,
+        "width": 608,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-ml-a",
+      "type": "predefined-process",
+      "text": "Task A",
+      "color": "blue",
+      "parentId": "section-ml-pending",
+      "geometry": {
+        "x": 944,
+        "y": 544,
+        "width": 544,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-ml-active",
+      "type": "section",
+      "text": "Active Tasks",
+      "color": "green",
+      "parentId": "section-ml-session-tasks",
+      "geometry": {
+        "x": 912,
+        "y": 704,
+        "width": 608,
+        "height": 256
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-ml-b",
+      "type": "predefined-process",
+      "text": "Task B",
+      "color": "blue",
+      "parentId": "section-ml-active",
+      "geometry": {
+        "x": 944,
+        "y": 768,
+        "width": 544,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "task-ml-c",
+      "type": "predefined-process",
+      "text": "Task C",
+      "color": "blue",
+      "parentId": "section-ml-active",
+      "geometry": {
+        "x": 944,
+        "y": 864,
+        "width": 544,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-ml-completed-not-sent",
+      "type": "section",
+      "text": "Completed Not Sent to User",
+      "color": "violet",
+      "parentId": "section-ml-session-tasks",
+      "geometry": {
+        "x": 912,
+        "y": 1024,
+        "width": 608,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-ml-d",
+      "type": "predefined-process",
+      "text": "Task D",
+      "color": "blue",
+      "parentId": "section-ml-completed-not-sent",
+      "geometry": {
+        "x": 944,
+        "y": 1088,
+        "width": 544,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-ml-completed-sent",
+      "type": "section",
+      "text": "Completed Sent to User",
+      "color": "gray",
+      "parentId": "section-ml-session-tasks",
+      "geometry": {
+        "x": 912,
+        "y": 1248,
+        "width": 608,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-ml-e",
+      "type": "predefined-process",
+      "text": "Task E",
+      "color": "blue",
+      "parentId": "section-ml-completed-sent",
+      "geometry": {
+        "x": 944,
+        "y": 1312,
+        "width": 544,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-task-manager",
+      "type": "section",
+      "text": "Task Manager",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 96,
+        "width": 1904,
+        "height": 1168
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-tm-session",
+      "type": "section",
+      "text": "Session Tasks",
+      "color": "pink",
+      "parentId": "section-task-manager",
+      "geometry": {
+        "x": 1792,
+        "y": 192,
+        "width": 560,
+        "height": 880
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-tm-s-pending",
+      "type": "section",
+      "text": "Pending Tasks",
+      "color": "green",
+      "parentId": "section-tm-session",
+      "geometry": {
+        "x": 1840,
+        "y": 272,
+        "width": 464,
+        "height": 256
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-s-a",
+      "type": "predefined-process",
+      "text": "Task A",
+      "color": "blue",
+      "parentId": "section-tm-s-pending",
+      "geometry": {
+        "x": 1872,
+        "y": 336,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "task-tm-s-b",
+      "type": "predefined-process",
+      "text": "Task B",
+      "color": "blue",
+      "parentId": "section-tm-s-pending",
+      "geometry": {
+        "x": 1872,
+        "y": 432,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-tm-s-active",
+      "type": "section",
+      "text": "Active Tasks",
+      "color": "yellow",
+      "parentId": "section-tm-session",
+      "geometry": {
+        "x": 1840,
+        "y": 624,
+        "width": 464,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-s-c",
+      "type": "predefined-process",
+      "text": "Task C",
+      "color": "blue",
+      "parentId": "section-tm-s-active",
+      "geometry": {
+        "x": 1872,
+        "y": 688,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-tm-s-completed",
+      "type": "section",
+      "text": "Completed Tasks",
+      "color": "red",
+      "parentId": "section-tm-session",
+      "geometry": {
+        "x": 1840,
+        "y": 880,
+        "width": 464,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-s-d",
+      "type": "predefined-process",
+      "text": "Task D",
+      "color": "blue",
+      "parentId": "section-tm-s-completed",
+      "geometry": {
+        "x": 1872,
+        "y": 944,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-tm-n",
+      "type": "section",
+      "text": "Session N Tasks",
+      "color": "violet",
+      "parentId": "section-task-manager",
+      "geometry": {
+        "x": 2496,
+        "y": 192,
+        "width": 560,
+        "height": 880
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-tm-n-pending",
+      "type": "section",
+      "text": "Pending Tasks",
+      "color": "green",
+      "parentId": "section-tm-n",
+      "geometry": {
+        "x": 2544,
+        "y": 272,
+        "width": 464,
+        "height": 256
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-n-a",
+      "type": "predefined-process",
+      "text": "Task A",
+      "color": "blue",
+      "parentId": "section-tm-n-pending",
+      "geometry": {
+        "x": 2576,
+        "y": 336,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "task-tm-n-b",
+      "type": "predefined-process",
+      "text": "Task B",
+      "color": "blue",
+      "parentId": "section-tm-n-pending",
+      "geometry": {
+        "x": 2576,
+        "y": 432,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-tm-n-active",
+      "type": "section",
+      "text": "Active Tasks",
+      "color": "yellow",
+      "parentId": "section-tm-n",
+      "geometry": {
+        "x": 2544,
+        "y": 624,
+        "width": 464,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-n-c",
+      "type": "predefined-process",
+      "text": "Task C",
+      "color": "blue",
+      "parentId": "section-tm-n-active",
+      "geometry": {
+        "x": 2576,
+        "y": 688,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-tm-n-completed",
+      "type": "section",
+      "text": "Completed Tasks",
+      "color": "red",
+      "parentId": "section-tm-n",
+      "geometry": {
+        "x": 2544,
+        "y": 880,
+        "width": 464,
+        "height": 160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "task-tm-n-d",
+      "type": "predefined-process",
+      "text": "Task D",
+      "color": "blue",
+      "parentId": "section-tm-n-completed",
+      "geometry": {
+        "x": 2576,
+        "y": 944,
+        "width": 400,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "sticky-task-manager",
+      "type": "sticky",
+      "text": "**Task Manager**\n- Enqueue Tasks into Manager\n- Processes the tasks\n- Updates the Multi Layer as the tasks complete",
+      "color": "gray",
+      "parentId": "section-task-manager",
+      "geometry": {
+        "x": 3184,
+        "y": 432,
+        "width": 352,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "section-layer1",
+      "type": "section",
+      "text": "Layer 1",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 224,
+        "y": 1648,
+        "width": 3216,
+        "height": 1200
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "icon-convert-audio",
+      "type": "icon",
+      "text": "Convert Audio to Text",
+      "color": "gray",
+      "parentId": "section-layer1",
+      "geometry": {
+        "x": 256,
+        "y": 2000,
+        "width": 224,
+        "height": 192
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "proc-add-history-top",
+      "type": "predefined-process",
+      "text": "Add to Conversation History",
+      "color": "blue",
+      "parentId": "section-layer1",
+      "geometry": {
+        "x": 560,
+        "y": 2048,
+        "width": 416,
+        "height": 96
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-layer1-llm",
+      "type": "section",
+      "text": "Layer 1 LLM",
+      "color": "white",
+      "parentId": "section-layer1",
+      "geometry": {
+        "x": 1168,
+        "y": 1696,
+        "width": 2208,
+        "height": 752
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "icon-format-prompt",
+      "type": "icon",
+      "text": "Format Prompt",
+      "color": "green",
+      "parentId": "section-layer1-llm",
+      "geometry": {
+        "x": 1264,
+        "y": 2016,
+        "width": 192,
+        "height": 160
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "rect-prompt-code",
+      "type": "rectangle",
+      "text": "<user_instructions>Please determine the next action to take based on the conversation history and task state.</user_instructions>\n<current_state>\n <conversation_history>\n  <message role=user>Hi, I need to reschedule my delivery.</message>\n  <message role=assistant>Sure. What date works best for you?</message>\n  <message role=user>Next Tuesday morning would be great.</message>\n </conversation_history>\n <tasks>\n  <pending_tasks>\n   <task id=task_173a>\n    <task_name>Confirm new delivery window with logistics</task_name>\n   </task>\n  </pending_tasks>\n  <active_tasks>\n   <task id=task_9b42>\n    <task_name>Check available Tuesday morning slots</task_name>\n   </task>\n  </active_tasks>\n  <completed_not_communicated_tasks>\n   <task id=task_55c1>\n    <task_name>Lookup customer account</task_name>\n    <result_summary>Account verified. Customer eligible for flexible rescheduling.</result_summary>\n   </task>\n  </completed_not_communicated_tasks>\n  <completed_and_communicated_tasks>\n   <task id=task_0021>\n    <task_name>Greet customer and ask for preferred date</task_name>\n    <result_summary>Customer prefers next Tuesday morning.</result_summary>\n   </task>\n  </completed_and_communicated_tasks>\n </tasks>\n</current_state>",
+      "color": "gray",
+      "parentId": "section-layer1-llm",
+      "geometry": {
+        "x": 1568,
+        "y": 1776,
+        "width": 800,
+        "height": 640
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "sticky-layer1-generates",
+      "type": "sticky",
+      "text": "Layer 1 Always Generates a Message\n- It then runs all tasks in the background",
+      "color": "blue",
+      "parentId": "section-layer1-llm",
+      "geometry": {
+        "x": 2432,
+        "y": 1760,
+        "width": 336,
+        "height": 224
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "icon-generate-message",
+      "type": "icon",
+      "text": "Generate Message",
+      "color": "orange",
+      "parentId": "section-layer1-llm",
+      "geometry": {
+        "x": 2496,
+        "y": 2016,
+        "width": 192,
+        "height": 160
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "section-layer1-tools",
+      "type": "section",
+      "text": "Tools",
+      "color": "gray",
+      "parentId": "section-layer1-llm",
+      "geometry": {
+        "x": 2816,
+        "y": 1952,
+        "width": 448,
+        "height": 304
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "tool-mark-communicated",
+      "type": "predefined-process",
+      "text": "Mark Task(s) Communicated",
+      "color": "blue",
+      "parentId": "section-layer1-tools",
+      "geometry": {
+        "x": 2848,
+        "y": 2016,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "tool-determine-new-task",
+      "type": "predefined-process",
+      "text": "Determine New Task",
+      "color": "blue",
+      "parentId": "section-layer1-tools",
+      "geometry": {
+        "x": 2848,
+        "y": 2128,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "proc-add-history-bottom",
+      "type": "predefined-process",
+      "text": "Add to Conversation History",
+      "color": "blue",
+      "parentId": "section-layer1",
+      "geometry": {
+        "x": 2384,
+        "y": 2672,
+        "width": 416,
+        "height": 96
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "icon-convert-text-audio",
+      "type": "icon",
+      "text": "Convert Text to Audio",
+      "color": "gray",
+      "parentId": "section-layer1",
+      "geometry": {
+        "x": 256,
+        "y": 2624,
+        "width": 224,
+        "height": 192
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "terminal"
+    },
+    {
+      "id": "icon-user",
+      "type": "icon",
+      "text": "User",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 48,
+        "y": 2240,
+        "width": 192,
+        "height": 224
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "section-layer2",
+      "type": "section",
+      "text": "Layer 2 LLM",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3568,
+        "y": 1632,
+        "width": 1600,
+        "height": 1104
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "icon-determine-next-task",
+      "type": "icon",
+      "text": "Determine Next Task",
+      "color": "orange",
+      "parentId": "section-layer2",
+      "geometry": {
+        "x": 3680,
+        "y": 1888,
+        "width": 192,
+        "height": 160
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "section-layer2-tools",
+      "type": "section",
+      "text": "Tools",
+      "color": "green",
+      "parentId": "section-layer2",
+      "geometry": {
+        "x": 3648,
+        "y": 2144,
+        "width": 432,
+        "height": 336
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "tool-get-loads",
+      "type": "predefined-process",
+      "text": "Get Loads",
+      "color": "blue",
+      "parentId": "section-layer2-tools",
+      "geometry": {
+        "x": 3680,
+        "y": 2208,
+        "width": 368,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "tool-get-assets",
+      "type": "predefined-process",
+      "text": "Get Assets",
+      "color": "blue",
+      "parentId": "section-layer2-tools",
+      "geometry": {
+        "x": 3680,
+        "y": 2304,
+        "width": 368,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "pill-more-tools",
+      "type": "pill",
+      "text": "…",
+      "color": "gray",
+      "parentId": "section-layer2-tools",
+      "geometry": {
+        "x": 3776,
+        "y": 2400,
+        "width": 176,
+        "height": 48
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "section-layer2-cases",
+      "type": "section",
+      "text": "Layer 2 Cases",
+      "color": "violet",
+      "parentId": "section-layer2",
+      "geometry": {
+        "x": 4160,
+        "y": 1664,
+        "width": 928,
+        "height": 1008
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rect-no-task-needed",
+      "type": "rectangle",
+      "text": "No Task Needed",
+      "color": "yellow",
+      "parentId": "section-layer2-cases",
+      "geometry": {
+        "x": 4240,
+        "y": 1776,
+        "width": 304,
+        "height": 128
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rect-task-needed",
+      "type": "rectangle",
+      "text": "Task Needed",
+      "color": "yellow",
+      "parentId": "section-layer2-cases",
+      "geometry": {
+        "x": 4240,
+        "y": 1968,
+        "width": 304,
+        "height": 128
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rect-more-info-needed",
+      "type": "rectangle",
+      "text": "More Info Needed",
+      "color": "yellow",
+      "parentId": "section-layer2-cases",
+      "geometry": {
+        "x": 4240,
+        "y": 2160,
+        "width": 304,
+        "height": 128
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "proc-enqueue-new-task",
+      "type": "predefined-process",
+      "text": "Enqueue New Task",
+      "color": "blue",
+      "parentId": "section-layer2-cases",
+      "geometry": {
+        "x": 4672,
+        "y": 2000,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "proc-request-info",
+      "type": "predefined-process",
+      "text": "Request Info From User",
+      "color": "blue",
+      "parentId": "section-layer2-cases",
+      "geometry": {
+        "x": 4672,
+        "y": 2192,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "sticky-layer2-llm",
+      "type": "sticky",
+      "text": "**Layer 2 LLM**\n- We give the LLM the conversation history, active tasks, and all tools it has access to\n  - Currently this is around 15 tools\n- This LLM then says what tool to use (if any)",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 4160,
+        "y": 2976,
+        "width": 464,
+        "height": 368
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-3cases",
+      "type": "sticky",
+      "text": "**There are 3cases we need to consider for the tool calling**\n- No Task Needed\n  - This is a fallback for if we do not need to create a new task for the chat\n    - EX, we got here to search for loads, but are already preforming a search\n- Task Needed (and Enough Info)\n  - We have everything to do a task that the user wants done\n  - Enqueue the task\n- Tasked Need but More info Required\n  - We may want to run a tool, but in order to do that we need more context\n    - EX, search loads we need a destination and pickup)",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 4160,
+        "y": 768,
+        "width": 560,
+        "height": 688
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-agent-response",
+      "type": "sticky",
+      "text": "How does the agent know when to return the agent response?\n- The classic gemini API we return the function call response, but gemini then formats this into a user response\n- We the multi layer, the function call is like “determine new task”, the response will now not be the actual function response\n- We need an intermediary layer to convert the function output into a response",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 608,
+        "y": 2976,
+        "width": 608,
+        "height": 480
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-layer1-agent",
+      "type": "sticky",
+      "text": "**Layer 1 Agent**\n- Handles communication with the user.\n- The agent does not have knowledge of the all the tools in layer 2-N, but rather has a tool to say\n  - “We need a tool call, go figure out what task to enqueue”\n- This functions as the pass through to the more powerful LLM that may take longer to respond\n- The other tool could then see what tasks are currently running",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1312,
+        "y": 2976,
+        "width": 608,
+        "height": 480
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-active-task-insertion",
+      "type": "sticky",
+      "text": "**Active Task Insertion**\n- Each message we will get all the tasks and their most recent state\n- This way if the user asks a question about an ongoing task, we will return to the user what is going on with that task in a conversational way\n- **KEY IDEA**\n  - Need the prompt to really detail how this process will work, ie, don’t make a new task if we are already doing that one",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2016,
+        "y": 2976,
+        "width": 608,
+        "height": 480
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-alert-mechanism",
+      "type": "sticky",
+      "text": "**ALERT MECHANISM**\n- Alert mechanism is that on each message, in the prompt we will have functions that are completed, but have not be told to the user\n- We will instruct the LLM to always tell the user about the results of completed tasks and then call the function to say “we did that”\n- This function will then remove the completed task id from the list, essentially marking that task has been communicated to the user\n- These completed tasks, will be included in the system prompt",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2720,
+        "y": 2976,
+        "width": 736,
+        "height": 480
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-user-to-convert-audio",
+      "from": {
+        "objectId": "icon-user",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "icon-convert-audio",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green",
+      "waypoints": [
+        [
+          144,
+          2096
+        ]
+      ]
+    },
+    {
+      "id": "conn-convert-audio-to-add-history",
+      "from": {
+        "objectId": "icon-convert-audio",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "proc-add-history-top",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-add-history-to-conversation-history",
+      "from": {
+        "objectId": "proc-add-history-top",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "icon-conversation-history",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray",
+      "waypoints": [
+        [
+          768,
+          256
+        ]
+      ]
+    },
+    {
+      "id": "conn-add-history-to-layer1-llm",
+      "from": {
+        "objectId": "proc-add-history-top",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "section-layer1-llm",
+        "anchor": "left",
+        "position": [
+          0,
+          0.531915
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-multilayer-to-format-prompt",
+      "from": {
+        "objectId": "section-multilayer",
+        "anchor": "bottom",
+        "position": [
+          0.6875,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "icon-format-prompt",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "gray"
+    },
+    {
+      "id": "conn-format-prompt-to-code",
+      "from": {
+        "objectId": "icon-format-prompt",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rect-prompt-code",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "green"
+    },
+    {
+      "id": "conn-code-to-generate-message",
+      "from": {
+        "objectId": "rect-prompt-code",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "icon-generate-message",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-layer1-tools-to-generate-message",
+      "from": {
+        "objectId": "section-layer1-tools",
+        "anchor": "left",
+        "position": [
+          0,
+          0.473684
+        ]
+      },
+      "to": {
+        "objectId": "icon-generate-message",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "gray"
+    },
+    {
+      "id": "conn-generate-message-to-add-history-bottom",
+      "from": {
+        "objectId": "icon-generate-message",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "proc-add-history-bottom",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-add-history-bottom-to-convert-text-audio",
+      "from": {
+        "objectId": "proc-add-history-bottom",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "icon-convert-text-audio",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-convert-text-audio-to-user",
+      "from": {
+        "objectId": "icon-convert-text-audio",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "icon-user",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "output",
+      "color": "gray",
+      "waypoints": [
+        [
+          144,
+          2720
+        ]
+      ]
+    },
+    {
+      "id": "conn-mark-communicated-to-task-d",
+      "from": {
+        "objectId": "tool-mark-communicated",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "task-ml-d",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "blue",
+      "waypoints": [
+        [
+          3040,
+          1536
+        ],
+        [
+          1648,
+          1536
+        ],
+        [
+          1648,
+          1120
+        ]
+      ]
+    },
+    {
+      "id": "conn-determine-new-task-to-hub",
+      "from": {
+        "objectId": "tool-determine-new-task",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "icon-determine-next-task",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue",
+      "waypoints": [
+        [
+          3504,
+          2160
+        ],
+        [
+          3504,
+          1968
+        ]
+      ]
+    },
+    {
+      "id": "conn-multilayer-to-hub",
+      "from": {
+        "objectId": "section-multilayer",
+        "anchor": "bottom",
+        "position": [
+          0.770833,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "icon-determine-next-task",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "gray",
+      "waypoints": [
+        [
+          1424,
+          1584
+        ],
+        [
+          3776,
+          1584
+        ]
+      ]
+    },
+    {
+      "id": "conn-hub-to-layer2-cases",
+      "from": {
+        "objectId": "icon-determine-next-task",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "section-layer2-cases",
+        "anchor": "left",
+        "position": [
+          0,
+          0.301587
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-layer2-tools-to-hub",
+      "from": {
+        "objectId": "section-layer2-tools",
+        "anchor": "top",
+        "position": [
+          0.296296,
+          0
+        ]
+      },
+      "to": {
+        "objectId": "icon-determine-next-task",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-task-needed-to-enqueue",
+      "from": {
+        "objectId": "rect-task-needed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "proc-enqueue-new-task",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "yellow"
+    },
+    {
+      "id": "conn-more-info-to-request-info",
+      "from": {
+        "objectId": "rect-more-info-needed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "proc-request-info",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "yellow"
+    },
+    {
+      "id": "conn-enqueue-to-task-manager",
+      "from": {
+        "objectId": "proc-enqueue-new-task",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "section-task-manager",
+        "anchor": "right",
+        "position": [
+          1,
+          0.506849
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "blue",
+      "waypoints": [
+        [
+          4864,
+          688
+        ]
+      ]
+    },
+    {
+      "id": "conn-request-info-to-add-history-bottom",
+      "from": {
+        "objectId": "proc-request-info",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "proc-add-history-bottom",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "gray",
+      "waypoints": [
+        [
+          4864,
+          2912
+        ],
+        [
+          3504,
+          2912
+        ],
+        [
+          3504,
+          2720
+        ]
+      ]
+    },
+    {
+      "id": "conn-task-manager-to-multilayer",
+      "from": {
+        "objectId": "section-task-manager",
+        "anchor": "left",
+        "position": [
+          0,
+          0.506849
+        ]
+      },
+      "to": {
+        "objectId": "section-multilayer",
+        "anchor": "right",
+        "position": [
+          1,
+          0.425287
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-tm-session-to-tm-n",
+      "from": {
+        "objectId": "section-tm-session",
+        "anchor": "right",
+        "position": [
+          1,
+          0.563636
+        ]
+      },
+      "to": {
+        "objectId": "section-tm-n",
+        "anchor": "left",
+        "position": [
+          0,
+          0.563636
+        ]
+      },
+      "style": "dashed",
+      "arrow": "none",
+      "role": "sequence",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

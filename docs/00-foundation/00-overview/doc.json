@@ -6,7 +6,7 @@
   "blocks": {
     "b-foundation-root": {
       "id": "b-foundation-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "FigJam aesthetics",
@@ -20,8 +20,9 @@
         "type": "overview"
       },
       "children": [
-        "b-foundation-title-1",
+        "pm-mrff7u8q-3-2eq4it",
         "b-foundation-intro-2",
+        "pm-mrfhyrtf-1-b35wf0",
         "b-foundation-figjam-half-3",
         "b-foundation-engineer-half-4",
         "b-foundation-wedge-5",
@@ -39,42 +40,44 @@
         "b-foundation-nextsteps-body-17"
       ]
     },
-    "b-foundation-title-1": {
-      "id": "b-foundation-title-1",
-      "flavour": "heading",
+    "pm-mrff7u8q-3-2eq4it": {
+      "id": "pm-mrff7u8q-3-2eq4it",
+      "type": "heading",
       "props": {
         "level": 1
       },
       "text": [
         {
-          "insert": "Foundation — Why This Canvas Exists"
+          "insert": "Foundation"
         }
       ],
-      "children": [
-        "pm-mr9qgfuo-2-2hss94"
-      ]
-    },
-    "pm-mr9qgfuo-2-2hss94": {
-      "id": "pm-mr9qgfuo-2-2hss94",
-      "flavour": "code",
-      "props": {},
-      "text": [],
       "children": []
     },
     "b-foundation-intro-2": {
       "id": "b-foundation-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "FigJam is my favorite design/whiteboarding tool for diagrams. It's aesthetic and clean in a way that makes things very clear to understand — it's obviously made by designers. But it doesn't integrate well with AI tooling, and it carries a lot of features that are unnecessary for software diagrams specifically. Meanwhile every tool built specifically for software diagramming is obviously made by software engineers and not designers — they all feel clunky and shitty. This canvas is the way in between: designer-grade FigJam aesthetics, scoped down to software diagramming, built agent-native so AI tooling can read and write the document model directly."
+          "insert": "FigJam is the best tool for create aesthetic and easy to understand diagrams. "
+        }
+      ],
+      "children": []
+    },
+    "pm-mrfhyrtf-1-b35wf0": {
+      "id": "pm-mrfhyrtf-1-b35wf0",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "But it has a major flawit's obviously made by designers. But it doesn't integrate well with AI tooling, and it carries a lot of features that are unnecessary for software diagrams specifically. Meanwhile every tool built specifically for software diagramming is obviously made by software engineers and not designers — they all feel clunky and shitty. This canvas is the way in between: designer-grade FigJam aesthetics, scoped down to software diagramming, built agent-native so AI tooling can read and write the document model directly."
         }
       ],
       "children": []
     },
     "b-foundation-figjam-half-3": {
       "id": "b-foundation-figjam-half-3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -85,7 +88,7 @@
     },
     "b-foundation-engineer-half-4": {
       "id": "b-foundation-engineer-half-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -96,7 +99,7 @@
     },
     "b-foundation-wedge-5": {
       "id": "b-foundation-wedge-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -107,7 +110,7 @@
     },
     "b-foundation-scope-heading-6": {
       "id": "b-foundation-scope-heading-6",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -120,7 +123,7 @@
     },
     "b-foundation-scope-intro-7": {
       "id": "b-foundation-scope-intro-7",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -131,8 +134,9 @@
     },
     "b-foundation-scope-not-whiteboard-8": {
       "id": "b-foundation-scope-not-whiteboard-8",
-      "flavour": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "Not a general-purpose whiteboard"
       },
@@ -145,8 +149,9 @@
     },
     "b-foundation-scope-not-sprawl-9": {
       "id": "b-foundation-scope-not-sprawl-9",
-      "flavour": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "No FigJam feature sprawl"
       },
@@ -159,7 +164,7 @@
     },
     "b-foundation-scope-is-10": {
       "id": "b-foundation-scope-is-10",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -170,7 +175,7 @@
     },
     "b-foundation-commitments-heading-11": {
       "id": "b-foundation-commitments-heading-11",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -183,8 +188,9 @@
     },
     "b-foundation-decision-lightboard-12": {
       "id": "b-foundation-decision-lightboard-12",
-      "flavour": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "The board is light-surface only — no dark mode for the canvas itself"
       },
@@ -228,8 +234,9 @@
     },
     "b-foundation-decision-parity-13": {
       "id": "b-foundation-decision-parity-13",
-      "flavour": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "FigJam visual parity is ground truth"
       },
@@ -262,18 +269,16 @@
           }
         },
         {
-          "insert": ", geometry constants beside each object def"
-        },
-        {
-          "insert": "). When a rendering question comes up — what radius should this shape have, what's the stroke color — the answer is \"what does FigJam do,\" checked against the sampled tokens, not \"what looks nice to me right now.\" New visual work should extend those sampled, provenance-commented constants rather than hardcoding fresh values elsewhere."
+          "insert": ", geometry constants beside each object def). When a rendering question comes up — what radius should this shape have, what's the stroke color — the answer is \"what does FigJam do,\" checked against the sampled tokens, not \"what looks nice to me right now.\" New visual work should extend those sampled, provenance-commented constants rather than hardcoding fresh values elsewhere."
         }
       ],
       "children": []
     },
     "b-foundation-decision-mutation-14": {
       "id": "b-foundation-decision-mutation-14",
-      "flavour": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Typed-action single mutation authority"
       },
@@ -308,8 +313,9 @@
     },
     "b-foundation-decision-agent-model-15": {
       "id": "b-foundation-decision-agent-model-15",
-      "flavour": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "The document model is agent-editable, not just human-editable"
       },
@@ -344,7 +350,7 @@
     },
     "b-foundation-nextsteps-heading-16": {
       "id": "b-foundation-nextsteps-heading-16",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -357,7 +363,7 @@
     },
     "b-foundation-nextsteps-body-17": {
       "id": "b-foundation-nextsteps-body-17",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -413,7 +419,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": ".the"
         }
       ],
       "children": []

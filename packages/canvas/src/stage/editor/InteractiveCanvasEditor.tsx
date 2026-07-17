@@ -43,7 +43,7 @@ import {
 } from "./pipeline/InteractionFeedback";
 import { TopBar } from "./components/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
-import { useCanvasViewport } from "./use-canvas-viewport";
+import { useCanvasViewport } from "../../navigation/use-canvas-viewport";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObjectType,
@@ -425,6 +425,7 @@ export function InteractiveCanvasEditor({
         title={title}
         titleContent={titleContent}
         editableTitle={editableTitle}
+        document={state.document}
         documentTitle={state.document.title}
         documentId={state.document.id}
         historyPastLength={state.history.past.length}

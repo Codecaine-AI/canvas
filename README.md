@@ -30,6 +30,7 @@ board-design-reference/
 bun install
 bun test packages/canvas/src   # engine test suite
 bun run dev:studio             # standalone board editor, http://localhost:3999
+make studio                    # build and open the Mac Electron app
 ```
 
 See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite

@@ -1,0 +1,759 @@
+{
+  "schemaVersion": 1,
+  "id": "intent-classification-1",
+  "title": "Making an Intent Classifier Overview",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3568,
+    "height": 2624
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Making an Intent Classifier Overview",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3472,
+        "height": 2528
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "sticky-no-sops",
+      "type": "sticky",
+      "text": "Think: “I have been doing it myself / I know how to do it:\n\nNo defined SOPs, structured data, etc\n\nYour job as the AI Engineer is to figure out what data is needed and how to collect it based on the clients goals.\n- Start collecting call transcripts\n- Start storing out support tickets",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 160,
+        "width": 432,
+        "height": 512
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-rarely-labeled",
+      "type": "sticky",
+      "text": "Most companies I work with have data, but rarely have it labeled already\n- The only case I have see where there were “labels” was closed customer support tickets\n- 95%+ of the time the data will not be labeled",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2064,
+        "y": 160,
+        "width": 432,
+        "height": 432
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-labels-shortcut",
+      "type": "sticky",
+      "text": "If there are already labels, we can go directly to working on the classification model\n\nIf the data is not labeled, then we need to have the client label a dataset we create so that we have something to test on",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2576,
+        "y": 1008,
+        "width": 432,
+        "height": 416
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-client-must-label",
+      "type": "sticky",
+      "text": "The client or some subject matter expert MUST label the data.\n\nIf we want the eval to be aligned with the clients goals / preferences, they MUST impart the preferences themselves",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 512,
+        "y": 1840,
+        "width": 416,
+        "height": 432
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "icon-client-top",
+      "type": "icon",
+      "text": "Client",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1344,
+        "y": 96,
+        "width": 128,
+        "height": 128
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "decision-have-data",
+      "type": "decision",
+      "text": "Have Data?",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1280,
+        "y": 288,
+        "width": 256,
+        "height": 128
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "decision-data-labeled",
+      "type": "decision",
+      "text": "Data Labeled?",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 640,
+        "width": 256,
+        "height": 128
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "process-build-data-collection",
+      "type": "process",
+      "text": "Build Data Collection",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 816,
+        "y": 656,
+        "width": 288,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "docs-data-labels",
+      "type": "document-stack",
+      "text": "Data Labels",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2992,
+        "y": 624,
+        "width": 288,
+        "height": 160
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "process-determine-labels",
+      "type": "process",
+      "text": "Determine Labels / Intent with Client",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1248,
+        "y": 1008,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "process-clearly-define-intent",
+      "type": "process",
+      "text": "Clearly Define Each Intent",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2112,
+        "y": 1008,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "process-build-llm-classifier",
+      "type": "process",
+      "text": "Build LLM Classifier",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2112,
+        "y": 1216,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "process-generate-classifications",
+      "type": "process",
+      "text": "Generate LLM Classifications",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2112,
+        "y": 1424,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "section-case-not-labeled",
+      "type": "section",
+      "text": "Case: Data Not Labeled",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1136,
+        "y": 1712,
+        "width": 640,
+        "height": 464
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "process-labeling-app",
+      "type": "process",
+      "text": "Building User Labeling App / Eval",
+      "color": "blue",
+      "parentId": "section-case-not-labeled",
+      "geometry": {
+        "x": 1200,
+        "y": 1808,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "process-client-labels-critiques",
+      "type": "process",
+      "text": "Client Labels / Critiques LLM Lables",
+      "color": "blue",
+      "parentId": "section-case-not-labeled",
+      "geometry": {
+        "x": 1200,
+        "y": 2000,
+        "width": 320,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "icon-client-labeler",
+      "type": "icon",
+      "text": "Client",
+      "color": "green",
+      "parentId": "section-case-not-labeled",
+      "geometry": {
+        "x": 1584,
+        "y": 1984,
+        "width": 128,
+        "height": 128
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "section-case-labeled",
+      "type": "section",
+      "text": "Case Data Already Labeled",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2272,
+        "y": 1712,
+        "width": 1088,
+        "height": 784
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "process-compare-intents",
+      "type": "process",
+      "text": "Compare Generated Intents to Labeled Intents",
+      "color": "blue",
+      "parentId": "section-case-labeled",
+      "geometry": {
+        "x": 2528,
+        "y": 1808,
+        "width": 352,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "sticky-loop-improvements",
+      "type": "sticky",
+      "text": "We loop making improvements until we hit the accuracy the client wants",
+      "color": "yellow",
+      "parentId": "section-case-labeled",
+      "geometry": {
+        "x": 2960,
+        "y": 1808,
+        "width": 336,
+        "height": 288
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "decision-acc-good",
+      "type": "decision",
+      "text": "Acc % Good?",
+      "color": "red",
+      "parentId": "section-case-labeled",
+      "geometry": {
+        "x": 2576,
+        "y": 2000,
+        "width": 256,
+        "height": 128
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "octagon-process-complete",
+      "type": "octagon",
+      "text": "Process Complete",
+      "color": "yellow",
+      "parentId": "section-case-labeled",
+      "geometry": {
+        "x": 2416,
+        "y": 2208,
+        "width": 224,
+        "height": 224
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "process-make-adjustments",
+      "type": "process",
+      "text": "Make Adjustments",
+      "color": "blue",
+      "parentId": "section-case-labeled",
+      "geometry": {
+        "x": 2736,
+        "y": 2272,
+        "width": 288,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-client-to-have-data",
+      "from": {
+        "objectId": "icon-client-top",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "decision-have-data",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-have-data-no",
+      "from": {
+        "objectId": "decision-have-data",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "process-build-data-collection",
+        "anchor": "top"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [960, 352]
+      ]
+    },
+    {
+      "id": "conn-have-data-yes",
+      "from": {
+        "objectId": "decision-have-data",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "decision-data-labeled",
+        "anchor": "top"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [1824, 352]
+      ]
+    },
+    {
+      "id": "conn-data-labeled-no-labels",
+      "from": {
+        "objectId": "decision-data-labeled",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "process-determine-labels",
+        "anchor": "top"
+      },
+      "label": "No Labels",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [1408, 704]
+      ]
+    },
+    {
+      "id": "conn-data-labeled-yes",
+      "from": {
+        "objectId": "decision-data-labeled",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "process-clearly-define-intent",
+        "anchor": "top"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [2272, 704]
+      ]
+    },
+    {
+      "id": "conn-data-labeled-to-data-labels",
+      "from": {
+        "objectId": "decision-data-labeled",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "docs-data-labels",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "output",
+      "color": "red"
+    },
+    {
+      "id": "conn-build-data-collection-to-determine",
+      "from": {
+        "objectId": "process-build-data-collection",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "process-determine-labels",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue",
+      "waypoints": [
+        [960, 1056]
+      ]
+    },
+    {
+      "id": "conn-determine-to-clearly-define",
+      "from": {
+        "objectId": "process-determine-labels",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "process-clearly-define-intent",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-clearly-define-to-build-llm",
+      "from": {
+        "objectId": "process-clearly-define-intent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "process-build-llm-classifier",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-build-llm-to-generate",
+      "from": {
+        "objectId": "process-build-llm-classifier",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "process-generate-classifications",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-generate-to-labeling-app",
+      "from": {
+        "objectId": "process-generate-classifications",
+        "anchor": "bottom",
+        "position": [0.25, 1]
+      },
+      "to": {
+        "objectId": "process-labeling-app",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue",
+      "waypoints": [
+        [2192, 1856]
+      ]
+    },
+    {
+      "id": "conn-generate-to-compare",
+      "from": {
+        "objectId": "process-generate-classifications",
+        "anchor": "bottom",
+        "position": [0.75, 1]
+      },
+      "to": {
+        "objectId": "process-compare-intents",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue",
+      "waypoints": [
+        [2352, 1856]
+      ]
+    },
+    {
+      "id": "conn-labeling-app-to-client-labels",
+      "from": {
+        "objectId": "process-labeling-app",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "process-client-labels-critiques",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-client-labeler-to-client-labels",
+      "from": {
+        "objectId": "icon-client-labeler",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "process-client-labels-critiques",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-client-labels-to-generate",
+      "from": {
+        "objectId": "process-client-labels-critiques",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "process-generate-classifications",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "blue",
+      "waypoints": [
+        [1008, 2048],
+        [1008, 1472]
+      ]
+    },
+    {
+      "id": "conn-data-labels-to-compare",
+      "from": {
+        "objectId": "docs-data-labels",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "process-compare-intents",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "teal",
+      "waypoints": [
+        [3136, 1616],
+        [2704, 1616]
+      ]
+    },
+    {
+      "id": "conn-compare-to-acc-good",
+      "from": {
+        "objectId": "process-compare-intents",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "decision-acc-good",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-acc-good-yes",
+      "from": {
+        "objectId": "decision-acc-good",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "octagon-process-complete",
+        "anchor": "top"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [2528, 2064]
+      ]
+    },
+    {
+      "id": "conn-acc-good-no",
+      "from": {
+        "objectId": "decision-acc-good",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "process-make-adjustments",
+        "anchor": "top"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red",
+      "waypoints": [
+        [2880, 2064]
+      ]
+    },
+    {
+      "id": "conn-make-adjustments-to-generate",
+      "from": {
+        "objectId": "process-make-adjustments",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "process-generate-classifications",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "blue",
+      "waypoints": [
+        [3440, 2320],
+        [3440, 1472]
+      ]
+    }
+  ],
+  "annotations": []
+}

@@ -251,6 +251,7 @@ describe("InteractiveCanvasViewer view cropping", () => {
       expect(worldLayer.style.transform).toBe(expectedTransform);
     });
   });
+
 });
 
 function makeExpandedVocabDocument(): InteractiveCanvasDocument {

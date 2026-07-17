@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { ArrowLeftIcon, PanelRightIcon, PlusIcon, ShapesIcon, TrashIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
+import { ArrowLeftIcon, ExpandIcon, PanelRightIcon, PlusIcon, ShapesIcon, TrashIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
 import {
   InteractiveCanvasEditor,
+  InteractiveCanvasViewer,
   type InteractiveCanvasDocument,
 } from "@codecaine-ai/canvas";
 import { Button } from "@codecaine-ai/canvas/ui/button";
-import { Badge } from "@codecaine-ai/canvas/ui/badge";
 import { GalleryPage } from "./GalleryPage";
 
 type CanvasListItem = {
@@ -14,17 +14,32 @@ type CanvasListItem = {
   updated_at: string;
 };
 
-type Route = { name: "list" } | { name: "gallery" } | { name: "canvas"; id: string };
+type Route =
+  | { name: "list" }
+  | { name: "gallery" }
+  | { name: "canvas"; id: string }
+  | { name: "view"; id: string; view?: string }
+  | { name: "embed"; id: string; view?: string };
 
 const SHOW_INSPECTOR_STORAGE_KEY = "studio.showInspector";
 
-function parseRoute(pathname: string): Route {
+export function parseRoute(pathname: string, search = ""): Route {
   if (pathname === "/gallery" || pathname === "/gallery/") {
     return { name: "gallery" };
   }
-  const match = pathname.match(/^\/canvas\/([^/]+)\/?$/);
-  if (match) return { name: "canvas", id: decodeURIComponent(match[1]) };
+  const match = pathname.match(/^\/(canvas|view|embed)\/([^/]+)\/?$/);
+  if (match) {
+    const name = match[1] as "canvas" | "view" | "embed";
+    const id = decodeURIComponent(match[2]);
+    if (name === "canvas") return { name, id };
+    const requestedView = new URLSearchParams(search).get("view")?.trim();
+    return { name, id, view: requestedView || undefined };
+  }
   return { name: "list" };
+}
+
+function isDocumentRoute(route: Route): route is Extract<Route, { id: string }> {
+  return route.name === "canvas" || route.name === "view" || route.name === "embed";
 }
 
 function navigate(pathname: string) {
@@ -97,10 +112,6 @@ function createStarterCanvasDocument(input: {
   };
 }
 
-function formatUpdatedAt(value: string): string {
-  return new Date(value).toLocaleString();
-}
-
 function readShowInspectorPreference(): boolean {
   try {
     return window.localStorage.getItem(SHOW_INSPECTOR_STORAGE_KEY) === "true";
@@ -116,7 +127,7 @@ function isEditableShortcutTarget(target: EventTarget | null): boolean {
 }
 
 export function App() {
-  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.pathname));
+  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.pathname, window.location.search));
   const [canvases, setCanvases] = useState<CanvasListItem[]>([]);
   const [listState, setListState] = useState<"idle" | "loading" | "error">("idle");
   const [activeDocument, setActiveDocument] =
@@ -200,7 +211,7 @@ export function App() {
   useEffect(() => {
     const handlePopState = () => {
       void flushPendingSave();
-      setRoute(parseRoute(window.location.pathname));
+      setRoute(parseRoute(window.location.pathname, window.location.search));
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -265,7 +276,7 @@ export function App() {
   }, [loadCanvases, route.name]);
 
   useEffect(() => {
-    if (route.name !== "canvas") return;
+    if (!isDocumentRoute(route)) return;
 
     let cancelled = false;
     setEditorState("loading");
@@ -337,15 +348,63 @@ export function App() {
     if (await flushPendingSave()) navigate("/");
   };
 
-  if (route.name === "canvas") {
+  if (isDocumentRoute(route)) {
     if (editorState === "loading") {
-      return <StatusPage message="Loading board..." />;
+      return <StatusPage message="Loading board..." showBack={route.name !== "embed"} />;
     }
     if (editorState === "not-found") {
-      return <StatusPage message={`Board "${route.id}" was not found.`} />;
+      return <StatusPage message={`Board "${route.id}" was not found.`} showBack={route.name !== "embed"} />;
     }
     if (editorState === "error" || !activeDocument) {
-      return <StatusPage message="Could not load this board." />;
+      return <StatusPage message="Could not load this board." showBack={route.name !== "embed"} />;
+    }
+
+    if (route.name === "view" || route.name === "embed") {
+      const viewer = (
+        <InteractiveCanvasViewer
+          document={activeDocument}
+          view={route.view}
+          interactive
+          bare
+          showNavigationControls
+        />
+      );
+
+      if (route.name === "embed") {
+        return <main className="fixed inset-0 overflow-hidden bg-[#F5F5F5]">{viewer}</main>;
+      }
+
+      return (
+        <main className="fixed inset-0 overflow-hidden bg-[#F5F5F5]">
+          {viewer}
+          <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-4">
+            <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded-xl border border-black/10 bg-white/95 p-1.5 shadow-md backdrop-blur">
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Back to boards"
+                title="Back to boards"
+                onClick={() => navigate("/")}
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Button>
+              <span className="max-w-[50vw] truncate px-1 text-sm font-medium text-neutral-900">
+                {activeDocument.title ?? activeDocument.id}
+              </span>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="pointer-events-auto bg-white/95 shadow-md backdrop-blur"
+              onClick={() => navigate(`/canvas/${encodeURIComponent(route.id)}`)}
+            >
+              Edit board
+            </Button>
+          </header>
+        </main>
+      );
     }
 
     return (
@@ -385,6 +444,16 @@ export function App() {
               <Button
                 type="button"
                 size="sm"
+                variant="outline"
+                title="Open view-only mode"
+                onClick={() => navigate(`/view/${encodeURIComponent(route.id)}`)}
+              >
+                <ExpandIcon className="h-4 w-4" />
+                View
+              </Button>
+              <Button
+                type="button"
+                size="sm"
                 variant={showInspector ? "default" : "outline"}
                 aria-pressed={showInspector}
                 title="Toggle inspector (Cmd/Ctrl+I)"
@@ -410,7 +479,7 @@ export function App() {
         <div className="flex items-center gap-2">
           <WorkflowIcon className="h-5 w-5 text-muted-foreground" />
           <h1 className="text-2xl font-semibold tracking-tight">
-            Codecaine Studio
+            Canvas
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -444,14 +513,24 @@ export function App() {
                 key={canvas.id}
                 type="button"
                 onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
-                className="group relative rounded-md border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                className="group relative overflow-hidden rounded-md border border-border bg-card text-left transition-colors hover:bg-muted/50"
               >
-                <span className="block truncate pr-6 text-sm font-medium">
-                  {canvas.title}
+                <span className="block aspect-[16/10] w-full overflow-hidden border-b border-border bg-[#F5F5F5]">
+                  <img
+                    src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg`}
+                    loading="lazy"
+                    alt=""
+                    draggable={false}
+                    className="h-full w-full object-contain"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
                 </span>
-                <span className="mt-1 flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
-                  <Badge variant="outline">{canvas.id}</Badge>
-                  {formatUpdatedAt(canvas.updated_at)}
+                <span className="block px-4 py-3">
+                  <span className="block truncate pr-6 text-sm font-medium">
+                    {canvas.title}
+                  </span>
                 </span>
                 <span
                   role="button"
@@ -470,14 +549,16 @@ export function App() {
   );
 }
 
-function StatusPage({ message }: { message: string }) {
+function StatusPage({ message, showBack = true }: { message: string; showBack?: boolean }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-8">
       <div className="flex flex-col items-center gap-4 text-center">
         <p className="text-sm text-muted-foreground">{message}</p>
-        <Button type="button" variant="outline" onClick={() => navigate("/")}>
-          Back to boards
-        </Button>
+        {showBack ? (
+          <Button type="button" variant="outline" onClick={() => navigate("/")}>
+            Back to boards
+          </Button>
+        ) : null}
       </div>
     </div>
   );

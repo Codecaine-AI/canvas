@@ -54,6 +54,41 @@
       "port": 4300
     },
     {
+      "name": "layout-sandbox",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4600",
+        "--directory",
+        "prototypes/layout-sandbox"
+      ],
+      "port": 4600
+    },
+    {
+      "name": "layout-lab",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/layout-lab",
+        "dev"
+      ],
+      "port": 4700
+    },
+    {
+      "name": "scratchpad",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4800",
+        "--directory",
+        "/private/tmp/claude-501/-Users-Ford-Github-Repos-Codecaine-canvas/894c7ea3-9e88-4c9c-b83a-f926433ee737/scratchpad"
+      ],
+      "port": 4800
+    },
+    {
       "name": "popup-doc",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
@@ -64,6 +99,18 @@
         "board-design-reference/analysis"
       ],
       "port": 4500
+    },
+    {
+      "name": "docs-verify",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "tools/docs-framework/packages/docs-cli/src/index.ts",
+        "serve",
+        "--rebuild",
+        "--port",
+        "4802"
+      ],
+      "port": 4802
     },
     {
       "name": "studio-bun",

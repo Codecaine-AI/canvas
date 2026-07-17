@@ -1,11 +1,15 @@
 {
   "name": "@codecaine-ai/studio",
+  "productName": "Canvas",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "dist-electron/main.cjs",
   "scripts": {
     "dev": "bunx --bun vite",
     "build": "vite build",
+    "build:electron": "esbuild electron/main.ts --bundle --platform=node --format=cjs --external:electron --outfile=dist-electron/main.cjs",
+    "studio": "bun run build && bun run build:electron && electron .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -19,9 +23,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
+    "electron": "^43.1.0",
+    "esbuild": "^0.28.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^7.3.0"

@@ -8,9 +8,11 @@ import { dirname, join, relative, resolve } from "node:path";
  * Layer diagram (lower layers may never import higher layers):
  *
  *   ui (orthogonal; imports no first-party code outside ui/)
- *   theme -> state -> objects -> interaction (kernel) -> connectors -> stage core -> stage/viewer
- *                                                                             \
- *                                                                              -> stage/editor
+ *   theme -> state -> objects -> interaction (kernel) -> connectors -> stage core -> navigation
+ *                                                                                           \
+ *                                                                                            -> stage/viewer
+ *                                                                                           \
+ *                                                                                            -> stage/editor
  *
  * stage core is src/stage/* excluding stage/viewer/** and stage/editor/**.
  * stage/editor/features/* are vertical slices; sideways imports are forbidden
@@ -342,6 +344,22 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
+  test("navigation/ imports only viewport and lower interaction/state layers", () => {
+    expect(
+      formatEdges(
+        edgesFromDir("navigation").filter(
+          (edge) =>
+            !targetStartsWith(edge, [
+              "navigation/",
+              "stage/viewport",
+              "interaction/",
+              "state/",
+            ]),
+        ),
+      ),
+    ).toEqual([]);
+  });
+
   test("stage/viewer/ imports only stage core plus lower layers", () => {
     const viewerEdges = edgesFromDir("stage/viewer");
 
@@ -358,6 +376,7 @@ describe("import boundaries", () => {
             "theme/",
             "interaction/",
             "connectors/",
+            "navigation/",
             "ui/",
           ]);
         }),

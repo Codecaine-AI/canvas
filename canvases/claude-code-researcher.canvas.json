@@ -1,0 +1,771 @@
+{
+  "schemaVersion": 1,
+  "id": "claude-code-researcher",
+  "title": "Claude Code Researcher",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2816,
+    "height": 2256
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Agent Flow",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2704,
+        "height": 2160
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "icon-user-research-request",
+      "type": "icon",
+      "text": "User Research Request",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 240,
+        "y": 96,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "section-slash-command",
+      "type": "section",
+      "text": "Research Slash Command",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 272,
+        "width": 416,
+        "height": 304
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-init-directory-structure",
+      "type": "predefined-process",
+      "text": "Initialize Directory Structure",
+      "color": "blue",
+      "parentId": "section-slash-command",
+      "geometry": {
+        "x": 144,
+        "y": 336,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-call-main-agent",
+      "type": "predefined-process",
+      "text": "Call Main Agent",
+      "color": "blue",
+      "parentId": "section-slash-command",
+      "geometry": {
+        "x": 144,
+        "y": 464,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "section-main-agent",
+      "type": "section",
+      "text": "Main Agent",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 640,
+        "width": 416,
+        "height": 1264
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-initialize-state",
+      "type": "predefined-process",
+      "text": "Initialize State",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 704,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-request-analysis",
+      "type": "predefined-process",
+      "text": "Request Analysis",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 832,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-general-codebase-analysis",
+      "type": "predefined-process",
+      "text": "General Codebase Analysis",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 960,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-request-query-decomposition",
+      "type": "predefined-process",
+      "text": "Request Query Decomposition",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 1088,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-spawn-sub-agent",
+      "type": "predefined-process",
+      "text": "Spawn Sub Agent to Research Each Query",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 1216,
+        "width": 320,
+        "height": 80
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "octagon-wait-for-sub-agents",
+      "type": "octagon",
+      "text": "Wait for Sub Agents to Complete",
+      "color": "red",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 192,
+        "y": 1360,
+        "width": 224,
+        "height": 224
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "node-read-sub-agent-states",
+      "type": "predefined-process",
+      "text": "Read Sub Agent States / Report",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 1648,
+        "width": 320,
+        "height": 80
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-compile-final-report",
+      "type": "predefined-process",
+      "text": "Compile Final Report",
+      "color": "blue",
+      "parentId": "section-main-agent",
+      "geometry": {
+        "x": 144,
+        "y": 1792,
+        "width": 320,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "doc-final-report",
+      "type": "document",
+      "text": "Final Report",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 192,
+        "y": 1968,
+        "width": 224,
+        "height": 160
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "section-agent-state",
+      "type": "section",
+      "text": "Agent State",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 832,
+        "y": 416,
+        "width": 1088,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "code-directory-tree",
+      "type": "rectangle",
+      "text": "research_requests/\n└── {session_id}/\n    ├── main_agent_state.json\n    ├── final_report.md\n    └── sub_agents/\n        ├── agent_001_state.json\n        ├── agent_002_state.json\n        └── ...",
+      "color": "gray",
+      "parentId": "section-agent-state",
+      "geometry": {
+        "x": 1120,
+        "y": 480,
+        "width": 512,
+        "height": 224
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "doc-main-agent-state",
+      "type": "document",
+      "text": "Main Agent State",
+      "color": "orange",
+      "parentId": "section-agent-state",
+      "geometry": {
+        "x": 1040,
+        "y": 784,
+        "width": 256,
+        "height": 192
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "doc-sub-agent-states",
+      "type": "document-stack",
+      "text": "Sub Agent States",
+      "color": "orange",
+      "parentId": "section-agent-state",
+      "geometry": {
+        "x": 1456,
+        "y": 784,
+        "width": 256,
+        "height": 192
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "section-sub-agents",
+      "type": "section",
+      "text": "Sub Agents",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2176,
+        "y": 768,
+        "width": 480,
+        "height": 512
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-init-sub-agent-state",
+      "type": "predefined-process",
+      "text": "Initialize Sub Agent State",
+      "color": "blue",
+      "parentId": "section-sub-agents",
+      "geometry": {
+        "x": 2224,
+        "y": 848,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-research-the-query",
+      "type": "predefined-process",
+      "text": "Research the Query",
+      "color": "blue",
+      "parentId": "section-sub-agents",
+      "geometry": {
+        "x": 2224,
+        "y": 1008,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-write-report-into-state",
+      "type": "predefined-process",
+      "text": "Write Report into State",
+      "color": "blue",
+      "parentId": "section-sub-agents",
+      "geometry": {
+        "x": 2224,
+        "y": 1168,
+        "width": 384,
+        "height": 64
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-user-to-init-directory",
+      "from": {
+        "objectId": "icon-user-research-request",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-init-directory-structure",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-init-directory-to-call-main",
+      "from": {
+        "objectId": "node-init-directory-structure",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-call-main-agent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-init-directory-to-code-tree",
+      "from": {
+        "objectId": "node-init-directory-structure",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "code-directory-tree",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [1376, 368]
+      ]
+    },
+    {
+      "id": "conn-call-main-to-initialize-state",
+      "from": {
+        "objectId": "node-call-main-agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-initialize-state",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-initialize-state-to-request-analysis",
+      "from": {
+        "objectId": "node-initialize-state",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-request-analysis",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-request-analysis-to-general-codebase",
+      "from": {
+        "objectId": "node-request-analysis",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-general-codebase-analysis",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-general-codebase-to-query-decomposition",
+      "from": {
+        "objectId": "node-general-codebase-analysis",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-request-query-decomposition",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-query-decomposition-to-spawn",
+      "from": {
+        "objectId": "node-request-query-decomposition",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-spawn-sub-agent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-spawn-to-wait",
+      "from": {
+        "objectId": "node-spawn-sub-agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "octagon-wait-for-sub-agents",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-wait-to-read-states",
+      "from": {
+        "objectId": "octagon-wait-for-sub-agents",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-read-sub-agent-states",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "red"
+    },
+    {
+      "id": "conn-read-states-to-compile",
+      "from": {
+        "objectId": "node-read-sub-agent-states",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-compile-final-report",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-compile-to-final-report",
+      "from": {
+        "objectId": "node-compile-final-report",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "doc-final-report",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "output",
+      "color": "blue"
+    },
+    {
+      "id": "conn-request-analysis-to-main-state",
+      "from": {
+        "objectId": "node-request-analysis",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "doc-main-agent-state",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [576, 864],
+        [576, 880]
+      ]
+    },
+    {
+      "id": "conn-general-codebase-to-main-state",
+      "from": {
+        "objectId": "node-general-codebase-analysis",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "doc-main-agent-state",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [576, 992],
+        [576, 880]
+      ]
+    },
+    {
+      "id": "conn-query-decomposition-to-main-state",
+      "from": {
+        "objectId": "node-request-query-decomposition",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "doc-main-agent-state",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [576, 1120],
+        [576, 880]
+      ]
+    },
+    {
+      "id": "conn-spawn-to-sub-agent-states",
+      "from": {
+        "objectId": "node-spawn-sub-agent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "doc-sub-agent-states",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [1360, 1256],
+        [1360, 880]
+      ]
+    },
+    {
+      "id": "conn-main-state-to-code-tree",
+      "from": {
+        "objectId": "doc-main-agent-state",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "code-directory-tree",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "orange",
+      "waypoints": [
+        [1168, 744],
+        [1376, 744]
+      ]
+    },
+    {
+      "id": "conn-sub-states-to-code-tree",
+      "from": {
+        "objectId": "doc-sub-agent-states",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "code-directory-tree",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "orange",
+      "waypoints": [
+        [1584, 744],
+        [1376, 744]
+      ]
+    },
+    {
+      "id": "conn-sub-states-to-read-states",
+      "from": {
+        "objectId": "doc-sub-agent-states",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-read-sub-agent-states",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-read",
+      "color": "orange",
+      "waypoints": [
+        [1584, 1320],
+        [576, 1320],
+        [576, 1688]
+      ]
+    },
+    {
+      "id": "conn-init-sub-state-to-sub-states",
+      "from": {
+        "objectId": "node-init-sub-agent-state",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "doc-sub-agent-states",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue"
+    },
+    {
+      "id": "conn-write-report-to-sub-states",
+      "from": {
+        "objectId": "node-write-report-into-state",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "doc-sub-agent-states",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "state-write",
+      "color": "blue",
+      "waypoints": [
+        [2048, 1200],
+        [2048, 880]
+      ]
+    },
+    {
+      "id": "conn-init-sub-state-to-research",
+      "from": {
+        "objectId": "node-init-sub-agent-state",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-research-the-query",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    },
+    {
+      "id": "conn-research-to-write-report",
+      "from": {
+        "objectId": "node-research-the-query",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-write-report-into-state",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

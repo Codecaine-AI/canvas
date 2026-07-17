@@ -8,7 +8,7 @@
       "id": "b-studio-root",
       "flavour": "paragraph",
       "props": {
-        "covers": "The studio dev app (packages/studio): a Vite+React shell whose /api/canvases middleware persists boards as canvases/*.canvas.json files at the repo root — list/create/save/delete plus debounced autosave — and the canvases/ corpus those files form: the studio's boards, the object gallery, and the fixtures the test suite imports directly.",
+        "covers": "The Studio app (packages/studio): a Vite web app and Electron shell whose shared /api/canvases file API persists boards as canvases/*.canvas.json, renders cacheable SVG previews, and serves editor, view-only, and iframe embed routes over the same canonical documents.",
         "format": "mdx",
         "type": "overview",
         "concepts": [
@@ -17,7 +17,10 @@
           "canvas JSON fixtures",
           "object gallery",
           "starter document",
-          "fixture double-duty"
+          "fixture double-duty",
+          "static SVG preview",
+          "view-only routes",
+          "iframe embedding"
         ]
       },
       "children": [
@@ -28,6 +31,10 @@
         "b-studio-app-para-5",
         "b-studio-app-para-6",
         "b-studio-app-para-7",
+        "b-studio-heading-embed",
+        "b-studio-embed-preview",
+        "b-studio-embed-routes",
+        "b-studio-embed-ux",
         "b-studio-heading-canvases-8",
         "b-studio-canvases-intro-9",
         "b-studio-sample-item-board-1",
@@ -78,7 +85,7 @@
           }
         },
         {
-          "insert": " is a Vite+React shell, and its dev-server middleware persists boards as "
+          "insert": " is a Vite+React shell, and its shared Node file API persists boards as "
         },
         {
           "insert": "canvases/*.canvas.json",
@@ -130,7 +137,7 @@
           }
         },
         {
-          "insert": ", a thin Vite+React dev app. It runs on port 3999 via "
+          "insert": ", a Vite+React web app with an Electron shell. Its development server runs on port 3999 via "
         },
         {
           "insert": "bun run dev:studio",
@@ -192,7 +199,7 @@
           }
         },
         {
-          "insert": " dependency. The source set is exactly four files: "
+          "insert": " dependency. The web entry is centered on "
         },
         {
           "insert": "main.tsx",
@@ -244,7 +251,33 @@
           }
         },
         {
-          "insert": "; "
+          "insert": ". The shared Node file API lives in "
+        },
+        {
+          "insert": "server/canvas-file-api.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-api.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and the desktop shell lives under "
+        },
+        {
+          "insert": "electron/main.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/electron/main.ts"
+            }
+          }
+        },
+        {
+          "insert": ". The retired "
         },
         {
           "insert": "board-store.ts",
@@ -253,7 +286,7 @@
           }
         },
         {
-          "insert": " is gone."
+          "insert": " remains gone."
         }
       ],
       "children": []
@@ -292,10 +325,28 @@
           }
         },
         {
-          "insert": ", and "
+          "insert": ", "
         },
         {
           "insert": "/canvas/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "/view/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "/embed/:id",
           "attributes": {
             "code": true
           }
@@ -493,21 +544,21 @@
       "props": {},
       "text": [
         {
-          "insert": "The backend is the Vite middleware in "
+          "insert": "The backend is the shared Node handler in "
         },
         {
-          "insert": "vite.config.ts",
+          "insert": "server/canvas-file-api.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/studio/vite.config.ts",
-              "symbol": "canvasFileApiPlugin"
+              "path": "packages/studio/server/canvas-file-api.ts",
+              "symbol": "createCanvasFileApiHandler"
             }
           }
         },
         {
-          "insert": ". Documents at rest are "
+          "insert": ". Vite and Electron both mount it, so documents and previews behave the same in the web and desktop shells. Documents at rest are "
         },
         {
           "insert": "canvases/*.canvas.json",
@@ -697,6 +748,163 @@
         },
         {
           "insert": "), snapshots it for the dirty check, and maps an unknown id to the not-found state."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-heading-embed": {
+      "id": "b-studio-heading-embed",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Preview and embedding surfaces"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-embed-preview": {
+      "id": "b-studio-embed-preview",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "GET /api/canvases/:id/preview.svg?section=&w=&h=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the lightweight read surface for dashboards, documentation cards, and other inline hosts. The shared file API loads the canvas document, calls "
+        },
+        {
+          "insert": "renderDocumentToSvg",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/static-svg.ts",
+              "symbol": "renderDocumentToSvg"
+            }
+          }
+        },
+        {
+          "insert": ", and returns a deterministic SVG with an ETag; matching "
+        },
+        {
+          "insert": "If-None-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " requests receive 304. "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a stable section id, while "
+        },
+        {
+          "insert": "w",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "h",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set the requested render size."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-embed-routes": {
+      "id": "b-studio-embed-routes",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "/view/:id?view=<section-id>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " opens the read-only viewer as a standalone Studio page. "
+        },
+        {
+          "insert": "/embed/:id?view=<section-id>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renders the same viewer without surrounding Studio chrome for an iframe or full-screen host. Both use "
+        },
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewer/InteractiveCanvasViewer.tsx",
+              "symbol": "InteractiveCanvasViewer"
+            }
+          }
+        },
+        {
+          "insert": " with navigation enabled and mutation unavailable. The query value maps directly to the viewer's "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop and "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "containerViewBounds"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-embed-ux": {
+      "id": "b-studio-embed-ux",
+      "flavour": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Keep inline previews static; expand to navigate; edit separately"
+      },
+      "text": [
+        {
+          "insert": "An inline canvas card should show the section crop without capturing drag or wheel input. An explicit full-screen action promotes it to the interactive read-only viewer, where pan and zoom are expected. Authoring is a third context: an Edit in Canvas Studio action opens the editor separately so the reader does not lose the surrounding document or webpage state. This progression is a portable host contract, not docs-system-only behavior."
         }
       ],
       "children": []

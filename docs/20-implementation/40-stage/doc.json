@@ -41,6 +41,8 @@
         "b-stage-viewer-fit",
         "b-stage-viewer-feedback",
         "b-stage-viewer-chrome",
+        "b-stage-heading-embedding",
+        "b-stage-embedding-contract",
         "b-render-heading-theme-11",
         "b-render-theme-body-12",
         "b-render-figjam-tokens-body-13",
@@ -1460,7 +1462,21 @@
           }
         },
         {
-          "insert": " = 4. The editor's stateful pan/zoom hook wraps the same helpers; see "
+          "insert": " = 4. The shared stateful navigation hook "
+        },
+        {
+          "insert": "useCanvasViewport",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/navigation/use-canvas-viewport.ts",
+              "symbol": "useCanvasViewport"
+            }
+          }
+        },
+        {
+          "insert": " wraps the same helpers for both the editor and the interactive viewer; the editor path re-exports it for compatibility. See "
         },
         {
           "insert": "20-implementation/50-editor",
@@ -1655,6 +1671,33 @@
           }
         },
         {
+          "insert": ", "
+        },
+        {
+          "insert": "interactive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "bare",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "showNavigationControls",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
           "insert": ", selection and context-menu callbacks, and "
         },
         {
@@ -1664,7 +1707,16 @@
           }
         },
         {
-          "insert": "; there is no tool prop, pointer pipeline, or interaction machine."
+          "insert": ". Setting "
+        },
+        {
+          "insert": "interactive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enables navigation only—wheel zoom, pointer pan, and Fit/+/− controls. There is still no tool prop, mutation callback, selection pipeline, or interaction machine, so read-only behavior remains structural rather than a mode flag on the editor."
         }
       ],
       "children": []
@@ -1735,7 +1787,16 @@
           }
         },
         {
-          "insert": ". Before measurement, the fallback screen is 960 × 360, or 760 × 320 in compact mode. A "
+          "insert": ". The static viewer recomputes that fit from its measured size. The interactive viewer seeds the shared navigation hook with the same target and refits when the document or "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " changes, while ordinary container resizes do not erase a user's chosen pan and zoom. Before measurement, the fallback screen is 960 × 360, or 760 × 320 in compact mode. A "
         },
         {
           "insert": "view",
@@ -1907,7 +1968,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The outer viewer chrome is a "
+          "insert": "The default card viewer chrome is a "
         },
         {
           "insert": "section[data-mdx-block=\"Canvas\"]",
@@ -1916,7 +1977,25 @@
           }
         },
         {
-          "insert": " shell with header badges for object count, connector count, annotation count, and document id. It also renders the annotations panel when annotations exist, and the stage shell uses an aspect ratio from "
+          "insert": " shell with header badges for object count, connector count, annotation count, and document id. It also renders the annotations panel when annotations exist. "
+        },
+        {
+          "insert": "bare",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " removes that document chrome for iframe and full-screen hosts; "
+        },
+        {
+          "insert": "showNavigationControls",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " independently controls the Fit/+/− surface. In either form, the stage shell uses an aspect ratio from "
         },
         {
           "insert": "document.size",
@@ -1926,6 +2005,53 @@
         },
         {
           "insert": " with 16:9 fallback."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-heading-embedding": {
+      "id": "b-stage-heading-embedding",
+      "flavour": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Embedding progression"
+        }
+      ],
+      "children": []
+    },
+    "b-stage-embedding-contract": {
+      "id": "b-stage-embedding-contract",
+      "flavour": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Hosts should disclose interaction progressively: show a static SVG crop in an inline card, mount the interactive read-only viewer only after an explicit expand action, and send editing to the Studio editor as a separate authoring context. The "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value is a stable section id shared across all three surfaces, so the preview, expanded viewer, and editor can address the same part of one canonical canvas document. Studio routes and the preview endpoint are documented in "
+        },
+        {
+          "insert": "20-implementation/70-studio-and-canvases",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-implementation/70-studio-and-canvases",
+              "label": "20-implementation/70-studio-and-canvases"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
