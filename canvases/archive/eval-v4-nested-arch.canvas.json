@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v4-nested-arch",
+  "title": "Eval v4 — Nested Architecture",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3008,
+    "height": 2208
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v4 — Nested Architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2944,
+        "height": 2144
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-bus",
+      "type": "process",
+      "text": "Event Bus",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1984,
+        "y": 736,
+        "width": 288,
+        "height": 176
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "prod-vpc",
+      "type": "section",
+      "text": "Production VPC",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 320,
+        "y": 128,
+        "width": 2576,
+        "height": 1536
+      }
+    },
+    {
+      "id": "edge-group",
+      "type": "section",
+      "text": "Edge",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 400,
+        "y": 256,
+        "width": 384,
+        "height": 640
+      }
+    },
+    {
+      "id": "services-group",
+      "type": "section",
+      "text": "Services",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 864,
+        "y": 256,
+        "width": 832,
+        "height": 1280
+      }
+    },
+    {
+      "id": "data-group",
+      "type": "section",
+      "text": "Data",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 2352,
+        "y": 256,
+        "width": 496,
+        "height": 1280
+      }
+    },
+    {
+      "id": "cdn-waf",
+      "type": "process",
+      "text": "CDN / WAF",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 448,
+        "y": 384,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "process",
+      "text": "API Gateway",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 448,
+        "y": 624,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "system-summary",
+      "type": "sticky",
+      "text": "Event-driven order platform; all cross-service state flows through the bus",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 64,
+        "y": 416,
+        "width": 224,
+        "height": 240
+      }
+    },
+    {
+      "id": "orders-service",
+      "type": "process",
+      "text": "Orders Service",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 976,
+        "y": 336,
+        "width": 384,
+        "height": 112
+      }
+    },
+    {
+      "id": "inventory-service",
+      "type": "process",
+      "text": "Inventory Service",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 1008,
+        "y": 656,
+        "width": 480,
+        "height": 112
+      }
+    },
+    {
+      "id": "billing-service",
+      "type": "process",
+      "text": "Billing Service",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 976,
+        "y": 1072,
+        "width": 384,
+        "height": 112
+      }
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "text": "Postgres",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 2496,
+        "y": 640,
+        "width": 320,
+        "height": 112
+      }
+    },
+    {
+      "id": "redis-cache",
+      "type": "database",
+      "text": "Redis Cache",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 2496,
+        "y": 1376,
+        "width": 320,
+        "height": 112
+      }
+    },
+    {
+      "id": "inventory-event-out",
+      "type": "pill",
+      "text": "PUBLISH",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 624,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "inventory-event-in",
+      "type": "pill",
+      "text": "CONSUME",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 752,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "postgres-orders-io",
+      "type": "pill",
+      "text": "ORDERS I/O",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2400,
+        "y": 384,
+        "width": 160,
+        "height": 64
+      }
+    },
+    {
+      "id": "postgres-inventory-io",
+      "type": "pill",
+      "text": "INVENTORY I/O",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2400,
+        "y": 992,
+        "width": 160,
+        "height": 64
+      }
+    },
+    {
+      "id": "orders-event-out",
+      "type": "pill",
+      "text": "PUBLISH",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 464,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "orders-data-out",
+      "type": "pill",
+      "text": "DATA",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 336,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "billing-event-out",
+      "type": "pill",
+      "text": "PUBLISH",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 1040,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "billing-cache-out",
+      "type": "pill",
+      "text": "CACHE",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 1168,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "inventory-data-out",
+      "type": "pill",
+      "text": "DATA",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 880,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "notifications-service",
+      "type": "process",
+      "text": "Notifications Service",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 976,
+        "y": 1312,
+        "width": 384,
+        "height": 112
+      }
+    },
+    {
+      "id": "notifications-order-consume",
+      "type": "pill",
+      "text": "CONSUME",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 1344,
+        "width": 144,
+        "height": 64
+      }
+    },
+    {
+      "id": "notifications-invoice-consume",
+      "type": "pill",
+      "text": "CONSUME",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 1440,
+        "width": 144,
+        "height": 64
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "sync-ingress",
+      "from": {
+        "objectId": "cdn-waf"
+      },
+      "to": {
+        "objectId": "api-gateway"
+      },
+      "label": "ingress",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "sync-orders",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "orders-service"
+      },
+      "label": "REST",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "sync-billing",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "billing-service"
+      },
+      "label": "REST",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "async-stock-changed",
+      "from": {
+        "objectId": "inventory-event-out"
+      },
+      "to": {
+        "objectId": "seed-bus"
+      },
+      "label": "stock.changed",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "async-bus-order-created",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "inventory-event-in"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "async-order-created",
+      "from": {
+        "objectId": "orders-event-out"
+      },
+      "to": {
+        "objectId": "seed-bus"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "async-invoice-issued",
+      "from": {
+        "objectId": "billing-event-out"
+      },
+      "to": {
+        "objectId": "seed-bus"
+      },
+      "label": "invoice.issued",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "data-orders-postgres",
+      "from": {
+        "objectId": "orders-data-out"
+      },
+      "to": {
+        "objectId": "postgres-orders-io"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "data-billing-redis",
+      "from": {
+        "objectId": "billing-cache-out"
+      },
+      "to": {
+        "objectId": "redis-cache"
+      },
+      "label": "session cache",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "data-inventory-postgres",
+      "from": {
+        "objectId": "inventory-data-out"
+      },
+      "to": {
+        "objectId": "postgres-inventory-io"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "async-notifications-order-created",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "notifications-invoice-consume"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "async-notifications-invoice-issued",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "notifications-order-consume"
+      },
+      "label": "invoice.issued",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

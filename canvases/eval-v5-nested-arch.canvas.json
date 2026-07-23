@@ -1,0 +1,593 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v5-nested-arch",
+  "title": "Eval v5 — Nested Architecture",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3008,
+    "height": 2208
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v5 — Nested Architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2944,
+        "height": 2144
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-bus",
+      "type": "process",
+      "text": "Event Bus\nAsync Backbone",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 1312,
+        "width": 384,
+        "height": 144
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "prod-vpc",
+      "type": "section",
+      "text": "Production VPC",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 512,
+        "y": 160,
+        "width": 2176,
+        "height": 1920
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "edge-group",
+      "type": "section",
+      "text": "Edge",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 608,
+        "y": 256,
+        "width": 1024,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "services-group",
+      "type": "section",
+      "text": "Services",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 736,
+        "y": 704,
+        "width": 1824,
+        "height": 352
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "data-group",
+      "type": "section",
+      "text": "Data",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 928,
+        "y": 1632,
+        "width": 1632,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "platform-note",
+      "type": "sticky",
+      "text": "Event-driven order platform; all cross-service state flows through the bus.",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 64,
+        "y": 768,
+        "width": 320,
+        "height": 224
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "cdn-waf",
+      "type": "pill",
+      "text": "CDN / WAF",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 736,
+        "y": 352,
+        "width": 320,
+        "height": 112
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "predefined-process",
+      "text": "API Gateway",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 1184,
+        "y": 352,
+        "width": 320,
+        "height": 112
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "orders-service",
+      "type": "process",
+      "text": "Orders Service",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 864,
+        "y": 816,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "inventory-service",
+      "type": "process",
+      "text": "Inventory Service",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1280,
+        "y": 816,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "billing-service",
+      "type": "process",
+      "text": "Billing Service",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 2112,
+        "y": 816,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "text": "Postgres",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 1056,
+        "y": 1744,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "redis-cache",
+      "type": "database",
+      "text": "Redis Cache",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 2112,
+        "y": 1744,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "bus-publish-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1504,
+        "y": 1216,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "bus-subscribe-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1872,
+        "y": 1264,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "messaging-group",
+      "type": "section",
+      "text": "Messaging",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1472,
+        "y": 1184,
+        "width": 576,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "notifications-service",
+      "type": "process",
+      "text": "Notifications Service",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1696,
+        "y": 816,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "notifications-order-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1952,
+        "y": 960,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "notifications-invoice-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1792,
+        "y": 960,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "notifications-order-bus-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1872,
+        "y": 1456,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "notifications-invoice-bus-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1600,
+        "y": 1456,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "inventory-publish-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1312,
+        "y": 960,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "inventory-subscribe-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1408,
+        "y": 960,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "orders-event-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1120,
+        "y": 960,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    },
+    {
+      "id": "orders-bus-input-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1472,
+        "y": 1312,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-ingress",
+      "from": {
+        "objectId": "cdn-waf"
+      },
+      "to": {
+        "objectId": "api-gateway"
+      },
+      "label": "ingress",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-rest-orders",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "orders-service"
+      },
+      "label": "REST",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-rest-billing",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "billing-service"
+      },
+      "label": "REST",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-orders-postgres",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "postgres"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-inventory-postgres",
+      "from": {
+        "objectId": "inventory-service"
+      },
+      "to": {
+        "objectId": "postgres"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-billing-redis",
+      "from": {
+        "objectId": "billing-service"
+      },
+      "to": {
+        "objectId": "redis-cache"
+      },
+      "label": "session cache",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-orders-bus",
+      "from": {
+        "objectId": "orders-event-port"
+      },
+      "to": {
+        "objectId": "orders-bus-input-port"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-inventory-bus",
+      "from": {
+        "objectId": "inventory-publish-port"
+      },
+      "to": {
+        "objectId": "bus-publish-port"
+      },
+      "label": "stock.changed",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-inventory",
+      "from": {
+        "objectId": "bus-subscribe-port"
+      },
+      "to": {
+        "objectId": "inventory-subscribe-port"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-billing",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "billing-service"
+      },
+      "label": "invoice.issued",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-notifications-order",
+      "from": {
+        "objectId": "notifications-order-bus-port"
+      },
+      "to": {
+        "objectId": "notifications-order-port"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-notifications-invoice",
+      "from": {
+        "objectId": "notifications-invoice-bus-port"
+      },
+      "to": {
+        "objectId": "notifications-invoice-port"
+      },
+      "label": "invoice.issued",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

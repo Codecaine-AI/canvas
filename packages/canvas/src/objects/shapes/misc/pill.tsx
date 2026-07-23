@@ -7,7 +7,7 @@ import type { ShapeDef } from "../shape-def";
 /**
  * Pill (W2) — a true stadium shape expressed purely in CSS (border-radius:
  * 999px against the object's own height/width, no SVG silhouette needed):
- * the base button chrome IS the outline, so this def only adds the extra
+ * the base button trim IS the outline, so this def only adds the extra
  * className and its one CSS rule.
  */
 export const pillShapeDef: ShapeDef = {

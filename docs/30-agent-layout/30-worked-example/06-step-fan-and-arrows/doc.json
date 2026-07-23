@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-30-worked-example-06-step-fan-and-arrows",
+  "title": "Step 6 — Fan out, wire the arrows",
+  "root": "b-step6-root",
+  "blocks": {
+    "b-step6-root": {
+      "id": "b-step6-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-step6-title-1",
+        "b-step6-body-2",
+        "b-step6-code-3",
+        "b-step6-canvas-4"
+      ],
+      "props": {
+        "covers": "Step 6 of the worked example: the score gate splits internally for two small outcome pills, a fan centers the regress decision over them, and the arrows block declares every connection one per line.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "worked example",
+          "fan",
+          "arrows",
+          "routing",
+          "pill"
+        ]
+      }
+    },
+    "b-step6-title-1": {
+      "id": "b-step6-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Step 6 — Fan out, wire the arrows"
+        }
+      ]
+    },
+    "b-step6-body-2": {
+      "id": "b-step6-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The score gate splits internally ("
+        },
+        {
+          "insert": "col 2|1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") to make room for two small outcome pills — absorb and reject, size S, sharing the lower slot at SW / SE. "
+        },
+        {
+          "insert": "fan 17 dir=S: 18 19",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " centers the regress decision over them, children south and evenly spaced (R6). The arrows block declares every connection, one per line — including the "
+        },
+        {
+          "insert": "9 > 8",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " retry loop and the "
+        },
+        {
+          "insert": "13 > 15",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " cross-section link. Lines are routed, never drawn (R9)."
+        }
+      ]
+    },
+    "b-step6-code-3": {
+      "id": "b-step6-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|4|2\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  col 2|1\n    section 5 text=loop label=\"Runner loop\"\n      grid 1x4 gap=96\n        item 6 text=cli type=process size=M\n        item 7 text=sched type=process size=M\n        item 8 text=workers type=process size=M\n        item 9 text=match type=decision size=M\n    section 10 text=board label=\"Board — hub\"\n      grid 1x3 gap=64\n        item 11 text=epochs type=database size=M\n        item 12 text=artifacts type=database size=M\n        item 13 text=saves type=database size=M\n  section 14 text=score label=\"Score gate\"\n    col 2|1\n      grid 3x1 gap=64\n        item 15 text=objdiff type=process size=M\n        item 16 text=qa type=process size=M\n        item 17 text=regress type=decision size=M\n      group\n        item 18 text=absorb type=pill size=S at=SW\n        item 19 text=reject type=pill size=S at=SE\n\nalign y: 6 15\nfan 17 dir=S: 18 19\n\narrows\n  6 > 7\n  7 > 8\n  8 > 9\n  9 > 15\n  15 > 16\n  16 > 17\n  17 > 18\n  17 > 19\n  9 > 8\n  13 > 15"
+        }
+      ]
+    },
+    "b-step6-canvas-4": {
+      "id": "b-step6-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/step-6.canvas.json",
+        "title": "Step 6 — Fan out, wire the arrows"
+      }
+    }
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-07-r7-hug",
+  "title": "R7 — hug: margin rails that never stretch",
+  "root": "b-r7-root",
+  "blocks": {
+    "b-r7-root": {
+      "id": "b-r7-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r7-title-1",
+        "b-r7-card-2",
+        "b-r7-detect-3",
+        "b-r7-expand-4",
+        "b-r7-corpus-5",
+        "b-r7-intrinsic-6"
+      ],
+      "props": {
+        "covers": "hug pins a lane at its natural content size in a corner of its band — side rails are never stretched to fill empty space; detection thresholds, intrinsic-extent computation, and the corpus lanes that motivated it.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "hug lane",
+          "margin rail",
+          "intrinsic extent",
+          "laneHugFor"
+        ]
+      }
+    },
+    "b-r7-title-1": {
+      "id": "b-r7-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R7 — hug: margin rails that never stretch"
+        }
+      ]
+    },
+    "b-r7-card-2": {
+      "id": "b-r7-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Lanes keep their natural size"
+      },
+      "text": [
+        {
+          "insert": "A pinned lane keeps its natural content size and sits in a corner of its band — side rails are never stretched to fill empty space."
+        }
+      ]
+    },
+    "b-r7-detect-3": {
+      "id": "b-r7-detect-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Detect:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " a split side whose content is thin along the split axis — at most "
+        },
+        {
+          "insert": "LANE_MAX_MAIN_FRACTION",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "LANE_MAX_MAIN_FRACTION"
+            }
+          }
+        },
+        {
+          "insert": " (0.4) of the parent and "
+        },
+        {
+          "insert": "LANE_MAX_MAIN_EXTENT",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "LANE_MAX_MAIN_EXTENT"
+            }
+          }
+        },
+        {
+          "insert": " (640px) absolute — and that under-fills the band's cross extent (below "
+        },
+        {
+          "insert": "LANE_MAX_CROSS_FILL",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "LANE_MAX_CROSS_FILL"
+            }
+          }
+        },
+        {
+          "insert": ", 0.66) reads as a margin rail ("
+        },
+        {
+          "insert": "laneHugFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "laneHugFor"
+            }
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "Spell:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " a "
+        },
+        {
+          "insert": "hug=<corner>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attribute on a direct child of the split, e.g. "
+        },
+        {
+          "insert": "section 1 text=config hug=NW",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-r7-expand-4": {
+      "id": "b-r7-expand-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Expand:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " the weighted band is still allocated, but the child lays out at its intrinsic content extent, snapped up to 16px, registered at the declared corner — never stretched across the band."
+        }
+      ]
+    },
+    "b-r7-corpus-5": {
+      "id": "b-r7-corpus-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Corpus margin lanes are 368-608 wide (gc's sticky rail 368; v2's "
+        },
+        {
+          "insert": "sticky-overall-context",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " 497; "
+        },
+        {
+          "insert": "bubba-voice",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/bubba-voice.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": "'s side stickies 560-608) and corner-registered: gc's rail and config panel NW, v2's rails W, note chips SE. DSL v1 stretched gc's 560-tall config panel to 1720 — 52% of that board's relation loss; lanes exist to make that impossible. The example-hug board and its stretched counterpart in the "
+        },
+        {
+          "insert": "hug reference",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/60-hug",
+              "label": "hug"
+            }
+          }
+        },
+        {
+          "insert": " show the contrast."
+        }
+      ]
+    },
+    "b-r7-intrinsic-6": {
+      "id": "b-r7-intrinsic-6",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Intrinsic extent is computed recursively: a leaf's spine or band block plus 16px leaf padding; a grid's lattice; a section is its child plus R3 trim; a split is its children plus 32px gutters — all capped by the band."
+        }
+      ]
+    }
+  }
+}

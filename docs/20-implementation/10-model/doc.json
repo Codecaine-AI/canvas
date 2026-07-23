@@ -245,7 +245,7 @@
           }
         },
         {
-          "insert": ": a FigJam-parity, typed-action, world-space interactive canvas engine, extracted into its own git submodule. It defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer — pointer interaction, connector routing, rendering, the chrome UI, the editor shell — reads and writes through these types and functions rather than inventing its own notion of canvas state."
+          "insert": ": a FigJam-parity, typed-action, world-space interactive canvas engine, extracted into its own git submodule. It defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer — pointer interaction, connector routing, rendering, the trim UI, the editor shell — reads and writes through these types and functions rather than inventing its own notion of canvas state."
         }
       ],
       "children": []
@@ -2210,7 +2210,7 @@
           }
         },
         {
-          "insert": "). Rendering uses the shared base chrome — 8px corner radius, 12px/14px padding, label top-left ("
+          "insert": "). Rendering uses the shared base trim — 8px corner radius, 12px/14px padding, label top-left ("
         },
         {
           "insert": "align-items: flex-start",
@@ -3156,7 +3156,7 @@
           }
         },
         {
-          "insert": " type, which now owns that silhouette exactly. document is still bbox-fallback for connection-anchor purposes (the wavy edge is not modeled as a true outline). Uses the shared base chrome otherwise: label top-left, body below it."
+          "insert": " type, which now owns that silhouette exactly. document is still bbox-fallback for connection-anchor purposes (the wavy edge is not modeled as a true outline). Uses the shared base trim otherwise: label top-left, body below it."
         }
       ],
       "children": []
@@ -7412,7 +7412,7 @@
           }
         },
         {
-          "insert": " — whether triggered by pointer interaction, keyboard shortcuts, the chrome UI, or an external agent — must be expressed as a "
+          "insert": " — whether triggered by pointer interaction, keyboard shortcuts, the trim UI, or an external agent — must be expressed as a "
         },
         {
           "insert": "CanvasAction",

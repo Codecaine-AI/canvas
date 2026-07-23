@@ -16,7 +16,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
  * Off-page connector (W5) — downward-pointing pentagon true-outline polygon
  * (connection-cascade.ts's offPageConnectorPoints, the same generator
  * connector attachment uses, a.k.a. Figma's `SHIELD` shapeType) painted
- * behind the label; the button chrome stays fully transparent so only one
+ * behind the label; the button trim stays fully transparent so only one
  * outline is visible..
  */
 export const offPageConnectorShapeDef: ShapeDef = {

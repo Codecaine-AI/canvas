@@ -7,7 +7,7 @@ asymmetric re-route)"), on 2026-07-05.
 
 ## What moved
 
-- `apps/frontend/src/lib/interactive-canvas/**` (the engine, chrome
+- `apps/frontend/src/lib/interactive-canvas/**` (the engine, trim
   components, sample canvas data, and test suite) → `packages/canvas/src/**`, with two
   exceptions that stayed in Spectre because they are app-coupled
   (`CanvasSidecarEmbed.tsx` imports Spectre's `@/lib/projects-api`;
@@ -39,7 +39,7 @@ so the package has zero dependency on a host app's component library:
 `Button`, `Input`, `Textarea`, `Badge`, `Tooltip`, and `cn`. These are trimmed
 copies of Spectre's `apps/frontend/src/components/ui/{button,input,textarea,badge}.tsx`
 and `apps/frontend/src/lib/utils.ts` (`cn` export only), plus the local canvas
-chrome tooltip primitive. The type-only `SpectreRef` copy vendored for
+trim tooltip primitive. The type-only `SpectreRef` copy vendored for
 code-block references was removed with the code-block object kind on
 2026-07-09.
 
@@ -65,7 +65,7 @@ files are MPL-2.0-licensed ports or verbatim copies from BlockSuite
 (https://github.com/toeverything/blocksuite). MPL-2.0 is a file-level
 copyleft license; see the BlockSuite MPL provenance section below for the
 exact provenance and modification status of each file, and keep it in sync if
-those files are ever modified. The rest of this package (the engine, chrome
+those files are ever modified. The rest of this package (the engine, trim
 components, sample canvas data, and vendored UI primitives) is original
 Spectre/Codecaine code with no further licensing constraints beyond whatever
 license this repository declares at large.

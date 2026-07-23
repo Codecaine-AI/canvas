@@ -149,7 +149,7 @@
           }
         },
         {
-          "insert": " pick from a closed 10-pick roster. Everything else about a kind — how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, its creation defaults — is declared on one registered definition object, and every consumer (render, routing, interaction, editor chrome) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class; every mutation flows through the single reducer documented in "
+          "insert": " pick from a closed 10-pick roster. Everything else about a kind — how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, its creation defaults — is declared on one registered definition object, and every consumer (render, routing, interaction, editor trim) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class; every mutation flows through the single reducer documented in "
         },
         {
           "insert": "canvas-10-model",
@@ -2211,7 +2211,7 @@
           },
           {
             "path": "packages/canvas/src/objects/object-shell.tsx",
-            "note": "shared object button chrome, ObjectSlotText, resolveObjectRoleColors (color role resolution)"
+            "note": "shared object button trim, ObjectSlotText, resolveObjectRoleColors (color role resolution)"
           },
           {
             "path": "packages/canvas/src/objects/section/",

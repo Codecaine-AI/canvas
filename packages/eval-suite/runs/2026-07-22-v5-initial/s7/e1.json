@@ -1,0 +1,875 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s7-telemetry-platform",
+  "title": "Eval Suite S7 — Telemetry Platform",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S7 — Telemetry Platform",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-agent-fleet",
+      "type": "process",
+      "text": "Agent fleet (hosts)",
+      "color": "green",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 464,
+        "y": 352,
+        "width": 304,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-ingest-gateway",
+      "type": "process",
+      "text": "Ingest gateway",
+      "color": "teal",
+      "parentId": "sec-ingest",
+      "geometry": {
+        "x": 1120,
+        "y": 384,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "sec-sources",
+      "type": "section",
+      "text": "Sources / Config",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 416,
+        "y": 256,
+        "width": 400,
+        "height": 608
+      }
+    },
+    {
+      "id": "sec-ingest",
+      "type": "section",
+      "text": "Ingest Loop",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1088,
+        "y": 240,
+        "width": 928,
+        "height": 640
+      }
+    },
+    {
+      "id": "sec-state",
+      "type": "section",
+      "text": "State substrate",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 416,
+        "y": 1008,
+        "width": 1600,
+        "height": 368
+      }
+    },
+    {
+      "id": "sec-alert",
+      "type": "section",
+      "text": "Alert gate",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 736,
+        "width": 656,
+        "height": 1088
+      }
+    },
+    {
+      "id": "sec-knowledge",
+      "type": "section",
+      "text": "Knowledge",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2368,
+        "y": 160,
+        "width": 736,
+        "height": 528
+      }
+    },
+    {
+      "id": "sec-handoff",
+      "type": "section",
+      "text": "Incident handoff",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2816,
+        "y": 800,
+        "width": 352,
+        "height": 1024
+      }
+    },
+    {
+      "id": "config-registry",
+      "type": "predefined-process",
+      "text": "Config registry",
+      "color": "green",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 432,
+        "y": 704,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "telemetry-secrets",
+      "type": "database",
+      "text": "Telemetry secrets\n(collector tokens)",
+      "color": "green",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 480,
+        "y": 480,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "stream-buffer",
+      "type": "database",
+      "text": "Stream buffer",
+      "color": "teal",
+      "parentId": "sec-ingest",
+      "geometry": {
+        "x": 1488,
+        "y": 384,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "enrichment",
+      "type": "process",
+      "text": "Enrichment\n(tags + geo)",
+      "color": "teal",
+      "parentId": "sec-ingest",
+      "geometry": {
+        "x": 1488,
+        "y": 640,
+        "width": 256,
+        "height": 112
+      }
+    },
+    {
+      "id": "router",
+      "type": "process",
+      "text": "Router",
+      "color": "teal",
+      "parentId": "sec-ingest",
+      "geometry": {
+        "x": 1760,
+        "y": 640,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "retention-policy",
+      "type": "document",
+      "text": "Retention policy",
+      "color": "gray",
+      "parentId": "sec-state",
+      "geometry": {
+        "x": 512,
+        "y": 1136,
+        "width": 304,
+        "height": 112
+      }
+    },
+    {
+      "id": "cold-archive",
+      "type": "database",
+      "text": "Cold archive (S3)",
+      "color": "gray",
+      "parentId": "sec-state",
+      "geometry": {
+        "x": 1056,
+        "y": 1136,
+        "width": 304,
+        "height": 112
+      }
+    },
+    {
+      "id": "hot-store",
+      "type": "database",
+      "text": "Hot store (7d)",
+      "color": "gray",
+      "parentId": "sec-state",
+      "geometry": {
+        "x": 1616,
+        "y": 1136,
+        "width": 304,
+        "height": 112
+      }
+    },
+    {
+      "id": "threshold-eval",
+      "type": "process",
+      "text": "☐  Threshold eval",
+      "color": "violet",
+      "parentId": "sec-alert",
+      "geometry": {
+        "x": 2144,
+        "y": 800,
+        "width": 352,
+        "height": 96
+      }
+    },
+    {
+      "id": "dedup-grouping",
+      "type": "process",
+      "text": "☐  Dedup + grouping",
+      "color": "violet",
+      "parentId": "sec-alert",
+      "geometry": {
+        "x": 2144,
+        "y": 1024,
+        "width": 352,
+        "height": 96
+      }
+    },
+    {
+      "id": "escalate",
+      "type": "decision",
+      "text": "Escalate?",
+      "color": "orange",
+      "parentId": "sec-alert",
+      "geometry": {
+        "x": 2176,
+        "y": 1248,
+        "width": 224,
+        "height": 128
+      }
+    },
+    {
+      "id": "page-oncall",
+      "type": "process",
+      "text": "Page on-call",
+      "color": "orange",
+      "parentId": "sec-alert",
+      "geometry": {
+        "x": 2192,
+        "y": 1536,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "suppress-log",
+      "type": "process",
+      "text": "Suppress\n(log only)",
+      "color": "red",
+      "parentId": "sec-alert",
+      "geometry": {
+        "x": 2560,
+        "y": 1456,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "triage-splitter",
+      "type": "process",
+      "text": "Triage splitter",
+      "color": "orange",
+      "parentId": "sec-handoff",
+      "geometry": {
+        "x": 2848,
+        "y": 1616,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "incident-reviewer",
+      "type": "process",
+      "text": "Incident reviewer",
+      "color": "orange",
+      "parentId": "sec-handoff",
+      "geometry": {
+        "x": 2944,
+        "y": 1360,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "remediation-fixer",
+      "type": "process",
+      "text": "Remediation fixer",
+      "color": "orange",
+      "parentId": "sec-handoff",
+      "geometry": {
+        "x": 2960,
+        "y": 1104,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "status-page",
+      "type": "document",
+      "text": "Status page",
+      "color": "orange",
+      "parentId": "sec-handoff",
+      "geometry": {
+        "x": 2816,
+        "y": 832,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "runbooks",
+      "type": "document-stack",
+      "text": "Runbooks",
+      "color": "pink",
+      "parentId": "sec-knowledge",
+      "geometry": {
+        "x": 2432,
+        "y": 304,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "postmortem-indexer",
+      "type": "process",
+      "text": "Postmortem indexer",
+      "color": "pink",
+      "parentId": "sec-knowledge",
+      "geometry": {
+        "x": 2784,
+        "y": 304,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "knowledge-graph",
+      "type": "database",
+      "text": "Knowledge graph\n(kg.sqlite)",
+      "color": "pink",
+      "parentId": "sec-knowledge",
+      "geometry": {
+        "x": 2784,
+        "y": 544,
+        "width": 256,
+        "height": 112
+      }
+    },
+    {
+      "id": "oncall-operator",
+      "type": "pill",
+      "text": "On-call operator",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1344,
+        "y": 80,
+        "width": 304,
+        "height": 96
+      }
+    },
+    {
+      "id": "note-summary",
+      "type": "sticky",
+      "text": "Streaming telemetry control plane: deterministic ingest owns ordering + enrichment; alerting is threshold- and dedup-gated; humans triage what pages.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 256,
+        "width": 288,
+        "height": 224
+      }
+    },
+    {
+      "id": "note-coordination",
+      "type": "sticky",
+      "text": "Coordination via hot store + retention policy — services never touch each other's disks.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 528,
+        "width": 288,
+        "height": 176
+      }
+    },
+    {
+      "id": "note-human",
+      "type": "sticky",
+      "text": "A human acknowledges every page. Suppressed alerts are logged, never dropped.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 752,
+        "width": 288,
+        "height": 208
+      }
+    },
+    {
+      "id": "sec-surfaces",
+      "type": "section",
+      "text": "Surfaces",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1088,
+        "y": 1536,
+        "width": 832,
+        "height": 368
+      }
+    },
+    {
+      "id": "api-server",
+      "type": "process",
+      "text": "API server",
+      "color": "gray",
+      "parentId": "sec-surfaces",
+      "geometry": {
+        "x": 1648,
+        "y": 1664,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "ops-dashboard",
+      "type": "process",
+      "text": "Ops dashboard",
+      "color": "gray",
+      "parentId": "sec-surfaces",
+      "geometry": {
+        "x": 1200,
+        "y": 1664,
+        "width": 256,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-agent-gateway",
+      "from": {
+        "objectId": "seed-agent-fleet"
+      },
+      "to": {
+        "objectId": "seed-ingest-gateway"
+      },
+      "label": "raw events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-gateway-buffer",
+      "from": {
+        "objectId": "seed-ingest-gateway"
+      },
+      "to": {
+        "objectId": "stream-buffer"
+      },
+      "label": "buffer",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-buffer-enrich",
+      "from": {
+        "objectId": "stream-buffer"
+      },
+      "to": {
+        "objectId": "enrichment"
+      },
+      "label": "drain",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-enrich-router",
+      "from": {
+        "objectId": "enrichment"
+      },
+      "to": {
+        "objectId": "router"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-router-hot",
+      "from": {
+        "objectId": "router"
+      },
+      "to": {
+        "objectId": "hot-store"
+      },
+      "label": "enriched stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-config-gateway",
+      "from": {
+        "objectId": "config-registry"
+      },
+      "to": {
+        "objectId": "seed-ingest-gateway"
+      },
+      "label": "collector config",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-config-threshold",
+      "from": {
+        "objectId": "config-registry"
+      },
+      "to": {
+        "objectId": "threshold-eval"
+      },
+      "label": "alert rules",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-secrets-gateway",
+      "from": {
+        "objectId": "telemetry-secrets"
+      },
+      "to": {
+        "objectId": "seed-ingest-gateway"
+      },
+      "label": "auth tokens",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-operator-config",
+      "from": {
+        "objectId": "oncall-operator"
+      },
+      "to": {
+        "objectId": "config-registry"
+      },
+      "label": "tune configs",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-hot-cold",
+      "from": {
+        "objectId": "hot-store"
+      },
+      "to": {
+        "objectId": "cold-archive"
+      },
+      "label": "age out",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-retention-cold",
+      "from": {
+        "objectId": "retention-policy"
+      },
+      "to": {
+        "objectId": "cold-archive"
+      },
+      "label": "expiry rules",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-router-threshold",
+      "from": {
+        "objectId": "router"
+      },
+      "to": {
+        "objectId": "threshold-eval"
+      },
+      "label": "alert candidates",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-threshold-dedup",
+      "from": {
+        "objectId": "threshold-eval"
+      },
+      "to": {
+        "objectId": "dedup-grouping"
+      },
+      "label": "grouped",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-dedup-escalate",
+      "from": {
+        "objectId": "dedup-grouping"
+      },
+      "to": {
+        "objectId": "escalate"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-escalate-page",
+      "from": {
+        "objectId": "escalate"
+      },
+      "to": {
+        "objectId": "page-oncall"
+      },
+      "label": "yes · page",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-escalate-suppress",
+      "from": {
+        "objectId": "escalate"
+      },
+      "to": {
+        "objectId": "suppress-log"
+      },
+      "label": "no · suppress",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-page-triage",
+      "from": {
+        "objectId": "page-oncall"
+      },
+      "to": {
+        "objectId": "triage-splitter"
+      },
+      "label": "page",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-page-operator",
+      "from": {
+        "objectId": "page-oncall"
+      },
+      "to": {
+        "objectId": "oncall-operator"
+      },
+      "label": "wake on-call",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-suppress-hot",
+      "from": {
+        "objectId": "suppress-log"
+      },
+      "to": {
+        "objectId": "hot-store"
+      },
+      "label": "log only",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-triage-reviewer",
+      "from": {
+        "objectId": "triage-splitter"
+      },
+      "to": {
+        "objectId": "incident-reviewer"
+      },
+      "label": "assigned",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-reviewer-fixer",
+      "from": {
+        "objectId": "incident-reviewer"
+      },
+      "to": {
+        "objectId": "remediation-fixer"
+      },
+      "label": "root cause",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-fixer-status",
+      "from": {
+        "objectId": "remediation-fixer"
+      },
+      "to": {
+        "objectId": "status-page"
+      },
+      "label": "status updates",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-reviewer-postmortem",
+      "from": {
+        "objectId": "incident-reviewer"
+      },
+      "to": {
+        "objectId": "postmortem-indexer"
+      },
+      "label": "distill lessons",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-postmortem-kg",
+      "from": {
+        "objectId": "postmortem-indexer"
+      },
+      "to": {
+        "objectId": "knowledge-graph"
+      },
+      "label": "write facts",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-runbooks-reviewer",
+      "from": {
+        "objectId": "runbooks"
+      },
+      "to": {
+        "objectId": "incident-reviewer"
+      },
+      "label": "runbook steps",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-kg-threshold",
+      "from": {
+        "objectId": "knowledge-graph"
+      },
+      "to": {
+        "objectId": "threshold-eval"
+      },
+      "label": "tuning hints",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-cold-replay",
+      "from": {
+        "objectId": "cold-archive"
+      },
+      "to": {
+        "objectId": "seed-ingest-gateway"
+      },
+      "label": "replay",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-api-dashboard",
+      "from": {
+        "objectId": "api-server"
+      },
+      "to": {
+        "objectId": "ops-dashboard"
+      },
+      "label": "live state",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-api-hot",
+      "from": {
+        "objectId": "api-server"
+      },
+      "to": {
+        "objectId": "hot-store"
+      },
+      "label": "controls / status",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

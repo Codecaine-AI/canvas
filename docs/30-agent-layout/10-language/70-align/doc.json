@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-70-align",
+  "title": "align — a shared centerline",
+  "root": "b-align-root",
+  "blocks": {
+    "b-align-root": {
+      "id": "b-align-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-align-title-1",
+        "b-align-body-2",
+        "b-align-code-3",
+        "b-align-canvas-4",
+        "b-align-contrast-body-5",
+        "b-align-contrast-canvas-6"
+      ],
+      "props": {
+        "covers": "The align statement: two or more objects share one centerline (y = horizontal, x = vertical), across branches of the tree — shown with and without the align line on the same program.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "align",
+          "centerline",
+          "alignment facts",
+          "cross-branch"
+        ]
+      }
+    },
+    "b-align-title-1": {
+      "id": "b-align-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "align — a shared centerline"
+        }
+      ]
+    },
+    "b-align-body-2": {
+      "id": "b-align-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Main value is the axis ("
+        },
+        {
+          "insert": "y",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = members share a horizontal centerline, "
+        },
+        {
+          "insert": "x",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = a vertical one), then "
+        },
+        {
+          "insert": ":",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and two or more references. Members may live in different branches of the tree — that is the point: a shared centerline across section boundaries is something nesting alone can never say (rule R5)."
+        }
+      ]
+    },
+    "b-align-code-3": {
+      "id": "b-align-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|1\n  section 1 text=left label=\"Left\"\n    group\n      item 2 text=a type=process size=M at=N\n      item 3 text=b type=process size=M at=S\n  section 4 text=right label=\"Right\"\n    item 5 text=c type=process size=M at=C\n\nalign y: 2 5\n\narrows"
+        }
+      ]
+    },
+    "b-align-canvas-4": {
+      "id": "b-align-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-align.canvas.json",
+        "title": "align y: 2 5 — a and c on one centerline"
+      }
+    },
+    "b-align-contrast-body-5": {
+      "id": "b-align-contrast-body-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The same program without the "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line — a and c drift apart:"
+        }
+      ]
+    },
+    "b-align-contrast-canvas-6": {
+      "id": "b-align-contrast-canvas-6",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-align-contrast.canvas.json",
+        "title": "No align — the centerlines drift apart"
+      }
+    }
+  }
+}

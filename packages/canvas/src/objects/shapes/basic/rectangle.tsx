@@ -5,7 +5,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Rectangle — the plain-rect successor to the removed "container" type. A
- * dumb shape with the standard rounded-rect chrome (label + body spans, edge
+ * dumb shape with the standard rounded-rect trim (label + body spans, edge
  * ports) and NO children/containment behavior: solid hit-test, no drag
  * capture. Sections are the only grouping object. Keeps the old container's
  * large default footprint.

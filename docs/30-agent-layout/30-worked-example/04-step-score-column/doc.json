@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-30-worked-example-04-step-score-column",
+  "title": "Step 4 — A score column",
+  "root": "b-step4-root",
+  "blocks": {
+    "b-step4-root": {
+      "id": "b-step4-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-step4-title-1",
+        "b-step4-body-2",
+        "b-step4-code-3",
+        "b-step4-canvas-4"
+      ],
+      "props": {
+        "covers": "Step 4 of the worked example: a third root band — row 1|4|2 — adds the score gate as a 3x1 vertical chain while the pinned config lane keeps its natural size.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "worked example",
+          "row bands",
+          "hug lane",
+          "vertical chain"
+        ]
+      }
+    },
+    "b-step4-title-1": {
+      "id": "b-step4-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Step 4 — A score column"
+        }
+      ]
+    },
+    "b-step4-body-2": {
+      "id": "b-step4-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A third root band: "
+        },
+        {
+          "insert": "row 1|4|2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The pinned config lane keeps its natural size (R7); the stage bands cede width and re-solve. The score gate arrives as a "
+        },
+        {
+          "insert": "grid 3x1 gap=64",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " vertical chain (R4, R3)."
+        }
+      ]
+    },
+    "b-step4-code-3": {
+      "id": "b-step4-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|4|2\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  col 2|1\n    section 5 text=loop label=\"Runner loop\"\n      grid 1x4 gap=96\n        item 6 text=cli type=process size=M\n        item 7 text=sched type=process size=M\n        item 8 text=workers type=process size=M\n        item 9 text=match type=decision size=M\n    section 10 text=board label=\"Board — hub\"\n      grid 1x3 gap=64\n        item 11 text=epochs type=database size=M\n        item 12 text=artifacts type=database size=M\n        item 13 text=saves type=database size=M\n  section 14 text=score label=\"Score gate\"\n    grid 3x1 gap=64\n      item 15 text=objdiff type=process size=M\n      item 16 text=qa type=process size=M\n      item 17 text=regress type=decision size=M\n\narrows"
+        }
+      ]
+    },
+    "b-step4-canvas-4": {
+      "id": "b-step4-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/step-4.canvas.json",
+        "title": "Step 4 — A score column"
+      }
+    }
+  }
+}

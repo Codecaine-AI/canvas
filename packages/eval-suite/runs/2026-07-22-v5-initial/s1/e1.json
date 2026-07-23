@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s1-linear-flow",
+  "title": "Eval Suite S1 \u2014 Linear Flow",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S1 \u2014 Linear Flow",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-commit",
+      "type": "process",
+      "text": "Commit",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-ci-build",
+      "type": "process",
+      "text": "CI Build",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 512,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "stage-unit-tests",
+      "type": "process",
+      "text": "Unit Tests",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 928,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      }
+    },
+    {
+      "id": "stage-staging-deploy",
+      "type": "process",
+      "text": "Staging Deploy",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1568,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      }
+    },
+    {
+      "id": "stage-smoke-tests",
+      "type": "process",
+      "text": "Smoke Tests",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1872,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      }
+    },
+    {
+      "id": "stage-production",
+      "type": "process",
+      "text": "Production",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2176,
+        "y": 736,
+        "width": 240,
+        "height": 192
+      }
+    },
+    {
+      "id": "pipeline-promise",
+      "type": "sticky",
+      "text": "every commit that survives the gates ships itself \u2014 no manual promotion.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 400,
+        "width": 640,
+        "height": 192
+      }
+    },
+    {
+      "id": "stage-security-scan",
+      "type": "process",
+      "text": "Security Scan",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1296,
+        "y": 736,
+        "width": 112,
+        "height": 192
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-push",
+      "from": {
+        "objectId": "seed-commit"
+      },
+      "to": {
+        "objectId": "seed-ci-build"
+      },
+      "label": "push",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-artifact-ready",
+      "from": {
+        "objectId": "seed-ci-build"
+      },
+      "to": {
+        "objectId": "stage-unit-tests"
+      },
+      "label": "artifact ready",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-deployed",
+      "from": {
+        "objectId": "stage-staging-deploy"
+      },
+      "to": {
+        "objectId": "stage-smoke-tests"
+      },
+      "label": "deployed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-verified",
+      "from": {
+        "objectId": "stage-smoke-tests"
+      },
+      "to": {
+        "objectId": "stage-production"
+      },
+      "label": "verified",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-all-green-security",
+      "from": {
+        "objectId": "stage-unit-tests"
+      },
+      "to": {
+        "objectId": "stage-security-scan"
+      },
+      "label": "all green",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-no-criticals",
+      "from": {
+        "objectId": "stage-security-scan"
+      },
+      "to": {
+        "objectId": "stage-staging-deploy"
+      },
+      "label": "no criticals",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

@@ -1,0 +1,489 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-org-tree",
+  "title": "Eval — Org Tree",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3200,
+    "height": 1600
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval — Org Tree",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3136,
+        "height": 1536
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "node-ceo",
+      "type": "predefined-process",
+      "text": "CEO — Dana Whitfield",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1704,
+        "y": 220,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-placeholder-vp",
+      "type": "predefined-process",
+      "text": "VP Engineering — Marcus Lee",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 456,
+        "y": 456,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "platform-team",
+      "type": "predefined-process",
+      "text": "Platform Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 172,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "frontend-team",
+      "type": "predefined-process",
+      "text": "Frontend Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 380,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "infra-team",
+      "type": "predefined-process",
+      "text": "Infra Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 588,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "qa-team",
+      "type": "predefined-process",
+      "text": "QA Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 796,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "vp-product-priya-raman",
+      "type": "predefined-process",
+      "text": "VP Product — Priya Raman",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1288,
+        "y": 456,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "design-team",
+      "type": "predefined-process",
+      "text": "Design Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1108,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "research-team",
+      "type": "predefined-process",
+      "text": "Research Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1316,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "growth-team",
+      "type": "predefined-process",
+      "text": "Growth Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1524,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "vp-operations-tomas-ortiz",
+      "type": "predefined-process",
+      "text": "VP Operations — Tomas Ortiz",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2120,
+        "y": 456,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "finance-team",
+      "type": "predefined-process",
+      "text": "Finance Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1940,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "people-team",
+      "type": "predefined-process",
+      "text": "People Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2148,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "it-team",
+      "type": "predefined-process",
+      "text": "IT Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2356,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "vp-marketing-lena-kovacs",
+      "type": "predefined-process",
+      "text": "VP Marketing — Lena Kovacs",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2952,
+        "y": 456,
+        "width": 200,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "brand-team",
+      "type": "predefined-process",
+      "text": "Brand Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2876,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "events-team",
+      "type": "predefined-process",
+      "text": "Events Team",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 3084,
+        "y": 657,
+        "width": 144,
+        "height": 72
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-ceo-vpe",
+      "from": {
+        "objectId": "node-ceo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-placeholder-vp",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "node-ceo"
+      },
+      "to": {
+        "objectId": "vp-product-priya-raman"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-2",
+      "from": {
+        "objectId": "node-ceo"
+      },
+      "to": {
+        "objectId": "vp-operations-tomas-ortiz"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-3",
+      "from": {
+        "objectId": "node-placeholder-vp"
+      },
+      "to": {
+        "objectId": "platform-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-4",
+      "from": {
+        "objectId": "node-placeholder-vp"
+      },
+      "to": {
+        "objectId": "frontend-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-5",
+      "from": {
+        "objectId": "node-placeholder-vp"
+      },
+      "to": {
+        "objectId": "infra-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-6",
+      "from": {
+        "objectId": "node-placeholder-vp"
+      },
+      "to": {
+        "objectId": "qa-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-7",
+      "from": {
+        "objectId": "vp-product-priya-raman"
+      },
+      "to": {
+        "objectId": "design-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-8",
+      "from": {
+        "objectId": "vp-product-priya-raman"
+      },
+      "to": {
+        "objectId": "research-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-9",
+      "from": {
+        "objectId": "vp-product-priya-raman"
+      },
+      "to": {
+        "objectId": "growth-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-10",
+      "from": {
+        "objectId": "vp-operations-tomas-ortiz"
+      },
+      "to": {
+        "objectId": "finance-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-11",
+      "from": {
+        "objectId": "vp-operations-tomas-ortiz"
+      },
+      "to": {
+        "objectId": "people-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-12",
+      "from": {
+        "objectId": "vp-operations-tomas-ortiz"
+      },
+      "to": {
+        "objectId": "it-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-13",
+      "from": {
+        "objectId": "node-ceo"
+      },
+      "to": {
+        "objectId": "vp-marketing-lena-kovacs"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-14",
+      "from": {
+        "objectId": "vp-marketing-lena-kovacs"
+      },
+      "to": {
+        "objectId": "brand-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-15",
+      "from": {
+        "objectId": "vp-marketing-lena-kovacs"
+      },
+      "to": {
+        "objectId": "events-team"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

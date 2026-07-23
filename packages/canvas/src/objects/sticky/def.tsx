@@ -18,7 +18,7 @@ export const STICKY_GEOMETRY = {
 
 /**
  * FigJam sticky note (W2 upgrade, P2 text unification) — the generic button
- * chrome plus the "inset-body" text slot rendering `object.text` as simple
+ * trim plus the "inset-body" text slot rendering `object.text` as simple
  * markdown (D18: H1–H3, bullets, bold, inline code). Dispatched on the
  * effective render shape "note" (a sticky-typed object without `style.shape`
  * keeps falling through to the rounded-rect path, as before). The in-place
@@ -33,7 +33,7 @@ function StickyObjectView(props: ObjectRenderProps) {
       object={object}
       renderShape="note"
       className="interactive-canvas-object interactive-canvas-object-note"
-      // Sticky fill resolves through the sticky role table; the chrome border is suppressed.
+      // Sticky fill resolves through the sticky role table; the trim border is suppressed.
       colorRole="sticky"
       selected={props.selected}
       changed={props.changed}

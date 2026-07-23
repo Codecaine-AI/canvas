@@ -141,7 +141,7 @@
       "props": {},
       "text": [
         {
-          "insert": "10-system-design/00-overview and 20-implementation/60-chrome both linked to \"20-implementation/70-studio-and-canvas JSON files\" — a space-containing doc TITLE fragment where a bundle PATH belongs, presumably minted by the .mdx migration. Fixed in this session's structure pass; worth a migrate-time validation that doc-link paths resolve."
+          "insert": "10-system-design/00-overview and 20-implementation/60-trim both linked to \"20-implementation/70-studio-and-canvas JSON files\" — a space-containing doc TITLE fragment where a bundle PATH belongs, presumably minted by the .mdx migration. Fixed in this session's structure pass; worth a migrate-time validation that doc-link paths resolve."
         }
       ],
       "children": []
@@ -405,7 +405,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Collected while auditing, no code changes this session: (1) CanvasDock.tsx's header comment still says 48px/13px radius — EDITOR_STYLE and the shipped chrome are 53px/radius 15; (2) zz-dom-fixtures.ts's docstring says the baseline is UNCOMMITTED — it is committed and active at packages/canvas/zz-dom-baseline.json; (3) CONNECTOR_TOOLBAR in connectors/def.ts is module-private while SHAPE_TOOLBAR/SECTION_TOOLBAR are exported — docs must cite connectorDef instead; export it or accept the asymmetry; (4) CanvasStage.tsx still carries an internal 'halving/doubling' grid comment — grid.ts only doubles."
+          "insert": "Collected while auditing, no code changes this session: (1) CanvasDock.tsx's header comment still says 48px/13px radius — EDITOR_STYLE and the shipped trim are 53px/radius 15; (2) zz-dom-fixtures.ts's docstring says the baseline is UNCOMMITTED — it is committed and active at packages/canvas/zz-dom-baseline.json; (3) CONNECTOR_TOOLBAR in connectors/def.ts is module-private while SHAPE_TOOLBAR/SECTION_TOOLBAR are exported — docs must cite connectorDef instead; export it or accept the asymmetry; (4) CanvasStage.tsx still carries an internal 'halving/doubling' grid comment — grid.ts only doubles."
         }
       ],
       "children": []

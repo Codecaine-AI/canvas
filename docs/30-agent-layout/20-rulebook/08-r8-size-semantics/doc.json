@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-08-r8-size-semantics",
+  "title": "R8 — Size semantics",
+  "root": "b-r8-root",
+  "blocks": {
+    "b-r8-root": {
+      "id": "b-r8-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r8-title-1",
+        "b-r8-card-2",
+        "b-r8-body-3",
+        "b-r8-sticky-4"
+      ],
+      "props": {
+        "covers": "Three size classes only — S chips at 0.72x, M standard members at 1x, L terminals and emphasis at 1.35x — ranked per leaf by area percentile, with the sticky 384x288 override where the drop default misrepresents the boards.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "size classes",
+          "SIZE_SCALE",
+          "area percentile",
+          "sticky override"
+        ]
+      }
+    },
+    "b-r8-title-1": {
+      "id": "b-r8-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R8 — Size semantics"
+        }
+      ]
+    },
+    "b-r8-card-2": {
+      "id": "b-r8-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Three sizes only"
+      },
+      "text": [
+        {
+          "insert": "S chips at 0.72x, M standard members at 1x, L terminals and emphasis at 1.35x. Cells of one grid always share a size."
+        }
+      ]
+    },
+    "b-r8-body-3": {
+      "id": "b-r8-body-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The three classes are ranked per leaf by area percentile. S covers compact operands, icons, and action triangles (intent-2's 128x112 actions, gc's 160x64 curator). M is the workhorse process/pill/card size; template members of one lattice are always the same class. L marks end states and decision hubs (ink's 192x192 completion ellipses, gc's 256x112 exact-match decision, intent-2's 256x144 classify pentagons). Type extents come from the canvas drop defaults scaled by "
+        },
+        {
+          "insert": "SIZE_SCALE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "SIZE_SCALE"
+            }
+          }
+        },
+        {
+          "insert": " (0.72 / 1 / 1.35)."
+        }
+      ]
+    },
+    "b-r8-sticky-4": {
+      "id": "b-r8-sticky-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One corpus override where the drop default misrepresents the boards: stickies expand from a 384x288 base ("
+        },
+        {
+          "insert": "SKETCH_TYPE_SIZE_OVERRIDES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "SKETCH_TYPE_SIZE_OVERRIDES"
+            }
+          }
+        },
+        {
+          "insert": "). Corpus stickies run 336-608 wide and 112-688 tall, median about 400x320; the 176x128 drop default collapses every relation through a sticky rail."
+        }
+      ]
+    }
+  }
+}

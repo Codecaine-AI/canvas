@@ -2,7 +2,7 @@
 
 /**
  * Editor-owned interaction feedback for the canvas stage slots.
- * Keeps ephemeral drag/selection/guide chrome out of document rendering.
+ * Keeps ephemeral drag/selection/guide trim out of document rendering.
  */
 import { useState, type ReactNode } from "react";
 import { ConnectorDragPreview } from "../../../connectors/ConnectorDragPreview";
@@ -160,7 +160,7 @@ export function InteractionFeedbackScreen({
       {/* Anchor dots (D5/D15): def-derived connection anchors on every
           selected object — editor-only (same gate as the old edge ports:
           pointer events wired + not the hand tool). Rendered in this
-          screen-space overlay, NOT in object chrome: the object button
+          screen-space overlay, NOT in object trim: the object button
           clips overflow, and true-outline anchors sit off the bbox edge. */}
       {interactionEnabled && !handToolActive && (
         <AnchorDots

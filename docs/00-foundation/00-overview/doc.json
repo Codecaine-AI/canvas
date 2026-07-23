@@ -209,7 +209,7 @@
           }
         },
         {
-          "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app chrome is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app chrome around the board is allowed to follow the host theme. See the sourcing comment beside the stage surface constants in "
+          "insert": " — regardless of the host app's theme. This mirrors FigJam's own behavior: FigJam never dark-themes the board surface, even when the surrounding app trim is dark. So even inside a dark-mode host, the canvas SURFACE stays light-only, matching Figma/FigJam's own convention; only the app trim around the board is allowed to follow the host theme. See the sourcing comment beside the stage surface constants in "
         },
         {
           "insert": "stage/CanvasStage.tsx",
@@ -284,7 +284,7 @@
       },
       "text": [
         {
-          "insert": "Every mutation to the document — a human dragging a shape, a keyboard shortcut, a chrome UI button, or an agent editing the board programmatically — is expressed as a "
+          "insert": "Every mutation to the document — a human dragging a shape, a keyboard shortcut, a trim UI button, or an agent editing the board programmatically — is expressed as a "
         },
         {
           "insert": "CanvasAction",

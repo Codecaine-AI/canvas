@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v5-state-machine",
+  "title": "Eval v5 — State Machine",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2816,
+    "height": 1808
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v5 — State Machine",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2752,
+        "height": 1744
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 448,
+        "y": 528,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "happy-region",
+      "type": "section",
+      "text": "Happy path · establish → operate → close",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 256,
+        "y": 176,
+        "width": 2272,
+        "height": 720
+      },
+      "style": {}
+    },
+    {
+      "id": "recovery-region",
+      "type": "section",
+      "text": "Failure + recovery cluster",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 800,
+        "y": 1120,
+        "width": 1728,
+        "height": 560
+      },
+      "style": {}
+    },
+    {
+      "id": "state-connecting",
+      "type": "process",
+      "text": "Connecting",
+      "color": "blue",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 944,
+        "y": 320,
+        "width": 256,
+        "height": 112
+      },
+      "style": {}
+    },
+    {
+      "id": "state-connected",
+      "type": "process",
+      "text": "Connected",
+      "color": "green",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 1664,
+        "y": 528,
+        "width": 256,
+        "height": 112
+      },
+      "style": {}
+    },
+    {
+      "id": "state-disconnecting",
+      "type": "process",
+      "text": "Disconnecting",
+      "color": "teal",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 1248,
+        "y": 736,
+        "width": 288,
+        "height": 112
+      },
+      "style": {}
+    },
+    {
+      "id": "state-degraded",
+      "type": "process",
+      "text": "Degraded",
+      "color": "orange",
+      "parentId": "recovery-region",
+      "geometry": {
+        "x": 2144,
+        "y": 1184,
+        "width": 256,
+        "height": 112
+      },
+      "style": {}
+    },
+    {
+      "id": "state-reconnecting",
+      "type": "process",
+      "text": "Reconnecting",
+      "color": "violet",
+      "parentId": "recovery-region",
+      "geometry": {
+        "x": 1472,
+        "y": 1472,
+        "width": 288,
+        "height": 112
+      },
+      "style": {}
+    },
+    {
+      "id": "heartbeat-badge",
+      "type": "pill",
+      "text": "↻ heartbeat · every 30s",
+      "color": "green",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 1648,
+        "y": 400,
+        "width": 288,
+        "height": 64
+      },
+      "style": {}
+    },
+    {
+      "id": "failure-note",
+      "type": "sticky",
+      "text": "Failure semantics\n\nDashed red = failure / threshold path.\nSolid return edges = recovery.\nTeal = intentional close lifecycle.\n↻ = Connected heartbeat every 30s.\nSmall rings are routing anchors, not states.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1184,
+        "width": 480,
+        "height": 256
+      },
+      "style": {}
+    },
+    {
+      "id": "idle-failure-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 416,
+        "y": 608,
+        "width": 32,
+        "height": 32
+      },
+      "style": {}
+    },
+    {
+      "id": "connected-recovery-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 1888,
+        "y": 496,
+        "width": 32,
+        "height": 32
+      },
+      "style": {}
+    },
+    {
+      "id": "connected-session-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "happy-region",
+      "geometry": {
+        "x": 1632,
+        "y": 608,
+        "width": 32,
+        "height": 32
+      },
+      "style": {}
+    },
+    {
+      "id": "degraded-recovery-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "recovery-region",
+      "geometry": {
+        "x": 2400,
+        "y": 1216,
+        "width": 32,
+        "height": 32
+      },
+      "style": {}
+    },
+    {
+      "id": "reconnecting-resume-port",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "recovery-region",
+      "geometry": {
+        "x": 1440,
+        "y": 1504,
+        "width": 32,
+        "height": 32
+      },
+      "style": {}
+    },
+    {
+      "id": "state-suspended",
+      "type": "process",
+      "text": "Suspended",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1664,
+        "y": 1200,
+        "width": 256,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-connect",
+      "from": {
+        "objectId": "seed-idle"
+      },
+      "to": {
+        "objectId": "state-connecting"
+      },
+      "label": "connect()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-handshake",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "state-connected"
+      },
+      "label": "handshake OK",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-timeout",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "idle-failure-port"
+      },
+      "label": "timeout",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-packet-loss",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-degraded"
+      },
+      "label": "packet loss > 5%",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-recovered",
+      "from": {
+        "objectId": "degraded-recovery-port"
+      },
+      "to": {
+        "objectId": "connected-recovery-port"
+      },
+      "label": "recovered",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-grace-expired",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "grace expired",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-session-resumed",
+      "from": {
+        "objectId": "reconnecting-resume-port"
+      },
+      "to": {
+        "objectId": "connected-session-port"
+      },
+      "label": "session resumed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-close",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-disconnecting"
+      },
+      "label": "close()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-socket-closed",
+      "from": {
+        "objectId": "state-disconnecting"
+      },
+      "to": {
+        "objectId": "seed-idle"
+      },
+      "label": "socket closed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-suspend",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "suspend()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-quarantine",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "quarantine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-resume-window",
+      "from": {
+        "objectId": "state-suspended"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "resume window",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

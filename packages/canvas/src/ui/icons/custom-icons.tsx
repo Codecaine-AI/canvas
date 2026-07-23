@@ -5,13 +5,13 @@ import type { IconProps } from "./icon-props";
 /**
  * Hand-authored icons that are NOT part of the generated Nucleo set
  * (see manifest.json `custom: true` entries):
- * - ColorSwatchIcon — a filled circle whose color is data, not chrome
+ * - ColorSwatchIcon — a filled circle whose color is data, not trim
  *   styling, so it can't be expressed as a currentColor Nucleo outline.
  * - SectionIcon — FigJam sections icon, not from the Nucleo library
  *   (source asset: ./sections-icon.svg).
  * - StickyIcon — sticky note with a top-left peel, not from the Nucleo
  *   library (source asset: ./sticky-note-icon.svg; the asset's 1024px
- *   y-flipped coordinates are baked down to the 18px chrome-icon grid here,
+ *   y-flipped coordinates are baked down to the 18px trim-icon grid here,
  *   with the fold flap extended past the asset's so the peel stays legible
  *   at dock size).
  */

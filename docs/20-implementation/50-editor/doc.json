@@ -127,7 +127,7 @@
           }
         },
         {
-          "insert": " with the viewport and hotkey hooks, runs every gesture through the interaction pipeline, and mounts the chrome. Everything ephemeral the editor draws — selection boxes, drag rectangles, snap guides, ghosts — arrives in the stage through its overlay slots; the stage itself only ever draws the document (see "
+          "insert": " with the viewport and hotkey hooks, runs every gesture through the interaction pipeline, and mounts the trim. Everything ephemeral the editor draws — selection boxes, drag rectangles, snap guides, ghosts — arrives in the stage through its overlay slots; the stage itself only ever draws the document (see "
         },
         {
           "insert": "20-implementation/40-stage",
@@ -1671,7 +1671,7 @@
       "props": {},
       "text": [
         {
-          "insert": "For dock, toolbar, palette, and other chrome components wired into "
+          "insert": "For dock, toolbar, palette, and other trim components wired into "
         },
         {
           "insert": "InteractiveCanvasEditor",
@@ -1688,11 +1688,11 @@
           "insert": ", see "
         },
         {
-          "insert": "20-implementation/60-chrome",
+          "insert": "20-implementation/60-trim",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome"
+              "path": "20-implementation/60-trim"
             }
           }
         },
@@ -1839,11 +1839,11 @@
           "insert": "Color controls stay out of this bundle: palette UI lives in "
         },
         {
-          "insert": "20-implementation/60-chrome",
+          "insert": "20-implementation/60-trim",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome"
+              "path": "20-implementation/60-trim"
             }
           }
         },
@@ -3568,14 +3568,14 @@
           }
         },
         {
-          "insert": " for FigJam parity, and also hides in connector mode; toolbar content and flyout chrome belong to "
+          "insert": " for FigJam parity, and also hides in connector mode; toolbar content and flyout trim belong to "
         },
         {
-          "insert": "20-implementation/60-chrome",
+          "insert": "20-implementation/60-trim",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome"
+              "path": "20-implementation/60-trim"
             }
           }
         },

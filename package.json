@@ -9,12 +9,13 @@
   "scripts": {
     "docs": "bun tools/docs-framework/packages/docs-cli/src/index.ts",
     "test": "bun test packages/canvas/src",
-    "typecheck": "bun run typecheck:canvas && bun run typecheck:studio && bun run typecheck:layout-lab",
+    "typecheck": "bun run typecheck:canvas && bun run typecheck:studio && bun run typecheck:canvas-agent",
     "typecheck:canvas": "bunx --bun tsc -p packages/canvas/tsconfig.json --noEmit",
     "typecheck:studio": "bunx --bun tsc -p packages/studio/tsconfig.json --noEmit",
-    "typecheck:layout-lab": "bunx --bun tsc -p apps/layout-lab/tsconfig.json --noEmit",
+    "typecheck:canvas-agent": "bunx --bun tsc -p packages/canvas-agent/tsconfig.json --noEmit",
     "dev:studio": "bun run --cwd packages/studio dev",
-    "dev:layout-lab": "bun run --cwd apps/layout-lab dev"
+    "dev:harness": "bun run --cwd packages/canvas-agent harness",
+    "dev:agent-viewer": "bun run --cwd packages/canvas-agent viewer"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.9.0",

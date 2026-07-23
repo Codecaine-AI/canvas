@@ -1,0 +1,60 @@
+import { describe, expect, test } from "bun:test";
+
+import { createInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
+
+import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
+import { box, connect, makeDocument } from "./synthetic";
+
+describe("handleApplyAgentPatch updateConnection", () => {
+  test("merges editable fields, strips incoming waypoints, and skips an unknown id", () => {
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [
+        {
+          ...connect("connection", "a", "b"),
+          label: "Before",
+          style: "solid",
+          color: "gray",
+          waypoints: [[80, 112]],
+        },
+      ],
+    );
+    const state = createInteractiveCanvasState(document);
+
+    const next = handleApplyAgentPatch(state, {
+      type: "canvas.applyAgentPatch",
+      operations: [
+        {
+          type: "updateConnection",
+          connectionId: "unknown",
+          patch: { label: "Must not land", color: "red" },
+        },
+        {
+          type: "updateConnection",
+          connectionId: "connection",
+          patch: {
+            label: "After",
+            style: "dashed",
+            color: "blue",
+            waypoints: [[320, 240]],
+          },
+        },
+      ],
+    });
+
+    expect(next.document.connections).toEqual([
+      {
+        id: "connection",
+        from: { objectId: "a" },
+        to: { objectId: "b" },
+        label: "After",
+        style: "dashed",
+        color: "blue",
+        // The reducer ignores draft routes and leaves the live route intact.
+        waypoints: [[80, 112]],
+      },
+    ]);
+    expect(next.lastChange?.changedConnectionIds).toEqual(["connection"]);
+    expect(next.history.past).toHaveLength(1);
+  });
+});

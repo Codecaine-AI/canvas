@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v3-nested-arch",
+  "title": "Eval v3 — Nested Architecture",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2800,
+    "height": 2000
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v3 — Nested Architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2736,
+        "height": 1936
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-gw",
+      "type": "process",
+      "text": "API Gateway",
+      "color": "blue",
+      "parentId": "edge-group",
+      "geometry": {
+        "x": 480,
+        "y": 592,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-bus",
+      "type": "process",
+      "text": "Event Bus",
+      "color": "orange",
+      "parentId": "services-group",
+      "geometry": {
+        "x": 1216,
+        "y": 736,
+        "width": 320,
+        "height": 160
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "production-vpc",
+      "type": "section",
+      "text": "Production VPC",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 288,
+        "y": 400,
+        "width": 2208,
+        "height": 800
+      }
+    },
+    {
+      "id": "edge-group",
+      "type": "section",
+      "text": "Edge",
+      "color": "blue",
+      "parentId": "production-vpc",
+      "geometry": {
+        "x": 368,
+        "y": 496,
+        "width": 448,
+        "height": 608
+      }
+    },
+    {
+      "id": "services-group",
+      "type": "section",
+      "text": "Services",
+      "color": "green",
+      "parentId": "production-vpc",
+      "geometry": {
+        "x": 880,
+        "y": 496,
+        "width": 944,
+        "height": 608
+      }
+    },
+    {
+      "id": "data-group",
+      "type": "section",
+      "text": "Data",
+      "color": "violet",
+      "parentId": "production-vpc",
+      "geometry": {
+        "x": 1888,
+        "y": 496,
+        "width": 448,
+        "height": 432
+      }
+    },
+    {
+      "id": "load-balancer",
+      "type": "process",
+      "text": "Load Balancer",
+      "color": "blue",
+      "parentId": "edge-group",
+      "geometry": {
+        "x": 480,
+        "y": 896,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "orders-service",
+      "type": "process",
+      "text": "Orders Service",
+      "color": "green",
+      "parentId": "services-group",
+      "geometry": {
+        "x": 960,
+        "y": 560,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "inventory-service",
+      "type": "process",
+      "text": "Inventory Service",
+      "color": "green",
+      "parentId": "services-group",
+      "geometry": {
+        "x": 960,
+        "y": 960,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "billing-service",
+      "type": "process",
+      "text": "Billing Service",
+      "color": "green",
+      "parentId": "services-group",
+      "geometry": {
+        "x": 1504,
+        "y": 560,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "text": "Postgres",
+      "color": "violet",
+      "parentId": "data-group",
+      "geometry": {
+        "x": 2000,
+        "y": 592,
+        "width": 224,
+        "height": 128
+      }
+    },
+    {
+      "id": "redis-cache",
+      "type": "database",
+      "text": "Redis Cache",
+      "color": "violet",
+      "parentId": "data-group",
+      "geometry": {
+        "x": 2000,
+        "y": 752,
+        "width": 224,
+        "height": 128
+      }
+    },
+    {
+      "id": "bus-note",
+      "type": "sticky",
+      "text": "All bus traffic is at-least-once delivery",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 368,
+        "y": 1312,
+        "width": 416,
+        "height": 160
+      }
+    },
+    {
+      "id": "notifications-service",
+      "type": "process",
+      "text": "Notifications Service",
+      "color": "green",
+      "parentId": "services-group",
+      "geometry": {
+        "x": 1504,
+        "y": 960,
+        "width": 224,
+        "height": 112
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-gw-lb",
+      "from": {
+        "objectId": "seed-gw"
+      },
+      "to": {
+        "objectId": "load-balancer"
+      },
+      "label": "HTTPS",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-lb-orders",
+      "from": {
+        "objectId": "load-balancer"
+      },
+      "to": {
+        "objectId": "orders-service"
+      },
+      "label": "route",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-orders-bus",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "seed-bus"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-billing-bus",
+      "from": {
+        "objectId": "billing-service"
+      },
+      "to": {
+        "objectId": "seed-bus"
+      },
+      "label": "invoice.issued",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-inventory",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "inventory-service"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-inventory-postgres",
+      "from": {
+        "objectId": "inventory-service"
+      },
+      "to": {
+        "objectId": "postgres"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-orders-postgres",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "postgres"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-billing-redis",
+      "from": {
+        "objectId": "billing-service"
+      },
+      "to": {
+        "objectId": "redis-cache"
+      },
+      "label": "cache",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-bus-notifications",
+      "from": {
+        "objectId": "seed-bus"
+      },
+      "to": {
+        "objectId": "notifications-service"
+      },
+      "label": "order.created",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

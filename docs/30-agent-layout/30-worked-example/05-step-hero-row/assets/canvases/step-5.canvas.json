@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-30-worked-example-05-step-hero-row-step-5",
+  "title": "Step 5 (step hero row)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "config",
+      "type": "section",
+      "text": "Config",
+      "label": "Config",
+      "title": "Config",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 112,
+        "height": 512
+      }
+    },
+    {
+      "id": "checkout",
+      "type": "pill",
+      "text": "checkout",
+      "label": "checkout",
+      "geometry": {
+        "x": 19,
+        "y": 184,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "goals",
+      "type": "pill",
+      "text": "goals",
+      "label": "goals",
+      "geometry": {
+        "x": 19,
+        "y": 276,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "secrets",
+      "type": "pill",
+      "text": "secrets",
+      "label": "secrets",
+      "geometry": {
+        "x": 19,
+        "y": 368,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "loop",
+      "type": "section",
+      "text": "Runner loop",
+      "label": "Runner loop",
+      "title": "Runner loop",
+      "tint": "gray",
+      "geometry": {
+        "x": 208,
+        "y": 0,
+        "width": 480,
+        "height": 320
+      }
+    },
+    {
+      "id": "cli",
+      "type": "process",
+      "text": "cli",
+      "label": "cli",
+      "geometry": {
+        "x": 246,
+        "y": 164,
+        "width": 72,
+        "height": 44
+      }
+    },
+    {
+      "id": "sched",
+      "type": "process",
+      "text": "sched",
+      "label": "sched",
+      "geometry": {
+        "x": 357,
+        "y": 164,
+        "width": 72,
+        "height": 44
+      }
+    },
+    {
+      "id": "workers",
+      "type": "process",
+      "text": "workers",
+      "label": "workers",
+      "geometry": {
+        "x": 467,
+        "y": 164,
+        "width": 72,
+        "height": 44
+      }
+    },
+    {
+      "id": "match",
+      "type": "decision",
+      "text": "match",
+      "label": "match",
+      "geometry": {
+        "x": 577,
+        "y": 164,
+        "width": 72,
+        "height": 44
+      }
+    },
+    {
+      "id": "board",
+      "type": "section",
+      "text": "Board — hub",
+      "label": "Board — hub",
+      "title": "Board — hub",
+      "tint": "gray",
+      "geometry": {
+        "x": 208,
+        "y": 416,
+        "width": 480,
+        "height": 160
+      }
+    },
+    {
+      "id": "epochs",
+      "type": "database",
+      "text": "epochs",
+      "label": "epochs",
+      "geometry": {
+        "x": 229,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    },
+    {
+      "id": "artifacts",
+      "type": "database",
+      "text": "artifacts",
+      "label": "artifacts",
+      "geometry": {
+        "x": 392,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    },
+    {
+      "id": "saves",
+      "type": "database",
+      "text": "saves",
+      "label": "saves",
+      "geometry": {
+        "x": 555,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    },
+    {
+      "id": "score",
+      "type": "section",
+      "text": "Score gate",
+      "label": "Score gate",
+      "title": "Score gate",
+      "tint": "gray",
+      "geometry": {
+        "x": 784,
+        "y": 0,
+        "width": 240,
+        "height": 576
+      }
+    },
+    {
+      "id": "objdiff",
+      "type": "process",
+      "text": "objdiff",
+      "label": "objdiff",
+      "geometry": {
+        "x": 814,
+        "y": 93,
+        "width": 180,
+        "height": 110
+      }
+    },
+    {
+      "id": "qa",
+      "type": "process",
+      "text": "qa",
+      "label": "qa",
+      "geometry": {
+        "x": 814,
+        "y": 265,
+        "width": 180,
+        "height": 110
+      }
+    },
+    {
+      "id": "regress",
+      "type": "decision",
+      "text": "regress",
+      "label": "regress",
+      "geometry": {
+        "x": 814,
+        "y": 438,
+        "width": 180,
+        "height": 110
+      }
+    }
+  ],
+  "connections": []
+}

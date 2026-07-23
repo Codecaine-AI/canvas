@@ -1,0 +1,1088 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-00-overview",
+  "title": "The layout language v3 reference",
+  "root": "b-language-root",
+  "blocks": {
+    "b-language-root": {
+      "id": "b-language-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-language-title-1",
+        "b-language-intro-2",
+        "b-language-clarity-decision-3",
+        "b-language-shape-heading-4",
+        "b-language-shape-body-5",
+        "b-language-shape-tree-6",
+        "b-language-shape-align-7",
+        "b-language-shape-arrows-8",
+        "b-language-shape-parsing-9",
+        "b-language-alignfacts-body-10",
+        "b-language-refs-heading-11",
+        "b-language-refs-body-12",
+        "b-language-anatomy-heading-13",
+        "b-language-anatomy-body-14",
+        "b-language-anatomy-code-15",
+        "b-language-anatomy-table-16",
+        "b-language-statements-body-17",
+        "b-language-statements-table-18",
+        "b-language-statements-index-19",
+        "b-language-nesting-heading-20",
+        "b-language-nesting-body-21",
+        "b-language-nesting-code-22",
+        "b-language-nesting-canvas-23",
+        "b-language-canonical-heading-24",
+        "b-language-canonical-body-25",
+        "b-language-deferred-heading-26",
+        "b-language-deferred-body-27",
+        "b-language-deferred-sparse-28",
+        "b-language-lab-pointer-29"
+      ],
+      "props": {
+        "covers": "Overview of the v3 layout language: the derived, disposable program, its three-part shape (tree, alignment facts, arrows), reference numbers, how to read a statement, and the nine-statement index — each construct documented on its own page.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "layout language",
+          "program shape",
+          "reference numbers",
+          "statement anatomy",
+          "nesting",
+          "canonical form"
+        ]
+      }
+    },
+    "b-language-title-1": {
+      "id": "b-language-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The layout language v3 reference"
+        }
+      ]
+    },
+    "b-language-intro-2": {
+      "id": "b-language-intro-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The layout language is a derived, disposable view of a canvas document. The fitter writes it with "
+        },
+        {
+          "insert": "serializeSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "serializeSketch"
+            }
+          }
+        },
+        {
+          "insert": ", the AI edits it, "
+        },
+        {
+          "insert": "parseSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "parseSketch"
+            }
+          }
+        },
+        {
+          "insert": " reads the edited text back into a "
+        },
+        {
+          "insert": "Sketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/types.ts",
+              "symbol": "Sketch"
+            }
+          }
+        },
+        {
+          "insert": ", and the solver expands it back into geometry through "
+        },
+        {
+          "insert": "expandSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "expandSketch"
+            }
+          }
+        },
+        {
+          "insert": ". Read a program in three passes: the indented tree first, then the alignment facts, then the arrows."
+        }
+      ]
+    },
+    "b-language-clarity-decision-3": {
+      "id": "b-language-clarity-decision-3",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "Clarity over compression"
+      },
+      "text": [
+        {
+          "insert": "Every value is labeled, every reference is a declared number, and indentation is the only nesting syntax. The canvas document is the single source of truth; the program is fitted fresh per edit and discarded after solving, so the grammar spends its budget on readability, not brevity."
+        }
+      ]
+    },
+    "b-language-shape-heading-4": {
+      "id": "b-language-shape-heading-4",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Program shape"
+        }
+      ]
+    },
+    "b-language-shape-body-5": {
+      "id": "b-language-shape-body-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A program has three parts, in this order:"
+        }
+      ]
+    },
+    "b-language-shape-tree-6": {
+      "id": "b-language-shape-tree-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The tree",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — objects and how space is divided. Nested by indentation."
+        }
+      ]
+    },
+    "b-language-shape-align-7": {
+      "id": "b-language-shape-align-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Alignment facts",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": " lines at the left margin. Cross-branch spatial claims; they reference objects by number."
+        }
+      ]
+    },
+    "b-language-shape-arrows-8": {
+      "id": "b-language-shape-arrows-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Arrows",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": " block, always last. The connections that exist in the document."
+        }
+      ]
+    },
+    "b-language-shape-parsing-9": {
+      "id": "b-language-shape-parsing-9",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Parts are separated by one blank line in canonical form. The parser ignores blank lines everywhere; tabs are an error; indentation is exactly 2 spaces per level."
+        }
+      ]
+    },
+    "b-language-alignfacts-body-10": {
+      "id": "b-language-alignfacts-body-10",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "After the tree, at the left margin, in this order: all "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": " lines, then all "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": " lines. Alignment facts are cross-branch spatial claims: they reference objects by number, from anywhere in the tree."
+        }
+      ]
+    },
+    "b-language-refs-heading-11": {
+      "id": "b-language-refs-heading-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Reference numbers"
+        }
+      ]
+    },
+    "b-language-refs-body-12": {
+      "id": "b-language-refs-body-12",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every object line ("
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": ") declares a positive integer, assigned in declaration order starting at 1. All later references — "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": " — use these numbers. The number "
+        },
+        {
+          "insert": "is",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " the object's identity; "
+        },
+        {
+          "insert": "text=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is only its short display name. Several objects may share the same text — references always go through numbers, so nothing is ambiguous. Declaring the same number twice is an error. A reference may instead be a JSON-quoted raw id ("
+        },
+        {
+          "insert": "\"some-id\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") for objects that do not appear in the tree. On parse, duplicate texts get unique internal engine ids; that uniquification is an implementation detail that never appears in serialized output (the fitter always emits unique names today)."
+        }
+      ]
+    },
+    "b-language-anatomy-heading-13": {
+      "id": "b-language-anatomy-heading-13",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How to read a statement"
+        }
+      ]
+    },
+    "b-language-anatomy-body-14": {
+      "id": "b-language-anatomy-body-14",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every value is labeled, so each field answers one specific layout question. One "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": " line, taken apart:"
+        }
+      ]
+    },
+    "b-language-anatomy-code-15": {
+      "id": "b-language-anatomy-code-15",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "item 2 text=checkout type=pill size=M at=C"
+        }
+      ]
+    },
+    "b-language-anatomy-table-16": {
+      "id": "b-language-anatomy-table-16",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Anatomy of an item line",
+        "columns": [
+          "token",
+          "meaning"
+        ],
+        "rows": [
+          [
+            "item",
+            "keyword — what this line declares"
+          ],
+          [
+            "2",
+            "reference number — declared once, reused later"
+          ],
+          [
+            "text=checkout",
+            "the object's name — several objects can share it; the number is the identity"
+          ],
+          [
+            "type=pill",
+            "shape type"
+          ],
+          [
+            "size=M",
+            "size — S, M, or L"
+          ],
+          [
+            "at=C",
+            "compass position — where in the region"
+          ]
+        ]
+      }
+    },
+    "b-language-statements-body-17": {
+      "id": "b-language-statements-body-17",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The language is small on purpose. These are all the statements there are:"
+        }
+      ]
+    },
+    "b-language-statements-table-18": {
+      "id": "b-language-statements-table-18",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "The nine statements",
+        "columns": [
+          "statement",
+          "meaning"
+        ],
+        "rows": [
+          [
+            "item",
+            "a real object — one per line, every field labeled"
+          ],
+          [
+            "section",
+            "a real container with a label — exactly one child"
+          ],
+          [
+            "group",
+            "wraps two or more loose items that share one slot"
+          ],
+          [
+            "row",
+            "split a region into side-by-side bands, one child per weight"
+          ],
+          [
+            "col",
+            "split a region into stacked bands, one child per weight"
+          ],
+          [
+            "grid",
+            "rows × columns of identical cells, one item line per cell"
+          ],
+          [
+            "align",
+            "put objects on one shared centerline — written after the tree"
+          ],
+          [
+            "fan",
+            "a hub with children spread out beside it — written after the tree"
+          ],
+          [
+            "arrows",
+            "the block of connections — always last, even when empty"
+          ]
+        ]
+      }
+    },
+    "b-language-statements-index-19": {
+      "id": "b-language-statements-index-19",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Each construct has its own page: "
+        },
+        {
+          "insert": "row and col",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/60-hug",
+              "label": "hug= — pinned lanes"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "The full example",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/95-full-example",
+              "label": "The full example"
+            }
+          }
+        },
+        {
+          "insert": " puts them all in one program."
+        }
+      ]
+    },
+    "b-language-nesting-heading-20": {
+      "id": "b-language-nesting-heading-20",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How a program nests"
+        }
+      ]
+    },
+    "b-language-nesting-body-21": {
+      "id": "b-language-nesting-body-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Indentation is the grammar, exactly like YAML: the lines indented under a container are its children, in order. Nothing else marks nesting. A "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": " has exactly one child; a "
+        },
+        {
+          "insert": "row",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "col",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": " has one child per weight; a "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": "'s items fill the lattice row by row; a "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": "'s indented lines are always items."
+        }
+      ]
+    },
+    "b-language-nesting-code-22": {
+      "id": "b-language-nesting-code-22",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "col 2|1\n  section 1 text=top label=\"Top\"\n    grid 1x3 gap=32\n      item 2 text=a type=process size=M\n      item 3 text=b type=process size=M\n      item 4 text=c type=process size=M\n  section 5 text=bottom label=\"Bottom\"\n    group\n      item 6 text=note type=sticky size=S at=W\n      item 7 text=core type=process size=L at=C\n\nalign y: 2 7\n\narrows\n  2 > 3\n  3 > 4\n  4 > 7"
+        }
+      ]
+    },
+    "b-language-nesting-canvas-23": {
+      "id": "b-language-nesting-canvas-23",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-nesting.canvas.json",
+        "title": "The nesting example, solved"
+      }
+    },
+    "b-language-canonical-heading-24": {
+      "id": "b-language-canonical-heading-24",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Canonical form"
+        }
+      ]
+    },
+    "b-language-canonical-body-25": {
+      "id": "b-language-canonical-body-25",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "serializeSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "serializeSketch"
+            }
+          }
+        },
+        {
+          "insert": " always emits: 2-space indentation; numbers in declaration order from 1; every required field; "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " per the rules above (including "
+        },
+        {
+          "insert": "at=C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — never omitted); "
+        },
+        {
+          "insert": "label=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/60-hug",
+              "label": "hug= — pinned lanes"
+            }
+          }
+        },
+        {
+          "insert": " only when present; one blank line before the alignment facts (when any exist) and one before "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "parseSketch(serializeSketch(s))",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "parseSketch"
+            }
+          }
+        },
+        {
+          "insert": " is structurally identical to "
+        },
+        {
+          "insert": "s",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and serializing again reproduces the exact same text. "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": " names ("
+        },
+        {
+          "insert": "t1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "t2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", ...) are internal, regenerated in order by the parser, and never written."
+        }
+      ]
+    },
+    "b-language-deferred-heading-26": {
+      "id": "b-language-deferred-heading-26",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Deliberately deferred"
+        }
+      ]
+    },
+    "b-language-deferred-body-27": {
+      "id": "b-language-deferred-body-27",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Body text on items",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "text=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the object's short name, not the real sticky body text, which is sentences long and would destroy line readability. Body text stays off the line until a preview form is designed."
+        }
+      ]
+    },
+    "b-language-deferred-sparse-28": {
+      "id": "b-language-deferred-sparse-28",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Sparse programs",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the fitter omitting obvious facts and solver defaults filling them in. The grammar is designed so this becomes an emission choice, not a rewrite."
+        }
+      ]
+    },
+    "b-language-lab-pointer-29": {
+      "id": "b-language-lab-pointer-29",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The spec source snapshot is "
+        },
+        {
+          "insert": "packages/canvas-agent/LANGUAGE.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/LANGUAGE.md"
+            }
+          }
+        },
+        {
+          "insert": "; these pages are the living reference. The layout-lab playground that offered live DSL editing is deleted."
+        }
+      ]
+    }
+  }
+}

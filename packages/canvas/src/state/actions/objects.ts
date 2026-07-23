@@ -14,7 +14,13 @@ import { nextId, selectedObjectIds } from "./helpers";
 import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
 
-function mergeObjectPatch(
+/**
+ * Merge an object patch the way canvas.updateObject does: geometry snaps to
+ * the grid, style patches merge per-key (undefined deletes). Shared with the
+ * agent apply path (./agent-patch.ts) so agent updates behave exactly like
+ * human ones.
+ */
+export function mergeObjectPatch(
   object: InteractiveCanvasObject,
   patch: Partial<Omit<InteractiveCanvasObject, "id">>,
 ): InteractiveCanvasObject {

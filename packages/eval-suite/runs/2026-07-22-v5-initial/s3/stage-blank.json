@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s3-state-machine",
+  "title": "Eval Suite S3 \u2014 State Machine",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2864,
+    "height": 1864
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S3 \u2014 State Machine",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2800,
+        "height": 1800
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 176,
+        "y": 320,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-connected",
+      "type": "process",
+      "text": "Connected",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 704,
+        "y": 320,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

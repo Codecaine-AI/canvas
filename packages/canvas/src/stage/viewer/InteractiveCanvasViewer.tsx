@@ -32,7 +32,7 @@ export interface InteractiveCanvasViewerProps {
   view?: string;
   /** Enables wheel/pinch zoom and drag/trackpad panning without enabling edits. */
   interactive?: boolean;
-  /** Removes the document card chrome and makes the stage fill its parent. */
+  /** Removes the document card trim and makes the stage fill its parent. */
   bare?: boolean;
   /** Shows compact fit/zoom controls over an interactive stage. */
   showNavigationControls?: boolean;

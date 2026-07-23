@@ -14,7 +14,7 @@ import { CENTER_TEXT_SLOT } from "../objects/text-slots";
  * type, everything else by effective render shape. The generic fallback below
  * only fires for a render shape with no registered def (today that is solely
  * an explicit `style.shape: "section"` on a non-section object, which always
- * rendered the plain default chrome), reproducing the old default branch:
+ * rendered the plain default trim), reproducing the old default branch:
  * base className, the default center text slot, edge ports.
  */
 export function ObjectShape(props: ObjectRenderProps) {

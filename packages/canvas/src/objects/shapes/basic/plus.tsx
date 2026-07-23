@@ -12,7 +12,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 /**
  * Plus (W5, 12-point cross/plus polygon) — true-outline polygon (connection-
  * overlay.ts's plusPoints, the same generator connector attachment uses)
- * painted behind the label; the button chrome stays fully transparent so
+ * painted behind the label; the button trim stays fully transparent so
  * only one outline is visible. Legacy `hidesVisibleText` suppressed BOTH the
  * label span and the body span for plus (along with or-junction/summing-
  * junction) — `text: "none"` reproduces that exactly, since

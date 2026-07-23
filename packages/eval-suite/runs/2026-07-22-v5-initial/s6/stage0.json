@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s6-org-tree",
+  "title": "Eval Suite S6 — Org Tree",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S6 — Org Tree",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-ceo",
+      "type": "process",
+      "text": "CEO",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1184,
+        "y": 64,
+        "width": 240,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-vp-engineering",
+      "type": "process",
+      "text": "VP Engineering",
+      "color": "teal",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 656,
+        "y": 608,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "panel-engineering",
+      "type": "section",
+      "text": "Engineering",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 480,
+        "y": 464,
+        "width": 576,
+        "height": 1072
+      }
+    },
+    {
+      "id": "panel-product",
+      "type": "section",
+      "text": "Product",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1088,
+        "y": 464,
+        "width": 288,
+        "height": 1072
+      }
+    },
+    {
+      "id": "panel-design",
+      "type": "section",
+      "text": "Design",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1408,
+        "y": 464,
+        "width": 256,
+        "height": 1072
+      }
+    },
+    {
+      "id": "panel-operations",
+      "type": "section",
+      "text": "Operations",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 464,
+        "width": 288,
+        "height": 1072
+      }
+    },
+    {
+      "id": "legend-sticky",
+      "type": "sticky",
+      "text": "HOW TO READ\nSolid gray = direct report\nOrange dashed = dotted-line report\nTinted panels = each VP’s org",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 112,
+        "width": 336,
+        "height": 240
+      }
+    },
+    {
+      "id": "vp-product",
+      "type": "process",
+      "text": "VP Product",
+      "color": "teal",
+      "parentId": "panel-product",
+      "geometry": {
+        "x": 1120,
+        "y": 608,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "vp-design",
+      "type": "process",
+      "text": "VP Design",
+      "color": "teal",
+      "parentId": "panel-design",
+      "geometry": {
+        "x": 1424,
+        "y": 608,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "vp-operations",
+      "type": "process",
+      "text": "VP Operations",
+      "color": "teal",
+      "parentId": "panel-operations",
+      "geometry": {
+        "x": 1728,
+        "y": 608,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-platform",
+      "type": "process",
+      "text": "Platform",
+      "color": "gray",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 496,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-frontend",
+      "type": "process",
+      "text": "Frontend",
+      "color": "gray",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 640,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-infrastructure",
+      "type": "process",
+      "text": "Infrastructure",
+      "color": "gray",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 784,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-security",
+      "type": "process",
+      "text": "Security",
+      "color": "gray",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 928,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-growth",
+      "type": "process",
+      "text": "Growth",
+      "color": "gray",
+      "parentId": "panel-product",
+      "geometry": {
+        "x": 1104,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-insights",
+      "type": "process",
+      "text": "Insights",
+      "color": "gray",
+      "parentId": "panel-product",
+      "geometry": {
+        "x": 1248,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-design-systems",
+      "type": "process",
+      "text": "Design Systems",
+      "color": "gray",
+      "parentId": "panel-design",
+      "geometry": {
+        "x": 1440,
+        "y": 1392,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-it",
+      "type": "process",
+      "text": "IT",
+      "color": "gray",
+      "parentId": "panel-operations",
+      "geometry": {
+        "x": 1712,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "team-facilities",
+      "type": "process",
+      "text": "Facilities",
+      "color": "gray",
+      "parentId": "panel-operations",
+      "geometry": {
+        "x": 1856,
+        "y": 1392,
+        "width": 112,
+        "height": 112
+      }
+    },
+    {
+      "id": "edge-dotted-label",
+      "type": "pill",
+      "text": "dotted line",
+      "color": "white",
+      "parentId": "panel-engineering",
+      "geometry": {
+        "x": 848,
+        "y": 1504,
+        "width": 144,
+        "height": 32
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-ceo-eng",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "seed-vp-engineering"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-product",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-product"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-design",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-design"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-ops",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-operations"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-platform",
+      "from": {
+        "objectId": "seed-vp-engineering"
+      },
+      "to": {
+        "objectId": "team-platform"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-frontend",
+      "from": {
+        "objectId": "seed-vp-engineering"
+      },
+      "to": {
+        "objectId": "team-frontend"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-infra",
+      "from": {
+        "objectId": "seed-vp-engineering"
+      },
+      "to": {
+        "objectId": "team-infrastructure"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-security",
+      "from": {
+        "objectId": "seed-vp-engineering"
+      },
+      "to": {
+        "objectId": "team-security"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-product-growth",
+      "from": {
+        "objectId": "vp-product"
+      },
+      "to": {
+        "objectId": "team-growth"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-product-insights",
+      "from": {
+        "objectId": "vp-product"
+      },
+      "to": {
+        "objectId": "team-insights"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-design-systems",
+      "from": {
+        "objectId": "vp-design"
+      },
+      "to": {
+        "objectId": "team-design-systems"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ops-it",
+      "from": {
+        "objectId": "vp-operations"
+      },
+      "to": {
+        "objectId": "team-it"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ops-facilities",
+      "from": {
+        "objectId": "vp-operations"
+      },
+      "to": {
+        "objectId": "team-facilities"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-dotted-design-eng",
+      "from": {
+        "objectId": "seed-vp-engineering"
+      },
+      "to": {
+        "objectId": "team-design-systems"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

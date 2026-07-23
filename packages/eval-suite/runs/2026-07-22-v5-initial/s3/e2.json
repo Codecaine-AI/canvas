@@ -1,0 +1,745 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s3-state-machine",
+  "title": "Eval Suite S3 — State Machine",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2864,
+    "height": 1864
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S3 — State Machine",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2800,
+        "height": 1800
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 320,
+        "y": 560,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-connected",
+      "type": "process",
+      "text": "Connected",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 560,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-connecting",
+      "type": "process",
+      "text": "Connecting",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 736,
+        "y": 560,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "state-degraded",
+      "type": "process",
+      "text": "Degraded",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 1056,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "state-reconnecting",
+      "type": "process",
+      "text": "Reconnecting",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1408,
+        "y": 1488,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "state-suspended",
+      "type": "process",
+      "text": "Suspended",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 128,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "state-disconnecting",
+      "type": "process",
+      "text": "Disconnecting",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 400,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "heartbeat-badge",
+      "type": "pill",
+      "text": "heartbeat / 30s",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 736,
+        "width": 224,
+        "height": 48
+      }
+    },
+    {
+      "id": "failure-note",
+      "type": "sticky",
+      "text": "dashed red = degradation — every failure lands back in Reconnecting or Idle, nothing dead-ends.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 1040,
+        "width": 384,
+        "height": 224
+      }
+    },
+    {
+      "id": "port-connect",
+      "type": "ellipse",
+      "text": "",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 720,
+        "y": 608,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-packet-loss",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 192,
+        "y": 1040,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "state-migrating",
+      "type": "process",
+      "text": "Migrating",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1744,
+        "y": 1040,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "port-migration-complete",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1376,
+        "y": 592,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-migrate",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1840,
+        "y": 1152,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-migration-failed",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1632,
+        "y": 1568,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-recovered-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1344,
+        "y": 672,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-session-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1328,
+        "y": 672,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-quarantine-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-grace-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1392,
+        "y": 1536,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-resume-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1632,
+        "y": 1504,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-close-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1376,
+        "y": 576,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-close-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2192,
+        "y": 432,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-suspend-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1184,
+        "y": 544,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-migrate-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1376,
+        "y": 624,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-packet-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1136,
+        "y": 624,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-complete-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1840,
+        "y": 1024,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-failed-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1968,
+        "y": 1120,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-socket-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2320,
+        "y": 384,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-socket-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 496,
+        "y": 544,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-recovered-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 352,
+        "y": 1168,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-grace-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 272,
+        "y": 1168,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-quarantine-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 1088,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-session-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1536,
+        "y": 1472,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-resume-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 384,
+        "y": 208,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-handshake-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 960,
+        "y": 576,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-handshake-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1136,
+        "y": 576,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-timeout-source",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 768,
+        "y": 544,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-timeout-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 544,
+        "y": 544,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "id": "port-suspend-target",
+      "type": "ellipse",
+      "text": "",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 384,
+        "y": 160,
+        "width": 16,
+        "height": 16
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-handshake",
+      "from": {
+        "objectId": "port-handshake-source"
+      },
+      "to": {
+        "objectId": "port-handshake-target"
+      },
+      "label": "handshake OK",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-timeout",
+      "from": {
+        "objectId": "port-timeout-source"
+      },
+      "to": {
+        "objectId": "port-timeout-target"
+      },
+      "label": "timeout",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-grace-expired",
+      "from": {
+        "objectId": "port-grace-source"
+      },
+      "to": {
+        "objectId": "port-grace-target"
+      },
+      "label": "grace expired",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-session-resumed",
+      "from": {
+        "objectId": "port-session-source"
+      },
+      "to": {
+        "objectId": "port-session-target"
+      },
+      "label": "session resumed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-suspend",
+      "from": {
+        "objectId": "port-suspend-source"
+      },
+      "to": {
+        "objectId": "port-suspend-target"
+      },
+      "label": "suspend()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-quarantine",
+      "from": {
+        "objectId": "port-quarantine-source"
+      },
+      "to": {
+        "objectId": "port-quarantine-target"
+      },
+      "label": "quarantine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-resume-window",
+      "from": {
+        "objectId": "port-resume-source"
+      },
+      "to": {
+        "objectId": "port-resume-target"
+      },
+      "label": "resume window",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-close",
+      "from": {
+        "objectId": "port-close-source"
+      },
+      "to": {
+        "objectId": "port-close-target"
+      },
+      "label": "close()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-socket-closed",
+      "from": {
+        "objectId": "port-socket-source"
+      },
+      "to": {
+        "objectId": "port-socket-target"
+      },
+      "label": "socket closed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-connect",
+      "from": {
+        "objectId": "seed-idle"
+      },
+      "to": {
+        "objectId": "port-connect"
+      },
+      "label": "connect()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-packet-loss",
+      "from": {
+        "objectId": "port-packet-source"
+      },
+      "to": {
+        "objectId": "port-packet-loss"
+      },
+      "label": "packet loss > 5%",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-recovered",
+      "from": {
+        "objectId": "port-recovered-source"
+      },
+      "to": {
+        "objectId": "port-recovered-target"
+      },
+      "label": "recovered",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-migrate",
+      "from": {
+        "objectId": "port-migrate-source"
+      },
+      "to": {
+        "objectId": "port-migrate"
+      },
+      "label": "migrate()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-migration-complete",
+      "from": {
+        "objectId": "port-complete-source"
+      },
+      "to": {
+        "objectId": "port-migration-complete"
+      },
+      "label": "migration complete",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-migration-failed",
+      "from": {
+        "objectId": "port-failed-source"
+      },
+      "to": {
+        "objectId": "port-migration-failed"
+      },
+      "label": "migration failed",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

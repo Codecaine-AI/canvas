@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 1,
+  "id": "v2-flow-figjam",
+  "title": "V2 Flow (FigJam parity)",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 5000,
+    "height": 2150
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Interview Agent",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 784,
+        "y": 448,
+        "width": 4352,
+        "height": 1872
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "sticky-overall-context",
+      "type": "sticky",
+      "text": "# Test\nThis is pretty nice\n- The UI is starting to feel very clean\n\nasdf\nasdf\n- test\n## Testing\n- asdf\n  - asdf\n  - asd\n    - asdf\n### Testing\n\n- testing this\n- testing\n  - esketit\n\n\n- testing this new setup\n\n- Overall Context is why we are doing the interview / overall goal we wish to accomplish.\n- Who the client is, etc\n- EX “We are doing this interview to understand why someone would change pharmacies",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 810.404848909794,
+        "y": 494.75376544860944,
+        "width": 497.1659436489356,
+        "height": 418.5
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-base-question-text",
+      "type": "sticky",
+      "text": "Base Question Text:\n• Stakeholder inputted text of the question\n• Can be adapted based on conversation history\n\nResearch Objective\n• Defines what we want to understand about the interviewee from this question.\n• In relation to the overall objective",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 835.8130798871061,
+        "y": 1326.5865110206894,
+        "width": 414,
+        "height": 490.5
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "section-interview-inputs",
+      "type": "section",
+      "text": "Interview Inputs",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1335.7687436354377,
+        "y": 560,
+        "width": 496,
+        "height": 1616
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "card-general",
+      "type": "section",
+      "text": "General",
+      "color": "blue",
+      "parentId": "section-interview-inputs",
+      "geometry": {
+        "x": 1357.2407776081056,
+        "y": 614.6689728418376,
+        "width": 430,
+        "height": 346
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pill-overall-context",
+      "type": "pill",
+      "text": "Overall Context / Interview Purpose",
+      "color": "white",
+      "parentId": "card-general",
+      "geometry": {
+        "x": 1390.7425739756402,
+        "y": 675.5010153385231,
+        "width": 363,
+        "height": 57
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "card-questions",
+      "type": "section",
+      "text": "Questions",
+      "color": "gray",
+      "parentId": "section-interview-inputs",
+      "geometry": {
+        "x": 1367.243291497402,
+        "y": 1012.247213189265,
+        "width": 430,
+        "height": 1134
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "card-question-1",
+      "type": "section",
+      "text": "Question 1",
+      "color": "yellow",
+      "parentId": "card-questions",
+      "geometry": {
+        "x": 1415.243291497402,
+        "y": 1076.247213189265,
+        "width": 334,
+        "height": 222
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pill-q1-base-question-text",
+      "type": "pill",
+      "text": "Base Question Text",
+      "color": "white",
+      "parentId": "card-question-1",
+      "geometry": {
+        "x": 1466.243291497402,
+        "y": 1126.247213189265,
+        "width": 234,
+        "height": 40
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-q1-research-objective",
+      "type": "pill",
+      "text": "Research Objective",
+      "color": "white",
+      "parentId": "card-question-1",
+      "geometry": {
+        "x": 1466.243291497402,
+        "y": 1212.247213189265,
+        "width": 234,
+        "height": 60
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "card-question-2",
+      "type": "section",
+      "text": "Question 2",
+      "color": "yellow",
+      "parentId": "card-questions",
+      "geometry": {
+        "x": 1415.243291497402,
+        "y": 1300.247213189265,
+        "width": 334,
+        "height": 298
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pill-q2-base-question-text",
+      "type": "pill",
+      "text": "Base Question Text",
+      "color": "white",
+      "parentId": "card-question-2",
+      "geometry": {
+        "x": 1466.243291497402,
+        "y": 1350.247213189265,
+        "width": 234,
+        "height": 60
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-q2-research-objective",
+      "type": "pill",
+      "text": "Research Objective",
+      "color": "white",
+      "parentId": "card-question-2",
+      "geometry": {
+        "x": 1465.2373291650072,
+        "y": 1438.2684030469657,
+        "width": 234,
+        "height": 60
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "card-question-n",
+      "type": "section",
+      "text": "Question N",
+      "color": "yellow",
+      "parentId": "card-questions",
+      "geometry": {
+        "x": 1415.243291497402,
+        "y": 1844.2472131892653,
+        "width": 334,
+        "height": 204
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pill-qn-base-question-text",
+      "type": "pill",
+      "text": "Base Question Text",
+      "color": "white",
+      "parentId": "card-question-n",
+      "geometry": {
+        "x": 1466.243291497402,
+        "y": 1893.2472131892641,
+        "width": 234,
+        "height": 46.5
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-qn-research-objective",
+      "type": "pill",
+      "text": "Research Objective",
+      "color": "white",
+      "parentId": "card-question-n",
+      "geometry": {
+        "x": 1466.243291497402,
+        "y": 1969.7472131892637,
+        "width": 234,
+        "height": 60
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "chip-generate-transition-response",
+      "type": "icon",
+      "text": "Generate Transition Response",
+      "color": "orange",
+      "parentId": "section",
+      "geometry": {
+        "x": 1952.311691518366,
+        "y": 1074.9991709114988,
+        "width": 115.63728061962729,
+        "height": 114.52014974952954
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "chip-adapt-question",
+      "type": "icon",
+      "text": "Adapt Question Based on Interview History",
+      "color": "orange",
+      "parentId": "section",
+      "geometry": {
+        "x": 1939.5246088766103,
+        "y": 1390.0054140114194,
+        "width": 140.47953241993946,
+        "height": 144
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "chat-ai-asks-question",
+      "type": "icon",
+      "text": "AI Asks Question",
+      "color": "violet",
+      "parentId": "section",
+      "geometry": {
+        "x": 2929.224675268634,
+        "y": 560.0030962823923,
+        "width": 233.61305719057918,
+        "height": 150.70939869672236
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "person-interviewee-response",
+      "type": "icon",
+      "text": "Interviewee Response",
+      "color": "green",
+      "parentId": "section",
+      "geometry": {
+        "x": 2907.6480292031283,
+        "y": 995.8744680202619,
+        "width": 276.75403010225455,
+        "height": 229.7540974149913
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "chip-generate-probing-question",
+      "type": "icon",
+      "text": "Generate Probing Question",
+      "color": "orange",
+      "parentId": "section",
+      "geometry": {
+        "x": 4866.760289161184,
+        "y": 1019.0570377247934,
+        "width": 209.27302563198737,
+        "height": 182.18744835316227
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "section-memory-bank",
+      "type": "section",
+      "text": "Memory Bank",
+      "color": "green",
+      "parentId": "section",
+      "geometry": {
+        "x": 3552,
+        "y": 816,
+        "width": 1008,
+        "height": 592
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sticky-memory-bank",
+      "type": "sticky",
+      "text": "Memory Bank\n• Memory of the current interview across all questions\n• Provides consistency without needing to pass the whole conversation each message\n• Ensure’s we do not ask the same question twice",
+      "color": "red",
+      "parentId": "section-memory-bank",
+      "geometry": {
+        "x": 3964.1201863307742,
+        "y": 863.4983881754117,
+        "width": 564.5251577326767,
+        "height": 440.6329428385394
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "card-memory-actions",
+      "type": "section",
+      "text": "Memory Actions",
+      "color": "gray",
+      "parentId": "section-memory-bank",
+      "geometry": {
+        "x": 3575.670916977789,
+        "y": 862.8866257045295,
+        "width": 320,
+        "height": 512
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "predefined-new-memory",
+      "type": "predefined-process",
+      "text": "New Memory",
+      "color": "blue",
+      "parentId": "card-memory-actions",
+      "geometry": {
+        "x": 3607.5925566574656,
+        "y": 917.8747148844514,
+        "width": 268,
+        "height": 66
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "predefined-update-memory",
+      "type": "predefined-process",
+      "text": "Update Memory",
+      "color": "blue",
+      "parentId": "card-memory-actions",
+      "geometry": {
+        "x": 3607.5925566574656,
+        "y": 1042.8747148844514,
+        "width": 268,
+        "height": 66
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "predefined-delete-memory",
+      "type": "predefined-process",
+      "text": "Delete Memory",
+      "color": "blue",
+      "parentId": "card-memory-actions",
+      "geometry": {
+        "x": 3607.5925566574656,
+        "y": 1167.8747148844514,
+        "width": 268,
+        "height": 66
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "predefined-no-change",
+      "type": "predefined-process",
+      "text": "No Change",
+      "color": "blue",
+      "parentId": "card-memory-actions",
+      "geometry": {
+        "x": 3607.5925566574656,
+        "y": 1292.8747148844514,
+        "width": 268,
+        "height": 66
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "predefined-get-next-question",
+      "type": "predefined-process",
+      "text": "Get Next Question",
+      "color": "blue",
+      "parentId": "section",
+      "geometry": {
+        "x": 1917.4787082294647,
+        "y": 1988.8350829354683,
+        "width": 176,
+        "height": 66
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "chevron-enough-context",
+      "type": "arrow-shape",
+      "text": "Enough Context",
+      "color": "yellow",
+      "parentId": "section-2",
+      "geometry": {
+        "x": 2301.9237909004964,
+        "y": 1837.5072661547465,
+        "width": 348,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "left"
+    },
+    {
+      "id": "chevron-null-response",
+      "type": "arrow-shape",
+      "text": "Null Response",
+      "color": "yellow",
+      "parentId": "section-2",
+      "geometry": {
+        "x": 2301.9231709557807,
+        "y": 1971.9760306762767,
+        "width": 348,
+        "height": 102.06166899741811
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "left"
+    },
+    {
+      "id": "chevron-user-safety-refusal",
+      "type": "arrow-shape",
+      "text": "User Safety Refusal",
+      "color": "yellow",
+      "parentId": "section-2",
+      "geometry": {
+        "x": 2318.3421524372625,
+        "y": 2124.0389359099318,
+        "width": 348,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "left"
+    },
+    {
+      "id": "emphasis-box-research-objective",
+      "type": "rectangle",
+      "text": "Does Response Provide Enough Context to Answer the Research Objective",
+      "color": "red",
+      "parentId": "section",
+      "geometry": {
+        "x": 2804.8182457733974,
+        "y": 1936.3374101209772,
+        "width": 470.70578977925334,
+        "height": 171
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "card-probing-response",
+      "type": "section",
+      "text": "Probing Response",
+      "color": "white",
+      "parentId": "section",
+      "geometry": {
+        "x": 3480.608300822934,
+        "y": 1775.2558119657476,
+        "width": 384,
+        "height": 480
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "chevron-not-enough-context",
+      "type": "arrow-shape",
+      "text": "Not Enough Context",
+      "color": "yellow",
+      "parentId": "card-probing-response",
+      "geometry": {
+        "x": 3511.6553194325693,
+        "y": 1823.9734680841052,
+        "width": 331,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "right"
+    },
+    {
+      "id": "chevron-unclear-message",
+      "type": "arrow-shape",
+      "text": "Unclear Message",
+      "color": "yellow",
+      "parentId": "card-probing-response",
+      "geometry": {
+        "x": 3511.6553194325693,
+        "y": 1973.9734680841045,
+        "width": 331,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "right"
+    },
+    {
+      "id": "chevron-possible-user-refusal",
+      "type": "arrow-shape",
+      "text": "Possible User Refusal",
+      "color": "yellow",
+      "parentId": "card-probing-response",
+      "geometry": {
+        "x": 3511.6553194325693,
+        "y": 2123.9734680841057,
+        "width": 331,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "right"
+    },
+    {
+      "id": "section",
+      "type": "section",
+      "text": "Section",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1893.3917592659027,
+        "y": 494.7538375693331,
+        "width": 3200,
+        "height": 1776
+      },
+      "style": {
+        "shape": "section",
+        "strokeStyle": "solid"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "section-2",
+      "type": "section",
+      "text": "Next Question Response",
+      "color": "gray",
+      "parentId": "section",
+      "geometry": {
+        "x": 2290.5666224412344,
+        "y": 1788.5828376293987,
+        "width": 413.7676745133267,
+        "height": 451.6224357677406
+      },
+      "style": {
+        "shape": "section"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-sticky-overall-context-to-pill",
+      "from": {
+        "objectId": "sticky-overall-context",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pill-overall-context",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "yellow"
+    },
+    {
+      "id": "conn-sticky-base-question-to-q2-research-objective",
+      "from": {
+        "objectId": "sticky-base-question-text",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pill-q2-research-objective",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "yellow"
+    },
+    {
+      "id": "conn-question2-to-questionn",
+      "from": {
+        "objectId": "card-question-2",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "card-question-n",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "none",
+      "role": "sequence",
+      "color": "gray"
+    },
+    {
+      "id": "conn-questions-to-ai-asks-question",
+      "from": {
+        "objectId": "card-questions",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chip-generate-transition-response",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "violet"
+    },
+    {
+      "id": "conn-adapt-question-to-generate-transition-response",
+      "from": {
+        "objectId": "chip-adapt-question",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "chip-generate-transition-response",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-get-next-question-to-adapt-question",
+      "from": {
+        "objectId": "predefined-get-next-question",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "chip-adapt-question",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-generate-probing-question-to-ai-asks-question",
+      "from": {
+        "objectId": "chip-generate-probing-question",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "chat-ai-asks-question",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-ai-asks-question-to-interviewee-response",
+      "from": {
+        "objectId": "chat-ai-asks-question",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "person-interviewee-response",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-interviewee-response-to-new-memory",
+      "from": {
+        "objectId": "person-interviewee-response",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "section-memory-bank",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "green"
+    },
+    {
+      "id": "conn-interviewee-response-to-emphasis-box",
+      "from": {
+        "objectId": "person-interviewee-response",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "top"
+      },
+      "label": "Test",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "green"
+    },
+    {
+      "id": "conn-get-next-question-to-enough-context",
+      "from": {
+        "objectId": "predefined-get-next-question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-enough-context",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "back",
+      "role": "flow",
+      "color": "gray",
+      "waypoints": [
+        [
+          2204.179758302058,
+          2021.8453133448186
+        ],
+        [
+          2204.179758302058,
+          1887.5174965640965
+        ]
+      ]
+    },
+    {
+      "id": "conn-get-next-question-to-null-response",
+      "from": {
+        "objectId": "predefined-get-next-question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-null-response",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "back",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-get-next-question-to-user-safety-refusal",
+      "from": {
+        "objectId": "predefined-get-next-question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-user-safety-refusal",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "back",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-emphasis-box-to-enough-context",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "chevron-enough-context",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-emphasis-box-to-null-response",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "left",
+        "position": [
+          0,
+          0.5034194592222451
+        ]
+      },
+      "to": {
+        "objectId": "chevron-null-response",
+        "anchor": "right",
+        "position": [
+          1,
+          0.4942708410243675
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-emphasis-box-to-user-safety-refusal",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "chevron-user-safety-refusal",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-emphasis-box-to-not-enough-context",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-not-enough-context",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-emphasis-box-to-unclear-message",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-unclear-message",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-emphasis-box-to-possible-user-refusal",
+      "from": {
+        "objectId": "emphasis-box-research-objective",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chevron-possible-user-refusal",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-not-enough-context-to-generate-probing-question",
+      "from": {
+        "objectId": "chevron-not-enough-context",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chip-generate-probing-question",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray",
+      "waypoints": [
+        [
+          3866.6585000953764,
+          1755.9210175030553
+        ],
+        [
+          4971.399982639995,
+          1755.9210175030553
+        ]
+      ]
+    },
+    {
+      "id": "conn-unclear-message-to-generate-probing-question",
+      "from": {
+        "objectId": "chevron-unclear-message",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chip-generate-probing-question",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray",
+      "waypoints": [
+        [
+          3866.6585000953764,
+          1917.4898013612633
+        ],
+        [
+          4971.399982639995,
+          1917.4898013612633
+        ]
+      ]
+    },
+    {
+      "id": "conn-possible-user-refusal-to-generate-probing-question",
+      "from": {
+        "objectId": "chevron-possible-user-refusal",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chip-generate-probing-question",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray",
+      "waypoints": [
+        [
+          3866.6585000953764,
+          2053.2342174131454
+        ],
+        [
+          4971.399982639995,
+          2053.2342174131454
+        ]
+      ]
+    },
+    {
+      "id": "conn-memory-bank-to-generate-probing-question",
+      "from": {
+        "objectId": "section-memory-bank",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chip-generate-probing-question",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "connection-2",
+      "from": {
+        "objectId": "chip-generate-transition-response",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "chat-ai-asks-question",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

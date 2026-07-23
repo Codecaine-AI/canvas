@@ -12,7 +12,7 @@ Codecaine suite alongside pi-agent-kernel and docs-framework.
 ```
 packages/
   canvas/     @codecaine-ai/canvas — the engine (schema, actions, geometry,
-              interaction state machine, rendering, chrome components).
+              interaction state machine, rendering, trim components).
               See packages/canvas/src/index.ts for the barrel and
               docs/00-overview.md for the architecture map.
   studio/     @codecaine-ai/studio — a minimal standalone Vite+React app

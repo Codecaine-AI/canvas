@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-swimlane",
+  "title": "Eval — Swimlane Pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2800,
+    "height": 2144
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval — Swimlane Pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2736,
+        "height": 2080
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "frontend",
+      "type": "section",
+      "text": "Frontend",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 144,
+        "width": 2640,
+        "height": 336
+      }
+    },
+    {
+      "id": "submit-form",
+      "type": "process",
+      "text": "Submit Form",
+      "parentId": null,
+      "geometry": {
+        "x": 399,
+        "y": 296,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "validate-input",
+      "type": "process",
+      "text": "Validate Input",
+      "parentId": null,
+      "geometry": {
+        "x": 647,
+        "y": 296,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "show-progress",
+      "type": "process",
+      "text": "Show Progress",
+      "parentId": null,
+      "geometry": {
+        "x": 1432,
+        "y": 296,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "render-result",
+      "type": "process",
+      "text": "Render Result",
+      "parentId": null,
+      "geometry": {
+        "x": 1821,
+        "y": 279,
+        "width": 248,
+        "height": 130
+      }
+    },
+    {
+      "id": "api",
+      "type": "section",
+      "text": "API",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 576,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "auth-rate-limit",
+      "type": "process",
+      "text": "Auth & Rate Limit",
+      "parentId": null,
+      "geometry": {
+        "x": 587,
+        "y": 704,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "parse-request",
+      "type": "process",
+      "text": "Parse Request",
+      "parentId": null,
+      "geometry": {
+        "x": 835,
+        "y": 704,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "enqueue-job",
+      "type": "process",
+      "text": "Enqueue Job",
+      "parentId": null,
+      "geometry": {
+        "x": 1176,
+        "y": 704,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "serve-result",
+      "type": "process",
+      "text": "Serve Result",
+      "parentId": null,
+      "geometry": {
+        "x": 1853,
+        "y": 704,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "workers",
+      "type": "section",
+      "text": "Workers",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 960,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "pick-up-job",
+      "type": "process",
+      "text": "Pick Up Job",
+      "parentId": null,
+      "geometry": {
+        "x": 1176,
+        "y": 1088,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "process-data",
+      "type": "process",
+      "text": "Process Data",
+      "parentId": null,
+      "geometry": {
+        "x": 1432,
+        "y": 1088,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "write-output",
+      "type": "process",
+      "text": "Write Output",
+      "parentId": null,
+      "geometry": {
+        "x": 1853,
+        "y": 1088,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "data",
+      "type": "section",
+      "text": "Data",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 1344,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "job-queue",
+      "type": "process",
+      "text": "Job Queue",
+      "parentId": null,
+      "geometry": {
+        "x": 1176,
+        "y": 1472,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "object-store",
+      "type": "process",
+      "text": "Object Store",
+      "parentId": null,
+      "geometry": {
+        "x": 1432,
+        "y": 1472,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "results-db",
+      "type": "process",
+      "text": "Results DB",
+      "parentId": null,
+      "geometry": {
+        "x": 1853,
+        "y": 1472,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "observability-2",
+      "type": "section",
+      "text": "Observability",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 1728,
+        "width": 2640,
+        "height": 336
+      }
+    },
+    {
+      "id": "collect-metrics",
+      "type": "process",
+      "text": "Collect Metrics",
+      "parentId": null,
+      "geometry": {
+        "x": 1176,
+        "y": 1880,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "trace-requests",
+      "type": "process",
+      "text": "Trace Requests",
+      "parentId": null,
+      "geometry": {
+        "x": 1432,
+        "y": 1880,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "alerting",
+      "type": "process",
+      "text": "Alerting",
+      "parentId": null,
+      "geometry": {
+        "x": 1821,
+        "y": 1863,
+        "width": 248,
+        "height": 130
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "submit-form"
+      },
+      "to": {
+        "objectId": "validate-input"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-2",
+      "from": {
+        "objectId": "validate-input"
+      },
+      "to": {
+        "objectId": "show-progress"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-3",
+      "from": {
+        "objectId": "show-progress"
+      },
+      "to": {
+        "objectId": "render-result"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-4",
+      "from": {
+        "objectId": "auth-rate-limit"
+      },
+      "to": {
+        "objectId": "parse-request"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-5",
+      "from": {
+        "objectId": "parse-request"
+      },
+      "to": {
+        "objectId": "enqueue-job"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-6",
+      "from": {
+        "objectId": "enqueue-job"
+      },
+      "to": {
+        "objectId": "serve-result"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-7",
+      "from": {
+        "objectId": "pick-up-job"
+      },
+      "to": {
+        "objectId": "process-data"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-8",
+      "from": {
+        "objectId": "process-data"
+      },
+      "to": {
+        "objectId": "write-output"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-9",
+      "from": {
+        "objectId": "job-queue"
+      },
+      "to": {
+        "objectId": "object-store"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-10",
+      "from": {
+        "objectId": "object-store"
+      },
+      "to": {
+        "objectId": "results-db"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-11",
+      "from": {
+        "objectId": "submit-form"
+      },
+      "to": {
+        "objectId": "auth-rate-limit"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-12",
+      "from": {
+        "objectId": "enqueue-job"
+      },
+      "to": {
+        "objectId": "job-queue"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-13",
+      "from": {
+        "objectId": "job-queue"
+      },
+      "to": {
+        "objectId": "pick-up-job"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-14",
+      "from": {
+        "objectId": "process-data"
+      },
+      "to": {
+        "objectId": "object-store"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-15",
+      "from": {
+        "objectId": "write-output"
+      },
+      "to": {
+        "objectId": "results-db"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-16",
+      "from": {
+        "objectId": "results-db"
+      },
+      "to": {
+        "objectId": "serve-result"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-17",
+      "from": {
+        "objectId": "serve-result"
+      },
+      "to": {
+        "objectId": "render-result"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-18",
+      "from": {
+        "objectId": "process-data"
+      },
+      "to": {
+        "objectId": "collect-metrics"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-19",
+      "from": {
+        "objectId": "serve-result"
+      },
+      "to": {
+        "objectId": "trace-requests"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-20",
+      "from": {
+        "objectId": "collect-metrics"
+      },
+      "to": {
+        "objectId": "alerting"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

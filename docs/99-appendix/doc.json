@@ -767,7 +767,7 @@
           }
         },
         {
-          "insert": " (\"figjam-w5: connection waypoints follow moved objects (rigid translate / asymmetric re-route)\"), on 2026-07-05. The engine, chrome components, canvas JSON files, and test suite moved from "
+          "insert": " (\"figjam-w5: connection waypoints follow moved objects (rigid translate / asymmetric re-route)\"), on 2026-07-05. The engine, trim components, canvas JSON files, and test suite moved from "
         },
         {
           "insert": "apps/frontend/src/lib/interactive-canvas/**",
@@ -920,13 +920,13 @@
           "insert": " (the bottom-dock layout/behavior spec), and "
         },
         {
-          "insert": "figjam-chrome-catalog.md",
+          "insert": "figjam-trim-catalog.md",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " (an inventory of every chrome surface observed). Every FigJam-derived constant in the engine — dispersed beside its consumer since the theme dispersal, notably the "
+          "insert": " (an inventory of every trim surface observed). Every FigJam-derived constant in the engine — dispersed beside its consumer since the theme dispersal, notably the "
         },
         {
           "insert": "theme/palette.ts",
@@ -964,13 +964,13 @@
           "insert": " \"multi\" selection variant discussed in "
         },
         {
-          "insert": "canvas-60-chrome",
+          "insert": "canvas-60-trim",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome",
-              "label": "canvas-60-chrome"
+              "path": "20-implementation/60-trim",
+              "label": "canvas-60-trim"
             }
           }
         },
@@ -1231,16 +1231,16 @@
           }
         },
         {
-          "insert": " — rather than visual screenshot/snapshot-image tests. This \"no screenshots\" philosophy was established for the chrome components (see "
+          "insert": " — rather than visual screenshot/snapshot-image tests. This \"no screenshots\" philosophy was established for the trim components (see "
         },
         {
-          "insert": "canvas-60-chrome",
+          "insert": "canvas-60-trim",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome",
-              "label": "canvas-60-chrome"
+              "path": "20-implementation/60-trim",
+              "label": "canvas-60-trim"
             }
           }
         },

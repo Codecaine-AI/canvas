@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-80-fan-example-fan",
+  "title": "Example fan (fan)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "tree",
+      "type": "section",
+      "text": "fan dir=S",
+      "label": "fan dir=S",
+      "title": "fan dir=S",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 336
+      }
+    },
+    {
+      "id": "hub",
+      "type": "decision",
+      "text": "hub",
+      "label": "hub",
+      "geometry": {
+        "x": 208,
+        "y": 111,
+        "width": 96,
+        "height": 67
+      }
+    },
+    {
+      "id": "a",
+      "type": "process",
+      "text": "a",
+      "label": "a",
+      "geometry": {
+        "x": 25,
+        "y": 242,
+        "width": 110,
+        "height": 57
+      }
+    },
+    {
+      "id": "b",
+      "type": "process",
+      "text": "b",
+      "label": "b",
+      "geometry": {
+        "x": 201,
+        "y": 242,
+        "width": 110,
+        "height": 57
+      }
+    },
+    {
+      "id": "c",
+      "type": "process",
+      "text": "c",
+      "label": "c",
+      "geometry": {
+        "x": 377,
+        "y": 242,
+        "width": 110,
+        "height": 57
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1-hub-a",
+      "from": {
+        "objectId": "hub"
+      },
+      "to": {
+        "objectId": "a"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-2-hub-b",
+      "from": {
+        "objectId": "hub"
+      },
+      "to": {
+        "objectId": "b"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-3-hub-c",
+      "from": {
+        "objectId": "hub"
+      },
+      "to": {
+        "objectId": "c"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ]
+}

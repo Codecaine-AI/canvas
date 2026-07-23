@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-90-arrows",
+  "title": "arrows — the connection block",
+  "root": "b-arrows-root",
+  "blocks": {
+    "b-arrows-root": {
+      "id": "b-arrows-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-arrows-title-1",
+        "b-arrows-body-2",
+        "b-arrows-constraint-3",
+        "b-arrows-code-4",
+        "b-arrows-canvas-5"
+      ],
+      "props": {
+        "covers": "The arrows block: one from > to line per connection, by reference number, mandatory and always last. Arrows declare connections, never paths — routing belongs to the solver.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "arrows",
+          "connections",
+          "routing",
+          "feedback loops"
+        ]
+      }
+    },
+    "b-arrows-title-1": {
+      "id": "b-arrows-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "arrows — the connection block"
+        }
+      ]
+    },
+    "b-arrows-body-2": {
+      "id": "b-arrows-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The block header "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at the left margin, then one indented line per connection: "
+        },
+        {
+          "insert": "from > to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", by reference number. Duplicates are allowed (the document may have them) and order follows the document. An empty block is the bare "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " header. The block is mandatory and always last."
+        }
+      ]
+    },
+    "b-arrows-constraint-3": {
+      "id": "b-arrows-constraint-3",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Arrows declare connections, never paths"
+      },
+      "text": [
+        {
+          "insert": "There is deliberately no way to say where a line bends. Routing is the solver's job: the router computes every route — forward flow through the corridors, feedback loops around the outside (rule R9)."
+        }
+      ]
+    },
+    "b-arrows-code-4": {
+      "id": "b-arrows-code-4",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "col 1|1|1\n  section 1 text=s1 label=\"A\"\n    item 2 text=a type=process size=M at=C\n  section 3 text=s2 label=\"B\"\n    item 4 text=b type=process size=M at=C\n  section 5 text=s3 label=\"C\"\n    item 6 text=c type=process size=M at=C\n\narrows\n  2 > 4\n  4 > 6\n  6 > 2"
+        }
+      ]
+    },
+    "b-arrows-canvas-5": {
+      "id": "b-arrows-canvas-5",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-arrows.canvas.json",
+        "title": "Three arrows, including a routed feedback loop"
+      }
+    }
+  }
+}

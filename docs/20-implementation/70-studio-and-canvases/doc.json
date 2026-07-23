@@ -738,7 +738,7 @@
           }
         },
         {
-          "insert": ". The editor chrome shows Saved or Save failed — retry. Opening a board deep-clones the fetched document ("
+          "insert": ". The editor trim shows Saved or Save failed — retry. Opening a board deep-clones the fetched document ("
         },
         {
           "insert": "JSON.parse(JSON.stringify(...))",
@@ -853,7 +853,7 @@
           }
         },
         {
-          "insert": " renders the same viewer without surrounding Studio chrome for an iframe or full-screen host. Both use "
+          "insert": " renders the same viewer without surrounding Studio trim for an iframe or full-screen host. Both use "
         },
         {
           "insert": "InteractiveCanvasViewer",

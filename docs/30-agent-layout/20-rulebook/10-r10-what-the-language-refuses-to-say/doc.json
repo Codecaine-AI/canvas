@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-10-r10-what-the-language-refuses-to-say",
+  "title": "R10 — What the language refuses to say",
+  "root": "b-r10-root",
+  "blocks": {
+    "b-r10-root": {
+      "id": "b-r10-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r10-title-1",
+        "b-r10-card-2",
+        "b-r10-body-3"
+      ],
+      "props": {
+        "covers": "The language has no way to write a raw coordinate; its one known blind spot is cross-column interleaving finer than the ladder, measurable as the dominant residual loss on gc-decomp-harness.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "no raw coordinates",
+          "blind spot",
+          "cross-column interleaving",
+          "register offset"
+        ]
+      }
+    },
+    "b-r10-title-1": {
+      "id": "b-r10-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R10 — What the language refuses to say"
+        }
+      ]
+    },
+    "b-r10-card-2": {
+      "id": "b-r10-card-2",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Absolute registers are never spelled"
+      },
+      "text": [
+        {
+          "insert": "The language has no way to write a raw coordinate. Its one known blind spot: cross-column interleaving finer than the ladder — a row threading between another column's rows."
+        }
+      ]
+    },
+    "b-r10-body-3": {
+      "id": "b-r10-body-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The corpus makes the blind spot measurable: gc's hero row at y=392 threads between pill rows at 96 pitch across a corridor, and the above/below facts flip on 16-48px differences. That interleave is not representable and is the dominant residual loss on "
+        },
+        {
+          "insert": "gc-decomp-harness",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/gc-decomp-harness.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": " (90.4% relation against the 93% target). If a future op is added for it, it should be a register offset on "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align"
+            }
+          }
+        },
+        {
+          "insert": " — e.g. "
+        },
+        {
+          "insert": "align y@+128 of config",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — not raw coordinates."
+        }
+      ]
+    }
+  }
+}

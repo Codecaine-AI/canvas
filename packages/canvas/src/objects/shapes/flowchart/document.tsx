@@ -35,7 +35,7 @@ export function documentWavyPath(x = 0, y = 0, width = 100, height = 100): strin
 /**
  * Document (W5) — inline SVG wavy-bottom silhouette (CSS clip-path can't
  * express the wave) painted behind the label/body content; the button
- * chrome stays fully transparent so only one outline is visible. Stroke
+ * trim stays fully transparent so only one outline is visible. Stroke
  * width follows the object's resolved stroke width.
  */
 export const documentShapeDef: ShapeDef = {

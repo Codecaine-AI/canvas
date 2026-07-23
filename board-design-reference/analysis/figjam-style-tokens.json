@@ -234,7 +234,7 @@
       "shapeText": 15
     }
   },
-  "chrome": {
+  "trim": {
     "topBarBg": "#E6E6E6",
     "topBarBorderBottom": "#DFDFDF",
     "canvasBg": "#F5F5F5",

@@ -3,13 +3,13 @@
 import { useEffect, useId, useSyncExternalStore, type CSSProperties } from "react";
 
 /**
- * Tooltip — shared dark hover-label used by all FigJam chrome
+ * Tooltip — shared dark hover-label used by all FigJam trim
  * components (dock buttons, selection-toolbar controls, etc.).
  *
  * Ground truth: the shape picker uses a small caret to visually connect the
  * hover label to the active icon, matching FigJam's anchored tooltip feel.
  *
- * Standalone (W2-chrome): no floating-ui anchoring here — callers position
+ * Standalone (W2-trim): no floating-ui anchoring here — callers position
  * this relative to their own trigger via a wrapping `position: relative`
  * element (see CanvasDock.tsx for the pattern). W3 may swap this for a
  * floating-ui-anchored version if absolute-positioned tooltips clip against
@@ -32,7 +32,7 @@ export type TooltipProps = {
 
 const TOOLTIP_BG = "#1D1D1D";
 const TOOLTIP_TEXT = "#FFFFFF";
-const TOOLTIP_EVENT = "chrome-tooltip-change";
+const TOOLTIP_EVENT = "trim-tooltip-change";
 
 let activeTooltipId: string | null = null;
 
@@ -133,7 +133,7 @@ export function Tooltip({
     <span
       id={tooltipId}
       role="tooltip"
-      data-chrome-tooltip=""
+      data-trim-tooltip=""
       data-placement={placement}
       data-align={align}
       style={{
@@ -158,7 +158,7 @@ export function Tooltip({
     >
       <span
         aria-hidden="true"
-        data-chrome-tooltip-caret=""
+        data-trim-tooltip-caret=""
         style={tooltipCaretStyle(placement, caretOffset)}
       />
       {label}

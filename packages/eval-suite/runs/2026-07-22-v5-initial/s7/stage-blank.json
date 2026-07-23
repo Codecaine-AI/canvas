@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s7-telemetry-platform",
+  "title": "Eval Suite S7 — Telemetry Platform",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S7 — Telemetry Platform",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-agent-fleet",
+      "type": "process",
+      "text": "Agent fleet (hosts)",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 384,
+        "y": 416,
+        "width": 240,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-ingest-gateway",
+      "type": "process",
+      "text": "Ingest gateway",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1056,
+        "y": 416,
+        "width": 240,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

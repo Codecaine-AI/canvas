@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s6-org-tree",
+  "title": "Eval Suite S6 — Org Tree",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S6 — Org Tree",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-ceo",
+      "type": "process",
+      "text": "CEO",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1136,
+        "y": 176,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-vp-engineering",
+      "type": "process",
+      "text": "VP Engineering",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 304,
+        "y": 480,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

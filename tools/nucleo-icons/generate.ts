@@ -2,7 +2,7 @@
  * Deterministic Nucleo icon codegen.
  *
  * Reads packages/canvas/src/ui/icons/manifest.json and emits:
- *   1. packages/canvas/src/ui/icons/nucleo/<kebab>-icon.tsx — one React chrome
+ *   1. packages/canvas/src/ui/icons/nucleo/<kebab>-icon.tsx — one React trim
  *      component per icon, plus a nucleo/index.ts barrel re-exporting them all.
  *   2. packages/canvas/src/objects/shapes/icon/icon-glyph-data.generated.ts —
  *      a single serializable glyph-data registry (consumed whole). Canvas
@@ -107,9 +107,9 @@ function vendorName(source: string): string {
 // Manifest types
 // ---------------------------------------------------------------------------
 
-type ChromeEntry = { export: string; source?: string; custom?: boolean };
+type TrimEntry = { export: string; source?: string; custom?: boolean };
 type GlyphEntry = { id: string; source: string };
-type Manifest = { chrome?: ChromeEntry[]; glyphs?: GlyphEntry[] };
+type Manifest = { trim?: TrimEntry[]; glyphs?: GlyphEntry[] };
 
 // ---------------------------------------------------------------------------
 // Error collection
@@ -343,16 +343,16 @@ function isPaintReference(value: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Output 1: chrome icon components (nucleo/<kebab>.tsx)
+// Output 1: trim icon components (nucleo/<kebab>.tsx)
 // ---------------------------------------------------------------------------
 
 /**
- * Chrome icons render with a thinner stroke than Nucleo's native 1.5 so the
+ * Trim icons render with a thinner stroke than Nucleo's native 1.5 so the
  * whole set matches the weight of the hand-authored FigJam section icon
  * (8/112 ≈ 1.29 at 18px). Applied at emit time only — vendored SVGs stay
  * byte-verbatim, and glyph data (geometry only) is unaffected.
  */
-const CHROME_STROKE_SCALE = 1.25 / 1.5;
+const TRIM_STROKE_SCALE = 1.25 / 1.5;
 
 /** AlertTriangleIcon → alert-triangle-icon */
 function kebabCase(exportName: string): string {
@@ -386,7 +386,7 @@ function emitTsxElement(el: SvgElement, source: string): string | null {
     if (name === "stroke" && value !== "none") outValue = "currentColor";
     if (name === "fill" && value !== "none") outValue = "currentColor";
     if (name === "stroke-width" && Number.isFinite(Number(value))) {
-      outValue = fmtNum(Number(value) * CHROME_STROKE_SCALE);
+      outValue = fmtNum(Number(value) * TRIM_STROKE_SCALE);
     }
     parts.push(`${outName}="${outValue}"`);
   }
@@ -712,22 +712,22 @@ function main(): void {
     report(0, 0, 0);
     return;
   }
-  const chrome = manifest.chrome ?? [];
+  const trim = manifest.trim ?? [];
   const glyphs = manifest.glyphs ?? [];
 
   ensureDirs();
 
   // --- Validate manifest shape / duplicates -------------------------------
   const seenExports = new Set<string>();
-  for (const entry of chrome) {
+  for (const entry of trim) {
     if (typeof entry.export !== "string" || !/^[A-Za-z_$][\w$]*$/.test(entry.export)) {
-      fail(`chrome entry has invalid export name: ${JSON.stringify(entry.export)}`);
+      fail(`trim entry has invalid export name: ${JSON.stringify(entry.export)}`);
       continue;
     }
-    if (seenExports.has(entry.export)) fail(`duplicate chrome export name "${entry.export}"`);
+    if (seenExports.has(entry.export)) fail(`duplicate trim export name "${entry.export}"`);
     seenExports.add(entry.export);
     if (!entry.custom && typeof entry.source !== "string") {
-      fail(`chrome entry "${entry.export}" is not custom but has no source`);
+      fail(`trim entry "${entry.export}" is not custom but has no source`);
     }
   }
   const seenIds = new Set<string>();
@@ -743,14 +743,14 @@ function main(): void {
     }
   }
 
-  // --- Chrome components (one module per icon) -----------------------------
-  const chromeSorted = [...chrome]
+  // --- Trim components (one module per icon) -----------------------------
+  const trimSorted = [...trim]
     .filter((e) => !e.custom && typeof e.source === "string")
     .sort((a, b) => (a.export < b.export ? -1 : a.export > b.export ? 1 : 0));
 
   // { exportName, fileBase } for the barrel, in export order.
   const modules: { exportName: string; fileBase: string; text: string }[] = [];
-  for (const entry of chromeSorted) {
+  for (const entry of trimSorted) {
     const svg = loadSource(entry.source!);
     if (svg === null) continue;
     const text = emitTsxModule(entry.export, svg, entry.source!);
@@ -842,7 +842,7 @@ function report(componentCount: number, glyphCount: number, vendoredCount: numbe
     for (const e of errors) console.error(`  - ${e}`);
     process.exit(1);
   }
-  console.log(`nucleo icons: wrote ${componentCount} chrome component module(s) → ${NUCLEO_DIR}`);
+  console.log(`nucleo icons: wrote ${componentCount} trim component module(s) → ${NUCLEO_DIR}`);
   console.log(`nucleo icons: wrote ${glyphCount} glyph entr(ies) → ${GLYPH_OUT_PATH}`);
   console.log(`nucleo icons: vendored ${vendoredCount} distinct source SVG(s) → ${VENDOR_DIR}`);
 }

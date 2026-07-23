@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-30-item",
+  "title": "item — a real object",
+  "root": "b-item-root",
+  "blocks": {
+    "b-item-root": {
+      "id": "b-item-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-item-title-1",
+        "b-item-body-2",
+        "b-item-table-3",
+        "b-item-at-4",
+        "b-item-compass-observation-5",
+        "b-item-code-6",
+        "b-item-canvas-7"
+      ],
+      "props": {
+        "covers": "The item statement: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "item",
+          "compass placement",
+          "at=",
+          "size ladder",
+          "reference numbers"
+        ]
+      }
+    },
+    "b-item-title-1": {
+      "id": "b-item-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "item — a real object"
+        }
+      ]
+    },
+    "b-item-body-2": {
+      "id": "b-item-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A real object on the board — one per line, every field labeled. An item says what it is and where it sits by compass, never by pixel coordinates; the solver turns that into geometry. Fields, in fixed order:"
+        }
+      ]
+    },
+    "b-item-table-3": {
+      "id": "b-item-table-3",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "item fields",
+        "columns": [
+          "field",
+          "required",
+          "values"
+        ],
+        "rows": [
+          [
+            "number",
+            "yes",
+            "positive integer, unique — declared once, reused by align, fan, and arrows"
+          ],
+          [
+            "text=",
+            "yes",
+            "the object's name; duplicates legal; JSON-quoted when not [A-Za-z0-9][A-Za-z0-9_.:-]*"
+          ],
+          [
+            "type=",
+            "yes",
+            "any canvas shape type (process, sticky, decision, database, pill, ...)"
+          ],
+          [
+            "size=",
+            "yes",
+            "S, M, L (0.72× / 1× / 1.35× of the type's base size)"
+          ],
+          [
+            "at=",
+            "see below",
+            "compass: N NE E SE S SW W NW C"
+          ],
+          [
+            "hug=",
+            "optional",
+            "compass corner; only on direct children of a split"
+          ]
+        ]
+      }
+    },
+    "b-item-at-4": {
+      "id": "b-item-at-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "required",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " on items inside a "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": " or standing alone as a split child or root (their position within their band matters). "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "forbidden",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " on items inside a "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": " (the lattice places them). An "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line directly under a split occupies one weight slot by itself."
+        }
+      ]
+    },
+    "b-item-compass-observation-5": {
+      "id": "b-item-compass-observation-5",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Nine compass values, three jobs"
+      },
+      "text": [
+        {
+          "insert": "The compass set is NW N NE W C E SW S SE. "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " places an item inside its region, "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pins a split child to a corner, and "
+        },
+        {
+          "insert": "dir=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes the four cardinal values for a fan."
+        }
+      ]
+    },
+    "b-item-code-6": {
+      "id": "b-item-code-6",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section 1 text=panel label=\"Item placement\"\n  group\n    item 2 text=note type=sticky size=M at=NW\n    item 3 text=step type=process size=M at=C\n    item 4 text=tag type=pill size=S at=SE\n\narrows"
+        }
+      ]
+    },
+    "b-item-canvas-7": {
+      "id": "b-item-canvas-7",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-item.canvas.json",
+        "title": "Three items placed by compass"
+      }
+    }
+  }
+}

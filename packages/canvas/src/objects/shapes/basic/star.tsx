@@ -12,7 +12,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 /**
  * Star (W5) — 5-point star true-outline polygon (connection-cascade.ts's
  * starPoints, the same generator connector attachment uses) painted behind
- * the label; the button chrome stays fully transparent so only one outline
+ * the label; the button trim stays fully transparent so only one outline
  * is visible. The label also carries a smaller font-size than the base
  * `.interactive-canvas-object-label` rule so it fits inside the star's
  * narrow inscribed area (legacy CanvasStage rule, moved here verbatim).

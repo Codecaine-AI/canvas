@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-20-section",
+  "title": "section — a real container object",
+  "root": "b-section-root",
+  "blocks": {
+    "b-section-root": {
+      "id": "b-section-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-section-title-1",
+        "b-section-body-2",
+        "b-section-frame-3",
+        "b-section-code-4",
+        "b-section-canvas-5"
+      ],
+      "props": {
+        "covers": "The section statement: a real container object with a label and exactly one child; the frame is automatic (64px label band, 48px padding) and the section shrinks to fit its content.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "section",
+          "label",
+          "container",
+          "automatic frame",
+          "shrink to fit"
+        ]
+      }
+    },
+    "b-section-title-1": {
+      "id": "b-section-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "section — a real container object"
+        }
+      ]
+    },
+    "b-section-body-2": {
+      "id": "b-section-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Fields, in fixed order: number, "
+        },
+        {
+          "insert": "text=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", then optional "
+        },
+        {
+          "insert": "label=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a JSON string; the literal "
+        },
+        {
+          "insert": "label=undefined",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " preserves a document label that is explicitly undefined — distinct from no "
+        },
+        {
+          "insert": "label=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at all). A section has "
+        },
+        {
+          "insert": "exactly one",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " indented child. Sections are real document objects with membership logic: everything inside becomes their children on the board. Sections are also the one shape never placed as an "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": " — they are always declared with "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-section-frame-3": {
+      "id": "b-section-frame-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The frame is automatic: a 64px band at the top for the label, 48px of padding, and the section shrinks to fit its content (rule R3). Nest sections for hierarchy."
+        }
+      ]
+    },
+    "b-section-code-4": {
+      "id": "b-section-code-4",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section 1 text=outer label=\"Automatic padding\"\n  section 2 text=inner label=\"Nested\"\n    item 3 text=content type=process size=M at=C\n\narrows"
+        }
+      ]
+    },
+    "b-section-canvas-5": {
+      "id": "b-section-canvas-5",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-section.canvas.json",
+        "title": "Nested sections with automatic frames"
+      }
+    }
+  }
+}

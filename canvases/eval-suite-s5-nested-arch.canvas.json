@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s5-nested-arch",
+  "title": "Eval Suite S5 — Nested Architecture",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S5 — Nested Architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-client",
+      "type": "process",
+      "text": "Client",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 640,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-event-bus",
+      "type": "process",
+      "text": "Event Bus",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 592,
+        "width": 320,
+        "height": 160
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "vpc",
+      "type": "section",
+      "text": "VPC",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 400,
+        "y": 192,
+        "width": 1232,
+        "height": 1152
+      }
+    },
+    {
+      "id": "public-subnet",
+      "type": "section",
+      "text": "Public Subnet",
+      "color": "green",
+      "parentId": "vpc",
+      "geometry": {
+        "x": 480,
+        "y": 512,
+        "width": 352,
+        "height": 544
+      }
+    },
+    {
+      "id": "private-subnet",
+      "type": "section",
+      "text": "App Subnet",
+      "color": "teal",
+      "parentId": "vpc",
+      "geometry": {
+        "x": 864,
+        "y": 288,
+        "width": 688,
+        "height": 928
+      }
+    },
+    {
+      "id": "alb",
+      "type": "process",
+      "text": "ALB",
+      "color": "teal",
+      "parentId": "public-subnet",
+      "geometry": {
+        "x": 560,
+        "y": 640,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "process",
+      "text": "API Gateway",
+      "color": "blue",
+      "parentId": "public-subnet",
+      "geometry": {
+        "x": 560,
+        "y": 832,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "auth-service",
+      "type": "process",
+      "text": "Auth Service",
+      "color": "blue",
+      "parentId": "private-subnet",
+      "geometry": {
+        "x": 1120,
+        "y": 480,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "orders-service",
+      "type": "process",
+      "text": "Orders Service",
+      "color": "teal",
+      "parentId": "private-subnet",
+      "geometry": {
+        "x": 928,
+        "y": 608,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "text": "Postgres",
+      "color": "white",
+      "parentId": "private-subnet",
+      "geometry": {
+        "x": 944,
+        "y": 896,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "notifications-service",
+      "type": "process",
+      "text": "Notifications Service",
+      "color": "yellow",
+      "parentId": "private-subnet",
+      "geometry": {
+        "x": 1280,
+        "y": 1056,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "analytics",
+      "type": "process",
+      "text": "Analytics",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 256,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "webhooks",
+      "type": "process",
+      "text": "Webhooks",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 624,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "email-provider",
+      "type": "process",
+      "text": "Email Provider\nExternal SaaS",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 1072,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "metrics-tracing",
+      "type": "process",
+      "text": "Metrics & Tracing",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1376,
+        "y": 1424,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "eventing-story",
+      "type": "sticky",
+      "text": "EVENTING STORY\n\nServices never call each other directly.\n\nAfter the synchronous order write, everything flows through the Event Bus.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 1072,
+        "width": 256,
+        "height": 320
+      }
+    },
+    {
+      "id": "payments-service",
+      "type": "process",
+      "text": "Payments Service",
+      "color": "pink",
+      "parentId": "private-subnet",
+      "geometry": {
+        "x": 1200,
+        "y": 352,
+        "width": 224,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-client-alb",
+      "from": {
+        "objectId": "seed-client"
+      },
+      "to": {
+        "objectId": "alb"
+      },
+      "label": "HTTPS",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-alb-api",
+      "from": {
+        "objectId": "alb"
+      },
+      "to": {
+        "objectId": "api-gateway"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-api-auth",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "auth-service"
+      },
+      "label": "authn",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-api-orders",
+      "from": {
+        "objectId": "api-gateway"
+      },
+      "to": {
+        "objectId": "orders-service"
+      },
+      "label": "REST",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-orders-postgres",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "postgres"
+      },
+      "label": "read/write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-orders-bus",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "seed-event-bus"
+      },
+      "label": "publish",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-auth-bus",
+      "from": {
+        "objectId": "auth-service"
+      },
+      "to": {
+        "objectId": "seed-event-bus"
+      },
+      "label": "audit events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-bus-notifications",
+      "from": {
+        "objectId": "seed-event-bus"
+      },
+      "to": {
+        "objectId": "notifications-service"
+      },
+      "label": "dispatch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-bus-analytics",
+      "from": {
+        "objectId": "seed-event-bus"
+      },
+      "to": {
+        "objectId": "analytics"
+      },
+      "label": "stream",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-bus-webhooks",
+      "from": {
+        "objectId": "seed-event-bus"
+      },
+      "to": {
+        "objectId": "webhooks"
+      },
+      "label": "external delivery",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-notifications-email",
+      "from": {
+        "objectId": "notifications-service"
+      },
+      "to": {
+        "objectId": "email-provider"
+      },
+      "label": "send email",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-auth-metrics",
+      "from": {
+        "objectId": "auth-service"
+      },
+      "to": {
+        "objectId": "metrics-tracing"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-orders-metrics",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "metrics-tracing"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-notifications-metrics",
+      "from": {
+        "objectId": "notifications-service"
+      },
+      "to": {
+        "objectId": "metrics-tracing"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-orders-payments",
+      "from": {
+        "objectId": "orders-service"
+      },
+      "to": {
+        "objectId": "payments-service"
+      },
+      "label": "charge",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-payments-bus",
+      "from": {
+        "objectId": "payments-service"
+      },
+      "to": {
+        "objectId": "seed-event-bus"
+      },
+      "label": "payment.captured",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

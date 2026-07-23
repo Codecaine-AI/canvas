@@ -1,0 +1,97 @@
+[
+  {
+    "file": "language-item.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-section.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-row-col.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-group.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-grid.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-hug.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-hug-contrast.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-align.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-align-contrast.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-fan.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "language-arrows.dsl",
+    "width": 512,
+    "height": 336
+  },
+  {
+    "file": "nesting-example.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-1.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-2.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-3.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-4.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-5.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-6.dsl",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "file": "worked-step-7.dsl",
+    "width": 1024,
+    "height": 576
+  }
+]

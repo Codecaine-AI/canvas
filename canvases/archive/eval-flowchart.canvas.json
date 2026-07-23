@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-flowchart",
+  "title": "Eval — Branching Flowchart",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval — Branching Flowchart",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "node-start",
+      "type": "pill",
+      "text": "Order received",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 88,
+        "y": 349,
+        "width": 270,
+        "height": 86
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "node-placeholder-validate",
+      "type": "process",
+      "text": "Validate order",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 505,
+        "y": 327,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "order-valid",
+      "type": "decision",
+      "text": "Order valid?",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1466,
+        "y": 336,
+        "width": 160,
+        "height": 112
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "reserve-inventory",
+      "type": "process",
+      "text": "Reserve inventory",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1690,
+        "y": 327,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "payment-authorized",
+      "type": "decision",
+      "text": "Payment authorized?",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2002,
+        "y": 336,
+        "width": 160,
+        "height": 112
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "request-correction",
+      "type": "process",
+      "text": "Request correction",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 851,
+        "y": 887,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "retry-payment-max-3",
+      "type": "process",
+      "text": "Retry payment (max 3)",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1322,
+        "y": 887,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "retries-left",
+      "type": "decision",
+      "text": "Retries left?",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1815,
+        "y": 896,
+        "width": 160,
+        "height": 112
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "pack-ship-order",
+      "type": "process",
+      "text": "Pack & ship order",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 269,
+        "y": 1351,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "send-confirmation-email",
+      "type": "process",
+      "text": "Send confirmation email",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 655,
+        "y": 1351,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "order-complete",
+      "type": "pill",
+      "text": "Order complete",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 967,
+        "y": 1373,
+        "width": 270,
+        "height": 86
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "cancel-order-release-inventory",
+      "type": "process",
+      "text": "Cancel order & release inventory",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1786,
+        "y": 1351,
+        "width": 248,
+        "height": 130
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "order-failed",
+      "type": "pill",
+      "text": "Order failed",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2098,
+        "y": 1373,
+        "width": 270,
+        "height": 86
+      },
+      "style": {
+        "shape": "pill"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "connection-1",
+      "from": {
+        "objectId": "node-start"
+      },
+      "to": {
+        "objectId": "node-placeholder-validate"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-2",
+      "from": {
+        "objectId": "node-placeholder-validate"
+      },
+      "to": {
+        "objectId": "order-valid"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-3",
+      "from": {
+        "objectId": "order-valid"
+      },
+      "to": {
+        "objectId": "reserve-inventory"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-4",
+      "from": {
+        "objectId": "order-valid"
+      },
+      "to": {
+        "objectId": "request-correction"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-5",
+      "from": {
+        "objectId": "request-correction"
+      },
+      "to": {
+        "objectId": "node-placeholder-validate"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-6",
+      "from": {
+        "objectId": "reserve-inventory"
+      },
+      "to": {
+        "objectId": "payment-authorized"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-7",
+      "from": {
+        "objectId": "payment-authorized"
+      },
+      "to": {
+        "objectId": "pack-ship-order"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-8",
+      "from": {
+        "objectId": "payment-authorized"
+      },
+      "to": {
+        "objectId": "retry-payment-max-3"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-9",
+      "from": {
+        "objectId": "retry-payment-max-3"
+      },
+      "to": {
+        "objectId": "retries-left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-10",
+      "from": {
+        "objectId": "retries-left"
+      },
+      "to": {
+        "objectId": "payment-authorized"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-11",
+      "from": {
+        "objectId": "retries-left"
+      },
+      "to": {
+        "objectId": "cancel-order-release-inventory"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-12",
+      "from": {
+        "objectId": "cancel-order-release-inventory"
+      },
+      "to": {
+        "objectId": "order-failed"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-13",
+      "from": {
+        "objectId": "pack-ship-order"
+      },
+      "to": {
+        "objectId": "send-confirmation-email"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "connection-14",
+      "from": {
+        "objectId": "send-confirmation-email"
+      },
+      "to": {
+        "objectId": "order-complete"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

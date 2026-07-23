@@ -7,7 +7,7 @@ import type { ShapeDef } from "../shape-def";
  * Cylinder (Horizontal) (W5) — inline SVG silhouette (rounded-end body path
  * plus two open "side curve" strokes to read as a cylinder lying on its
  * side, CSS clip-path can't express it) painted behind the label/body
- * content; the button chrome stays fully transparent so only one outline is
+ * content; the button trim stays fully transparent so only one outline is
  * visible. The original 100x100 silhouette proportions are projected into
  * object-local coordinates so the SVG stroke width remains in true canvas px.
  * Stroke width follows the object's resolved stroke width.

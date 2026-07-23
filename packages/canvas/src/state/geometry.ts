@@ -267,7 +267,7 @@ function overlapArea(a: CanvasBounds, b: CanvasBounds): number {
 /**
  * Section capture-membership threshold (W2 design decision — not directly
  * pixel-sampled; FigJam's own overlap fraction was never captured in the
- * screen-recording chrome catalog, see affine-mining-map.md §1's flagged
+ * screen-recording trim catalog, see affine-mining-map.md §1's flagged
  * caveat). Capture claims every object whose bounds overlap the section's
  * bounds by at least this fraction of the OBJECT's own area (since W6 the
  * result is persisted as auto-managed parentId membership rather than

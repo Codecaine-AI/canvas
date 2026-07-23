@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-09-r9-feedback-edges",
+  "title": "R9 — Feedback edges and detours",
+  "root": "b-r9-root",
+  "blocks": {
+    "b-r9-root": {
+      "id": "b-r9-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r9-title-1",
+        "b-r9-card-2",
+        "b-r9-body-3",
+        "b-r9-evidence-4"
+      ],
+      "props": {
+        "covers": "Feedback arrows exit the side facing their return corridor and detour around content on offsets drawn from {48, 80, 96, 128, 144, 192} — never through a box; forward flow routes through reserved corridors and the elbow router penalizes halo entry.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "feedback edges",
+          "detours",
+          "return corridors",
+          "elbow router"
+        ]
+      }
+    },
+    "b-r9-title-1": {
+      "id": "b-r9-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R9 — Feedback edges and detours"
+        }
+      ]
+    },
+    "b-r9-card-2": {
+      "id": "b-r9-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Feedback detours on ladder offsets"
+      },
+      "text": [
+        {
+          "insert": "Feedback arrows exit the side that faces their return corridor and detour around content on offsets drawn from {48, 80, 96, 128, 144, 192} — never through a box."
+        }
+      ]
+    },
+    "b-r9-body-3": {
+      "id": "b-r9-body-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Forward flow routes through reserved corridors — split gutters are emitted as routable corridors ("
+        },
+        {
+          "insert": "corridorRoutedEdges",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "corridorRoutedEdges"
+            }
+          }
+        },
+        {
+          "insert": "). The elbow router ("
+        },
+        {
+          "insert": "directElbow",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "directElbow"
+            }
+          }
+        },
+        {
+          "insert": ") prefers the facing sides of the two boxes but may exit any free side — a flush grid cell's facing side is often walled in. Crossing a box outright is forbidden; merely entering its 6px clearance halo is penalized, so tight-but-legal squeezes stay available ("
+        },
+        {
+          "insert": "detourCandidates",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "detourCandidates"
+            }
+          }
+        },
+        {
+          "insert": "). Boxes physically overlapping an endpoint are unavoidable by definition and carry no routing signal."
+        }
+      ]
+    },
+    "b-r9-evidence-4": {
+      "id": "b-r9-evidence-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: ink's \"calls are incorrect\" loop exits W and returns at a 144 offset; gc's regression loop returns through the 128 cluster corridor."
+        }
+      ]
+    }
+  }
+}

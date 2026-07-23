@@ -1,0 +1,1434 @@
+{
+  "schemaVersion": 1,
+  "id": "gc-decomp-harness",
+  "title": "GameCube Decomp Harness",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 4048,
+    "height": 1872
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "GameCube Decomp Harness",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3984,
+        "height": 1808
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "sticky-purpose",
+      "type": "sticky",
+      "text": "Bun/TS control plane for high-parallelism GameCube decompilation (Melee). Deterministic runner owns state/scheduling/validation; many Pi agents research, edit, validate in parallel \u2014 coordinating only through a shared SQLite board, never agent-to-agent chat.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 224,
+        "width": 368,
+        "height": 416
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-coordination",
+      "type": "sticky",
+      "text": "Coordination via board + file locks + artifacts \u2014 no agent chat",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 720,
+        "width": 368,
+        "height": 192
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "sticky-human-review",
+      "type": "sticky",
+      "text": "Human reviews what survives validation",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 992,
+        "width": 368,
+        "height": 144
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "section-config",
+      "type": "section",
+      "text": "Project / Config",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 512,
+        "y": 224,
+        "width": 384,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pill-melee-checkout",
+      "type": "pill",
+      "text": "Melee checkout (doldecomp)",
+      "color": "white",
+      "parentId": "section-config",
+      "geometry": {
+        "x": 560,
+        "y": 288,
+        "width": 288,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-project-json",
+      "type": "pill",
+      "text": "project.json descriptor",
+      "color": "white",
+      "parentId": "section-config",
+      "geometry": {
+        "x": 560,
+        "y": 384,
+        "width": 288,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-run-goals",
+      "type": "pill",
+      "text": "Run goals (match % target)",
+      "color": "white",
+      "parentId": "section-config",
+      "geometry": {
+        "x": 560,
+        "y": 480,
+        "width": 288,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-pi-provider",
+      "type": "pill",
+      "text": "Pi provider config",
+      "color": "white",
+      "parentId": "section-config",
+      "geometry": {
+        "x": 560,
+        "y": 576,
+        "width": 288,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "pill-secrets",
+      "type": "pill",
+      "text": "Secrets (local.env)",
+      "color": "white",
+      "parentId": "section-config",
+      "geometry": {
+        "x": 560,
+        "y": 672,
+        "width": 288,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "icon-operator",
+      "type": "icon",
+      "text": "Operator",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1056,
+        "y": 80,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "section-hero",
+      "type": "section",
+      "text": "Runner + Agent Loop",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 976,
+        "y": 224,
+        "width": 1856,
+        "height": 656
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-runner-cli",
+      "type": "predefined-process",
+      "text": "Job runner CLI",
+      "color": "blue",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 1024,
+        "y": 352,
+        "width": 192,
+        "height": 80
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-scheduler",
+      "type": "process",
+      "text": "Deterministic scheduler",
+      "color": "blue",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 1360,
+        "y": 352,
+        "width": 208,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-worker-pool",
+      "type": "process",
+      "text": "Worker pool (Pi agents)",
+      "color": "orange",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 1712,
+        "y": 320,
+        "width": 256,
+        "height": 144
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-toolpack",
+      "type": "predefined-process",
+      "text": "Toolpack calls (ghidra \u00b7 opseq \u00b7 m2c \u00b7 permuter)",
+      "color": "violet",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 1712,
+        "y": 560,
+        "width": 256,
+        "height": 80
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "node-compile-validate",
+      "type": "process",
+      "text": "Compile + objdiff validate",
+      "color": "blue",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 2112,
+        "y": 352,
+        "width": 224,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "decision-exact-match",
+      "type": "decision",
+      "text": "Exact match?",
+      "color": "yellow",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 2480,
+        "y": 336,
+        "width": 256,
+        "height": 112
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "node-checkpoint",
+      "type": "process",
+      "text": "Checkpoint + facts + patch",
+      "color": "green",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 2496,
+        "y": 560,
+        "width": 224,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "section-integration",
+      "type": "section",
+      "text": "Integration resolver",
+      "color": "gray",
+      "parentId": "section-hero",
+      "geometry": {
+        "x": 1024,
+        "y": 592,
+        "width": 352,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-resolver",
+      "type": "process",
+      "text": "Merge conflicting outputs",
+      "color": "white",
+      "parentId": "section-integration",
+      "geometry": {
+        "x": 1072,
+        "y": 672,
+        "width": 256,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "section-board",
+      "type": "section",
+      "text": "State substrate \u2014 SQLite board",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1264,
+        "y": 1136,
+        "width": 1088,
+        "height": 272
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "db-epochs",
+      "type": "database",
+      "text": "Epochs / claims / events",
+      "color": "teal",
+      "parentId": "section-board",
+      "geometry": {
+        "x": 1312,
+        "y": 1232,
+        "width": 288,
+        "height": 112
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "db-artifacts",
+      "type": "database",
+      "text": "Artifacts + prompts (audit)",
+      "color": "teal",
+      "parentId": "section-board",
+      "geometry": {
+        "x": 1664,
+        "y": 1232,
+        "width": 288,
+        "height": 112
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "db-savepoints",
+      "type": "database",
+      "text": "Save points",
+      "color": "teal",
+      "parentId": "section-board",
+      "geometry": {
+        "x": 2016,
+        "y": 1232,
+        "width": 288,
+        "height": 112
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "section-score-gate",
+      "type": "section",
+      "text": "Score gate",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2896,
+        "y": 224,
+        "width": 448,
+        "height": 720
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-objdiff",
+      "type": "process",
+      "text": "objdiff scoring",
+      "color": "violet",
+      "parentId": "section-score-gate",
+      "geometry": {
+        "x": 2976,
+        "y": 320,
+        "width": 288,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-qa-lint",
+      "type": "process",
+      "text": "QA lint gates",
+      "color": "violet",
+      "parentId": "section-score-gate",
+      "geometry": {
+        "x": 2976,
+        "y": 464,
+        "width": 288,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-regression",
+      "type": "process",
+      "text": "Regression check",
+      "color": "violet",
+      "parentId": "section-score-gate",
+      "geometry": {
+        "x": 2976,
+        "y": 608,
+        "width": 288,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "decision-regression",
+      "type": "decision",
+      "text": "Regression?",
+      "color": "yellow",
+      "parentId": "section-score-gate",
+      "geometry": {
+        "x": 2960,
+        "y": 752,
+        "width": 320,
+        "height": 128
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "node-reject",
+      "type": "rectangle",
+      "text": "Reject candidate",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3024,
+        "y": 1008,
+        "width": 192,
+        "height": 64
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "section-pr",
+      "type": "section",
+      "text": "PR handoff",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3472,
+        "y": 528,
+        "width": 352,
+        "height": 528
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-pr-splitter",
+      "type": "process",
+      "text": "PR splitter",
+      "color": "orange",
+      "parentId": "section-pr",
+      "geometry": {
+        "x": 3536,
+        "y": 624,
+        "width": 224,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-pr-reviewer",
+      "type": "process",
+      "text": "PR reviewer",
+      "color": "orange",
+      "parentId": "section-pr",
+      "geometry": {
+        "x": 3536,
+        "y": 768,
+        "width": 224,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-pr-fixer",
+      "type": "process",
+      "text": "PR fixer",
+      "color": "orange",
+      "parentId": "section-pr",
+      "geometry": {
+        "x": 3536,
+        "y": 912,
+        "width": 224,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-github-prs",
+      "type": "pill",
+      "text": "GitHub PRs",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3536,
+        "y": 1152,
+        "width": 224,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "section-knowledge",
+      "type": "section",
+      "text": "Knowledge",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3472,
+        "y": 96,
+        "width": 464,
+        "height": 368
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-curator",
+      "type": "process",
+      "text": "Curator",
+      "color": "pink",
+      "parentId": "section-knowledge",
+      "geometry": {
+        "x": 3520,
+        "y": 176,
+        "width": 160,
+        "height": 64
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-pr-indexer",
+      "type": "process",
+      "text": "PR indexer",
+      "color": "pink",
+      "parentId": "section-knowledge",
+      "geometry": {
+        "x": 3728,
+        "y": 176,
+        "width": 160,
+        "height": 64
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "db-knowledge-graph",
+      "type": "database",
+      "text": "Knowledge graph (graph.sqlite)",
+      "color": "pink",
+      "parentId": "section-knowledge",
+      "geometry": {
+        "x": 3568,
+        "y": 304,
+        "width": 272,
+        "height": 112
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "section-health",
+      "type": "section",
+      "text": "Process health",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1008,
+        "y": 1504,
+        "width": 384,
+        "height": 272
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "icon-guardian",
+      "type": "icon",
+      "text": "Guardian (babysit)",
+      "color": "red",
+      "parentId": "section-health",
+      "geometry": {
+        "x": 1104,
+        "y": 1568,
+        "width": 192,
+        "height": 144
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "section-surfaces",
+      "type": "section",
+      "text": "Surfaces",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1952,
+        "y": 1504,
+        "width": 768,
+        "height": 272
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "node-api-server",
+      "type": "process",
+      "text": "Bun API server",
+      "color": "teal",
+      "parentId": "section-surfaces",
+      "geometry": {
+        "x": 2144,
+        "y": 1600,
+        "width": 208,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-dashboard",
+      "type": "process",
+      "text": "React dashboard",
+      "color": "teal",
+      "parentId": "section-surfaces",
+      "geometry": {
+        "x": 2480,
+        "y": 1600,
+        "width": 192,
+        "height": 80
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-operator-to-cli",
+      "from": {
+        "objectId": "icon-operator",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-runner-cli",
+        "anchor": "top"
+      },
+      "label": "run goals",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-config-to-cli",
+      "from": {
+        "objectId": "section-config",
+        "anchor": "right",
+        "position": [
+          1,
+          0.3
+        ]
+      },
+      "to": {
+        "objectId": "node-runner-cli",
+        "anchor": "left"
+      },
+      "label": "load config",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-cli-to-scheduler",
+      "from": {
+        "objectId": "node-runner-cli",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-scheduler",
+        "anchor": "left"
+      },
+      "label": "start epoch",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-scheduler-to-worker",
+      "from": {
+        "objectId": "node-scheduler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-worker-pool",
+        "anchor": "left"
+      },
+      "label": "assign claims",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-worker-toolpack",
+      "from": {
+        "objectId": "node-worker-pool",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-toolpack",
+        "anchor": "top"
+      },
+      "label": "research / edit",
+      "style": "solid",
+      "arrow": "both",
+      "role": "flow",
+      "color": "violet"
+    },
+    {
+      "id": "conn-worker-to-compile",
+      "from": {
+        "objectId": "node-worker-pool",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-compile-validate",
+        "anchor": "left"
+      },
+      "label": "candidate build",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-compile-to-exact-match",
+      "from": {
+        "objectId": "node-compile-validate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "decision-exact-match",
+        "anchor": "left"
+      },
+      "label": "score",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-exact-match-yes-checkpoint",
+      "from": {
+        "objectId": "decision-exact-match",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-checkpoint",
+        "anchor": "top"
+      },
+      "label": "yes \u00b7 match",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "green"
+    },
+    {
+      "id": "conn-exact-match-no-retry",
+      "from": {
+        "objectId": "decision-exact-match",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "node-worker-pool",
+        "anchor": "top",
+        "position": [
+          0.75,
+          0
+        ]
+      },
+      "label": "no \u00b7 retry",
+      "style": "dashed",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "red",
+      "waypoints": [
+        [
+          2608,
+          272
+        ],
+        [
+          1904,
+          272
+        ]
+      ]
+    },
+    {
+      "id": "conn-checkpoint-to-savepoints",
+      "from": {
+        "objectId": "node-checkpoint",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "db-savepoints",
+        "anchor": "top",
+        "position": [
+          0.611111,
+          0
+        ]
+      },
+      "label": "commit",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "teal",
+      "waypoints": [
+        [
+          2608,
+          1168
+        ],
+        [
+          2192,
+          1168
+        ]
+      ]
+    },
+    {
+      "id": "conn-scheduler-to-board",
+      "from": {
+        "objectId": "node-scheduler",
+        "anchor": "bottom",
+        "position": [
+          0.230769,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "section-board",
+        "anchor": "top",
+        "position": [
+          0.132353,
+          0
+        ]
+      },
+      "label": "read board",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "teal"
+    },
+    {
+      "id": "conn-epochs-to-scheduler",
+      "from": {
+        "objectId": "db-epochs",
+        "anchor": "top",
+        "position": [
+          0.75,
+          0
+        ]
+      },
+      "to": {
+        "objectId": "node-scheduler",
+        "anchor": "bottom",
+        "position": [
+          0.461538,
+          1
+        ]
+      },
+      "label": "wake + snapshot",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "teal",
+      "waypoints": [
+        [
+          1528,
+          960
+        ],
+        [
+          1456,
+          960
+        ]
+      ]
+    },
+    {
+      "id": "conn-worker-to-integration",
+      "from": {
+        "objectId": "node-worker-pool",
+        "anchor": "bottom",
+        "position": [
+          0.125,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "section-integration",
+        "anchor": "top"
+      },
+      "label": "conflicts",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange",
+      "waypoints": [
+        [
+          1744,
+          528
+        ],
+        [
+          1200,
+          528
+        ]
+      ]
+    },
+    {
+      "id": "conn-integration-to-board",
+      "from": {
+        "objectId": "section-integration",
+        "anchor": "bottom",
+        "position": [
+          0.840909,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "section-board",
+        "anchor": "top",
+        "position": [
+          0.051471,
+          0
+        ]
+      },
+      "label": "resolved facts",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "teal"
+    },
+    {
+      "id": "conn-board-to-score-gate",
+      "from": {
+        "objectId": "section-board",
+        "anchor": "right",
+        "position": [
+          1,
+          0.382353
+        ]
+      },
+      "to": {
+        "objectId": "section-score-gate",
+        "anchor": "bottom",
+        "position": [
+          0.089286,
+          1
+        ]
+      },
+      "label": "candidates",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "violet",
+      "waypoints": [
+        [
+          2936,
+          1240
+        ]
+      ]
+    },
+    {
+      "id": "conn-objdiff-to-qa-lint",
+      "from": {
+        "objectId": "node-objdiff",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-qa-lint",
+        "anchor": "top"
+      },
+      "label": "score OK",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-qa-lint-to-regression",
+      "from": {
+        "objectId": "node-qa-lint",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-regression",
+        "anchor": "top"
+      },
+      "label": "lint OK",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-regression-to-decision",
+      "from": {
+        "objectId": "node-regression",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "decision-regression",
+        "anchor": "top"
+      },
+      "label": "verdict",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-regression-yes-reject",
+      "from": {
+        "objectId": "decision-regression",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-reject",
+        "anchor": "top"
+      },
+      "label": "yes \u00b7 reject",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "red"
+    },
+    {
+      "id": "conn-regression-no-new-baseline",
+      "from": {
+        "objectId": "decision-regression",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "db-savepoints",
+        "anchor": "top",
+        "position": [
+          0.777778,
+          0
+        ]
+      },
+      "label": "no \u00b7 new baseline",
+      "style": "dashed",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "green",
+      "waypoints": [
+        [
+          2864,
+          816
+        ],
+        [
+          2864,
+          1200
+        ],
+        [
+          2240,
+          1200
+        ]
+      ]
+    },
+    {
+      "id": "conn-board-to-pr-splitter",
+      "from": {
+        "objectId": "db-savepoints",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-pr-splitter",
+        "anchor": "left"
+      },
+      "label": "matched slices",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange",
+      "waypoints": [
+        [
+          3408,
+          1288
+        ],
+        [
+          3408,
+          664
+        ]
+      ]
+    },
+    {
+      "id": "conn-splitter-to-reviewer",
+      "from": {
+        "objectId": "node-pr-splitter",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-pr-reviewer",
+        "anchor": "top"
+      },
+      "label": "split PRs",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-reviewer-to-fixer",
+      "from": {
+        "objectId": "node-pr-reviewer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-pr-fixer",
+        "anchor": "top"
+      },
+      "label": "findings",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "orange"
+    },
+    {
+      "id": "conn-fixer-to-github",
+      "from": {
+        "objectId": "node-pr-fixer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-github-prs",
+        "anchor": "top"
+      },
+      "label": "open PRs",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "output",
+      "color": "green"
+    },
+    {
+      "id": "conn-checkpoint-to-knowledge",
+      "from": {
+        "objectId": "node-checkpoint",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "section-knowledge",
+        "anchor": "left",
+        "position": [
+          0,
+          0.23913
+        ]
+      },
+      "label": "distill lessons",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "pink",
+      "waypoints": [
+        [
+          2784,
+          600
+        ],
+        [
+          2784,
+          184
+        ]
+      ]
+    },
+    {
+      "id": "conn-github-to-pr-indexer",
+      "from": {
+        "objectId": "node-github-prs",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-pr-indexer",
+        "anchor": "right"
+      },
+      "label": "merged evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "pink",
+      "waypoints": [
+        [
+          3968,
+          1184
+        ],
+        [
+          3968,
+          208
+        ]
+      ]
+    },
+    {
+      "id": "conn-knowledge-to-worker",
+      "from": {
+        "objectId": "section-knowledge",
+        "anchor": "left",
+        "position": [
+          0,
+          0.152174
+        ]
+      },
+      "to": {
+        "objectId": "node-worker-pool",
+        "anchor": "top",
+        "position": [
+          0.25,
+          0
+        ]
+      },
+      "label": "context packs",
+      "style": "dashed",
+      "arrow": "forward",
+      "role": "feedback",
+      "color": "pink",
+      "waypoints": [
+        [
+          1776,
+          152
+        ]
+      ]
+    },
+    {
+      "id": "conn-curator-to-kg",
+      "from": {
+        "objectId": "node-curator",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "db-knowledge-graph",
+        "anchor": "top",
+        "position": [
+          0.117647,
+          0
+        ]
+      },
+      "label": "write facts",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "pink"
+    },
+    {
+      "id": "conn-indexer-to-kg",
+      "from": {
+        "objectId": "node-pr-indexer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "db-knowledge-graph",
+        "anchor": "top",
+        "position": [
+          0.882353,
+          0
+        ]
+      },
+      "label": "index PRs",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "pink"
+    },
+    {
+      "id": "conn-guardian-to-hero",
+      "from": {
+        "objectId": "icon-guardian",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "section-hero",
+        "anchor": "bottom",
+        "position": [
+          0.12069,
+          1
+        ]
+      },
+      "label": "recover / restart",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "red"
+    },
+    {
+      "id": "conn-api-dashboard",
+      "from": {
+        "objectId": "node-api-server",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "node-dashboard",
+        "anchor": "left"
+      },
+      "label": "live state",
+      "style": "solid",
+      "arrow": "both",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-api-to-board",
+      "from": {
+        "objectId": "node-api-server",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "section-board",
+        "anchor": "bottom",
+        "position": [
+          0.904412,
+          1
+        ]
+      },
+      "label": "controls / status",
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "teal"
+    }
+  ],
+  "annotations": []
+}

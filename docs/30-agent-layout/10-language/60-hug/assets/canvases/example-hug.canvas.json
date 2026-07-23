@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-60-hug-example-hug",
+  "title": "Example hug (hug)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "rail",
+      "type": "section",
+      "text": "Lane hug=NW",
+      "label": "Lane hug=NW",
+      "title": "Lane hug=NW",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 112,
+        "height": 336
+      }
+    },
+    {
+      "id": "one",
+      "type": "pill",
+      "text": "one",
+      "label": "one",
+      "geometry": {
+        "x": 19,
+        "y": 113,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "two",
+      "type": "pill",
+      "text": "two",
+      "label": "two",
+      "geometry": {
+        "x": 19,
+        "y": 183,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "three",
+      "type": "pill",
+      "text": "three",
+      "label": "three",
+      "geometry": {
+        "x": 19,
+        "y": 252,
+        "width": 75,
+        "height": 24
+      }
+    },
+    {
+      "id": "stage",
+      "type": "section",
+      "text": "Stage",
+      "label": "Stage",
+      "title": "Stage",
+      "tint": "gray",
+      "geometry": {
+        "x": 176,
+        "y": 0,
+        "width": 336,
+        "height": 336
+      }
+    },
+    {
+      "id": "content",
+      "type": "process",
+      "text": "content",
+      "label": "content",
+      "geometry": {
+        "x": 228,
+        "y": 135,
+        "width": 231,
+        "height": 121
+      }
+    }
+  ],
+  "connections": []
+}

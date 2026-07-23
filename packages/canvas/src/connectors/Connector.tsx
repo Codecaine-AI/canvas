@@ -2,7 +2,7 @@
 
 /**
  * Connector rendering components draw routed connection paths plus selection
- * chrome for endpoint and bend editing.
+ * trim for endpoint and bend editing.
  */
 import type {
   InteractiveCanvasConnection,
@@ -17,7 +17,7 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 
 /** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
 const CONNECTOR_STROKE_WIDTH_PX = 4;
-/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (stage must not import stage/editor/components/editor-style). */
+/** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 
 const CONNECTION_HIT_WIDTH = 14;
@@ -47,8 +47,8 @@ function connectionLabelWidth(label: string): number {
 /**
  * One routed connector: an invisible wide hit path (for click-to-select),
  * the visible routed path (elbow, with forward/back/both arrowheads), and an
- * optional label chip. Selection chrome (endpoint handles, bend pills) is NOT
- * rendered here — CanvasStage mounts ConnectorSelectionChrome in a dedicated
+ * optional label chip. Selection trim (endpoint handles, bend pills) is NOT
+ * rendered here — CanvasStage mounts ConnectorSelectionTrim in a dedicated
  * layer ABOVE the object layer, so shape bodies/borders can never paint over
  * the blue affordances.
  */
@@ -151,13 +151,13 @@ export function Connector({
 }
 
 /**
- * Selection chrome for the selected connection: blue bend pills on every
+ * Selection trim for the selected connection: blue bend pills on every
  * segment plus endpoint handles at the routed start/end (3.2.2's endpoint-drag
  * hit targets). Rendered by CanvasStage in its own world-space SVG layer ABOVE
  * the object layer — shapes paint over connector LINES by design (W4 z-cake),
  * but the selection affordances must never be covered by a shape body/border.
  */
-export function ConnectorSelectionChrome({
+export function ConnectorSelectionTrim({
   document,
   connection,
   fromObject,
@@ -188,7 +188,7 @@ export function ConnectorSelectionChrome({
       : [];
 
   return (
-    <g data-canvas-connection-chrome={connection.id}>
+    <g data-canvas-connection-trim={connection.id}>
       {bendSegments.map((segment) => (
         <rect
           key={`bend-segment-${segment.index}`}

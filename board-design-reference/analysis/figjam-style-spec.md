@@ -122,7 +122,7 @@ Universal rules sampled across all shapes:
 - **Stroke width: 8 px (4 logical)** on every pastel bordered shape.
 - **Text on pastel fills = black @ 80 % opacity over the fill** (verified as exact alpha blend on white, blue, yellow, red, purple fills). Text on saturated fills = **#FFFFFF**. Text on white shapes: #333333 (= 80 % black on white).
 - Shape text ≈ 14–16 px logical, Inter, centered; standalone bold labels 20 px bold.
-- No shadows on any shape (stickies and chrome only).
+- No shadows on any shape (stickies and trim only).
 
 | Shape | Fill | Stroke | Geometry (export px, logical in parens) |
 |---|---|---|---|
@@ -277,7 +277,7 @@ as `rgba(0,0,0,0.8)` (body) and `rgba(0,0,0,0.4)` (author) rather than fixed hex
 
 ---
 
-## 9. Chrome (from video frames, CSS px at recording scale)
+## 9. Trim (from video frames, CSS px at recording scale)
 
 | Element | Value |
 |---|---|
@@ -300,5 +300,5 @@ as `rgba(0,0,0,0.8)` (body) and `rgba(0,0,0,0.4)` (author) rather than fixed hex
 - Teal chip/section-tint pairing (tint #C6FAF6 seen, chip not).
 - Dracula comment color in the wild.
 - Exact code-block font family.
-- Shadows on shapes, sections, panels, code blocks — none exist; only stickies and floating chrome have shadows.
+- Shadows on shapes, sections, panels, code blocks — none exist; only stickies and floating trim have shadows.
 - Export scale of the 10 corroboration files (only V2 Flow's 2× was verified; they were used for color palette only).

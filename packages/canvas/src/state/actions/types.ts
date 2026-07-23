@@ -88,6 +88,11 @@ export type CanvasAgentPatchOperation =
       connection: InteractiveCanvasConnection;
     }
   | {
+      type: "updateConnection";
+      connectionId: string;
+      patch: Partial<Omit<InteractiveCanvasConnection, "id">>;
+    }
+  | {
       type: "addAnnotation";
       annotation: InteractiveCanvasAnnotation;
     }
@@ -95,6 +100,23 @@ export type CanvasAgentPatchOperation =
       type: "fitSectionToChildren";
       sectionId: string;
       padding?: number;
+    }
+  | {
+      /**
+       * Removes the object; its connections cascade away with it (and, for a
+       * section, its recorded descendants too) — same semantics as the human
+       * delete (handleDeleteSelection).
+       */
+      type: "removeObject";
+      objectId: string;
+    }
+  | {
+      type: "removeConnection";
+      connectionId: string;
+    }
+  | {
+      type: "removeAnnotation";
+      annotationId: string;
     };
 
 export type CanvasAction =
@@ -203,12 +225,21 @@ export type CanvasAction =
       body: string;
       intent?: "note" | "agent-request";
     }
+  | { type: "canvas.removeAnnotation"; annotationId: string }
   | {
       type: "canvas.alignSelection";
       axis: "left" | "center-x" | "right" | "top" | "center-y" | "bottom";
     }
   | { type: "canvas.distributeSelection"; axis: "horizontal" | "vertical" }
   | { type: "canvas.fitSectionToChildren"; sectionId: string; padding?: number }
+  // Agent apply path — every operation lands on the document in ONE history
+  // entry stamped `source: "agent"` (a single ⌘Z reverts the whole patch).
+  // Handler: ./agent-patch.ts.
+  | {
+      type: "canvas.applyAgentPatch";
+      operations: CanvasAgentPatchOperation[];
+      summary?: string;
+    }
   // W6 — records geometric capture as persisted membership: sets
   // parentId = sectionId for objects sectionCaptureMembers() finds whose
   // current parentId is null.

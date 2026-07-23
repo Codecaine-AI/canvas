@@ -1,0 +1,1679 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-40-kernel",
+  "title": "Agent kernel architecture",
+  "root": "b-kernel-root",
+  "blocks": {
+    "b-kernel-root": {
+      "id": "b-kernel-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-kernel-title-1",
+        "b-kernel-lede-2",
+        "b-kernel-assumptions-3",
+        "b-kernel-shape-heading-4",
+        "b-kernel-shape-body-5",
+        "b-kernel-shape-code-6",
+        "b-kernel-shape-promote-7",
+        "b-kernel-host-heading-8",
+        "b-kernel-host-body-9",
+        "b-kernel-host-d5-decision-10",
+        "b-kernel-host-context-11",
+        "b-kernel-session-heading-12",
+        "b-kernel-session-body-13",
+        "b-kernel-session-tools-14",
+        "b-kernel-session-delta-15",
+        "b-kernel-session-whole-program-16",
+        "b-kernel-diff-heading-17",
+        "b-kernel-diff-body-18",
+        "b-kernel-diff-move-19",
+        "b-kernel-diff-add-20",
+        "b-kernel-diff-arrow-21",
+        "b-kernel-diff-section-22",
+        "b-kernel-diff-parent-constraint-23",
+        "b-kernel-diff-waypoints-constraint-24",
+        "b-kernel-diff-d1-decision-25",
+        "b-kernel-apply-heading-26",
+        "b-kernel-apply-put-27",
+        "b-kernel-apply-action-28",
+        "b-kernel-apply-handle-29",
+        "b-kernel-apply-dispatch-30",
+        "b-kernel-apply-downstream-31",
+        "b-kernel-apply-headless-32",
+        "b-kernel-rebase-heading-33",
+        "b-kernel-rebase-body-34",
+        "b-kernel-scope-heading-35",
+        "b-kernel-scope-ring0-36",
+        "b-kernel-scope-ring1-37",
+        "b-kernel-scope-ring2-38",
+        "b-kernel-scope-d2-decision-39",
+        "b-kernel-review-heading-40",
+        "b-kernel-review-invoke-41",
+        "b-kernel-review-progress-42",
+        "b-kernel-review-preview-43",
+        "b-kernel-review-verdict-44",
+        "b-kernel-camera-heading-45",
+        "b-kernel-camera-body-46",
+        "b-kernel-camera-d3-decision-47",
+        "b-kernel-camera-fidelity-48",
+        "b-kernel-docs-heading-49",
+        "b-kernel-docs-d4-decision-50",
+        "b-kernel-docs-body-51",
+        "b-kernel-gaps-heading-52",
+        "b-kernel-gap-consumer-53",
+        "b-kernel-gap-stale-applier-54",
+        "b-kernel-gap-atomic-55",
+        "b-kernel-gap-union-56",
+        "b-kernel-gap-port-57",
+        "b-kernel-phasing-heading-58",
+        "b-kernel-phase-pipeline-59",
+        "b-kernel-phase-apply-60",
+        "b-kernel-phase-harness-61",
+        "b-kernel-phase-ux-62",
+        "b-kernel-phase-annotations-63",
+        "b-kernel-phase-intent-64",
+        "b-kernel-phasing-sequencing-65",
+        "b-kernel-decisions-heading-66",
+        "b-kernel-decisions-table-67"
+      ],
+      "props": {
+        "covers": "How the layout-lab pipeline becomes a real AI editing loop in the product: promoting the sketch pipeline to packages/layout, the Agent Kernel harness and its tool surface, program diff to patch operations, the atomic applyAgentPatch path, rebase-as-refit concurrency, scope rings, ghost preview, the resvg agent camera, and decisions D1–D5.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "agent kernel",
+          "applyAgentPatch",
+          "CanvasAgentPatchOperation",
+          "program diff",
+          "scope rings",
+          "ghost preview",
+          "rebase = refit",
+          "agent camera"
+        ]
+      }
+    },
+    "b-kernel-title-1": {
+      "id": "b-kernel-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Agent kernel architecture"
+        }
+      ]
+    },
+    "b-kernel-lede-2": {
+      "id": "b-kernel-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "How the layout-lab pipeline becomes a real AI editing loop inside the canvas product: the kernel and its tools, the scoped-editing UX, and the agent's camera. This is a design record migrated from the kernel integration proposal — decisions D1–D5 were settled 2026-07-20, before implementation started."
+        }
+      ]
+    },
+    "b-kernel-assumptions-3": {
+      "id": "b-kernel-assumptions-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Settled and assumed, not re-argued here: the canvas document is the single source of truth; the program is fitted fresh per edit and thrown away; fit, solve, and routing are deterministic; the AI is the only judgment in the loop; layout intent eventually persists in the document with a reconcile pass."
+        }
+      ]
+    },
+    "b-kernel-shape-heading-4": {
+      "id": "b-kernel-shape-heading-4",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The shape of the whole thing"
+        }
+      ]
+    },
+    "b-kernel-shape-body-5": {
+      "id": "b-kernel-shape-body-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Four pieces, three of which already exist in some form:"
+        }
+      ]
+    },
+    "b-kernel-shape-code-6": {
+      "id": "b-kernel-shape-code-6",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "packages/layout            NEW — the graduated sketch pipeline (pure library)\n  fit / serialize / expand / route / program-diff / lint\n\npackages/canvas            EXISTS — gains one action + small extensions\n  canvas.applyAgentPatch action (consumes CanvasAgentPatchOperation[])\n  renderDocumentToSvg: add arbitrary-rect crop\n\nlayout harness             NEW — Agent Kernel harness (@agent-kernel/kernel,\n  Pi Agent SDK) owning the layout tools + sessions; fronted through\n  /api/canvases/:id/agent/* with SSE progress; calls packages/layout +\n  the renderer in-process\n\npackages/studio (UI)       EXISTS — gains the invoke/preview surface\n  selection-toolbar entry, instruction popover, ghost preview layer,\n  accept/reject, refine"
+        }
+      ]
+    },
+    "b-kernel-shape-promote-7": {
+      "id": "b-kernel-shape-promote-7",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The first concrete move is promoting "
+        },
+        {
+          "insert": "packages/canvas-agent/src/pipeline/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline"
+            }
+          }
+        },
+        {
+          "insert": " to a workspace package, "
+        },
+        {
+          "insert": "packages/layout",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The kernel, the studio server, and the docs-sidecar generator all need it; layout-lab keeps importing it and stays alive as the playground and verification harness. "
+        },
+        {
+          "insert": "mapping/to-canvas.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "apps/layout-lab/src/mapping/to-canvas.ts"
+            }
+          }
+        },
+        {
+          "insert": " is prototype-era (it maps the old "
+        },
+        {
+          "insert": "CompileResult",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and it is unmounted); the program-diff described below replaces it rather than extending it."
+        }
+      ]
+    },
+    "b-kernel-host-heading-8": {
+      "id": "b-kernel-host-heading-8",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Where the loop runs"
+        }
+      ]
+    },
+    "b-kernel-host-body-9": {
+      "id": "b-kernel-host-body-9",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Three candidates were considered. A client-side loop in the editor was rejected: the LLM call needs a key and a Node context, the editor is deliberately uncontrolled with no imperative surface, and a browser-resident loop dies with the tab. An external process would talk to studio over HTTP and would have to respect the save-path rules from the outside. The third candidate is studio's shared server handler, "
+        },
+        {
+          "insert": "createCanvasFileApiHandler",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-api.ts",
+              "symbol": "createCanvasFileApiHandler"
+            }
+          }
+        },
+        {
+          "insert": " — already mounted identically in Vite dev middleware and the Electron packaged server, already importing canvas source directly (the schema and "
+        },
+        {
+          "insert": "renderDocumentToSvg",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/static-svg.ts",
+              "symbol": "renderDocumentToSvg"
+            }
+          }
+        },
+        {
+          "insert": "), and home to "
+        },
+        {
+          "insert": "/preview.svg",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-host-d5-decision-10": {
+      "id": "b-kernel-host-d5-decision-10",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "D5: the loop is an Agent Kernel harness"
+      },
+      "text": [
+        {
+          "insert": "The loop is an Agent Kernel harness — "
+        },
+        {
+          "insert": "Codecaine/agent-kernel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "@agent-kernel/kernel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", built on the Pi Agent SDK). The harness layer owns the layout tool surface, session and workflow semantics, and editor-state context; the kernel platform owns spawning, context assembly, model routing, and trace observability. Whether the harness runs inside studio's server process or as a sibling bun service the studio fronts is settled during harness setup against agent-kernel's harness-adapter docs — the deterministic layout library stays process-agnostic either way: given a document, a scope, and a program, everything except the model call is a pure function. The browser remains only the invoke/review surface."
+        }
+      ]
+    },
+    "b-kernel-host-context-11": {
+      "id": "b-kernel-host-context-11",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One standing requirement on the harness: the kernel session must be fed editor state as context — the current selection, viewport, and annotations — not just the document, so the agent operates with awareness of what the user is looking at and pointing to."
+        }
+      ]
+    },
+    "b-kernel-session-heading-12": {
+      "id": "b-kernel-session-heading-12",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The session and its tools"
+        }
+      ]
+    },
+    "b-kernel-session-body-13": {
+      "id": "b-kernel-session-body-13",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A session is created from "
+        },
+        {
+          "insert": "{canvasId, scopeObjectIds, instruction, annotations, baselineHash}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and holds a draft document in memory — the board as it would be if the current proposal were accepted. Nothing touches disk until accept. The tool surface the model sees:"
+        }
+      ]
+    },
+    "b-kernel-session-tools-14": {
+      "id": "b-kernel-session-tools-14",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Kernel session tools",
+        "density": "compact",
+        "columns": [
+          "Tool",
+          "In",
+          "Out"
+        ],
+        "rows": [
+          [
+            "fit_scope",
+            "—",
+            "program text; legend (number ↔ id/type/full text, sizes); boundary report (arrows crossing the scope edge, nearest outside neighbors, frame rect)"
+          ],
+          [
+            "propose_program",
+            "full program text",
+            "parse/validate result (line-numbered errors verbatim from parseSketch), or: solved draft + delta report + lint report"
+          ],
+          [
+            "render_draft",
+            "optional crop/zoom",
+            "image of the current draft with a margin ring of outside context"
+          ],
+          [
+            "inspect",
+            "object refs",
+            "full text/body, exact geometry, occupancy ASCII"
+          ],
+          [
+            "commit / abandon",
+            "summary line",
+            "ends the loop; commit hands the proposal to the UI"
+          ]
+        ]
+      }
+    },
+    "b-kernel-session-delta-15": {
+      "id": "b-kernel-session-delta-15",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The delta report is text and free: objects moved (with before/after compass-and-band descriptions, not raw coordinates), objects created, spacing-ladder violations, overflow beyond the scope frame, connector/box crossings ("
+        },
+        {
+          "insert": "countPathBoxViolations",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "countPathBoxViolations"
+            }
+          }
+        },
+        {
+          "insert": "), and off-grid values. Most iterations should be steerable from this alone; the image is for judgment calls. The occupancy ASCII already exists as "
+        },
+        {
+          "insert": "canvasDocumentToOccupancyAscii",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "apps/layout-lab/src/mapping/from-canvas.ts",
+              "symbol": "canvasDocumentToOccupancyAscii"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-session-whole-program-16": {
+      "id": "b-kernel-session-whole-program-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The model rewrites the whole program each proposal. Programs are small (76–177 decisions on the corpus), and whole-text proposals keep the byte-exact serializer ("
+        },
+        {
+          "insert": "serializeSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "serializeSketch"
+            }
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "parseSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "parseSketch"
+            }
+          }
+        },
+        {
+          "insert": ") as the single parser path. No patch-DSL to invent."
+        }
+      ]
+    },
+    "b-kernel-diff-heading-17": {
+      "id": "b-kernel-diff-heading-17",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Program diff → patch operations"
+        }
+      ]
+    },
+    "b-kernel-diff-body-18": {
+      "id": "b-kernel-diff-body-18",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "After a commit, the kernel diffs the accepted draft against the baseline document and emits "
+        },
+        {
+          "insert": "CanvasAgentPatchOperation[]",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts",
+              "symbol": "CanvasAgentPatchOperation"
+            }
+          }
+        },
+        {
+          "insert": ":"
+        }
+      ]
+    },
+    "b-kernel-diff-move-19": {
+      "id": "b-kernel-diff-move-19",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Moved or resized object → "
+        },
+        {
+          "insert": "updateObject {geometry}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-diff-add-20": {
+      "id": "b-kernel-diff-add-20",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "New number in the program → "
+        },
+        {
+          "insert": "addObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", with a real canvas id minted via "
+        },
+        {
+          "insert": "draftPlacedObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions.ts",
+              "symbol": "draftPlacedObject"
+            }
+          }
+        },
+        {
+          "insert": " — the program's number was session identity only."
+        }
+      ]
+    },
+    "b-kernel-diff-arrow-21": {
+      "id": "b-kernel-diff-arrow-21",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "New arrow → "
+        },
+        {
+          "insert": "addConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-diff-section-22": {
+      "id": "b-kernel-diff-section-22",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Section growth from "
+        },
+        {
+          "insert": "growSections",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "growSections"
+            }
+          }
+        },
+        {
+          "insert": " → "
+        },
+        {
+          "insert": "updateObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on the section, geometry only — membership stays derived."
+        }
+      ]
+    },
+    "b-kernel-diff-parent-constraint-23": {
+      "id": "b-kernel-diff-parent-constraint-23",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Never emit parentId"
+      },
+      "text": [
+        {
+          "insert": "Geometry is written; the reducer's "
+        },
+        {
+          "insert": "reconcileSectionMembership",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-membership.ts",
+              "symbol": "reconcileSectionMembership"
+            }
+          }
+        },
+        {
+          "insert": " choke point derives membership, following the section-membership precedent. The prototype mapper already did this correctly."
+        }
+      ]
+    },
+    "b-kernel-diff-waypoints-constraint-24": {
+      "id": "b-kernel-diff-waypoints-constraint-24",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Never emit waypoints"
+      },
+      "text": [
+        {
+          "insert": "The kernel's corridor router is the preview approximation; the product's live router owns real connector paths. Connectors whose endpoints moved get their waypoints cleared so the live router re-routes. Fidelity gap acknowledged: preview elbows and product elbows can differ. R9 constants came from the corpus, so divergence should be small; revisit if it isn't."
+        }
+      ]
+    },
+    "b-kernel-diff-d1-decision-25": {
+      "id": "b-kernel-diff-d1-decision-25",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "D1: omission is deletion"
+      },
+      "text": [
+        {
+          "insert": "A number missing from a proposed program removes that object. Its neighbors flow into the freed space, and the delta report and preview surface the removal loudly (\"2 objects deleted\") so accidents are caught at review. This needs new "
+        },
+        {
+          "insert": "removeObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "removeConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " patch ops in the union. When a deletion or push leaves the board messy, the loop runs a cleanup pass: the agent reviews the post-change render and issues a follow-up proposal to repair spacing, alignment, and routing before commit."
+        }
+      ]
+    },
+    "b-kernel-apply-heading-26": {
+      "id": "b-kernel-apply-heading-26",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Applying: one atomic save, and why not PUT"
+        }
+      ]
+    },
+    "b-kernel-apply-put-27": {
+      "id": "b-kernel-apply-put-27",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The obvious server-side route — mutate JSON, "
+        },
+        {
+          "insert": "PUT /api/canvases/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — is wrong while an editor is open: the editor is uncontrolled (the document prop only seeds state), so it would neither see the change nor stop its own 800ms debounced autosave from clobbering it. Last-writer-wins, no "
+        },
+        {
+          "insert": "If-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The recommended apply path goes through the editor:"
+        }
+      ]
+    },
+    "b-kernel-apply-action-28": {
+      "id": "b-kernel-apply-action-28",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "A new reducer action "
+        },
+        {
+          "insert": "canvas.applyAgentPatch {operations, summary}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "packages/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " maps the patch ops onto existing handlers, wrapped in one "
+        },
+        {
+          "insert": "withHistory",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " entry, stamped "
+        },
+        {
+          "insert": "source: \"agent\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-apply-handle-29": {
+      "id": "b-kernel-apply-handle-29",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "InteractiveCanvasEditor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
+              "symbol": "InteractiveCanvasEditor"
+            }
+          }
+        },
+        {
+          "insert": " exposes a narrow imperative handle (or prop) to dispatch it — today its only channels are the initial "
+        },
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop and "
+        },
+        {
+          "insert": "onDocumentChange",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-kernel-apply-dispatch-30": {
+      "id": "b-kernel-apply-dispatch-30",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Studio receives the committed proposal over the session API and dispatches it."
+        }
+      ]
+    },
+    "b-kernel-apply-downstream-31": {
+      "id": "b-kernel-apply-downstream-31",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Everything downstream is then free and correct: a single undo step (⌘Z reverts the whole agent edit), waypoint and section-membership reconciliation, the already-built agent-change halo ("
+        },
+        {
+          "insert": "lastChange.source === \"agent\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " → "
+        },
+        {
+          "insert": "changedObjectIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — currently dead code because nothing ever produces "
+        },
+        {
+          "insert": "\"agent\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and autosave persisting the result through the normal path."
+        }
+      ]
+    },
+    "b-kernel-apply-headless-32": {
+      "id": "b-kernel-apply-headless-32",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Headless mode (no editor open — CLI, batch, future automation) may use a server-side apply that runs the same patch applier and reconcile functions and writes with a hash precondition. Same kernel, second entrance; not v1."
+        }
+      ]
+    },
+    "b-kernel-rebase-heading-33": {
+      "id": "b-kernel-rebase-heading-33",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Concurrency: rebase = refit"
+        }
+      ]
+    },
+    "b-kernel-rebase-body-34": {
+      "id": "b-kernel-rebase-body-34",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "If the user keeps editing while a session is open, the draft goes stale. The derived-program architecture makes this cheap: on accept (and optionally per iteration), compare "
+        },
+        {
+          "insert": "baselineHash",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to the live document; if it changed, refit the scope from the live document and re-solve the accepted program against it. Deterministic, milliseconds. If a scope object was itself hand-moved or deleted mid-session, stop and tell the user instead of silently merging. No locks, no freeze on the editor."
+        }
+      ]
+    },
+    "b-kernel-scope-heading-35": {
+      "id": "b-kernel-scope-heading-35",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Scoped editing: three rings"
+        }
+      ]
+    },
+    "b-kernel-scope-ring0-36": {
+      "id": "b-kernel-scope-ring0-36",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Ring 0 — the selection.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Fitted into the program; the agent may rearrange freely. Fit runs on a sub-document (selected objects plus arrows among them), solving into the selection's bounding frame instead of a default canvas. If the user selects a whole section, the section is in scope and its trim and growth rules apply."
+        }
+      ]
+    },
+    "b-kernel-scope-ring1-37": {
+      "id": "b-kernel-scope-ring1-37",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Ring 1 — the boundary.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Arrows with one endpoint outside, near neighbors, and the frame itself. The grammar already supports this with no new syntax: JSON-quoted raw-id references put outside endpoints in the "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block without putting the objects in the tree. The legend describes each quoted id (type, text, which side of the frame it sits on) so the agent routes toward reality."
+        }
+      ]
+    },
+    "b-kernel-scope-ring2-38": {
+      "id": "b-kernel-scope-ring2-38",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Ring 2 — coupled outsiders.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Objects outside the scope that share a fitted tier or fan with inside members. The v1 rule: outside members are pinned constraints, never movables — their register is where the tier lives, and inside members solve onto it. The agent cannot move anything it did not select, with the one make-room exception below."
+        }
+      ]
+    },
+    "b-kernel-scope-d2-decision-39": {
+      "id": "b-kernel-scope-d2-decision-39",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "D2: overflow pushes neighbors"
+      },
+      "text": [
+        {
+          "insert": "Solve at natural size; on overflow, the kernel pushes neighbors — a deterministic single-axis minimal displacement of outside content (the same push discipline as "
+        },
+        {
+          "insert": "separateOverlaps",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "separateOverlaps"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "growSections",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "growSections"
+            }
+          }
+        },
+        {
+          "insert": ", snapped to the ladder), reported as a distinct \"moved to make room\" set. The agent never chooses who moves. If the push wrecks the surroundings, the same cleanup pass as D1 applies — and a cleanup can also be invoked standalone on any area."
+        }
+      ]
+    },
+    "b-kernel-review-heading-40": {
+      "id": "b-kernel-review-heading-40",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Invocation, progress, review"
+        }
+      ]
+    },
+    "b-kernel-review-invoke-41": {
+      "id": "b-kernel-review-invoke-41",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Invoke. With a selection active: a selection-toolbar entry (respecting the usage-ordered toolbar design) plus a hotkey. A popover takes the instruction; scope chips show what is in Ring 0 and how many boundary arrows exist. The schema's "
+        },
+        {
+          "insert": "agent-request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " annotation intent (already validated, currently unused) is the point-at-things channel — drop a marker on an object or region and type an instruction fragment; any "
+        },
+        {
+          "insert": "agent-request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " annotations inside the scope are gathered into the prompt and consumed (cleared) on accept. v1 treats them as input only."
+        }
+      ]
+    },
+    "b-kernel-review-progress-42": {
+      "id": "b-kernel-review-progress-42",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Progress. The session API streams over SSE: fitted → proposal n → lint/delta summary → reviewing render → proposal n+1. Each accepted-so-far draft renders on the canvas as a ghost preview layer — the browser stays a read-only camera; nothing is dispatched, nothing autosaves."
+        }
+      ]
+    },
+    "b-kernel-review-preview-43": {
+      "id": "b-kernel-review-preview-43",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Preview vocabulary — what moved vs stayed. Three visual classes: unchanged (dimmed slightly), rearranged (Ring 0 movers: ghost outline at the old spot, solid at the new, agent-halo tint), and displaced (Ring 1/2 make-room movers: a distinct cooler tint, so the user instantly sees collateral motion). New objects get a \"new\" badge. A side panel lists the delta in plain language (\"moved 3, created 2, made room by shifting 4 objects 96px east\")."
+        }
+      ]
+    },
+    "b-kernel-review-verdict-44": {
+      "id": "b-kernel-review-verdict-44",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Accept is the single atomic apply above — halo pulse, one undo step, done. Refine is a follow-up instruction into the same session; the draft and conversation persist. Reject discards the session and leaves the board untouched."
+        }
+      ]
+    },
+    "b-kernel-camera-heading-45": {
+      "id": "b-kernel-camera-heading-45",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Rendering for the agent: the camera"
+        }
+      ]
+    },
+    "b-kernel-camera-body-46": {
+      "id": "b-kernel-camera-body-46",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Not the HTTP endpoint: "
+        },
+        {
+          "insert": "/preview.svg",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " reads only saved files, and drafts must never touch disk. The kernel calls "
+        },
+        {
+          "insert": "renderDocumentToSvg",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/static-svg.ts",
+              "symbol": "renderDocumentToSvg"
+            }
+          }
+        },
+        {
+          "insert": " in-process on the draft document — pure, Node-safe, deterministic, and already faithful: real shape outlines, routed connectors, icon glyphs, section trim. One renderer extension is needed: an arbitrary-rect crop (today it renders the whole board or a "
+        },
+        {
+          "insert": "sectionId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") so the camera can frame the scope plus one gutter of context."
+        }
+      ]
+    },
+    "b-kernel-camera-d3-decision-47": {
+      "id": "b-kernel-camera-d3-decision-47",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "D3: resvg raster for the agent camera"
+      },
+      "text": [
+        {
+          "insert": "Models consume PNG, not SVG-as-image, and there is no server-side rasterizer in the repo. Add "
+        },
+        {
+          "insert": "@resvg/resvg-js",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (pure native Node, no headless browser) with the Inter font files bundled, giving byte-stable PNGs of the already-deterministic SVG. The alternative — feeding the model the SVG as text — is workable for structure checks but weak for visual judgment (overlap salience, balance), and boards are large. resvg is a small dependency for a large capability."
+        }
+      ]
+    },
+    "b-kernel-camera-fidelity-48": {
+      "id": "b-kernel-camera-fidelity-48",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Fidelity per iteration is cheap-first: every proposal gets the free text channels (delta report, lint, occupancy ASCII), and the agent is prompted to request "
+        },
+        {
+          "insert": "render_draft",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when it is about to commit or when the lint is clean but judgment is needed. Known renderer gaps that are fine for this purpose: char-width-heuristic text wrapping (not real font metrics), no markdown in stickies, and a few flowchart silhouettes fall back to rounded rects — none affect layout judgment. Default camera: scope rect plus a 128px context ring at roughly 1400px wide; "
+        },
+        {
+          "insert": "inspect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and crop for close-ups."
+        }
+      ]
+    },
+    "b-kernel-docs-heading-49": {
+      "id": "b-kernel-docs-heading-49",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Docs migration"
+        }
+      ]
+    },
+    "b-kernel-docs-d4-decision-50": {
+      "id": "b-kernel-docs-d4-decision-50",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "D4: docs land in docs/30-agent-layout"
+      },
+      "text": [
+        {
+          "insert": "The layout material moves into the real docs system as a new numbered section, "
+        },
+        {
+          "insert": "docs/30-agent-layout/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", framed as the agent-implementation home and keeping the approved structure pass intact. The kernel architecture — this document — migrates in as its own sub-doc alongside the language reference, rulebook, and worked example."
+        }
+      ]
+    },
+    "b-kernel-docs-body-51": {
+      "id": "b-kernel-docs-body-51",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Worked programs are pre-solved through the real pipeline into "
+        },
+        {
+          "insert": ".canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sidecars and embedded as live canvas blocks; sidecars are generated by a small script (DSL → parse → expand → route → document) so they can be regenerated whenever the solver changes, never hand-edited. What does not migrate: the R11–R22 candidate rules (unreviewed — they stay in the lab until promoted), the live DSL editor, and the metrics panel. The lab remains the interactive playground and the docs link to it. True live-solving demos in docs would be a new docs-viewer block type hosting "
+        },
+        {
+          "insert": "packages/layout",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — deliberately out of scope now."
+        }
+      ]
+    },
+    "b-kernel-gaps-heading-52": {
+      "id": "b-kernel-gaps-heading-52",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Gaps and hazards found during the survey"
+        }
+      ]
+    },
+    "b-kernel-gap-consumer-53": {
+      "id": "b-kernel-gap-consumer-53",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "CanvasAgentPatchOperation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts",
+              "symbol": "CanvasAgentPatchOperation"
+            }
+          }
+        },
+        {
+          "insert": " has no consumer in "
+        },
+        {
+          "insert": "packages/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the type exists, the halo exists, nothing produces or applies them. The apply path above is that missing consumer."
+        }
+      ]
+    },
+    "b-kernel-gap-stale-applier-54": {
+      "id": "b-kernel-gap-stale-applier-54",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The only existing patch applier speaks a stale schema: docs-server's "
+        },
+        {
+          "insert": "canvas_apply_patch",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " runs against a vendored fork ("
+        },
+        {
+          "insert": "tools/docs-framework/external/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") with pre-P1 ops. The kernel must not build on it; the fork needs a refresh eventually regardless (tracked, not v1)."
+        }
+      ]
+    },
+    "b-kernel-gap-atomic-55": {
+      "id": "b-kernel-gap-atomic-55",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Non-atomic saves in "
+        },
+        {
+          "insert": "canvas-file-api.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-api.ts"
+            }
+          }
+        },
+        {
+          "insert": ": the disk write is a bare "
+        },
+        {
+          "insert": "fs.writeFile",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with no temp-file+rename. Worth fixing while in this file — docs-server's applier already persists atomically."
+        }
+      ]
+    },
+    "b-kernel-gap-union-56": {
+      "id": "b-kernel-gap-union-56",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "No delete/reparent/waypoint story in the patch union — v1 sidesteps all three by design (D1's remove ops, derived membership, cleared waypoints)."
+        }
+      ]
+    },
+    "b-kernel-gap-port-57": {
+      "id": "b-kernel-gap-port-57",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Port note: studio dev runs on "
+        },
+        {
+          "insert": ":3999",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not :4000."
+        }
+      ]
+    },
+    "b-kernel-phasing-heading-58": {
+      "id": "b-kernel-phasing-heading-58",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Phasing"
+        }
+      ]
+    },
+    "b-kernel-phase-pipeline-59": {
+      "id": "b-kernel-phase-pipeline-59",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Graduate the pipeline.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "packages/layout",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; layout-lab imports it; the round-trip and no-crossing dev assertions become package tests. Scoped fit (sub-document, frame, boundary quoted-ids) and program-diff → patch-ops land here."
+        }
+      ]
+    },
+    "b-kernel-phase-apply-60": {
+      "id": "b-kernel-phase-apply-60",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The apply path.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "canvas.applyAgentPatch",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (one history entry, "
+        },
+        {
+          "insert": "source: \"agent\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), the editor dispatch handle, and the halo goes live."
+        }
+      ]
+    },
+    "b-kernel-phase-harness-61": {
+      "id": "b-kernel-phase-harness-61",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The layout harness.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " An Agent Kernel harness wiring the session tools; session endpoints and SSE fronted via the shared handler; the renderer crop; resvg (per D3); the editor-state context feed (selection, viewport, annotations)."
+        }
+      ]
+    },
+    "b-kernel-phase-ux-62": {
+      "id": "b-kernel-phase-ux-62",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Invoke/review UX.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Toolbar entry, popover, ghost preview with the three-class vocabulary, accept/refine/reject."
+        }
+      ]
+    },
+    "b-kernel-phase-annotations-63": {
+      "id": "b-kernel-phase-annotations-63",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Annotations + make-room.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "agent-request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " gathering; the D2 displacement pass with its distinct preview tint."
+        }
+      ]
+    },
+    "b-kernel-phase-intent-64": {
+      "id": "b-kernel-phase-intent-64",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Intent persistence.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Grids, aligns, fans, and hugs saved into the document next to geometry with a reconcile pass — the section-membership pattern: derived, validated, choke-pointed. Design doc first; separate sign-off."
+        }
+      ]
+    },
+    "b-kernel-phasing-sequencing-65": {
+      "id": "b-kernel-phasing-sequencing-65",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The docs migration is independent of everything except step 1's package and runs in parallel. Sequencing direction: docs migration first, then the kernel package — the point of landing this in the real system now is to start testing the loop against real boards."
+        }
+      ]
+    },
+    "b-kernel-decisions-heading-66": {
+      "id": "b-kernel-decisions-heading-66",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions (settled 2026-07-20)"
+        }
+      ]
+    },
+    "b-kernel-decisions-table-67": {
+      "id": "b-kernel-decisions-table-67",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Decisions D1–D5",
+        "density": "compact",
+        "columns": [
+          "#",
+          "Question",
+          "Decision"
+        ],
+        "rows": [
+          [
+            "D1",
+            "Program omits a fitted object",
+            "Omission = deletion; neighbors flow in; loud delta/preview surfacing; cleanup pass if the result is messy"
+          ],
+          [
+            "D2",
+            "Scope overflow",
+            "Push neighbors — deterministic single-axis kernel displacement; cleanup pass when the push degrades surroundings"
+          ],
+          [
+            "D3",
+            "Agent camera raster",
+            "Add @resvg/resvg-js with bundled Inter fonts"
+          ],
+          [
+            "D4",
+            "Docs placement",
+            "New docs/30-agent-layout/ section — the agent-implementation home; the kernel architecture doc migrates into it"
+          ],
+          [
+            "D5",
+            "LLM loop host",
+            "An Agent Kernel harness — Codecaine/agent-kernel (@agent-kernel/kernel, Pi Agent SDK underneath). The harness owns the layout tools, session semantics, and editor-state context; the kernel owns spawning, context assembly, and trace observability. Process topology settled during harness setup"
+          ]
+        ]
+      }
+    }
+  }
+}

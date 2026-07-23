@@ -1,0 +1,45 @@
+{
+  "name": "@codecaine-ai/canvas-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/pipeline/index.ts",
+  "types": "src/pipeline/index.ts",
+  "exports": {
+    ".": "./src/pipeline/index.ts",
+    "./protocol": "./src/protocol.ts"
+  },
+  "scripts": {
+    "generate:docs-boards": "bun scripts/generate-docs-boards.ts",
+    "harness": "bun src/harness/server.ts",
+    "viewer": "vite --config src/viewer/vite.config.ts",
+    "cli": "bun src/cli.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@agent-kernel/db": "link:@agent-kernel/db",
+    "@agent-kernel/kernel": "link:@agent-kernel/kernel",
+    "@agent-kernel/protocol": "link:@agent-kernel/protocol",
+    "@agent-kernel/viewer-core": "link:@agent-kernel/viewer-core",
+    "@agent-kernel/viewer-shell": "link:@agent-kernel/viewer-shell",
+    "@agent-kernel/viewer-ui": "link:@agent-kernel/viewer-ui",
+    "@codecaine-ai/canvas": "workspace:*",
+    "@codecaine-ai/prompt-kit": "link:@codecaine-ai/prompt-kit",
+    "@mariozechner/pi-ai": "^0.70.6",
+    "@resvg/resvg-js": "^2.6.2",
+    "elysia": "^1.2.0",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bun": "latest",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.2",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^7.3.0"
+  }
+}

@@ -577,7 +577,7 @@ function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: 
     });
   }
 
-  // Bbox tier: the base rounded-rect chrome (2px CSS radius track — the CSS
+  // Bbox tier: the base rounded-rect trim (2px CSS radius track — the CSS
   // border paints inside the box, so inset by half the stroke).
   const inset = strokeWidth / 2;
   return tag("rect", {
@@ -824,7 +824,25 @@ function selectContent(
   document: InteractiveCanvasDocument,
   options: RenderStaticSvgOptions,
 ): RenderContent {
-  const { sectionId, padding } = options;
+  const { cropRect, sectionId, padding } = options;
+
+  // Arbitrary-rect crop wins over sectionId (see RenderStaticSvgOptions).
+  // Everything renders; the viewBox clips — same camera mechanics as the
+  // section frame crop, but with caller-supplied world bounds. Padding
+  // defaults to 0: the rect is authoritative.
+  if (cropRect) {
+    const cropPadding = padding ?? 0;
+    return {
+      bounds: {
+        x: cropRect.x - cropPadding,
+        y: cropRect.y - cropPadding,
+        width: cropRect.width + cropPadding * 2,
+        height: cropRect.height + cropPadding * 2,
+      },
+      objects: document.objects,
+      connections: document.connections,
+    };
+  }
 
   if (sectionId && options.fit === "content") {
     const includedIds = sectionDescendantIds(document, sectionId);

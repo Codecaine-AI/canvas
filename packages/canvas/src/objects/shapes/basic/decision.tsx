@@ -6,7 +6,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Decision (rendered as a diamond) — a pure CSS `clip-path` outline, no SVG
- * silhouette: the base button chrome is clipped into the diamond shape
+ * silhouette: the base button trim is clipped into the diamond shape
  * directly. Center text uses the shared analytic inscribed rect.
  */
 export const decisionShapeDef: ShapeDef = {

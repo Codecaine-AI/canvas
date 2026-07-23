@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-01-r1-the-16px-grid",
+  "title": "R1 — The 16px grid",
+  "root": "b-r1-root",
+  "blocks": {
+    "b-r1-root": {
+      "id": "b-r1-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r1-title-1",
+        "b-r1-card-2",
+        "b-r1-enforce-3",
+        "b-r1-evidence-4"
+      ],
+      "props": {
+        "covers": "Every emitted coordinate, extent, corridor width, and pitch snaps to a 16px grid; GRID = 16 in the expander, split allocation runs on 16px units, and the elbow router walks the same lattice.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "16px grid",
+          "snapping",
+          "route lattice"
+        ]
+      }
+    },
+    "b-r1-title-1": {
+      "id": "b-r1-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R1 — The 16px grid"
+        }
+      ]
+    },
+    "b-r1-card-2": {
+      "id": "b-r1-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Everything snaps to a 16px grid"
+      },
+      "text": [
+        {
+          "insert": "Every emitted coordinate, extent, corridor width, and pitch snaps to a 16px grid. Offsets finer than 16px are authoring noise, never intent."
+        }
+      ]
+    },
+    "b-r1-enforce-3": {
+      "id": "b-r1-enforce-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Enforcement: "
+        },
+        {
+          "insert": "GRID = 16",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "GRID"
+            }
+          }
+        },
+        {
+          "insert": " in the expander; split allocation runs on 16px units through "
+        },
+        {
+          "insert": "allocateWeightedUnits",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/units.ts",
+              "symbol": "allocateWeightedUnits"
+            }
+          }
+        },
+        {
+          "insert": "; hug rects snap up to 16; fan pitch snaps up to 16. The elbow router walks the same lattice ("
+        },
+        {
+          "insert": "ROUTE_GRID",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "ROUTE_GRID"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-r1-evidence-4": {
+      "id": "b-r1-evidence-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: 88.3% of objects across the reference boards sit exactly on the grid, and the misses are hand-drag noise — "
+        },
+        {
+          "insert": "v2-flow",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/v2-flow.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "sticky-overall-context",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at x=810.4 reads as 816."
+        }
+      ]
+    }
+  }
+}

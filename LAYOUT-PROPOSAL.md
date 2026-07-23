@@ -56,7 +56,7 @@ session (DOCS-OVERHAUL.md).
 | # | Path | Action | Rule / evidence |
 |---|------|--------|-----------------|
 | 1 | `to_add/connector-stuff/` (12 CleanShot PNGs) | **delete** | Zero references; connector work shipped and documented |
-| 2 | `to_add/black pop up/figjam-popup-animation.html` | **move** → `board-design-reference/analysis/` | R4. Live ground truth; 3 citations rewritten in the same commit (`editor-style.ts:43`, `.claude/launch.json:64`, `60-chrome/doc.json:1726`) |
+| 2 | `to_add/black pop up/figjam-popup-animation.html` | **move** → `board-design-reference/analysis/` | R4. Live ground truth; 3 citations rewritten in the same commit (`editor-style.ts:43`, `.claude/launch.json:64`, `60-trim/doc.json:1726`) |
 | 3 | `to_add/black pop up/Figma Pop Up.mp4` | **delete** (per Ford) | Zero references; the measured HTML recipe supersedes it |
 | 4 | `to_add/` | **delete** (emptied) | Session exit criterion |
 | 5 | `tools/migrations/flatten-containers.ts` | **delete** | R3. One-shot, already applied, zero references |
@@ -152,7 +152,7 @@ packages/canvas/src/
 │       │   ├── use-interaction-pipeline.ts, use-hover-target.ts   # ← features/drag-pipeline/
 │       │   ├── stage-dom.ts        #     ← editor/stage-dom.ts
 │       │   └── InteractionFeedback.tsx   # NEW: renders slice visuals into the stage slot
-│       ├── components/             #   RULE: stateless chrome widgets
+│       ├── components/             #   RULE: stateless trim widgets
 │       │   └── CanvasDock, TopBar, ZoomControls, ColorPicker,
 │       │       ShapesPanel, ShapeSearchPopover, shape-previews, editor-style
 │       └── features/               #   RULE: vertical slices — behavior + visuals together
@@ -317,6 +317,6 @@ Commits: `461a0a4` `1172162` `7490d4a` `08c9be9` (Part 1) · `d3f1994`
 
 ## Post-freeze amendments
 
-- 2026-07-09: `objects/object-chrome.tsx` → `objects/object-shell.tsx`
-  (`ObjectButtonChrome` → `ObjectShell`), per Ford — "chrome" is now reserved
+- 2026-07-09: `objects/object-trim.tsx` → `objects/object-shell.tsx`
+  (`ObjectButtonTrim` → `ObjectShell`), per Ford — "trim" is now reserved
   for editor UI. Full gates held.

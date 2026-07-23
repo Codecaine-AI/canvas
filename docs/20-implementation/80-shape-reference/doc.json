@@ -445,7 +445,7 @@
           }
         },
         {
-          "insert": ", sized to hold a few default shapes. The label renders top-left in the shared base chrome ("
+          "insert": ", sized to hold a few default shapes. The label renders top-left in the shared base trim ("
         },
         {
           "insert": "align-items: flex-start",
@@ -1150,7 +1150,7 @@
           }
         },
         {
-          "insert": "'s waveShoulderYRatio (0.82) and waveCrestYRatio (0.96); label renders top-left, body below, in the shared base chrome. The old dog-eared notch moved verbatim to the new "
+          "insert": "'s waveShoulderYRatio (0.82) and waveCrestYRatio (0.96); label renders top-left, body below, in the shared base trim. The old dog-eared notch moved verbatim to the new "
         },
         {
           "insert": "page-corner",

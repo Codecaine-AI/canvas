@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-30-worked-example-02-step-runner-pipeline",
+  "title": "Step 2 — The runner pipeline",
+  "root": "b-step2-root",
+  "blocks": {
+    "b-step2-root": {
+      "id": "b-step2-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-step2-title-1",
+        "b-step2-body-2",
+        "b-step2-code-3",
+        "b-step2-canvas-4"
+      ],
+      "props": {
+        "covers": "Step 2 of the worked example: the stage becomes the runner loop — a 1x4 grid of identical cells at the loose 96 gap, ending in a decision cell.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "worked example",
+          "grid",
+          "gap ladder",
+          "decision"
+        ]
+      }
+    },
+    "b-step2-title-1": {
+      "id": "b-step2-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Step 2 — The runner pipeline"
+        }
+      ]
+    },
+    "b-step2-body-2": {
+      "id": "b-step2-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The stage becomes the runner loop: "
+        },
+        {
+          "insert": "grid 1x4 gap=96",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — one row of four identical cells at the loose 96 gap (R4, R2), ending in a decision cell. The new section frames itself with R3 trim; the config lane does not move."
+        }
+      ]
+    },
+    "b-step2-code-3": {
+      "id": "b-step2-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|4\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  section 5 text=loop label=\"Runner loop\"\n    grid 1x4 gap=96\n      item 6 text=cli type=process size=M\n      item 7 text=sched type=process size=M\n      item 8 text=workers type=process size=M\n      item 9 text=match type=decision size=M\n\narrows"
+        }
+      ]
+    },
+    "b-step2-canvas-4": {
+      "id": "b-step2-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/step-2.canvas.json",
+        "title": "Step 2 — The runner pipeline"
+      }
+    }
+  }
+}

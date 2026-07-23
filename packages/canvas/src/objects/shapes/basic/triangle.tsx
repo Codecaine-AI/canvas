@@ -13,7 +13,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
  * Triangle (W5) — a single SVG polygon tracing the isosceles-triangle
  * silhouette (connectors/connection-cascade.ts trianglePoints, the same true
  * outline connector attachment uses), painted behind the label/body content;
- * the button chrome stays fully transparent so only one outline is visible.
+ * the button trim stays fully transparent so only one outline is visible.
  * Direction: "down" flips apex-to-base vertically (legacy `triangleDirection`);
  * anything else (including absent `direction`) is "up".
  */

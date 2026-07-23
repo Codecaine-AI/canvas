@@ -48,7 +48,7 @@ function glyphElementHasClosedInterior(element: IconGlyphElement) {
  * this component is glyph-only since the P2 text unification.
  *
  * The caller (`objects/shapes/icon/def.tsx`) is responsible for the outer
- * button/positioning chrome, matching how other shape bodies are composed.
+ * button/positioning trim, matching how other shape bodies are composed.
  */
 export function IconShapeBody({
   object,

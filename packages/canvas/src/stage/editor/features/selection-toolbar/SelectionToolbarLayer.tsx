@@ -13,7 +13,7 @@ export interface SelectionToolbarLayerProps {
   toolbar: SelectionToolbarApi;
   selectedConnection: InteractiveCanvasConnection | undefined;
   dispatch: (action: CanvasAction) => void;
-  /** Current canvas tool; connector mode suppresses select-mode toolbar chrome without clearing selection state. */
+  /** Current canvas tool; connector mode suppresses select-mode toolbar trim without clearing selection state. */
   activeTool?: CanvasTool;
   /**
    * Drag-in-progress suppression — the toolbar unmounts during selection drags
@@ -23,7 +23,7 @@ export interface SelectionToolbarLayerProps {
 }
 
 /**
- * Floating SelectionToolbar host (RESTRUCTURE.md step 5): renders the chrome
+ * Floating SelectionToolbar host (RESTRUCTURE.md step 5): renders the trim
  * pill with the registry-resolved control specs, plus whichever flyout
  * component the editor-side flyout registry (./flyouts, keyed by def kind +
  * action id) declares for the currently open action. ObjectDefs carry only

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s5-nested-arch",
+  "title": "Eval Suite S5 — Nested Architecture",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S5 — Nested Architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-client",
+      "type": "process",
+      "text": "Client",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 720,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-event-bus",
+      "type": "process",
+      "text": "Event Bus",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 656,
+        "width": 288,
+        "height": 144
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

@@ -23,7 +23,7 @@ export const SECTION_GEOMETRY = {
 /**
  * FigJam section (W2) — a large tinted backdrop with a floating title chip
  * in the top-left corner, per the title-chip slot preset. Deliberately NOT
- * built on the generic button/label chrome the shape family shares: sections
+ * built on the generic button/label trim the shape family shares: sections
  * have no centered text, no shadow, no edge ports, and their "border" is
  * literally the title chip's fill color (per spec, border = chip fill).
  *
@@ -125,7 +125,7 @@ export const sectionDef: ObjectDef = {
   render: SectionObjectView,
   css: `
         /* W2 — section: tint fill, subtle border (= chip fill), no shadow, no
-           button-style chrome; the floating title chip renders in CanvasStage's
+           button-style trim; the floating title chip renders in CanvasStage's
            section-header layer. */
         .interactive-canvas-object-section {
           border-style: solid;

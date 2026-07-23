@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-06-r6-fan",
+  "title": "R6 — fan: hub over children",
+  "root": "b-r6-root",
+  "blocks": {
+    "b-r6-root": {
+      "id": "b-r6-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r6-title-1",
+        "b-r6-card-2",
+        "b-r6-detect-3",
+        "b-r6-register-4",
+        "b-r6-clearance-5",
+        "b-r6-pitch-6",
+        "b-r6-centering-7",
+        "b-r6-evidence-8"
+      ],
+      "props": {
+        "covers": "fan centers a hub over its children on one shared register, evenly pitched and never closer than 64px to the hub, expanded bottom-up with nested fans first.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "fan",
+          "hub",
+          "child register",
+          "pitch",
+          "detectFans"
+        ]
+      }
+    },
+    "b-r6-title-1": {
+      "id": "b-r6-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R6 — fan: hub over children"
+        }
+      ]
+    },
+    "b-r6-card-2": {
+      "id": "b-r6-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The hub centers over its children"
+      },
+      "text": [
+        {
+          "insert": "A fan centers the hub over its children; the children sit on one shared centerline, evenly spaced, and never closer than 64px to the hub."
+        }
+      ]
+    },
+    "b-r6-detect-3": {
+      "id": "b-r6-detect-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Detect:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " a node whose outgoing edges include two or more targets sharing a register ("
+        },
+        {
+          "insert": "FAN_REGISTER_TOLERANCE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "FAN_REGISTER_TOLERANCE"
+            }
+          }
+        },
+        {
+          "insert": " = 16px) strictly on one side (S/N/E/W), with the hub's main-axis center within max(64, 25% of span) of the children's midpoint ("
+        },
+        {
+          "insert": "detectFans",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "detectFans"
+            }
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "Spell:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "fan 17 dir=S: 18 19",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "Expand,",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " bottom-up, nested fans first:"
+        }
+      ]
+    },
+    "b-r6-register-4": {
+      "id": "b-r6-register-4",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Children share one register on the fan side; a moved child carries its whole fan subtree rigidly."
+        }
+      ]
+    },
+    "b-r6-clearance-5": {
+      "id": "b-r6-clearance-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Hubs bottom-anchor onto children top-anchors: the children's register always clears the hub by at least 64px — never overlap (intent-2: layer-1 pentagon bottoms at 1312, action tops at 1424)."
+        }
+      ]
+    },
+    "b-r6-pitch-6": {
+      "id": "b-r6-pitch-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Even pitch. When hub and children share one section — a local template — pitch normalizes to the widest solved child subtree + 64, so nested fan trees compose compactly (intent-2's layer tree derives its 640 pitch from its grandchildren). When children straddle section boundaries, the existing spread is never compressed past unrelated content — only widened."
+        }
+      ]
+    },
+    "b-r6-centering-7": {
+      "id": "b-r6-centering-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The hub centers over the children's midpoint (intent-2: "
+        },
+        {
+          "insert": "classify-intent-layered",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at x=3168 — the exact midpoint of the layer-1 centers 2208..4128)."
+        }
+      ]
+    },
+    "b-r6-evidence-8": {
+      "id": "b-r6-evidence-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: "
+        },
+        {
+          "insert": "intent-classification-2",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/intent-classification-2.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": "'s three-level layer tree (9 fans, nesting 3 deep); intent-1's decision fans; v2-flow's chevron fan; the researcher's spawn fan. The example-fan board in the "
+        },
+        {
+          "insert": "fan reference",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/80-fan",
+              "label": "fan"
+            }
+          }
+        },
+        {
+          "insert": " demonstrates the geometry."
+        }
+      ]
+    }
+  }
+}

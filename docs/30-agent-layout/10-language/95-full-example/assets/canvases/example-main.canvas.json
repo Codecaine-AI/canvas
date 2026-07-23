@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-95-full-example-example-main",
+  "title": "Example main (full example)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "pipeline",
+      "type": "section",
+      "text": "Pipeline",
+      "label": "Pipeline",
+      "title": "Pipeline",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 343
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "process",
+      "text": "ingest",
+      "label": "ingest",
+      "geometry": {
+        "x": 82,
+        "y": 138,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "parse",
+      "type": "process",
+      "text": "parse",
+      "label": "parse",
+      "geometry": {
+        "x": 418,
+        "y": 72,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "score-gate",
+      "type": "decision",
+      "text": "score-gate",
+      "label": "score-gate",
+      "geometry": {
+        "x": 404,
+        "y": 176,
+        "width": 216,
+        "height": 151
+      }
+    },
+    {
+      "id": "check-a",
+      "type": "sticky",
+      "text": "check-a",
+      "label": "check-a",
+      "geometry": {
+        "x": 335,
+        "y": 416,
+        "width": 66,
+        "height": 50
+      }
+    },
+    {
+      "id": "check-b",
+      "type": "sticky",
+      "text": "check-b",
+      "label": "check-b",
+      "geometry": {
+        "x": 623,
+        "y": 416,
+        "width": 66,
+        "height": 50
+      }
+    },
+    {
+      "id": "check-c",
+      "type": "sticky",
+      "text": "check-c",
+      "label": "check-c",
+      "geometry": {
+        "x": 479,
+        "y": 416,
+        "width": 66,
+        "height": 50
+      }
+    },
+    {
+      "id": "check-d",
+      "type": "sticky",
+      "text": "check-d",
+      "label": "check-d",
+      "geometry": {
+        "x": 515,
+        "y": 471,
+        "width": 66,
+        "height": 50
+      }
+    },
+    {
+      "id": "check-e",
+      "type": "sticky",
+      "text": "check-e",
+      "label": "check-e",
+      "geometry": {
+        "x": 443,
+        "y": 526,
+        "width": 66,
+        "height": 50
+      }
+    },
+    {
+      "id": "check-f",
+      "type": "sticky",
+      "text": "check-f",
+      "label": "check-f",
+      "geometry": {
+        "x": 515,
+        "y": 526,
+        "width": 66,
+        "height": 50
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1-ingest-parse",
+      "from": {
+        "objectId": "ingest"
+      },
+      "to": {
+        "objectId": "parse"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-2-parse-score-gate",
+      "from": {
+        "objectId": "parse"
+      },
+      "to": {
+        "objectId": "score-gate"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-3-score-gate-check-a",
+      "from": {
+        "objectId": "score-gate"
+      },
+      "to": {
+        "objectId": "check-a"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-4-score-gate-check-b",
+      "from": {
+        "objectId": "score-gate"
+      },
+      "to": {
+        "objectId": "check-b"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-5-score-gate-check-c",
+      "from": {
+        "objectId": "score-gate"
+      },
+      "to": {
+        "objectId": "check-c"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ]
+}

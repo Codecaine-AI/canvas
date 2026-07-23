@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-50-grid",
+  "title": "grid — a repeated-cell lattice",
+  "root": "b-grid-root",
+  "blocks": {
+    "b-grid-root": {
+      "id": "b-grid-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-grid-title-1",
+        "b-grid-body-2",
+        "b-grid-code-3",
+        "b-grid-canvas-4"
+      ],
+      "props": {
+        "covers": "The grid statement: RxC identical cells filled by item lines in row-major order, gap= from the spacing ladder (0/32/64/96); cells keep row and column identity, anchoring later placement.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "grid",
+          "gap",
+          "spacing ladder",
+          "lattice",
+          "row-major"
+        ]
+      }
+    },
+    "b-grid-title-1": {
+      "id": "b-grid-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "grid — a repeated-cell lattice"
+        }
+      ]
+    },
+    "b-grid-body-2": {
+      "id": "b-grid-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Main value "
+        },
+        {
+          "insert": "RxC",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (rows × columns), then "
+        },
+        {
+          "insert": "gap=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the one shared gap between cells, from the spacing ladder: 0 (cells touching — tables), 32 (tight), 64 (standard), 96 (loose). Children are item lines in row-major order; the count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later (rule R4)."
+        }
+      ]
+    },
+    "b-grid-code-3": {
+      "id": "b-grid-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section 1 text=table label=\"grid 2x3 gap=32\"\n  grid 2x3 gap=32\n    item 2 text=c1 type=process size=M\n    item 3 text=c2 type=process size=M\n    item 4 text=c3 type=process size=M\n    item 5 text=c4 type=process size=M\n    item 6 text=c5 type=process size=M\n    item 7 text=c6 type=process size=M\n\narrows"
+        }
+      ]
+    },
+    "b-grid-canvas-4": {
+      "id": "b-grid-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-grid.canvas.json",
+        "title": "grid 2x3 gap=32 — six identical cells"
+      }
+    }
+  }
+}

@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v4-smoke",
+  "title": "Eval v4 — Smoke",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2800,
+    "height": 1800
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v4 — Smoke",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2736,
+        "height": 1736
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "sec-source",
+      "type": "section",
+      "text": "SOURCE",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 256,
+        "y": 448,
+        "width": 512,
+        "height": 448
+      }
+    },
+    {
+      "id": "sec-ci",
+      "type": "section",
+      "text": "CI",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 832,
+        "y": 448,
+        "width": 896,
+        "height": 528
+      }
+    },
+    {
+      "id": "sec-deploy",
+      "type": "section",
+      "text": "DEPLOY",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1792,
+        "y": 448,
+        "width": 768,
+        "height": 528
+      }
+    },
+    {
+      "id": "src-webhook",
+      "type": "pill",
+      "text": "Webhook\nPush / PR",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 304,
+        "y": 624,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "src-repo",
+      "type": "database",
+      "text": "Git repository\nmain branch",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 544,
+        "y": 608,
+        "width": 176,
+        "height": 128
+      }
+    },
+    {
+      "id": "note-rollback-policy",
+      "type": "sticky",
+      "text": "ROLLBACK POLICY\n\n• Canary breach stops promotion\n• Revert to last known good\n• Notify release owner",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 2080,
+        "y": 1008,
+        "width": 208,
+        "height": 304
+      }
+    },
+    {
+      "id": "ci-build",
+      "type": "process",
+      "text": "Build\ncompile • image",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 896,
+        "y": 608,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "ci-test",
+      "type": "process",
+      "text": "Test\nunit • integration",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1184,
+        "y": 608,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "ci-package",
+      "type": "document",
+      "text": "Package\nsign • publish",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1472,
+        "y": 608,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "ci-retry",
+      "type": "pill",
+      "text": "Retry queue\nmax 2 attempts",
+      "color": "red",
+      "parentId": null,
+      "geometry": {
+        "x": 1168,
+        "y": 832,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "dep-staging",
+      "type": "process",
+      "text": "Staging\ndeploy candidate",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 1856,
+        "y": 608,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "dep-canary",
+      "type": "decision",
+      "text": "Canary\nSLO OK?",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 2112,
+        "y": 608,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "dep-production",
+      "type": "process",
+      "text": "Production\npromoted release",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 2336,
+        "y": 608,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "dep-rollback",
+      "type": "pill",
+      "text": "Rollback\nlast known good",
+      "color": "red",
+      "parentId": null,
+      "geometry": {
+        "x": 2080,
+        "y": 832,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "ci-rebuild",
+      "type": "process",
+      "text": "Rebuild\nsame commit",
+      "color": "red",
+      "parentId": null,
+      "geometry": {
+        "x": 912,
+        "y": 832,
+        "width": 160,
+        "height": 80
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-webhook-repo",
+      "from": {
+        "objectId": "src-webhook"
+      },
+      "to": {
+        "objectId": "src-repo"
+      },
+      "label": "dispatch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-repo-build",
+      "from": {
+        "objectId": "src-repo"
+      },
+      "to": {
+        "objectId": "ci-build"
+      },
+      "label": "checkout",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-build-test",
+      "from": {
+        "objectId": "ci-build"
+      },
+      "to": {
+        "objectId": "ci-test"
+      },
+      "label": "run suite",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-test-package",
+      "from": {
+        "objectId": "ci-test"
+      },
+      "to": {
+        "objectId": "ci-package"
+      },
+      "label": "pass",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-test-retry",
+      "from": {
+        "objectId": "ci-test"
+      },
+      "to": {
+        "objectId": "ci-retry"
+      },
+      "label": "fail",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-package-staging",
+      "from": {
+        "objectId": "ci-package"
+      },
+      "to": {
+        "objectId": "dep-staging"
+      },
+      "label": "publish",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-staging-canary",
+      "from": {
+        "objectId": "dep-staging"
+      },
+      "to": {
+        "objectId": "dep-canary"
+      },
+      "label": "10%",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-canary-production",
+      "from": {
+        "objectId": "dep-canary"
+      },
+      "to": {
+        "objectId": "dep-production"
+      },
+      "label": "promote",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-canary-rollback",
+      "from": {
+        "objectId": "dep-canary"
+      },
+      "to": {
+        "objectId": "dep-rollback"
+      },
+      "label": "breach",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-retry-rebuild",
+      "from": {
+        "objectId": "ci-retry"
+      },
+      "to": {
+        "objectId": "ci-rebuild"
+      },
+      "label": "retry",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-rebuild-build",
+      "from": {
+        "objectId": "ci-rebuild"
+      },
+      "to": {
+        "objectId": "ci-build"
+      },
+      "label": "rebuild",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

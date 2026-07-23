@@ -14,6 +14,11 @@ import type {
   InteractiveCanvasObjectType,
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
+import { exportDocumentAsPng, exportDocumentAsSvg } from "../../../../render/download";
+import {
+  exportCanvasSection,
+  type SectionExportFormat,
+} from "./section-export";
 
 export type CanvasContextMenuState =
   | {
@@ -65,6 +70,8 @@ export interface UseCanvasContextMenuArgs {
   dispatch: (action: CanvasAction) => void;
   screenToWorld: (point: CanvasPoint) => CanvasPoint;
   zoom?: number;
+  exportSection?: typeof exportCanvasSection;
+  exportBoard?: (document: InteractiveCanvasDocument, format: SectionExportFormat) => Promise<void>;
 }
 
 export interface CanvasContextMenuApi {
@@ -84,7 +91,9 @@ export interface CanvasContextMenuApi {
   canPasteFromContextMenu: boolean;
   copyFromContextMenu: () => void;
   setLockFromContextMenu: (mode: "all" | "background" | undefined) => void;
-  addContextAnnotation: () => void;
+  addContextAnnotation: (body: string) => void;
+  exportContextSection: (format: SectionExportFormat) => void;
+  exportContextBoard: (format: SectionExportFormat) => void;
   contextObjectFitDisabled: boolean;
   fitContextObject: () => void;
   tidySectionMembership: () => void;
@@ -103,6 +112,11 @@ export function useCanvasContextMenu({
   dispatch,
   screenToWorld,
   zoom = 1,
+  exportSection = exportCanvasSection,
+  exportBoard = (canvasDocument, format) =>
+    format === "svg"
+      ? exportDocumentAsSvg(canvasDocument)
+      : exportDocumentAsPng(canvasDocument),
 }: UseCanvasContextMenuArgs): CanvasContextMenuApi {
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
 
@@ -238,15 +252,37 @@ export function useCanvasContextMenu({
     setContextMenu(null);
   };
 
-  const addContextAnnotation = () => {
+  const addContextAnnotation = (body: string) => {
     if (contextMenu?.kind !== "object") return;
+    const note = body.trim();
+    if (!note) return;
     dispatch({
       type: "canvas.addAnnotation",
       target: { kind: "object", objectId: contextMenu.objectId },
-      body: "Review this object.",
+      body: note,
       intent: "agent-request",
     });
     setContextMenu(null);
+  };
+
+  const exportContextSection = (format: SectionExportFormat) => {
+    if (contextMenu?.kind !== "object") return;
+    const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
+    if (contextObject?.type !== "section") return;
+    setContextMenu(null);
+    exportSection(document, contextObject.id, format).catch((error: unknown) => {
+      // No toast surface exists yet; match the TopBar export failure behavior.
+      console.error("Canvas section export failed", error);
+    });
+  };
+
+  const exportContextBoard = (format: SectionExportFormat) => {
+    if (contextMenu?.kind !== "canvas") return;
+    setContextMenu(null);
+    exportBoard(document, format).catch((error: unknown) => {
+      // No toast surface exists yet; keep failures loud in the console.
+      console.error("Canvas export failed", error);
+    });
   };
 
   const fitContextObject = () => {
@@ -297,6 +333,8 @@ export function useCanvasContextMenu({
     copyFromContextMenu,
     setLockFromContextMenu,
     addContextAnnotation,
+    exportContextSection,
+    exportContextBoard,
     contextObjectFitDisabled,
     fitContextObject,
     tidySectionMembership,

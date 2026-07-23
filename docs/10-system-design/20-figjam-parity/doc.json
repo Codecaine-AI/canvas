@@ -2791,12 +2791,12 @@
         }
       ]
     },
-    "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91": {
-      "id": "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91",
+    "b-figjam-parity-trim-scale-intentionally-exceeds-th-91": {
+      "id": "b-figjam-parity-trim-scale-intentionally-exceeds-th-91",
       "flavour": "decision",
       "props": {
         "status": "accepted",
-        "title": "Chrome scale intentionally exceeds the measured baseline"
+        "title": "Trim scale intentionally exceeds the measured baseline"
       },
       "text": [
         {
@@ -2828,7 +2828,7 @@
           }
         },
         {
-          "insert": ". This is a product decision, not a parity gap — any earlier measured-baseline figure for these chrome surfaces is superseded by the deliberate scale-up."
+          "insert": ". This is a product decision, not a parity gap — any earlier measured-baseline figure for these trim surfaces is superseded by the deliberate scale-up."
         }
       ],
       "children": []
@@ -3127,7 +3127,7 @@
           }
         },
         {
-          "insert": " hits are unrelated toolbar-icon and CSS-chevron animations in the chrome layer, not object rendering). This is a deliberate, documented gap: "
+          "insert": " hits are unrelated toolbar-icon and CSS-chevron animations in the trim layer, not object rendering). This is a deliberate, documented gap: "
         },
         {
           "insert": "connection-cascade.ts",
@@ -3740,7 +3740,7 @@
         "b-figjam-parity-junction-geometry-82",
         "b-figjam-parity-default-size-90x90-small-these-are-ju-83",
         "b-figjam-parity-where-our-model-diverges-from-figma-s-84",
-        "b-figjam-parity-chrome-scale-intentionally-exceeds-th-91",
+        "b-figjam-parity-trim-scale-intentionally-exceeds-th-91",
         "b-figjam-parity-toolbar-control-sets-deliberately-sim-92",
         "b-figjam-parity-one-color-per-object-93",
         "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",

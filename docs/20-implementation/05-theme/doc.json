@@ -530,7 +530,7 @@
           }
         },
         {
-          "insert": ", object chrome metrics with the object defs, connector stroke/dash/chip metrics in the connector slice, arrowhead ratios in "
+          "insert": ", object trim metrics with the object defs, connector stroke/dash/chip metrics in the connector slice, arrowhead ratios in "
         },
         {
           "insert": "CanvasStage.tsx",
@@ -749,15 +749,15 @@
           }
         },
         {
-          "insert": ". For the picker chrome that offers the roster, see "
+          "insert": ". For the picker trim that offers the roster, see "
         },
         {
-          "insert": "20-implementation/60-chrome",
+          "insert": "20-implementation/60-trim",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome",
-              "label": "20-implementation/60-chrome"
+              "path": "20-implementation/60-trim",
+              "label": "20-implementation/60-trim"
             }
           }
         },

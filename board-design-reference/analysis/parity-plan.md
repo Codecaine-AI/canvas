@@ -1,6 +1,6 @@
 # FigJam Parity — Gap Analysis & Build Plan
 
-> Synthesized from: `figjam-chrome-catalog.md`, `figjam-bottom-dock-spec.md`,
+> Synthesized from: `figjam-trim-catalog.md`, `figjam-bottom-dock-spec.md`,
 > `figjam-style-spec.md` + `figjam-style-tokens.json`, `affine-mining-map.md`.
 > Acceptance gate: recreate `my_diagrams/V2 Flow.png` in our editor — indistinguishable
 > side-by-side, with the same build ergonomics. Fidelity decision: pixel-close clone.
@@ -34,11 +34,11 @@ CanvasStage background block.
 chip + tints + layering) + shape vocabulary expansion (pill, chevron-arrow,
 predefined-process, icon shapes, code block, label; sticky upgrade w/ author + shadow) +
 tools/placement + renderers. Files: schema/actions/interaction/CanvasStage/editor.
-∥ **W2-chrome-components** *(parallel, standalone)*: dock, contextual toolbar variants,
+∥ **W2-trim-components** *(parallel, standalone)*: dock, contextual toolbar variants,
 palette popover, shape-search popover, Shapes panel, tooltips — as unwired components with
 tests (no editor edits → no conflicts).
 
-**W3-wire + feel**: wire chrome into the editor (replace old toolbar/inspector affordances);
+**W3-wire + feel**: wire trim into the editor (replace old toolbar/inspector affordances);
 ConnectionOverlay port; snap-overlay port; right-click menu contents; preview-trap fix;
 text-edit caret/font-preset/sizes/bullets.
 

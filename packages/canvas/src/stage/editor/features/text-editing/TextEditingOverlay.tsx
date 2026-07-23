@@ -113,7 +113,7 @@ interface SlotTextEditorProps {
 }
 
 /**
- * The in-place slot editor (D14): a transparent, chrome-free textarea
+ * The in-place slot editor (D14): a transparent, trim-free textarea
  * positioned at the def's resolved text-slot rect with the slot's exact
  * typography — at rest and mid-edit the text is pixel-identical, caret
  * aside. Vertical anchoring mirrors the at-rest renderer: the wrapper
@@ -184,7 +184,7 @@ function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotT
           width: "100%",
           height: fitHeight ? undefined : "100%",
           // No border, no background, no padding — the object underneath is
-          // the chrome (D14: no dimming, no visual jump).
+          // the trim (D14: no dimming, no visual jump).
           background: "transparent",
           border: "none",
           outline: "none",

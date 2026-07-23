@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s2-branching-flowchart",
+  "title": "Eval Suite S2 \u2014 Branching Flowchart",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S2 \u2014 Branching Flowchart",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-start",
+      "type": "process",
+      "text": "Order received",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 768,
+        "width": 208,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-end",
+      "type": "process",
+      "text": "Order shipped",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 768,
+        "width": 208,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

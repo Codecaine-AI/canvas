@@ -141,7 +141,7 @@ function resolvePortProximityHit(
  * objects also get a screen-space anchor-dot proximity pass for their rendered
  * 28px hit targets; connector bend pills carry data-canvas-bend-segment +
  * data-canvas-connection-id;
- * connector hit paths carry data-canvas-connection-id (checked after chrome
+ * connector hit paths carry data-canvas-connection-id (checked after trim
  * elements, since they render as siblings, not inside, the hit path); section
  * title chips carry data-canvas-section-title-chip + data-canvas-object-id;
  * object shapes carry data-canvas-object-id; everything else falls through to
@@ -239,6 +239,8 @@ export interface UseInteractionPipelineArgs {
   document: InteractiveCanvasDocument;
   selection: CanvasSelection;
   tool: CanvasTool;
+  /** Suppresses editor gestures while leaving viewport navigation to useCanvasViewport. */
+  readOnly?: boolean;
   /** Repeat-placement mode (Shapes panel open): completing a place gesture keeps the tool armed — see InteractionContext.stickyPlacement. */
   stickyPlacement?: boolean;
   /** Catalog-entry variant of the armed tool (Shapes panel pick) — flows into placements and the ghost preview. */
@@ -247,6 +249,8 @@ export interface UseInteractionPipelineArgs {
   lastPickedColor?: InteractionContext["lastPickedColor"];
   viewport: ViewportState;
   dispatch: (action: CanvasAction) => void;
+  /** Ungated dispatch used only to restore speculative geometry while entering read-only mode. */
+  cancelDispatch?: (action: CanvasAction) => void;
   setViewport: (updater: ViewportState | ((viewport: ViewportState) => ViewportState)) => void;
   screenToWorld: (point: CanvasPoint) => CanvasPoint;
   /** Context-menu feature: any primary pointerdown on the stage closes an open menu. */
@@ -298,11 +302,13 @@ export function useInteractionPipeline({
   document,
   selection,
   tool,
+  readOnly = false,
   stickyPlacement = false,
   armedShape,
   lastPickedColor,
   viewport,
   dispatch,
+  cancelDispatch = dispatch,
   setViewport,
   screenToWorld,
   closeContextMenu,
@@ -315,8 +321,24 @@ export function useInteractionPipeline({
   const interactionStateRef = useRef<InteractionState>(IDLE_INTERACTION_STATE);
   const [interactionOverlay, setInteractionOverlay] = useState<InteractionOverlay>({});
   const [selectionDragActive, setSelectionDragActive] = useState<boolean>(false);
-  const stateRef = useRef({ document, selection, tool, stickyPlacement, armedShape, lastPickedColor });
-  stateRef.current = { document, selection, tool, stickyPlacement, armedShape, lastPickedColor };
+  const stateRef = useRef({
+    document,
+    selection,
+    tool,
+    readOnly,
+    stickyPlacement,
+    armedShape,
+    lastPickedColor,
+  });
+  stateRef.current = {
+    document,
+    selection,
+    tool,
+    readOnly,
+    stickyPlacement,
+    armedShape,
+    lastPickedColor,
+  };
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
   const {
@@ -380,6 +402,7 @@ export function useInteractionPipeline({
 
   const runInteraction = useCallback(
     (canvasEvent: CanvasPointerEvent) => {
+      if (stateRef.current.readOnly) return;
       const ctx: InteractionContext = {
         document: stateRef.current.document,
         selection: stateRef.current.selection,
@@ -497,6 +520,7 @@ export function useInteractionPipeline({
 
   const handleStageDoubleClick = useCallback(
     (event: ReactMouseEvent<HTMLElement>) => {
+      if (stateRef.current.readOnly) return;
       if (stateRef.current.tool === "hand") return;
       const stage = stageFromEventTarget(event.currentTarget);
       if (!stage) return;
@@ -530,6 +554,7 @@ export function useInteractionPipeline({
 
   const onWindowPointerMove = useCallback(
     (event: PointerEvent) => {
+      if (stateRef.current.readOnly) return;
       const active = activeGestureRef.current;
       if (!active || active.pointerId !== event.pointerId) return;
       // T1.1.1: record + schedule only — the coalescer commits at most one
@@ -576,6 +601,7 @@ export function useInteractionPipeline({
   const handleStagePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (event.button !== 0) return;
+      if (stateRef.current.readOnly) return;
       if (stateRef.current.tool === "hand") return;
       const stage = event.currentTarget;
       closeContextMenu();
@@ -601,6 +627,7 @@ export function useInteractionPipeline({
   // overlay. Cheap math (no hit-testing/snapping), so no rAF coalescing.
   const handleStagePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
+      if (stateRef.current.readOnly) return;
       if (interactionStateRef.current.kind !== "idle") return;
       const stage = event.currentTarget;
       if (stateRef.current.tool === "connector") {
@@ -651,9 +678,14 @@ export function useInteractionPipeline({
     setSelectionDragActive(SELECTION_DRAG_KINDS.has(result.state.kind));
     activeGestureRef.current = null;
     for (const action of result.dispatch) {
-      dispatch(action);
+      cancelDispatch(action);
     }
-  }, [dispatch, moveCoalescer, stopEdgePanLoop]);
+  }, [cancelDispatch, moveCoalescer, stopEdgePanLoop]);
+
+  useEffect(() => {
+    if (!readOnly || interactionStateRef.current.kind === "idle") return;
+    applyCancelInteraction(cancelInteraction(interactionStateRef.current));
+  }, [applyCancelInteraction, readOnly]);
 
   return {
     interactionOverlay,

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { useRef } from "react";
 import syntheticCanvas from "../../../../../../canvases/synthetic.canvas.json";
-import type { CanvasAction, CanvasSelection } from "../../../state/actions";
+import type { CanvasAction, CanvasSelection, CanvasTool } from "../../../state/actions";
 import { sectionFitGeometry } from "../../../state/geometry";
 import {
   IDLE_INTERACTION_STATE,
@@ -70,6 +70,8 @@ function setup(overrides: {
   isContextMenuOpen?: () => boolean;
   interactionState?: InteractionState;
   onSelectDockTool?: (tool: ToolId) => void;
+  cameraOnly?: boolean;
+  tool?: CanvasTool;
 } = {}) {
   const dispatch = mock((_action: CanvasAction) => {});
   const onSelectDockTool = overrides.onSelectDockTool;
@@ -88,8 +90,10 @@ function setup(overrides: {
       overrides.interactionState ?? IDLE_INTERACTION_STATE,
     );
     useCanvasHotkeys({
+      cameraOnly: overrides.cameraOnly,
       document,
       selection,
+      tool: overrides.tool ?? "select",
       dispatch: dispatch as unknown as (action: CanvasAction) => void,
       onSelectDockTool,
       isTypingContextActive: overrides.isTypingContextActive ?? (() => false),
@@ -209,11 +213,11 @@ describe("useCanvasHotkeys", () => {
     input.focus();
 
     const onSelectDockTool = mock((_tool: ToolId) => {});
-    const { dispatch } = setup({ onSelectDockTool });
+    const { dispatch } = setup({ onSelectDockTool, tool: "annotation" });
     let notCancelled = false;
 
     act(() => {
-      const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "a", metaKey: true });
+      const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "e" });
       notCancelled = input.dispatchEvent(event);
     });
 
@@ -235,6 +239,7 @@ describe("useCanvasHotkeys", () => {
       dispatchKeyDown({ key: "d" });
       dispatchKeyDown({ key: "f" });
       dispatchKeyDown({ key: "g" });
+      dispatchKeyDown({ key: "e" });
       notCancelled = dispatchKeyDown({ key: "a", metaKey: true });
     });
 
@@ -261,6 +266,22 @@ describe("useCanvasHotkeys", () => {
     });
 
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.deleteSelection" });
+  });
+
+  it("dispatches canvas.removeAnnotation for a selected annotation on Delete or Backspace", () => {
+    const { dispatch } = setup({
+      selection: { kind: "annotation", annotationId: "annotation-a" },
+    });
+
+    act(() => {
+      dispatchKeyDown({ key: "Delete" });
+      dispatchKeyDown({ key: "Backspace" });
+    });
+
+    expect(dispatch.mock.calls.map((call) => call[0])).toEqual([
+      { type: "canvas.removeAnnotation", annotationId: "annotation-a" },
+      { type: "canvas.removeAnnotation", annotationId: "annotation-a" },
+    ]);
   });
 
   it("maps positional home-row keys through the dock selection callback", () => {
@@ -321,6 +342,27 @@ describe("useCanvasHotkeys", () => {
     ]);
   });
 
+  it("toggles annotation mode with plain E", () => {
+    const entering = setup({ tool: "select" });
+    let notCancelled = true;
+
+    act(() => {
+      notCancelled = dispatchKeyDown({ key: "e" });
+    });
+
+    expect(notCancelled).toBe(false);
+    expect(entering.dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "annotation" });
+    cleanup();
+
+    const exiting = setup({ tool: "annotation" });
+
+    act(() => {
+      dispatchKeyDown({ key: "e" });
+    });
+
+    expect(exiting.dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "select" });
+  });
+
   it("does not treat modified letters as plain dock or shape-tool hotkeys", () => {
     const onSelectDockTool = mock((_tool: ToolId) => {});
     const { dispatch } = setup({ onSelectDockTool });
@@ -329,6 +371,7 @@ describe("useCanvasHotkeys", () => {
       dispatchKeyDown({ key: "f", ctrlKey: true });
       dispatchKeyDown({ key: "c", altKey: true });
       dispatchKeyDown({ key: "p", shiftKey: true });
+      dispatchKeyDown({ key: "e", shiftKey: true });
     });
 
     expect(onSelectDockTool).not.toHaveBeenCalled();
@@ -398,6 +441,17 @@ describe("useCanvasHotkeys", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "canvas.select", selection: { kind: "none" } });
   });
 
+  it("exits annotation mode on Escape instead of clearing selection", () => {
+    const { dispatch } = setup({ tool: "annotation" });
+
+    act(() => {
+      dispatchKeyDown({ key: "Escape" });
+    });
+
+    expect(dispatch).toHaveBeenCalledWith({ type: "canvas.setTool", tool: "select" });
+    expect(dispatch).not.toHaveBeenCalledWith({ type: "canvas.select", selection: { kind: "none" } });
+  });
+
   it("dispatches canvas.undo / canvas.redo on cmd-Z / shift-cmd-Z", () => {
     const { dispatch } = setup();
 
@@ -428,6 +482,30 @@ describe("useCanvasHotkeys", () => {
     act(() => {
       dispatchKeyDown({ key: "-", metaKey: true });
     });
+    expect(controls.zoomOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps viewport shortcuts live but blocks editing shortcuts in camera-only mode", () => {
+    const onSelectDockTool = mock((_tool: ToolId) => {});
+    const { controls, dispatch } = setup({ cameraOnly: true, onSelectDockTool });
+
+    act(() => {
+      dispatchKeyDown({ key: "Delete" });
+      dispatchKeyDown({ key: "ArrowRight" });
+      dispatchKeyDown({ key: "z", metaKey: true });
+      dispatchKeyDown({ key: "d", metaKey: true });
+      dispatchKeyDown({ key: "f" });
+      dispatchKeyDown({ key: "c" });
+      dispatchKeyDown({ key: "e" });
+      dispatchKeyDown({ key: "0", metaKey: true });
+      dispatchKeyDown({ key: "=", metaKey: true });
+      dispatchKeyDown({ key: "-", metaKey: true });
+    });
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(onSelectDockTool).not.toHaveBeenCalled();
+    expect(controls.fit).toHaveBeenCalledTimes(1);
+    expect(controls.zoomIn).toHaveBeenCalledTimes(1);
     expect(controls.zoomOut).toHaveBeenCalledTimes(1);
   });
 
@@ -796,7 +874,7 @@ describe("InteractiveCanvasEditor: double-click inline text editing (4.2.1)", ()
   });
 });
 
-describe("InteractiveCanvasEditor: Inspector color section (P1 — one 10-pick roster)", () => {
+describe("InteractiveCanvasEditor: section toolbar", () => {
   function stubStageRect() {
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
@@ -855,127 +933,6 @@ describe("InteractiveCanvasEditor: Inspector color section (P1 — one 10-pick r
     pointerClick(section, { clientX: 180, clientY: 160 });
     return section as HTMLElement;
   }
-
-  it("does not render the inspector by default, but renders it when enabled", () => {
-    const { rerender } = render(
-      <InteractiveCanvasEditor
-        document={syntheticCanvasDocument}
-        onSave={() => undefined}
-        onCancel={() => undefined}
-      />,
-    );
-
-    expect(screen.queryByText("Inspector")).toBeNull();
-    expect(screen.queryByText("Selection context")).toBeNull();
-
-    rerender(
-      <InteractiveCanvasEditor
-        document={syntheticCanvasDocument}
-        onSave={() => undefined}
-        onCancel={() => undefined}
-        showInspector
-      />,
-    );
-
-    expect(screen.getByText("Inspector")).toBeTruthy();
-    expect(screen.getByText("Selection context")).toBeTruthy();
-  });
-
-  it("clicking a swatch sets the color pick on the selected object without touching its shape", () => {
-    const restoreRect = stubStageRect();
-    try {
-      render(
-        <InteractiveCanvasEditor
-          document={syntheticCanvasDocument}
-          onSave={() => undefined}
-          onCancel={() => undefined}
-          showInspector
-        />,
-      );
-
-      const object = screen.getByRole("button", { name: /User brief/i });
-      pointerClick(object, { clientX: 232, clientY: 244 });
-
-      const swatch = document.querySelector('[data-canvas-color-swatch="orange"]') as HTMLElement;
-      expect(swatch).toBeTruthy();
-      fireEvent.click(swatch);
-
-      expect(object.getAttribute("data-canvas-object-shape")).toBe("rounded-rect");
-      expect(swatch.getAttribute("data-selected")).toBe("true");
-    } finally {
-      restoreRect();
-    }
-  });
-
-  it("applies the color pick to every selected object when multiple are selected (shift-click)", () => {
-    const restoreRect = stubStageRect();
-    try {
-      render(
-        <InteractiveCanvasEditor
-          document={syntheticCanvasDocument}
-          onSave={() => undefined}
-          onCancel={() => undefined}
-          showInspector
-        />,
-      );
-
-      const brief = screen.getByRole("button", { name: /User brief/i });
-      const summarizes = screen.getByRole("button", { name: /Agent summarizes/i });
-      const stage = document.querySelector("[data-canvas-stage='true']") as HTMLElement;
-
-      // Drag-select both objects (identity viewport: screen == world).
-      fireEvent.pointerDown(stage, { pointerId: 21, button: 0, clientX: 130, clientY: 160 });
-      fireEvent.pointerMove(window, { pointerId: 21, clientX: 660, clientY: 300 });
-      fireEvent.pointerUp(window, { pointerId: 21, clientX: 660, clientY: 300 });
-      expect(brief.getAttribute("data-selected")).toBe("true");
-      expect(summarizes.getAttribute("data-selected")).toBe("true");
-
-      const swatch = document.querySelector('[data-canvas-color-swatch="violet"]') as HTMLElement;
-      fireEvent.click(swatch);
-
-      // Both objects take the pick: their chrome recolors to the violet
-      // shape cells (pastel fill + saturated border).
-      const containerEl = window.document.body;
-      expect(containerEl.querySelectorAll('[data-canvas-color-swatch="violet"][data-selected="true"]').length).toBe(1);
-      expect(brief.getAttribute("data-canvas-object-shape")).toBe("rounded-rect");
-      expect(summarizes.getAttribute("data-canvas-object-shape")).toBe("rounded-rect");
-      expect(brief.style.background).toBe("#DCCCFF");
-      expect(summarizes.style.background).toBe("#DCCCFF");
-    } finally {
-      restoreRect();
-    }
-  });
-
-  it("renders all 10 swatches and picking another one moves the selection ring", () => {
-    const restoreRect = stubStageRect();
-    try {
-      render(
-        <InteractiveCanvasEditor
-          document={syntheticCanvasDocument}
-          onSave={() => undefined}
-          onCancel={() => undefined}
-          showInspector
-        />,
-      );
-
-      const object = screen.getByRole("button", { name: /User brief/i });
-      pointerClick(object, { clientX: 232, clientY: 244 });
-
-      expect(document.querySelectorAll("[data-canvas-color-swatch]").length).toBe(10);
-
-      const orangeSwatch = document.querySelector('[data-canvas-color-swatch="orange"]') as HTMLElement;
-      fireEvent.click(orangeSwatch);
-      expect(orangeSwatch.getAttribute("data-selected")).toBe("true");
-
-      const tealSwatch = document.querySelector('[data-canvas-color-swatch="teal"]') as HTMLElement;
-      fireEvent.click(tealSwatch);
-
-      expect(tealSwatch.getAttribute("data-selected")).toBe("true");
-      expect(orangeSwatch.getAttribute("data-selected")).toBeNull();
-    } finally {
-      restoreRect();
-    }
-  });
 
   it("keeps only one section toolbar flyout mounted when switching color and border style", () => {
     const restoreRect = stubStageRect();

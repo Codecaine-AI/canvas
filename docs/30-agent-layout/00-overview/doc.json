@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-00-overview",
+  "title": "How the AI↔canvas layout system works",
+  "root": "b-overview-root",
+  "blocks": {
+    "b-overview-root": {
+      "id": "b-overview-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-overview-title-1",
+        "b-overview-lede-2",
+        "b-overview-sequence-heading-3",
+        "b-overview-sequence-intro-4",
+        "b-overview-sequence-mermaid-5",
+        "b-overview-steps-heading-6",
+        "b-overview-step-command-7",
+        "b-overview-step-fit-8",
+        "b-overview-step-read-9",
+        "b-overview-step-loop-10",
+        "b-overview-step-done-11",
+        "b-overview-handoff-observation-12",
+        "b-overview-pipeline-13",
+        "b-overview-facts-heading-14",
+        "b-overview-fact-view-15",
+        "b-overview-fact-intent-16",
+        "b-overview-fact-hands-17",
+        "b-overview-fact-ownership-18",
+        "b-overview-next-heading-19",
+        "b-overview-playground-20",
+        "b-overview-siblings-21"
+      ],
+      "props": {
+        "covers": "How one AI-driven canvas edit works end to end: the fitter derives a disposable layout program from the saved document, the AI proposes structural changes, and the deterministic solver and router turn them into the geometry the AI reviews.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "layout program",
+          "fitter",
+          "solver",
+          "router",
+          "derived view",
+          "agent editing loop",
+          "canvas-agent"
+        ]
+      }
+    },
+    "b-overview-title-1": {
+      "id": "b-overview-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "How the AI↔canvas layout system works"
+        }
+      ]
+    },
+    "b-overview-lede-2": {
+      "id": "b-overview-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The AI works with structure, not pixel coordinates. The canvas document is the single source of truth. The layout program is a derived, disposable view: "
+        },
+        {
+          "insert": "fitSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "fitSketch"
+            }
+          }
+        },
+        {
+          "insert": " reads the saved board fresh for every edit, and the program is thrown away afterward, so it can never go stale. Fit, solve, and routing are deterministic — the same document and program produce the same result every time. The AI is the only judgment in the loop: it decides what should change, and the deterministic tools decide where every pixel and line lands."
+        }
+      ]
+    },
+    "b-overview-sequence-heading-3": {
+      "id": "b-overview-sequence-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "One edit, in order"
+        }
+      ]
+    },
+    "b-overview-sequence-intro-4": {
+      "id": "b-overview-sequence-intro-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One edit, from your command to the updated board. Solid arrows are calls; dashed arrows are derived views coming back."
+        }
+      ]
+    },
+    "b-overview-sequence-mermaid-5": {
+      "id": "b-overview-sequence-mermaid-5",
+      "flavour": "mermaid",
+      "children": [],
+      "props": {
+        "title": "One edit, in order",
+        "caption": "The AI is the only judgment in the loop. The fitter, solver, and router are deterministic, and the document is the one saved thing."
+      },
+      "text": [
+        {
+          "insert": "sequenceDiagram\n  participant You\n  participant AI as The AI\n  participant Fitter\n  participant Document\n  participant Solver\n  participant Router\n  You->>AI: your command + what you have selected\n  AI->>Fitter: fit the document\n  Fitter->>Document: read\n  Document-->>Fitter: geometry + intent\n  Fitter-->>AI: the program — identical every time\n  Router-->>AI: a picture of the current board\n  loop repeat until it looks right\n    AI->>Solver: a one-line change to the program\n    Solver->>Document: write geometry + intent — one save\n    Document->>Router: new geometry\n    Router-->>AI: a fresh picture — the AI reviews it\n  end\n  AI-->>You: done — the board updates in front of you"
+        }
+      ]
+    },
+    "b-overview-steps-heading-6": {
+      "id": "b-overview-steps-heading-6",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Reading the diagram"
+        }
+      ]
+    },
+    "b-overview-step-command-7": {
+      "id": "b-overview-step-command-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "You say what should change.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Your command — plus anything you have selected — tells the AI what you want to accomplish."
+        }
+      ]
+    },
+    "b-overview-step-fit-8": {
+      "id": "b-overview-step-fit-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The fitter reads the current board.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " It turns the saved canvas into the compact layout language: groups, rows, columns, grids, lanes, shared centerlines, and arrows. It does not interpret your command; it gives the AI a structural view of what is already there."
+        }
+      ]
+    },
+    "b-overview-step-read-9": {
+      "id": "b-overview-step-read-9",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The AI reads structure and sees the result.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The language explains how the board is organized. A screenshot, SVG, or other rendering shows how it actually looks. The AI uses both views together."
+        }
+      ]
+    },
+    "b-overview-step-loop-10": {
+      "id": "b-overview-step-loop-10",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "It changes, solves, and checks.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The AI makes a small change to the language. The solver turns that change into geometry, the router redraws the lines, and a fresh rendering comes back for review. The loop repeats until the board looks right."
+        }
+      ]
+    },
+    "b-overview-step-done-11": {
+      "id": "b-overview-step-done-11",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The AI tells you it is done.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " When the structure and the rendered result both look right, the AI stops iterating and returns the finished board."
+        }
+      ]
+    },
+    "b-overview-handoff-observation-12": {
+      "id": "b-overview-handoff-observation-12",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "The handoff is simple"
+      },
+      "text": [
+        {
+          "insert": "The fitter reads. The AI decides. The solver places. The router draws."
+        }
+      ]
+    },
+    "b-overview-pipeline-13": {
+      "id": "b-overview-pipeline-13",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "In code, one pass through the loop is "
+        },
+        {
+          "insert": "fitSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "fitSketch"
+            }
+          }
+        },
+        {
+          "insert": " (document to structure), "
+        },
+        {
+          "insert": "serializeSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "serializeSketch"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "parseSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
+              "symbol": "parseSketch"
+            }
+          }
+        },
+        {
+          "insert": " (the byte-exact program text the AI reads and rewrites), "
+        },
+        {
+          "insert": "expandSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "expandSketch"
+            }
+          }
+        },
+        {
+          "insert": " (program to geometry), and "
+        },
+        {
+          "insert": "routeSketchEdges",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "routeSketchEdges"
+            }
+          }
+        },
+        {
+          "insert": " (geometry to connector paths). Everything except the model call is a pure function."
+        }
+      ]
+    },
+    "b-overview-facts-heading-14": {
+      "id": "b-overview-facts-heading-14",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Key facts"
+        }
+      ]
+    },
+    "b-overview-fact-view-15": {
+      "id": "b-overview-fact-view-15",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The program is a view, not a file.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The language is derived fresh from the document on every edit and thrown away after. It can never go stale."
+        }
+      ]
+    },
+    "b-overview-fact-intent-16": {
+      "id": "b-overview-fact-intent-16",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Intent lives inside the document.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Grids, lanes, shared centerlines, and fans are saved next to the geometry in the same file, so they cannot drift apart."
+        }
+      ]
+    },
+    "b-overview-fact-hands-17": {
+      "id": "b-overview-fact-hands-17",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Your hands stay on the canvas.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Dragging a box edits geometry directly. A reconcile pass then checks whether the stored intents still hold."
+        }
+      ]
+    },
+    "b-overview-fact-ownership-18": {
+      "id": "b-overview-fact-ownership-18",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Who owns what.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The AI owns structure and intent. The solver owns every pixel. The router owns every line. You own anything, any time."
+        }
+      ]
+    },
+    "b-overview-next-heading-19": {
+      "id": "b-overview-next-heading-19",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Pipeline home and sibling docs"
+        }
+      ]
+    },
+    "b-overview-playground-20": {
+      "id": "b-overview-playground-20",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The pipeline lives in "
+        },
+        {
+          "insert": "packages/canvas-agent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent"
+            }
+          }
+        },
+        {
+          "insert": " (pure math under "
+        },
+        {
+          "insert": "src/pipeline",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline"
+            }
+          }
+        },
+        {
+          "insert": "); the boards in these docs regenerate with "
+        },
+        {
+          "insert": "bun run --cwd packages/canvas-agent generate:docs-boards",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The old layout-lab playground is deleted; its interactive surface returns as the studio agent pages."
+        }
+      ]
+    },
+    "b-overview-siblings-21": {
+      "id": "b-overview-siblings-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The rest of this section: the language reference ("
+        },
+        {
+          "insert": "10-language",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), the rulebook ("
+        },
+        {
+          "insert": "20-rulebook",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), the worked example ("
+        },
+        {
+          "insert": "30-worked-example",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and the kernel architecture ("
+        },
+        {
+          "insert": "40-kernel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,424 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v4-state-machine",
+  "title": "Eval v4 — State Machine",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2816,
+    "height": 1808
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v4 — State Machine",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2752,
+        "height": 1744
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 320,
+        "y": 816,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-connecting",
+      "type": "process",
+      "text": "Connecting",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 960,
+        "y": 816,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-connected",
+      "type": "process",
+      "text": "Connected",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 816,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-degraded",
+      "type": "process",
+      "text": "Degraded",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1360,
+        "y": 256,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-reconnecting",
+      "type": "process",
+      "text": "Reconnecting",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2240,
+        "y": 256,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-disconnecting",
+      "type": "process",
+      "text": "Disconnecting",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2000,
+        "y": 1280,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "heartbeat-badge",
+      "type": "pill",
+      "text": "↻  heartbeat / 30s",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1312,
+        "y": 720,
+        "width": 224,
+        "height": 64
+      },
+      "style": {
+        "shape": "pill"
+      }
+    },
+    {
+      "id": "failure-note",
+      "type": "sticky",
+      "text": "Failure semantics\n\n• timeout resets to Idle\n• packet loss > 5% degrades the link\n• grace expiry starts Reconnecting\n\nAll three paths steer back toward reconnection and a healthy session.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 208,
+        "y": 176,
+        "width": 384,
+        "height": 208
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "route-timeout",
+      "type": "or-junction",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1056,
+        "y": 560,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "or-junction"
+      }
+    },
+    {
+      "id": "route-recovered",
+      "type": "or-junction",
+      "text": "",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1296,
+        "y": 512,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "or-junction"
+      }
+    },
+    {
+      "id": "route-timeout-idle",
+      "type": "or-junction",
+      "text": "",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 416,
+        "y": 560,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "shape": "or-junction"
+      }
+    },
+    {
+      "id": "state-suspended",
+      "type": "process",
+      "text": "Suspended",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1680,
+        "y": 64,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-connect",
+      "from": {
+        "objectId": "seed-idle"
+      },
+      "to": {
+        "objectId": "state-connecting"
+      },
+      "label": "connect()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-handshake-ok",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "state-connected"
+      },
+      "label": "handshake OK",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-packet-loss",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-degraded"
+      },
+      "label": "packet loss > 5%",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-grace-expired",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "grace expired",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-session-resumed",
+      "from": {
+        "objectId": "state-reconnecting"
+      },
+      "to": {
+        "objectId": "state-connected"
+      },
+      "label": "session resumed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-close",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-disconnecting"
+      },
+      "label": "close()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-socket-closed",
+      "from": {
+        "objectId": "state-disconnecting"
+      },
+      "to": {
+        "objectId": "seed-idle"
+      },
+      "label": "socket closed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-timeout-labeled",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "route-timeout"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-recovered-labeled",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "route-recovered"
+      },
+      "label": "recovered",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-recovered-return",
+      "from": {
+        "objectId": "route-recovered"
+      },
+      "to": {
+        "objectId": "state-connected"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-timeout-across",
+      "from": {
+        "objectId": "route-timeout"
+      },
+      "to": {
+        "objectId": "route-timeout-idle"
+      },
+      "label": "timeout",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-timeout-into-idle",
+      "from": {
+        "objectId": "route-timeout-idle"
+      },
+      "to": {
+        "objectId": "seed-idle"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-suspend",
+      "from": {
+        "objectId": "state-connected"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "suspend()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-quarantine",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "quarantine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-resume-window",
+      "from": {
+        "objectId": "state-suspended"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "resume window",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

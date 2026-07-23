@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-02-r2-the-spacing-ladder",
+  "title": "R2 — The spacing ladder",
+  "root": "b-r2-root",
+  "blocks": {
+    "b-r2-root": {
+      "id": "b-r2-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r2-title-1",
+        "b-r2-card-2",
+        "b-r2-flush-3",
+        "b-r2-packed-4",
+        "b-r2-spaced-5",
+        "b-r2-loose-6",
+        "b-r2-cluster-7",
+        "b-r2-classify-8"
+      ],
+      "props": {
+        "covers": "Sibling gaps come from the closed ladder {0, 32, 64, 96} — flush, packed, spaced, loose — with 128+ cluster corridors from GUTTER_LADDER, and gap classification is semantic rather than nearest-rung.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "spacing ladder",
+          "gap classification",
+          "gutter ladder",
+          "cluster corridor"
+        ]
+      }
+    },
+    "b-r2-title-1": {
+      "id": "b-r2-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R2 — The spacing ladder"
+        }
+      ]
+    },
+    "b-r2-card-2": {
+      "id": "b-r2-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Gaps come from a closed ladder"
+      },
+      "text": [
+        {
+          "insert": "Sibling gaps come from the closed ladder {0, 32, 64, 96}; separation between unrelated clusters is at least 128."
+        }
+      ]
+    },
+    "b-r2-flush-3": {
+      "id": "b-r2-flush-3",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "0 (\"flush\") — repeated template cells: ink-diagrams' twelve 288x80 table cells tile with zero gap on both axes."
+        }
+      ]
+    },
+    "b-r2-packed-4": {
+      "id": "b-r2-packed-4",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "32 (\"packed\") — stacked chips and pills: gc's config pills sit at pitch 96 = 64 height + 32 gap; v2's memory predefined-process stack (raw gap 59) reads as packed, not spaced."
+        }
+      ]
+    },
+    "b-r2-spaced-5": {
+      "id": "b-r2-spaced-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "64 (\"spaced\") — the default sibling gap inside a leaf ("
+        },
+        {
+          "insert": "ITEM_GAP = 64",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "ITEM_GAP"
+            }
+          }
+        },
+        {
+          "insert": "): gc's db row (pitch 352 = 288 + 64) and gc's PR stack (pitch 144 = 80 + 64)."
+        }
+      ]
+    },
+    "b-r2-loose-6": {
+      "id": "b-r2-loose-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "96 (\"loose\") — chain steps with room for connector labels: agent-flows-2's function-call chain (pitch ~176 = 80 + 96)."
+        }
+      ]
+    },
+    "b-r2-cluster-7": {
+      "id": "b-r2-cluster-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "128 and up (\"cluster\") — the root-level corridor between unrelated groups: "
+        },
+        {
+          "insert": "GUTTER_LADDER = [128, 96, 64, 32]",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "GUTTER_LADDER"
+            }
+          }
+        },
+        {
+          "insert": " by split depth."
+        }
+      ]
+    },
+    "b-r2-classify-8": {
+      "id": "b-r2-classify-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Gap classification is semantic, not nearest-rung: "
+        },
+        {
+          "insert": "gapClass",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "gapClass"
+            }
+          }
+        },
+        {
+          "insert": " reads raw gaps under 16 as 0, under 64 as 32, under 96 as 64, and up to 112 as 96. A sub-64 gap is adjacent in the corpus and must stay adjacent after the round trip."
+        }
+      ]
+    }
+  }
+}

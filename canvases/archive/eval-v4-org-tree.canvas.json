@@ -1,0 +1,713 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v4-org-tree",
+  "title": "Eval v4 — Org Tree",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3408,
+    "height": 1808
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v4 — Org Tree",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3344,
+        "height": 1744
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-ceo",
+      "type": "process",
+      "text": "CEO — Dana Whitfield",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 176,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "vp-engineering",
+      "type": "process",
+      "text": "VP Engineering\nPriya Natarajan",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 432,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "vp-product",
+      "type": "process",
+      "text": "VP Product\nMarcus Bell",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1200,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "vp-operations",
+      "type": "process",
+      "text": "VP Operations\nSofia Reyes",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2928,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "vp-marketing",
+      "type": "process",
+      "text": "VP Marketing\nLena Kovacs",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1728,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-platform",
+      "type": "process",
+      "text": "Platform Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 176,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-frontend",
+      "type": "process",
+      "text": "Frontend Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 368,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-infra",
+      "type": "process",
+      "text": "Infra Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 560,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-security",
+      "type": "process",
+      "text": "Security Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 752,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-design",
+      "type": "process",
+      "text": "Design Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1040,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-research-ops",
+      "type": "process",
+      "text": "Research Ops",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1232,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-growth",
+      "type": "process",
+      "text": "Growth Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1424,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-finance",
+      "type": "process",
+      "text": "Finance Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2864,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-people",
+      "type": "process",
+      "text": "People Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3056,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-brand",
+      "type": "process",
+      "text": "Brand Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1712,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-events",
+      "type": "process",
+      "text": "Events Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1904,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-community",
+      "type": "process",
+      "text": "Community Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2096,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "sticky-interim",
+      "type": "sticky",
+      "text": "Interim: Growth also reports to Marketing while Product backfills the director role.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 352,
+        "width": 224,
+        "height": 256
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "vp-research",
+      "type": "process",
+      "text": "VP Research\nDr. Amara Osei",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2448,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-applied-ml",
+      "type": "process",
+      "text": "Applied ML Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2384,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "team-data-science",
+      "type": "process",
+      "text": "Data Science Team",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2576,
+        "y": 1344,
+        "width": 160,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "section-engineering",
+      "type": "section",
+      "text": "Engineering",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 624,
+        "width": 832,
+        "height": 848
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-product",
+      "type": "section",
+      "text": "Product",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 992,
+        "y": 624,
+        "width": 640,
+        "height": 848
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-marketing",
+      "type": "section",
+      "text": "Marketing",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1664,
+        "y": 624,
+        "width": 640,
+        "height": 848
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-research",
+      "type": "section",
+      "text": "Research",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2336,
+        "y": 624,
+        "width": 448,
+        "height": 848
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "section-operations",
+      "type": "section",
+      "text": "Operations",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2816,
+        "y": 624,
+        "width": 448,
+        "height": 848
+      },
+      "style": {
+        "shape": "section"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-ceo-eng",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-engineering"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-product",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-product"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-ops",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-operations"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ceo-marketing",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-marketing"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-platform",
+      "from": {
+        "objectId": "vp-engineering"
+      },
+      "to": {
+        "objectId": "team-platform"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-frontend",
+      "from": {
+        "objectId": "vp-engineering"
+      },
+      "to": {
+        "objectId": "team-frontend"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-infra",
+      "from": {
+        "objectId": "vp-engineering"
+      },
+      "to": {
+        "objectId": "team-infra"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-eng-security",
+      "from": {
+        "objectId": "vp-engineering"
+      },
+      "to": {
+        "objectId": "team-security"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-product-design",
+      "from": {
+        "objectId": "vp-product"
+      },
+      "to": {
+        "objectId": "team-design"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-product-research",
+      "from": {
+        "objectId": "vp-product"
+      },
+      "to": {
+        "objectId": "team-research-ops"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-product-growth",
+      "from": {
+        "objectId": "vp-product"
+      },
+      "to": {
+        "objectId": "team-growth"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ops-finance",
+      "from": {
+        "objectId": "vp-operations"
+      },
+      "to": {
+        "objectId": "team-finance"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-ops-people",
+      "from": {
+        "objectId": "vp-operations"
+      },
+      "to": {
+        "objectId": "team-people"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-marketing-brand",
+      "from": {
+        "objectId": "vp-marketing"
+      },
+      "to": {
+        "objectId": "team-brand"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-marketing-events",
+      "from": {
+        "objectId": "vp-marketing"
+      },
+      "to": {
+        "objectId": "team-events"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-marketing-community",
+      "from": {
+        "objectId": "vp-marketing"
+      },
+      "to": {
+        "objectId": "team-community"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-marketing-growth-acting",
+      "from": {
+        "objectId": "vp-marketing"
+      },
+      "to": {
+        "objectId": "team-growth"
+      },
+      "label": "acting",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-ceo-research",
+      "from": {
+        "objectId": "seed-ceo"
+      },
+      "to": {
+        "objectId": "vp-research"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-research-applied-ml",
+      "from": {
+        "objectId": "vp-research"
+      },
+      "to": {
+        "objectId": "team-applied-ml"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-research-data-science",
+      "from": {
+        "objectId": "vp-research"
+      },
+      "to": {
+        "objectId": "team-data-science"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

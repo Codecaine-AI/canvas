@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-05-r5-align",
+  "title": "R5 — align: cross-branch registers",
+  "root": "b-r5-root",
+  "blocks": {
+    "b-r5-root": {
+      "id": "b-r5-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r5-title-1",
+        "b-r5-card-2",
+        "b-r5-detect-3",
+        "b-r5-expand-4",
+        "b-r5-order-ascending-5",
+        "b-r5-order-carry-6",
+        "b-r5-order-excluded-7",
+        "b-r5-evidence-8"
+      ],
+      "props": {
+        "covers": "align pins peers to one shared centerline, even across section boundaries: register detection within 8px tolerance, median-center solving, and the order rules the solver must keep.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "align register",
+          "cross-branch centerline",
+          "solver order",
+          "detectTiers"
+        ]
+      }
+    },
+    "b-r5-title-1": {
+      "id": "b-r5-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R5 — align: cross-branch registers"
+        }
+      ]
+    },
+    "b-r5-card-2": {
+      "id": "b-r5-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "One shared centerline"
+      },
+      "text": [
+        {
+          "insert": "Peers can be pinned to one shared centerline — even across section boundaries, which nested containers alone can never say."
+        }
+      ]
+    },
+    "b-r5-detect-3": {
+      "id": "b-r5-detect-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Detect:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " three or more non-section nodes from at least two different leaf groups whose cross-axis centers sit within one register ("
+        },
+        {
+          "insert": "TIER_REGISTER_TOLERANCE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "TIER_REGISTER_TOLERANCE"
+            }
+          }
+        },
+        {
+          "insert": " = 8px; 4px is the corpus norm, 8 tolerates authoring noise). Both axes work: "
+        },
+        {
+          "insert": "align y",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a horizontal row register, "
+        },
+        {
+          "insert": "align x",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " a column register. "
+        },
+        {
+          "insert": "Spell:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "align y: 6 15",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at the left margin, after the tree."
+        }
+      ]
+    },
+    "b-r5-expand-4": {
+      "id": "b-r5-expand-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Expand:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " solved as constraints after the split pass — members shift onto the shared register, taken as the members' median center; a grid member's lattice register wins when present. Order rules the solver must keep:"
+        }
+      ]
+    },
+    "b-r5-order-ascending-5": {
+      "id": "b-r5-order-ascending-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Same-axis aligns are declared in ascending register order and may never leapfrog each other on expansion."
+        }
+      ]
+    },
+    "b-r5-order-carry-6": {
+      "id": "b-r5-order-carry-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A member crossing a leaf-sibling on the way to its register carries that sibling along — leaf-internal order is inviolable."
+        }
+      ]
+    },
+    "b-r5-order-excluded-7": {
+      "id": "b-r5-order-excluded-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Members pinned by an align on an axis are excluded from fan pitching and carry-along on that axis."
+        }
+      ]
+    },
+    "b-r5-evidence-8": {
+      "id": "b-r5-evidence-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: "
+        },
+        {
+          "insert": "gc-decomp-harness",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/gc-decomp-harness.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": "' hero row at y-center 392 (runner CLI, scheduler, worker pool, compile+validate, and the exact-match decision — spanning section-hero's subtrees); gc's y=604 register (pi-provider pill, toolpack, checkpoint — three different columns); intent-2's three global action registers (y-centers 1256 / 1480 / 1672, spanning both halves of the layered section); the researcher's doc row (y=880 across the Agent State and Sub Agents sections). Pitch along the register runs 192-320 between chip-sized members. The example-align board in the "
+        },
+        {
+          "insert": "align reference",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/70-align",
+              "label": "align"
+            }
+          }
+        },
+        {
+          "insert": " shows the cross-section register live."
+        }
+      ]
+    }
+  }
+}

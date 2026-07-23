@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, useState } from "react";
-// Type-only import: chrome must never import objects/ at runtime — the
-// dependency points the other way (object defs import chrome components).
+// Type-only import: trim must never import objects/ at runtime — the
+// dependency points the other way (object defs import trim components).
 import type { ToolbarControlSpec } from "../../../../objects/object-def";
 import { EDITOR_STYLE } from "../../components/editor-style";
 import { Tooltip } from "../../../../ui/Tooltip";
@@ -24,10 +24,10 @@ import {
 /**
  * SelectionToolbar — the dark floating pill shown above a selection.
  *
- * Ground truth: board-design-reference/analysis/figjam-chrome-catalog.md
+ * Ground truth: board-design-reference/analysis/figjam-trim-catalog.md
  * section 2 (selection-specific control sets) + figjam-style-tokens.json
- * `chrome` key (historically named "contextToolbarBg" there, #1D1D1D).
- * The host is FigJam-scale chrome: a 48px dark rounded rectangle with 36px
+ * `trim` key (historically named "contextToolbarBg" there, #1D1D1D).
+ * The host is FigJam-scale trim: a 48px dark rounded rectangle with 36px
  * controls and action-specific presentation supplied by the layer.
  *
  * Since RESTRUCTURE.md step 5 this is a DUMB HOST: callers pass the icon-free
@@ -80,7 +80,7 @@ export type ToolbarControlState = {
 
 /**
  * Icon resolution for registry-driven (icon-free) control specs: each action
- * id maps 1:1 onto the icon measured for it in figjam-chrome-catalog.md
+ * id maps 1:1 onto the icon measured for it in figjam-trim-catalog.md
  * section 2. "color" additionally keeps its special current-color swatch
  * rendering inside ToolbarButton.
  */

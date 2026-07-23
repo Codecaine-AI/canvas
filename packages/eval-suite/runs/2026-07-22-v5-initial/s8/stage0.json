@@ -1,0 +1,732 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s8-retrieval-designs",
+  "title": "Eval Suite S8 — Retrieval Designs",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 1864
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S8 — Retrieval Designs",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 1800
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-user-query",
+      "type": "process",
+      "text": "User Query",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1488,
+        "y": 80,
+        "width": 288,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-query-understanding",
+      "type": "trapezoid",
+      "text": "Query Understanding",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1456,
+        "y": 272,
+        "width": 352,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "section-single",
+      "type": "section",
+      "text": "Single-Stage Retrieval",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 560,
+        "width": 1424,
+        "height": 976
+      }
+    },
+    {
+      "id": "section-multi",
+      "type": "section",
+      "text": "Multi-Stage Retrieval",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1712,
+        "y": 560,
+        "width": 1424,
+        "height": 976
+      }
+    },
+    {
+      "id": "ctx-chat",
+      "type": "rectangle",
+      "text": "Chat History",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 160,
+        "width": 304,
+        "height": 80
+      }
+    },
+    {
+      "id": "ctx-profile",
+      "type": "rectangle",
+      "text": "User Profile",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 272,
+        "width": 304,
+        "height": 80
+      }
+    },
+    {
+      "id": "ctx-glossary",
+      "type": "rectangle",
+      "text": "Domain Glossary",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 384,
+        "width": 304,
+        "height": 80
+      }
+    },
+    {
+      "id": "single-embed",
+      "type": "process",
+      "text": "Embed Query",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 240,
+        "y": 672,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "single-vector",
+      "type": "process",
+      "text": "Vector Search",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 560,
+        "y": 800,
+        "width": 240,
+        "height": 80
+      }
+    },
+    {
+      "id": "single-rerank",
+      "type": "process",
+      "text": "Top-k Rerank",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 800,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "single-shard-a",
+      "type": "document",
+      "text": "Shard A",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 256,
+        "y": 976,
+        "width": 224,
+        "height": 72
+      }
+    },
+    {
+      "id": "single-shard-b",
+      "type": "document",
+      "text": "Shard B",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 560,
+        "y": 976,
+        "width": 224,
+        "height": 72
+      }
+    },
+    {
+      "id": "single-shard-c",
+      "type": "document",
+      "text": "Shard C",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 864,
+        "y": 976,
+        "width": 224,
+        "height": 72
+      }
+    },
+    {
+      "id": "single-answer",
+      "type": "process",
+      "text": "Answer Synthesis",
+      "color": "pink",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 1360,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "single-response",
+      "type": "pill",
+      "text": "Response to User",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 1024,
+        "y": 1472,
+        "width": 256,
+        "height": 48
+      }
+    },
+    {
+      "id": "single-note",
+      "type": "sticky",
+      "text": "Good for small corpora — a single hop keeps latency low.",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 256,
+        "y": 1232,
+        "width": 720,
+        "height": 144
+      }
+    },
+    {
+      "id": "multi-decompose",
+      "type": "process",
+      "text": "Query Decomposition",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2256,
+        "y": 608,
+        "width": 336,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-sub-a",
+      "type": "process",
+      "text": "Sub-query A",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1856,
+        "y": 768,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-sub-b",
+      "type": "process",
+      "text": "Sub-query B",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 2736,
+        "y": 768,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-router",
+      "type": "decision",
+      "text": "Mode Router (sparse vs dense)",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 832,
+        "width": 256,
+        "height": 112
+      }
+    },
+    {
+      "id": "multi-retriever-a",
+      "type": "database",
+      "text": "Retriever A",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1856,
+        "y": 976,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-retriever-b",
+      "type": "database",
+      "text": "Retriever B",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 2736,
+        "y": 976,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-fusion",
+      "type": "process",
+      "text": "Fusion Ranker",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 1152,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-answer",
+      "type": "process",
+      "text": "Answer Synthesis",
+      "color": "pink",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 1360,
+        "width": 256,
+        "height": 80
+      }
+    },
+    {
+      "id": "multi-response",
+      "type": "pill",
+      "text": "Response to User",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 1472,
+        "width": 256,
+        "height": 48
+      }
+    },
+    {
+      "id": "multi-note",
+      "type": "sticky",
+      "text": "Good for complex, multi-part questions — trades latency for recall.",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 2640,
+        "y": 1328,
+        "width": 416,
+        "height": 128
+      }
+    },
+    {
+      "id": "margin-tradeoff",
+      "type": "sticky",
+      "text": "Tradeoff: single-stage is cheap and fast, but quality caps at one retrieval hop. Multi-stage wins on compound questions at the cost of moving parts. Pick per corpus size and query complexity.",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 512,
+        "y": 1600,
+        "width": 2240,
+        "height": 144
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "entry-user",
+      "from": {
+        "objectId": "seed-user-query"
+      },
+      "to": {
+        "objectId": "seed-query-understanding"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "entry-chat",
+      "from": {
+        "objectId": "ctx-chat"
+      },
+      "to": {
+        "objectId": "seed-query-understanding"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "entry-profile",
+      "from": {
+        "objectId": "ctx-profile"
+      },
+      "to": {
+        "objectId": "seed-query-understanding"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "entry-glossary",
+      "from": {
+        "objectId": "ctx-glossary"
+      },
+      "to": {
+        "objectId": "seed-query-understanding"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "branch-single",
+      "from": {
+        "objectId": "seed-query-understanding"
+      },
+      "to": {
+        "objectId": "single-embed"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "branch-multi",
+      "from": {
+        "objectId": "seed-query-understanding"
+      },
+      "to": {
+        "objectId": "multi-decompose"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "single-flow-1",
+      "from": {
+        "objectId": "single-embed"
+      },
+      "to": {
+        "objectId": "single-vector"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "single-flow-2",
+      "from": {
+        "objectId": "single-vector"
+      },
+      "to": {
+        "objectId": "single-rerank"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "single-flow-3",
+      "from": {
+        "objectId": "single-rerank"
+      },
+      "to": {
+        "objectId": "single-answer"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "single-flow-4",
+      "from": {
+        "objectId": "single-answer"
+      },
+      "to": {
+        "objectId": "single-response"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "single-fan-a",
+      "from": {
+        "objectId": "single-vector"
+      },
+      "to": {
+        "objectId": "single-shard-a"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "single-fan-b",
+      "from": {
+        "objectId": "single-vector"
+      },
+      "to": {
+        "objectId": "single-shard-b"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "single-fan-c",
+      "from": {
+        "objectId": "single-vector"
+      },
+      "to": {
+        "objectId": "single-shard-c"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "multi-fan-a",
+      "from": {
+        "objectId": "multi-decompose"
+      },
+      "to": {
+        "objectId": "multi-sub-a"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-fan-b",
+      "from": {
+        "objectId": "multi-decompose"
+      },
+      "to": {
+        "objectId": "multi-sub-b"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-subflow-a",
+      "from": {
+        "objectId": "multi-sub-a"
+      },
+      "to": {
+        "objectId": "multi-retriever-a"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-subflow-b",
+      "from": {
+        "objectId": "multi-sub-b"
+      },
+      "to": {
+        "objectId": "multi-retriever-b"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-result-a",
+      "from": {
+        "objectId": "multi-retriever-a"
+      },
+      "to": {
+        "objectId": "multi-fusion"
+      },
+      "label": "results",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-result-b",
+      "from": {
+        "objectId": "multi-retriever-b"
+      },
+      "to": {
+        "objectId": "multi-fusion"
+      },
+      "label": "results",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "multi-fusion-answer",
+      "from": {
+        "objectId": "multi-fusion"
+      },
+      "to": {
+        "objectId": "multi-answer"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "multi-answer-response",
+      "from": {
+        "objectId": "multi-answer"
+      },
+      "to": {
+        "objectId": "multi-response"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "multi-route-plan",
+      "from": {
+        "objectId": "multi-decompose"
+      },
+      "to": {
+        "objectId": "multi-router"
+      },
+      "label": "route plan",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "multi-route-dense",
+      "from": {
+        "objectId": "multi-router"
+      },
+      "to": {
+        "objectId": "multi-retriever-a"
+      },
+      "label": "dense",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "multi-route-sparse",
+      "from": {
+        "objectId": "multi-router"
+      },
+      "to": {
+        "objectId": "multi-retriever-b"
+      },
+      "label": "sparse",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "cross-same-role",
+      "from": {
+        "objectId": "single-answer"
+      },
+      "to": {
+        "objectId": "multi-answer"
+      },
+      "label": "same role",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "cross-retrieval-core",
+      "from": {
+        "objectId": "single-vector"
+      },
+      "to": {
+        "objectId": "multi-fusion"
+      },
+      "label": "retrieval core",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

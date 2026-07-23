@@ -592,7 +592,7 @@ export function MarkdownSlotTextEditor({
           width: "100%",
           height: "100%",
           // No border, no background, no padding — the object underneath is
-          // the chrome (D14: no dimming, no visual jump).
+          // the trim (D14: no dimming, no visual jump).
           background: "transparent",
           border: "none",
           outline: "none",

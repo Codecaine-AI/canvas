@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "./agent-theme.css";
+
+/* The viewer app's own sources (this directory). */
+@source "./";
+
+/*
+ * The agent-kernel viewer packages are machine-local `link:` deps resolving
+ * to TS source in the sibling checkout; Tailwind never scans node_modules,
+ * so their class usage must be named explicitly or the trace viewer / prompt
+ * lab render naked.
+ */
+@source "../../../../../agent-kernel/packages/viewer-shell/src";
+@source "../../../../../agent-kernel/packages/viewer-ui/src";
+@source "../../../../../agent-kernel/packages/prompt-kit/src";
+
+/*
+ * Shared-name token → Tailwind color mapping (the same mapping studio's
+ * index.css carries for its light theme). The values themselves are the dark
+ * instrument set declared at :root in agent-theme.css.
+ */
+:root {
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}

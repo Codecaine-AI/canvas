@@ -2,7 +2,7 @@
  * positionSelectionToolbar — pure geometry helper for floating the dark
  * selection toolbar above a selection, clamped fully inside the viewport.
  *
- * Ground truth: figjam-chrome-catalog.md section 2 describes the toolbar as
+ * Ground truth: figjam-trim-catalog.md section 2 describes the toolbar as
  * floating "above the current selection"; figjam-style-tokens.json/spec
  * don't give an exact gap figure for the *toolbar* (only the color popover's
  * ~9px gap above the toolbar is measured), so we started from the brief's

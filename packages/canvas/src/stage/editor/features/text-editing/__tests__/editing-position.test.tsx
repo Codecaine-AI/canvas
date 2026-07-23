@@ -235,7 +235,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
   it("generic shape (process / rounded-rect): center slot, not the full bbox", () => {
     const object = makeObject({ id: "p1", type: "process", style: { shape: "rounded-rect" } });
     const { resolved } = expectEditorOnSlot(object);
-    // Center preset = content box (bbox minus the 14/12 chrome inset).
+    // Center preset = content box (bbox minus the 14/12 trim inset).
     expect(resolved.rect).toEqual({ x: 14, y: 12, width: 220 - 28, height: 140 - 24 });
     const { slot, effectiveButtonBorderWidth } = expectAtRestMatchesEditor(object);
     expect(effectiveButtonBorderWidth).toBe(4);

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@codecaine-ai/canvas": "workspace:*",
+    "@codecaine-ai/canvas-agent": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "radix-ui": "^1.4.3",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "latest",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

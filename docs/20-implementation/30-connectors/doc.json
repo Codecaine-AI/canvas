@@ -2805,13 +2805,13 @@
       "props": {},
       "text": [
         {
-          "insert": "ConnectorSelectionChrome",
+          "insert": "ConnectorSelectionTrim",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/Connector.tsx",
-              "symbol": "ConnectorSelectionChrome"
+              "symbol": "ConnectorSelectionTrim"
             }
           }
         },

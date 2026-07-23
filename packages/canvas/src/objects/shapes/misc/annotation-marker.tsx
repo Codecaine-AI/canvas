@@ -5,7 +5,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Annotation marker — a small round pin/dot, pure CSS (no silhouette): the
- * base `interactive-canvas-object` chrome (border + background) plus a
+ * base `interactive-canvas-object` trim (border + background) plus a
  * pill-shaped border-radius override and slot text.
  * Placement default (220, 220) diverges from the shape-family standard
  * (160, 160) — see OBJECT_TYPE_DEFAULTS in state/schema/object-defaults.ts.

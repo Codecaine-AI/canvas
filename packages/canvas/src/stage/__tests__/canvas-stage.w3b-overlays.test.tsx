@@ -204,7 +204,7 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
   });
 });
 
-describe("CanvasStage: selected-connector chrome (W3b)", () => {
+describe("CanvasStage: selected-connector trim (W3b)", () => {
   it("hides selected object handles while connector mode is active", () => {
     const select = render(
       <CanvasStage
@@ -245,7 +245,7 @@ describe("CanvasStage: selected-connector chrome (W3b)", () => {
     expect(to!.getAttribute("stroke")).toBe(SELECTION_BLUE);
   });
 
-  it("hides selected connector chrome while connector mode is active", () => {
+  it("hides selected connector trim while connector mode is active", () => {
     const { container } = render(
       <CanvasStage
         document={makeDocument()}
@@ -254,7 +254,7 @@ describe("CanvasStage: selected-connector chrome (W3b)", () => {
         activeTool="connector"
       />,
     );
-    expect(container.querySelector("[data-canvas-connection-chrome]")).toBeNull();
+    expect(container.querySelector("[data-canvas-connection-trim]")).toBeNull();
     expect(container.querySelector('[data-canvas-endpoint="from"]')).toBeNull();
     expect(container.querySelectorAll("[data-canvas-bend-segment]").length).toBe(0);
   });

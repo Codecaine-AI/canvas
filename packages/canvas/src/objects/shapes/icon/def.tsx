@@ -61,7 +61,7 @@ export const iconDef: ObjectDef = {
   render: IconObjectView,
   /*
    * IconShapeBody paints the glyph itself and the brief's "bbox" tier means
-   * NO chip/box behind it, so the button chrome goes fully transparent —
+   * NO chip/box behind it, so the button trim goes fully transparent —
    * `!important` beats objectStyle's inline `background: colors.fill`.
    * Hover/selection feedback comes back as the standard bounding-box outline.
    */

@@ -2,7 +2,7 @@ import type { ToolbarSpec } from "../object-def";
 
 /**
  * Section selection toolbar (step 5): control list moved verbatim from
- * chrome's CONTEXT_TOOLBAR_REGISTRY["section"] (minus the Icon field).
+ * trim's CONTEXT_TOOLBAR_REGISTRY["section"] (minus the Icon field).
  * Controls read left-to-right by expected usage frequency; universal Color +
  * Text pair comes first adjacent/never separated where present; type-specific
  * modifiers next; state controls (Lock) last; dividerAfter marks group

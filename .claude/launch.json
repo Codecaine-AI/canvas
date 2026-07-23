@@ -66,17 +66,6 @@
       "port": 4600
     },
     {
-      "name": "layout-lab",
-      "runtimeExecutable": "bun",
-      "runtimeArgs": [
-        "run",
-        "--cwd",
-        "apps/layout-lab",
-        "dev"
-      ],
-      "port": 4700
-    },
-    {
       "name": "scratchpad",
       "runtimeExecutable": "python3",
       "runtimeArgs": [

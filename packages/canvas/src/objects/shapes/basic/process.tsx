@@ -5,7 +5,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Process — the plain rounded-rect default shape. Its entire outline is the
- * base `interactive-canvas-object` chrome (2px border, 8px radius), so it
+ * base `interactive-canvas-object` trim (2px border, 8px radius), so it
  * declares no extra className, no silhouette, and no CSS of its own.
  *
  * Registered under the effective render shape "rounded-rect": any object

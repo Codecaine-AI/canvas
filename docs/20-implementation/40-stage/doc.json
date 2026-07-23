@@ -40,7 +40,7 @@
         "b-stage-viewer-props",
         "b-stage-viewer-fit",
         "b-stage-viewer-feedback",
-        "b-stage-viewer-chrome",
+        "b-stage-viewer-trim",
         "b-stage-heading-embedding",
         "b-stage-embedding-contract",
         "b-render-heading-theme-11",
@@ -165,7 +165,7 @@
           }
         },
         {
-          "insert": ", selected-connection chrome, floating section header chips, and the "
+          "insert": ", selected-connection trim, floating section header chips, and the "
         },
         {
           "insert": "worldOverlay",
@@ -250,10 +250,10 @@
           }
         },
         {
-          "insert": ": section 0, connector 1, object 2, section header 3, world overlay 4. The selected-connection chrome is a separate "
+          "insert": ": section 0, connector 1, object 2, section header 3, world overlay 4. The selected-connection trim is a separate "
         },
         {
-          "insert": "data-canvas-connection-chrome-layer",
+          "insert": "data-canvas-connection-trim-layer",
           "attributes": {
             "code": true
           }
@@ -884,7 +884,7 @@
           }
         },
         {
-          "insert": "; object chrome metrics live with object defs; connector dash metadata lives in "
+          "insert": "; object trim metrics live with object defs; connector dash metadata lives in "
         },
         {
           "insert": "CONNECTOR_DASH_PATTERN_PX",
@@ -1038,7 +1038,7 @@
       "props": {},
       "text": [
         {
-          "insert": "CanvasStage is the stage core. The editor face that wires live interaction state, pointer handling, and chrome is covered in "
+          "insert": "CanvasStage is the stage core. The editor face that wires live interaction state, pointer handling, and trim is covered in "
         },
         {
           "insert": "20-implementation/50-editor",
@@ -1090,7 +1090,7 @@
       "flavour": "decision",
       "props": {
         "status": "accepted",
-        "title": "Board text is chrome: user-select is off at the stage root, re-enabled only inside active text editors"
+        "title": "Board text is trim: user-select is off at the stage root, re-enabled only inside active text editors"
       },
       "text": [
         {
@@ -1135,7 +1135,7 @@
           }
         },
         {
-          "insert": ", and every label inherits it: board text behaves like chrome, not like document text. The only places selection must work are the active text editors, so each of the four editing surfaces (the slot textarea, section-title input, and connector-label input in "
+          "insert": ", and every label inherits it: board text behaves like trim, not like document text. The only places selection must work are the active text editors, so each of the four editing surfaces (the slot textarea, section-title input, and connector-label input in "
         },
         {
           "insert": "TextEditingOverlay",
@@ -1232,13 +1232,13 @@
           "insert": " paths in the connector tier at z1 and "
         },
         {
-          "insert": "ConnectorSelectionChrome",
+          "insert": "ConnectorSelectionTrim",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/Connector.tsx",
-              "symbol": "ConnectorSelectionChrome"
+              "symbol": "ConnectorSelectionTrim"
             }
           }
         },
@@ -1246,7 +1246,7 @@
           "insert": " in "
         },
         {
-          "insert": "data-canvas-connection-chrome-layer",
+          "insert": "data-canvas-connection-trim-layer",
           "attributes": {
             "code": true
           }
@@ -1294,7 +1294,7 @@
           }
         },
         {
-          "insert": "; the dash, label, anchor-dot, preview, and chrome component story lives in "
+          "insert": "; the dash, label, anchor-dot, preview, and trim component story lives in "
         },
         {
           "insert": "20-implementation/30-connectors",
@@ -1962,13 +1962,13 @@
       ],
       "children": []
     },
-    "b-stage-viewer-chrome": {
-      "id": "b-stage-viewer-chrome",
+    "b-stage-viewer-trim": {
+      "id": "b-stage-viewer-trim",
       "flavour": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "The default card viewer chrome is a "
+          "insert": "The default card viewer trim is a "
         },
         {
           "insert": "section[data-mdx-block=\"Canvas\"]",
@@ -1986,7 +1986,7 @@
           }
         },
         {
-          "insert": " removes that document chrome for iframe and full-screen hosts; "
+          "insert": " removes that document trim for iframe and full-screen hosts; "
         },
         {
           "insert": "showNavigationControls",

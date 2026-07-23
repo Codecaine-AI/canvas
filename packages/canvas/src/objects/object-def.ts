@@ -75,7 +75,7 @@ export interface ObjectRenderProps {
   bounds: CanvasBounds;
   /** Shows the grab-cursor affordance; defaults to true when any select/pointer handler is wired. */
   editable?: boolean;
-  /** Current viewport zoom — used to counter-scale zoom-invariant chrome (the section title chip). */
+  /** Current viewport zoom — used to counter-scale zoom-invariant trim (the section title chip). */
   zoom?: number;
   /** True while this object's text is being edited in place (D14) — hides the at-rest text so the editor is the only visible copy. */
   hideText?: boolean;
@@ -226,7 +226,7 @@ export interface ConnectorDef {
 
 /**
  * The effective render shape ObjectShape dispatches on: `style.shape`, with
- * objects without an explicit shape defaulting to the rounded-rect chrome.
+ * objects without an explicit shape defaulting to the rounded-rect trim.
  */
 export type RenderObjectShape = NonNullable<CanvasObjectStyle["shape"]>;
 
@@ -240,7 +240,7 @@ export function renderShapeFor(object: InteractiveCanvasObject): RenderObjectSha
  * through a registered def; the `undefined` fallback in `objectDefFor` only
  * fires for a render shape with no registered def (today solely an explicit
  * `style.shape: "section"` on a non-section object), reproducing the old
- * generic default chrome (see stage/ObjectShape.tsx).
+ * generic default trim (see stage/ObjectShape.tsx).
  *
  * Two keys mirror the two dispatch mechanisms ObjectShape actually uses:
  *  - `section` is dispatched on `object.type` (the ONLY type the legacy

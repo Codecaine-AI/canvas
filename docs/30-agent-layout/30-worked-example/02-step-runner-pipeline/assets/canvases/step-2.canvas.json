@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-30-worked-example-02-step-runner-pipeline-step-2",
+  "title": "Step 2 (step runner pipeline)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "config",
+      "type": "section",
+      "text": "Config",
+      "label": "Config",
+      "title": "Config",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 176,
+        "height": 512
+      }
+    },
+    {
+      "id": "checkout",
+      "type": "pill",
+      "text": "checkout",
+      "label": "checkout",
+      "geometry": {
+        "x": 29,
+        "y": 167,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "goals",
+      "type": "pill",
+      "text": "goals",
+      "label": "goals",
+      "geometry": {
+        "x": 29,
+        "y": 269,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "secrets",
+      "type": "pill",
+      "text": "secrets",
+      "label": "secrets",
+      "geometry": {
+        "x": 29,
+        "y": 372,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "loop",
+      "type": "section",
+      "text": "Runner loop",
+      "label": "Runner loop",
+      "title": "Runner loop",
+      "tint": "gray",
+      "geometry": {
+        "x": 304,
+        "y": 0,
+        "width": 720,
+        "height": 576
+      }
+    },
+    {
+      "id": "cli",
+      "type": "process",
+      "text": "cli",
+      "label": "cli",
+      "geometry": {
+        "x": 352,
+        "y": 286,
+        "width": 112,
+        "height": 68
+      }
+    },
+    {
+      "id": "sched",
+      "type": "process",
+      "text": "sched",
+      "label": "sched",
+      "geometry": {
+        "x": 523,
+        "y": 286,
+        "width": 112,
+        "height": 68
+      }
+    },
+    {
+      "id": "workers",
+      "type": "process",
+      "text": "workers",
+      "label": "workers",
+      "geometry": {
+        "x": 693,
+        "y": 286,
+        "width": 112,
+        "height": 68
+      }
+    },
+    {
+      "id": "match",
+      "type": "decision",
+      "text": "match",
+      "label": "match",
+      "geometry": {
+        "x": 864,
+        "y": 286,
+        "width": 112,
+        "height": 68
+      }
+    }
+  ],
+  "connections": []
+}

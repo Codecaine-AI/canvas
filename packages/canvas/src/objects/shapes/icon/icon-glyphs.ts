@@ -8,7 +8,7 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  * shape specs" row for `icon`).
  *
  * Each glyph is stroke-outline-only (fill="none"), round caps/joins,
- * matching the FigJam/Nucleo Advanced icon set aesthetic used by the chrome
+ * matching the FigJam/Nucleo Advanced icon set aesthetic used by the trim
  * icons in ui/icons/nucleo/. Since the Nucleo consolidation the path data is
  * GENERATED from the licensed Nucleo sources (the vendored Nucleo SVGs +
  * ui/icons/manifest.json via tools/nucleo-icons/generate.ts) into

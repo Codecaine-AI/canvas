@@ -134,7 +134,7 @@ export interface SelectionToolbarApi {
   selectionToolbarVariant: string | null;
   /** DOM back-compat `data-variant`/aria string (single non-special kinds read "shape"). */
   selectionToolbarVariantLabel: string | null;
-  /** Registry-resolved control specs for the chrome SelectionToolbar host. */
+  /** Registry-resolved control specs for the trim SelectionToolbar host. */
   selectionToolbarControls: readonly ToolbarControlSpec[] | null;
   /** The primary selection's flyout components, keyed by opening action id. */
   selectionToolbarFlyouts: ToolbarFlyoutTable | null;

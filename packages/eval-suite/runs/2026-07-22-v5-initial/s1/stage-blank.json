@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s1-linear-flow",
+  "title": "Eval Suite S1 \u2014 Linear Flow",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S1 \u2014 Linear Flow",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-commit",
+      "type": "process",
+      "text": "Commit",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 176,
+        "y": 320,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-ci-build",
+      "type": "process",
+      "text": "CI Build",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 704,
+        "y": 320,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

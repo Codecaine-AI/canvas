@@ -39,7 +39,7 @@ export function chevronTextRect(object: InteractiveCanvasObject): LocalRect {
  * Chevron (W5, "fast-forward"-style pointer, distinct from arrow-shape's
  * thinner 7-point sliver) — 6-point true-outline polygon (connection-
  * overlay.ts's chevronPoints, the same generator connector attachment uses)
- * painted behind the text; the button chrome stays fully transparent so
+ * painted behind the text; the button trim stays fully transparent so
  * only one outline is visible. The text slot is a symmetric safe band clear
  * of the notch/head extremes (chevronTextRect — the rect-function slot that
  * replaced the legacy labelStyle margin).

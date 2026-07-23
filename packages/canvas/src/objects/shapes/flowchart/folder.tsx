@@ -13,7 +13,7 @@ export const FOLDER_GEOMETRY = {
 /**
  * Folder (W5) — inline SVG silhouette (tab + body path, CSS clip-path can't
  * express the tab notch) painted behind the label/body content; the button
- * chrome stays fully transparent so only one outline is visible. The original
+ * trim stays fully transparent so only one outline is visible. The original
  * 100x100 silhouette proportions are projected into object-local coordinates
  * so the SVG stroke width remains in true canvas px. Stroke width follows the
  * object's resolved stroke width — the shared shape view
@@ -63,7 +63,7 @@ export const folderShapeDef: ShapeDef = {
   /*
    * Moved from CanvasStage's grouped rule (folder shared its selector group
    * there with document-stack/cylinder-horizontal — the last three members
-   * of the trans­parent-chrome group, alongside document/triangle/
+   * of the trans­parent-trim group, alongside document/triangle/
    * parallelogram/pentagon/octagon/star/plus/chevron/off-page-connector/
    * trapezoid/manual-input/hexagon/or-junction/summing-junction, already
    * converted). Paint declarations moved here.

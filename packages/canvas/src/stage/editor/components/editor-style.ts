@@ -1,10 +1,10 @@
 /**
  * EDITOR_STYLE — the editor interface style constants (renamed from
- * theme/tokens.ts's CHROME in the theme dispersal: editor chrome styling
+ * theme/tokens.ts's TRIM in the theme dispersal: editor trim styling
  * co-locates with the editor components that consume it). Values sampled
  * from FigJam reference exports; `*Px` values are LOGICAL px.
  *
- * Two former CHROME values now live in stage/ instead (stage core must not
+ * Two former TRIM values now live in stage/ instead (stage core must not
  * import stage/editor/): the select-tool cursor (CanvasStage) and the selection
  * outline blue (Connector/ConnectorDragPreview, SelectionBox et al.'s
  * #0D99FF).

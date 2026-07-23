@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v3-swimlane",
+  "title": "Eval v3 — Swimlane",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2800,
+    "height": 1600
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v3 — Swimlane",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2736,
+        "height": 2352
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-a",
+      "type": "process",
+      "text": "Submit Form",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 156,
+        "y": 272,
+        "width": 184,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-b",
+      "type": "process",
+      "text": "Serve Result",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1886,
+        "y": 624,
+        "width": 184,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "lane-frontend",
+      "type": "section",
+      "text": "Frontend",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 144,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "lane-api",
+      "type": "section",
+      "text": "API",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 496,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "lane-workers",
+      "type": "section",
+      "text": "Workers",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 848,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "lane-data",
+      "type": "section",
+      "text": "Data",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 1200,
+        "width": 2640,
+        "height": 368
+      }
+    },
+    {
+      "id": "validate-input",
+      "type": "process",
+      "text": "Validate Input",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 736,
+        "y": 272,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "show-progress",
+      "type": "process",
+      "text": "Show Progress",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1312,
+        "y": 272,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "render-result",
+      "type": "process",
+      "text": "Render Result",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 1886,
+        "y": 272,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "receive-request",
+      "type": "process",
+      "text": "Receive Request",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 156,
+        "y": 624,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "auth-check",
+      "type": "process",
+      "text": "Auth Check",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 736,
+        "y": 624,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "enqueue-job",
+      "type": "process",
+      "text": "Enqueue Job",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1312,
+        "y": 624,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "pick-up-job",
+      "type": "process",
+      "text": "Pick Up Job",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 156,
+        "y": 976,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "process-data",
+      "type": "process",
+      "text": "Process Data",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1308,
+        "y": 976,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "write-results",
+      "type": "process",
+      "text": "Write Results",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1556,
+        "y": 976,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "job-queue",
+      "type": "database",
+      "text": "Job Queue",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1554,
+        "y": 1335,
+        "width": 189,
+        "height": 162
+      }
+    },
+    {
+      "id": "results-db",
+      "type": "database",
+      "text": "Results DB",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1843,
+        "y": 1335,
+        "width": 189,
+        "height": 162
+      }
+    },
+    {
+      "id": "object-store",
+      "type": "database",
+      "text": "Object Store",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 2144,
+        "y": 1344,
+        "width": 192,
+        "height": 160
+      }
+    },
+    {
+      "id": "async-note",
+      "type": "sticky",
+      "text": "Async queue handoffs are dashed",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 96,
+        "y": 2032,
+        "width": 384,
+        "height": 288
+      }
+    },
+    {
+      "id": "lane-observability",
+      "type": "section",
+      "text": "Observability",
+      "color": "pink",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 1632,
+        "width": 2640,
+        "height": 288
+      }
+    },
+    {
+      "id": "collect-metrics",
+      "type": "process",
+      "text": "Collect Metrics",
+      "color": "pink",
+      "parentId": null,
+      "geometry": {
+        "x": 1556,
+        "y": 1760,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "trace-requests",
+      "type": "process",
+      "text": "Trace Requests",
+      "color": "pink",
+      "parentId": null,
+      "geometry": {
+        "x": 1886,
+        "y": 1760,
+        "width": 184,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "f-1",
+      "from": {
+        "objectId": "seed-a"
+      },
+      "to": {
+        "objectId": "validate-input"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "f-2",
+      "from": {
+        "objectId": "validate-input"
+      },
+      "to": {
+        "objectId": "show-progress"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "f-3",
+      "from": {
+        "objectId": "show-progress"
+      },
+      "to": {
+        "objectId": "render-result"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "a-1",
+      "from": {
+        "objectId": "receive-request"
+      },
+      "to": {
+        "objectId": "auth-check"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "a-2",
+      "from": {
+        "objectId": "auth-check"
+      },
+      "to": {
+        "objectId": "enqueue-job"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "a-3",
+      "from": {
+        "objectId": "enqueue-job"
+      },
+      "to": {
+        "objectId": "seed-b"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "w-1",
+      "from": {
+        "objectId": "pick-up-job"
+      },
+      "to": {
+        "objectId": "process-data"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "w-2",
+      "from": {
+        "objectId": "process-data"
+      },
+      "to": {
+        "objectId": "write-results"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "d-1",
+      "from": {
+        "objectId": "job-queue"
+      },
+      "to": {
+        "objectId": "results-db"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "d-2",
+      "from": {
+        "objectId": "results-db"
+      },
+      "to": {
+        "objectId": "object-store"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "x-post",
+      "from": {
+        "objectId": "seed-a"
+      },
+      "to": {
+        "objectId": "receive-request"
+      },
+      "label": "POST /submit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "x-enqueue",
+      "from": {
+        "objectId": "enqueue-job"
+      },
+      "to": {
+        "objectId": "job-queue"
+      },
+      "label": "enqueue",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "x-poll",
+      "from": {
+        "objectId": "job-queue"
+      },
+      "to": {
+        "objectId": "pick-up-job"
+      },
+      "label": "poll",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "x-write",
+      "from": {
+        "objectId": "write-results"
+      },
+      "to": {
+        "objectId": "results-db"
+      },
+      "label": "write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "x-read",
+      "from": {
+        "objectId": "results-db"
+      },
+      "to": {
+        "objectId": "seed-b"
+      },
+      "label": "read",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "x-ok",
+      "from": {
+        "objectId": "seed-b"
+      },
+      "to": {
+        "objectId": "render-result"
+      },
+      "label": "200 OK",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "draft-connection-1",
+      "from": {
+        "objectId": "process-data"
+      },
+      "to": {
+        "objectId": "collect-metrics"
+      },
+      "label": "emit metrics",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "draft-connection-2",
+      "from": {
+        "objectId": "seed-b"
+      },
+      "to": {
+        "objectId": "trace-requests"
+      },
+      "label": "trace",
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

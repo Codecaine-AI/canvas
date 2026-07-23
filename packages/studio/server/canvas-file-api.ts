@@ -56,6 +56,22 @@ function readJsonBody(req: IncomingMessage): Promise<unknown> {
   });
 }
 
+/**
+ * Write via a temp file in the same directory plus rename — atomic on the
+ * same filesystem, so a crash mid-write can never leave a half-written
+ * canvas file behind.
+ */
+async function writeFileAtomic(filePath: string, contents: string): Promise<void> {
+  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tempPath, contents);
+  try {
+    await fs.rename(tempPath, filePath);
+  } catch (error) {
+    await fs.unlink(tempPath).catch(() => {});
+    throw error;
+  }
+}
+
 function filePathForId(canvasesDir: string, id: string): string | null {
   if (!CANVAS_ID_PATTERN.test(id)) return null;
   const filePath = resolve(canvasesDir, `${id}.canvas.json`);
@@ -169,7 +185,7 @@ export function createCanvasFileApiHandler(options: {
               sendJson(res, 422, { error: "Invalid canvas document.", issues: validation.issues });
               return;
             }
-            await fs.writeFile(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
+            await writeFileAtomic(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
             sendJson(res, 201, { id: body.id });
             return;
           }
@@ -269,7 +285,7 @@ export function createCanvasFileApiHandler(options: {
             sendJson(res, 422, { error: "Invalid canvas document.", issues: validation.issues });
             return;
           }
-          await fs.writeFile(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
+          await writeFileAtomic(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
           sendJson(res, 200, { id });
           return;
         }

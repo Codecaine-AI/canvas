@@ -10,7 +10,7 @@ import type { InteractiveCanvasDocument } from "../state/schema";
 import { connectionBoundsForObject } from "../objects/geometry";
 import { worldToScreen, type ViewportState } from "../stage/viewport";
 
-/** Selection outline/handle color — matches SelectionBox and the connector chrome (stage must not import stage/editor/components/editor-style). */
+/** Selection outline/handle color — matches SelectionBox and the connector trim (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 
 /**

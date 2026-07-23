@@ -5,7 +5,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Page corner — a pure CSS `clip-path` outline (a rect with the top-right
- * corner folded down), no SVG silhouette: the base button chrome is clipped
+ * corner folded down), no SVG silhouette: the base button trim is clipped
  * directly, matching the legacy `.interactive-canvas-object-page-corner`
  * rule.
  */

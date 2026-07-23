@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-30-worked-example-00-overview",
+  "title": "A board in seven edits",
+  "root": "b-worked-root",
+  "blocks": {
+    "b-worked-root": {
+      "id": "b-worked-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-worked-title-1",
+        "b-worked-lede-2",
+        "b-worked-steps-heading-3",
+        "b-worked-steps-item1-4",
+        "b-worked-steps-item2-5",
+        "b-worked-steps-item3-6",
+        "b-worked-steps-item4-7",
+        "b-worked-steps-item5-8",
+        "b-worked-steps-item6-9",
+        "b-worked-steps-item7-10",
+        "b-worked-stepper-heading-11",
+        "b-worked-stepper-body-12"
+      ],
+      "props": {
+        "covers": "Overview and index of the seven-step worked example: one board built program-first, each step an edit to the layout program — a lane and a stage, the runner grid, the board hub, a score column, one align line, a fan plus arrows, and the final 2x2 board edit — each step a child page with its program, prose, and solved board.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "worked example",
+          "layout program",
+          "hug lane",
+          "grid",
+          "align",
+          "fan",
+          "arrows",
+          "diff overlay"
+        ]
+      }
+    },
+    "b-worked-title-1": {
+      "id": "b-worked-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "A board in seven edits"
+        }
+      ]
+    },
+    "b-worked-lede-2": {
+      "id": "b-worked-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A small runner-and-score board built up program-first: every step below edits the layout program, never a coordinate. On each step the solver re-derives all geometry from scratch — "
+        },
+        {
+          "insert": "expandSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "expandSketch"
+            }
+          }
+        },
+        {
+          "insert": " lays out the boxes and "
+        },
+        {
+          "insert": "routeSketchEdges",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/route.ts",
+              "symbol": "routeSketchEdges"
+            }
+          }
+        },
+        {
+          "insert": " routes the arrows — into the same 1024x576 frame the board generator uses ("
+        },
+        {
+          "insert": "WORKED_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/scripts/generate-docs-boards.ts",
+              "symbol": "WORKED_SIZE"
+            }
+          }
+        },
+        {
+          "insert": "). Each step is its own page showing the program verbatim and the solved board; the rule ids in the prose refer to the "
+        },
+        {
+          "insert": "rulebook",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/00-overview",
+              "label": "The layout rulebook: corpus rules R1-R10"
+            }
+          }
+        },
+        {
+          "insert": " (R1-R10)."
+        }
+      ]
+    },
+    "b-worked-steps-heading-3": {
+      "id": "b-worked-steps-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The seven steps"
+        }
+      ]
+    },
+    "b-worked-steps-item1-4": {
+      "id": "b-worked-steps-item1-4",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 1 — A lane and a stage",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/01-step-lane-and-stage",
+              "label": "Step 1 — A lane and a stage"
+            }
+          }
+        },
+        {
+          "insert": " — one row split at 1:4 — a config lane pinned NW at its natural size, three stacked pills, and a stage placeholder."
+        }
+      ]
+    },
+    "b-worked-steps-item2-5": {
+      "id": "b-worked-steps-item2-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 2 — The runner pipeline",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/02-step-runner-pipeline",
+              "label": "Step 2 — The runner pipeline"
+            }
+          }
+        },
+        {
+          "insert": " — the stage becomes the runner loop — a 1x4 grid at the loose 96 gap, ending in a decision cell."
+        }
+      ]
+    },
+    "b-worked-steps-item3-6": {
+      "id": "b-worked-steps-item3-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 3 — The board hub below",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/03-step-board-hub",
+              "label": "Step 3 — The board hub below"
+            }
+          }
+        },
+        {
+          "insert": " — the stage band splits vertically, stacking the loop over a board hub with its own 1x3 grid of database stores."
+        }
+      ]
+    },
+    "b-worked-steps-item4-7": {
+      "id": "b-worked-steps-item4-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 4 — A score column",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/04-step-score-column",
+              "label": "Step 4 — A score column"
+            }
+          }
+        },
+        {
+          "insert": " — a third root band adds the score gate as a 3x1 vertical chain; the pinned config lane keeps its natural size."
+        }
+      ]
+    },
+    "b-worked-steps-item5-8": {
+      "id": "b-worked-steps-item5-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 5 — Line up the hero row",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/05-step-hero-row",
+              "label": "Step 5 — Line up the hero row"
+            }
+          }
+        },
+        {
+          "insert": " — one added align line puts cli and objdiff on a shared horizontal centerline across section boundaries."
+        }
+      ]
+    },
+    "b-worked-steps-item6-9": {
+      "id": "b-worked-steps-item6-9",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 6 — Fan out, wire the arrows",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/06-step-fan-and-arrows",
+              "label": "Step 6 — Fan out, wire the arrows"
+            }
+          }
+        },
+        {
+          "insert": " — the score gate gains two outcome pills, a fan centers the regress decision over them, and the arrows block declares every connection."
+        }
+      ]
+    },
+    "b-worked-steps-item7-10": {
+      "id": "b-worked-steps-item7-10",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Step 7 — The edit: one more store",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/07-step-one-more-store",
+              "label": "Step 7 — The edit: one more store"
+            }
+          }
+        },
+        {
+          "insert": " — the board grid goes 1x3 to 2x2 with a new cache cell; the lattice re-solves and the rest of the board stays put."
+        }
+      ]
+    },
+    "b-worked-stepper-heading-11": {
+      "id": "b-worked-stepper-heading-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How the steps show locality"
+        }
+      ]
+    },
+    "b-worked-stepper-body-12": {
+      "id": "b-worked-stepper-body-12",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The lab's interactive stepper (deleted with the lab) diffed the two solved boards object by object between steps: every object whose geometry changed got a highlight ring, moved and unchanged counts sat beside the step annotation, and program lines new to the step were highlighted in the code pane. The locality it made visible still holds when comparing each step's board with the next — a structural edit like "
+        },
+        {
+          "insert": "step 4",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/04-step-score-column",
+              "label": "Step 4 — A score column"
+            }
+          }
+        },
+        {
+          "insert": "'s third root band re-solves whole bands, while "
+        },
+        {
+          "insert": "step 5",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/05-step-hero-row",
+              "label": "Step 5 — Line up the hero row"
+            }
+          }
+        },
+        {
+          "insert": "'s single align line and "
+        },
+        {
+          "insert": "step 7",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/30-worked-example/07-step-one-more-store",
+              "label": "Step 7 — The edit: one more store"
+            }
+          }
+        },
+        {
+          "insert": "'s grid edit leave most of the board unchanged."
+        }
+      ]
+    }
+  }
+}

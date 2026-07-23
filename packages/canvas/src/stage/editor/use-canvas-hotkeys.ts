@@ -25,7 +25,9 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   P              process tool
  *   O              document tool (checkpoint 5 — D16 expanded vocabulary)
  *   B              database tool (checkpoint 5 — D16 expanded vocabulary)
- *   Delete/Backspace   canvas.deleteSelection (objects AND selected connections)
+ *   E              toggle annotation tool / select tool
+ *   Delete/Backspace   canvas.deleteSelection (objects AND selected connections),
+ *                    or canvas.removeAnnotation for a selected annotation
  *   Cmd/Ctrl-A     sticky dock tool (preventDefault — beats the browser's
  *                  select-all shortcut)
  *   Cmd/Ctrl-D     canvas.duplicateSelection (preventDefault — beats the browser's
@@ -37,9 +39,9 @@ import type { CanvasViewportControls } from "./use-canvas-viewport";
  *   Cmd/Ctrl-Z     canvas.undo
  *   Shift-Cmd/Ctrl-Z   canvas.redo
  *   Escape         cancel the active interaction machine gesture, else close an
- *                  open context menu, else exit shape-placement mode (disarm
- *                  the creation tool / close the Shapes panel — see
- *                  onEscapeExitPlacement), else clear selection
+ *                  open context menu, else exit annotation mode, else exit
+ *                  shape-placement mode (disarm the creation tool / close the
+ *                  Shapes panel — see onEscapeExitPlacement), else clear selection
  *   Cmd/Ctrl-0     viewport controls.fit
  *   Cmd/Ctrl-=     viewport controls.zoomIn
  *   Cmd/Ctrl--     viewport controls.zoomOut
@@ -78,8 +80,12 @@ const TOOL_KEY_MAP: Partial<Record<string, CanvasTool>> = {
 
 export type UseCanvasHotkeysArgs = {
   enabled?: boolean;
+  /** Read-only camera lock: keeps Escape and viewport zoom shortcuts, suppresses editing shortcuts. */
+  cameraOnly?: boolean;
   document: InteractiveCanvasDocument;
   selection: CanvasSelection;
+  /** Current editor tool, used by toggle/exit shortcuts for annotation mode. */
+  tool: CanvasTool;
   dispatch: (action: CanvasAction) => void;
   /** Activates a bottom-dock tool through the same editor path used by a dock button click. */
   onSelectDockTool?: (tool: ToolId) => void;
@@ -117,8 +123,10 @@ function isEditableTarget(target: EventTarget | null): boolean {
  */
 export function useCanvasHotkeys({
   enabled = true,
+  cameraOnly = false,
   document: canvasDocument,
   selection,
+  tool,
   dispatch,
   onSelectDockTool,
   isTypingContextActive,
@@ -135,8 +143,12 @@ export function useCanvasHotkeys({
   // render/state change.
   const documentRef = useRef(canvasDocument);
   documentRef.current = canvasDocument;
+  const cameraOnlyRef = useRef(cameraOnly);
+  cameraOnlyRef.current = cameraOnly;
   const selectionRef = useRef(selection);
   selectionRef.current = selection;
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
   const dispatchRef = useRef(dispatch);
   dispatchRef.current = dispatch;
   const onSelectDockToolRef = useRef(onSelectDockTool);
@@ -177,6 +189,12 @@ export function useCanvasHotkeys({
           onCloseContextMenuRef.current();
           return;
         }
+        if (cameraOnlyRef.current) return;
+        if (toolRef.current === "annotation") {
+          event.preventDefault();
+          dispatchRef.current({ type: "canvas.setTool", tool: "select" });
+          return;
+        }
         // Shapes-panel placement mode: disarm the creation tool / close the
         // panel before falling through to clear-selection.
         if (onEscapeExitPlacementRef.current?.()) {
@@ -186,6 +204,25 @@ export function useCanvasHotkeys({
         dispatchRef.current({ type: "canvas.select", selection: { kind: "none" } });
         return;
       }
+
+      // Zoom controls remain live in read-only camera mode.
+      if (meta && (event.key === "0")) {
+        event.preventDefault();
+        controlsRef.current.fit();
+        return;
+      }
+      if (meta && (event.key === "=" || event.key === "+")) {
+        event.preventDefault();
+        controlsRef.current.zoomIn();
+        return;
+      }
+      if (meta && (event.key === "-" || event.key === "_")) {
+        event.preventDefault();
+        controlsRef.current.zoomOut();
+        return;
+      }
+
+      if (cameraOnlyRef.current) return;
 
       // Undo / redo.
       if (meta && event.key.toLowerCase() === "z") {
@@ -237,23 +274,6 @@ export function useCanvasHotkeys({
         return;
       }
 
-      // Zoom controls.
-      if (meta && (event.key === "0")) {
-        event.preventDefault();
-        controlsRef.current.fit();
-        return;
-      }
-      if (meta && (event.key === "=" || event.key === "+")) {
-        event.preventDefault();
-        controlsRef.current.zoomIn();
-        return;
-      }
-      if (meta && (event.key === "-" || event.key === "_")) {
-        event.preventDefault();
-        controlsRef.current.zoomOut();
-        return;
-      }
-
       // Anything else with a modifier held falls through unhandled (avoid
       // hijacking browser/system shortcuts we don't own).
       if (meta) return;
@@ -261,7 +281,12 @@ export function useCanvasHotkeys({
       // Delete / Backspace.
       if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
-        dispatchRef.current({ type: "canvas.deleteSelection" });
+        const selection = selectionRef.current;
+        dispatchRef.current(
+          selection.kind === "annotation"
+            ? { type: "canvas.removeAnnotation", annotationId: selection.annotationId }
+            : { type: "canvas.deleteSelection" },
+        );
         return;
       }
 
@@ -283,6 +308,15 @@ export function useCanvasHotkeys({
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 
       const key = event.key.toLowerCase();
+
+      if (key === "e") {
+        event.preventDefault();
+        dispatchRef.current({
+          type: "canvas.setTool",
+          tool: toolRef.current === "annotation" ? "select" : "annotation",
+        });
+        return;
+      }
 
       // Dock hotkeys (single letter, no modifier).
       const dockTool = DOCK_TOOL_KEY_MAP[key];

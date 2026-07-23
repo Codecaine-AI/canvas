@@ -147,7 +147,7 @@ describe("ShapesPanel interaction", () => {
     fireEvent.pointerEnter(firstColumnButton);
 
     let tooltip = container.querySelector('[role="tooltip"]') as HTMLElement;
-    let caret = tooltip.querySelector("[data-chrome-tooltip-caret]") as HTMLElement;
+    let caret = tooltip.querySelector("[data-trim-tooltip-caret]") as HTMLElement;
     expect(tooltip.getAttribute("data-placement")).toBe("bottom");
     expect(tooltip.getAttribute("data-align")).toBe("start");
     expect(tooltip.style.left).toBe("0px");
@@ -160,7 +160,7 @@ describe("ShapesPanel interaction", () => {
     fireEvent.pointerEnter(lastColumnButton);
 
     tooltip = container.querySelector('[role="tooltip"]') as HTMLElement;
-    caret = tooltip.querySelector("[data-chrome-tooltip-caret]") as HTMLElement;
+    caret = tooltip.querySelector("[data-trim-tooltip-caret]") as HTMLElement;
     expect(tooltip.getAttribute("data-placement")).toBe("bottom");
     expect(tooltip.getAttribute("data-align")).toBe("end");
     expect(tooltip.style.right).toBe("0px");

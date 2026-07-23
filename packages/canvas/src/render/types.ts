@@ -18,6 +18,16 @@ export interface RenderStaticSvgOptions {
    */
   sectionId?: string;
   /**
+   * Crop to an arbitrary world-space rect (agent draft renders, scope crops).
+   * The viewBox becomes the rect expanded by `padding` on all sides
+   * (padding defaults to 0 here — the rect is authoritative); everything is
+   * still rendered and the viewBox does the clipping, so objects straddling
+   * the rect edge appear partially, exactly like the live stage camera.
+   * Mutually exclusive with `sectionId` — if both are given, `cropRect`
+   * wins and `sectionId`/`fit` are ignored.
+   */
+  cropRect?: { x: number; y: number; width: number; height: number };
+  /**
    * How a `sectionId` crop frames its content. "frame" (default) crops to
    * the section frame's own rect and draws the frame backdrop + title chip.
    * "content" fits the crop to the member objects' bounds and omits the

@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v3-state-machine",
+  "title": "Eval v3 — State Machine",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2400,
+    "height": 1600
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v3 — State Machine",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2336,
+        "height": 1536
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 240,
+        "y": 688,
+        "width": 240,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-connected",
+      "type": "process",
+      "text": "Connected",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1024,
+        "y": 304,
+        "width": 240,
+        "height": 128
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "state-connecting",
+      "type": "process",
+      "text": "Connecting",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 600,
+        "y": 300,
+        "width": 240,
+        "height": 120
+      }
+    },
+    {
+      "id": "state-degraded",
+      "type": "process",
+      "text": "Degraded",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1480,
+        "y": 500,
+        "width": 240,
+        "height": 120
+      }
+    },
+    {
+      "id": "state-reconnecting",
+      "type": "process",
+      "text": "Reconnecting",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1504,
+        "y": 896,
+        "width": 240,
+        "height": 128
+      }
+    },
+    {
+      "id": "state-disconnecting",
+      "type": "process",
+      "text": "Disconnecting",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 820,
+        "y": 1080,
+        "width": 240,
+        "height": 120
+      }
+    },
+    {
+      "id": "note-degraded-loop",
+      "type": "sticky",
+      "text": "Degraded loop:\npacket loss → grace period → reconnect → resume session",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1520,
+        "y": 1056,
+        "width": 288,
+        "height": 176
+      }
+    },
+    {
+      "id": "state-suspended",
+      "type": "process",
+      "text": "Suspended",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1120,
+        "y": 688,
+        "width": 240,
+        "height": 128
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-idle-connecting",
+      "from": {
+        "objectId": "seed-idle"
+      },
+      "to": {
+        "objectId": "state-connecting"
+      },
+      "label": "connect()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-connecting-connected",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "seed-connected"
+      },
+      "label": "handshake ok",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-connecting-idle",
+      "from": {
+        "objectId": "state-connecting"
+      },
+      "to": {
+        "objectId": "seed-idle"
+      },
+      "label": "timeout",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-connected-degraded",
+      "from": {
+        "objectId": "seed-connected"
+      },
+      "to": {
+        "objectId": "state-degraded"
+      },
+      "label": "packet loss > 5%",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-degraded-reconnecting",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "grace expired",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-reconnecting-connected",
+      "from": {
+        "objectId": "state-reconnecting"
+      },
+      "to": {
+        "objectId": "seed-connected"
+      },
+      "label": "session resumed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-connected-disconnecting",
+      "from": {
+        "objectId": "seed-connected"
+      },
+      "to": {
+        "objectId": "state-disconnecting"
+      },
+      "label": "close()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-disconnecting-idle",
+      "from": {
+        "objectId": "state-disconnecting"
+      },
+      "to": {
+        "objectId": "seed-idle"
+      },
+      "label": "socket closed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-connected-suspended",
+      "from": {
+        "objectId": "seed-connected"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "suspend()",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-degraded-suspended",
+      "from": {
+        "objectId": "state-degraded"
+      },
+      "to": {
+        "objectId": "state-suspended"
+      },
+      "label": "quarantine",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-suspended-reconnecting",
+      "from": {
+        "objectId": "state-suspended"
+      },
+      "to": {
+        "objectId": "state-reconnecting"
+      },
+      "label": "resume window",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

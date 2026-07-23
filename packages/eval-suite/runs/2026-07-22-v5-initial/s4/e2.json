@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s4-swimlane",
+  "title": "Eval Suite S4 — Swimlane Pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S4 — Swimlane Pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1920
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-submit-form",
+      "type": "process",
+      "text": "Submit Form",
+      "color": "white",
+      "parentId": "lane-frontend",
+      "geometry": {
+        "x": 176,
+        "y": 352,
+        "width": 192,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-parse-request",
+      "type": "process",
+      "text": "Parse Request",
+      "color": "white",
+      "parentId": "lane-api",
+      "geometry": {
+        "x": 752,
+        "y": 672,
+        "width": 192,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "lane-frontend",
+      "type": "section",
+      "text": "Frontend",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 256,
+        "width": 2272,
+        "height": 256
+      }
+    },
+    {
+      "id": "lane-api",
+      "type": "section",
+      "text": "API",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 576,
+        "width": 2272,
+        "height": 256
+      }
+    },
+    {
+      "id": "lane-data",
+      "type": "section",
+      "text": "Data",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 896,
+        "width": 2272,
+        "height": 256
+      }
+    },
+    {
+      "id": "lane-workers",
+      "type": "section",
+      "text": "Workers",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 1536,
+        "width": 2272,
+        "height": 256
+      }
+    },
+    {
+      "id": "legend-sync-async",
+      "type": "sticky",
+      "text": "Solid edges are synchronous calls.\nDashed edges are async handoffs.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 80,
+        "width": 512,
+        "height": 112
+      }
+    },
+    {
+      "id": "pipeline-summary",
+      "type": "sticky",
+      "text": "Submit returns immediately; the real work flows through the queue; status streams back to the browser.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 800,
+        "y": 80,
+        "width": 1408,
+        "height": 112
+      }
+    },
+    {
+      "id": "frontend-validate-input",
+      "type": "process",
+      "text": "Validate Input",
+      "color": "white",
+      "parentId": "lane-frontend",
+      "geometry": {
+        "x": 752,
+        "y": 352,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "frontend-show-progress",
+      "type": "process",
+      "text": "Show Progress",
+      "color": "white",
+      "parentId": "lane-frontend",
+      "geometry": {
+        "x": 1744,
+        "y": 352,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "frontend-render-result",
+      "type": "process",
+      "text": "Render Result",
+      "color": "white",
+      "parentId": "lane-frontend",
+      "geometry": {
+        "x": 2160,
+        "y": 384,
+        "width": 160,
+        "height": 80
+      }
+    },
+    {
+      "id": "api-auth-check",
+      "type": "process",
+      "text": "Auth Check",
+      "color": "white",
+      "parentId": "lane-api",
+      "geometry": {
+        "x": 1136,
+        "y": 672,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "api-enqueue-job",
+      "type": "process",
+      "text": "Enqueue Job",
+      "color": "white",
+      "parentId": "lane-api",
+      "geometry": {
+        "x": 1520,
+        "y": 672,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "api-serve-result",
+      "type": "process",
+      "text": "Serve Result",
+      "color": "white",
+      "parentId": "lane-api",
+      "geometry": {
+        "x": 2160,
+        "y": 704,
+        "width": 160,
+        "height": 80
+      }
+    },
+    {
+      "id": "data-job-queue",
+      "type": "database",
+      "text": "Job Queue",
+      "color": "white",
+      "parentId": "lane-data",
+      "geometry": {
+        "x": 1520,
+        "y": 992,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "data-results-db",
+      "type": "database",
+      "text": "Results DB",
+      "color": "white",
+      "parentId": "lane-data",
+      "geometry": {
+        "x": 2160,
+        "y": 1024,
+        "width": 160,
+        "height": 80
+      }
+    },
+    {
+      "id": "workers-pick-up-job",
+      "type": "process",
+      "text": "Pick Up Job",
+      "color": "white",
+      "parentId": "lane-workers",
+      "geometry": {
+        "x": 1520,
+        "y": 1632,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "workers-process-data",
+      "type": "process",
+      "text": "Process Data",
+      "color": "white",
+      "parentId": "lane-workers",
+      "geometry": {
+        "x": 1744,
+        "y": 1632,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "workers-write-results",
+      "type": "process",
+      "text": "Write Results",
+      "color": "white",
+      "parentId": "lane-workers",
+      "geometry": {
+        "x": 2160,
+        "y": 1696,
+        "width": 160,
+        "height": 80
+      }
+    },
+    {
+      "id": "lane-observability",
+      "type": "section",
+      "text": "Observability",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 1216,
+        "width": 2272,
+        "height": 256
+      }
+    },
+    {
+      "id": "observability-trace-requests",
+      "type": "process",
+      "text": "Trace Requests",
+      "color": "white",
+      "parentId": "lane-observability",
+      "geometry": {
+        "x": 752,
+        "y": 1312,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "observability-collect-metrics",
+      "type": "process",
+      "text": "Collect Metrics",
+      "color": "white",
+      "parentId": "lane-observability",
+      "geometry": {
+        "x": 1744,
+        "y": 1312,
+        "width": 192,
+        "height": 80
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-submit-validate",
+      "from": {
+        "objectId": "seed-submit-form"
+      },
+      "to": {
+        "objectId": "frontend-validate-input"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-validate-progress",
+      "from": {
+        "objectId": "frontend-validate-input"
+      },
+      "to": {
+        "objectId": "frontend-show-progress"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-progress-render",
+      "from": {
+        "objectId": "frontend-show-progress"
+      },
+      "to": {
+        "objectId": "frontend-render-result"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-validate-parse",
+      "from": {
+        "objectId": "frontend-validate-input"
+      },
+      "to": {
+        "objectId": "seed-parse-request"
+      },
+      "label": "submit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-parse-auth",
+      "from": {
+        "objectId": "seed-parse-request"
+      },
+      "to": {
+        "objectId": "api-auth-check"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-auth-enqueue",
+      "from": {
+        "objectId": "api-auth-check"
+      },
+      "to": {
+        "objectId": "api-enqueue-job"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-enqueue-queue",
+      "from": {
+        "objectId": "api-enqueue-job"
+      },
+      "to": {
+        "objectId": "data-job-queue"
+      },
+      "label": "enqueue",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-queue-pick",
+      "from": {
+        "objectId": "data-job-queue"
+      },
+      "to": {
+        "objectId": "workers-pick-up-job"
+      },
+      "label": "poll",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-pick-process",
+      "from": {
+        "objectId": "workers-pick-up-job"
+      },
+      "to": {
+        "objectId": "workers-process-data"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-process-write",
+      "from": {
+        "objectId": "workers-process-data"
+      },
+      "to": {
+        "objectId": "workers-write-results"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-write-resultsdb",
+      "from": {
+        "objectId": "workers-write-results"
+      },
+      "to": {
+        "objectId": "data-results-db"
+      },
+      "label": "persist",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-resultsdb-serve",
+      "from": {
+        "objectId": "data-results-db"
+      },
+      "to": {
+        "objectId": "api-serve-result"
+      },
+      "label": "read",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-serve-render",
+      "from": {
+        "objectId": "api-serve-result"
+      },
+      "to": {
+        "objectId": "frontend-render-result"
+      },
+      "label": "response",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-process-status",
+      "from": {
+        "objectId": "workers-process-data"
+      },
+      "to": {
+        "objectId": "frontend-show-progress"
+      },
+      "label": "status",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-enqueue-serve",
+      "from": {
+        "objectId": "api-enqueue-job"
+      },
+      "to": {
+        "objectId": "api-serve-result"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-parse-trace-tap",
+      "from": {
+        "objectId": "seed-parse-request"
+      },
+      "to": {
+        "objectId": "observability-trace-requests"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-process-metrics-tap",
+      "from": {
+        "objectId": "workers-process-data"
+      },
+      "to": {
+        "objectId": "observability-collect-metrics"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-auth-render-cache-hit",
+      "from": {
+        "objectId": "api-auth-check"
+      },
+      "to": {
+        "objectId": "frontend-render-result"
+      },
+      "label": "cache hit",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

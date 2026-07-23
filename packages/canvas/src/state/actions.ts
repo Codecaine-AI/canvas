@@ -15,6 +15,8 @@
  *  - ./actions/geometry-ops — move/resize/geometries/parent/fit/align/distribute
  *  - ./actions/connections  — connector handlers + endpoint validators
  *  - ./actions/annotations  — annotation handlers
+ *  - ./actions/agent-patch  — canvas.applyAgentPatch (agent apply path:
+ *                             one history entry, source:"agent")
  *  - ./actions/reducer      — state factory, thin action switch, entry point
  *  - ./actions/helpers      — nextId/selectedObjectIds shared across domains
  *

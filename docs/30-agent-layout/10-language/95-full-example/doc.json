@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-95-full-example",
+  "title": "The full example",
+  "root": "b-fullexample-root",
+  "blocks": {
+    "b-fullexample-root": {
+      "id": "b-fullexample-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-fullexample-title-1",
+        "b-fullexample-lede-2",
+        "b-fullexample-code-3",
+        "b-fullexample-canvas-4",
+        "b-fullexample-read-5"
+      ],
+      "props": {
+        "covers": "A complete v3 program exercising splits, sections, a grid, align, fan, and arrows — with the solved board and a read-aloud walkthrough of what the program says.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "full example",
+          "worked program",
+          "read-aloud"
+        ]
+      }
+    },
+    "b-fullexample-title-1": {
+      "id": "b-fullexample-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The full example"
+        }
+      ]
+    },
+    "b-fullexample-lede-2": {
+      "id": "b-fullexample-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every statement in one program — the tree, both alignment facts, and the arrows block:"
+        }
+      ]
+    },
+    "b-fullexample-code-3": {
+      "id": "b-fullexample-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "col 2|1\n  section 1 text=pipeline label=\"Pipeline\"\n    row 1|1|1\n      item 2 text=ingest type=process size=M at=C\n      item 3 text=parse type=process size=M at=C\n      item 4 text=score-gate type=decision size=L at=C\n  grid 3x2 gap=32\n    item 5 text=check-a type=sticky size=M\n    item 6 text=check-b type=sticky size=M\n    item 7 text=check-c type=sticky size=M\n    item 8 text=check-d type=sticky size=M\n    item 9 text=check-e type=sticky size=M\n    item 10 text=check-f type=sticky size=M\n\nalign y: 2 3 4\nfan 4 dir=S: 5 6 7\n\narrows\n  2 > 3\n  3 > 4\n  4 > 5\n  4 > 6\n  4 > 7"
+        }
+      ]
+    },
+    "b-fullexample-canvas-4": {
+      "id": "b-fullexample-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-main.canvas.json",
+        "title": "The full example, solved"
+      }
+    },
+    "b-fullexample-read-5": {
+      "id": "b-fullexample-read-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Read aloud: a two-thirds / one-third split; the pipeline section holds three items in a row, the gate drawn large; beside it a 3×2 grid of check stickies; the pipeline items share a horizontal centerline; the gate fans south onto three of the checks; five arrows connect them."
+        }
+      ]
+    }
+  }
+}

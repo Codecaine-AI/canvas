@@ -13,7 +13,7 @@ Dropbox Nucleo library (canonical)  →  manifest.json  →  generate.ts  →  p
    user's Dropbox: `/Users/Ford/Dropbox/UI Components/Icons/nucleo`, five sets:
    `nucleo_ui`, `nucleo_core`, `nucleo_sharp`, `nucleo_pixel`,
    `nucleo_micro_bold`). Discover new icons by grepping it.
-2. **manifest.json** — the icon selection/mapping. `chrome` entries name each
+2. **manifest.json** — the icon selection/mapping. `trim` entries name each
    React component `export` and its Nucleo `source` path (relative to a library
    set, e.g. `nucleo_ui/outline/ui-layout/18px_check.svg`), unless marked
    `{ "custom": true }`. `glyphs` entries map a stable `id` to a `source` for
@@ -49,7 +49,7 @@ the manifest are pruned on each run.
 The generator owns `packages/canvas/src/ui/icons/nucleo/` — it rewrites every
 `.tsx`/`.ts` it emits there and manages the vendored `svg/` subdir. It writes:
 
-- `packages/canvas/src/ui/icons/nucleo/<kebab>-icon.tsx` — one React chrome
+- `packages/canvas/src/ui/icons/nucleo/<kebab>-icon.tsx` — one React trim
   component per icon (e.g. `alert-triangle-icon.tsx` for `AlertTriangleIcon`).
 - `packages/canvas/src/ui/icons/nucleo/index.ts` — a barrel re-exporting every
   component and the shared `IconProps` type.
@@ -61,7 +61,7 @@ The shared `IconProps` type is hand-authored in
 
 ## Validation
 
-The generator validates source existence, square viewBoxes, duplicate chrome
+The generator validates source existence, square viewBoxes, duplicate trim
 exports, duplicate glyph ids, custom entries with forbidden source fields,
 supported SVG tags/attributes, paint values, and transform syntax. Glyph
 conversion supports paths, circles, lines, rounded or transformed rects,

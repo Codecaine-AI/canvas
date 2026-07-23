@@ -130,7 +130,7 @@
       "id": "sticky-direct-notes",
       "type": "sticky",
       "text": "- Good For Small # of Intents",
-      "color": "white",
+      "color": "yellow",
       "parentId": "section-direct",
       "geometry": {
         "x": 160,

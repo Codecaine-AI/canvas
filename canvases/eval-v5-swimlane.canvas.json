@@ -1,0 +1,626 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v5-swimlane",
+  "title": "Eval v5 — Swimlane",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3008,
+    "height": 2032
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v5 — Swimlane",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2944,
+        "height": 1968
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-a",
+      "type": "process",
+      "text": "Submit Form",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 240,
+        "y": 384,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "lane-frontend",
+      "type": "section",
+      "text": "Frontend",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 320,
+        "width": 2720,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lane-api",
+      "type": "section",
+      "text": "API",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 656,
+        "width": 2720,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lane-workers",
+      "type": "section",
+      "text": "Workers",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 992,
+        "width": 2720,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lane-data",
+      "type": "section",
+      "text": "Data",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 1328,
+        "width": 2720,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pipeline-note",
+      "type": "sticky",
+      "text": "REQUEST PIPELINE\nA form becomes a queued job, workers process it, and the UI polls for the result.\nSolid = synchronous call or read  •  Dashed = asynchronous queue or status flow",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 96,
+        "width": 704,
+        "height": 160
+      },
+      "style": {
+        "shape": "sticky"
+      }
+    },
+    {
+      "id": "fe-pending",
+      "type": "process",
+      "text": "Show Pending",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 960,
+        "y": 384,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "fe-poll",
+      "type": "process",
+      "text": "Poll Status",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1680,
+        "y": 384,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "fe-render",
+      "type": "process",
+      "text": "Render Result",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 2640,
+        "y": 384,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "api-validate",
+      "type": "process",
+      "text": "Validate Request",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 480,
+        "y": 720,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "api-create",
+      "type": "process",
+      "text": "Create Job",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 784,
+        "y": 720,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "api-status",
+      "type": "process",
+      "text": "Status Endpoint",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 1856,
+        "y": 720,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "api-serve",
+      "type": "process",
+      "text": "Serve Response",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 2400,
+        "y": 720,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "worker-enqueue",
+      "type": "process",
+      "text": "Enqueue Job",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1152,
+        "y": 1056,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "worker-load",
+      "type": "process",
+      "text": "Load Inputs",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1456,
+        "y": 1056,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "worker-process",
+      "type": "process",
+      "text": "Process Task",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1760,
+        "y": 1088,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "worker-status",
+      "type": "process",
+      "text": "Update Status",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 2064,
+        "y": 1056,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "data-job",
+      "type": "database",
+      "text": "Job Record",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 1152,
+        "y": 1392,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "data-result",
+      "type": "database",
+      "text": "Result Store",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2400,
+        "y": 1392,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "database"
+      }
+    },
+    {
+      "id": "worker-return",
+      "type": "process",
+      "text": "Return Result",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 2400,
+        "y": 1056,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "lane-observability",
+      "type": "section",
+      "text": "Observability",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 1664,
+        "width": 2720,
+        "height": 208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "obs-trace",
+      "type": "process",
+      "text": "Trace Requests",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 784,
+        "y": 1728,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "obs-metrics",
+      "type": "process",
+      "text": "Collect Metrics",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 2560,
+        "y": 1728,
+        "width": 176,
+        "height": 80
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-submit",
+      "from": {
+        "objectId": "seed-a"
+      },
+      "to": {
+        "objectId": "api-validate"
+      },
+      "label": "submit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-accept",
+      "from": {
+        "objectId": "api-validate"
+      },
+      "to": {
+        "objectId": "api-create"
+      },
+      "label": "accept",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-payload",
+      "from": {
+        "objectId": "worker-load"
+      },
+      "to": {
+        "objectId": "worker-process"
+      },
+      "label": "payload",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-worker-status",
+      "from": {
+        "objectId": "worker-process"
+      },
+      "to": {
+        "objectId": "worker-status"
+      },
+      "label": "status",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-persist",
+      "from": {
+        "objectId": "worker-status"
+      },
+      "to": {
+        "objectId": "data-result"
+      },
+      "label": "persist",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-accepted-ui",
+      "from": {
+        "objectId": "api-create"
+      },
+      "to": {
+        "objectId": "fe-pending"
+      },
+      "label": "202",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-poll-loop",
+      "from": {
+        "objectId": "fe-pending"
+      },
+      "to": {
+        "objectId": "fe-poll"
+      },
+      "label": "poll",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-status-call",
+      "from": {
+        "objectId": "fe-poll"
+      },
+      "to": {
+        "objectId": "api-status"
+      },
+      "label": "status",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-serve",
+      "from": {
+        "objectId": "api-serve"
+      },
+      "to": {
+        "objectId": "fe-render"
+      },
+      "label": "serve",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-status-dispatch",
+      "from": {
+        "objectId": "api-status"
+      },
+      "to": {
+        "objectId": "api-serve"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-enqueue-api",
+      "from": {
+        "objectId": "api-create"
+      },
+      "to": {
+        "objectId": "worker-enqueue"
+      },
+      "label": "enqueue",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-write-record",
+      "from": {
+        "objectId": "worker-enqueue"
+      },
+      "to": {
+        "objectId": "data-job"
+      },
+      "label": "write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-read-inputs",
+      "from": {
+        "objectId": "data-job"
+      },
+      "to": {
+        "objectId": "worker-load"
+      },
+      "label": "read",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-read-return",
+      "from": {
+        "objectId": "data-result"
+      },
+      "to": {
+        "objectId": "worker-return"
+      },
+      "label": "read",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-return-serve",
+      "from": {
+        "objectId": "worker-return"
+      },
+      "to": {
+        "objectId": "api-serve"
+      },
+      "label": "result",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-trace-spans",
+      "from": {
+        "objectId": "worker-process"
+      },
+      "to": {
+        "objectId": "obs-trace"
+      },
+      "label": "spans",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-collect-metrics",
+      "from": {
+        "objectId": "api-status"
+      },
+      "to": {
+        "objectId": "obs-metrics"
+      },
+      "label": "metrics",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

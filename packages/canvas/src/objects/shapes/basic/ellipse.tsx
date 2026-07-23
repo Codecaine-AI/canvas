@@ -7,7 +7,7 @@ import type { ShapeDef } from "../shape-def";
 /**
  * Ellipse (W5, Wave A) — a true-outline SVG silhouette (an explicit stroke
  * traces the actual ellipse, not the bounding box) behind the slot text;
- * the button chrome stays fully transparent so only one outline is visible.
+ * the button trim stays fully transparent so only one outline is visible.
  */
 export const ellipseShapeDef: ShapeDef = {
   type: "ellipse",

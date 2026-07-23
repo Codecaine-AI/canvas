@@ -58,7 +58,7 @@ export type ShapesPanelProps = {
 const PANEL_WIDTH_PX = 252;
 const SHAPE_GRID_COLUMNS = 4;
 const SHAPE_BUTTON_SIZE_PX = 46;
-const PURPLE_FOCUS_RING = "#8C2EF2"; // CHROME.accentPurple
+const PURPLE_FOCUS_RING = "#8C2EF2"; // TRIM.accentPurple
 /** Violet wash behind the armed shape's grid button (accentPurple at low alpha). */
 const SELECTED_SHAPE_BG = "rgba(140, 46, 242, 0.12)";
 const PANEL_ENTER_ANIMATION_NAME = "canvas-shapes-panel-enter";

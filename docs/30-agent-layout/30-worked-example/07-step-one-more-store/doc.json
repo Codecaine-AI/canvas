@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-30-worked-example-07-step-one-more-store",
+  "title": "Step 7 — The edit: one more store",
+  "root": "b-step7-root",
+  "blocks": {
+    "b-step7-root": {
+      "id": "b-step7-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-step7-title-1",
+        "b-step7-body-2",
+        "b-step7-code-3",
+        "b-step7-canvas-4"
+      ],
+      "props": {
+        "covers": "Step 7 of the worked example: the edit the walkthrough was built for — the board grid goes 1x3 to 2x2 with a new cache cell, the lattice re-solves, and the rest of the board stays put.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "worked example",
+          "grid edit",
+          "re-solve",
+          "locality",
+          "stability"
+        ]
+      }
+    },
+    "b-step7-title-1": {
+      "id": "b-step7-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Step 7 — The edit: one more store"
+        }
+      ]
+    },
+    "b-step7-body-2": {
+      "id": "b-step7-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The edit the walkthrough was built for: the board grid goes "
+        },
+        {
+          "insert": "1x3",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "2x2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a new cache cell. The lattice re-solves around the new cell and the rest of the board stays put (R4) — the program never said where anything was, so nothing else had a coordinate to lose (R10)."
+        }
+      ]
+    },
+    "b-step7-code-3": {
+      "id": "b-step7-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|4|2\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  col 2|1\n    section 5 text=loop label=\"Runner loop\"\n      grid 1x4 gap=96\n        item 6 text=cli type=process size=M\n        item 7 text=sched type=process size=M\n        item 8 text=workers type=process size=M\n        item 9 text=match type=decision size=M\n    section 10 text=board label=\"Board — hub\"\n      grid 2x2 gap=64\n        item 11 text=epochs type=database size=M\n        item 12 text=artifacts type=database size=M\n        item 13 text=saves type=database size=M\n        item 20 text=cache type=database size=M\n  section 14 text=score label=\"Score gate\"\n    col 2|1\n      grid 3x1 gap=64\n        item 15 text=objdiff type=process size=M\n        item 16 text=qa type=process size=M\n        item 17 text=regress type=decision size=M\n      group\n        item 18 text=absorb type=pill size=S at=SW\n        item 19 text=reject type=pill size=S at=SE\n\nalign y: 6 15\nfan 17 dir=S: 18 19\n\narrows\n  6 > 7\n  7 > 8\n  8 > 9\n  9 > 15\n  15 > 16\n  16 > 17\n  17 > 18\n  17 > 19\n  9 > 8\n  13 > 15"
+        }
+      ]
+    },
+    "b-step7-canvas-4": {
+      "id": "b-step7-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/step-7.canvas.json",
+        "title": "Step 7 — The edit: one more store"
+      }
+    }
+  }
+}

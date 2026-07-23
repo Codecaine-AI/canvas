@@ -400,7 +400,7 @@ snapping.
 
 ---
 
-## 9. Selection chrome
+## 9. Selection trim
 
 ### (a) Source files
 - `widgets/edgeless-selected-rect/src/edgeless-selected-rect.ts` — selection rect + handle styles
@@ -413,7 +413,7 @@ snapping.
 **Liftable:** the constants below; `HandleDirection` = 4 corners + 4 edge midpoints; rotation via
 transparent corner hot-zones with dynamically generated SVG-data-URL cursors per angle (the
 cursor-generation function is pure and worth porting); scale-percentage badge logic.
-**Bound:** the whole Lit component tree — rebuild in React (we already render selection chrome;
+**Bound:** the whole Lit component tree — rebuild in React (we already render selection trim;
 this is a restyle to AFFiNE's constants).
 
 ### (c) Constants worth copying

@@ -1,5 +1,5 @@
 {
-  "chrome": [
+  "trim": [
     { "export": "AlertTriangleIcon", "source": "nucleo_ui/outline/ui-layout/18px_triangle-warning.svg" },
     { "export": "AlignIcon", "source": "nucleo_ui/outline/design-development/18px_align-distribute-horizontal.svg" },
     { "export": "ArrowDownIcon", "source": "nucleo_ui/outline/arrows/18px_arrow-down.svg" },

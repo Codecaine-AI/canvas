@@ -33,7 +33,7 @@ export const canvasSurfaceStyle = {
 export const SHAPE_STROKE_WIDTH_PX = 4;
 
 /**
- * Border width for an object's chrome (logical px): the FigJam universal
+ * Border width for an object's trim (logical px): the FigJam universal
  * shape stroke (SHAPE_STROKE_WIDTH_PX, 4px), overridable per object via
  * `style.strokeWidth`.
  */

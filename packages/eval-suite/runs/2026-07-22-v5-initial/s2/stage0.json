@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s2-branching-flowchart",
+  "title": "Eval Suite S2 \u2014 Branching Flowchart",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2464,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S2 \u2014 Branching Flowchart",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2400,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-start",
+      "type": "pill",
+      "text": "Order received",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 64,
+        "y": 704,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-end",
+      "type": "pill",
+      "text": "Order shipped",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1952,
+        "y": 448,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "order-valid",
+      "type": "decision",
+      "text": "Order valid?",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 480,
+        "y": 432,
+        "width": 224,
+        "height": 144
+      }
+    },
+    {
+      "id": "request-correction",
+      "type": "process",
+      "text": "Request correction",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 64,
+        "y": 448,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "charge-payment",
+      "type": "process",
+      "text": "Charge payment",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 832,
+        "y": 448,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "in-stock",
+      "type": "decision",
+      "text": "In stock?",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1184,
+        "y": 432,
+        "width": 224,
+        "height": 144
+      }
+    },
+    {
+      "id": "pick-pack",
+      "type": "process",
+      "text": "Pick & pack",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1536,
+        "y": 448,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "create-backorder",
+      "type": "process",
+      "text": "Create backorder",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1184,
+        "y": 752,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "await-restock",
+      "type": "process",
+      "text": "Await restock",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 1536,
+        "y": 960,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "order-refunded",
+      "type": "pill",
+      "text": "Order refunded",
+      "color": "red",
+      "parentId": null,
+      "geometry": {
+        "x": 832,
+        "y": 1328,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "refund-note",
+      "type": "sticky",
+      "text": "backorders rejoin the line \u2014\na refund only happens when the card declines\nor the restock window lapses.",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 512,
+        "y": 1248,
+        "width": 288,
+        "height": 208
+      }
+    },
+    {
+      "id": "resubmitted-arrow",
+      "type": "arrow-shape",
+      "text": "resubmitted",
+      "color": "gray",
+      "parentId": null,
+      "geometry": {
+        "x": 224,
+        "y": 384,
+        "width": 256,
+        "height": 48
+      },
+      "direction": "right"
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-new-order",
+      "from": {
+        "objectId": "seed-start"
+      },
+      "to": {
+        "objectId": "order-valid"
+      },
+      "label": "new order",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-valid-yes",
+      "from": {
+        "objectId": "order-valid"
+      },
+      "to": {
+        "objectId": "charge-payment"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-valid-no",
+      "from": {
+        "objectId": "order-valid"
+      },
+      "to": {
+        "objectId": "request-correction"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-charged",
+      "from": {
+        "objectId": "charge-payment"
+      },
+      "to": {
+        "objectId": "in-stock"
+      },
+      "label": "charged",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-charge-declined",
+      "from": {
+        "objectId": "charge-payment"
+      },
+      "to": {
+        "objectId": "order-refunded"
+      },
+      "label": "charge declined",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-stock-yes",
+      "from": {
+        "objectId": "in-stock"
+      },
+      "to": {
+        "objectId": "pick-pack"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-stock-no",
+      "from": {
+        "objectId": "in-stock"
+      },
+      "to": {
+        "objectId": "create-backorder"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-queued",
+      "from": {
+        "objectId": "create-backorder"
+      },
+      "to": {
+        "objectId": "await-restock"
+      },
+      "label": "queued",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-stock-arrived",
+      "from": {
+        "objectId": "await-restock"
+      },
+      "to": {
+        "objectId": "pick-pack"
+      },
+      "label": "stock arrived",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-restock-expired",
+      "from": {
+        "objectId": "await-restock"
+      },
+      "to": {
+        "objectId": "order-refunded"
+      },
+      "label": "restock window expired",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "edge-handed-carrier",
+      "from": {
+        "objectId": "pick-pack"
+      },
+      "to": {
+        "objectId": "seed-end"
+      },
+      "label": "handed to carrier",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    }
+  ],
+  "annotations": []
+}

@@ -1,0 +1,1338 @@
+{
+  "schemaVersion": 1,
+  "id": "intent-classification-2",
+  "title": "Intent Classifier Example: Support Ticket Classification",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 4448,
+    "height": 1888
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Intent Classifier Example: Support Ticket Classification",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 4384,
+        "height": 1824
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "node-incoming-message",
+      "type": "rectangle",
+      "text": "Incoming Message",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1984,
+        "y": 112,
+        "width": 288,
+        "height": 96
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "node-fetch-relevant-data",
+      "type": "trapezoid",
+      "text": "Fetch Relavant Data",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1984,
+        "y": 304,
+        "width": 288,
+        "height": 128
+      },
+      "style": {
+        "shape": "trapezoid"
+      }
+    },
+    {
+      "id": "doc-past-messages",
+      "type": "page-corner",
+      "text": "Past Messages in Chain (And Message Classifications)",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2464,
+        "y": 112,
+        "width": 448,
+        "height": 160
+      },
+      "style": {
+        "shape": "page-corner"
+      }
+    },
+    {
+      "id": "doc-similar-past-tickets",
+      "type": "page-corner",
+      "text": "Similar Past Tickets",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2464,
+        "y": 304,
+        "width": 448,
+        "height": 128
+      },
+      "style": {
+        "shape": "page-corner"
+      }
+    },
+    {
+      "id": "doc-other-context",
+      "type": "page-corner",
+      "text": "Other Context",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2464,
+        "y": 464,
+        "width": 448,
+        "height": 128
+      },
+      "style": {
+        "shape": "page-corner"
+      }
+    },
+    {
+      "id": "section-direct",
+      "type": "section",
+      "text": "Direct Intent Classification",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 768,
+        "width": 1680,
+        "height": 1024
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sticky-direct-notes",
+      "type": "sticky",
+      "text": "- Good For Small # of Intents",
+      "color": "white",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 160,
+        "y": 880,
+        "width": 384,
+        "height": 112
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "node-classify-intent-direct",
+      "type": "pentagon",
+      "text": "Classify Intent",
+      "color": "blue",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 976,
+        "y": 864,
+        "width": 256,
+        "height": 144
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "doc-intent-defs-direct",
+      "type": "page-corner",
+      "text": "Intent Definitions and Examples",
+      "color": "yellow",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 1328,
+        "y": 864,
+        "width": 384,
+        "height": 144
+      },
+      "style": {
+        "shape": "page-corner"
+      }
+    },
+    {
+      "id": "intent-refund-request",
+      "type": "triangle",
+      "text": "Refund Request",
+      "color": "violet",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 256,
+        "y": 1200,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "intent-fetch-order",
+      "type": "triangle",
+      "text": "Fetch Order",
+      "color": "violet",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 640,
+        "y": 1200,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "intent-cancel-order",
+      "type": "triangle",
+      "text": "Cancel Order",
+      "color": "violet",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 1024,
+        "y": 1200,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "intent-rest-of-intents",
+      "type": "triangle",
+      "text": "Rest of Intents",
+      "color": "violet",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 1408,
+        "y": 1200,
+        "width": 160,
+        "height": 160
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "handler-refund",
+      "type": "rectangle",
+      "text": "Custom Handler",
+      "color": "teal",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 224,
+        "y": 1568,
+        "width": 224,
+        "height": 128
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "handler-rest",
+      "type": "rectangle",
+      "text": "Custom Handler",
+      "color": "teal",
+      "parentId": "section-direct",
+      "geometry": {
+        "x": 1376,
+        "y": 1568,
+        "width": 224,
+        "height": 128
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "section-layered",
+      "type": "section",
+      "text": "Layered Intent",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1872,
+        "y": 768,
+        "width": 2480,
+        "height": 1024
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sticky-layered-notes",
+      "type": "sticky",
+      "text": "- Good For Larger # Intents\n- Each layer adds latency",
+      "color": "white",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 1936,
+        "y": 864,
+        "width": 416,
+        "height": 144
+      },
+      "style": {
+        "shape": "note"
+      },
+      "author": "ford"
+    },
+    {
+      "id": "node-classify-intent-layered",
+      "type": "pentagon",
+      "text": "Classify Intent",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3040,
+        "y": 864,
+        "width": 256,
+        "height": 144
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "doc-intent-defs-layered",
+      "type": "page-corner",
+      "text": "Intent Definitions and Examples",
+      "color": "yellow",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3392,
+        "y": 864,
+        "width": 384,
+        "height": 144
+      },
+      "style": {
+        "shape": "page-corner"
+      }
+    },
+    {
+      "id": "layer1-refunds",
+      "type": "pentagon",
+      "text": "Refunds",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2112,
+        "y": 1200,
+        "width": 192,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "layer1-orders",
+      "type": "pentagon",
+      "text": "Orders",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2752,
+        "y": 1200,
+        "width": 192,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "layer1-subscriptions",
+      "type": "pentagon",
+      "text": "Subscriptions",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3392,
+        "y": 1200,
+        "width": 192,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "layer1-intent-n",
+      "type": "pentagon",
+      "text": "Intent N",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 4032,
+        "y": 1200,
+        "width": 192,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "layer2-new-orders",
+      "type": "pentagon",
+      "text": "New Orders",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2528,
+        "y": 1424,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "layer2-existing-orders",
+      "type": "pentagon",
+      "text": "Existing Orders",
+      "color": "blue",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2944,
+        "y": 1424,
+        "width": 224,
+        "height": 112
+      },
+      "style": {
+        "shape": "pentagon"
+      }
+    },
+    {
+      "id": "action-refunds-1",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2048,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-refunds-2",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2240,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-subscriptions-1",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3328,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-subscriptions-2",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3520,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-intent-n-1",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3968,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-intent-n-2",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 4160,
+        "y": 1424,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-new-orders-1",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2480,
+        "y": 1616,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-new-orders-2",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2672,
+        "y": 1616,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-existing-orders-1",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 2896,
+        "y": 1616,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    },
+    {
+      "id": "action-existing-orders-2",
+      "type": "triangle",
+      "text": "Action",
+      "color": "violet",
+      "parentId": "section-layered",
+      "geometry": {
+        "x": 3088,
+        "y": 1616,
+        "width": 128,
+        "height": 112
+      },
+      "style": {
+        "shape": "triangle"
+      },
+      "direction": "down"
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-incoming-to-fetch",
+      "from": {
+        "objectId": "node-incoming-message",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "gray"
+    },
+    {
+      "id": "conn-past-messages-to-fetch",
+      "from": {
+        "objectId": "doc-past-messages",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green",
+      "waypoints": [
+        [
+          2368,
+          192
+        ],
+        [
+          2368,
+          368
+        ]
+      ]
+    },
+    {
+      "id": "conn-similar-tickets-to-fetch",
+      "from": {
+        "objectId": "doc-similar-past-tickets",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-other-context-to-fetch",
+      "from": {
+        "objectId": "doc-other-context",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green",
+      "waypoints": [
+        [
+          2368,
+          528
+        ],
+        [
+          2368,
+          368
+        ]
+      ]
+    },
+    {
+      "id": "conn-fetch-to-classify-direct",
+      "from": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "red",
+      "waypoints": [
+        [
+          2128,
+          688
+        ],
+        [
+          1104,
+          688
+        ]
+      ]
+    },
+    {
+      "id": "conn-fetch-to-classify-layered",
+      "from": {
+        "objectId": "node-fetch-relevant-data",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "red",
+      "waypoints": [
+        [
+          2128,
+          688
+        ],
+        [
+          3168,
+          688
+        ]
+      ]
+    },
+    {
+      "id": "conn-defs-to-classify-direct",
+      "from": {
+        "objectId": "doc-intent-defs-direct",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-classify-direct-to-refund-request",
+      "from": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intent-refund-request",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          1104,
+          1136
+        ],
+        [
+          336,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-classify-direct-to-fetch-order",
+      "from": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intent-fetch-order",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          1104,
+          1136
+        ],
+        [
+          720,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-classify-direct-to-cancel-order",
+      "from": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intent-cancel-order",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue"
+    },
+    {
+      "id": "conn-classify-direct-to-rest-of-intents",
+      "from": {
+        "objectId": "node-classify-intent-direct",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intent-rest-of-intents",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          1104,
+          1136
+        ],
+        [
+          1488,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-cancel-order-more-intents",
+      "from": {
+        "objectId": "intent-cancel-order",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "intent-rest-of-intents",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "none",
+      "role": "ellipsis",
+      "color": "gray"
+    },
+    {
+      "id": "conn-refund-request-to-handler",
+      "from": {
+        "objectId": "intent-refund-request",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "handler-refund",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "violet"
+    },
+    {
+      "id": "conn-rest-of-intents-to-handler",
+      "from": {
+        "objectId": "intent-rest-of-intents",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "handler-rest",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "flow",
+      "color": "violet"
+    },
+    {
+      "id": "conn-handlers-ellipsis",
+      "from": {
+        "objectId": "handler-refund",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "handler-rest",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "none",
+      "role": "ellipsis",
+      "color": "teal"
+    },
+    {
+      "id": "conn-defs-to-classify-layered",
+      "from": {
+        "objectId": "doc-intent-defs-layered",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "input",
+      "color": "green"
+    },
+    {
+      "id": "conn-classify-layered-to-refunds",
+      "from": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer1-refunds",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3168,
+          1136
+        ],
+        [
+          2208,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-classify-layered-to-orders",
+      "from": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer1-orders",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3168,
+          1136
+        ],
+        [
+          2848,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-classify-layered-to-subscriptions",
+      "from": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer1-subscriptions",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3168,
+          1136
+        ],
+        [
+          3488,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-classify-layered-to-intent-n",
+      "from": {
+        "objectId": "node-classify-intent-layered",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer1-intent-n",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3168,
+          1136
+        ],
+        [
+          4128,
+          1136
+        ]
+      ]
+    },
+    {
+      "id": "conn-subscriptions-intent-n-ellipsis",
+      "from": {
+        "objectId": "layer1-subscriptions",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "layer1-intent-n",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "none",
+      "role": "ellipsis",
+      "color": "gray"
+    },
+    {
+      "id": "conn-refunds-to-action-1",
+      "from": {
+        "objectId": "layer1-refunds",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-refunds-1",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2208,
+          1376
+        ],
+        [
+          2112,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-refunds-to-action-2",
+      "from": {
+        "objectId": "layer1-refunds",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-refunds-2",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2208,
+          1376
+        ],
+        [
+          2304,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-orders-to-new-orders",
+      "from": {
+        "objectId": "layer1-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer2-new-orders",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2848,
+          1376
+        ],
+        [
+          2640,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-orders-to-existing-orders",
+      "from": {
+        "objectId": "layer1-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "layer2-existing-orders",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2848,
+          1376
+        ],
+        [
+          3056,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-new-orders-to-action-1",
+      "from": {
+        "objectId": "layer2-new-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-new-orders-1",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2640,
+          1568
+        ],
+        [
+          2544,
+          1568
+        ]
+      ]
+    },
+    {
+      "id": "conn-new-orders-to-action-2",
+      "from": {
+        "objectId": "layer2-new-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-new-orders-2",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          2640,
+          1568
+        ],
+        [
+          2736,
+          1568
+        ]
+      ]
+    },
+    {
+      "id": "conn-existing-orders-to-action-1",
+      "from": {
+        "objectId": "layer2-existing-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-existing-orders-1",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3056,
+          1568
+        ],
+        [
+          2960,
+          1568
+        ]
+      ]
+    },
+    {
+      "id": "conn-existing-orders-to-action-2",
+      "from": {
+        "objectId": "layer2-existing-orders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-existing-orders-2",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3056,
+          1568
+        ],
+        [
+          3152,
+          1568
+        ]
+      ]
+    },
+    {
+      "id": "conn-subscriptions-to-action-1",
+      "from": {
+        "objectId": "layer1-subscriptions",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-subscriptions-1",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3488,
+          1376
+        ],
+        [
+          3392,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-subscriptions-to-action-2",
+      "from": {
+        "objectId": "layer1-subscriptions",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-subscriptions-2",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          3488,
+          1376
+        ],
+        [
+          3584,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-intent-n-to-action-1",
+      "from": {
+        "objectId": "layer1-intent-n",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-intent-n-1",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          4128,
+          1376
+        ],
+        [
+          4032,
+          1376
+        ]
+      ]
+    },
+    {
+      "id": "conn-intent-n-to-action-2",
+      "from": {
+        "objectId": "layer1-intent-n",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "action-intent-n-2",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "role": "decision",
+      "color": "blue",
+      "waypoints": [
+        [
+          4128,
+          1376
+        ],
+        [
+          4224,
+          1376
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

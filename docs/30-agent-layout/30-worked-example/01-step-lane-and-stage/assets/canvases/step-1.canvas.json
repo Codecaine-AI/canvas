@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-30-worked-example-01-step-lane-and-stage-step-1",
+  "title": "Step 1 (step lane and stage)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "config",
+      "type": "section",
+      "text": "Config",
+      "label": "Config",
+      "title": "Config",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 176,
+        "height": 512
+      }
+    },
+    {
+      "id": "checkout",
+      "type": "pill",
+      "text": "checkout",
+      "label": "checkout",
+      "geometry": {
+        "x": 29,
+        "y": 167,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "goals",
+      "type": "pill",
+      "text": "goals",
+      "label": "goals",
+      "geometry": {
+        "x": 29,
+        "y": 269,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "secrets",
+      "type": "pill",
+      "text": "secrets",
+      "label": "secrets",
+      "geometry": {
+        "x": 29,
+        "y": 372,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "stage",
+      "type": "section",
+      "text": "Stage",
+      "label": "Stage",
+      "title": "Stage",
+      "tint": "gray",
+      "geometry": {
+        "x": 304,
+        "y": 0,
+        "width": 720,
+        "height": 576
+      }
+    },
+    {
+      "id": "placeholder",
+      "type": "sticky",
+      "text": "placeholder",
+      "label": "placeholder",
+      "geometry": {
+        "x": 472,
+        "y": 176,
+        "width": 384,
+        "height": 288
+      }
+    }
+  ],
+  "connections": []
+}

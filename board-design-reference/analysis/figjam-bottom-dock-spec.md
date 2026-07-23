@@ -1,7 +1,7 @@
 # FigJam Bottom Dock — Implementation Spec
 
 > Pixel-measured from `analysis/figjam-frames/` (1476×1080, fj-001–089). Companion to
-> `figjam-chrome-catalog.md` — this file is the higher-precision source for the bottom dock
+> `figjam-trim-catalog.md` — this file is the higher-precision source for the bottom dock
 > specifically. Estimate/guess items are flagged inline.
 
 ## Architectural corrections vs. earlier assumptions
@@ -20,7 +20,7 @@
   sampling (left edge x=515 at y=1034/1068 → x=509 at y=1042–1058).
 - Background **#FDFDFD** mid-bar → #FFFFFF near bottom (sampled).
 - Shadow: soft ~2px penumbra, ~10–30 RGB-units darkening at y≈1070–1071 (the darker band
-  at y≈1074+ is browser chrome, not the dock's shadow). Estimate: small-blur low-opacity
+  at y≈1074+ is browser trim, not the dock's shadow). Estimate: small-blur low-opacity
   box-shadow.
 - Buttons are "naked" glyphs on the shared pill (no per-button boxes at rest), glyph color
   ≈ RGB(45–60) charcoal. Exception: the "+" button has a persistent light-gray circular

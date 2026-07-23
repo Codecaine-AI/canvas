@@ -1,11 +1,11 @@
 # Editor components (FigJam-parity page furniture)
 
 Built per `board-design-reference/analysis/figjam-bottom-dock-spec.md`,
-`figjam-chrome-catalog.md`, `figjam-style-tokens.json`/`figjam-style-spec.md`.
+`figjam-trim-catalog.md`, `figjam-style-tokens.json`/`figjam-style-spec.md`.
 This directory holds what shows up on the page around the canvas — the
 top bar, the bottom dock, the shapes panel, the zoom pill, the picker
 popovers, the catalog preview SVGs, and the editor style constants. It
-started as a standalone component library (W2-chrome, the old `src/chrome/`);
+started as a standalone component library (W2-trim, the old `src/trim/`);
 since W3 it **is** wired in: `stage/editor/InteractiveCanvasEditor.tsx` composes
 these components directly.
 
@@ -29,14 +29,14 @@ INTERFACE icons only.
 | `ShapeSearchPopover.tsx` | `ShapeSearchPopover` | Compact dark "Search for a shape" popover (Panel A), opened by the shape-swap flyout. |
 | `ColorPicker.tsx` | `ColorPicker` | THE one 10-pick color picker (P1, D12): the closed hue roster, identical previews for every kind, current-color ring, no custom color. |
 | `shape-previews.tsx` | `shapeCatalogPreview()` | Maps `objects/catalog.ts` entries → 20x20 preview SVGs (polygon generators / hand-drawn minis / glyph data). |
-| `editor-style.ts` | `EDITOR_STYLE` | Editor interface style constants (né theme/tokens' `CHROME`). |
+| `editor-style.ts` | `EDITOR_STYLE` | Editor interface style constants (né theme/tokens' `TRIM`). |
 | `TopBar.tsx` | `TopBar` | Top bar: board title (optionally inline-editable), undo/reset history controls, save/cancel, host-provided leading/action slots. |
 | `ZoomControls.tsx` | `ZoomControls` | Bottom-right zoom pill. |
 
 Shared primitives these components draw on live in `src/ui/`:
 `ui/Tooltip.tsx` (dark hover-label used by every component above) and
 `ui/icons/` — interface icons only: `custom-icons`, and the generated
-`nucleo/` chrome components (+ vendored SVG sources). The canvas-object
+`nucleo/` trim components (+ vendored SVG sources). The canvas-object
 glyph registry is NOT interface iconography; it lives with the icon def at
 `objects/shapes/icon/icon-glyphs.ts`.
 
@@ -71,7 +71,7 @@ knowledge of which selection kind produced the controls it's given.
 
 The old variant-keyed control table (`CONTEXT_TOOLBAR_REGISTRY`) and its
 legacy `variant` prop were **deleted** once the registry migration landed
-(the `@codecaine-ai/canvas/chrome` subpath export they once served had no
+(the `@codecaine-ai/canvas/trim` subpath export they once served had no
 real external consumer). `controls` is now required; control sets belong on
 an `ObjectDef.toolbar`.
 

@@ -1,0 +1,547 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-00-overview",
+  "title": "The layout rulebook: corpus rules R1-R10",
+  "root": "b-rulebook-root",
+  "blocks": {
+    "b-rulebook-root": {
+      "id": "b-rulebook-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-rulebook-title-1",
+        "b-rulebook-intro-2",
+        "b-rulebook-naming-3",
+        "b-rulebook-rules-heading-4",
+        "b-rulebook-idx-r1-5",
+        "b-rulebook-idx-r2-6",
+        "b-rulebook-idx-r3-7",
+        "b-rulebook-idx-r4-8",
+        "b-rulebook-idx-r5-9",
+        "b-rulebook-idx-r6-10",
+        "b-rulebook-idx-r7-11",
+        "b-rulebook-idx-r8-12",
+        "b-rulebook-idx-r9-13",
+        "b-rulebook-idx-r10-14",
+        "b-rulebook-accounting-heading-15",
+        "b-rulebook-accounting-body-16",
+        "b-rulebook-accounting-code-17",
+        "b-rulebook-accounting-results-18",
+        "b-rulebook-lab-heading-19",
+        "b-rulebook-lab-body-20"
+      ],
+      "props": {
+        "covers": "Corpus-derived layout rules R1-R10 for the sketch compiler: the enforcement model (fitter detects, language declares, expander reproduces), a linked index of the ten rules, the decision-accounting method, and what stayed in the lab.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "16px grid",
+          "spacing ladder",
+          "section trim",
+          "grid lattice",
+          "align register",
+          "fan",
+          "hug lane",
+          "size classes",
+          "feedback corridors",
+          "decision accounting"
+        ]
+      }
+    },
+    "b-rulebook-title-1": {
+      "id": "b-rulebook-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The layout rulebook: corpus rules R1-R10"
+        }
+      ]
+    },
+    "b-rulebook-intro-2": {
+      "id": "b-rulebook-intro-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "These rules were mined from the eight polished boards in "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — agent-flows-2, bubba-voice, claude-code-researcher, gc-decomp-harness, ink-diagrams, intent-classification-1 and -2, and v2-flow. Each rule is written as an enforceable compiler constraint: the fitter detects it ("
+        },
+        {
+          "insert": "fitSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "fitSketch"
+            }
+          }
+        },
+        {
+          "insert": "), the language declares it ("
+        },
+        {
+          "insert": "serialize.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/serialize.ts"
+            }
+          }
+        },
+        {
+          "insert": "), and the expander reproduces it ("
+        },
+        {
+          "insert": "expandSketch",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "expandSketch"
+            }
+          }
+        },
+        {
+          "insert": "). The constants cited are the ones the expander ships with; corpus evidence is cited inline."
+        }
+      ]
+    },
+    "b-rulebook-naming-3": {
+      "id": "b-rulebook-naming-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One naming note: the rulebook predates the v3 spellings. What R5 calls a tier is spelled "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in the current language, and R7's margin lanes are declared with the "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attribute. The fitter's internals keep the older names ("
+        },
+        {
+          "insert": "detectTiers",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "detectTiers"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "laneHugFor",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "laneHugFor"
+            }
+          }
+        },
+        {
+          "insert": "); the rule docs use the v3 spellings."
+        }
+      ]
+    },
+    "b-rulebook-rules-heading-4": {
+      "id": "b-rulebook-rules-heading-4",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The ten rules"
+        }
+      ]
+    },
+    "b-rulebook-idx-r1-5": {
+      "id": "b-rulebook-idx-r1-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R1 — The 16px grid",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/01-r1-the-16px-grid",
+              "label": "R1 — The 16px grid"
+            }
+          }
+        },
+        {
+          "insert": " — every emitted coordinate, extent, corridor width, and pitch snaps to 16px."
+        }
+      ]
+    },
+    "b-rulebook-idx-r2-6": {
+      "id": "b-rulebook-idx-r2-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R2 — The spacing ladder",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/02-r2-the-spacing-ladder",
+              "label": "R2 — The spacing ladder"
+            }
+          }
+        },
+        {
+          "insert": " — sibling gaps come from the closed ladder {0, 32, 64, 96}; clusters separate at 128 and up."
+        }
+      ]
+    },
+    "b-rulebook-idx-r3-7": {
+      "id": "b-rulebook-idx-r3-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R3 — Section trim",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/03-r3-section-trim",
+              "label": "R3 — Section trim"
+            }
+          }
+        },
+        {
+          "insert": " — the 64px header band, 48px padding, and content hugging."
+        }
+      ]
+    },
+    "b-rulebook-idx-r4-8": {
+      "id": "b-rulebook-idx-r4-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R4 — grid: repeated-cell tables",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/04-r4-grid",
+              "label": "R4 — grid: repeated-cell tables"
+            }
+          }
+        },
+        {
+          "insert": " — four or more same-size items become an exact lattice that anchors everything placed later."
+        }
+      ]
+    },
+    "b-rulebook-idx-r5-9": {
+      "id": "b-rulebook-idx-r5-9",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R5 — align: cross-branch registers",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/05-r5-align",
+              "label": "R5 — align: cross-branch registers"
+            }
+          }
+        },
+        {
+          "insert": " — peers pinned to one shared centerline, even across section boundaries."
+        }
+      ]
+    },
+    "b-rulebook-idx-r6-10": {
+      "id": "b-rulebook-idx-r6-10",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R6 — fan: hub over children",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/06-r6-fan",
+              "label": "R6 — fan: hub over children"
+            }
+          }
+        },
+        {
+          "insert": " — the hub centers over an evenly pitched child register with at least 64px clearance."
+        }
+      ]
+    },
+    "b-rulebook-idx-r7-11": {
+      "id": "b-rulebook-idx-r7-11",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R7 — hug: margin rails that never stretch",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/07-r7-hug",
+              "label": "R7 — hug: margin rails that never stretch"
+            }
+          }
+        },
+        {
+          "insert": " — pinned lanes keep their natural content size, registered in a corner of their band."
+        }
+      ]
+    },
+    "b-rulebook-idx-r8-12": {
+      "id": "b-rulebook-idx-r8-12",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R8 — Size semantics",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/08-r8-size-semantics",
+              "label": "R8 — Size semantics"
+            }
+          }
+        },
+        {
+          "insert": " — three sizes only: S at 0.72x, M at 1x, L at 1.35x; one size per lattice."
+        }
+      ]
+    },
+    "b-rulebook-idx-r9-13": {
+      "id": "b-rulebook-idx-r9-13",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R9 — Feedback edges and detours",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/09-r9-feedback-edges",
+              "label": "R9 — Feedback edges and detours"
+            }
+          }
+        },
+        {
+          "insert": " — feedback exits toward its return corridor and detours on ladder offsets, never through a box."
+        }
+      ]
+    },
+    "b-rulebook-idx-r10-14": {
+      "id": "b-rulebook-idx-r10-14",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "R10 — What the language refuses to say",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/10-r10-what-the-language-refuses-to-say",
+              "label": "R10 — What the language refuses to say"
+            }
+          }
+        },
+        {
+          "insert": " — no raw coordinates, and the one known blind spot: cross-column interleaving finer than the ladder."
+        }
+      ]
+    },
+    "b-rulebook-accounting-heading-15": {
+      "id": "b-rulebook-accounting-heading-15",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decision accounting"
+        }
+      ]
+    },
+    "b-rulebook-accounting-body-16": {
+      "id": "b-rulebook-accounting-body-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The lab's metrics panel counts spatial decisions on both sides of the round trip ("
+        },
+        {
+          "insert": "countSketchDecisions",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/metrics.ts",
+              "symbol": "countSketchDecisions"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "countRawDecisions",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/metrics.ts",
+              "symbol": "countRawDecisions"
+            }
+          }
+        },
+        {
+          "insert": "):"
+        }
+      ]
+    },
+    "b-rulebook-accounting-code-17": {
+      "id": "b-rulebook-accounting-code-17",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "DSL:\n  split weights + lane hugs\n  one compass slot + one size class per leaf item\n  grid dims + gap + one size class per cell\n  one axis/direction per align/fan + one per referenced member\nraw:\n  4 per object geometry\n  2 per connector waypoint\n  1 per explicit endpoint anchor"
+        }
+      ]
+    },
+    "b-rulebook-accounting-results-18": {
+      "id": "b-rulebook-accounting-results-18",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Across the corpus at DSL v2: 76-177 DSL decisions against 166-324 raw (mean ratio about 0.46), at 92.9% mean relation and 98.8% mean adjacency preservation."
+        }
+      ]
+    },
+    "b-rulebook-lab-heading-19": {
+      "id": "b-rulebook-lab-heading-19",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "What stayed out of the rulebook"
+        }
+      ]
+    },
+    "b-rulebook-lab-body-20": {
+      "id": "b-rulebook-lab-body-20",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The lab's rule cards drew hand-built before/after mini-scenes from the real constants; the lab is deleted now, and several of those points are demonstrated live by the boards in the "
+        },
+        {
+          "insert": "layout-language reference",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/00-overview",
+              "label": "layout-language reference"
+            }
+          }
+        },
+        {
+          "insert": ". Candidate rules R11-R22 were unreviewed and deliberately not part of this rulebook — they remain in git history (the deleted "
+        },
+        {
+          "insert": "apps/layout-lab",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") pending review."
+        }
+      ]
+    }
+  }
+}

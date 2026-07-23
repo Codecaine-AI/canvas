@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Screen-space selection outline and resize-handle chrome.
+ * Screen-space selection outline and resize-handle trim.
  */
 import {
   RESIZE_HANDLES,
@@ -32,7 +32,7 @@ const CORNER_POSITIONS: Record<string, { fx: number; fy: number }> = {
 };
 
 /**
- * Screen-space selection chrome rendered in CanvasStage's overlay slot.
+ * Screen-space selection trim rendered in CanvasStage's overlay slot.
  *
  * Single selection: outline, visible corner squares at a fixed screen size
  * (independent of zoom), and invisible full-edge grab strips for single-axis
@@ -69,14 +69,14 @@ export function SelectionBox({
 
   const isSingle = objects.length === 1;
   const objectId = objects[0]!.id;
-  // FigJam-style chrome: visible squares at the corners only, plus invisible
+  // FigJam-style trim: visible squares at the corners only, plus invisible
   // full-length grab strips along each border edge for single-axis resizing.
   // Both carry data-canvas-handle, which is what hit-testing reads. Defs
   // registered with handles: "corners" (sections) opt out of the edge strips.
   const handleMode = isSingle ? objectDefForType(objects[0]!.type)?.handles : undefined;
   const withEdgeStrips = handleMode !== "corners";
   // Border centerline in padding-box coordinates (the container owns the
-  // border): pulls chrome back so it sits centered on the drawn outline.
+  // border): pulls trim back so it sits centered on the drawn outline.
   const centerline = (fraction: number, size: number) =>
     fraction * (size - SELECTION_BORDER_WIDTH) - SELECTION_BORDER_WIDTH / 2;
   const edgeStripRect = (handle: ResizeHandle) => {

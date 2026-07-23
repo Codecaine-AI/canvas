@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-04-r4-grid",
+  "title": "R4 — grid: repeated-cell tables",
+  "root": "b-r4-root",
+  "blocks": {
+    "b-r4-root": {
+      "id": "b-r4-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r4-title-1",
+        "b-r4-card-2",
+        "b-r4-detect-3",
+        "b-r4-expand-4",
+        "b-r4-evidence-5"
+      ],
+      "props": {
+        "covers": "Four or more same-size items become a grid lattice: pixel-identical cells, one shared ladder gap, row and column identity preserved — and the lattice anchors everything placed later.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "grid lattice",
+          "repeated cells",
+          "template members",
+          "detectGrid"
+        ]
+      }
+    },
+    "b-r4-title-1": {
+      "id": "b-r4-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R4 — grid: repeated-cell tables"
+        }
+      ]
+    },
+    "b-r4-card-2": {
+      "id": "b-r4-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Same-size items become a lattice"
+      },
+      "text": [
+        {
+          "insert": "Four or more same-size items become a grid: pixel-identical cells, one shared gap from the ladder, row and column identity preserved — and the lattice anchors everything placed later."
+        }
+      ]
+    },
+    "b-r4-detect-3": {
+      "id": "b-r4-detect-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Detect:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " at least four same-size items ("
+        },
+        {
+          "insert": "GRID_SIZE_TOLERANCE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "GRID_SIZE_TOLERANCE"
+            }
+          }
+        },
+        {
+          "insert": " = 2px) occupying a complete row/column lattice with uniform pitch (registers within "
+        },
+        {
+          "insert": "GRID_REGISTER_TOLERANCE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "GRID_REGISTER_TOLERANCE"
+            }
+          }
+        },
+        {
+          "insert": " = 8px) — or three for a single row or column ("
+        },
+        {
+          "insert": "detectGrid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/fit.ts",
+              "symbol": "detectGrid"
+            }
+          }
+        },
+        {
+          "insert": "). "
+        },
+        {
+          "insert": "Spell:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "grid RxC gap=0|32|64|96",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", cells row-major."
+        }
+      ]
+    },
+    "b-r4-expand-4": {
+      "id": "b-r4-expand-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Expand:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " an exact lattice — one shared cell extent, one ladder gap, column and row identity preserved. Template members are pixel-identical in the corpus: every cell in ink's 3x4 table is exactly 288x80, and gc's five config pills are exactly 288x64, so the expander gives all cells one extent and one scale and the registers survive exactly. Grid cells are immovable afterwards — no align shift, fan pitch, or overlap push may move a lattice cell; the lattice anchors those constraints instead."
+        }
+      ]
+    },
+    "b-r4-evidence-5": {
+      "id": "b-r4-evidence-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: "
+        },
+        {
+          "insert": "ink-diagrams",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "canvases/ink-diagrams.canvas.json"
+            }
+          }
+        },
+        {
+          "insert": "' 3x4 flush table (the single largest fidelity loss in DSL v1 — 25% of its adjacency); gc's 5x1 gap=32 pills, 1x3 gap=64 db row, and 3x1 gap=64 PR stack; v2's 4x1 memory stack; the researcher, intent-1, and agent-flows process chains. The example-grid board in the "
+        },
+        {
+          "insert": "grid reference",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/10-language/50-grid",
+              "label": "grid"
+            }
+          }
+        },
+        {
+          "insert": " shows the lattice live."
+        }
+      ]
+    }
+  }
+}

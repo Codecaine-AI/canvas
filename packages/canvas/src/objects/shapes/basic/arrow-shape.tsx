@@ -77,7 +77,7 @@ export const arrowShapeShapeDef: ShapeDef = {
   css: `
         /* W2/W4 — arrow-shape: the SVG silhouette (interactive-canvas-arrow-
            shape-silhouette) paints the full 7-point chevron (fill + stroke),
-           so the button chrome stays fully transparent — one outline only. */
+           so the button trim stays fully transparent — one outline only. */
         .interactive-canvas-object-arrow-shape {
           border: none;
           border-radius: ${ARROW_SHAPE_GEOMETRY.bodyCornerRadiusPx}px;

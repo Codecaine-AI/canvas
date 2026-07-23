@@ -2,7 +2,7 @@
 
 /*
  * Tailwind v4 auto-detection does not reliably scan the engine package's
- * sources from here, so name them explicitly — the editor chrome's
+ * sources from here, so name them explicitly — the editor trim's
  * positioning/sizing classes live in ../../canvas/src and vanish from the
  * build without this.
  */

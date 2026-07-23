@@ -8,12 +8,12 @@ import { MinusIcon, PlusIcon } from "../../../ui/icons";
 /**
  * ZoomControls — bottom-right zoom pill (matches the dock's white styling).
  *
- * Ground truth: figjam-chrome-catalog.md section 8 / figjam-bottom-dock-spec
+ * Ground truth: figjam-trim-catalog.md section 8 / figjam-bottom-dock-spec
  * both describe a smaller light-gray pill at bottom-right containing ONLY
  * "-"/"+" with NO percentage readout observed in any frame (fj-001,
  * ~x=1330-1410, y=1045-1075). The task brief asks for "-, %, +" — we render
  * the percentage as an optional slot (shown when `zoomPercent` is supplied)
- * since it's genuinely useful chrome, but keep it easy to omit for strict
+ * since it's genuinely useful trim, but keep it easy to omit for strict
  * frame-parity if W3 decides to match the recording exactly with no
  * percentage readout.
  */

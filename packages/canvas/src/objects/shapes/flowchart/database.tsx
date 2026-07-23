@@ -5,7 +5,7 @@ import type { ShapeDef } from "../shape-def";
 
 /**
  * Database — a cylinder silhouette (lid ellipse + body path) drawn via inline
- * SVG behind the slot text; the button chrome stays fully transparent so only
+ * SVG behind the slot text; the button trim stays fully transparent so only
  * one outline is visible. Unlike icon glyph shapes, database keeps the
  * older tone-driven pastel-pair styling (colors.fill/colors.border) rather
  * than a fixed icon-color pair — it was not in the W2 restyle scope.
@@ -73,7 +73,7 @@ export const databaseShapeDef: ShapeDef = {
   css: `
         .interactive-canvas-object-database {
           /* The inline SVG silhouette paints the fill/border; the button
-             chrome stays fully transparent so only one outline is visible. */
+             trim stays fully transparent so only one outline is visible. */
           border: none;
           border-radius: 0;
           background: transparent !important;

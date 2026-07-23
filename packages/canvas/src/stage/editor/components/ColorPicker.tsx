@@ -15,7 +15,7 @@ import { EDITOR_STYLE } from "./editor-style";
  *
  * Replaces ColorPalettePopover + the section-tint flyout + the connector
  * swatch flyout. Panel styling (dark pill, swatch metrics) carries over from
- * the sampled FigJam popover chrome (editor-style.ts).
+ * the sampled FigJam popover trim (editor-style.ts).
  */
 
 export type ColorPickerProps = {

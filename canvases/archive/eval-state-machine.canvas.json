@@ -1,0 +1,528 @@
+{
+ "schemaVersion": 1,
+ "id": "eval-state-machine",
+ "title": "Eval \u2014 Connection State Machine",
+ "mode": "diagram",
+ "viewport": {
+  "x": 0,
+  "y": 0,
+  "zoom": 1
+ },
+ "size": {
+  "width": 2400,
+  "height": 1600
+ },
+ "objects": [
+  {
+   "id": "page-frame",
+   "type": "section",
+   "text": "Connection Lifecycle \u2014 State Machine",
+   "color": "white",
+   "parentId": null,
+   "geometry": {
+    "x": 32,
+    "y": 32,
+    "width": 2357,
+    "height": 1936
+   },
+   "style": {
+    "shape": "section"
+   },
+   "locked": "background"
+  },
+  {
+   "id": "state-idle",
+   "type": "rectangle",
+   "text": "Idle",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 118,
+    "y": 560,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "state-connected",
+   "type": "rectangle",
+   "text": "Connected",
+   "color": "green",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1030,
+    "y": 560,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "connect",
+   "type": "rectangle",
+   "text": "connect()",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 346,
+    "y": 160,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "handshake-ok",
+   "type": "rectangle",
+   "text": "handshake ok",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 802,
+    "y": 160,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "packet-loss-5",
+   "type": "rectangle",
+   "text": "packet loss > 5%",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1258,
+    "y": 160,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "grace-expired",
+   "type": "rectangle",
+   "text": "grace expired",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1714,
+    "y": 160,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "connecting",
+   "type": "rectangle",
+   "text": "Connecting",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 574,
+    "y": 560,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "degraded",
+   "type": "rectangle",
+   "text": "Degraded",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1486,
+    "y": 560,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "reconnecting",
+   "type": "rectangle",
+   "text": "Reconnecting",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1942,
+    "y": 560,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "timeout-2",
+   "type": "rectangle",
+   "text": "timeout",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 96,
+    "y": 928,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "heartbeat-30s",
+   "type": "rectangle",
+   "text": "heartbeat / 30s",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1201,
+    "y": 1336,
+    "width": 259,
+    "height": 173
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "session-resumed",
+   "type": "rectangle",
+   "text": "session resumed",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1760,
+    "y": 1048,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "close",
+   "type": "rectangle",
+   "text": "close()",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 1030,
+    "y": 928,
+    "width": 360,
+    "height": 240
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "disconnecting",
+   "type": "rectangle",
+   "text": "Disconnecting",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 967,
+    "y": 1573,
+    "width": 486,
+    "height": 324
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "socket-closed",
+   "type": "rectangle",
+   "text": "socket closed",
+   "color": "gray",
+   "parentId": "page-frame",
+   "geometry": {
+    "x": 627,
+    "y": 1336,
+    "width": 259,
+    "height": 173
+   },
+   "style": {
+    "shape": "rounded-rect"
+   }
+  },
+  {
+   "id": "admin-suspend",
+   "type": "rectangle",
+   "text": "admin suspend",
+   "geometry": {
+    "x": 1415,
+    "y": 379,
+    "width": 259,
+    "height": 173
+   },
+   "parentId": "page-frame",
+   "style": {
+    "shape": "rounded-rect"
+   },
+   "color": "gray"
+  },
+  {
+   "id": "quarantine-2",
+   "type": "rectangle",
+   "text": "quarantine",
+   "geometry": {
+    "x": 1738,
+    "y": 379,
+    "width": 259,
+    "height": 173
+   },
+   "parentId": "page-frame",
+   "style": {
+    "shape": "rounded-rect"
+   },
+   "color": "gray"
+  },
+  {
+   "id": "resume-2",
+   "type": "rectangle",
+   "text": "resume",
+   "geometry": {
+    "x": 2082,
+    "y": 368,
+    "width": 259,
+    "height": 173
+   },
+   "parentId": "page-frame",
+   "style": {
+    "shape": "rounded-rect"
+   },
+   "color": "gray"
+  },
+  {
+   "id": "suspended",
+   "type": "rectangle",
+   "text": "Suspended",
+   "geometry": {
+    "x": 1608,
+    "y": 800,
+    "width": 360,
+    "height": 240
+   },
+   "parentId": "page-frame",
+   "style": {
+    "shape": "rounded-rect"
+   },
+   "color": "gray"
+  }
+ ],
+ "connections": [
+  {
+   "id": "connection-1",
+   "from": {
+    "objectId": "state-idle"
+   },
+   "to": {
+    "objectId": "connecting"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-2",
+   "from": {
+    "objectId": "connecting"
+   },
+   "to": {
+    "objectId": "state-connected"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-4",
+   "from": {
+    "objectId": "state-connected"
+   },
+   "to": {
+    "objectId": "degraded"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-5",
+   "from": {
+    "objectId": "degraded"
+   },
+   "to": {
+    "objectId": "reconnecting"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-10",
+   "from": {
+    "objectId": "connecting"
+   },
+   "to": {
+    "objectId": "timeout-2"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-11",
+   "from": {
+    "objectId": "timeout-2"
+   },
+   "to": {
+    "objectId": "state-idle"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-12",
+   "from": {
+    "objectId": "reconnecting"
+   },
+   "to": {
+    "objectId": "session-resumed"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-13",
+   "from": {
+    "objectId": "session-resumed"
+   },
+   "to": {
+    "objectId": "state-connected"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-14",
+   "from": {
+    "objectId": "state-connected"
+   },
+   "to": {
+    "objectId": "close"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-15",
+   "from": {
+    "objectId": "close"
+   },
+   "to": {
+    "objectId": "disconnecting"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-16",
+   "from": {
+    "objectId": "disconnecting"
+   },
+   "to": {
+    "objectId": "socket-closed"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-17",
+   "from": {
+    "objectId": "socket-closed"
+   },
+   "to": {
+    "objectId": "state-idle"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-18",
+   "from": {
+    "objectId": "state-connected"
+   },
+   "to": {
+    "objectId": "heartbeat-30s"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-19",
+   "from": {
+    "objectId": "heartbeat-30s"
+   },
+   "to": {
+    "objectId": "state-connected"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-3",
+   "from": {
+    "objectId": "state-connected"
+   },
+   "to": {
+    "objectId": "suspended"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-6",
+   "from": {
+    "objectId": "degraded"
+   },
+   "to": {
+    "objectId": "suspended"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  },
+  {
+   "id": "connection-7",
+   "from": {
+    "objectId": "suspended"
+   },
+   "to": {
+    "objectId": "reconnecting"
+   },
+   "style": "solid",
+   "arrow": "forward"
+  }
+ ],
+ "annotations": []
+}

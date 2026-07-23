@@ -4,25 +4,29 @@
  * Interactive editor is the editing layer on top of the stage core.
  * The stage core draws persisted document content and accepts overlay slots.
  * The viewer is the read-only face that fits and mounts the stage.
- * This editor adds tools, gestures, chrome, text editing, and inspector state.
+ * This editor adds tools, gestures, trim, text editing, and inspector state.
  */
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useReducer,
   useRef,
   useState,
   type ReactNode,
+  type Ref,
 } from "react";
 import {
-  buildSelectionContext,
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
   type CanvasAction,
+  type CanvasAgentPatchOperation,
+  type CanvasChangeSummary,
   type CanvasSelection,
   type CanvasTool,
 } from "../../state/actions";
+import { fitBounds, type ViewportState } from "../viewport";
 import { CanvasStage } from "../CanvasStage";
 import { objectTypeForTool } from "./features/place/place";
 import type { ShapeCatalogEntry } from "../../objects/catalog";
@@ -31,10 +35,14 @@ import { ShapesPanel } from "./components/ShapesPanel";
 import { ZoomControls } from "./components/ZoomControls";
 import { CanvasContextMenu } from "./features/context-menu/CanvasContextMenu";
 import { useCanvasContextMenu } from "./features/context-menu/use-canvas-context-menu";
+import { AnnotateFeedback } from "./features/annotate/AnnotateFeedback";
+import { AnnotationPins } from "./features/annotate/AnnotationPins";
+import { AnnotationHint, AnnotationPopup } from "./features/annotate/AnnotationPopup";
+import { annotationTargetLabel } from "./features/annotate/target-label";
+import { useAnnotateMode } from "./features/annotate/use-annotate-mode";
 import { SelectionToolbarLayer } from "./features/selection-toolbar/SelectionToolbarLayer";
 import { useSelectionToolbar } from "./features/selection-toolbar/use-selection-toolbar";
 import { useInteractionPipeline } from "./pipeline/use-interaction-pipeline";
-import { Inspector } from "./features/inspector/Inspector";
 import { TextEditingOverlay } from "./features/text-editing/TextEditingOverlay";
 import { useTextEditing } from "./features/text-editing/use-text-editing";
 import {
@@ -49,17 +57,56 @@ import type {
   InteractiveCanvasObjectType,
 } from "../../state/schema";
 
+/** Point-in-time editor state a caller can pull through the imperative handle. */
+export interface InteractiveCanvasEditorSnapshot {
+  selection: CanvasSelection;
+  /** The LIVE pan/zoom camera (useCanvasViewport), not anything persisted on the document. */
+  viewport: ViewportState;
+}
+
+/** Payload for `onEditorStateChange` — the snapshot plus current tool and last change summary. */
+export interface InteractiveCanvasEditorState extends InteractiveCanvasEditorSnapshot {
+  tool: CanvasTool;
+  lastChange?: CanvasChangeSummary;
+}
+
+/**
+ * Imperative handle exposed via the `ref` prop — the agent apply path's
+ * doorway into an open (uncontrolled) editor: pull selection/viewport for
+ * invoke context, push a committed patch as one canvas.applyAgentPatch
+ * dispatch (one undo step, `source: "agent"` halo).
+ */
+export interface InteractiveCanvasEditorHandle {
+  getEditorSnapshot(): InteractiveCanvasEditorSnapshot;
+  dispatchAgentPatch(operations: CanvasAgentPatchOperation[], summary?: string): void;
+  setTool(tool: CanvasTool): void;
+  revealRect(rect: { x: number; y: number; width: number; height: number }): void;
+}
+
 export interface InteractiveCanvasEditorProps {
   document: InteractiveCanvasDocument;
   onSave?: (document: InteractiveCanvasDocument) => void | Promise<void>;
   onCancel?: () => void;
   onDocumentChange?: (document: InteractiveCanvasDocument) => void;
+  /**
+   * Fired (post-render effect) whenever selection, viewport, tool, or
+   * lastChange changes — the dev rail / agent-context subscription. Not
+   * called for unrelated re-renders.
+   */
+  onEditorStateChange?: (state: InteractiveCanvasEditorState) => void;
+  /** Imperative handle (React 19 ref-as-prop): see InteractiveCanvasEditorHandle. */
+  ref?: Ref<InteractiveCanvasEditorHandle>;
   title?: string;
   titleContent?: ReactNode;
   editableTitle?: boolean;
-  showInspector?: boolean;
   topBarLeading?: ReactNode;
   topBarActions?: ReactNode;
+  /** Caller-owned content appended after editor feedback in the transformed world layer. */
+  worldOverlay?: ReactNode;
+  /** Caller-owned content appended after editor feedback in the screen-space overlay. */
+  screenOverlay?: ReactNode;
+  /** Locks document and selection editing while keeping viewport navigation active. */
+  cameraOnly?: boolean;
 }
 
 function reducer(state: ReturnType<typeof createInteractiveCanvasState>, action: CanvasAction) {
@@ -75,7 +122,7 @@ type ShapesPanelPhase = "closed" | "open" | "closing";
 /**
  * Wave 3a — CanvasDock ↔ CanvasTool mapping.
  *
- * The dock speaks a small fixed vocabulary of chrome-level tool ids
+ * The dock speaks a small fixed vocabulary of trim-level tool ids
  * (ToolId, from stage/editor/components/CanvasDock.tsx) while the reducer speaks the much
  * larger CanvasTool vocabulary (one entry per placeable object type, plus
  * select/hand/annotation/connector). Most dock ids map 1:1 to an editor tool;
@@ -100,12 +147,9 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
 };
 
 /**
- * Every other CanvasTool value (rectangle/process/decision/
- * document/database/pill/arrow-shape/predefined-process/
- * annotation) is armed exclusively via the Shapes panel or the shape-search
- * swap popover now — the dock's "shapes" button opens
- * that surface (see ShapesPanel wiring below) rather than exposing 16
- * individual per-type buttons as the old toolbar did.
+ * Placeable tools outside this map are armed through the Shapes panel or its
+ * search popover. The non-placeable annotation tool is keyboard-only (E), so
+ * it deliberately has no dock mapping or active dock button.
  */
 function dockToolForCanvasTool(tool: CanvasTool): ToolId | null {
   return CANVAS_TOOL_TO_DOCK_TOOL[tool] ?? null;
@@ -116,14 +160,27 @@ export function InteractiveCanvasEditor({
   onSave,
   onCancel,
   onDocumentChange,
+  onEditorStateChange,
+  ref,
   title,
   titleContent,
   editableTitle = false,
-  showInspector = false,
   topBarLeading,
   topBarActions,
+  worldOverlay,
+  screenOverlay,
+  cameraOnly = false,
 }: InteractiveCanvasEditorProps) {
-  const [state, dispatch] = useReducer(reducer, document, createInteractiveCanvasState);
+  const [state, dispatchCanvasAction] = useReducer(reducer, document, createInteractiveCanvasState);
+  const cameraOnlyRef = useRef(cameraOnly);
+  cameraOnlyRef.current = cameraOnly;
+  const dispatch = useCallback(
+    (action: CanvasAction) => {
+      if (!cameraOnlyRef.current) dispatchCanvasAction(action);
+    },
+    [],
+  );
+  const activeTool: CanvasTool = cameraOnly ? "hand" : state.tool;
   const stageRef = useRef<HTMLDivElement | null>(null);
   // In-place text editing (connector labels + the unified object text) —
   // state and callbacks live in stage/editor/features/text-editing.
@@ -135,9 +192,11 @@ export function InteractiveCanvasEditor({
     setObjectTextEditValue,
     openConnectionLabelEditor,
     openObjectTextEditor,
+    cancelConnectionLabelEdit,
+    cancelObjectTextEdit,
   } = textEditing;
   // While the Shapes panel is open, keep the dock's Shapes button highlighted
-  // so the bottom chrome reflects the active shape-adding mode.
+  // so the bottom trim reflects the active shape-adding mode.
   const [shapesPanelPhase, setShapesPanelPhase] = useState<ShapesPanelPhase>("closed");
   const shapesPanelOpen = shapesPanelPhase === "open";
   const shapesPanelVisible = shapesPanelPhase !== "closed";
@@ -167,7 +226,15 @@ export function InteractiveCanvasEditor({
   const { viewport, setViewport, isPanning, controls, screenToWorld } = useCanvasViewport({
     document: state.document,
     stageRef,
-    panOnPlainDrag: state.tool === "hand",
+    panOnPlainDrag: activeTool === "hand",
+  });
+  const annotateModeActive = activeTool === "annotation";
+  const annotateMode = useAnnotateMode({
+    document: state.document,
+    enabled: annotateModeActive && !cameraOnly,
+    dispatch,
+    screenToWorld,
+    zoom: viewport.zoom,
   });
   // Right-click context menu (canvas + object variants) — state and actions
   // live in stage/editor/features/context-menu.
@@ -184,7 +251,9 @@ export function InteractiveCanvasEditor({
     openObjectContextMenu,
   } = canvasContextMenu;
   const selectedIds = selectedObjectIds(state.selection);
-  const selectedObject = state.document.objects.find((object) => object.id === selectedIds[0]);
+  const annotationPopupTarget = annotateMode.popup
+    ? state.document.objects.find((object) => object.id === annotateMode.popup?.objectId)
+    : undefined;
   const selectedConnectionId = state.selection.kind === "connection" ? state.selection.connectionId : null;
   const selectedConnection = state.document.connections.find(
     (connection) => connection.id === selectedConnectionId,
@@ -204,11 +273,16 @@ export function InteractiveCanvasEditor({
     openObjectTextEditor,
     openConnectionLabelEditor,
   });
-  const { applyColorToSelection } = selectionToolbar;
-  const selectionContext = useMemo(
-    () => buildSelectionContext(state.document, state.selection),
-    [state.document, state.selection],
-  );
+  const { setOpenFlyout } = selectionToolbar;
+
+  useEffect(() => {
+    if (!annotateModeActive) return;
+    closeContextMenu();
+    setOpenFlyout(null);
+    setShapesPanelPhase("closed");
+    setPickedShapeEntry(null);
+  }, [annotateModeActive, closeContextMenu, setOpenFlyout]);
+
 
   const didReportInitialDocumentRef = useRef(false);
 
@@ -219,6 +293,51 @@ export function InteractiveCanvasEditor({
     }
     onDocumentChange?.(state.document);
   }, [onDocumentChange, state.document]);
+
+  // Imperative handle (agent apply path): getEditorSnapshot reads through
+  // refs so the handle identity is stable while snapshots stay live —
+  // selection from the reducer, viewport from useCanvasViewport (the live
+  // camera; the document carries no viewport). dispatchAgentPatch funnels
+  // into the same reducer as every human action (dispatch is stable).
+  const selectionRef = useRef(state.selection);
+  selectionRef.current = state.selection;
+  const liveViewportRef = useRef(viewport);
+  liveViewportRef.current = viewport;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getEditorSnapshot: () => ({
+        selection: selectionRef.current,
+        viewport: liveViewportRef.current,
+      }),
+      dispatchAgentPatch: (operations, summary) => {
+        dispatchCanvasAction({ type: "canvas.applyAgentPatch", operations, summary });
+      },
+      setTool: (tool) => {
+        dispatch({ type: "canvas.setTool", tool });
+      },
+      revealRect: (rect) => {
+        const stageRect = stageRef.current?.getBoundingClientRect();
+        if (!stageRect || stageRect.width <= 0 || stageRect.height <= 0) return;
+        setViewport(
+          fitBounds(rect, { width: stageRect.width, height: stageRect.height }),
+        );
+      },
+    }),
+    [],
+  );
+
+  // Editor-state subscription (dev rail / agent invoke context): fires only
+  // when selection, viewport, tool, or lastChange actually change.
+  useEffect(() => {
+    onEditorStateChange?.({
+      selection: state.selection,
+      viewport,
+      tool: state.tool,
+      lastChange: state.lastChange,
+    });
+  }, [onEditorStateChange, state.selection, state.lastChange, state.tool, viewport]);
 
   // One-shot signal sink for the interaction machine's double-click
   // text-edit intent. Existing objects open through the editability-aware
@@ -253,12 +372,14 @@ export function InteractiveCanvasEditor({
   } = useInteractionPipeline({
     document: state.document,
     selection: state.selection,
-    tool: state.tool,
+    tool: activeTool,
+    readOnly: cameraOnly || annotateModeActive,
     stickyPlacement: shapesPanelOpen,
     armedShape,
     lastPickedColor: state.lastPickedColor,
     viewport,
     dispatch,
+    cancelDispatch: dispatchCanvasAction,
     setViewport,
     screenToWorld,
     closeContextMenu,
@@ -267,9 +388,29 @@ export function InteractiveCanvasEditor({
   });
 
   const isTypingContextActive = useCallback(
-    () => labelEditConnectionId !== null || objectTextEditId !== null,
-    [labelEditConnectionId, objectTextEditId],
+    () => !cameraOnly && (labelEditConnectionId !== null || objectTextEditId !== null),
+    [cameraOnly, labelEditConnectionId, objectTextEditId],
   );
+
+  const previousCameraOnlyRef = useRef(false);
+  useEffect(() => {
+    if (previousCameraOnlyRef.current === cameraOnly) return;
+    previousCameraOnlyRef.current = cameraOnly;
+    dispatchCanvasAction({ type: "canvas.setTool", tool: cameraOnly ? "hand" : "select" });
+    if (!cameraOnly) return;
+    closeContextMenu();
+    cancelConnectionLabelEdit();
+    cancelObjectTextEdit();
+    setOpenFlyout(null);
+    setShapesPanelPhase("closed");
+    setPickedShapeEntry(null);
+  }, [
+    cameraOnly,
+    cancelConnectionLabelEdit,
+    cancelObjectTextEdit,
+    closeContextMenu,
+    setOpenFlyout,
+  ]);
 
   // Picking a shape arms its creation tool but keeps the panel open — the
   // Shapes creation flow is a mode: ghost preview follows the cursor, each
@@ -349,8 +490,10 @@ export function InteractiveCanvasEditor({
   }, [closeShapesPanel, dispatch, shapesPanelOpen, state.tool]);
 
   useCanvasHotkeys({
+    cameraOnly,
     document: state.document,
     selection: state.selection,
+    tool: activeTool,
     dispatch,
     onSelectDockTool: handleDockHotkeyTool,
     isTypingContextActive,
@@ -376,60 +519,122 @@ export function InteractiveCanvasEditor({
           // until the next action, reading as a stray gray border.
           state.lastChange?.source === "agent" ? state.lastChange.changedObjectIds : undefined
         }
-        selectedConnectionId={selectedConnectionId}
+        selectedConnectionId={annotateModeActive ? null : selectedConnectionId}
         dropTargetId={interactionOverlay.dropTargetId}
-        onCanvasContextMenu={openCanvasContextMenu}
-        onObjectContextMenu={openObjectContextMenu}
-        onConnectionDoubleClick={openConnectionLabelEditor}
-        onStagePointerEvent={handleStagePointerDown}
-        onStagePointerMove={handleStagePointerMove}
-        onStagePointerLeave={handleStagePointerLeave}
-        onStageDoubleClick={handleStageDoubleClick}
-        editingTextObjectId={objectTextEditId}
-        activeTool={state.tool}
-        connectorDragActive={Boolean(interactionOverlay.connectorDrag)}
+        onCanvasContextMenu={cameraOnly ? undefined : openCanvasContextMenu}
+        onObjectContextMenu={cameraOnly ? undefined : openObjectContextMenu}
+        onConnectionDoubleClick={
+          cameraOnly || annotateModeActive ? undefined : openConnectionLabelEditor
+        }
+        onStagePointerEvent={
+          cameraOnly
+            ? undefined
+            : annotateModeActive
+              ? (event) => {
+                  closeContextMenu();
+                  annotateMode.handleStagePointerDown(event);
+                }
+              : handleStagePointerDown
+        }
+        onStagePointerMove={
+          cameraOnly
+            ? undefined
+            : annotateModeActive
+              ? annotateMode.handleStagePointerMove
+              : handleStagePointerMove
+        }
+        onStagePointerLeave={
+          cameraOnly
+            ? undefined
+            : annotateModeActive
+              ? annotateMode.handleStagePointerLeave
+              : handleStagePointerLeave
+        }
+        onStageDoubleClick={cameraOnly || annotateModeActive ? undefined : handleStageDoubleClick}
+        editingTextObjectId={cameraOnly ? null : objectTextEditId}
+        activeTool={activeTool}
+        connectorDragActive={
+          !cameraOnly && !annotateModeActive && Boolean(interactionOverlay.connectorDrag)
+        }
         className="h-full"
         style={{
           cursor: isPanning
             ? "grabbing"
-            : state.tool === "hand"
+            : activeTool === "hand"
               ? "grab"
-              : undefined,
+              : annotateModeActive
+                ? "crosshair"
+                : undefined,
         }}
         overlay={
-          <InteractionFeedbackScreen
-            document={state.document}
-            viewport={viewport}
-            selectedObjectIds={selectedIds}
-            interactionOverlay={interactionOverlay}
-            hoveredObjectId={hoveredObjectId}
-            activeTool={state.tool}
-            interactionEnabled
-          />
+          <>
+            <InteractionFeedbackScreen
+              document={state.document}
+              viewport={viewport}
+              selectedObjectIds={annotateModeActive ? [] : selectedIds}
+              interactionOverlay={interactionOverlay}
+              hoveredObjectId={hoveredObjectId}
+              activeTool={activeTool}
+              interactionEnabled={!cameraOnly && !annotateModeActive}
+            />
+            {annotateModeActive ? (
+              <AnnotateFeedback
+                document={state.document}
+                viewport={viewport}
+                hoveredObjectId={annotateMode.hoveredObjectId}
+                selectedObjectIds={selectedIds}
+              />
+            ) : null}
+            {annotateMode.popup && annotationPopupTarget ? (
+              <AnnotationPopup
+                key={`${annotateMode.popup.objectId}:${annotateMode.popup.anchor.x}:${annotateMode.popup.anchor.y}`}
+                anchor={annotateMode.popup.anchor}
+                targetLabel={annotationTargetLabel(annotationPopupTarget)}
+                onSave={annotateMode.saveAnnotation}
+                onCancel={annotateMode.cancelPopup}
+              />
+            ) : null}
+            {annotateMode.hint ? (
+              <AnnotationHint
+                anchor={annotateMode.hint.anchor}
+                message={annotateMode.hint.message}
+              />
+            ) : null}
+            {screenOverlay}
+          </>
         }
         worldOverlay={
-          <InteractionFeedbackWorld
-            document={state.document}
-            viewport={viewport}
-            interactionOverlay={interactionOverlay}
-            activeTool={state.tool}
-          >
-            <TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />
-          </InteractionFeedbackWorld>
+          <>
+            <InteractionFeedbackWorld
+              document={state.document}
+              viewport={viewport}
+              interactionOverlay={interactionOverlay}
+              activeTool={activeTool}
+            >
+              <TextEditingOverlay textEditing={textEditing} zoom={viewport.zoom} />
+            </InteractionFeedbackWorld>
+            {!cameraOnly ? (
+              <AnnotationPins
+                document={state.document}
+                selection={state.selection}
+                dispatch={dispatch}
+                zoom={viewport.zoom}
+              />
+            ) : null}
+            {worldOverlay}
+          </>
         }
       />
 
-      <CanvasContextMenu menu={canvasContextMenu} />
+      {cameraOnly ? null : <CanvasContextMenu menu={canvasContextMenu} />}
 
       <TopBar
         title={title}
         titleContent={titleContent}
-        editableTitle={editableTitle}
+        editableTitle={editableTitle && !cameraOnly}
         document={state.document}
         documentTitle={state.document.title}
         documentId={state.document.id}
-        historyPastLength={state.history.past.length}
-        historyFutureLength={state.history.future.length}
         dispatch={dispatch}
         onSave={onSave ? () => void onSave(state.document) : undefined}
         onCancel={onCancel}
@@ -437,27 +642,15 @@ export function InteractiveCanvasEditor({
         topBarActions={topBarActions}
       />
 
-      {showInspector ? (
-        <Inspector
-          document={state.document}
-          lastChange={state.lastChange}
-          selectedObject={selectedObject}
-          selectedConnection={selectedConnection}
-          selectionContext={selectionContext}
-          dispatch={dispatch}
-          applyColorToSelection={applyColorToSelection}
-        />
-      ) : null}
-
       <SelectionToolbarLayer
         toolbar={selectionToolbar}
         selectedConnection={selectedConnection}
         dispatch={dispatch}
-        activeTool={state.tool}
-        hidden={selectionDragActive}
+        activeTool={activeTool}
+        hidden={cameraOnly || annotateModeActive || selectionDragActive}
       />
 
-      {shapesPanelVisible && (
+      {!cameraOnly && shapesPanelVisible && (
         <div className={`${shapesPanelClosing ? "pointer-events-none" : "pointer-events-auto"} absolute bottom-4 left-4 top-20 z-30`}>
           <ShapesPanel
             className="h-full"
@@ -474,9 +667,10 @@ export function InteractiveCanvasEditor({
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center px-4">
         <CanvasDock
           className="pointer-events-auto"
-          activeTool={shapesPanelOpen ? "shapes" : dockToolForCanvasTool(state.tool)}
+          activeTool={shapesPanelOpen ? "shapes" : dockToolForCanvasTool(activeTool)}
           onSelectTool={handleDockSelectTool}
           onOpenShapes={toggleShapesPanel}
+          disabled={cameraOnly}
         />
       </div>
 

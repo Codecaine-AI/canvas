@@ -42,7 +42,7 @@ export interface ShapeOutlineArgs {
 export interface SilhouetteSpec {
   /**
    * Per-shape CSS class appended after the base `interactive-canvas-object`
-   * class (omit for the plain rounded-rect chrome, which is fully styled by
+   * class (omit for the plain rounded-rect trim, which is fully styled by
    * the base class).
    */
   className?: string;

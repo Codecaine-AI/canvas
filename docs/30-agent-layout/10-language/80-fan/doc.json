@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-80-fan",
+  "title": "fan — hub over children",
+  "root": "b-fan-root",
+  "blocks": {
+    "b-fan-root": {
+      "id": "b-fan-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-fan-title-1",
+        "b-fan-body-2",
+        "b-fan-code-3",
+        "b-fan-canvas-4"
+      ],
+      "props": {
+        "covers": "The fan statement: a hub centered over its children with 64px clearance; dir= gives the side the children sit on, and declaration order becomes their left-to-right order on one shared line.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "fan",
+          "hub",
+          "dir=",
+          "alignment facts"
+        ]
+      }
+    },
+    "b-fan-title-1": {
+      "id": "b-fan-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "fan — hub over children"
+        }
+      ]
+    },
+    "b-fan-body-2": {
+      "id": "b-fan-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Main value is the hub reference; "
+        },
+        {
+          "insert": "dir=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "N",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "S",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "E",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "W",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the side of the hub the children sit on); after "
+        },
+        {
+          "insert": ":",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", two or more child references. The children land on one shared line, evenly spaced, and the hub centers over their midpoint with 64px of clearance (rule R6). The children's declaration order becomes their left-to-right order."
+        }
+      ]
+    },
+    "b-fan-code-3": {
+      "id": "b-fan-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section 1 text=tree label=\"fan dir=S\"\n  group\n    item 2 text=hub type=decision size=M at=N\n    item 3 text=a type=process size=M at=SW\n    item 4 text=b type=process size=M at=S\n    item 5 text=c type=process size=M at=SE\n\nfan 2 dir=S: 3 4 5\n\narrows\n  2 > 3\n  2 > 4\n  2 > 5"
+        }
+      ]
+    },
+    "b-fan-canvas-4": {
+      "id": "b-fan-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-fan.canvas.json",
+        "title": "fan 2 dir=S — the hub centers over its children"
+      }
+    }
+  }
+}

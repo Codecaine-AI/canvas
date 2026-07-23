@@ -20,7 +20,7 @@ import { gridBackground } from "./grid";
 import { canvasSurfaceStyle } from "../theme/tokens";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
-import { Connector, ConnectorSelectionChrome } from "../connectors/Connector";
+import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import type { CanvasTool } from "../state/actions";
 
@@ -36,7 +36,7 @@ const CANVAS_BG = "#F5F5F5";
 const GRID_DOT_COLOR = "rgba(0, 0, 0, 0.25)";
 /**
  * Canvas content font. Applied to canvas OBJECTS/labels/stickies via the
- * stage's content root class — never to app chrome (toolbars, panels, etc.
+ * stage's content root class — never to app trim (toolbars, panels, etc.
  * keep the app's existing font stack).
  */
 const CANVAS_FONT_FAMILY =
@@ -52,9 +52,9 @@ const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
 // Same kite-shaped pointer as the dock's Select glyph (Nucleo
 // maps-location/pointer), filled for cursor use — the tool icon and the
 // on-canvas cursor are literally the same form. Inlined from the old
-// CHROME.selectCursor (stage core must not import stage/editor/components/editor-style).
+// TRIM.selectCursor (stage core must not import stage/editor/components/editor-style).
 // Rendered with a soft drop shadow (padded viewBox so it is not clipped).
-/** FigJam selection blue — matches SelectionBox and the connector chrome. */
+/** FigJam selection blue — matches SelectionBox and the connector trim. */
 const SELECTION_BLUE = "#0D99FF";
 
 const SELECT_CURSOR_SVG =
@@ -161,7 +161,7 @@ export interface CanvasStageProps {
  */
 /**
  * Connections in render order: the selected one moves to the end so its
- * selection chrome (endpoint rings, bend pills) and line paint above every
+ * selection trim (endpoint rings, bend pills) and line paint above every
  * sibling connector path — SVG stacks strictly by document order.
  */
 function orderedConnections(
@@ -287,13 +287,13 @@ export function CanvasStage({
         // FigJam-parity board surface (theme/tokens.ts CANVAS_BG /
         // GRID_DOT_COLOR): fixed light values in BOTH app themes — FigJam's
         // board is light-only, it never dark-themes the canvas surface
-        // itself (only chrome around it changes).
+        // itself (only trim around it changes).
         backgroundImage: `radial-gradient(circle, ${GRID_DOT_COLOR} ${grid.dotRadius}px, transparent ${grid.dotRadius}px)`,
         backgroundPosition: grid.backgroundPosition,
         backgroundSize: grid.backgroundSize,
         backgroundColor: CANVAS_BG,
         fontFamily: CANVAS_FONT_FAMILY,
-        // Board text (labels, section titles, captions) is chrome, not
+        // Board text (labels, section titles, captions) is trim, not
         // document text — drags must never sweep a native DOM selection
         // across it. Text-editing surfaces opt back in with user-select:
         // text.
@@ -485,7 +485,7 @@ export function CanvasStage({
             />
           ))}
         </div>
-        {/* Selected-connection chrome (endpoint rings + bend pills) in its own
+        {/* Selected-connection trim (endpoint rings + bend pills) in its own
             SVG layer ABOVE the object layer (z2) and below section headers:
             shape bodies/borders paint over connector lines by design, but must
             never cover the blue selection affordances. */}
@@ -501,7 +501,7 @@ export function CanvasStage({
           return (
             <svg
               className="interactive-canvas-layer"
-              data-canvas-connection-chrome-layer="true"
+              data-canvas-connection-trim-layer="true"
               style={{
                 position: "absolute",
                 left: 0,
@@ -511,7 +511,7 @@ export function CanvasStage({
                 pointerEvents: handToolActive ? "none" : undefined,
               }}
             >
-              <ConnectorSelectionChrome
+              <ConnectorSelectionTrim
                 document={document}
                 connection={connection}
                 fromObject={fromObject}

@@ -8,7 +8,7 @@ import { Tooltip } from "../../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../../state/schema";
 
 /**
- * ShapeSearchPopover — Panel A from figjam-chrome-catalog.md section 4: the
+ * ShapeSearchPopover — Panel A from figjam-trim-catalog.md section 4: the
  * compact dark "Search for a shape" popover, anchored above the selected
  * object's shape-swap control (NOT the bottom dock — that opens the larger
  * ShapesPanel instead).
@@ -31,7 +31,7 @@ const POPOVER_BG = "#1D1D1D";
 /**
  * Scrollbar restyle for the shape grid: slim rounded translucent thumb on a
  * transparent track, matching the dark FigJam-style panel (replaces the
- * chunky default chrome). The @supports block is the Firefox fallback —
+ * chunky default trim). The @supports block is the Firefox fallback —
  * it has no ::-webkit-scrollbar, so it gets the standard thin-scrollbar
  * properties instead.
  */

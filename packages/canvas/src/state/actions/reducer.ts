@@ -2,7 +2,8 @@
 
 import type { InteractiveCanvasDocument } from "../schema";
 import { reconcileSectionMembership } from "../section-membership";
-import { handleAddAnnotation } from "./annotations";
+import { handleApplyAgentPatch } from "./agent-patch";
+import { handleAddAnnotation, handleRemoveAnnotation } from "./annotations";
 import { FIRST_USE_COLORS } from "../schema/object-defaults";
 import {
   handleAddConnection,
@@ -93,6 +94,9 @@ function shouldReconcileSectionMembership(action: CanvasAction): boolean {
     case "canvas.distributeSelection":
     case "canvas.fitSectionToChildren":
     case "canvas.setObjectType":
+    // Agent patches write geometry (add/update/fit) — membership must
+    // re-derive; patch ops never write parentId themselves (agent-patch.ts).
+    case "canvas.applyAgentPatch":
       return true;
     case "canvas.updateObject":
       return objectPatchTouchesSectionMembership(action.patch);
@@ -206,6 +210,10 @@ function reduceCanvasAction(
     return handleAddAnnotation(state, action);
   }
 
+  if (action.type === "canvas.removeAnnotation") {
+    return handleRemoveAnnotation(state, action);
+  }
+
   if (action.type === "canvas.deleteSelection") {
     return handleDeleteSelection(state);
   }
@@ -224,6 +232,10 @@ function reduceCanvasAction(
 
   if (action.type === "canvas.captureSectionContents") {
     return handleCaptureSectionContents(state, action);
+  }
+
+  if (action.type === "canvas.applyAgentPatch") {
+    return handleApplyAgentPatch(state, action);
   }
 
   return state;

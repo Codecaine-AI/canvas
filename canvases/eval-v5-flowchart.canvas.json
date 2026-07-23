@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-v5-flowchart",
+  "title": "Eval v5 — Flowchart",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2816,
+    "height": 1808
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval v5 — Flowchart",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2752,
+        "height": 1744
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-start",
+      "type": "process",
+      "text": "Order received",
+      "color": "white",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 272,
+        "width": 192,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "section-validation",
+      "type": "section",
+      "text": "1. Intake & validation",
+      "color": "blue",
+      "parentId": null,
+      "geometry": {
+        "x": 96,
+        "y": 96,
+        "width": 1056,
+        "height": 848
+      }
+    },
+    {
+      "id": "section-payment",
+      "type": "section",
+      "text": "2. Payment authorization",
+      "color": "violet",
+      "parentId": null,
+      "geometry": {
+        "x": 1280,
+        "y": 96,
+        "width": 896,
+        "height": 1376
+      }
+    },
+    {
+      "id": "section-fulfillment",
+      "type": "section",
+      "text": "3. Fulfillment",
+      "color": "teal",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 96,
+        "width": 384,
+        "height": 848
+      }
+    },
+    {
+      "id": "validate-order",
+      "type": "process",
+      "text": "Validate order",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 512,
+        "y": 272,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "decision-order-valid",
+      "type": "decision",
+      "text": "Order valid?",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 864,
+        "y": 256,
+        "width": 240,
+        "height": 144
+      }
+    },
+    {
+      "id": "request-correction",
+      "type": "process",
+      "text": "Request correction",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 736,
+        "y": 720,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "authorize-payment",
+      "type": "process",
+      "text": "Authorize payment",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 1344,
+        "y": 272,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "decision-payment-authorized",
+      "type": "decision",
+      "text": "Payment authorized?",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1872,
+        "y": 256,
+        "width": 240,
+        "height": 144
+      }
+    },
+    {
+      "id": "retry-payment",
+      "type": "process",
+      "text": "Retry payment",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1584,
+        "y": 800,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-failed",
+      "type": "pill",
+      "text": "Order failed",
+      "color": "red",
+      "parentId": null,
+      "geometry": {
+        "x": 1552,
+        "y": 1248,
+        "width": 304,
+        "height": 96
+      }
+    },
+    {
+      "id": "pack-ship",
+      "type": "process",
+      "text": "Pack & ship",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 2352,
+        "y": 272,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-complete",
+      "type": "pill",
+      "text": "Order complete",
+      "color": "green",
+      "parentId": null,
+      "geometry": {
+        "x": 2368,
+        "y": 752,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "retry-policy-note",
+      "type": "sticky",
+      "text": "Payment retries: max 3, then fail the order",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 2304,
+        "y": 1072,
+        "width": 384,
+        "height": 192
+      }
+    },
+    {
+      "id": "fraud-review",
+      "type": "process",
+      "text": "Fraud review",
+      "color": "orange",
+      "parentId": null,
+      "geometry": {
+        "x": 1952,
+        "y": 592,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "decision-fraud-suspected",
+      "type": "decision",
+      "text": "Fraud suspected?",
+      "color": "yellow",
+      "parentId": null,
+      "geometry": {
+        "x": 1856,
+        "y": 816,
+        "width": 256,
+        "height": 144
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge-order-to-validate",
+      "from": {
+        "objectId": "seed-start"
+      },
+      "to": {
+        "objectId": "validate-order"
+      },
+      "label": "New order",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-validate-to-order-decision",
+      "from": {
+        "objectId": "validate-order"
+      },
+      "to": {
+        "objectId": "decision-order-valid"
+      },
+      "label": "Validated",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "edge-order-valid-yes",
+      "from": {
+        "objectId": "decision-order-valid"
+      },
+      "to": {
+        "objectId": "authorize-payment"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "edge-order-valid-no",
+      "from": {
+        "objectId": "decision-order-valid"
+      },
+      "to": {
+        "objectId": "request-correction"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-correction-loop",
+      "from": {
+        "objectId": "request-correction"
+      },
+      "to": {
+        "objectId": "validate-order"
+      },
+      "label": "Corrected order",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-authorize-to-payment-decision",
+      "from": {
+        "objectId": "authorize-payment"
+      },
+      "to": {
+        "objectId": "decision-payment-authorized"
+      },
+      "label": "Result",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-payment-yes",
+      "from": {
+        "objectId": "decision-payment-authorized"
+      },
+      "to": {
+        "objectId": "pack-ship"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-payment-no",
+      "from": {
+        "objectId": "decision-payment-authorized"
+      },
+      "to": {
+        "objectId": "retry-payment"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-retry-loop",
+      "from": {
+        "objectId": "retry-payment"
+      },
+      "to": {
+        "objectId": "authorize-payment"
+      },
+      "label": "Retry (< 3)",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-retries-exhausted",
+      "from": {
+        "objectId": "retry-payment"
+      },
+      "to": {
+        "objectId": "order-failed"
+      },
+      "label": "Retries exhausted",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-pack-to-complete",
+      "from": {
+        "objectId": "pack-ship"
+      },
+      "to": {
+        "objectId": "order-complete"
+      },
+      "label": "Shipped",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "edge-payment-risky",
+      "from": {
+        "objectId": "decision-payment-authorized"
+      },
+      "to": {
+        "objectId": "fraud-review"
+      },
+      "label": "Risky",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "edge-fraud-review-to-decision",
+      "from": {
+        "objectId": "fraud-review"
+      },
+      "to": {
+        "objectId": "decision-fraud-suspected"
+      },
+      "label": "Reviewed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "edge-fraud-yes-failed",
+      "from": {
+        "objectId": "decision-fraud-suspected"
+      },
+      "to": {
+        "objectId": "order-failed"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "edge-fraud-no-pack",
+      "from": {
+        "objectId": "decision-fraud-suspected",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pack-ship"
+      },
+      "label": "No",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    }
+  ],
+  "annotations": []
+}

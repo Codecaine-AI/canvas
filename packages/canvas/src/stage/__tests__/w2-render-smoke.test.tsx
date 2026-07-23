@@ -235,8 +235,8 @@ describe("W2 render smoke: every new object type renders without throwing", () =
     });
   });
 
-  it("registers the icon-shape chrome-strip so Advanced glyphs render without the generic box", () => {
-    // The glyph IS the shape (brief's "bbox" tier): the button chrome must go
+  it("registers the icon-shape trim-strip so Advanced glyphs render without the generic box", () => {
+    // The glyph IS the shape (brief's "bbox" tier): the button trim must go
     // fully transparent. `!important` is load-bearing —
     // it has to beat objectStyle's inline `background: colors.fill`.
     const iconRule = OBJECT_DEFS_CSS.match(/\.interactive-canvas-object-icon\s*\{[^}]*\}/)?.[0];

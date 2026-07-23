@@ -15,7 +15,7 @@ function pointsAttribute(points: CanvasPoint[]): string {
 /**
  * Manual input (W5) — slanted-top-edge true-outline polygon (connection-
  * overlay.ts's manualInputPoints, the same generator connector attachment
- * uses) painted behind the label; the button chrome stays fully transparent
+ * uses) painted behind the label; the button trim stays fully transparent
  * so only one outline is visible..
  */
 export const manualInputShapeDef: ShapeDef = {

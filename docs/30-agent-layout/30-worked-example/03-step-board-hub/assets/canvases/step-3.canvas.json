@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-30-worked-example-03-step-board-hub-step-3",
+  "title": "Step 3 (step board hub)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "config",
+      "type": "section",
+      "text": "Config",
+      "label": "Config",
+      "title": "Config",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 176,
+        "height": 512
+      }
+    },
+    {
+      "id": "checkout",
+      "type": "pill",
+      "text": "checkout",
+      "label": "checkout",
+      "geometry": {
+        "x": 29,
+        "y": 167,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "goals",
+      "type": "pill",
+      "text": "goals",
+      "label": "goals",
+      "geometry": {
+        "x": 29,
+        "y": 269,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "secrets",
+      "type": "pill",
+      "text": "secrets",
+      "label": "secrets",
+      "geometry": {
+        "x": 29,
+        "y": 372,
+        "width": 118,
+        "height": 38
+      }
+    },
+    {
+      "id": "loop",
+      "type": "section",
+      "text": "Runner loop",
+      "label": "Runner loop",
+      "title": "Runner loop",
+      "tint": "gray",
+      "geometry": {
+        "x": 304,
+        "y": 0,
+        "width": 720,
+        "height": 320
+      }
+    },
+    {
+      "id": "cli",
+      "type": "process",
+      "text": "cli",
+      "label": "cli",
+      "geometry": {
+        "x": 342,
+        "y": 150,
+        "width": 116,
+        "height": 70
+      }
+    },
+    {
+      "id": "sched",
+      "type": "process",
+      "text": "sched",
+      "label": "sched",
+      "geometry": {
+        "x": 518,
+        "y": 150,
+        "width": 116,
+        "height": 70
+      }
+    },
+    {
+      "id": "workers",
+      "type": "process",
+      "text": "workers",
+      "label": "workers",
+      "geometry": {
+        "x": 694,
+        "y": 150,
+        "width": 116,
+        "height": 70
+      }
+    },
+    {
+      "id": "match",
+      "type": "decision",
+      "text": "match",
+      "label": "match",
+      "geometry": {
+        "x": 870,
+        "y": 150,
+        "width": 116,
+        "height": 70
+      }
+    },
+    {
+      "id": "board",
+      "type": "section",
+      "text": "Board — hub",
+      "label": "Board — hub",
+      "title": "Board — hub",
+      "tint": "gray",
+      "geometry": {
+        "x": 304,
+        "y": 416,
+        "width": 720,
+        "height": 160
+      }
+    },
+    {
+      "id": "epochs",
+      "type": "database",
+      "text": "epochs",
+      "label": "epochs",
+      "geometry": {
+        "x": 445,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    },
+    {
+      "id": "artifacts",
+      "type": "database",
+      "text": "artifacts",
+      "label": "artifacts",
+      "geometry": {
+        "x": 608,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    },
+    {
+      "id": "saves",
+      "type": "database",
+      "text": "saves",
+      "label": "saves",
+      "geometry": {
+        "x": 771,
+        "y": 461,
+        "width": 112,
+        "height": 96
+      }
+    }
+  ],
+  "connections": []
+}

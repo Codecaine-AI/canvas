@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-10-row-and-col",
+  "title": "row and col — weighted splits",
+  "root": "b-rowcol-root",
+  "blocks": {
+    "b-rowcol-root": {
+      "id": "b-rowcol-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-rowcol-title-1",
+        "b-rowcol-body-2",
+        "b-rowcol-code-3",
+        "b-rowcol-canvas-4"
+      ],
+      "props": {
+        "covers": "The row and col statements: |-separated weights divide a region into proportional bands along the axis, exactly one child per weight, with automatic corridors kept between neighboring bands.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "row",
+          "col",
+          "weighted splits",
+          "weights",
+          "corridors"
+        ]
+      }
+    },
+    "b-rowcol-title-1": {
+      "id": "b-rowcol-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "row and col — weighted splits"
+        }
+      ]
+    },
+    "b-rowcol-body-2": {
+      "id": "b-rowcol-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Weights are "
+        },
+        {
+          "insert": "|",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-separated numbers; the space divides proportionally along the axis ("
+        },
+        {
+          "insert": "row",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = left→right, "
+        },
+        {
+          "insert": "col",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " = top→bottom). Weights are proportions, never pixels: "
+        },
+        {
+          "insert": "row 1|2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " means the second band is twice as wide. Exactly one indented child per weight, in order. A bare "
+        },
+        {
+          "insert": "row",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "col",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with no weights has no children. An empty corridor is kept between neighboring bands automatically, so connector lines have room to run."
+        }
+      ]
+    },
+    "b-rowcol-code-3": {
+      "id": "b-rowcol-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "col 1|2\n  section 1 text=side label=\"weight 1\"\n    item 2 text=a type=process size=M at=C\n  section 3 text=main label=\"weight 2\"\n    item 4 text=b type=process size=L at=C\n\narrows"
+        }
+      ]
+    },
+    "b-rowcol-canvas-4": {
+      "id": "b-rowcol-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-row-col.canvas.json",
+        "title": "col 1|2 — two stacked bands, heights 1:2"
+      }
+    }
+  }
+}

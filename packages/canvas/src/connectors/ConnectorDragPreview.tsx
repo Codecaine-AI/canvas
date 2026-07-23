@@ -24,7 +24,7 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import type { ConnectorDragOverlay } from "./types";
-/** Selection outline/handle color — inlined from the old CHROME.selectionBlue (stage must not import stage/editor/components/editor-style). */
+/** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
 const CONNECTOR_PREVIEW_STROKE_WIDTH_PX = 4;

@@ -29,7 +29,7 @@
         "b-overview-dataflow-heading-7",
         "b-overview-dataflow-model-8",
         "b-overview-dataflow-interaction-9",
-        "b-overview-dataflow-chrome-10",
+        "b-overview-dataflow-trim-10",
         "b-overview-dataflow-decision-11",
         "b-overview-selfcontained-heading-12",
         "b-overview-selfcontained-body-13",
@@ -49,7 +49,7 @@
         "b-overview-nextsteps-routing-27",
         "b-overview-nextsteps-render-28",
         "b-overview-nextsteps-editor-29",
-        "b-overview-nextsteps-chrome-30",
+        "b-overview-nextsteps-trim-30",
         "b-overview-nextsteps-studio-31",
         "b-overview-nextsteps-appendix-32",
         "b-overview-nextsteps-provenance-33"
@@ -113,7 +113,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The package is the engine layer only: document schema, action vocabulary and reducer, geometry helpers, pointer interaction state machine, connector routing, rendering, and FigJam-parity chrome. It is React-based but framework-agnostic about its host — it vendors its own UI primitives and has no dependency back on the Spectre app it was extracted from. See "
+          "insert": "The package is the engine layer only: document schema, action vocabulary and reducer, geometry helpers, pointer interaction state machine, connector routing, rendering, and FigJam-parity trim. It is React-based but framework-agnostic about its host — it vendors its own UI primitives and has no dependency back on the Spectre app it was extracted from. See "
         },
         {
           "insert": "README.md",
@@ -175,11 +175,11 @@
           },
           {
             "path": "packages/canvas/src/stage/editor/",
-            "note": "React component wiring: InteractiveCanvasEditor, viewport model, hotkeys, chrome components + editor features"
+            "note": "React component wiring: InteractiveCanvasEditor, viewport model, hotkeys, trim components + editor features"
           },
           {
             "path": "packages/canvas/src/stage/editor/components/ + features/",
-            "note": "FigJam-parity UI chrome: CanvasDock, selection toolbar + flyouts, ColorPicker, ShapesPanel, text editing"
+            "note": "FigJam-parity UI trim: CanvasDock, selection toolbar + flyouts, ColorPicker, ShapesPanel, text editing"
           },
           {
             "path": "packages/canvas/src/ui/",
@@ -446,8 +446,8 @@
       ],
       "children": []
     },
-    "b-overview-dataflow-chrome-10": {
-      "id": "b-overview-dataflow-chrome-10",
+    "b-overview-dataflow-trim-10": {
+      "id": "b-overview-dataflow-trim-10",
       "flavour": "paragraph",
       "props": {},
       "text": [
@@ -462,7 +462,7 @@
           }
         },
         {
-          "insert": " holds FigJam-parity UI chrome — dock, first-class connector tool mode, selection toolbar, color palette, shapes panel — standalone components wired into the live editor."
+          "insert": " holds FigJam-parity UI trim — dock, first-class connector tool mode, selection toolbar, color palette, shapes panel — standalone components wired into the live editor."
         }
       ],
       "children": []
@@ -633,7 +633,7 @@
           }
         },
         {
-          "insert": " — the full editable board, with chrome, hotkeys, and viewport wiring."
+          "insert": " — the full editable board, with trim, hotkeys, and viewport wiring."
         }
       ],
       "children": []
@@ -807,7 +807,7 @@
           }
         },
         {
-          "insert": " — regardless of the host app's theme. This is an intentional \"light board under dark app theme\" design choice, not an oversight: FigJam-style diagramming boards are conventionally light regardless of the surrounding app chrome, so the canvas does not follow a host's dark-mode setting."
+          "insert": " — regardless of the host app's theme. This is an intentional \"light board under dark app theme\" design choice, not an oversight: FigJam-style diagramming boards are conventionally light regardless of the surrounding app trim, so the canvas does not follow a host's dark-mode setting."
         }
       ],
       "children": []
@@ -986,25 +986,25 @@
       ],
       "children": []
     },
-    "b-overview-nextsteps-chrome-30": {
-      "id": "b-overview-nextsteps-chrome-30",
+    "b-overview-nextsteps-trim-30": {
+      "id": "b-overview-nextsteps-trim-30",
       "flavour": "list-item",
       "props": {
         "ordered": false
       },
       "text": [
         {
-          "insert": "canvas-60-chrome",
+          "insert": "canvas-60-trim",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-chrome",
-              "label": "canvas-60-chrome"
+              "path": "20-implementation/60-trim",
+              "label": "canvas-60-trim"
             }
           }
         },
         {
-          "insert": " — FigJam-parity UI chrome: dock, first-class connector tool mode, toolbar, palette, shapes panel."
+          "insert": " — FigJam-parity UI trim: dock, first-class connector tool mode, toolbar, palette, shapes panel."
         }
       ],
       "children": []

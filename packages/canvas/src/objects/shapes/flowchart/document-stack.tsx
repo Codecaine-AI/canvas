@@ -12,7 +12,7 @@ export const DOCUMENT_STACK_GEOMETRY = {
 /**
  * Document Stack (W5) — two offset wavy-bottom document silhouettes (the
  * back page dimmed via opacity, the front page full-opacity) drawn via
- * inline SVG behind the label/body content; the button chrome stays fully
+ * inline SVG behind the label/body content; the button trim stays fully
  * transparent so only one outline is visible. The original 100x100 silhouette
  * proportions are projected into object-local coordinates so the SVG stroke
  * width remains in true canvas px. Reuses `documentWavyPath` from the document

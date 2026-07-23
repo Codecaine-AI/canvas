@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-30-item-example-item",
+  "title": "Example item (item)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "panel",
+      "type": "section",
+      "text": "Item placement",
+      "label": "Item placement",
+      "title": "Item placement",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 336
+      }
+    },
+    {
+      "id": "note",
+      "type": "sticky",
+      "text": "note",
+      "label": "note",
+      "geometry": {
+        "x": 161,
+        "y": 106,
+        "width": 122,
+        "height": 92
+      }
+    },
+    {
+      "id": "step",
+      "type": "process",
+      "text": "step",
+      "label": "step",
+      "geometry": {
+        "x": 227,
+        "y": 218,
+        "width": 58,
+        "height": 31
+      }
+    },
+    {
+      "id": "tag",
+      "type": "pill",
+      "text": "tag",
+      "label": "tag",
+      "geometry": {
+        "x": 267,
+        "y": 269,
+        "width": 46,
+        "height": 15
+      }
+    }
+  ],
+  "connections": []
+}

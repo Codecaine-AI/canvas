@@ -40,3 +40,30 @@ export function handleAddAnnotation(
     },
   );
 }
+
+export function handleRemoveAnnotation(
+  state: InteractiveCanvasState,
+  action: Extract<CanvasAction, { type: "canvas.removeAnnotation" }>,
+): InteractiveCanvasState {
+  if (!state.document.annotations?.some((annotation) => annotation.id === action.annotationId)) {
+    return state;
+  }
+  return withHistory(
+    state.selection.kind === "annotation" && state.selection.annotationId === action.annotationId
+      ? { ...state, selection: { kind: "none" } }
+      : state,
+    {
+      ...state.document,
+      annotations: state.document.annotations.filter(
+        (annotation) => annotation.id !== action.annotationId,
+      ),
+    },
+    {
+      source: "human",
+      summary: "Removed note",
+      changedObjectIds: [],
+      changedConnectionIds: [],
+      changedAnnotationIds: [action.annotationId],
+    },
+  );
+}

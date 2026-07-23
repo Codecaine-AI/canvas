@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-60-hug",
+  "title": "hug= — pinned lanes",
+  "root": "b-hug-root",
+  "blocks": {
+    "b-hug-root": {
+      "id": "b-hug-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-hug-title-1",
+        "b-hug-body-2",
+        "b-hug-code-3",
+        "b-hug-canvas-4",
+        "b-hug-contrast-body-5",
+        "b-hug-contrast-canvas-6"
+      ],
+      "props": {
+        "covers": "The hug= field: a direct child of a split keeps its natural content size and pins to a corner of its band instead of stretching to fill it — shown with and without hug on the same program.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "hug",
+          "pinned lanes",
+          "natural size",
+          "split children"
+        ]
+      }
+    },
+    "b-hug-title-1": {
+      "id": "b-hug-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "hug= — pinned lanes"
+        }
+      ]
+    },
+    "b-hug-body-2": {
+      "id": "b-hug-body-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Any line that is a direct child of a split may end with "
+        },
+        {
+          "insert": "hug=<corner>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": the child keeps its natural content size and pins to that corner of its band instead of stretching to fill it (rule R7). This replaces the old "
+        },
+        {
+          "insert": "@corner",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " suffix on weights."
+        }
+      ]
+    },
+    "b-hug-code-3": {
+      "id": "b-hug-code-3",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "row 1|3\n  section 1 text=rail label=\"Lane hug=NW\" hug=NW\n    group\n      item 2 text=one type=pill size=S at=N\n      item 3 text=two type=pill size=S at=C\n      item 4 text=three type=pill size=S at=S\n  section 5 text=stage label=\"Stage\"\n    item 6 text=content type=process size=L at=C\n\narrows"
+        }
+      ]
+    },
+    "b-hug-canvas-4": {
+      "id": "b-hug-canvas-4",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-hug.canvas.json",
+        "title": "hug=NW — the rail pinned at its natural size"
+      }
+    },
+    "b-hug-contrast-body-5": {
+      "id": "b-hug-contrast-body-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The same program without "
+        },
+        {
+          "insert": "hug=NW",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the rail stretches across its whole band:"
+        }
+      ]
+    },
+    "b-hug-contrast-canvas-6": {
+      "id": "b-hug-contrast-canvas-6",
+      "flavour": "canvas",
+      "children": [],
+      "props": {
+        "src": "./assets/canvases/example-hug-contrast.canvas.json",
+        "title": "No hug — the rail stretches to fill its band"
+      }
+    }
+  }
+}

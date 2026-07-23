@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-03-r3-section-trim",
+  "title": "R3 — Section trim",
+  "root": "b-r3-root",
+  "blocks": {
+    "b-r3-root": {
+      "id": "b-r3-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r3-title-1",
+        "b-r3-card-2",
+        "b-r3-body-3",
+        "b-r3-evidence-4"
+      ],
+      "props": {
+        "covers": "A section reserves a 64px header band and 48px side/bottom padding, degrades proportionally in cramped regions, and shrinks to hug its content; corpus top insets run 64-128.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "section trim",
+          "header band",
+          "padding",
+          "content hugging"
+        ]
+      }
+    },
+    "b-r3-title-1": {
+      "id": "b-r3-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R3 — Section trim"
+        }
+      ]
+    },
+    "b-r3-card-2": {
+      "id": "b-r3-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Sections frame themselves"
+      },
+      "text": [
+        {
+          "insert": "A section reserves a 64px header band for its label chip and pads content 48px on the sides and bottom — and it shrinks to hug whatever is inside."
+        }
+      ]
+    },
+    "b-r3-body-3": {
+      "id": "b-r3-body-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The expander reserves "
+        },
+        {
+          "insert": "SECTION_HEADER = 64",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "SECTION_HEADER"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "DEFAULT_PADDING = 48",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/pipeline/expand.ts",
+              "symbol": "DEFAULT_PADDING"
+            }
+          }
+        },
+        {
+          "insert": " where the region affords it, and degrades proportionally in cramped regions — padding is capped at 12% of the region extent and the header at 16% of its height. Corpus top insets run 64-128 depending on label size."
+        }
+      ]
+    },
+    "b-r3-evidence-4": {
+      "id": "b-r3-evidence-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Evidence: gc "
+        },
+        {
+          "insert": "section-config",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (top inset 64, side 48), ink "
+        },
+        {
+          "insert": "section-input-adapter",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (side 48), intent-2 "
+        },
+        {
+          "insert": "section-direct",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (side 64)."
+        }
+      ]
+    }
+  }
+}

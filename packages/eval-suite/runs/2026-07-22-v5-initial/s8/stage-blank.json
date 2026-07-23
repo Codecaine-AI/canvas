@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "eval-suite-s8-retrieval-designs",
+  "title": "Eval Suite S8 — Retrieval Designs",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 1864
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Eval Suite S8 — Retrieval Designs",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 1800
+      },
+      "style": {
+        "shape": "section"
+      },
+      "locked": "background"
+    },
+    {
+      "id": "seed-user-query",
+      "type": "process",
+      "text": "User Query",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1456,
+        "y": 112,
+        "width": 224,
+        "height": 96
+      },
+      "style": {
+        "shape": "process"
+      }
+    },
+    {
+      "id": "seed-query-understanding",
+      "type": "process",
+      "text": "Query Understanding",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1424,
+        "y": 272,
+        "width": 288,
+        "height": 112
+      },
+      "style": {
+        "shape": "process"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}
