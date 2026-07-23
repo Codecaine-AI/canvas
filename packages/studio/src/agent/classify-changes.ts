@@ -98,8 +98,6 @@ export function classifyChanges(
         removedConnections.push(operation.connectionId);
         break;
       case "addConnection":
-      case "addAnnotation":
-      case "fitSectionToChildren":
         break;
     }
   }

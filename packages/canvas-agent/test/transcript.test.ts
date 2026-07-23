@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 
-import { createTranscriptRoutes } from "../src/harness/routes/transcript";
+import { createTranscriptRoutes } from "../src/service/routes/transcript";
 
 const CONTAINER_ID = "aaaa1111-2222-3333-4444-555566667777";
 const FILE_BASE_1 = "2026-01-01T00-00-00-000Z_sess-one";

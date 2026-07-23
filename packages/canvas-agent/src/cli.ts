@@ -13,8 +13,8 @@ import { join } from "node:path";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
-import { bootKernelDatabase, CANVASES_DIR } from "./harness/kernel";
-import { LayoutSessionStore } from "./harness/session-store";
+import { bootKernelDatabase, CANVASES_DIR } from "./service/kernel";
+import { LayoutSessionStore } from "./service/session";
 import type { AgentSessionEvent } from "./protocol";
 
 interface CliArgs {
@@ -93,10 +93,9 @@ function printEvent(event: AgentSessionEvent): void {
   switch (event.type) {
     case "fitted":
       console.log(`\n== fitted: ${event.scopeObjectIds.length} objects, frame ${Math.round(event.frame.width)}×${Math.round(event.frame.height)} at (${event.frame.x},${event.frame.y}), ${event.boundaryArrowCount} boundary arrow(s) ==`);
-      console.log(event.program);
       break;
     case "proposal":
-      console.log(`\n== proposal ${event.n} solved ==`);
+      console.log(`\n== proposal ${event.n} ==`);
       break;
     case "delta":
       console.log(event.delta);

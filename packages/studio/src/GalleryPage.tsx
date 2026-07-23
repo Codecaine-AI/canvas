@@ -15,6 +15,7 @@ import {
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
 import { Button } from "@codecaine-ai/canvas/ui/button";
 import { ArrowLeftIcon, ShapesIcon } from "@codecaine-ai/canvas/ui/icons";
+import { withRootPageFrame } from "./new-document";
 
 type GalleryPageProps = {
   onBack: () => void;
@@ -338,7 +339,7 @@ function makeDocument(input: {
   objects: InteractiveCanvasObject[];
   connections: InteractiveCanvasConnection[];
 }): InteractiveCanvasDocument {
-  return {
+  return withRootPageFrame({
     schemaVersion: 1,
     id: input.id,
     title: input.title,
@@ -348,7 +349,7 @@ function makeDocument(input: {
     objects: input.objects,
     connections: input.connections,
     annotations: [],
-  };
+  });
 }
 
 function sizeForObjects(objects: InteractiveCanvasObject[]): { width: number; height: number } {

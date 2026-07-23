@@ -176,7 +176,7 @@ describe("useAgentSession", () => {
     });
   });
 
-  it("runs through proposal-ready and atomically applies the proposal with its notes", async () => {
+  it("runs through proposal-ready and atomically applies the proposal", async () => {
     const { view, beforeStart, dispatchAgentPatch } = setup();
 
     await act(async () => {
@@ -193,7 +193,6 @@ describe("useAgentSession", () => {
       event({
         type: "fitted",
         sessionId: "session-1",
-        program: "section-a := row(card-a)",
         frame: { x: 0, y: 0, width: 400, height: 240 },
         scopeObjectIds: ["section-a", "card-a"],
         boundaryArrowCount: 0,
@@ -224,7 +223,6 @@ describe("useAgentSession", () => {
         objectId: "card-a",
         patch: { geometry: { x: 20, y: 30, width: 120, height: 80 } },
       },
-      { type: "removeAnnotation", annotationId: "note-a" },
     ];
     const expectedResult = {
       operations: expectedOperations,

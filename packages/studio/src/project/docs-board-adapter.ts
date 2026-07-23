@@ -20,6 +20,7 @@ import {
   type InteractiveCanvasDocument,
   type InteractiveCanvasObject,
 } from "@codecaine-ai/canvas";
+import { withRootPageFrame } from "../new-document";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -213,6 +214,7 @@ export function adaptStudioDocumentToProject(
   document: InteractiveCanvasDocument,
   originalRaw: unknown,
 ): Record<string, unknown> {
+  const framedDocument = withRootPageFrame(document);
   const rawDoc = isRecord(originalRaw) ? originalRaw : {};
   const originalObjects = new Map<unknown, Record<string, unknown>>();
   if (Array.isArray(rawDoc.objects)) {
@@ -227,10 +229,10 @@ export function adaptStudioDocumentToProject(
     }
   }
 
-  const objects = document.objects.map((object) =>
+  const objects = framedDocument.objects.map((object) =>
     adaptObjectToDocs(object, originalObjects.get(object.id)),
   );
-  const connections = document.connections.map((connection) => ({
+  const connections = framedDocument.connections.map((connection) => ({
     ...(originalConnections.get(connection.id) ?? {}),
     ...JSON.parse(JSON.stringify(connection)),
   }));
@@ -238,13 +240,13 @@ export function adaptStudioDocumentToProject(
   return {
     ...rawDoc,
     schemaVersion: 1,
-    id: document.id,
-    title: document.title,
-    mode: document.mode,
-    viewport: document.viewport,
-    size: document.size,
+    id: framedDocument.id,
+    title: framedDocument.title,
+    mode: framedDocument.mode,
+    viewport: framedDocument.viewport,
+    size: framedDocument.size,
     objects,
     connections,
-    annotations: document.annotations ?? [],
+    annotations: framedDocument.annotations ?? [],
   };
 }

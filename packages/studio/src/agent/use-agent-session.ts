@@ -1,6 +1,5 @@
 import type {
   CanvasAgentPatchOperation,
-  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas";
@@ -376,22 +375,6 @@ function toCanvasOperation(
         type: "removeConnection",
         connectionId: operation.connectionId,
       };
-    case "addAnnotation":
-      return {
-        type: "addAnnotation",
-        annotation: operation.annotation as unknown as InteractiveCanvasAnnotation,
-      };
-    case "removeAnnotation":
-      return {
-        type: "removeAnnotation",
-        annotationId: operation.annotationId,
-      };
-    case "fitSectionToChildren":
-      return {
-        type: "fitSectionToChildren",
-        sectionId: operation.sectionId,
-        padding: operation.padding,
-      };
     default: {
       const exhaustive: never = operation;
       return exhaustive;
@@ -457,7 +440,6 @@ export function useAgentSession({
   const liveSessionRef = useRef(false);
   const generationRef = useRef(0);
   const streamErrorCountRef = useRef(0);
-  const consumedNoteIdsRef = useRef<string[]>([]);
   const canvasIdRef = useRef(canvasId);
   const beforeStartRef = useRef(beforeStart);
   const dispatchAgentPatchRef = useRef(dispatchAgentPatch);
@@ -480,7 +462,6 @@ export function useAgentSession({
       sessionIdRef.current = null;
       liveSessionRef.current = false;
       streamErrorCountRef.current = 0;
-      consumedNoteIdsRef.current = [];
       dispatch({ type: "begin", instruction: payload.instruction });
 
       try {
@@ -491,9 +472,6 @@ export function useAgentSession({
           ...payload,
           ...freshSnapshot,
         };
-        consumedNoteIdsRef.current = [
-          ...new Set((effectivePayload.annotations ?? []).map(({ id }) => id)),
-        ];
 
         const response = await createSession(canvasIdRef.current, effectivePayload);
         if (generation !== generationRef.current) return null;
@@ -582,16 +560,7 @@ export function useAgentSession({
       const response = await acceptSession(canvasIdRef.current, sessionId);
       if (generation !== generationRef.current) return null;
 
-      const operations: CanvasAgentPatchOperation[] = [
-        ...response.operations.map(toCanvasOperation),
-        ...consumedNoteIdsRef.current.map(
-          (annotationId) =>
-            ({
-              type: "removeAnnotation",
-              annotationId,
-            }) satisfies AgentPatchOperation,
-        ),
-      ];
+      const operations = response.operations.map(toCanvasOperation);
       const result: AgentAcceptResult = {
         operations,
         summary: response.summary,
@@ -647,7 +616,6 @@ export function useAgentSession({
     sessionIdRef.current = null;
     liveSessionRef.current = false;
     streamErrorCountRef.current = 0;
-    consumedNoteIdsRef.current = [];
     dispatch({ type: "reset" });
   }, [closeSubscription]);
 

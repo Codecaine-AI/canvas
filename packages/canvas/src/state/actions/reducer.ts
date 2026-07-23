@@ -94,7 +94,7 @@ function shouldReconcileSectionMembership(action: CanvasAction): boolean {
     case "canvas.distributeSelection":
     case "canvas.fitSectionToChildren":
     case "canvas.setObjectType":
-    // Agent patches write geometry (add/update/fit) — membership must
+    // Agent patches write geometry (add/update) and auto-fit affected sections — membership must
     // re-derive; patch ops never write parentId themselves (agent-patch.ts).
     case "canvas.applyAgentPatch":
       return true;

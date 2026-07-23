@@ -1,0 +1,10 @@
+{
+	"$schema": "agent-kernel/agent-v1",
+	"name": "layout-editor",
+	"description": "Edits the scoped part of a canvas whiteboard per the operator's instruction: applies direct object and connection operations, checks delta and lint reports, judges renders, then commits a draft for review.",
+	"model": "layout",
+	"thinking": "high",
+	"maxTurns": 120,
+	"extensions": false,
+	"variables": {}
+}

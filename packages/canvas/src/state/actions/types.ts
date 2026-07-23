@@ -9,7 +9,6 @@ import type {
   CanvasShapeDirection,
   CanvasConnectionStyle,
   CanvasGeometry,
-  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -84,24 +83,6 @@ export type CanvasAgentPatchOperation =
       patch: Partial<Omit<InteractiveCanvasObject, "id">>;
     }
   | {
-      type: "addConnection";
-      connection: InteractiveCanvasConnection;
-    }
-  | {
-      type: "updateConnection";
-      connectionId: string;
-      patch: Partial<Omit<InteractiveCanvasConnection, "id">>;
-    }
-  | {
-      type: "addAnnotation";
-      annotation: InteractiveCanvasAnnotation;
-    }
-  | {
-      type: "fitSectionToChildren";
-      sectionId: string;
-      padding?: number;
-    }
-  | {
       /**
        * Removes the object; its connections cascade away with it (and, for a
        * section, its recorded descendants too) — same semantics as the human
@@ -111,12 +92,17 @@ export type CanvasAgentPatchOperation =
       objectId: string;
     }
   | {
-      type: "removeConnection";
-      connectionId: string;
+      type: "addConnection";
+      connection: InteractiveCanvasConnection;
     }
   | {
-      type: "removeAnnotation";
-      annotationId: string;
+      type: "updateConnection";
+      connectionId: string;
+      patch: Partial<Omit<InteractiveCanvasConnection, "id">>;
+    }
+  | {
+      type: "removeConnection";
+      connectionId: string;
     };
 
 export type CanvasAction =

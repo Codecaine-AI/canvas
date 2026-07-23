@@ -1,24 +1,29 @@
 /**
- * v5 Phase-B context wiring gate: the style-guide loader injects every
- * registered style topic; the board-state loader renders the spawn snapshot
- * (or its fallback line); the layout-editor context sidecar assembles the
- * three tagged blocks in declaration order; and the kernel config registers
- * all three custom loaders.
+ * Context wiring gate: the style-guide loader injects every registered style
+ * topic; the board-state and user-requests loaders render their spawn
+ * snapshots (or fallback lines); the layout-editor context sidecar assembles
+ * the four tagged blocks in declaration order; and the kernel config
+ * registers all four custom loaders.
  */
 import { describe, expect, test } from "bun:test";
 
 import type { LoadedMap, SpawnContext } from "@agent-kernel/kernel/context";
 
-import { STYLE_TOPICS } from "../src/styles";
+import { STYLE_TOPICS } from "../src/agent/styles";
 import {
   formatStyleGuide,
   styleGuideLoader,
-} from "../src/harness/loaders/style-guide";
+} from "../src/agent/loaders/style-guide";
 import {
   BOARD_STATE_FALLBACK,
   boardStateLoader,
-} from "../src/harness/loaders/board-state";
-import { context as layoutEditorContext } from "../src/harness/agent-catalog/layout-editor/context";
+} from "../src/agent/loaders/board-state";
+import {
+  USER_REQUESTS_EMPTY,
+  formatUserRequests,
+  userRequestsLoader,
+} from "../src/agent/loaders/user-requests";
+import { context as layoutEditorContext } from "../src/agent/catalog/layout-editor/context";
 
 const RESOLVE_CTX = { cwd: "/" };
 
@@ -92,10 +97,68 @@ describe("board-state loader", () => {
   });
 });
 
+describe("user-requests loader", () => {
+  test("renders sessionData.userRequests verbatim and falls back when absent", async () => {
+    const userRequests = formatUserRequests([
+      {
+        id: "req-1",
+        target: { kind: "object", objectId: "task" },
+        intent: "agent-request",
+        status: "open",
+        body: "Split this into two steps",
+      },
+    ]);
+    const present = await userRequestsLoader.resolve(
+      { kind: "user-requests" },
+      { cwd: "/", sessionData: { userRequests } },
+    );
+    expect(present.status).toBe("ok");
+    expect(present.content).toBe(userRequests);
+
+    const absent = await userRequestsLoader.resolve({ kind: "user-requests" }, { cwd: "/" });
+    expect(absent.content).toBe(USER_REQUESTS_EMPTY);
+  });
+
+  test("formats every target kind, defaults status to open, and marks the empty queue", () => {
+    const text = formatUserRequests([
+      {
+        id: "on-object",
+        target: { kind: "object", objectId: "task" },
+        intent: "note",
+        status: "open",
+        body: "Keep this as the entry point",
+      },
+      {
+        id: "on-edge",
+        target: { kind: "connection", connectionId: "task-other" },
+        intent: "agent-request",
+        status: "applied",
+        body: "Make the relationship clearer",
+      },
+      {
+        id: "on-region",
+        target: { kind: "region", region: { x: 12, y: 34, width: 200, height: 120 } },
+        intent: "agent-request",
+        body: "Use this area for outcomes",
+      },
+    ]);
+    expect(text).toContain("read-only — respond by editing board content");
+    expect(text).toContain('  on-object  object:task  note/open  "Keep this as the entry point"');
+    expect(text).toContain(
+      '  on-edge  connection:task-other  agent-request/applied  "Make the relationship clearer"',
+    );
+    expect(text).toContain(
+      '  on-region  region:12,34 200×120  agent-request/open  "Use this area for outcomes"',
+    );
+    expect(formatUserRequests([])).toBe(USER_REQUESTS_EMPTY);
+  });
+});
+
 describe("layout-editor context sidecar", () => {
-  test("declares the three loaders in block order", () => {
+  test("declares the four loaders in block order", () => {
     expect(layoutEditorContext.loaders.map((decl) => decl.kind)).toEqual([
       "editor-state",
+      "user-requests",
       "style-guide",
       "board-state",
     ]);
@@ -104,19 +167,22 @@ describe("layout-editor context sidecar", () => {
   test("assemble wraps each loaded input in its tagged block", async () => {
     const loaded: LoadedMap = [
       loadedInput("editor-state", "canvas: c1 (baseline abc)"),
+      loadedInput("user-requests", USER_REQUESTS_EMPTY),
       loadedInput("style-guide", formatStyleGuide()),
       loadedInput("board-state", BOARD_STATE_FALLBACK),
     ];
     const assembled = await layoutEditorContext.assemble(loaded, {} as SpawnContext);
 
     expect(assembled).toContain("<editor_state>\ncanvas: c1 (baseline abc)\n</editor_state>");
+    expect(assembled).toContain(`<user_requests>\n${USER_REQUESTS_EMPTY}\n</user_requests>`);
     expect(assembled).toContain(`<board_state>\n${BOARD_STATE_FALLBACK}\n</board_state>`);
     expect(assembled).toContain("<style_guide>\n");
     for (const topic of STYLE_TOPICS) {
       expect(assembled).toContain(`## ${topic.title}`);
     }
     // Block order matches declaration order.
-    expect(assembled.indexOf("<editor_state>")).toBeLessThan(assembled.indexOf("<style_guide>"));
+    expect(assembled.indexOf("<editor_state>")).toBeLessThan(assembled.indexOf("<user_requests>"));
+    expect(assembled.indexOf("<user_requests>")).toBeLessThan(assembled.indexOf("<style_guide>"));
     expect(assembled.indexOf("<style_guide>")).toBeLessThan(assembled.indexOf("<board_state>"));
   });
 
@@ -128,14 +194,15 @@ describe("layout-editor context sidecar", () => {
 });
 
 describe("kernel loader registration", () => {
-  test("kernel.ts registers all three custom loaders", () => {
-    // createLayoutKernel wires `loaders: [editorStateLoader, styleGuideLoader,
-    // boardStateLoader]`; booting a kernel here would touch trace.db, so this
-    // gate reads the wiring statically.
+  test("kernel.ts registers all four custom loaders", () => {
+    // Booting a kernel here would touch trace.db, so this gate reads the
+    // wiring statically.
     const source = require("node:fs").readFileSync(
-      require("node:path").join(import.meta.dir, "..", "src", "harness", "kernel.ts"),
+      require("node:path").join(import.meta.dir, "..", "src", "service", "kernel.ts"),
       "utf8",
     ) as string;
-    expect(source).toContain("loaders: [editorStateLoader, styleGuideLoader, boardStateLoader]");
+    expect(source).toContain(
+      "loaders: [editorStateLoader, userRequestsLoader, styleGuideLoader, boardStateLoader]",
+    );
   });
 });

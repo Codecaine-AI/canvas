@@ -8,8 +8,10 @@ import {
   WorkflowIcon,
 } from "@codecaine-ai/canvas/ui/icons";
 import {
+  createInteractiveCanvasState,
   InteractiveCanvasEditor,
   InteractiveCanvasViewer,
+  reduceInteractiveCanvasState,
   type InteractiveCanvasDocument,
   type InteractiveCanvasEditorHandle,
   type InteractiveCanvasEditorState,
@@ -37,6 +39,7 @@ import { GalleryPage } from "./GalleryPage";
 import { DevRail } from "./dev/DevRail";
 import { devPagesEnabled } from "./dev-flag";
 import { navigate } from "./navigation";
+import { withRootPageFrame } from "./new-document";
 import {
   adaptProjectCanvasToStudio,
   adaptStudioDocumentToProject,
@@ -112,7 +115,7 @@ function createStarterCanvasDocument(input: {
   id: string;
   title: string;
 }): InteractiveCanvasDocument {
-  return {
+  return withRootPageFrame({
     schemaVersion: 1,
     id: input.id,
     title: input.title,
@@ -158,7 +161,7 @@ function createStarterCanvasDocument(input: {
       },
     ],
     annotations: [],
-  };
+  });
 }
 
 type Rect = { x: number; y: number; width: number; height: number };
@@ -260,6 +263,7 @@ export function App() {
   // plus the live selection/viewport/lastChange stream.
   const editorRef = useRef<InteractiveCanvasEditorHandle | null>(null);
   const [editorState, setEditorState] = useState<InteractiveCanvasEditorState | null>(null);
+  const [editorDocumentRevision, setEditorDocumentRevision] = useState(0);
   const previousEditorToolRef = useRef<InteractiveCanvasEditorState["tool"] | null>(null);
   const lastAgentRunRef = useRef<{ instruction: string; wholeBoard: boolean } | null>(null);
   const pendingSaveRef = useRef<InteractiveCanvasDocument | null>(null);
@@ -648,8 +652,20 @@ export function App() {
   );
 
   const handleRemoveAgentNote = useCallback((annotationId: string) => {
-    editorRef.current?.dispatchAgentPatch([{ type: "removeAnnotation", annotationId }]);
-  }, []);
+    if (!activeDocument) return;
+    const state = createInteractiveCanvasState(activeDocument);
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.removeAnnotation",
+      annotationId,
+    });
+    if (next.document === state.document) return;
+
+    // The canvas editor is intentionally uncontrolled. Remount it with the
+    // human-action result so its internal reducer and the autosave snapshot
+    // cannot diverge after a sidebar-driven annotation removal.
+    setEditorDocumentRevision((revision) => revision + 1);
+    queueAutosave(next.document);
+  }, [activeDocument, queueAutosave]);
 
   const handlePanToAgentNote = useCallback(
     (note: PendingNote) => {
@@ -787,6 +803,7 @@ export function App() {
     return (
       <div className="min-h-screen bg-background p-4">
         <InteractiveCanvasEditor
+          key={`${activeDocument.id}:${editorDocumentRevision}`}
           document={activeDocument}
           editableTitle
           onDocumentChange={queueAutosave}

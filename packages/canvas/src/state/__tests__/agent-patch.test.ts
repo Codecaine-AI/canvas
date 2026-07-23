@@ -69,30 +69,6 @@ function makeState(): InteractiveCanvasState {
   return createInteractiveCanvasState(document);
 }
 
-function makeAnnotatedState(): InteractiveCanvasState {
-  return createInteractiveCanvasState({
-    ...makeState().document,
-    annotations: [
-      {
-        id: "note-a",
-        target: { kind: "object", objectId: "a" },
-        intent: "agent-request",
-        body: "Remove this step",
-        status: "open",
-        createdBy: "human",
-      },
-      {
-        id: "note-region",
-        target: { kind: "region", region: { x: 192, y: 0, width: 96, height: 64 } },
-        intent: "agent-request",
-        body: "Rename this step",
-        status: "open",
-        createdBy: "human",
-      },
-    ],
-  });
-}
-
 function apply(
   state: InteractiveCanvasState,
   operations: CanvasAgentPatchOperation[],
@@ -166,31 +142,6 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.document.connections).toHaveLength(0);
     expect(next.lastChange?.changedObjectIds).toEqual(["a"]);
     expect(next.lastChange?.changedConnectionIds.sort()).toEqual(["conn-ab", "conn-ca"]);
-  });
-
-  it("removes annotations alongside object updates in one history entry", () => {
-    const state = makeAnnotatedState();
-    const next = apply(state, [
-      { type: "updateObject", objectId: "b", patch: { text: "Updated B" } },
-      { type: "removeAnnotation", annotationId: "note-a" },
-      { type: "removeAnnotation", annotationId: "note-region" },
-    ]);
-
-    expect(next.history.past).toHaveLength(state.history.past.length + 1);
-    expect(next.document.objects.find((object) => object.id === "b")?.text).toBe("Updated B");
-    expect(next.document.annotations).toEqual([]);
-    expect(next.lastChange?.changedAnnotationIds).toEqual(["note-a", "note-region"]);
-  });
-
-  it("skips removeAnnotation when removeObject already cascaded it away", () => {
-    const state = makeAnnotatedState();
-    const next = apply(state, [
-      { type: "removeObject", objectId: "a" },
-      { type: "removeAnnotation", annotationId: "note-a" },
-    ]);
-
-    expect(next.document.objects.some((object) => object.id === "a")).toBe(false);
-    expect(next.document.annotations?.map((annotation) => annotation.id)).toEqual(["note-region"]);
   });
 
   it("skips operations referencing unknown ids but applies the rest", () => {
@@ -303,5 +254,195 @@ describe("canvas.applyAgentPatch", () => {
     });
     const next = apply(state, [{ type: "removeObject", objectId: "a" }]);
     expect(next.selection).toEqual({ kind: "objects", objectIds: ["b"] });
+  });
+
+  it("grows a section when an object is added inside it", () => {
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "auto-fit-add",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "section",
+          type: "section",
+          geometry: { x: 496, y: 16, width: 144, height: 144 },
+        }),
+        makeObject({
+          id: "first",
+          geometry: { x: 512, y: 64, width: 96, height: 64 },
+        }),
+      ],
+      connections: [],
+    });
+
+    const next = apply(state, [
+      {
+        type: "addObject",
+        object: makeObject({
+          id: "second",
+          geometry: { x: 576, y: 64, width: 96, height: 64 },
+        }),
+      },
+    ]);
+
+    expect(next.document.objects.find((object) => object.id === "second")?.parentId).toBe(
+      "section",
+    );
+    expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
+      x: 496,
+      y: 16,
+      width: 208,
+      height: 144,
+    });
+    expect(next.lastChange?.changedObjectIds.sort()).toEqual(["second", "section"]);
+  });
+
+  it("shrinks a section when an object moves out", () => {
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "auto-fit-move-out",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "section",
+          type: "section",
+          geometry: { x: 496, y: 16, width: 208, height: 144 },
+        }),
+        makeObject({ id: "first", geometry: { x: 512, y: 64, width: 96, height: 64 } }),
+        makeObject({ id: "second", geometry: { x: 576, y: 64, width: 96, height: 64 } }),
+      ],
+      connections: [],
+    });
+
+    const next = apply(state, [
+      {
+        type: "updateObject",
+        objectId: "second",
+        patch: { geometry: { x: 0, y: 0, width: 96, height: 64 } },
+      },
+    ]);
+
+    expect(next.document.objects.find((object) => object.id === "second")?.parentId ?? null).toBe(
+      null,
+    );
+    expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
+      x: 496,
+      y: 16,
+      width: 144,
+      height: 144,
+    });
+  });
+
+  it("fits nested sections innermost-first so geometry cascades outward", () => {
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "auto-fit-nested",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "outer",
+          type: "section",
+          geometry: { x: 480, y: 64, width: 192, height: 224 },
+        }),
+        makeObject({
+          id: "inner",
+          type: "section",
+          geometry: { x: 496, y: 112, width: 144, height: 144 },
+        }),
+        makeObject({ id: "first", geometry: { x: 512, y: 160, width: 96, height: 64 } }),
+      ],
+      connections: [],
+    });
+
+    const next = apply(state, [
+      {
+        type: "addObject",
+        object: makeObject({
+          id: "second",
+          geometry: { x: 576, y: 160, width: 96, height: 64 },
+        }),
+      },
+    ]);
+
+    expect(next.document.objects.find((object) => object.id === "inner")?.geometry).toEqual({
+      x: 496,
+      y: 112,
+      width: 208,
+      height: 144,
+    });
+    expect(next.document.objects.find((object) => object.id === "outer")?.geometry).toEqual({
+      x: 480,
+      y: 64,
+      width: 256,
+      height: 224,
+    });
+    expect(next.lastChange?.changedObjectIds.sort()).toEqual(["inner", "outer", "second"]);
+  });
+
+  it("never auto-fits a background-locked page frame", () => {
+    const frameGeometry = { x: 0, y: 0, width: 800, height: 600 };
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "auto-fit-frame",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "frame",
+          type: "section",
+          locked: "background",
+          geometry: frameGeometry,
+        }),
+      ],
+      connections: [],
+    });
+
+    const next = apply(state, [
+      {
+        type: "addObject",
+        object: makeObject({ id: "inside", geometry: { x: 96, y: 96, width: 96, height: 64 } }),
+      },
+    ]);
+
+    expect(next.document.objects.find((object) => object.id === "inside")?.parentId).toBe("frame");
+    expect(next.document.objects.find((object) => object.id === "frame")?.geometry).toEqual(
+      frameGeometry,
+    );
+    expect(next.lastChange?.changedObjectIds).toEqual(["inside"]);
+  });
+
+  it("lets an explicit in-batch section resize win over auto-fit", () => {
+    const explicitGeometry = { x: 496, y: 16, width: 320, height: 256 };
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "auto-fit-explicit-resize",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "section",
+          type: "section",
+          geometry: { x: 496, y: 16, width: 144, height: 144 },
+        }),
+        makeObject({ id: "child", geometry: { x: 512, y: 64, width: 96, height: 64 } }),
+      ],
+      connections: [],
+    });
+
+    const next = apply(state, [
+      {
+        type: "updateObject",
+        objectId: "child",
+        patch: { geometry: { x: 576, y: 64, width: 96, height: 64 } },
+      },
+      {
+        type: "updateObject",
+        objectId: "section",
+        patch: { geometry: explicitGeometry },
+      },
+    ]);
+
+    expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual(
+      explicitGeometry,
+    );
+    expect(next.history.past).toHaveLength(1);
   });
 });

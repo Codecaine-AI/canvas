@@ -5,51 +5,43 @@ import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
-import { rasterizeSvgToPng } from "../src/harness/render";
+import { rasterizeSvgToPng } from "../src/service/render";
 import {
+  createLayoutToolState,
+  emitSessionEvent,
   LayoutSessionStore,
+  toolApplyOps,
+  toolRenderDraft,
   type LayoutSession,
-} from "../src/harness/session-store";
+  type LayoutToolState,
+} from "../src/service/session";
 import type {
   LayoutRenderRequest,
   LayoutToolRenderResult,
-  LayoutToolTextResult,
-} from "../src/harness/tool-runtime";
-import { fitScope } from "../src/pipeline";
+} from "../src/service/tool-runtime";
+import { resolveScope } from "../src/board/scope";
 import { FIXTURES_DIR } from "./helpers";
 
 const PNG_SIGNATURE = "89504e470d0a1a0a";
-const CENTER_TASK_PROGRAM = [
-  "section 1 text=section-ml-pending label=\"Pending\"",
-  "  item 2 text=task-ml-a type=predefined-process size=M at=C",
-  "",
-  "align x: \"icon-conversation-history\" 2 \"task-ml-b\" \"task-ml-c\" \"task-ml-d\" \"task-ml-e\"",
-  "",
-  "arrows",
-].join("\n");
 
-function invokePrivate<T>(store: LayoutSessionStore, name: string, ...args: unknown[]): T {
-  const method = Reflect.get(store, name) as (...methodArgs: unknown[]) => T;
-  return method.apply(store, args);
-}
-
-function makeBubbaStore(): { store: LayoutSessionStore; session: LayoutSession } {
+function makeBubbaStore(): {
+  store: LayoutSessionStore;
+  session: LayoutSession;
+  state: LayoutToolState;
+} {
   const baseline = JSON.parse(
     readFileSync(join(FIXTURES_DIR, "bubba-voice.canvas.json"), "utf8"),
   ) as InteractiveCanvasDocument;
-  const fit = fitScope(baseline, ["section-ml-pending"]);
+  const scopeResolution = resolveScope(baseline, ["section-ml-pending"]);
   const session: LayoutSession = {
     id: "render-session",
     canvasId: "bubba-voice",
     canvasPath: join(FIXTURES_DIR, "bubba-voice.canvas.json"),
     baseline,
     baselineHash: "test-hash",
-    requestedScopeIds: ["section-ml-pending"],
-    baselineFit: fit,
-    currentFit: fit,
-    scopeIds: new Set(fit.scopeObjectIds),
+    scopeResolution,
+    scopeIds: new Set(scopeResolution.scopeObjectIds),
     draft: baseline,
-    lastSketch: null,
     proposalCount: 0,
     proposal: null,
     status: "running",
@@ -65,21 +57,26 @@ function makeBubbaStore(): { store: LayoutSessionStore; session: LayoutSession }
   };
 
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
-  Object.defineProperty(store, "currentSession", { value: () => session });
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([
     [session.id, session],
   ]);
-  (store as unknown as { renderCount: number }).renderCount = 0;
-  store.onRender = null;
-  return { store, session };
+  return { store, session, state: createLayoutToolState() };
 }
 
-function proposeCenteredTask(store: LayoutSessionStore): LayoutToolTextResult {
-  return invokePrivate(store, "toolProposeProgram", CENTER_TASK_PROGRAM);
+function centerTask(session: LayoutSession): LayoutToolRenderResult {
+  return toolApplyOps(session, [{
+    type: "updateObject",
+    objectId: "task-ml-a",
+    patch: { geometry: { x: 1116, y: 614, width: 200, height: 100 } },
+  }], emitSessionEvent);
 }
 
-function renderDraft(store: LayoutSessionStore, request: LayoutRenderRequest): LayoutToolRenderResult {
-  return invokePrivate(store, "toolRenderDraft", request);
+function renderDraft(
+  session: LayoutSession,
+  state: LayoutToolState,
+  request: LayoutRenderRequest,
+): LayoutToolRenderResult {
+  return toolRenderDraft(session, request, emitSessionEvent, state);
 }
 
 function expectPng(png: Buffer | undefined): asserts png is Buffer {
@@ -89,38 +86,38 @@ function expectPng(png: Buffer | undefined): asserts png is Buffer {
 
 describe("harness render boundary", () => {
   test("renders the exact bubba-voice session draft and render_draft camera", () => {
-    const { store, session } = makeBubbaStore();
+    const { store, session, state } = makeBubbaStore();
 
-    expect(proposeCenteredTask(store).isError).not.toBe(true);
+    expect(centerTask(session).isError).not.toBe(true);
     expect(session.draft.objects.find((object) => object.id === "task-ml-a")?.geometry).toEqual({
-      x: 1116,
-      y: 614,
-      width: 200,
-      height: 100,
+      x: 1120,
+      y: 608,
+      width: 208,
+      height: 96,
     });
 
     const ghost = store.draftSvg(session.id);
-    expect({ width: ghost.width, height: ghost.height }).toEqual({ width: 1400, height: 907 });
-    expect(ghost.svg).toContain('viewBox="784 352 864 560"');
+    expect({ width: ghost.width, height: ghost.height }).toEqual({ width: 1400, height: 778 });
+    expect(ghost.svg).toContain('viewBox="784 352 864 480"');
     const ghostPng = rasterizeSvgToPng(ghost.svg);
-    expect({ width: ghostPng.width, height: ghostPng.height }).toEqual({ width: 1400, height: 907 });
+    expect({ width: ghostPng.width, height: ghostPng.height }).toEqual({ width: 1400, height: 778 });
     expectPng(ghostPng.png);
 
-    const rendered = renderDraft(store, { pixelWidth: 1000 });
+    const rendered = renderDraft(session, state, { pixelWidth: 1000 });
     expect(rendered.isError).not.toBe(true);
     expect(rendered.details).toEqual({
-      crop: { x: 784, y: 352, width: 864, height: 560 },
+      crop: { x: 784, y: 352, width: 864, height: 480 },
       width: 1000,
-      height: 648,
+      height: 556,
     });
     expectPng(rendered.png);
 
-    const secondRecordedWidth = renderDraft(store, { pixelWidth: 1200 });
+    const secondRecordedWidth = renderDraft(session, state, { pixelWidth: 1200 });
     expect(secondRecordedWidth.isError).not.toBe(true);
-    expect(secondRecordedWidth.details).toMatchObject({ width: 1200, height: 778 });
+    expect(secondRecordedWidth.details).toMatchObject({ width: 1200, height: 667 });
     expectPng(secondRecordedWidth.png);
 
-    const closeUp = renderDraft(store, {
+    const closeUp = renderDraft(session, state, {
       crop: { x: 912, y: 480, width: 608, height: 160 },
       pixelWidth: 1000,
     });
@@ -134,8 +131,8 @@ describe("harness render boundary", () => {
   });
 
   test("returns tool errors for degenerate crops and remains usable", () => {
-    const { store, session } = makeBubbaStore();
-    expect(proposeCenteredTask(store).isError).not.toBe(true);
+    const { session, state } = makeBubbaStore();
+    expect(centerTask(session).isError).not.toBe(true);
     const invalidRequests: LayoutRenderRequest[] = [
       { crop: { x: 0, y: 0, width: 0, height: 0 } },
       { crop: { x: 0, y: 0, width: -1, height: 10 } },
@@ -151,7 +148,7 @@ describe("harness render boundary", () => {
       (event) => event.type === "rendering",
     ).length;
     for (const request of invalidRequests) {
-      const result = renderDraft(store, request);
+      const result = renderDraft(session, state, request);
       expect(result.isError).toBe(true);
       expect(result.png).toBeUndefined();
     }
@@ -159,7 +156,7 @@ describe("harness render boundary", () => {
       renderingEventsBefore,
     );
 
-    const recovered = renderDraft(store, { pixelWidth: 1000 });
+    const recovered = renderDraft(session, state, { pixelWidth: 1000 });
     expect(recovered.isError).not.toBe(true);
     expectPng(recovered.png);
   });
@@ -172,7 +169,7 @@ describe("harness render boundary", () => {
       '<rect x="3184" y="432" width="352" height="320" filter="url(#shadow)"/>',
       "</svg>",
     ].join("");
-    const renderModuleUrl = new URL("../src/harness/render.ts", import.meta.url).href;
+    const renderModuleUrl = new URL("../src/service/render.ts", import.meta.url).href;
     const probe = [
       `import { rasterizeSvgToPng } from ${JSON.stringify(renderModuleUrl)};`,
       `const svg = ${JSON.stringify(svg)};`,

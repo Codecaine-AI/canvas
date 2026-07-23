@@ -3,15 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/pipeline/index.ts",
-  "types": "src/pipeline/index.ts",
   "exports": {
-    ".": "./src/pipeline/index.ts",
     "./protocol": "./src/protocol.ts"
   },
   "scripts": {
-    "generate:docs-boards": "bun scripts/generate-docs-boards.ts",
-    "harness": "bun src/harness/server.ts",
+    "harness": "bun src/service/server.ts",
     "viewer": "vite --config src/viewer/vite.config.ts",
     "cli": "bun src/cli.ts",
     "test": "bun test"

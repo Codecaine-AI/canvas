@@ -10,21 +10,21 @@
  * halo for every object the patch added/updated/removed.
  *
  * Error policy: this is a reducer, so it cannot log or throw usefully — an
- * operation referencing an unknown objectId/connectionId/sectionId (or an
+ * operation referencing an unknown objectId/connectionId (or an
  * addObject/addConnection whose id or endpoints are invalid) is SKIPPED and
  * the remaining operations still apply. Callers who need strict validation
  * should pre-validate against the document before dispatching.
  *
  * parentId is NEVER written from patch ops: an added object's parentId is
- * nulled and updateObject patches have parentId stripped — the reducer's
- * post-reduce reconcileSectionMembership choke point (which runs for this
- * action, see shouldReconcileSectionMembership) re-derives membership from
- * geometry, exactly as it does for human moves. Waypoints of connectors
+ * nulled and updateObject patches have parentId stripped. After the whole
+ * batch, membership is re-derived and affected sections are fit once via
+ * autoFitSectionsAfterAgentPatch. Waypoints of connectors
  * whose endpoint owners moved are likewise handled downstream by the
  * always-on reconcileConnectionWaypoints choke point — nothing here
  * duplicates it.
  */
-import { fitSectionToChildren, sectionDescendantIds } from "../geometry";
+import { autoFitSectionsAfterAgentPatch } from "../agent-patch-auto-fit";
+import { sectionDescendantIds } from "../geometry";
 import type { InteractiveCanvasDocument } from "../schema";
 import { hasValidEndpoint, removeConnection } from "./connections";
 import { nextId } from "./helpers";
@@ -42,6 +42,7 @@ type PatchAccumulator = {
   changedObjectIds: Set<string>;
   changedConnectionIds: Set<string>;
   changedAnnotationIds: Set<string>;
+  explicitlyResizedSectionIds: Set<string>;
 };
 
 function applyOperation(
@@ -66,6 +67,14 @@ function applyOperation(
     case "updateObject": {
       const existing = document.objects.find((object) => object.id === operation.objectId);
       if (!existing) return; // unknown id → skip
+      if (
+        existing.type === "section" &&
+        operation.patch.geometry &&
+        (operation.patch.geometry.width !== existing.geometry.width ||
+          operation.patch.geometry.height !== existing.geometry.height)
+      ) {
+        accumulator.explicitlyResizedSectionIds.add(operation.objectId);
+      }
       // Strip parentId — membership is derived from geometry downstream.
       const { parentId: _ignored, ...patch } = operation.patch;
       accumulator.document = {
@@ -102,35 +111,18 @@ function applyOperation(
         (connection) => connection.id === operation.connectionId,
       );
       if (!existing) return; // unknown id → skip
-      // Strip waypoints — live routing owns connector paths.
-      const { waypoints: _ignored, ...patch } = operation.patch;
+      // Waypoints apply verbatim — they are part of the agent's routing
+      // steering surface; post-reduce reconcile still clears them when an
+      // endpoint object later moves asymmetrically.
       accumulator.document = {
         ...document,
         connections: document.connections.map((connection) =>
-          connection.id === operation.connectionId ? { ...connection, ...patch } : connection,
+          connection.id === operation.connectionId
+            ? { ...connection, ...operation.patch }
+            : connection,
         ),
       };
       accumulator.changedConnectionIds.add(operation.connectionId);
-      return;
-    }
-    case "addAnnotation": {
-      const { annotation } = operation;
-      const existingIds = document.annotations?.map((candidate) => candidate.id) ?? [];
-      const id = existingIds.includes(annotation.id)
-        ? nextId("annotation", existingIds)
-        : annotation.id;
-      accumulator.document = {
-        ...document,
-        annotations: [...(document.annotations ?? []), { ...annotation, id }],
-      };
-      accumulator.changedAnnotationIds.add(id);
-      return;
-    }
-    case "fitSectionToChildren": {
-      const fitted = fitSectionToChildren(document, operation.sectionId, operation.padding);
-      if (fitted === document) return; // unknown/childless section → no-op
-      accumulator.document = fitted;
-      accumulator.changedObjectIds.add(operation.sectionId);
       return;
     }
     case "removeObject": {
@@ -181,19 +173,6 @@ function applyOperation(
       accumulator.changedConnectionIds.add(operation.connectionId);
       return;
     }
-    case "removeAnnotation": {
-      if (!document.annotations?.some((annotation) => annotation.id === operation.annotationId)) {
-        return; // unknown id → skip
-      }
-      accumulator.document = {
-        ...document,
-        annotations: document.annotations.filter(
-          (annotation) => annotation.id !== operation.annotationId,
-        ),
-      };
-      accumulator.changedAnnotationIds.add(operation.annotationId);
-      return;
-    }
   }
 }
 
@@ -233,12 +212,23 @@ export function handleApplyAgentPatch(
     changedObjectIds: new Set(),
     changedConnectionIds: new Set(),
     changedAnnotationIds: new Set(),
+    explicitlyResizedSectionIds: new Set(),
   };
   for (const operation of action.operations) {
     applyOperation(accumulator, operation);
   }
   // Every operation skipped / no-op'd → no history entry, no halo.
   if (accumulator.document === state.document) return state;
+
+  const autoFit = autoFitSectionsAfterAgentPatch(
+    state.document,
+    accumulator.document,
+    accumulator.explicitlyResizedSectionIds,
+  );
+  accumulator.document = autoFit.document;
+  for (const sectionId of autoFit.fittedSectionIds) {
+    accumulator.changedObjectIds.add(sectionId);
+  }
 
   return withHistory(
     { ...state, selection: pruneSelection(state.selection, accumulator.document) },

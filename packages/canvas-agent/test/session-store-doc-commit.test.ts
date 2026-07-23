@@ -3,35 +3,29 @@ import { describe, expect, test } from "bun:test";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import {
-  LayoutSessionStore,
+  emitSessionEvent,
+  toolApplyOps,
+  toolCommit,
   type LayoutSession,
-} from "../src/harness/session-store";
-import type { LayoutToolTextResult } from "../src/harness/tool-runtime";
-import { fitScope } from "../src/pipeline";
+} from "../src/service/session";
+import type { LayoutToolTextResult } from "../src/service/tool-runtime";
+import { resolveScope } from "../src/board/scope";
 import { box, connect, makeDocument } from "./synthetic";
-
-function invokePrivate<T>(store: LayoutSessionStore, name: string, ...args: unknown[]): T {
-  const method = Reflect.get(store, name) as (...methodArgs: unknown[]) => T;
-  return method.apply(store, args);
-}
 
 function makeSession(
   baseline: InteractiveCanvasDocument,
   requestedScopeIds: string[],
 ): LayoutSession {
-  const fit = fitScope(baseline, requestedScopeIds);
+  const scopeResolution = resolveScope(baseline, requestedScopeIds);
   return {
     id: "doc-commit-session",
     canvasId: "synthetic",
     canvasPath: "/tmp/doc-commit.canvas.json",
     baseline,
     baselineHash: "test-hash",
-    requestedScopeIds,
-    baselineFit: fit,
-    currentFit: fit,
-    scopeIds: new Set(fit.scopeObjectIds),
+    scopeResolution,
+    scopeIds: new Set(scopeResolution.scopeObjectIds),
     draft: baseline,
-    lastSketch: null,
     proposalCount: 0,
     proposal: null,
     status: "running",
@@ -49,12 +43,6 @@ function makeSession(
   };
 }
 
-function makeToolStore(session: LayoutSession): LayoutSessionStore {
-  const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
-  Object.defineProperty(store, "currentSession", { value: () => session });
-  return store;
-}
-
 function expectBlocked(result: LayoutToolTextResult, session: LayoutSession, detail: string): void {
   expect(result.isError).toBe(true);
   expect(result.text).toContain("Commit blocked");
@@ -64,7 +52,7 @@ function expectBlocked(result: LayoutToolTextResult, session: LayoutSession, det
   expect(session.events).toHaveLength(0);
 }
 
-describe("document-path commit gate (v4: error-tier diagnostics)", () => {
+describe("document-path commit gate (error-tier diagnostics)", () => {
   test("blocks a parentId child that escapes its section", () => {
     const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
     const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
@@ -75,10 +63,10 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
       { ...child, geometry: { ...child.geometry, x: 400 } },
     ]);
 
-    const result = invokePrivate<LayoutToolTextResult>(
-      makeToolStore(session),
-      "toolCommit",
+    const result = toolCommit(
+      session,
       "Escaped child should fail",
+      emitSessionEvent,
     );
 
     expectBlocked(result, session, "E1 containment: child extends 104px outside its section section");
@@ -97,10 +85,10 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
       { ...card, geometry: { ...card.geometry, x: 600 } },
     ]);
 
-    const result = invokePrivate<LayoutToolTextResult>(
-      makeToolStore(session),
-      "toolCommit",
+    const result = toolCommit(
+      session,
       "Overflow should fail",
+      emitSessionEvent,
     );
 
     expectBlocked(result, session, "card extends 144px past the locked frame page");
@@ -115,13 +103,13 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
     const session = makeSession(baseline, ["a", "b"]);
     session.draft = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
-      box("b", 288, 0, 192, 96, "process"),  // gap 96 — unreadable-labels warning
+      box("b", 240, 0, 192, 96, "process"),  // gap 48 — under the "go" chip's 76px need
     ], labeled);
 
-    const result = invokePrivate<LayoutToolTextResult>(
-      makeToolStore(session),
-      "toolCommit",
+    const result = toolCommit(
+      session,
       "Ship with a named warning",
+      emitSessionEvent,
     );
 
     expect(result.isError).toBeUndefined();
@@ -129,7 +117,7 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
     expect(session.status).toBe("proposal-ready");
     expect(session.proposal).not.toBeNull();
     expect(session.proposal!.lint).toContain("W1 unreadable-labels:");
-    expect(session.proposal!.lint).toContain("96px gap is too tight");
+    expect(session.proposal!.lint).toContain("48px of corridor where the chip needs 76px");
   });
 
   test("error-tier findings outside the scope do not block", () => {
@@ -145,10 +133,10 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
       { ...task, text: "renamed task" },
     ]);
 
-    const result = invokePrivate<LayoutToolTextResult>(
-      makeToolStore(session),
-      "toolCommit",
+    const result = toolCommit(
+      session,
       "Renamed the task",
+      emitSessionEvent,
     );
 
     expect(result.isError).toBeUndefined();
@@ -163,21 +151,21 @@ describe("document-path commit gate (v4: error-tier diagnostics)", () => {
     ], [{ ...connect("edge", "a", "b"), label: "go" }]);
     const session = makeSession(baseline, ["a", "b"]);
 
-    const result = invokePrivate<LayoutToolTextResult>(
-      makeToolStore(session),
-      "toolApplyOps",
+    const result = toolApplyOps(
+      session,
       [{
         type: "updateObject",
         objectId: "b",
         patch: { geometry: { x: 208, y: 0, width: 160, height: 96 } },
       }],
+      emitSessionEvent,
     );
 
     expect(result.isError).not.toBe(true);
     expect(result.text).toContain("APPLIED · 1 op");
     expect(result.text).toContain("DELTA");
     expect(result.text).toContain("DIAGNOSTICS · 0 errors · 1 warning");
-    expect(result.text).toContain('labeled edge a↔b: 48px gap is too tight for its "go" chip');
+    expect(result.text).toContain('label "go" chip on edge (43×30px) bleeds onto a and b');
     expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(208);
     expect(session.status).toBe("running");
     expect(session.proposal).toBeNull();

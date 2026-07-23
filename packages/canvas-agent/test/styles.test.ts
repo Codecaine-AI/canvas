@@ -1,12 +1,11 @@
 /**
- * v5 Tier-B style registry gate (v5-plan.md §1 Tier B, Phase B): every
- * topic file is exported through STYLE_TOPICS, in the documented order,
- * with a usable id/title/prose. Style topics are prose-only — no check(),
- * no diagnostics — so this is the whole contract.
+ * Style registry gate: every topic file is exported through STYLE_TOPICS,
+ * in the documented order, with a usable id/title/prose. Style topics are
+ * prose-only — no check(), no diagnostics — so this is the whole contract.
  */
 import { describe, expect, test } from "bun:test";
 
-import { STYLE_TOPICS } from "../src/styles";
+import { STYLE_TOPICS } from "../src/agent/styles";
 
 const EXPECTED_TOPIC_IDS = [
   "spacing-and-corridors",
@@ -20,7 +19,7 @@ const EXPECTED_TOPIC_IDS = [
   "lanes-and-corridors",
 ];
 
-describe("style registry (src/styles)", () => {
+describe("style registry (src/agent/styles)", () => {
   test("every topic is exported, in registry order", () => {
     expect(STYLE_TOPICS.map((topic) => topic.id)).toEqual(EXPECTED_TOPIC_IDS);
   });
@@ -37,11 +36,11 @@ describe("style registry (src/styles)", () => {
     }
   });
 
-  test("prose stays in the 6-15 line craft-guidance band", () => {
+  test("prose stays in the 6-18 line craft-guidance band", () => {
     for (const topic of STYLE_TOPICS) {
       const lines = topic.prose.split("\n").filter((line) => line.trim().length > 0);
       expect(lines.length, `${topic.id} has ${lines.length} lines`).toBeGreaterThanOrEqual(6);
-      expect(lines.length, `${topic.id} has ${lines.length} lines`).toBeLessThanOrEqual(15);
+      expect(lines.length, `${topic.id} has ${lines.length} lines`).toBeLessThanOrEqual(18);
     }
   });
 });

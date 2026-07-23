@@ -9,7 +9,7 @@ import {
   HttpError,
   LayoutSessionStore,
   type LayoutSession,
-} from "../src/harness/session-store";
+} from "../src/service/session";
 import type { AgentSessionStatus } from "../src/protocol";
 import { makeDocument } from "./synthetic";
 
@@ -28,12 +28,9 @@ function makeStore(status: AgentSessionStatus): LayoutSessionStore {
     canvasPath,
     baseline,
     baselineHash: createHash("sha256").update(baselineRaw).digest("hex"),
-    requestedScopeIds: [],
-    baselineFit: {} as LayoutSession["baselineFit"],
-    currentFit: {} as LayoutSession["currentFit"],
+    scopeResolution: {} as LayoutSession["scopeResolution"],
     scopeIds: new Set(),
     draft: baseline,
-    lastSketch: null,
     proposalCount: 1,
     proposal: { n: 1, operations: [], summary: "Ready", delta: "", lint: "" },
     status,

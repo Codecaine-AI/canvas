@@ -1,23 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import type {
-  InteractiveCanvasAnnotation,
-  InteractiveCanvasConnection,
-} from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasConnection } from "@codecaine-ai/canvas/schema";
 
-import { diffDocuments } from "../src/pipeline/doc-diff";
+import { diffDocuments } from "../src/board/doc-diff";
 import { box, connect, makeDocument } from "./synthetic";
-
-function annotation(id: string, body = id): InteractiveCanvasAnnotation {
-  return {
-    id,
-    target: { kind: "object", objectId: "kept" },
-    intent: "note",
-    body,
-    status: "open",
-    createdBy: "human",
-  };
-}
 
 describe("diffDocuments", () => {
   test("emits minimal object add, update, and remove operations without parentId", () => {
@@ -106,8 +92,6 @@ describe("diffDocuments", () => {
         connect("removed-connection", "kept", "removed"),
       ],
     );
-    baseline.annotations = [annotation("changed-annotation", "Before")];
-
     const draft = makeDocument(
       [box("kept", 384, 0), box("added", 576, 0), { ...box("updated", 192, 0), text: "After" }],
       [
@@ -115,22 +99,30 @@ describe("diffDocuments", () => {
         connect("added-connection", "added", "kept"),
       ],
     );
-    draft.annotations = [
-      annotation("changed-annotation", "After"),
-      annotation("added-annotation"),
-    ];
-
     expect(diffDocuments(baseline, draft).map((operation) => operation.type)).toEqual([
       "addObject",
       "updateObject",
       "updateConnection",
       "removeConnection",
-      "removeAnnotation",
       "removeObject",
       "addConnection",
-      "addAnnotation",
-      "addAnnotation",
     ]);
+  });
+
+  test("ignores annotation array differences because annotations are read-only to the agent", () => {
+    const baseline = makeDocument([box("kept", 0, 0)]);
+    baseline.annotations = [{
+      id: "comment",
+      target: { kind: "object", objectId: "kept" },
+      intent: "agent-request",
+      body: "Before",
+      status: "open",
+      createdBy: "human",
+    }];
+    const draft = structuredClone(baseline);
+    draft.annotations![0] = { ...draft.annotations![0]!, body: "After" };
+
+    expect(diffDocuments(baseline, draft)).toEqual([]);
   });
 
   test("returns an empty operation list for an unchanged document", () => {

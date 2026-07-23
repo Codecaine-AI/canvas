@@ -3,36 +3,31 @@ import { describe, expect, test } from "bun:test";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import {
-  LayoutSessionStore,
+  boardStateSnapshot,
+  emitSessionEvent,
+  toolApplyOps,
+  toolApplyQuickfix,
   type LayoutSession,
-} from "../src/harness/session-store";
-import type { LayoutToolRenderResult } from "../src/harness/tool-runtime";
+} from "../src/service/session";
+import type { LayoutToolRenderResult } from "../src/service/tool-runtime";
 import type { AgentPatchOperation } from "../src/protocol";
-import { fitScope } from "../src/pipeline";
+import { resolveScope } from "../src/board/scope";
 import { box, connect, makeDocument } from "./synthetic";
-
-function invokePrivate<T>(store: LayoutSessionStore, name: string, ...args: unknown[]): T {
-  const method = Reflect.get(store, name) as (...methodArgs: unknown[]) => T;
-  return method.apply(store, args);
-}
 
 function makeSession(
   baseline: InteractiveCanvasDocument,
   requestedScopeIds: string[],
 ): LayoutSession {
-  const fit = fitScope(baseline, requestedScopeIds);
+  const scopeResolution = resolveScope(baseline, requestedScopeIds);
   return {
     id: "perception-session",
     canvasId: "synthetic",
     canvasPath: "/tmp/perception.canvas.json",
     baseline,
     baselineHash: "test-hash",
-    requestedScopeIds,
-    baselineFit: fit,
-    currentFit: fit,
-    scopeIds: new Set(fit.scopeObjectIds),
+    scopeResolution,
+    scopeIds: new Set(scopeResolution.scopeObjectIds),
     draft: baseline,
-    lastSketch: null,
     proposalCount: 0,
     proposal: null,
     status: "running",
@@ -50,17 +45,11 @@ function makeSession(
   };
 }
 
-function makeToolStore(session: LayoutSession): LayoutSessionStore {
-  const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
-  Object.defineProperty(store, "currentSession", { value: () => session });
-  return store;
-}
-
 function applyOps(
-  store: LayoutSessionStore,
+  session: LayoutSession,
   operations: AgentPatchOperation[],
 ): LayoutToolRenderResult {
-  return invokePrivate<LayoutToolRenderResult>(store, "toolApplyOps", operations);
+  return toolApplyOps(session, operations, emitSessionEvent);
 }
 
 describe("spawn board-state snapshot", () => {
@@ -71,9 +60,8 @@ describe("spawn board-state snapshot", () => {
       [{ ...connect("edge", "alpha", "beta"), label: "go" }],
     );
     const session = makeSession(baseline, ["alpha", "beta"]);
-    const store = makeToolStore(session);
 
-    const snapshot = invokePrivate<string>(store, "boardStateSnapshot", session);
+    const snapshot = boardStateSnapshot(session);
 
     expect(snapshot).toContain("BOARD ·");
     expect(snapshot).toContain('"alpha"');
@@ -85,11 +73,10 @@ describe("spawn board-state snapshot", () => {
   test("recomputes from the current draft, so refinements get a fresh snapshot", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
     const session = makeSession(baseline, ["alpha"]);
-    const store = makeToolStore(session);
 
-    const first = invokePrivate<string>(store, "boardStateSnapshot", session);
+    const first = boardStateSnapshot(session);
     session.draft = makeDocument([{ ...box("alpha", 0, 0), text: "renamed alpha" }]);
-    const second = invokePrivate<string>(store, "boardStateSnapshot", session);
+    const second = boardStateSnapshot(session);
 
     expect(first).not.toBe(second);
     expect(second).toContain("renamed alpha");
@@ -104,9 +91,8 @@ describe("apply_ops DELTA block", () => {
       box("gamma", 640, 0),
     ]);
     const session = makeSession(baseline, ["alpha", "beta", "gamma"]);
-    const store = makeToolStore(session);
 
-    const result = applyOps(store, [
+    const result = applyOps(session, [
       {
         type: "updateObject",
         objectId: "beta",
@@ -140,9 +126,8 @@ describe("apply_ops DELTA block", () => {
     const child = { ...box("child", 80, 112), parentId: "section-a" };
     const baseline = makeDocument([sectionA, sectionB, child]);
     const session = makeSession(baseline, ["section-a", "section-b"]);
-    const store = makeToolStore(session);
 
-    const result = applyOps(store, [{
+    const result = applyOps(session, [{
       type: "updateObject",
       objectId: "child",
       patch: { geometry: { x: 576, y: 112, width: 160, height: 96 } },
@@ -162,9 +147,8 @@ describe("apply_ops DELTA block", () => {
       ],
     );
     const session = makeSession(baseline, ["alpha", "beta", "gamma"]);
-    const store = makeToolStore(session);
 
-    const result = applyOps(store, [
+    const result = applyOps(session, [
       {
         type: "updateConnection",
         connectionId: "alpha-beta",
@@ -189,10 +173,9 @@ describe("apply_ops LINTS delta", () => {
   test("first apply reports the full list; later applies report +new/−resolved", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeSession(baseline, ["alpha", "beta"]);
-    const store = makeToolStore(session);
 
     // Round 1 — introduce a covered-content error (beta 75% onto alpha).
-    const round1 = applyOps(store, [{
+    const round1 = applyOps(session, [{
       type: "updateObject",
       objectId: "beta",
       patch: { geometry: { x: 40, y: 0, width: 160, height: 96 } },
@@ -205,7 +188,7 @@ describe("apply_ops LINTS delta", () => {
     expect(session.lastDiagnostics).toHaveLength(1);
 
     // Round 2 — fix it: the finding resolves and is reported as −.
-    const round2 = applyOps(store, [{
+    const round2 = applyOps(session, [{
       type: "updateObject",
       objectId: "beta",
       patch: { geometry: { x: 480, y: 0, width: 160, height: 96 } },
@@ -218,7 +201,7 @@ describe("apply_ops LINTS delta", () => {
     expect(session.lastDiagnostics).toHaveLength(0);
 
     // Round 3 — nothing changes lint-wise: clean, no noise.
-    const round3 = applyOps(store, [{
+    const round3 = applyOps(session, [{
       type: "updateObject",
       objectId: "alpha",
       patch: { text: "renamed" },
@@ -230,13 +213,12 @@ describe("apply_ops LINTS delta", () => {
   test("new findings after the baseline are listed in full with +", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeSession(baseline, ["alpha", "beta"]);
-    const store = makeToolStore(session);
 
     // Round 1 — channel-only, clean baseline.
-    applyOps(store, [{ type: "updateObject", objectId: "alpha", patch: { color: "teal" } }]);
+    applyOps(session, [{ type: "updateObject", objectId: "alpha", patch: { color: "teal" } }]);
 
     // Round 2 — introduce the overlap.
-    const round2 = applyOps(store, [{
+    const round2 = applyOps(session, [{
       type: "updateObject",
       objectId: "beta",
       patch: { geometry: { x: 40, y: 0, width: 160, height: 96 } },
@@ -254,10 +236,9 @@ describe("apply_ops LINTS delta", () => {
       box("b2", 2040, 0),
     ]);
     const session = makeSession(baseline, ["a1", "a2", "b1", "b2"]);
-    const store = makeToolStore(session);
 
     // Round 1 — baseline carries both errors.
-    const round1 = applyOps(store, [{
+    const round1 = applyOps(session, [{
       type: "updateObject",
       objectId: "a1",
       patch: { text: "pair a" },
@@ -267,7 +248,7 @@ describe("apply_ops LINTS delta", () => {
 
     // Round 2 — fix pair a. The surviving b-pair finding renumbers E2 → E1,
     // but it is the same finding: not new, not resolved.
-    const round2 = applyOps(store, [{
+    const round2 = applyOps(session, [{
       type: "updateObject",
       objectId: "a2",
       patch: { geometry: { x: 480, y: 0, width: 160, height: 96 } },
@@ -283,9 +264,8 @@ describe("apply_ops auto close-up", () => {
   test("geometry changes attach a close-up png of the touched region", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeSession(baseline, ["alpha", "beta"]);
-    const store = makeToolStore(session);
 
-    const result = applyOps(store, [{
+    const result = applyOps(session, [{
       type: "updateObject",
       objectId: "beta",
       patch: { geometry: { x: 480, y: 240, width: 160, height: 96 } },
@@ -302,9 +282,8 @@ describe("apply_ops auto close-up", () => {
       [connect("alpha-beta", "alpha", "beta")],
     );
     const session = makeSession(baseline, ["alpha", "beta"]);
-    const store = makeToolStore(session);
 
-    const result = applyOps(store, [
+    const result = applyOps(session, [
       { type: "updateObject", objectId: "alpha", patch: { color: "violet", text: "renamed" } },
       { type: "updateConnection", connectionId: "alpha-beta", patch: { label: "flows" } },
     ]);
@@ -318,7 +297,8 @@ describe("apply_ops auto close-up", () => {
 
 describe("apply_quickfix perception", () => {
   test("shares the DELTA + LINTS-delta + close-up result path", () => {
-    // Labeled pair 44px apart — quickfix pushes beta right (geometry change).
+    // Labeled pair 44px apart — the rendered 41px chip needs 73px, so the
+    // quickfix pushes beta right by the grid-snapped deficit (geometry change).
     const baseline = makeDocument(
       [box("alpha", 0, 0), box("beta", 204, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
@@ -326,15 +306,14 @@ describe("apply_quickfix perception", () => {
     const session = makeSession(baseline, ["alpha", "beta"]);
     // Simulate a prior apply so the quickfix round reports a delta.
     session.lastDiagnostics = undefined;
-    const store = makeToolStore(session);
-    const seed = applyOps(store, [{ type: "updateObject", objectId: "alpha", patch: { text: "alpha" } }]);
+    const seed = applyOps(session, [{ type: "updateObject", objectId: "alpha", patch: { text: "alpha" } }]);
     expect(seed.text).toContain("DIAGNOSTICS · 0 errors · 1 warning");
 
-    const result = invokePrivate<LayoutToolRenderResult>(store, "toolApplyQuickfix", "W1");
+    const result = toolApplyQuickfix(session, "W1", emitSessionEvent);
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · quickfix W1 (unreadable-labels) · 1 op");
-    expect(result.text).toContain("beta  204,0 → 288,0");
+    expect(result.text).toContain("beta  204,0 → 240,0");
     expect(result.text).toContain("LINTS · +0 −1");
     expect(result.text).toContain("− W1 unreadable-labels");
     expect(result.png).toBeInstanceOf(Buffer);

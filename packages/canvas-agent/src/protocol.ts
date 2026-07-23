@@ -26,6 +26,7 @@ export interface AgentSessionAnnotation {
   body: string;
   target:
     | { kind: "object"; objectId: string }
+    | { kind: "connection"; connectionId: string }
     | { kind: "region"; region: AgentRect };
   status?: string;
   createdBy?: "human" | "agent" | "system";
@@ -71,10 +72,7 @@ export type AgentPatchOperation =
   | { type: "removeObject"; objectId: string }
   | { type: "addConnection"; connection: Record<string, unknown> }
   | { type: "updateConnection"; connectionId: string; patch: Record<string, unknown> }
-  | { type: "removeConnection"; connectionId: string }
-  | { type: "addAnnotation"; annotation: Record<string, unknown> }
-  | { type: "removeAnnotation"; annotationId: string }
-  | { type: "fitSectionToChildren"; sectionId: string; padding?: number };
+  | { type: "removeConnection"; connectionId: string };
 
 /** One committed proposal: the harness's final output for studio to apply. */
 export interface AgentProposal {
@@ -83,7 +81,7 @@ export interface AgentProposal {
   operations: AgentPatchOperation[];
   /** The agent's one-line commit summary. */
   summary: string;
-  /** The plain-language delta report (formatDeltaReport output). */
+  /** The plain-language delta report for the proposed document patch. */
   delta: string;
   /** The lint report text for the committed draft. */
   lint: string;
@@ -97,7 +95,7 @@ export interface AgentSessionState {
   scopeObjectIds: string[];
   frame: AgentRect;
   baselineHash: string;
-  /** Number of drafts proposed so far (propose_program calls that solved). */
+  /** Number of draft revisions proposed so far. */
   proposalCount: number;
   /** The committed proposal, once the agent called commit. */
   proposal: AgentProposal | null;
@@ -115,7 +113,7 @@ export interface AgentSessionMessageRequest {
 export interface AcceptAgentSessionResponse {
   operations: AgentPatchOperation[];
   summary: string;
-  /** True when the live file changed and the proposal was refit/re-solved. */
+  /** True when the live file changed and the proposal was safely rebased. */
   rebased: boolean;
 }
 
@@ -132,13 +130,12 @@ export interface AcceptAgentSessionConflict {
 export interface AgentFittedEvent {
   type: "fitted";
   sessionId: string;
-  program: string;
   frame: AgentRect;
   scopeObjectIds: string[];
   boundaryArrowCount: number;
 }
 
-/** Emitted when a proposed program solved into a new draft. */
+/** Emitted when the draft changes. */
 export interface AgentProposalEvent {
   type: "proposal";
   sessionId: string;

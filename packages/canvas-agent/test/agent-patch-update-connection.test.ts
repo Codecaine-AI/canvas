@@ -6,7 +6,7 @@ import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patc
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("handleApplyAgentPatch updateConnection", () => {
-  test("merges editable fields, strips incoming waypoints, and skips an unknown id", () => {
+  test("merges editable fields, applies waypoint steering, and skips an unknown id", () => {
     const document = makeDocument(
       [box("a", 0, 0), box("b", 192, 0)],
       [
@@ -50,8 +50,10 @@ describe("handleApplyAgentPatch updateConnection", () => {
         label: "After",
         style: "dashed",
         color: "blue",
-        // The reducer ignores draft routes and leaves the live route intact.
-        waypoints: [[80, 112]],
+        // Waypoints are part of the agent's steering surface and apply
+        // verbatim (post-reduce reconcile still clears them if an endpoint
+        // object later moves asymmetrically).
+        waypoints: [[320, 240]],
       },
     ]);
     expect(next.lastChange?.changedConnectionIds).toEqual(["connection"]);
