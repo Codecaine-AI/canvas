@@ -109,13 +109,20 @@ export function fitDocument(
   return fitBounds(documentBounds(document, 0), screen, padding);
 }
 
+/**
+ * Bounds for a named view crop. The crop root may be a `container` or a
+ * `section` object — both parent descendants via `parentId`, and the bounds
+ * cover the root plus all of its descendants.
+ */
 export function containerViewBounds(
   document: InteractiveCanvasDocument,
   containerId: string,
   padding = 32,
 ): CanvasBounds | null {
   const container = document.objects.find(
-    (object) => object.id === containerId && object.type === "container",
+    (object) =>
+      object.id === containerId &&
+      (object.type === "container" || object.type === "section"),
   );
   if (!container) return null;
 

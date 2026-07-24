@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+ * Tailwind v4 auto content detection never scans workspace deps under
+ * node_modules, so the editor-only utilities used by @codecaine-ai/canvas
+ * (e.g. the fullscreen `fixed inset-0 z-50` editor shell) would be missing
+ * from the compiled CSS. Point Tailwind at the canvas sources explicitly.
+ */
+@source "../../canvas/src";
+
+/*
  * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved
  * "spectre-light" design tokens (apps/frontend/src/theme/themes/spectre-light.json,
  * resolved via apps/frontend/src/theme/css-vars.ts at extraction time). Spectre
