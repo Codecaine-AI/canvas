@@ -10,6 +10,7 @@
     "./schema": "./src/state/schema.ts",
     "./actions": "./src/state/actions.ts",
     "./agent-patch-auto-fit": "./src/state/agent-patch-auto-fit.ts",
+    "./agent-schema": "./src/agent-schema.ts",
     "./geometry": "./src/state/geometry.ts",
     "./ui/cn": "./src/ui/cn.ts",
     "./ui/icons": "./src/ui/icons/index.ts",
@@ -23,6 +24,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.34",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "radix-ui": "^1.4.3",
