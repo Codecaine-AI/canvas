@@ -213,8 +213,12 @@ describe("resolve_request", () => {
   });
 });
 
-describe("operation REQUESTS block", () => {
-  test("every applied result carries the queue with statuses", () => {
+describe("the queue in operation results", () => {
+  // The queue is re-rendered into section ③ on every request, so an operation
+  // result restating it would put the same list in the window twice. It stays
+  // on the tools whose whole answer IS the queue: resolve_request and
+  // add_annotation (covered above and below).
+  test("an applied operation reports its own change, not the standing queue", () => {
     const session = sessionWithQueue();
     toolResolveRequest(session, "R1", "done", "split it", emitSessionEvent);
 
@@ -224,21 +228,20 @@ describe("operation REQUESTS block", () => {
     });
 
     expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("APPLIED · update_object task");
+    expect(result.text).not.toContain("REQUESTS ·");
+    expect(result.text).not.toContain('R1 done "split it"');
+  });
+
+  test("resolve_request still answers with the queue — that is its whole result", () => {
+    const session = sessionWithQueue();
+
+    const result = toolResolveRequest(session, "R1", "done", "split it", emitSessionEvent);
+
+    expect(result.isError).toBeUndefined();
     expect(result.text).toContain("REQUESTS · 1/2 disposed");
     expect(result.text).toContain('R1 done "split it"');
     expect(result.text).toContain("R2 open");
-  });
-
-  test("a session without requests reports REQUESTS · none", () => {
-    const session = makeTestSession(makeDocument([box("solo", 0, 0)]), ["solo"]);
-    syncSessionRequests(session);
-
-    const result = runOp(session, "update_object", {
-      objectId: "solo",
-      patch: { text: "renamed" },
-    });
-
-    expect(result.text).toContain("REQUESTS · none");
   });
 });
 

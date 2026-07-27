@@ -6,5 +6,12 @@
 	"thinking": "high",
 	"maxTurns": 300,
 	"extensions": false,
-	"variables": {}
+	"variables": {},
+	"state": {
+		"window": {
+			"strategy": "turns",
+			"maxTurns": 4,
+			"maxImages": 0
+		}
+	}
 }

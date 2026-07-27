@@ -69,9 +69,13 @@ to `.agent-kernel/cli-renders/` (override with `--out-dir`).
 ## Prompts
 
 The layout agent is a catalog bundle at
-`src/harness/agent-catalog/layout-editor/` — `agent.json` (manifest),
-`prompt.json` (the canonical prompt document), `prompt.rendered.md` (derived
-snapshot; never hand-edit), with `context.ts`/`tools.ts` code sidecars.
+`src/agent/catalog/layout-editor/`, laid out as the four sections of a request
+(agent-kernel `state-shapes.html` §6): `agent.json` (the index), `prompt/`
+(`prompt.json`, the canonical prompt document, plus the derived `system.md`
+snapshot — never hand-edit), `context/` (section ②: the capabilities block, the
+style guide, and the two reference-image declarations), `tools/` (the eighteen
+private tools, one file per tool), and `state/` (section ③: `shape.ts`,
+`rules/`, `render/`).
 Prompt edits go through the kernel catalog API (the viewer's `/config` page,
 `make traces`), which re-canonicalizes, regenerates the rendered snapshot,
 and records the new promptHash — every kernel session records the promptHash

@@ -19,7 +19,7 @@ import {
   CAPABILITIES_CONNECTION_FIELDS_GENERATED,
   CAPABILITIES_OBJECTS_GENERATED,
   formatCapabilities,
-} from "../src/agent/catalog/layout-editor/capabilities";
+} from "../src/agent/catalog/layout-editor/context/capabilities";
 import { capabilitiesLoader } from "../src/agent/loaders/capabilities";
 import {
   MODEL_OPERATION_KINDS,
@@ -28,7 +28,8 @@ import {
 
 const GENERATED_FILE = join(
   import.meta.dir,
-  "..", "src", "agent", "catalog", "layout-editor", "capabilities", "vocabulary.generated.ts",
+  "..", "src", "agent", "catalog", "layout-editor", "context", "capabilities",
+  "vocabulary.generated.ts",
 );
 
 const SECTION_HEADERS = [

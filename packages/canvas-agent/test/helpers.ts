@@ -81,6 +81,8 @@ export function makeTestSession(
     runPromise: null,
     requests: [],
     lastDiagnostics: undefined,
+    views: [],
+    viewCount: 0,
     ...overrides,
   };
 }

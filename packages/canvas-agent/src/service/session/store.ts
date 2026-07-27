@@ -54,7 +54,9 @@ import {
   syncSessionRequests,
   userRequestsSnapshot,
 } from "./context";
+import { registerLayoutSession } from "./registry";
 import { createToolRuntime } from "./tools";
+import type { SessionView } from "./view-log";
 
 const AGENT_NAME = "layout-editor";
 /** World-space context ring around the scope frame for the ghost preview. */
@@ -100,6 +102,14 @@ export interface LayoutSession {
   requests: RequestQueueEntry[];
   /** Diagnostics attached to the previous apply result, for LINTS delta reporting. */
   lastDiagnostics?: Diagnostic[];
+  /**
+   * Rasters the model has been shown, newest last (./view-log). They live here
+   * rather than in the agent's state object because state must stay
+   * JSON-serializable; `render(state)` attaches the newest few from here.
+   */
+  views: SessionView[];
+  /** Monotonic capture counter behind SessionView.seq. */
+  viewCount: number;
 }
 
 function sha256(input: string | Buffer): string {
@@ -229,6 +239,8 @@ export class LayoutSessionStore {
       subscribers: new Set(),
       runPromise: null,
       requests: [],
+      views: [],
+      viewCount: 0,
     };
     // Every operation reports its lint delta against a baseline, so the session
     // starts with one: the findings already on the board before the first edit.
@@ -236,6 +248,9 @@ export class LayoutSessionStore {
     syncSessionRequests(session);
     this.sessions.set(sessionId, session);
     this.byContainer.set(container.id, session);
+    // The agent's state/ render reads the CURRENT board every request; this is how
+    // it reaches the authoritative document from inside the kernel (./registry).
+    registerLayoutSession(session);
 
     await updateContainerStatus(this.db, container.id, "active", {
       startedAt: new Date().toISOString(),
@@ -377,8 +392,9 @@ export class LayoutSessionStore {
     refine: boolean,
   ): Promise<void> {
     try {
-      // Fresh per run — refinements re-spawn context over the current draft.
+      // Fresh per run — refinements re-seed the state over the current draft.
       const boot = bootPerception(session);
+      const spawnDiagnostics = session.lastDiagnostics ?? [];
       await this.kernel.spawnAgent(AGENT_NAME, instruction, null, {
         containerId: session.containerId,
         trigger: "operator",
@@ -386,13 +402,24 @@ export class LayoutSessionStore {
         workingDir: REPO_ROOT,
         displayLabel: "Layout Editor",
         reuseExistingSession: refine,
+        // v1 state persistence: .agent-kernel/state/<container>/layout-editor/state.json.
+        stateRoot: REPO_ROOT,
         ...(AGENT_THINKING_OVERRIDE === undefined
           ? {}
           : { thinkingLevel: AGENT_THINKING_OVERRIDE }),
+        // The working-picture keys (editorState, userRequests, boardState) are
+        // read by the agent's state/ seed, not by context loaders — the same
+        // snapshots, now on the state side of the request.
         sessionData: {
+          containerId: session.containerId,
+          sessionId: session.id,
           editorState: editorSnapshot(session),
           userRequests: userRequestsSnapshot(session),
           boardState: boot.boardState,
+          boardLints: {
+            errors: spawnDiagnostics.filter((d) => d.severity === "error").length,
+            warnings: spawnDiagnostics.filter((d) => d.severity === "warning").length,
+          },
           bootImages: boot.images,
         },
       });

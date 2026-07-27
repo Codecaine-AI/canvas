@@ -1,5 +1,6 @@
 /**
- * Emits src/agent/catalog/layout-editor/capabilities/vocabulary.generated.ts
+ * Emits src/agent/catalog/layout-editor/context/capabilities/
+ * vocabulary.generated.ts
  * with the schema-derived fragments used by the OBJECTS and CONNECTIONS
  * sections of the <capabilities> context block. The source tables are the
  * same ones the operation schemas declare: OBJECT_TYPE_DEFAULTS (the
@@ -201,7 +202,8 @@ export function renderVocabularyModule(): string {
 
 const OUTPUT_FILE = join(
   resolve(import.meta.dir, ".."),
-  "src", "agent", "catalog", "layout-editor", "capabilities", "vocabulary.generated.ts",
+  "src", "agent", "catalog", "layout-editor", "context", "capabilities",
+  "vocabulary.generated.ts",
 );
 
 if (import.meta.main) {

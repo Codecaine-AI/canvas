@@ -3,7 +3,7 @@
  *
  *   GET /api/agent/catalog/:agent        manifest + prompt document + rendered
  *   PUT /api/agent/catalog/:agent/prompt write prompt.json (the kernel's
- *       catalog service re-canonicalizes, regenerates prompt.rendered.md,
+ *       catalog service re-canonicalizes, regenerates prompt/system.md,
  *       upserts the prompt revision, hot-swaps the registry) → new promptHash
  *
  * Plus the kernel's STANDARD catalog API mounted under the reserved prefix —

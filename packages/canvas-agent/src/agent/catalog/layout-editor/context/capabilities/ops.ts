@@ -12,7 +12,7 @@
 import {
   MODEL_OPERATION_KINDS,
   type ModelOperationKind,
-} from "../../../../service/session/op-surface";
+} from "../../../../../service/session/op-surface";
 
 interface OpReferenceEntry {
   /** Short `→` consequence lines: effects, guards, and what returns. */

@@ -244,7 +244,7 @@ export interface AgentCatalogDetail {
   /** The canonical PromptDocument (prompt-kit/v1). */
   prompt: Record<string, unknown>;
   promptHash: string;
-  /** The rendered system-prompt snapshot (prompt.rendered.md body). */
+  /** The rendered system-prompt snapshot (prompt/system.md body). */
   rendered: string;
   declaredVariables: string[];
   modelAliases: string[];

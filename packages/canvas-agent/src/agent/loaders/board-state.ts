@@ -1,19 +1,15 @@
 /**
- * Renders the spawn-time board snapshot the session store places at
- * `sessionData.boardState`: the pre-formatted description, full digest, and
- * lint report. The agent's context.ts wraps the content in <board_state> tags.
+ * The board's description block.
  *
- * When no snapshot is present, a fallback explains that look returns the full
- * BOARD digest; the lint report travels as the LINTS delta block.
+ * This module used to register a `board-state` context loader that rendered
+ * the spawn-time snapshot at `sessionData.boardState` into a <board_state>
+ * block. That loader retired with the state layer: the board is working
+ * picture, so it is re-derived into section ③ on every request by the
+ * layout-editor's state/ sidecar, and the spawn snapshot it seeds from is the same
+ * sessionData value. What remains here is the description formatter, which
+ * both the spawn snapshot (service/session/context.ts) and the state render
+ * share.
  */
-import { createHash } from "node:crypto";
-
-import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
-
-export const BOARD_STATE_FALLBACK =
-  "(no board snapshot was captured at spawn — look returns the full BOARD digest; the lint report travels as the LINTS delta block)";
-
-/** The board's standing account, kept separate from its structural digest. */
 export function formatBoardDescription(description?: string): string {
   if (description === undefined || description.trim() === "") {
     return "DESCRIPTION · none — this board has no description yet";
@@ -25,24 +21,3 @@ export function formatBoardDescription(description?: string): string {
     "---",
   ].join("\n");
 }
-
-function sha256(input: string): string {
-  return createHash("sha256").update(input, "utf8").digest("hex");
-}
-
-export const boardStateLoader: Loader = {
-  kind: "board-state",
-  async resolve(_decl, ctx): Promise<LoaderResult> {
-    const boardState = ctx.sessionData?.boardState;
-    const content =
-      typeof boardState === "string" && boardState.length > 0
-        ? boardState
-        : BOARD_STATE_FALLBACK;
-    return {
-      status: "ok",
-      content,
-      bytes: Buffer.byteLength(content, "utf8"),
-      hash: sha256(content),
-    };
-  },
-};

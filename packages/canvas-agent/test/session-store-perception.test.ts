@@ -1,12 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  boardDiffBlock,
   boardStateSnapshot,
   bootPerception,
   emitSessionEvent,
   toolFinalize,
 } from "../src/service/session";
 import { diffDocuments } from "../src/board/doc-diff";
+import { formatDiagnostics, runDiagnostics } from "../src/board/lints/run";
 import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -47,7 +49,7 @@ describe("spawn board-state snapshot", () => {
 describe("spawn boot perception", () => {
   const PNG_SIGNATURE = "89504e470d0a1a0a";
 
-  test("carries the board render (base64 PNG) alongside the board-state text", () => {
+  test("pushes the board render onto the session view log, not into the boot images", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
@@ -55,9 +57,15 @@ describe("spawn boot perception", () => {
 
     expect(boot.boardState).toContain("BOARD ·");
     expect(boot.boardState).not.toContain("board render unavailable");
-    expect(typeof boot.images.board).toBe("string");
-    const png = Buffer.from(boot.images.board!, "base64");
-    expect(png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
+    // The board is working picture: it rides section ③, so it never becomes a
+    // reference image pinned into the context message.
+    expect(boot.boardView).toBe(true);
+    expect(Object.keys(boot.images)).not.toContain("board");
+    expect(session.views).toHaveLength(1);
+    const [view] = session.views;
+    expect(view.kind).toBe("board");
+    expect(view.sectionId).toBeNull();
+    expect(view.png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
   });
 
   test("attaches the house-style exemplar as a PNG when the exemplar canvas exists", () => {
@@ -82,7 +90,8 @@ describe("spawn boot perception", () => {
 
     const boot = bootPerception(session);
 
-    expect(boot.images.board).toBeUndefined();
+    expect(boot.boardView).toBe(false);
+    expect(session.views).toHaveLength(0);
     expect(boot.boardState).toContain("board render unavailable at spawn");
     expect(boot.boardState).toContain("call look for a fresh full-board render");
   });
@@ -294,14 +303,13 @@ describe("BOARD DIFF block", () => {
         geometry: { x: 960, y: 0, width: 160, height: 96 },
       },
     });
-    const result = look(session);
+    const diff = boardDiffBlock(session);
 
-    expect(result.isError).toBeUndefined();
     // Cumulative: the retext and move share one base-to-draft line.
-    expect(result.text).toContain("updateObject alpha  moved · retexted");
-    expect(result.text).toContain("addObject note");
-    expect(result.text).toContain("removeObject gamma");
-    expect(result.text).not.toContain("updateObject beta");
+    expect(diff).toContain("updateObject alpha  moved · retexted");
+    expect(diff).toContain("addObject note");
+    expect(diff).toContain("removeObject gamma");
+    expect(diff).not.toContain("updateObject beta");
   });
 
   test("renders section and sticky ops in the model-facing grammar", () => {
@@ -322,16 +330,15 @@ describe("BOARD DIFF block", () => {
         geometry: { x: 0, y: 400, width: 480, height: 320 },
       },
     });
-    const result = look(session);
+    const diff = boardDiffBlock(session);
 
-    expect(result.isError).toBeUndefined();
     // BOARD DIFF classifies internal object patches into their entity-kind names.
-    expect(result.text).toContain("BOARD DIFF · base → draft · 3 ops");
-    expect(result.text).toContain("addSection annex");
-    expect(result.text).toContain("updateSection home  retexted");
-    expect(result.text).toContain("removeSticky note");
-    expect(result.text).not.toContain("updateObject home");
-    expect(result.text).not.toContain("removeObject note");
+    expect(diff).toContain("BOARD DIFF · base → draft · 3 ops");
+    expect(diff).toContain("addSection annex");
+    expect(diff).toContain("updateSection home  retexted");
+    expect(diff).toContain("removeSticky note");
+    expect(diff).not.toContain("updateObject home");
+    expect(diff).not.toContain("removeObject note");
   });
 
   test("matches the operations a committed finalize proposes", () => {
@@ -353,10 +360,9 @@ describe("BOARD DIFF block", () => {
         geometry: { x: 640, y: 0, width: 160, height: 96 },
       },
     });
-    const result = look(session);
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("updateObject alpha  retexted · recolored");
-    expect(result.text).toContain("addObject note");
+    const diff = boardDiffBlock(session);
+    expect(diff).toContain("updateObject alpha  retexted · recolored");
+    expect(diff).toContain("addObject note");
 
     const expected = diffDocuments(session.baseline, session.draft);
     const finalized = toolFinalize(session, "committed", "Renamed and annotated", emitSessionEvent);
@@ -366,7 +372,7 @@ describe("BOARD DIFF block", () => {
 });
 
 describe("LINTS delta", () => {
-  test("operations report +new/−resolved while look reports the complete list", () => {
+  test("operations report +new/−resolved while the state block carries the complete list", () => {
     const baseline = makeDocument([
       // This covered pair is already present before the operation.
       box("existing-a", 0, 0),
@@ -391,11 +397,14 @@ describe("LINTS delta", () => {
     expect(introduced.text).not.toContain("DIAGNOSTICS ·");
     expect(session.lastDiagnostics).toHaveLength(2);
 
-    const wholeBoard = look(session);
-    expect(wholeBoard.text).toContain("DIAGNOSTICS · 2 errors");
-    expect(wholeBoard.text).toContain("E1 covered-content");
-    expect(wholeBoard.text).toContain("E2 covered-content");
-    expect(wholeBoard.text).not.toContain("LINTS ·");
+    // The whole list is section ③'s job now: look no longer restates it, and
+    // the state block renders exactly this text every request.
+    const wholeBoard = formatDiagnostics(runDiagnostics(session.draft));
+    expect(wholeBoard).toContain("DIAGNOSTICS · 2 errors");
+    expect(wholeBoard).toContain("E1 covered-content");
+    expect(wholeBoard).toContain("E2 covered-content");
+    expect(wholeBoard).not.toContain("LINTS ·");
+    expect(look(session).text).not.toContain("DIAGNOSTICS ·");
 
     // Fix it: the finding resolves and is reported as −.
     const resolved = runOp(session, "update_object", {
@@ -472,8 +481,10 @@ describe("LINTS delta", () => {
     ]);
     const session = makeTestSession(baseline, ["a1", "a2", "b1", "b2"]);
 
-    const initial = look(session);
-    expect(initial.text).toContain("DIAGNOSTICS · 2 errors");
+    // look still refreshes the session's diagnostic baseline; only its text
+    // stopped restating the report.
+    look(session);
+    expect(formatDiagnostics(session.lastDiagnostics!)).toContain("DIAGNOSTICS · 2 errors");
     expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.id)).toEqual(["E1", "E2"]);
 
     // Fix pair a. The surviving b-pair finding renumbers E2 → E1,
@@ -548,7 +559,7 @@ describe("rendered perception", () => {
     expect(session.events).toEqual([]);
   });
 
-  test("look reflects both geometric and channel edits in its full-board render", () => {
+  test("both geometric and channel edits reach the cumulative diff and the render", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
@@ -567,11 +578,12 @@ describe("rendered perception", () => {
     expect(channelOnly.pngs).toBeUndefined();
     expect(channelOnly.text).toContain("alpha  color gray → violet");
 
-    const result = look(session);
+    const diff = boardDiffBlock(session);
+    expect(diff).toContain("updateObject alpha  retexted · recolored");
+    expect(diff).toContain("updateObject beta  moved");
 
+    const result = look(session);
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("updateObject alpha  retexted · recolored");
-    expect(result.text).toContain("updateObject beta  moved");
     expect(result.pngs).toHaveLength(1);
     expect(result.pngs![0]!.length).toBeGreaterThan(0);
   });

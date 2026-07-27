@@ -80,7 +80,7 @@ describe("update_description", () => {
 });
 
 describe("board description perception", () => {
-  test("places the delimited description before the digest at spawn and in look", () => {
+  test("places the delimited description before the digest in the board snapshot", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
     const markdown = "# Payment flow\n\nAPI → worker";
     baseline.description = markdown;
@@ -93,11 +93,11 @@ describe("board description perception", () => {
     ].join("\n");
 
     const snapshot = boardStateSnapshot(session);
-    const looked = lookPerception(session);
 
     expect(formatBoardDescription(markdown)).toBe(block);
     expect(snapshot).toContain(`${block}\n\nBOARD ·`);
-    expect(looked.text).toContain(`${block}\nBOARD ·`);
+    // look no longer restates the board; the description rides section ③.
+    expect(lookPerception(session).text).not.toContain("DESCRIPTION ·");
     expect(formatBoardDigest(session.draft)).not.toContain("DESCRIPTION");
     expect(formatBoardDigest(session.draft)).not.toContain(markdown);
   });

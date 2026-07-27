@@ -1,17 +1,15 @@
 /**
- * Formats the invoke-time editor snapshot (selection, viewport, scope frame,
- * baseline hash) for <editor_state>, so the model sees what the user was
- * looking at before its first tool call. User comments/requests live in the
- * separate <user_requests> block, not here.
+ * The invoke-time editor snapshot (selection, viewport, scope frame, baseline
+ * hash): what the user was looking at before the agent's first tool call.
  *
  * The snapshot is captured by the session store at spawn time (and again on
- * refine) and travels through the kernel's per-spawn `sessionData` slot — the
- * loader never polls the editor.
+ * refine) and travels through the kernel's per-spawn `sessionData` slot. It
+ * used to be rendered into an <editor_state> context block by an
+ * `editor-state` loader; that loader retired with the state layer — the scope
+ * is part of the working picture, so it is seeded into the layout-editor's
+ * state/ sidecar and rendered inside section ③'s <scope> block instead. The type
+ * and formatter stay here as the shape of that sessionData slot.
  */
-import { createHash } from "node:crypto";
-
-import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
-
 import type { AgentSessionViewport, AgentRect } from "../../protocol";
 
 export interface EditorStateSnapshot {
@@ -22,10 +20,6 @@ export interface EditorStateSnapshot {
   selection: Array<{ id: string; type: string; text: string }>;
   boundaryArrowCount: number;
   viewport?: AgentSessionViewport;
-}
-
-function sha256(input: string): string {
-  return createHash("sha256").update(input, "utf8").digest("hex");
 }
 
 function rect(r: AgentRect): string {
@@ -47,24 +41,3 @@ export function formatEditorState(snapshot: EditorStateSnapshot): string {
   }
   return lines.join("\n");
 }
-
-/**
- * The custom loader registered through the kernel `loaders` config slot. The
- * declaration is just `{ kind: "editor-state" }` in the agent's context.ts.
- */
-export const editorStateLoader: Loader = {
-  kind: "editor-state",
-  async resolve(_decl, ctx): Promise<LoaderResult> {
-    const snapshot = ctx.sessionData?.editorState as EditorStateSnapshot | undefined;
-    if (!snapshot) {
-      return { status: "empty", content: "", bytes: 0, hash: sha256("") };
-    }
-    const content = formatEditorState(snapshot);
-    return {
-      status: "ok",
-      content,
-      bytes: Buffer.byteLength(content, "utf8"),
-      hash: sha256(content),
-    };
-  },
-};

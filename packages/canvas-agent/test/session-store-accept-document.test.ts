@@ -57,6 +57,8 @@ function makeStore(
     subscribers: new Set(),
     runPromise: null,
     requests: [],
+    views: [],
+    viewCount: 0,
   };
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([

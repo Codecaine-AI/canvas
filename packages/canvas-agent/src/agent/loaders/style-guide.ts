@@ -1,7 +1,8 @@
 /**
- * Renders ALL registered style topics (src/agent/styles/ STYLE_TOPICS) and
- * the craft targets as nested XML blocks. The agent's context.ts wraps the
- * content in <style_guide> tags.
+ * Renders ALL registered style topics (the layout-editor bundle's
+ * context/style-guide/ STYLE_TOPICS) and
+ * the craft targets as nested XML blocks. The agent's context/index.ts wraps
+ * the content in <style_guide> tags.
  *
  * Static by design: no sessionData and no per-spawn variation. The full craft
  * corpus is present in every session; the system prompt only summarizes its
@@ -11,8 +12,8 @@ import { createHash } from "node:crypto";
 
 import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
 
-import { CRAFT_TARGETS, STYLE_TOPICS } from "../styles";
-import type { CraftTargets } from "../styles";
+import { CRAFT_TARGETS, STYLE_TOPICS } from "../catalog/layout-editor/context/style-guide";
+import type { CraftTargets } from "../catalog/layout-editor/context/style-guide";
 
 function sha256(input: string): string {
   return createHash("sha256").update(input, "utf8").digest("hex");

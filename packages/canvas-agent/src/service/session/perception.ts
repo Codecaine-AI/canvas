@@ -1,7 +1,14 @@
 /**
  * Model-facing perception for layout sessions: derives document changes,
- * cumulative edits, lint movement, routed paths, scoped board digests, and
- * requested raster views from the session's authoritative documents.
+ * cumulative edits, lint movement, routed paths, and requested raster views
+ * from the session's authoritative documents.
+ *
+ * The standing picture — the whole board digest, the whole lint report, the
+ * whole request queue — is NOT here. Since the state layer landed, section ③
+ * re-derives all three from the current draft on every request (the agent
+ * bundle's state/ sidecar), so what perception produces is strictly the per-call
+ * reading: what this operation changed, what it cost in lints, and how the
+ * wires it touched now route.
  */
 import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
 import {
@@ -11,12 +18,9 @@ import {
   type InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
 import { routeConnection } from "../../../../canvas/src/connectors/routing";
-import { sectionDescendantIds } from "../../../../canvas/src/state/geometry";
 
-import { formatBoardDescription } from "../../agent/loaders/board-state";
-import { formatRequestsBlock, targetText } from "../../agent/loaders/user-requests";
+import { targetText } from "../../agent/loaders/user-requests";
 import { diffDocuments } from "../../board/doc-diff";
-import { DIGEST_DEFAULTS_LEGEND, formatBoardDigest } from "../../board/digest";
 import type { Diagnostic } from "../../board/lints";
 import { pathBoxViolationIds } from "../../board/lints/geometry";
 import { diagnosticLines, formatDiagnostics, runDiagnostics } from "../../board/lints/run";
@@ -26,6 +30,7 @@ import type { LayoutToolRenderResult } from "../tool-runtime";
 import { round2 } from "./context";
 import { classifyOperation, operationTargetId } from "./op-surface";
 import type { LayoutSession } from "./store";
+import { recordSessionView } from "./view-log";
 import {
   BOARD_VIEW_WIDTH,
   SECTION_VIEW_WIDTH,
@@ -439,96 +444,6 @@ export function boardRoutesBlock(session: LayoutSession): string | null {
   ].join("\n");
 }
 
-function scopeRootForObject(
-  object: InteractiveCanvasObject,
-  afterById: ReadonlyMap<string, InteractiveCanvasObject>,
-): string | null {
-  const current = afterById.get(object.id);
-  if (current?.type === "section") return current.id;
-  if (!current && object.type === "section") {
-    const formerParent = object.parentId;
-    return formerParent && afterById.get(formerParent)?.type === "section"
-      ? formerParent
-      : null;
-  }
-  const resolved = current ?? object;
-  const parentId = resolved.parentId;
-  return parentId && afterById.get(parentId)?.type === "section" ? parentId : resolved.id;
-}
-
-/**
- * The sections that own what changed, plus any changed entity outside every frame —
- * the roots a scoped digest renders.
- */
-export function touchedScopeIds(
-  before: InteractiveCanvasDocument,
-  after: InteractiveCanvasDocument,
-  delta: DocumentDelta,
-): string[] {
-  const beforeById = new Map(before.objects.map((object) => [object.id, object]));
-  const afterById = new Map(after.objects.map((object) => [object.id, object]));
-  const afterConnections = new Map(after.connections.map((connection) => [
-    connection.id,
-    connection,
-  ]));
-  const roots: string[] = [];
-  const seen = new Set<string>();
-  const addObjectRoot = (object: InteractiveCanvasObject | undefined): void => {
-    if (!object) return;
-    const rootId = scopeRootForObject(object, afterById);
-    if (!rootId || seen.has(rootId) || !afterById.has(rootId)) return;
-    seen.add(rootId);
-    roots.push(rootId);
-  };
-
-  for (const id of delta.touchedObjectIds) {
-    addObjectRoot(afterById.get(id) ?? beforeById.get(id));
-  }
-  for (const id of delta.touchedConnectionIds) {
-    const connection = afterConnections.get(id);
-    if (!connection) continue;
-    addObjectRoot(
-      afterById.get(connection.from.objectId) ?? beforeById.get(connection.from.objectId),
-    );
-    addObjectRoot(
-      afterById.get(connection.to.objectId) ?? beforeById.get(connection.to.objectId),
-    );
-  }
-  return roots;
-}
-
-/**
- * Digest rows for the named roots only: each section with its subtree, each loose object on its own.
- */
-export function scopedDigestBlock(
-  document: InteractiveCanvasDocument,
-  rootIds: readonly string[],
-): string | null {
-  if (rootIds.length === 0) return null;
-  const blocks: string[] = [];
-  for (const rootId of rootIds) {
-    const root = document.objects.find((object) => object.id === rootId);
-    if (!root) continue;
-    const includedIds = root.type === "section"
-      ? new Set([rootId, ...sectionDescendantIds(document, rootId)])
-      : new Set([rootId]);
-    const subDocument: InteractiveCanvasDocument = {
-      ...document,
-      objects: document.objects.filter((object) => includedIds.has(object.id)),
-      connections: document.connections.filter((connection) =>
-        includedIds.has(connection.from.objectId)
-        || includedIds.has(connection.to.objectId)),
-    };
-    const [, ...digestLines] = formatBoardDigest(subDocument).split("\n");
-    const label = root.type === "section" ? "SECTION" : "OUTSIDE";
-    blocks.push([
-      `${label} ${rootId}  ${DIGEST_DEFAULTS_LEGEND}`,
-      ...digestLines,
-    ].join("\n"));
-  }
-  return blocks.length > 0 ? blocks.join("\n") : null;
-}
-
 export interface RenderOptions {
   /** Render the full board view. */
   board: boolean;
@@ -538,7 +453,12 @@ export interface RenderOptions {
   onRender?: (png: Buffer) => void;
 }
 
-/** Rasterize the requested views. A raster failure never silently drops an image. */
+/**
+ * Rasterize the requested views. A raster failure never silently drops an
+ * image. Every raster also lands on the session's view log, so the state
+ * render can re-attach the newest few after the tool result that carried them
+ * has scrolled out of the message tail.
+ */
 export function renderPerception(
   session: LayoutSession,
   options: RenderOptions,
@@ -550,6 +470,7 @@ export function renderPerception(
       const rendered = renderBoardView(session.draft, { width: BOARD_VIEW_WIDTH });
       const { png } = rasterizeSvgToPng(rendered.svg);
       pngs.push(png);
+      recordSessionView(session, "board", null, png);
       options.onRender?.(png);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -563,7 +484,9 @@ export function renderPerception(
         options.view,
         { width: SECTION_VIEW_WIDTH },
       );
-      pngs.push(rasterizeSvgToPng(rendered.svg).png);
+      const { png } = rasterizeSvgToPng(rendered.svg);
+      pngs.push(png);
+      recordSessionView(session, "section", options.view, png);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       notes.push(`render failed: view "${options.view}" — ${message}`);
@@ -588,7 +511,18 @@ export interface OperationPerceptionOptions {
   details?: Record<string, unknown>;
 }
 
-/** The per-operation envelope: what changed, what it cost in lints, and the region it landed in. */
+/**
+ * The per-operation envelope: what changed and what it cost in lints, plus the
+ * routed truth for every wire the change moved.
+ *
+ * Deliberately NOT here any more: the scoped digest rows and the REQUESTS
+ * queue. Both existed to patch a context that went stale the moment the model
+ * edited — the spawn-time <board_state> / <user_requests> blocks. Section ③
+ * now re-renders the whole board digest and the whole queue on every request,
+ * so restating them per operation would put the same text in the window twice.
+ * The delta, the lint movement, and the routes are genuinely per-operation:
+ * they say what THIS call did, which the board picture alone does not.
+ */
 export function operationPerception(
   session: LayoutSession,
   before: InteractiveCanvasDocument,
@@ -598,10 +532,6 @@ export function operationPerception(
   const delta = documentDelta(before, session.draft);
   const diagnostics = runDiagnostics(session.draft);
   const lintText = lintDeltaBlock(session, diagnostics, before);
-  const digest = scopedDigestBlock(
-    session.draft,
-    touchedScopeIds(before, session.draft, delta),
-  );
   const routes = routesBlock(session, delta);
   const perception = renderPerception(session, {
     board: false,
@@ -615,9 +545,7 @@ export function operationPerception(
     ...noteLines,
     deltaBlock(delta),
     lintText,
-    ...(digest ? [digest] : []),
     ...(routes ? [routes] : []),
-    formatRequestsBlock(session.requests),
     ...perception.notes,
   ];
   return {
@@ -639,7 +567,24 @@ export interface LookPerceptionOptions {
   details?: Record<string, unknown>;
 }
 
-/** The whole board, deliberately: full digest, cumulative diff, every lint, and the renders. */
+/** What look says instead of restating text section ③ already carries. */
+export const LOOK_STATE_POINTER =
+  "The full BOARD digest, the cumulative BOARD DIFF, the DIAGNOSTICS list and the"
+  + " REQUESTS queue are in the <state> block of this request, re-derived from the"
+  + " current draft — read them there, not from an older turn.";
+
+/**
+ * The deliberate step back: fresh renders of the whole board (and a section
+ * close-up when asked), the routed truth for every wire, and a pointer to the
+ * state block.
+ *
+ * look used to restate the digest, the diff, the lint list and the queue,
+ * because the only other copy was the spawn snapshot and that copy aged. With
+ * section ③ re-rendering all four from the authoritative draft every request,
+ * restating them here would mean the model reads the same board twice in one
+ * window. What survives is what look alone produces: the rasters and the
+ * routes.
+ */
 export function lookPerception(
   session: LayoutSession,
   options?: LookPerceptionOptions,
@@ -654,12 +599,10 @@ export function lookPerception(
   });
   const blocks = [
     ...(options?.headline !== undefined ? [options.headline] : []),
-    formatBoardDescription(session.draft.description),
-    formatBoardDigest(session.draft),
-    boardDiffBlock(session),
-    formatDiagnostics(diagnostics),
+    `LOOK · ${perception.pngs.length} render${perception.pngs.length === 1 ? "" : "s"}`
+    + (options?.view !== undefined ? ` · close-up ${options.view}` : ""),
     ...(routes ? [routes] : []),
-    formatRequestsBlock(session.requests),
+    LOOK_STATE_POINTER,
     ...perception.notes,
   ];
   return {

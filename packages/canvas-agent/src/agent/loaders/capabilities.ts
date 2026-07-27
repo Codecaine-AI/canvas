@@ -1,6 +1,7 @@
 /**
  * The <capabilities> context block loader. The block itself is assembled in
- * src/agent/catalog/layout-editor/capabilities/ as four flat kind sections.
+ * src/agent/catalog/layout-editor/context/capabilities/ as four flat kind
+ * sections.
  * Each section combines hand-written framing, completeness-guarded operation
  * declarations, and the generated schema fragments used by OBJECTS and
  * CONNECTIONS.
@@ -12,7 +13,7 @@ import { createHash } from "node:crypto";
 
 import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
 
-import { formatCapabilities } from "../catalog/layout-editor/capabilities";
+import { formatCapabilities } from "../catalog/layout-editor/context/capabilities";
 
 export { formatCapabilities };
 

@@ -1,6 +1,6 @@
 /**
  * The layout tool runtime — the harness handle bound to the layout-editor
- * agent's private tools.ts sidecar at spawn time.
+ * agent's private tools/ sidecar at spawn time.
  *
  * Each mutation call handles one operation, individually validating, applying,
  * and reporting it. Its result is sized to that operation: the APPLIED line,

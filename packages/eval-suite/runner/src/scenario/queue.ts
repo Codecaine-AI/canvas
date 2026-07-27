@@ -761,6 +761,7 @@ async function writeFingerprint(options: {
       "agent",
       "catalog",
       "layout-editor",
+      "prompt",
       "prompt.json",
     ),
     resolve(
@@ -771,14 +772,25 @@ async function writeFingerprint(options: {
       "agent",
       "catalog",
       "layout-editor",
-      "prompt.rendered.md",
+      "prompt",
+      "system.md",
     ),
   ]);
   const lints = await hashFiles([
     resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "lints"),
   ]);
   const styles = await hashFiles([
-    resolve(REPO_ROOT, "packages", "canvas-agent", "src", "agent", "styles"),
+    resolve(
+      REPO_ROOT,
+      "packages",
+      "canvas-agent",
+      "src",
+      "agent",
+      "catalog",
+      "layout-editor",
+      "context",
+      "style-guide",
+    ),
   ]);
   const harness = options.services.find((service) => service.name === "eval harness");
   const lines = [

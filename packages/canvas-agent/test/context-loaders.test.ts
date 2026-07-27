@@ -1,10 +1,13 @@
 /**
- * Context wiring gate: the style-guide and capabilities loaders inject their
- * static corpora; the board-state and user-requests loaders render their
- * spawn snapshots (or fallback lines); the layout-editor context sidecar
- * assembles the five tagged blocks in declaration order and appends a caption
- * line naming the delivered boot images; and the kernel config registers all
- * five custom loaders.
+ * Section ② wiring gate: the style-guide and capabilities loaders inject their
+ * static corpora; the layout-editor context sidecar assembles the two tagged
+ * blocks in declaration order and appends a caption line naming the delivered
+ * reference images; and the kernel config registers exactly those two custom
+ * loaders.
+ *
+ * The board-state / editor-state / user-requests loaders retired when the
+ * layout-editor's state/ sidecar took over the working picture, so what remains of
+ * them here is their formatters, which section ③ now renders through.
  */
 import { describe, expect, test } from "bun:test";
 
@@ -14,20 +17,15 @@ import {
   CRAFT_TARGETS,
   STYLE_TOPICS,
   type CraftTargets,
-} from "../src/agent/styles";
+} from "../src/agent/catalog/layout-editor/context/style-guide";
 import {
   formatCraftTargets,
   formatStyleGuide,
   styleGuideLoader,
 } from "../src/agent/loaders/style-guide";
 import {
-  BOARD_STATE_FALLBACK,
-  boardStateLoader,
-} from "../src/agent/loaders/board-state";
-import {
   USER_REQUESTS_EMPTY,
   formatRequestQueue,
-  userRequestsLoader,
   type RequestQueueEntry,
 } from "../src/agent/loaders/user-requests";
 import { formatCapabilities } from "../src/agent/loaders/capabilities";
@@ -159,60 +157,7 @@ describe("style-guide loader", () => {
   });
 });
 
-describe("board-state loader", () => {
-  test("renders sessionData.boardState verbatim", async () => {
-    const boardState = "FRAME 0,0 2752x1744\nNODES\n- seed-idle rectangle …\nLINTS · clean";
-    const result = await boardStateLoader.resolve(
-      { kind: "board-state" },
-      { cwd: "/", sessionData: { boardState } },
-    );
-    expect(result.status).toBe("ok");
-    expect(result.content).toBe(boardState);
-  });
-
-  test("falls back to the pointer line when the snapshot is absent or empty", async () => {
-    const absent = await boardStateLoader.resolve({ kind: "board-state" }, { cwd: "/" });
-    expect(absent.content).toBe(BOARD_STATE_FALLBACK);
-
-    const empty = await boardStateLoader.resolve(
-      { kind: "board-state" },
-      { cwd: "/", sessionData: { boardState: "" } },
-    );
-    expect(empty.content).toBe(BOARD_STATE_FALLBACK);
-
-    const wrongType = await boardStateLoader.resolve(
-      { kind: "board-state" },
-      { cwd: "/", sessionData: { boardState: 42 } },
-    );
-    expect(wrongType.content).toBe(BOARD_STATE_FALLBACK);
-  });
-});
-
-describe("user-requests loader", () => {
-  test("renders sessionData.userRequests verbatim and falls back when absent", async () => {
-    const userRequests = formatRequestQueue([
-      {
-        alias: "R1",
-        annotationId: "req-1",
-        target: { kind: "object", objectId: "task" },
-        intent: "agent-request",
-        status: "open",
-        body: "Split this into two steps",
-        createdBy: "human",
-        replies: [],
-      },
-    ]);
-    const present = await userRequestsLoader.resolve(
-      { kind: "user-requests" },
-      { cwd: "/", sessionData: { userRequests } },
-    );
-    expect(present.status).toBe("ok");
-    expect(present.content).toBe(userRequests);
-
-    const absent = await userRequestsLoader.resolve({ kind: "user-requests" }, { cwd: "/" });
-    expect(absent.content).toBe(USER_REQUESTS_EMPTY);
-  });
-
+describe("request queue rendering", () => {
   test("formats every target kind and status, and marks the empty queue", () => {
     const entries: RequestQueueEntry[] = [
       {
@@ -311,24 +256,27 @@ describe("user-requests loader", () => {
   });
 });
 
+const CONTACT_SHEET_CAPTION =
+  "the board vocabulary — every object type, icon glyph, and color rendered and labeled,"
+  + " plus the connection arrows and styles; the visual reference for everything the board"
+  + " can draw";
+const EXEMPLAR_CAPTION =
+  "a finished board in the house style — a taste reference, not this board";
+
 describe("layout-editor context sidecar", () => {
-  test("declares the five loaders in block order", () => {
+  test("declares only the two reference loaders, in block order", () => {
+    // The working-picture loaders retired: board / editor / requests are
+    // rendered fresh into section ③ by state/, never pinned here.
     expect(layoutEditorContext.loaders.map((decl) => decl.kind)).toEqual([
-      "editor-state",
-      "user-requests",
       "capabilities",
       "style-guide",
-      "board-state",
     ]);
   });
 
   test("assemble wraps each loaded input in its tagged block", async () => {
     const loaded: LoadedMap = [
-      loadedInput("editor-state", "canvas: c1 (baseline abc)"),
-      loadedInput("user-requests", USER_REQUESTS_EMPTY),
       loadedInput("capabilities", formatCapabilities()),
       loadedInput("style-guide", formatStyleGuide()),
-      loadedInput("board-state", BOARD_STATE_FALLBACK),
     ];
     const assembled = await layoutEditorContext.assemble(loaded, {} as SpawnContext);
 
@@ -336,40 +284,48 @@ describe("layout-editor context sidecar", () => {
       .split("\n")
       .map((line) => (line.length > 0 ? `    ${line}` : line))
       .join("\n");
-    expect(assembled).toContain("<editor_state>\n    canvas: c1 (baseline abc)\n</editor_state>");
-    expect(assembled).toContain(`<user_requests>\n${indented(USER_REQUESTS_EMPTY)}\n</user_requests>`);
-    expect(assembled).toContain(`<board_state>\n${indented(BOARD_STATE_FALLBACK)}\n</board_state>`);
     expect(assembled).toContain(`<capabilities>\n${indented(formatCapabilities())}\n</capabilities>`);
     expect(assembled).toContain("<style_guide>\n");
     for (const topic of STYLE_TOPICS) {
       expect(assembled).toContain(`<${topic.id.replaceAll("-", "_")}>`);
     }
     // Block order matches declaration order.
-    expect(assembled.indexOf("<editor_state>")).toBeLessThan(assembled.indexOf("<user_requests>"));
-    expect(assembled.indexOf("<user_requests>")).toBeLessThan(assembled.indexOf("<capabilities>"));
     expect(assembled.indexOf("<capabilities>")).toBeLessThan(assembled.indexOf("<style_guide>"));
-    expect(assembled.indexOf("<style_guide>")).toBeLessThan(assembled.indexOf("<board_state>"));
+    // Nothing that moved to the state side is emitted here any more.
+    expect(assembled).not.toContain("<board_state>");
+    expect(assembled).not.toContain("<editor_state>");
+    expect(assembled).not.toContain("<user_requests>");
   });
 
   test("assemble keeps an empty input's block as an empty tag pair", async () => {
-    const loaded: LoadedMap = [loadedInput("editor-state", "")];
+    const loaded: LoadedMap = [loadedInput("capabilities", "")];
     const assembled = await layoutEditorContext.assemble(loaded, {} as SpawnContext);
-    expect(assembled).toContain("<editor_state>\n</editor_state>");
+    expect(assembled).toContain("<capabilities>\n</capabilities>");
   });
 
-  test("assembleImages returns board-then-exemplar as image/png blocks", async () => {
+  test("assembleImages returns exemplar-then-contact-sheet as image/png blocks", async () => {
     const ctx = {
       sessionData: {
-        bootImages: { board: "Qk9BUkQ=", exemplar: "RVhFTVBMQVI=" },
+        bootImages: { exemplar: "RVhFTVBMQVI=", contactSheet: "U0hFRVQ=" },
       },
     } as unknown as SpawnContext;
 
     const images = await layoutEditorContext.assembleImages!([], ctx);
 
     expect(images).toEqual([
-      { data: "Qk9BUkQ=", mimeType: "image/png" },
       { data: "RVhFTVBMQVI=", mimeType: "image/png" },
+      { data: "U0hFRVQ=", mimeType: "image/png" },
     ]);
+  });
+
+  test("a board payload is never delivered as a context image", async () => {
+    // Working picture rides section ③ through the session view log; even if a
+    // stale caller put one here it must not become a pinned context image.
+    const images = await layoutEditorContext.assembleImages!(
+      [],
+      { sessionData: { bootImages: { board: "Qk9BUkQ=" } } } as unknown as SpawnContext,
+    );
+    expect(images).toEqual([]);
   });
 
   test("assembleImages skips missing payloads and degrades to text-only", async () => {
@@ -380,7 +336,7 @@ describe("layout-editor context sidecar", () => {
       [],
       { sessionData: { boardState: "BOARD" } } as unknown as SpawnContext,
     )).toEqual([]);
-    // A failed board render: only the exemplar rides along.
+    // A missing contact sheet: only the exemplar rides along.
     expect(await layoutEditorContext.assembleImages!(
       [],
       { sessionData: { bootImages: { exemplar: "RVhFTVBMQVI=" } } } as unknown as SpawnContext,
@@ -388,60 +344,54 @@ describe("layout-editor context sidecar", () => {
     // Empty strings and wrong types never become image blocks.
     expect(await layoutEditorContext.assembleImages!(
       [],
-      { sessionData: { bootImages: { board: "", exemplar: 7 } } } as unknown as SpawnContext,
+      { sessionData: { bootImages: { exemplar: "", contactSheet: 7 } } } as unknown as SpawnContext,
     )).toEqual([]);
   });
 
   test("assemble appends the caption line for both images, after the blocks", async () => {
-    const loaded: LoadedMap = [loadedInput("board-state", BOARD_STATE_FALLBACK)];
+    const loaded: LoadedMap = [loadedInput("capabilities", "CAPS")];
     const ctx = {
-      sessionData: { bootImages: { board: "Qk9BUkQ=", exemplar: "RVhFTVBMQVI=" } },
+      sessionData: { bootImages: { exemplar: "RVhFTVBMQVI=", contactSheet: "U0hFRVQ=" } },
     } as unknown as SpawnContext;
 
     const assembled = await layoutEditorContext.assemble(loaded, ctx);
 
     expect(assembled.endsWith(
-      "\n\nimages attached: (1) the current full-board render, "
-      + "(2) a finished board in the house style — a taste reference, not this board",
+      `\n\nimages attached: (1) ${EXEMPLAR_CAPTION}, (2) ${CONTACT_SHEET_CAPTION}`,
     )).toBe(true);
     // The blocks themselves are untouched.
-    expect(assembled).toContain(`<board_state>\n    ${BOARD_STATE_FALLBACK}\n</board_state>`);
+    expect(assembled).toContain("<capabilities>\n    CAPS\n</capabilities>");
     // Caption count matches the images assembleImages delivers for the same ctx.
     const images = await layoutEditorContext.assembleImages!([], ctx);
     expect(images.length).toBe(2);
   });
 
   test("caption numbering follows delivery order when one image is missing", async () => {
-    const loaded: LoadedMap = [loadedInput("board-state", BOARD_STATE_FALLBACK)];
+    const loaded: LoadedMap = [loadedInput("capabilities", "CAPS")];
 
-    const boardOnly = {
-      sessionData: { bootImages: { board: "Qk9BUkQ=" } },
+    const sheetOnly = {
+      sessionData: { bootImages: { contactSheet: "U0hFRVQ=" } },
     } as unknown as SpawnContext;
-    const boardText = await layoutEditorContext.assemble(loaded, boardOnly);
-    expect(boardText.endsWith(
-      "\n\nimages attached: (1) the current full-board render",
-    )).toBe(true);
-    expect((await layoutEditorContext.assembleImages!([], boardOnly)).length).toBe(1);
+    const sheetText = await layoutEditorContext.assemble(loaded, sheetOnly);
+    expect(sheetText.endsWith(`\n\nimages attached: (1) ${CONTACT_SHEET_CAPTION}`)).toBe(true);
+    expect((await layoutEditorContext.assembleImages!([], sheetOnly)).length).toBe(1);
 
     const exemplarOnly = {
       sessionData: { bootImages: { exemplar: "RVhFTVBMQVI=" } },
     } as unknown as SpawnContext;
     const exemplarText = await layoutEditorContext.assemble(loaded, exemplarOnly);
-    expect(exemplarText.endsWith(
-      "\n\nimages attached: (1) a finished board in the house style — "
-      + "a taste reference, not this board",
-    )).toBe(true);
+    expect(exemplarText.endsWith(`\n\nimages attached: (1) ${EXEMPLAR_CAPTION}`)).toBe(true);
     expect((await layoutEditorContext.assembleImages!([], exemplarOnly)).length).toBe(1);
   });
 
   test("assemble omits the caption line whenever no image is delivered", async () => {
-    const loaded: LoadedMap = [loadedInput("board-state", BOARD_STATE_FALLBACK)];
+    const loaded: LoadedMap = [loadedInput("capabilities", "CAPS")];
     const bare = await layoutEditorContext.assemble(loaded, {} as SpawnContext);
-    expect(bare).toBe(`<board_state>\n    ${BOARD_STATE_FALLBACK}\n</board_state>`);
+    expect(bare).toBe("<capabilities>\n    CAPS\n</capabilities>");
 
     // Empty strings and wrong types produce no images, so no caption either.
     const junk = {
-      sessionData: { bootImages: { board: "", exemplar: 7 } },
+      sessionData: { bootImages: { exemplar: "", contactSheet: 7 } },
     } as unknown as SpawnContext;
     expect(await layoutEditorContext.assemble(loaded, junk)).toBe(bare);
     expect(await layoutEditorContext.assembleImages!([], junk)).toEqual([]);
@@ -449,7 +399,7 @@ describe("layout-editor context sidecar", () => {
 });
 
 describe("kernel loader registration", () => {
-  test("kernel.ts registers all five custom loaders", () => {
+  test("kernel.ts registers exactly the two section-② loaders", () => {
     // Booting a kernel here would touch trace.db, so this gate reads the
     // wiring statically.
     const source = require("node:fs").readFileSync(
@@ -458,14 +408,15 @@ describe("kernel loader registration", () => {
     ) as string;
     const loadersEntry = source.match(/loaders: \[[^\]]*\]/);
     expect(loadersEntry).not.toBeNull();
-    for (const loader of [
+    for (const loader of ["capabilitiesLoader", "styleGuideLoader"]) {
+      expect(loadersEntry![0], loader).toContain(loader);
+    }
+    for (const retired of [
       "editorStateLoader",
       "userRequestsLoader",
-      "capabilitiesLoader",
-      "styleGuideLoader",
       "boardStateLoader",
     ]) {
-      expect(loadersEntry![0], loader).toContain(loader);
+      expect(loadersEntry![0], retired).not.toContain(retired);
     }
   });
 });

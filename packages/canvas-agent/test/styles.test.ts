@@ -6,13 +6,13 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { CRAFT_TARGETS, STYLE_TOPICS } from "../src/agent/styles";
+import { CRAFT_TARGETS, STYLE_TOPICS } from "../src/agent/catalog/layout-editor/context/style-guide";
 
 const EXPECTED_TOPIC_IDS = [
   "aesthetic",
 ];
 
-describe("style registry (src/agent/styles)", () => {
+describe("style registry (catalog/layout-editor/context/style-guide)", () => {
   test("every topic is exported, in registry order", () => {
     expect(STYLE_TOPICS.map((topic) => topic.id)).toEqual(EXPECTED_TOPIC_IDS);
   });

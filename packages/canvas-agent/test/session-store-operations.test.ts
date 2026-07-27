@@ -4,13 +4,14 @@ import { formatBoardDigest } from "../src/board/digest";
 import { pageFrameOf } from "../src/board/helpers";
 import {
   draftWithPageFrame,
+  LOOK_STATE_POINTER,
   wreckedDocumentError,
 } from "../src/service/session";
 import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("session operations", () => {
-  test("look returns board truth and a requested section close-up without editing", () => {
+  test("look returns the renders and points at the state block, without editing", () => {
     const section = { ...box("home", 0, 0, 480, 320, "section"), text: "Home" };
     const child = { ...box("child", 64, 96), parentId: "home" };
     const baseline = makeDocument([section, child]);
@@ -19,21 +20,21 @@ describe("session operations", () => {
     const result = look(session, "home");
 
     expect(result.isError).toBeUndefined();
-    const digest = formatBoardDigest(session.draft);
-    const digestIndex = result.text.indexOf(digest);
-    // A delta belongs to an operation; the deliberate read carries the
-    // cumulative diff from the baseline instead.
-    const diffIndex = result.text.indexOf("\nBOARD DIFF");
-    expect(digestIndex).toBeGreaterThan(-1);
-    expect(diffIndex).toBeGreaterThan(-1);
+    // The digest, the diff, the lint list and the queue live in section ③,
+    // re-derived every request; look restating them would double-feed the
+    // same board into one window.
+    expect(result.text).not.toContain(formatBoardDigest(session.draft));
+    expect(result.text).not.toContain("BOARD DIFF · base → draft");
     expect(result.text).not.toContain("\nDELTA");
-    expect(result.text).not.toContain("no base section");
-    expect(result.text).toContain('  home section "Home" 0,0 480×320');
-    expect(digestIndex).toBeLessThan(diffIndex);
+    expect(result.text).toContain("LOOK · 2 renders · close-up home");
+    expect(result.text).toContain(LOOK_STATE_POINTER);
     // Whole-board perception includes the board render and requested close-up.
     expect(result.pngs).toHaveLength(2);
     expect(result.pngs![0]).toBeInstanceOf(Buffer);
     expect(result.pngs![1]).toBeInstanceOf(Buffer);
+    // Both rasters land on the view log for the state render to re-attach.
+    expect(session.views.map((view) => view.kind)).toEqual(["board", "section"]);
+    expect(session.views[1]!.sectionId).toBe("home");
     // Perception does not create an edit event.
     expect(session.events).toEqual([]);
     expect(session.draft).toBe(baseline);

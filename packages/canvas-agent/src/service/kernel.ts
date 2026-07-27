@@ -20,11 +20,8 @@ import {
 } from "@agent-kernel/db";
 import { createKernel, type KernelInstance } from "@agent-kernel/kernel";
 
-import { boardStateLoader } from "../agent/loaders/board-state";
 import { capabilitiesLoader } from "../agent/loaders/capabilities";
-import { editorStateLoader } from "../agent/loaders/editor-state";
 import { styleGuideLoader } from "../agent/loaders/style-guide";
-import { userRequestsLoader } from "../agent/loaders/user-requests";
 import type { LayoutToolRuntime } from "./tool-runtime";
 
 export const KERNEL_ID = "canvas-agent";
@@ -105,13 +102,10 @@ export function createLayoutKernel(
       aliases: { layout: LAYOUT_MODEL },
       prices: { [LAYOUT_MODEL]: { inputPerMTok: 1.25, outputPerMTok: 10 } },
     },
-    loaders: [
-      editorStateLoader,
-      userRequestsLoader,
-      capabilitiesLoader,
-      styleGuideLoader,
-      boardStateLoader,
-    ],
+    // Section ② only. The board / editor / user-request loaders retired when
+    // the layout-editor's state/ sidecar took over the working picture (③);
+    // their snapshots still travel on sessionData, read by seed() instead.
+    loaders: [capabilitiesLoader, styleGuideLoader],
     toolRuntime,
     piSessionsDir: PI_SESSIONS_DIR,
     piAgentDir: PI_AGENT_DIR,

@@ -25,7 +25,7 @@ const CATALOG_DIR = join(
   "catalog",
   "layout-editor",
 );
-const PROMPT_FILE = join(CATALOG_DIR, "prompt.json");
+const PROMPT_FILE = join(CATALOG_DIR, "prompt", "prompt.json");
 
 interface PromptNode {
   type: string;
@@ -155,8 +155,10 @@ describe("layout-editor prompt", () => {
   test("pins the identity, instruction channel, and draft framing", () => {
     const { text } = readPrompt();
     expect(text).toContain("full board editor for a shared whiteboard");
-    expect(text).toContain("their instruction arrives as the message that follows your context blocks");
-    expect(text).toContain("Open entries in the user_requests block are part of that instruction");
+    expect(text).toContain("their instruction is the <instruction> block of your state");
+    expect(text).toContain(
+      "Open entries in the <requests> block of your state are part of that instruction",
+    );
     expect(text).toContain("Your edits build a draft, not the live board");
     expect(text).toContain("outcome committed presents that draft to the operator for review");
   });
@@ -255,7 +257,7 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("An indented object tree where indentation is containment");
     expect(text).toContain("Text is never truncated");
     expect(text).toContain("What the operation changed, derived by comparing the documents");
-    expect(text).toContain("`look`'s cumulative base→draft change list");
+    expect(text).toContain("The <diff> block's cumulative base→draft change list");
     expect(text).toContain("exact edits a committed finalize will propose");
     expect(text).toContain("An operation returns `LINTS · +new −resolved`");
     expect(text).toContain("through none|ids");
@@ -265,15 +267,20 @@ describe("layout-editor prompt", () => {
   });
 
   test("tells the true perception-delivery contract", () => {
-    const { text } = readPrompt();
+    const { text, raw } = readPrompt();
+    // Section ③ is re-derived per request, so the prompt must not describe a
+    // spawn snapshot that ages, and must not send the model to `look` for the
+    // board text it already has this turn.
     expect(text).toContain(
-      "The board_state context block is the spawn-time snapshot — the digest plus the lint report — and goes stale the moment you edit; from then on `look` is the truth.",
+      "Every request opens with a <state> block re-derived from the live board that instant",
+    );
+    expect(text).toContain("can never go stale under you");
+    expect(text).toContain("<instruction> the ask, <scope> what the operator selected");
+    expect(text).toContain(
+      "An operation result is sized to the operation: its APPLIED line, its DELTA, its lint delta, and ROUTES for any wire it moved",
     );
     expect(text).toContain(
-      "An operation result is sized to the operation: its APPLIED line, its DELTA, its lint delta, and the digest rows around what it touched.",
-    );
-    expect(text).toContain(
-      "`look` is the step back — the full digest, the cumulative BOARD DIFF, every open finding, ROUTES, REQUESTS, and a full-board render.",
+      "`look` is the step back — a fresh full-board render and the routed truth for every connection",
     );
     expect(text).toContain(
       "`look` carries the full-board render; a section close-up arrives on any call that names a view.",
@@ -281,6 +288,10 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("A failed or missing render is always explained in the result text");
     expect(text).not.toContain("carries the current state");
     expect(text).not.toContain("current full-board render (plus the requested close-up)");
+    // The three retired context blocks are gone from the model's vocabulary.
+    for (const retired of ["board_state", "editor_state", "user_requests"]) {
+      expect(raw, retired).not.toContain(retired);
+    }
   });
 
   test("pins the five workflow phases as nested XML in order", () => {
@@ -341,11 +352,11 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("is a failure of judgment, not diligence");
   });
 
-  test("routes annotations to user_requests, never the digest", () => {
+  test("routes annotations to the request queue, never the digest", () => {
     const { text } = readPrompt();
     expect(text).toContain("indentation is containment");
     expect(text).toContain("appearing only when present");
-    expect(text).toContain("The operator's arrive in the user_requests block");
+    expect(text).toContain("The operator's arrive in the <requests> block of your state");
     expect(text).toContain("never appear in the board digest");
     expect(text).not.toContain("USER ANNOTATIONS (READ-ONLY)");
     expect(text).not.toContain("invoke-time annotations");

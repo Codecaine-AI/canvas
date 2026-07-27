@@ -9,16 +9,18 @@
  * its own outstanding questions, labelled by author; only user-authored
  * threads gate a committed finalize.
  *
- * This module renders the queue in its two homes: the <user_requests> boot
- * block (the session store pre-formats it via formatRequestQueue and places
- * it at `sessionData.userRequests`) and the REQUESTS block in tool results.
- * Both render the thread: the opening post with its author, then one indented
- * line per reply, oldest first.
+ * This module renders the queue in its two homes: section ③'s <requests>
+ * block, re-rendered from the live queue on every request by the
+ * layout-editor's state/ sidecar (and seeded from the store's pre-formatted
+ * `sessionData.userRequests` when the live session is out of reach), and the
+ * REQUESTS block that resolve_request / add_annotation return. Both render the
+ * thread: the opening post with its author, then one indented line per reply,
+ * oldest first.
+ *
+ * The `user-requests` context loader that used to own the first of those
+ * retired with the state layer: the queue moves while the agent works, so it
+ * belongs to the re-rendered section, not to a pinned spawn block.
  */
-import { createHash } from "node:crypto";
-
-import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
-
 import type {
   AgentRect,
   AgentSessionAnnotation,
@@ -48,10 +50,6 @@ export interface RequestQueueEntry {
   status: RequestStatus;
   /** The resolve_request note, set when the entry is disposed. */
   note?: string;
-}
-
-function sha256(input: string): string {
-  return createHash("sha256").update(input, "utf8").digest("hex");
 }
 
 function fmt(value: number): string {
@@ -103,7 +101,7 @@ export function formatRequestThread(entry: RequestQueueEntry): string[] {
   ];
 }
 
-/** The <user_requests> boot block: one thread per entry, or the empty marker. */
+/** Section ③'s <requests> body: one thread per entry, or the empty marker. */
 export function formatRequestQueue(entries: readonly RequestQueueEntry[]): string {
   if (entries.length === 0) return USER_REQUESTS_EMPTY;
   const lines = [
@@ -130,20 +128,3 @@ export function formatRequestsBlock(entries: readonly RequestQueueEntry[]): stri
       formatRequestThread(entry).map((line) => `  ${line}`)),
   ].join("\n");
 }
-
-export const userRequestsLoader: Loader = {
-  kind: "user-requests",
-  async resolve(_decl, ctx): Promise<LoaderResult> {
-    const userRequests = ctx.sessionData?.userRequests;
-    const content =
-      typeof userRequests === "string" && userRequests.length > 0
-        ? userRequests
-        : USER_REQUESTS_EMPTY;
-    return {
-      status: "ok",
-      content,
-      bytes: Buffer.byteLength(content, "utf8"),
-      hash: sha256(content),
-    };
-  },
-};

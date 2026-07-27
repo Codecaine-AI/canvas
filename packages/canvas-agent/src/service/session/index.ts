@@ -24,11 +24,25 @@ export {
 export {
   boardDiffBlock,
   documentDelta,
+  LOOK_STATE_POINTER,
   lookPerception,
   operationPerception,
-  scopedDigestBlock,
   type DocumentDelta,
 } from "./perception";
+
+export {
+  forgetLayoutSession,
+  layoutSessionForContainer,
+  registerLayoutSession,
+} from "./registry";
+
+export {
+  describeSessionView,
+  newestSessionViews,
+  recordSessionView,
+  VIEW_LOG_LIMIT,
+  type SessionView,
+} from "./view-log";
 
 export {
   classifyOperation,

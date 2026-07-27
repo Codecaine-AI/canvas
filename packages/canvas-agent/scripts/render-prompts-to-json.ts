@@ -1,29 +1,27 @@
-/** Regenerate every derived prompt snapshot in this package's agent catalog. */
-import { writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+/**
+ * Regenerate every derived prompt snapshot in this package's agent catalog.
+ *
+ * `prompt.json` is the source of truth; the markdown beside it is generated so
+ * the prompt stays readable and diffable in the form the model receives. Where
+ * it lands follows the bundle form (agent-kernel registry/bundle-layout.ts):
+ * `prompt/prompt.json` → `prompt/system.md`, and a flat `prompt.json` →
+ * `prompt.rendered.md`. The kernel owns both the render and the path rule, so
+ * this script only points it at the catalog root.
+ */
+import { join, relative, resolve } from "node:path";
 
-import {
-  buildRegistry,
-  renderedPromptSnapshot,
-} from "@agent-kernel/kernel";
+import { refreshCatalogPromptSnapshots } from "@agent-kernel/kernel";
 
 const packageRoot = resolve(import.meta.dir, "..");
 const catalogRoot = join(packageRoot, "src", "agent", "catalog");
 
-async function main(): Promise<void> {
-  const registry = await buildRegistry({ roots: [catalogRoot] });
-
-  for (const agent of registry.list()) {
-    const snapshotFile = join(dirname(agent.promptFile), "prompt.rendered.md");
-    writeFileSync(
-      snapshotFile,
-      renderedPromptSnapshot(agent.parsed.body),
-      "utf8",
-    );
+function main(): void {
+  for (const result of refreshCatalogPromptSnapshots([catalogRoot])) {
+    const status = result.changed ? "wrote" : "unchanged";
     console.log(
-      `wrote ${relative(packageRoot, snapshotFile)} (${agent.promptHash})`,
+      `${status} ${relative(packageRoot, result.renderedFile)} (${result.hash})`,
     );
   }
 }
 
-if (import.meta.main) await main();
+if (import.meta.main) main();
