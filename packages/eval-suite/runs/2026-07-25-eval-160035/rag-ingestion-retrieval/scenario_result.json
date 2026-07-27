@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-25-eval-160035",
+  "tier": "system",
+  "scenario": "rag-ingestion-retrieval",
+  "board_id": "eval.2026-07-25-eval-160035.rag-ingestion-retrieval",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-25T21:00:37.741Z",
+      "finished_at": "2026-07-25T21:04:52.013Z",
+      "wall_ms": 254900,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "8e63b2ed-9243-416e-ade2-e10c5c759f66"
+    ]
+  },
+  "finished_at": "2026-07-25T21:04:52.648Z",
+  "exit_code": 0
+}

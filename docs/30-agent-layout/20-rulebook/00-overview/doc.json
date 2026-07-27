@@ -22,28 +22,26 @@
         "b-rulebook-idx-r8-12",
         "b-rulebook-idx-r9-13",
         "b-rulebook-idx-r10-14",
-        "b-rulebook-accounting-heading-15",
-        "b-rulebook-accounting-body-16",
-        "b-rulebook-accounting-code-17",
-        "b-rulebook-accounting-results-18",
         "b-rulebook-lab-heading-19",
         "b-rulebook-lab-body-20"
       ],
       "props": {
-        "covers": "Corpus-derived layout rules R1-R10 for the sketch compiler: the enforcement model (fitter detects, language declares, expander reproduces), a linked index of the ten rules, the decision-accounting method, and what stayed in the lab.",
+        "covers": "R1-R10 as documentation lenses over the layout agent's actual mechanisms: the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and five layout diagnostics.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "16px grid",
-          "spacing ladder",
-          "section trim",
-          "grid lattice",
-          "align register",
-          "fan",
-          "hug lane",
-          "size classes",
-          "feedback corridors",
-          "decision accounting"
+          "uniform gaps",
+          "section grouping",
+          "peer lattice",
+          "peer alignment",
+          "parent-child composition",
+          "content-sized rails",
+          "size semantics",
+          "routed returns",
+          "style guide",
+          "automatic layout behavior",
+          "lint diagnostics"
         ]
       }
     },
@@ -67,7 +65,7 @@
       "props": {},
       "text": [
         {
-          "insert": "These rules were mined from the eight polished boards in "
+          "insert": "These rules come from the eight polished boards in "
         },
         {
           "insert": "canvases/",
@@ -76,48 +74,21 @@
           }
         },
         {
-          "insert": " — agent-flows-2, bubba-voice, claude-code-researcher, gc-decomp-harness, ink-diagrams, intent-classification-1 and -2, and v2-flow. Each rule is written as an enforceable compiler constraint: the fitter detects it ("
+          "insert": " — agent-flows-2, bubba-voice, claude-code-researcher, gc-decomp-harness, ink-diagrams, intent-classification-1 and -2, and v2-flow. Their composition lessons are expressed by the single "
         },
         {
-          "insert": "fitSketch",
+          "insert": "Calm and uniform — uniformity is information",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "fitSketch"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": "), the language declares it ("
-        },
-        {
-          "insert": "serialize.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts"
-            }
-          }
-        },
-        {
-          "insert": "), and the expander reproduces it ("
-        },
-        {
-          "insert": "expandSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "expandSketch"
-            }
-          }
-        },
-        {
-          "insert": "). The constants cited are the ones the expander ships with; corpus evidence is cited inline."
+          "insert": " aesthetic topic and by the constraints inside the six workflow phases. The system prompt's four top-level sections are purpose, board_model, state_grammar, and workflow; phase constraints carry the operational rules. Corpus evidence remains cited inline; the runtime surfaces named below own behavior."
         }
       ]
     },
@@ -128,34 +99,15 @@
       "props": {},
       "text": [
         {
-          "insert": "One naming note: the rulebook predates the v3 spellings. What R5 calls a tier is spelled "
+          "insert": "The capability blocks define the four entity kinds and their operations. The op path applies the mechanical invariants: geometry patches are complete finite rectangles, patched geometry snaps to the 16px grid, section membership is reconciled from geometry, sections keep the geometry they are given until fit_section closes one, and the locked page frame is protected. The "
         },
         {
-          "insert": "align",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " in the current language, and R7's margin lanes are declared with the "
-        },
-        {
-          "insert": "hug=",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " attribute. The fitter's internals keep the older names ("
-        },
-        {
-          "insert": "detectTiers",
+          "insert": "covered-content",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "detectTiers"
+              "path": "packages/canvas-agent/src/board/lints/rules/covered-content.ts"
             }
           }
         },
@@ -163,18 +115,65 @@
           "insert": ", "
         },
         {
-          "insert": "laneHugFor",
+          "insert": "containment",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "laneHugFor"
+              "path": "packages/canvas-agent/src/board/lints/rules/containment.ts"
             }
           }
         },
         {
-          "insert": "); the rule docs use the v3 spellings."
+          "insert": ", "
+        },
+        {
+          "insert": "broken-edges",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/broken-edges.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "crowding",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/crowding.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "unreadable-labels",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/unreadable-labels.ts"
+            }
+          }
+        },
+        {
+          "insert": " lints judge production geometry. Error-tier findings block a committed finalize; warning-tier findings must be fixed or named as deliberate overrides. A fixable finding includes ready-to-send "
+        },
+        {
+          "insert": "suggested op:",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " JSON."
         }
       ]
     },
@@ -210,7 +209,7 @@
           }
         },
         {
-          "insert": " — every emitted coordinate, extent, corridor width, and pitch snaps to 16px."
+          "insert": " — object geometry is quantized to 16px; the grid is a snap unit, not a spacing prescription."
         }
       ]
     },
@@ -233,7 +232,7 @@
           }
         },
         {
-          "insert": " — sibling gaps come from the closed ladder {0, 32, 64, 96}; clusters separate at 128 and up."
+          "insert": " — each peer group repeats one exact gap, the ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
         }
       ]
     },
@@ -256,7 +255,7 @@
           }
         },
         {
-          "insert": " — the 64px header band, 48px padding, and content hugging."
+          "insert": " — sections supply grouping and addressability, children keep air from borders, and a frame is closed around its contents with fit_section when the region is done."
         }
       ]
     },
@@ -279,7 +278,7 @@
           }
         },
         {
-          "insert": " — four or more same-size items become an exact lattice that anchors everything placed later."
+          "insert": " — repeated peers share the largest required size, one exact gap, and centers on a line, copied from digest geometry."
         }
       ]
     },
@@ -302,7 +301,7 @@
           }
         },
         {
-          "insert": " — peers pinned to one shared centerline, even across section boundaries."
+          "insert": " — peer alignment is a deliberate visual signal, copied exactly and judged from each pushed render."
         }
       ]
     },
@@ -325,7 +324,7 @@
           }
         },
         {
-          "insert": " — the hub centers over an evenly pitched child register with at least 64px clearance."
+          "insert": " — a parent centers over peer children while their repeated gap leaves a readable wire corridor."
         }
       ]
     },
@@ -348,7 +347,7 @@
           }
         },
         {
-          "insert": " — pinned lanes keep their natural content size, registered in a corner of their band."
+          "insert": " — content-sized side regions keep air around their contents and live in sections rather than stretching across unused space."
         }
       ]
     },
@@ -371,7 +370,7 @@
           }
         },
         {
-          "insert": " — three sizes only: S at 0.72x, M at 1x, L at 1.35x; one size per lattice."
+          "insert": " — content determines size from one shared 288×96 target, peers match the largest member, and deliberate size differences communicate importance or exception."
         }
       ]
     },
@@ -394,7 +393,7 @@
           }
         },
         {
-          "insert": " — feedback exits toward its return corridor and detours on ladder offsets, never through a box."
+          "insert": " — returns use flow-facing anchors, direct labels, and minimally steered routes through clear corridors."
         }
       ]
     },
@@ -417,83 +416,7 @@
           }
         },
         {
-          "insert": " — no raw coordinates, and the one known blind spot: cross-column interleaving finer than the ladder."
-        }
-      ]
-    },
-    "b-rulebook-accounting-heading-15": {
-      "id": "b-rulebook-accounting-heading-15",
-      "flavour": "heading",
-      "children": [],
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Decision accounting"
-        }
-      ]
-    },
-    "b-rulebook-accounting-body-16": {
-      "id": "b-rulebook-accounting-body-16",
-      "flavour": "paragraph",
-      "children": [],
-      "props": {},
-      "text": [
-        {
-          "insert": "The lab's metrics panel counts spatial decisions on both sides of the round trip ("
-        },
-        {
-          "insert": "countSketchDecisions",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/metrics.ts",
-              "symbol": "countSketchDecisions"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "countRawDecisions",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/metrics.ts",
-              "symbol": "countRawDecisions"
-            }
-          }
-        },
-        {
-          "insert": "):"
-        }
-      ]
-    },
-    "b-rulebook-accounting-code-17": {
-      "id": "b-rulebook-accounting-code-17",
-      "flavour": "code",
-      "children": [],
-      "props": {
-        "language": "text"
-      },
-      "text": [
-        {
-          "insert": "DSL:\n  split weights + lane hugs\n  one compass slot + one size class per leaf item\n  grid dims + gap + one size class per cell\n  one axis/direction per align/fan + one per referenced member\nraw:\n  4 per object geometry\n  2 per connector waypoint\n  1 per explicit endpoint anchor"
-        }
-      ]
-    },
-    "b-rulebook-accounting-results-18": {
-      "id": "b-rulebook-accounting-results-18",
-      "flavour": "paragraph",
-      "children": [],
-      "props": {},
-      "text": [
-        {
-          "insert": "Across the corpus at DSL v2: 76-177 DSL decisions against 166-324 raw (mean ratio about 0.46), at 92.9% mean relation and 98.8% mean adjacency preservation."
+          "insert": " — abstract align, fan, and lattice relations are not operation fields; complete geometry carries the placement and fresh digests plus renders carry the evidence."
         }
       ]
     },
@@ -506,7 +429,7 @@
       },
       "text": [
         {
-          "insert": "What stayed out of the rulebook"
+          "insert": "Rulebook scope"
         }
       ]
     },
@@ -517,29 +440,20 @@
       "props": {},
       "text": [
         {
-          "insert": "The lab's rule cards drew hand-built before/after mini-scenes from the real constants; the lab is deleted now, and several of those points are demonstrated live by the boards in the "
+          "insert": "R1-R10 are navigation names for recurring composition concerns. Each page documents the aesthetic, workflow, capability, op-path, and diagnostic mechanisms that own its concern. The boards in the "
         },
         {
-          "insert": "layout-language reference",
+          "insert": "agent layout reference",
           "attributes": {
             "reference": {
               "kind": "doc",
               "path": "30-agent-layout/10-language/00-overview",
-              "label": "layout-language reference"
+              "label": "agent layout reference"
             }
           }
         },
         {
-          "insert": ". Candidate rules R11-R22 were unreviewed and deliberately not part of this rulebook — they remain in git history (the deleted "
-        },
-        {
-          "insert": "apps/layout-lab",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") pending review."
+          "insert": " demonstrate the resulting composition patterns."
         }
       ]
     }

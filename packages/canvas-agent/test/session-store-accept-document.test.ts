@@ -5,13 +5,15 @@ import { join } from "node:path";
 
 import { afterAll, describe, expect, test } from "bun:test";
 
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
+import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import {
   emitSessionEvent,
   HttpError,
   LayoutSessionStore,
-  toolCommit,
+  toolFinalize,
   type LayoutSession,
 } from "../src/service/session";
 import type { LayoutToolTextResult } from "../src/service/tool-runtime";
@@ -54,7 +56,7 @@ function makeStore(
     events: [],
     subscribers: new Set(),
     runPromise: null,
-    exemplarShown: false,
+    requests: [],
   };
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([
@@ -64,7 +66,7 @@ function makeStore(
 }
 
 function commitDocumentDraft(session: LayoutSession): LayoutToolTextResult {
-  return toolCommit(session, "Renamed the task", emitSessionEvent);
+  return toolFinalize(session, "committed", "Renamed the task", emitSessionEvent);
 }
 
 describe("document-patch accept", () => {
@@ -117,5 +119,75 @@ describe("document-patch accept", () => {
       expect((error as Error).message).toContain("objects in the agent's scope were moved or resized (task)");
     }
     expect(session.status).toBe("proposal-ready");
+  });
+});
+
+describe("annotation threads through the accept path", () => {
+  test("carries the thread operations to studio, where the reducer lands them", () => {
+    const canvasPath = join(tempDir, "threads.canvas.json");
+    const baseline = makeDocument([box("task", 0, 0, 184, 96, "process")]);
+    baseline.annotations = [{
+      id: "annotation-1",
+      target: { kind: "object", objectId: "task" },
+      intent: "agent-request",
+      body: "Split this into two steps",
+      status: "open",
+      createdBy: "human",
+      replies: [],
+    }];
+    const baselineRaw = JSON.stringify(baseline);
+    writeFileSync(canvasPath, baselineRaw);
+    const { store, session } = makeStore("threads", canvasPath, baseline, baselineRaw);
+    session.draft = {
+      ...session.draft,
+      annotations: [
+        {
+          ...baseline.annotations[0]!,
+          status: "applied",
+          replies: [{ id: "reply-1", author: "agent", body: "Split into prep and run" }],
+        },
+        {
+          id: "annotation-2",
+          target: { kind: "object", objectId: "task" },
+          intent: "agent-request",
+          body: "Is this the retry path?",
+          status: "open",
+          createdBy: "agent",
+          replies: [],
+        },
+      ],
+    };
+
+    expect(commitDocumentDraft(session).isError).not.toBe(true);
+    const accepted = store.accept(session.id);
+
+    expect(accepted.operations.map((operation) => operation.type)).toEqual([
+      "updateObject",
+      "appendAnnotationReply",
+      "setAnnotationStatus",
+      "addAnnotation",
+    ]);
+
+    const applied = reduceInteractiveCanvasState(
+      createInteractiveCanvasState(baseline),
+      {
+        type: "canvas.applyAgentPatch",
+        operations: accepted.operations as CanvasAgentPatchOperation[],
+        summary: accepted.summary,
+      },
+    );
+
+    expect(applied.document.annotations).toMatchObject([
+      {
+        id: "annotation-1",
+        status: "applied",
+        replies: [{ id: "reply-1", author: "agent", body: "Split into prep and run" }],
+      },
+      { id: "annotation-2", createdBy: "agent", status: "open", replies: [] },
+    ]);
+    expect(applied.lastChange?.changedAnnotationIds).toEqual([
+      "annotation-1",
+      "annotation-2",
+    ]);
   });
 });

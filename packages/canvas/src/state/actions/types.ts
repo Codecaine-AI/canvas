@@ -2,6 +2,9 @@
 
 import type { Anchor } from "../schema/connections";
 import type {
+  CanvasAnnotationAuthor,
+  CanvasAnnotationReply,
+  CanvasAnnotationStatus,
   CanvasAnnotationTarget,
   CanvasArrowDirection,
   CanvasColor,
@@ -9,6 +12,7 @@ import type {
   CanvasShapeDirection,
   CanvasConnectionStyle,
   CanvasGeometry,
+  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -23,7 +27,6 @@ export type CanvasTool =
   | "process"
   | "decision"
   | "sticky"
-  | "annotation-marker"
   | "annotation"
   // D16 — expanded vocabulary (checkpoint 5):
   | "document"
@@ -73,6 +76,7 @@ export type CanvasSelection =
   | { kind: "region"; region: CanvasGeometry };
 
 export type CanvasAgentPatchOperation =
+  | { type: "updateDescription"; description: string }
   | {
       type: "addObject";
       object: InteractiveCanvasObject;
@@ -103,12 +107,24 @@ export type CanvasAgentPatchOperation =
   | {
       type: "removeConnection";
       connectionId: string;
+    }
+  | { type: "addAnnotation"; annotation: InteractiveCanvasAnnotation }
+  | {
+      type: "appendAnnotationReply";
+      annotationId: string;
+      reply: CanvasAnnotationReply;
+    }
+  | {
+      type: "setAnnotationStatus";
+      annotationId: string;
+      status: CanvasAnnotationStatus;
     };
 
 export type CanvasAction =
   | { type: "canvas.select"; selection: CanvasSelection }
   | { type: "canvas.setTool"; tool: CanvasTool }
   | { type: "canvas.updateDocumentTitle"; title: string }
+  | { type: "canvas.setDocumentDescription"; description: string }
   | {
       type: "canvas.addObject";
       objectType: InteractiveCanvasObjectType;
@@ -210,8 +226,20 @@ export type CanvasAction =
       target: CanvasAnnotationTarget;
       body: string;
       intent?: "note" | "agent-request";
+      createdBy?: CanvasAnnotationAuthor;
     }
   | { type: "canvas.removeAnnotation"; annotationId: string }
+  | {
+      type: "canvas.appendAnnotationReply";
+      annotationId: string;
+      author: CanvasAnnotationAuthor;
+      body: string;
+    }
+  | {
+      type: "canvas.setAnnotationStatus";
+      annotationId: string;
+      status: CanvasAnnotationStatus;
+    }
   | {
       type: "canvas.alignSelection";
       axis: "left" | "center-x" | "right" | "top" | "center-y" | "bottom";

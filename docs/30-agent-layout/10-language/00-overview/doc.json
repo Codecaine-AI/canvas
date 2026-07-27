@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "canvas-30-agent-layout-10-language-00-overview",
-  "title": "The layout language v3 reference",
+  "title": "The board layout vocabulary",
   "root": "b-language-root",
   "blocks": {
     "b-language-root": {
@@ -39,16 +39,16 @@
         "b-language-lab-pointer-29"
       ],
       "props": {
-        "covers": "Overview of the v3 layout language: the derived, disposable program, its three-part shape (tree, alignment facts, arrows), reference numbers, how to read a statement, and the nine-statement index — each construct documented on its own page.",
+        "covers": "Overview of the board layout vocabulary: a compact descriptive notation for composition patterns, its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine-construct index.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "layout language",
-          "program shape",
+          "layout vocabulary",
+          "description shape",
           "reference numbers",
           "statement anatomy",
           "nesting",
-          "canonical form"
+          "notation conventions"
         ]
       }
     },
@@ -61,7 +61,7 @@
       },
       "text": [
         {
-          "insert": "The layout language v3 reference"
+          "insert": "The board layout vocabulary"
         }
       ]
     },
@@ -72,63 +72,25 @@
       "props": {},
       "text": [
         {
-          "insert": "The layout language is a derived, disposable view of a canvas document. The fitter writes it with "
+          "insert": "These pages document the board's layout vocabulary and composition patterns. Their compact notation describes arrangements for people; it is not a machine interface, and the agent neither reads nor writes it. The agent edits sections, stickies, objects, and connections directly through the thirteen kind-specific operations exposed as "
         },
         {
-          "insert": "serializeSketch",
+          "insert": "the operation surface",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "serializeSketch"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", the AI edits it, "
+          "insert": ". The "
         },
         {
-          "insert": "parseSketch",
+          "insert": "style_guide",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "parseSketch"
-            }
+            "code": true
           }
         },
         {
-          "insert": " reads the edited text back into a "
-        },
-        {
-          "insert": "Sketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/types.ts",
-              "symbol": "Sketch"
-            }
-          }
-        },
-        {
-          "insert": ", and the solver expands it back into geometry through "
-        },
-        {
-          "insert": "expandSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "expandSketch"
-            }
-          }
-        },
-        {
-          "insert": ". Read a program in three passes: the indented tree first, then the alignment facts, then the arrows."
+          "insert": " context renders one nested aesthetic topic: calm and uniform, with content-first sizing, one repeated gap per group, peer geometry copied from the digest, air around content and labels, sections as homes and addressable units, restrained semantic color, and direct edge labels. Read a description in three passes: the indented tree first, then the alignment facts, then the arrows."
         }
       ]
     },
@@ -138,11 +100,11 @@
       "children": [],
       "props": {
         "status": "accepted",
-        "title": "Clarity over compression"
+        "title": "Vocabulary in practice"
       },
       "text": [
         {
-          "insert": "Every value is labeled, every reference is a declared number, and indentation is the only nesting syntax. The canvas document is the single source of truth; the program is fitted fresh per edit and discarded after solving, so the grammar spends its budget on readability, not brevity."
+          "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the digest rows around what it touched — while a look returns the whole board; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Five diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, and crowding — and a committed finalize adds frame-slack."
         }
       ]
     },
@@ -155,7 +117,7 @@
       },
       "text": [
         {
-          "insert": "Program shape"
+          "insert": "Description shape"
         }
       ]
     },
@@ -166,7 +128,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A program has three parts, in this order:"
+          "insert": "The descriptive notation has three parts, in this order:"
         }
       ]
     },
@@ -276,7 +238,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Parts are separated by one blank line in canonical form. The parser ignores blank lines everywhere; tabs are an error; indentation is exactly 2 spaces per level."
+          "insert": "Examples separate the parts with one blank line and use exactly 2 spaces per indentation level. This is a reading convention for the pages, not input grammar."
         }
       ]
     },
@@ -418,7 +380,7 @@
           }
         },
         {
-          "insert": " the object's identity; "
+          "insert": " the object's identity within the description; "
         },
         {
           "insert": "text=",
@@ -436,7 +398,7 @@
           }
         },
         {
-          "insert": ") for objects that do not appear in the tree. On parse, duplicate texts get unique internal engine ids; that uniquification is an implementation detail that never appears in serialized output (the fitter always emits unique names today)."
+          "insert": ") for objects that do not appear in the tree. When display text repeats, reference numbers keep the description unambiguous."
         }
       ]
     },
@@ -520,7 +482,7 @@
           ],
           [
             "size=M",
-            "size — S, M, or L"
+            "qualitative role size — S, M, or L; live geometry is chosen content-first, with peers matched exactly"
           ],
           [
             "at=C",
@@ -536,7 +498,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The language is small on purpose. These are all the statements there are:"
+          "insert": "The notation is small on purpose. These are all the statements used on these pages:"
         }
       ]
     },
@@ -735,7 +697,7 @@
           }
         },
         {
-          "insert": " puts them all in one program."
+          "insert": " puts them all in one description."
         }
       ]
     },
@@ -748,7 +710,7 @@
       },
       "text": [
         {
-          "insert": "How a program nests"
+          "insert": "How a description nests"
         }
       ]
     },
@@ -852,7 +814,7 @@
       "children": [],
       "props": {
         "src": "./assets/canvases/example-nesting.canvas.json",
-        "title": "The nesting example, solved"
+        "title": "The nesting example"
       }
     },
     "b-language-canonical-heading-24": {
@@ -864,7 +826,7 @@
       },
       "text": [
         {
-          "insert": "Canonical form"
+          "insert": "Notation conventions"
         }
       ]
     },
@@ -875,18 +837,7 @@
       "props": {},
       "text": [
         {
-          "insert": "serializeSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "serializeSketch"
-            }
-          }
-        },
-        {
-          "insert": " always emits: 2-space indentation; numbers in declaration order from 1; every required field; "
+          "insert": "For consistent examples, use 2-space indentation, assign reference numbers in declaration order from 1, write every required field, and include "
         },
         {
           "insert": "at=",
@@ -895,7 +846,7 @@
           }
         },
         {
-          "insert": " per the rules above (including "
+          "insert": " according to the construct rules, including "
         },
         {
           "insert": "at=C",
@@ -904,7 +855,7 @@
           }
         },
         {
-          "insert": " — never omitted); "
+          "insert": ". Include "
         },
         {
           "insert": "label=",
@@ -927,7 +878,7 @@
           }
         },
         {
-          "insert": " only when present; one blank line before the alignment facts (when any exist) and one before "
+          "insert": " only when they describe the arrangement. Put one blank line before alignment facts, when present, and one before "
         },
         {
           "insert": "arrows",
@@ -941,62 +892,7 @@
           }
         },
         {
-          "insert": ". "
-        },
-        {
-          "insert": "parseSketch(serializeSketch(s))",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "parseSketch"
-            }
-          }
-        },
-        {
-          "insert": " is structurally identical to "
-        },
-        {
-          "insert": "s",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and serializing again reproduces the exact same text. "
-        },
-        {
-          "insert": "align",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/10-language/70-align",
-              "label": "align — a shared centerline"
-            }
-          }
-        },
-        {
-          "insert": " names ("
-        },
-        {
-          "insert": "t1",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "t2",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", ...) are internal, regenerated in order by the parser, and never written."
+          "insert": ". These conventions make examples comparable; they do not define a serialized board format."
         }
       ]
     },
@@ -1050,13 +946,13 @@
       },
       "text": [
         {
-          "insert": "Sparse programs",
+          "insert": "Sparse descriptions",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " — the fitter omitting obvious facts and solver defaults filling them in. The grammar is designed so this becomes an emission choice, not a rewrite."
+          "insert": " — these pages favor explicit facts so a reader does not have to infer omitted layout decisions."
         }
       ]
     },
@@ -1067,20 +963,16 @@
       "props": {},
       "text": [
         {
-          "insert": "The spec source snapshot is "
+          "insert": "Use this notation to discuss composition, review examples, and name design intent. To change a board, the agent uses "
         },
         {
-          "insert": "packages/canvas-agent/LANGUAGE.md",
+          "insert": "the operation surface",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/LANGUAGE.md"
-            }
+            "code": true
           }
         },
         {
-          "insert": "; these pages are the living reference. The layout-lab playground that offered live DSL editing is deleted."
+          "insert": "; the notation itself is never submitted as an edit."
         }
       ]
     }

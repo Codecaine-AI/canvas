@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-smoke",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 5.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board has similarly clear color-coded sections but uses the frame far less effectively and exposes substantially more awkward branching and retry-routing machinery.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 4,
+        "note": "Failure: the workflow is packed into the upper-left while roughly half the frame remains empty across the right and bottom, creating severe visual imbalance."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "Most nodes and labels have generous breathing room, although several branch corridors in the lower blue and central orange sections tighten into visually busy junctions."
+      },
+      {
+        "name": "grouping",
+        "score": 7,
+        "note": "The three softly tinted, titled phase regions provide clear and useful grouping, with node colors reinforcing roles across region boundaries."
+      },
+      {
+        "name": "color",
+        "score": 6.5,
+        "note": "Blue, orange, green, yellow, and red are applied consistently enough to convey phase and status, though the mixed role-versus-phase semantics require some inference."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 4.5,
+        "note": "Failure: exposed T-junction stubs, arrowheads aimed at shared rails, and the central retry loop make routing construction visibly intrude on the diagram."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "Vertical stacks and section headers hold strong registers, but the dense first two phases beside the sparse third phase and vast unused frame produce an uneven overall rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "Failure: primary vertical sequences are clear, but the central parallel branches, return loop, and lower decision splits contain ambiguous rail merges and awkward terminal geometry."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness ranks first, intent-classification-2 second, and the board under grade third."
+  },
+  "usage": {
+    "input_tokens": 17346,
+    "output_tokens": 637
+  },
+  "flags": []
+}

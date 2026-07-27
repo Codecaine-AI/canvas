@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "canvas-30-agent-layout-30-worked-example-05-step-hero-row",
-  "title": "Step 5 — Line up the hero row",
+  "title": "Step 5 — Review the hero row",
   "root": "b-step5-root",
   "blocks": {
     "b-step5-root": {
@@ -14,14 +14,15 @@
         "b-step5-canvas-4"
       ],
       "props": {
-        "covers": "Step 5 of the worked example: one added align line puts cli and objdiff on a shared horizontal centerline across section boundaries (R5); nothing else changes.",
+        "covers": "Step 5 of the worked example: an empty apply_ops batch with a score view performs a no-document-change review of whether the intended cross-section centerline reads clearly.",
         "format": "mdx",
         "type": "design",
         "concepts": [
           "worked example",
-          "align",
-          "centerline",
-          "cross-section alignment"
+          "apply_ops",
+          "pure look",
+          "section close-up",
+          "cross-section review"
         ]
       }
     },
@@ -34,7 +35,7 @@
       },
       "text": [
         {
-          "insert": "Step 5 — Line up the hero row"
+          "insert": "Step 5 — Review the hero row"
         }
       ]
     },
@@ -45,16 +46,25 @@
       "props": {},
       "text": [
         {
-          "insert": "One added line: "
+          "insert": "Before adding the final content and connections, the agent takes a focused pure look at the Score gate. An empty "
         },
         {
-          "insert": "align y: 6 15",
+          "insert": "ops",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " puts cli (6) and objdiff (15) on one shared horizontal centerline — across section boundaries, which the containment tree alone can never say (R5). Nothing else in the program changes."
+          "insert": " array is valid here because "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " requests a section close-up. No document change occurs: the result still pushes APPLIED, a fresh BOARD digest, an empty DELTA, the cumulative BOARD DIFF, the lint delta, and REQUESTS, plus the Score gate close-up, but it does not produce a fresh full-board render or ROUTES for untouched connections. The close-up and the current full-board view let the agent judge whether alignment is carrying a deliberate peer signal. In this frozen artifact, cli centers at y=186 while objdiff centers at y=148, so the cross-section centerline is not satisfied; a later document-changing batch needs complete updateObject geometry before the agent can claim alignment."
         }
       ]
     },
@@ -63,11 +73,11 @@
       "flavour": "code",
       "children": [],
       "props": {
-        "language": "text"
+        "language": "json"
       },
       "text": [
         {
-          "insert": "row 1|4|2\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  col 2|1\n    section 5 text=loop label=\"Runner loop\"\n      grid 1x4 gap=96\n        item 6 text=cli type=process size=M\n        item 7 text=sched type=process size=M\n        item 8 text=workers type=process size=M\n        item 9 text=match type=decision size=M\n    section 10 text=board label=\"Board — hub\"\n      grid 1x3 gap=64\n        item 11 text=epochs type=database size=M\n        item 12 text=artifacts type=database size=M\n        item 13 text=saves type=database size=M\n  section 14 text=score label=\"Score gate\"\n    grid 3x1 gap=64\n      item 15 text=objdiff type=process size=M\n      item 16 text=qa type=process size=M\n      item 17 text=regress type=decision size=M\n\nalign y: 6 15\n\narrows"
+          "insert": "{\n  \"ops\": [],\n  \"view\": \"score\"\n}"
         }
       ]
     },

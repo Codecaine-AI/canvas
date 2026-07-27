@@ -1,0 +1,787 @@
+{
+  "axis": "rc",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Orders are accepted through an API gateway and passed to the order service.",
+        "brief_evidence": "Our commerce platform accepts an order through an API gateway and order service.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Order intake & transactional outbox",
+            "observation": "API gateway is connected by a directed 'submit order' arrow to Order service."
+          },
+          {
+            "source": "json",
+            "locator": "objects api-gateway, order-service; connection e-api-order",
+            "observation": "Forward connection runs from api-gateway to order-service with label 'submit order'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "The order service validates the request.",
+        "brief_evidence": "The order service validates the request",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Order service node",
+            "observation": "Node text includes 'validate'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=order-service].text",
+            "observation": "Text is 'Order service\\nvalidate · IDs · idempotency'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The order service assigns an order id.",
+        "brief_evidence": "assigns an order id",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Order service node",
+            "observation": "The service responsibility list includes 'IDs' in the order-intake context."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=order-service].text",
+            "observation": "The node explicitly lists 'IDs' among order-service responsibilities."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The order service assigns an idempotency key.",
+        "brief_evidence": "and idempotency key",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Order service node",
+            "observation": "Node text includes 'idempotency'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=order-service].text",
+            "observation": "The order service lists 'idempotency' as a responsibility."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The order service stores the order in a pending state.",
+        "brief_evidence": "stores the pending order",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Order DB + outbox node",
+            "observation": "Database text says 'atomic pending + OrderPlaced'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=order-db-outbox].text",
+            "observation": "The shared database/outbox object explicitly includes pending-order storage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The pending order and an OrderPlaced outbox event are written in the same database transaction.",
+        "brief_evidence": "writes an OrderPlaced event to an outbox in the same database transaction",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Order service to Order DB + outbox",
+            "observation": "The arrow is labeled 'single transaction', and the destination says 'atomic pending + OrderPlaced'."
+          },
+          {
+            "source": "json",
+            "locator": "object order-db-outbox; connection e-order-db",
+            "observation": "A forward edge labeled 'single transaction' targets 'Order DB + outbox\\natomic pending + OrderPlaced'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "An outbox relay publishes the outbox event to a durable event bus.",
+        "brief_evidence": "An outbox relay publishes events to the durable event bus",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1–2",
+            "observation": "Order DB/outbox sends 'unpublished rows' to Outbox relay, which sends 'publish OrderPlaced' to Durable event bus."
+          },
+          {
+            "source": "json",
+            "locator": "connections e-db-relay and e-relay-bus",
+            "observation": "The two directed connections encode outbox-to-relay and relay-to-durable-bus publication."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Event-bus consumers may receive duplicate deliveries.",
+        "brief_evidence": "where consumers may receive duplicates",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Durable event bus to Payment consumer connection",
+            "observation": "The delivery edge is labeled 'at-least-once', unambiguously allowing duplicate delivery."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-bus-payment].label",
+            "observation": "The event-bus delivery contract is 'at-least-once'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Consumers record the ids of events they have processed.",
+        "brief_evidence": "and must record their processed event ids",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Consumer reliability",
+            "observation": "A database-shaped node is labeled 'Processed event IDs'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=idempotency-store]",
+            "observation": "The consumer-reliability section contains a database object whose text is 'Processed event IDs'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The payment consumer authorizes funds through the payment provider.",
+        "brief_evidence": "The payment consumer authorizes funds through the payment provider",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Parallel decision consumers",
+            "observation": "A Payment consumer with a PaymentAuthorized outcome is shown, but no payment-provider component or authorization call is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object payment-consumer; searched all objects and connections for payment provider/provider/authorize call",
+            "observation": "payment-consumer exists, but there is no payment-provider object and no connection from the consumer to such an endpoint."
+          }
+        ],
+        "note": "The payment branch and authorization result are recognizable, but the stated provider endpoint and authorization interaction are missing."
+      },
+      {
+        "id": "R11",
+        "requirement": "The payment consumer emits either PaymentAuthorized or PaymentFailed.",
+        "brief_evidence": "and emits either PaymentAuthorized or PaymentFailed",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Payment consumer node",
+            "observation": "The node lists 'PaymentAuthorized / Failed'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payment-consumer].text",
+            "observation": "Text encodes both PaymentAuthorized and Failed alternatives."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The inventory consumer reserves stock in the inventory database.",
+        "brief_evidence": "The inventory consumer reserves stock in the inventory database",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Inventory consumer node",
+            "observation": "Inventory consumer and its Reserved outcome are visible, but no inventory database or reserve-stock interaction appears."
+          },
+          {
+            "source": "json",
+            "locator": "object inventory-consumer; searched all objects and connections for inventory database/stock reservation endpoint",
+            "observation": "No inventory-database object or connection from inventory-consumer to a database is present."
+          }
+        ],
+        "note": "The reservation branch is recognizable from 'Reserved', but the stock action and inventory database endpoint are not represented."
+      },
+      {
+        "id": "R13",
+        "requirement": "The inventory consumer emits either InventoryReserved or InventoryUnavailable.",
+        "brief_evidence": "and emits InventoryReserved or InventoryUnavailable",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Inventory consumer node",
+            "observation": "The node lists 'Reserved / Unavailable'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=inventory-consumer].text",
+            "observation": "In the Inventory consumer context, the two outcome labels are Reserved and Unavailable."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "The fraud consumer evaluates the order.",
+        "brief_evidence": "A fraud consumer evaluates the order",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, event bus to Fraud consumer",
+            "observation": "OrderPlaced is delivered to a Fraud consumer that produces a fraud decision."
+          },
+          {
+            "source": "json",
+            "locator": "object fraud-consumer; connection e-bus-fraud",
+            "observation": "A directed OrderPlaced connection targets fraud-consumer, whose outcomes are Cleared/Rejected."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The fraud consumer emits either FraudCleared or FraudRejected.",
+        "brief_evidence": "and emits FraudCleared or FraudRejected",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Fraud consumer node",
+            "observation": "The node lists 'Cleared / Rejected'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=fraud-consumer].text",
+            "observation": "In the Fraud consumer context, both Cleared and Rejected outcomes are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "The order coordinator waits for successful payment, inventory, and fraud results.",
+        "brief_evidence": "An order coordinator waits for successful payment, inventory, and fraud results",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 3–4",
+            "observation": "Three decision consumers show success/failure outcomes, and the coordinator says 'wait for all 3 results' before the confirm/cancel decision."
+          },
+          {
+            "source": "json",
+            "locator": "objects payment-consumer, inventory-consumer, fraud-consumer, coordinator, terminal-check",
+            "observation": "The three branch outcomes and a coordinator explicitly waiting for all three results are represented together."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "After all required successful results, the coordinator emits OrderConfirmed.",
+        "brief_evidence": "before emitting OrderConfirmed",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Order coordination",
+            "observation": "Coordinator 'wait for all 3 results' flows through a confirm/cancel decision to an OrderConfirmed or OrderCancelled outcome."
+          },
+          {
+            "source": "json",
+            "locator": "objects coordinator, terminal-check, order-outcome; connections e-coordinate-check, e-check-outcome",
+            "observation": "The directed coordination chain terminates in an object explicitly containing OrderConfirmed."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "A failure from any payment, inventory, or fraud branch cancels the order.",
+        "brief_evidence": "A failure from any branch cancels the order",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 3–5",
+            "observation": "Each decision branch shows a failure result; the coordinator waits for all three, and its decision flows to OrderCancelled with a downstream edge labeled 'failure or late success'."
+          },
+          {
+            "source": "json",
+            "locator": "branch outcome objects; order-outcome; e-check-outcome; e-failure-comp",
+            "observation": "Failure alternatives are shown for all three branches and the coordinator outcome explicitly includes OrderCancelled."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "A branch failure starts compensation only for branches that already succeeded.",
+        "brief_evidence": "and starts compensation for branches that already succeeded",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Cancellation & compensation",
+            "observation": "Failure is routed into a compensation region containing void and release actions, but the board does not state or encode the 'already succeeded' condition."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-failure-comp; objects void-payment, release-stock, late-success; searched compensation connections/labels",
+            "observation": "Compensation is present, but no label, condition, or branch-specific connection restricts it to previously successful branches."
+          }
+        ],
+        "note": "The compensation path exists, but its critical eligibility qualifier—compensate only branches that already succeeded—is missing."
+      },
+      {
+        "id": "R20",
+        "requirement": "Compensation voids a successful payment authorization.",
+        "brief_evidence": "payment authorization is voided",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Void authorization node",
+            "observation": "The cancellation and compensation region explicitly contains 'Void authorization'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=void-payment]",
+            "observation": "A compensation process is labeled 'Void authorization'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Compensation releases successfully reserved inventory.",
+        "brief_evidence": "and inventory is released",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Release inventory node",
+            "observation": "The cancellation and compensation region explicitly contains 'Release inventory'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=release-stock]",
+            "observation": "A compensation process is labeled 'Release inventory'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Confirmed orders are sent to the fulfillment consumer, which creates warehouse work.",
+        "brief_evidence": "Confirmed orders go to the fulfillment consumer, which creates warehouse work",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Order coordination to Section 6",
+            "observation": "An OrderConfirmed arrow enters Fulfillment consumer, whose node says 'create warehouse work'."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-confirm-fulfill; object fulfillment-consumer",
+            "observation": "A forward OrderConfirmed connection targets a fulfillment consumer explicitly responsible for warehouse work."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "The fulfillment consumer later emits Packed.",
+        "brief_evidence": "and later emits Packed",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Fulfillment & shipping",
+            "observation": "Fulfillment consumer points to a Packed event with label 'warehouse work → Packed'."
+          },
+          {
+            "source": "json",
+            "locator": "objects packed-event, fulfillment-consumer; connection e-fulfill-packed",
+            "observation": "The directed edge from fulfillment-consumer terminates at the Packed document."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "The shipping consumer buys a shipping label from the carrier.",
+        "brief_evidence": "The shipping consumer buys a label from the carrier",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6, Packed to Shipping consumer",
+            "observation": "The path is labeled 'buy label · record tracking', but no carrier endpoint is shown."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-packed-ship; searched all objects and connections for carrier",
+            "observation": "Label purchase is represented, but there is no carrier object or carrier connection."
+          }
+        ],
+        "note": "Buying a label is present, but the stated carrier boundary is absent."
+      },
+      {
+        "id": "R25",
+        "requirement": "The shipping consumer records tracking information.",
+        "brief_evidence": "records tracking",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6, Shipping consumer node and incoming edge",
+            "observation": "Both the node and edge explicitly mention tracking."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shipping-consumer].text; connections[id=e-packed-ship].label",
+            "observation": "The shipping consumer text includes 'tracking', and the path says 'record tracking'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "The shipping consumer emits Shipped.",
+        "brief_evidence": "and emits Shipped",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6, Shipping consumer node",
+            "observation": "The node text includes 'Shipped'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shipping-consumer].text",
+            "observation": "The shipping consumer responsibility list ends with 'Shipped'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "A notification consumer sends customer updates for confirmation, cancellation, and shipment.",
+        "brief_evidence": "A notification consumer sends customer updates for confirmation, cancellation, and shipment.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Customer experiences",
+            "observation": "Notification consumer text lists 'confirm · cancel · ship'; confirmed/cancelled outcomes also point to it."
+          },
+          {
+            "source": "json",
+            "locator": "object notification-consumer; connection e-events-notify",
+            "observation": "The consumer explicitly lists all three update categories, with a directed outcome-to-notification connection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "A read-model projector builds the customer order timeline used by the query API.",
+        "brief_evidence": "A read-model projector builds the customer order timeline used by the query API.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7, Read-model projector to Query API",
+            "observation": "The projector points to Query API along an edge labeled 'customer timeline'; the API says 'customer order timeline'."
+          },
+          {
+            "source": "json",
+            "locator": "objects timeline-projector, query-api; connection e-project-query",
+            "observation": "A directed 'customer timeline' connection runs from the read-model projector to the query API."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Each consumer has an idempotency store.",
+        "brief_evidence": "Each consumer has an idempotency store",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Consumer reliability and all consumer sections",
+            "observation": "A shared 'Processed event IDs' database is shown, but it is not repeated for or connected to each consumer."
+          },
+          {
+            "source": "json",
+            "locator": "object idempotency-store; searched all connections to payment, inventory, fraud, fulfillment, shipping, notification, and projector consumers",
+            "observation": "The store exists as a generic reliability object, but no structure explicitly applies it to every consumer."
+          }
+        ],
+        "note": "The idempotency-store concept is present, but the universal 'each consumer' scope is not fully encoded."
+      },
+      {
+        "id": "R30",
+        "requirement": "Each consumer uses bounded retries.",
+        "brief_evidence": "Each consumer has ... bounded retries",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Consumer reliability and all consumer sections",
+            "observation": "A generic Bounded retries policy is shown, but there is no connection or annotation applying it to every consumer."
+          },
+          {
+            "source": "json",
+            "locator": "object retry-policy; searched consumer connections and annotations",
+            "observation": "The bounded-retry object exists, but the JSON contains no per-consumer associations and no global 'each consumer' annotation."
+          }
+        ],
+        "note": "Bounded retries are represented as a policy, but their required universal scope is only implied."
+      },
+      {
+        "id": "R31",
+        "requirement": "Each consumer has a dead-letter queue.",
+        "brief_evidence": "Each consumer has ... a dead-letter queue.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Consumer reliability and all consumer sections",
+            "observation": "One generic Dead-letter queue receives exhausted retries, but no per-consumer queues or universal applicability marker is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object dead-letter-queue; connection e-retry-dlq; searched consumer-to-DLQ connections",
+            "observation": "A DLQ path exists, but no JSON relationship establishes a DLQ for each consumer."
+          }
+        ],
+        "note": "The DLQ mechanism is present, but the 'each consumer' qualifier is not fully represented."
+      },
+      {
+        "id": "R32",
+        "requirement": "Operators can repair and replay dead-lettered events.",
+        "brief_evidence": "Operators can repair and replay dead-lettered events",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 8–9",
+            "observation": "A dashed 'repair & replay' arrow runs from Dead-letter queue to Operator repair & replay."
+          },
+          {
+            "source": "json",
+            "locator": "objects repair-replay, dead-letter-queue; connection e-dlq-repair",
+            "observation": "The DLQ has a directed repair-and-replay path to the operator process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Dead-letter replay preserves the original event id.",
+        "brief_evidence": "while preserving the original event id",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9, Operator repair & replay node",
+            "observation": "Node text says 'preserve event id + causation'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=repair-replay].text",
+            "observation": "The repair/replay process explicitly says it preserves the event id."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Dead-letter replay preserves the causation chain.",
+        "brief_evidence": "and causation chain",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9, Operator repair & replay node",
+            "observation": "Node text says 'preserve event id + causation'."
+          },
+          {
+            "source": "json",
+            "locator": "objects repair-replay and event-contract",
+            "observation": "Repair/replay explicitly preserves causation, and the event envelope includes a causation field."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "The coordinator uses timeouts to cancel orders that never receive all required results.",
+        "brief_evidence": "The coordinator uses timeouts to cancel orders that never receive all required results",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Order coordination",
+            "observation": "The coordinator waits for all three results, sends 'results or timeout' to 'Terminal or timed out?', and then follows 'confirm / cancel' to the terminal outcome."
+          },
+          {
+            "source": "json",
+            "locator": "objects coordinator, terminal-check, order-outcome; connections e-coordinate-check and e-check-outcome",
+            "observation": "The complete timeout-to-cancellation decision path is encoded."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Late success events run the appropriate compensation.",
+        "brief_evidence": "late success events must run the appropriate compensation",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Cancellation & compensation",
+            "observation": "A decision says 'Late success? compensate, never reopen', and void/release actions are present, but no connections select the appropriate action by event type."
+          },
+          {
+            "source": "json",
+            "locator": "object late-success; connection e-failure-comp; searched outgoing connections from late-success",
+            "observation": "Late-success compensation is stated, but late-success has no outgoing connection to void-payment or release-stock and no branch-selection encoding."
+          }
+        ],
+        "note": "The requirement to compensate late success is present, but how the appropriate branch-specific compensation is selected is missing."
+      },
+      {
+        "id": "R37",
+        "requirement": "Late success events must not reopen a terminal order.",
+        "brief_evidence": "rather than reopening a terminal order",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Late success decision",
+            "observation": "The decision explicitly says 'compensate, never reopen'."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=late-success].text",
+            "observation": "The late-success object explicitly encodes 'never reopen'."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "Correlation ids, traces, consumer lag, retry counts, and compensation outcomes feed the observability platform.",
+        "brief_evidence": "Correlation ids, traces, consumer lag, retry counts, and compensation outcomes feed the observability platform.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9 · Operations & observability",
+            "observation": "Telemetry lists 'Traces · correlation · lag · retries · compensation' and points to Observability platform via 'metrics + traces'."
+          },
+          {
+            "source": "json",
+            "locator": "objects telemetry, observability; connection e-telemetry-observe",
+            "observation": "All five telemetry categories are listed in the telemetry object and a directed connection feeds the observability platform."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.8873,
+    "caps_applied": [],
+    "strongest_covered_cluster": "Order intake and transactional outbox through the durable event backbone are covered especially strongly: gateway intake, validation and identifiers, atomic pending-order plus OrderPlaced persistence, relay publication, at-least-once delivery, and processed-event ids are all represented.",
+    "most_consequential_gap": "External operational boundaries and branch-specific safety qualifiers are incomplete: the payment provider, inventory database, and carrier are not shown, and compensation is not explicitly limited or routed according to which branches previously succeeded.",
+    "coverage_summary": "The board substantially covers the full event-driven fulfillment lifecycle, including intake, transactional outbox, decision outcomes, coordination, cancellation, fulfillment, customer views, replay, timeout handling, terminal-order protection, and observability. The main losses are partial rather than absent: several external endpoints are omitted, compensation eligibility and branch routing are underspecified, and the reliability controls are shown generically without establishing that each consumer has them. Weighted credit is 63.0 out of 71.0; no absent or contradicted system-defining requirement triggers a cap.",
+    "score": 7
+  },
+  "usage": {
+    "input_tokens": 11952,
+    "output_tokens": 8252
+  },
+  "flags": []
+}

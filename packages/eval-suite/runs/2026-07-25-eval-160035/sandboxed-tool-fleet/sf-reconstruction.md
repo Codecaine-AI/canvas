@@ -1,0 +1,78 @@
+# SF blind system reconstruction
+
+## SYSTEM PURPOSE
+A sandboxed tool-execution fleet that fairly admits agent requests, places them under tenant quotas, fulfills them from compatible warm environments or by cold provisioning, manages fixed-term leases and destruction, constrains tool calls and network/output behavior, maintains host capacity and health, and emits operations and governance signals.
+
+## COMPONENTS
+- Sandboxed tool-execution fleet: Top-level boundary containing the depicted request, placement, provisioning, lease, execution-control, networking, health, operations, and governance mechanisms. [The large enclosing frame is labeled “Sandboxed tool-execution fleet.”]
+- 1 · Request & fair admission: Collects an agent request and its requested image and resource class, then submits it for placement. [The first blue-tinted stage is labeled “1 · Request & fair admission” and contains “Agent request” and “Image + resource class,” with a “submit” arrow leaving toward placement.]
+- Agent request: Represents the requester initiating a sandboxed tool-execution request. [A person icon labeled “Agent request” appears at the start of the flow.]
+- Image + resource class: Carries the requested image and resource class used for admission and placement. [A parallelogram labeled “Image + resource class” receives a downward arrow from “Agent request” and has an outgoing path labeled “submit.”]
+- 2 · Placement: Places submitted requests and checks tenant limits before environment fulfillment. [The second blue-tinted stage is labeled “2 · Placement” and contains “Placement service” and “Tenant quota gate.”]
+- Placement service: Receives submitted requests and initiates limit checking. [A box labeled “Placement service” receives the submission arrow and points downward through the label “check limits.”]
+- Tenant quota gate: Applies tenant quota checks before a request proceeds to environment acquisition. [A box labeled “Tenant quota gate” sits below “Placement service,” connected by a downward arrow labeled “check limits,” and has an outgoing arrow toward warm-environment claiming.]
+- 3 · Warm hit or cold boot: Attempts to claim a compatible warm environment and otherwise selects a host and cold-provisions an environment while the request waits fairly. [The orange-tinted stage is labeled “3 · Warm hit or cold boot” and contains “Claim compatible warm env,” “Select host + cold provision,” and a miss-behavior note.]
+- Claim compatible warm env: Attempts to satisfy an admitted request from a compatible pre-warmed environment. [A box labeled “Claim compatible warm env” receives the main placement path and has an outgoing path to “Provisioning.”]
+- Select host + cold provision: Selects a host and cold-provisions an environment when a warm environment is not available. [A box labeled “Select host + cold provision” appears beneath the warm-claim box; its outgoing path rises toward provisioning and is labeled “miss · wait.”]
+- Miss behavior: Defines the request behavior while cold boot completes: fair waiting rather than an immediate failure. [A note explicitly says “**Miss behavior** Request waits fairly until boot completes.”]
+- 4 · Lease lifecycle: Tracks environment states from provisioning through readiness and leasing, then through release, idling, draining, and destruction. [The purple-tinted stage is labeled “4 · Lease lifecycle” and contains the states “Provisioning,” “Ready,” “Leased,” “Idle,” “Draining,” and “Destroyed.”]
+- Provisioning: Represents an environment being prepared after a warm claim or cold-provision path. [A purple rounded state labeled “Provisioning” receives paths from the warm/cold-boot stage and points to “Ready.”]
+- Ready: Represents a provisioned environment available to be leased. [A green rounded state labeled “Ready” follows “Provisioning” and precedes the transition labeled “lease.”]
+- Leased: Represents an environment assigned under an active lease. [A blue rounded state labeled “Leased” follows “Ready” through a transition labeled “lease.”]
+- Idle: Represents a released or ended environment that is no longer actively leased. [A gray rounded state labeled “Idle” is reached by a return path labeled “term ends / release.”]
+- Draining: Represents an idle environment being prepared for removal. [An orange rounded state labeled “Draining” follows “Idle” and points to “Destroyed.”]
+- Destroyed: Represents final destruction of an environment. [A red rounded state labeled “Destroyed” receives an arrow from “Draining” and also a red downward arrow from “Leased.”]
+- Warm pool & host health: Maintains the warm pool, reports healthy-host capacity to cold provisioning, and quarantines hosts after repeated boot failures. [A teal section labeled “Warm pool & host health” contains “Warm-pool supervisor,” “Healthy hosts + capacity,” and “Quarantine failed host,” with dashed control paths to the warm/cold-boot stage.]
+- Warm-pool supervisor: Adjusts warm-pool depth for compatible warm-environment availability. [A box labeled “Warm-pool supervisor” has a dashed teal path labeled “adjust pool depth” leading toward “Claim compatible warm env.”]
+- Healthy hosts + capacity: Provides host-health and capacity information for host selection and cold provisioning. [A box labeled “Healthy hosts + capacity” has a dashed teal path labeled “capacity” leading toward “Select host + cold provision.”]
+- Quarantine failed host: Removes a host from normal use after repeated boot failure. [A red-outlined shape labeled “Quarantine failed host” is reached from “Healthy hosts + capacity” by a red path labeled “repeated boot failure.”]
+- Tool-call controls: Enforces timeout, memory, and CPU limits; kills overlong calls; and defines the result returned for killed calls. [An orange section labeled “Tool-call controls” contains “Timeout · memory · CPU,” “Kill overlong call,” and a result-semantics note.]
+- Timeout · memory · CPU: Defines execution limits applied to tool calls. [A box labeled “Timeout · memory · CPU” points to “Kill overlong call.”]
+- Kill overlong call: Terminates a call that exceeds the depicted execution controls. [A red box labeled “Kill overlong call” receives an arrow from “Timeout · memory · CPU.”]
+- Result semantics: Specifies that a killed call is reported as a timeout rather than as a tool error. [A note says “**Result semantics** A killed call reports **timeout**, not a tool error.”]
+- Network & outputs: Restricts egress, caps streamed output, and persists durable per-session files in an artifact store. [A pink section labeled “Network & outputs” contains “Allowlist egress proxy,” “Capped output stream,” and “Session artifact store.”]
+- Allowlist egress proxy: Restricts outbound network access to an allowlist. [A box labeled “Allowlist egress proxy” points to “Capped output stream.”]
+- Capped output stream: Limits the amount of streamed output and feeds session-durable file handling. [A box labeled “Capped output stream” receives an arrow from the proxy and has a downward path labeled “durable files by session.”]
+- Session artifact store: Stores durable files associated with a session. [A box labeled “Session artifact store” receives the downward path labeled “durable files by session.”]
+- Operations & governance signals: Collects or exposes operational measures and governance-related signals for the fleet. [A large lower section is labeled “Operations & governance signals” and contains four named signal pills plus a governance box.]
+- Boot latency: Operational signal for boot latency. [A blue pill in the operations section is labeled “Boot latency.”]
+- Lease reclamations: Operational signal for reclaimed leases. [A purple pill in the operations section is labeled “Lease reclamations.”]
+- Tool timeouts: Operational signal for tool-call timeouts. [An orange pill in the operations section is labeled “Tool timeouts.”]
+- Escape-attempt signals: Governance or security signal for attempted sandbox escapes. [A red pill in the operations section is labeled “Escape-attempt signals.”]
+- Non-negotiable governance: States mandatory lease, renewal, durability, image-release, reclamation, and quota rules. [A bordered note is headed “### Non-negotiable governance” and lists five explicit rules.]
+
+## FLOWS
+- control · Request submission and quota admission: Agent request initiates the process. → The request supplies “Image + resource class.” → The request is sent via the path labeled “submit” to “Placement service.” → Placement service sends the request through “check limits.” → “Tenant quota gate” applies the quota check. → An admitted request proceeds toward “Claim compatible warm env.” [Solid arrows connect “Agent request” → “Image + resource class” → “Placement service” → “Tenant quota gate” → “Claim compatible warm env”; the path labels are “submit” and “check limits.”]
+- control · Warm-hit fulfillment: An admitted request reaches “Claim compatible warm env.” → A compatible warm environment is claimed. → The path continues into “Provisioning.” → Provisioning transitions to “Ready.” → The transition labeled “lease” moves the environment to “Leased.” [The solid main path runs from the tenant quota gate to “Claim compatible warm env,” then to “Provisioning” → “Ready” → “Leased,” with “lease” shown between Ready and Leased.]
+- control · Cold-boot fulfillment after a warm miss: The warm-environment attempt misses. → “Select host + cold provision” performs host selection and cold provisioning. → The request follows the path labeled “miss · wait.” → The request waits fairly until boot completes. → The path joins “Provisioning.” → Provisioning transitions to “Ready,” then the “lease” transition reaches “Leased.” [The cold-provision box has an outgoing path rising to provisioning with the label “miss · wait,” and the note states “Request waits fairly until boot completes.”]
+- control · Normal lease release and reclamation: The environment is in “Leased.” → When the term ends or the lease is released, the path labeled “term ends / release” moves it to “Idle.” → Idle transitions to “Draining.” → Draining transitions to “Destroyed.” [A gray return path labeled “term ends / release” leads from the leased side of the lifecycle to “Idle,” followed by arrows “Idle” → “Draining” → “Destroyed.”]
+- control · Leased environment destruction path: The environment is in “Leased.” → A red downward transition leads directly to “Destroyed.” [A red vertical arrow is drawn from “Leased” directly down to the “Destroyed” state.]
+- control · Warm-pool depth adjustment: “Warm-pool supervisor” supplies a dashed control path. → The path is labeled “adjust pool depth.” → The path terminates at “Claim compatible warm env.” [A dashed teal route from the warm-pool area is labeled “adjust pool depth” and ends with an arrow into the warm-claim box.]
+- data · Host capacity supplied to cold provisioning: “Healthy hosts + capacity” supplies capacity information. → The dashed path is labeled “capacity.” → The path terminates at “Select host + cold provision.” [A dashed teal route from “Healthy hosts + capacity” is labeled “capacity” and ends with an arrow at the cold-provision box.]
+- control · Tool-call limit enforcement: Timeout, memory, and CPU controls are applied. → An overlong call is killed. → The killed call reports “timeout,” not a tool error. [“Timeout · memory · CPU” points to “Kill overlong call,” and the note states that a killed call reports “timeout,” not a tool error.]
+- data · Network and output handling: Network egress passes through “Allowlist egress proxy.” → The proxy feeds “Capped output stream.” → Files marked “durable files by session” are sent to “Session artifact store.” [Solid arrows connect “Allowlist egress proxy” → “Capped output stream,” followed by a downward path labeled “durable files by session” to “Session artifact store.”]
+
+## FAILURE PATHS
+- No compatible warm environment is available.: Claim compatible warm env → Select host + cold provision → miss · wait → Provisioning → The request waits fairly until cold boot completes, rather than immediately failing. [The cold path is labeled “miss · wait,” and the explicit note says “**Miss behavior** Request waits fairly until boot completes.”]
+- Repeated boot failure on a host.: Healthy hosts + capacity → repeated boot failure → Quarantine failed host → The failed host is quarantined. [A red downward path from “Healthy hosts + capacity” is labeled “repeated boot failure” and terminates at “Quarantine failed host.”]
+- A tool call exceeds the enforced call limits or is overlong.: Timeout · memory · CPU → Kill overlong call → The call is killed and reported as “timeout,” not as a tool error. [The control box points to “Kill overlong call,” and the result-semantics note explicitly specifies the timeout outcome.]
+
+## CONSTRAINTS & BOUNDARIES
+- Leases are fixed-term; renewal heartbeats preserve validity. [The governance note states “Fixed-term lease; renewal heartbeats preserve validity.”]
+- There is no renewal or absolute maximum age; reclaim and destroy. [The governance note states “No renewal or absolute max age → reclaim and **destroy**.”]
+- Image release marks an environment as draining; destruction occurs after the active lease ends. [The governance note states “Image release → mark draining; destroy after active lease ends.”]
+- Reclaimed instances never return to the pool; local filesystem and process state are ephemeral. [The governance note states “Reclaimed instances never return to pool; local filesystem/process state is ephemeral.”]
+- Quotas cover both concurrent environments and aggregate runtime; excess requests wait fairly. [The governance note states “Quotas cover concurrent environments and aggregate runtime; excess waits fairly.”]
+- A warm miss waits fairly until boot completes. [The miss-behavior note explicitly says “Request waits fairly until boot completes.”]
+- Tool calls are bounded by timeout, memory, and CPU controls. [The tool-control box is labeled “Timeout · memory · CPU.”]
+- An overlong killed call must be reported as “timeout,” not as a tool error. [The result-semantics note explicitly states “A killed call reports **timeout**, not a tool error.”]
+- Network egress is allowlisted. [The network component is labeled “Allowlist egress proxy.”]
+- The output stream is capped. [The output component is labeled “Capped output stream.”]
+- Durable files are scoped by session and stored in the session artifact store. [The path from “Capped output stream” to “Session artifact store” is labeled “durable files by session.”]
+
+## UNCERTAIN
+- A red arrow directly connects “Leased” to “Destroyed.”: The arrow has no visible trigger label. The separate governance text says image release should mark draining and destroy only after the active lease ends, so the exact condition represented by the direct transition is not stated.
+- The line labeled “term ends / release” returns to “Idle.”: The line visually originates from the leased side of the lifecycle, but the precise attachment point is partly obscured by the routed connector.
+- The cold-provision route is labeled “miss · wait.”: The diagram communicates that a miss invokes waiting and cold provisioning, but it does not show a distinct, explicitly arrowed connector from the warm-claim box down to the cold-provision box.
+- Operational signal pills are shown for boot latency, lease reclamations, tool timeouts, and escape-attempt signals.: No arrows identify their producers, consumers, storage location, or transport.
+- The “Allowlist egress proxy” points to “Capped output stream.”: The picture shows ordering but does not specify whether network responses, tool output, or another payload is carried on that arrow.

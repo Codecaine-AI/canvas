@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-25-eval-104726",
+  "tier": "system",
+  "scenario": "oauth-session-lifecycle",
+  "board_id": "eval.2026-07-25-eval-104726.oauth-session-lifecycle",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-25T15:47:27.682Z",
+      "finished_at": "2026-07-25T15:49:14.349Z",
+      "wall_ms": 107230,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "29c88fc2-c290-48ee-89a0-99e757589ccf"
+    ]
+  },
+  "finished_at": "2026-07-25T15:49:14.913Z",
+  "exit_code": 0
+}

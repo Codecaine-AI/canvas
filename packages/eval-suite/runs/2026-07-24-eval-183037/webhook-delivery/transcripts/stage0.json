@@ -1,0 +1,1216 @@
+{
+  "container_id": "7c0a277b-04a6-5fb3-8fcc-415a9556030e",
+  "pi_sessions": [
+    {
+      "piSessionId": "019f9677-7ce0-72a5-9c92-6462e388e7a7",
+      "file": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.jsonl",
+      "startedAt": "2026-07-24T23:30:40.992Z",
+      "userMessages": [
+        {
+          "text": "# Reliable webhook delivery\n\nWe are building a multi-tenant webhook delivery subsystem. Product services publish webhook events through an internal ingress API, and the ingress transaction must durably record each accepted event before acknowledging it. A dispatcher expands the event into one delivery per subscribed endpoint and puts those deliveries on a durable queue. Delivery workers load the tenant's active signing secret, sign the exact payload, and call the customer endpoint with an idempotency key.\n\nA 2xx response completes the delivery. Timeouts, network failures, and retryable responses return through a retry scheduler using exponential backoff with jitter and a maximum attempt count. Permanent failures and exhausted retries go to a dead-letter queue with the payload, endpoint, attempt history, and last error intact. Operators can inspect and replay dead-lettered deliveries without changing their original event identity. Endpoint configuration can be paused, and paused endpoints retain deliveries until they are resumed. Delivery attempts and outcomes feed tenant-visible status history and operational metrics.\n",
+          "timestamp": "2026-07-24T23:30:40.996Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-24T23:30:50.727Z",
+          "thinking": "**Planning nested sections layout**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6yacDPgDo1Vzbuv4ib3MoLXK|fc_0e134130d544e259016a63f5a564c4819b8fb3b278c9fb1568",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "page-frame",
+                    "patch": {
+                      "text": "Reliable webhook delivery",
+                      "geometry": {
+                        "x": 32,
+                        "y": 32,
+                        "width": 1920,
+                        "height": 1200
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "ingress",
+                      "text": "1 · Durable ingress",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 96,
+                        "y": 112,
+                        "width": 352,
+                        "height": 416
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "dispatch",
+                      "text": "2 · Fan-out & queue",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 480,
+                        "y": 112,
+                        "width": 352,
+                        "height": 416
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "delivery",
+                      "text": "3 · Signed delivery",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 864,
+                        "y": 112,
+                        "width": 448,
+                        "height": 416
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "recovery",
+                      "text": "4 · Retry & recovery",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1344,
+                        "y": 112,
+                        "width": 544,
+                        "height": 704
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "control",
+                      "text": "Tenant controls & secrets",
+                      "color": "gray",
+                      "geometry": {
+                        "x": 96,
+                        "y": 560,
+                        "width": 736,
+                        "height": 304
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "visibility",
+                      "text": "Status & operations",
+                      "color": "green",
+                      "geometry": {
+                        "x": 864,
+                        "y": 848,
+                        "width": 1024,
+                        "height": 288
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 7 ops\n  1. updateSection page-frame\n  2. addSection ingress\n  3. addSection dispatch\n  4. addSection delivery\n  5. addSection recovery\n  6. addSection control\n  7. addSection visibility\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 80,64 1840×1104\n    ingress section \"1 · Durable ingress\" blue 96,112 352×416\n      (empty)\n    dispatch section \"2 · Fan-out & queue\" violet 480,112 352×416\n      (empty)\n    delivery section \"3 · Signed delivery\" teal 864,112 448×416\n      (empty)\n    recovery section \"4 · Retry & recovery\" orange 1344,112 544×704\n      (empty)\n    control section \"Tenant controls & secrets\" 96,560 736×304\n      (empty)\n    visibility section \"Status & operations\" green 864,848 1024×288\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  32,32 1920×1200 → 80,64 1840×1104\n  page-frame  text \"2026-07-24-eval-183037 · webhook-delivery\" → \"Reliable webhook delivery\"\n  + ingress  section 96,112 352×416 \"1 · Durable ingress\"\n  + dispatch  section 480,112 352×416 \"2 · Fan-out & queue\"\n  + delivery  section 864,112 448×416 \"3 · Signed delivery\"\n  + recovery  section 1344,112 544×704 \"4 · Retry & recovery\"\n  + control  section 96,560 736×304 \"Tenant controls & secrets\"\n  + visibility  section 864,848 1024×288 \"Status & operations\"\nBOARD DIFF · base → draft · 7 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  updateSection page-frame  moved · resized · retexted\nDIAGNOSTICS · clean\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.9.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.9.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-24T23:31:01.993Z",
+          "thinking": "**Filling ingress and dispatch sections incrementally**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Vp1ebdBFRdRIokNAHifbKVqe|fc_0e134130d544e259016a63f5af3e9c819baceffe4df748a899",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "product",
+                      "type": "icon",
+                      "icon": "package",
+                      "text": "Product service",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 128,
+                        "y": 176,
+                        "width": 96,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "api",
+                      "type": "process",
+                      "text": "Internal ingress API",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 256,
+                        "y": 176,
+                        "width": 160,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "event-store",
+                      "type": "database",
+                      "text": "Durable event store",
+                      "color": "gray",
+                      "geometry": {
+                        "x": 160,
+                        "y": 336,
+                        "width": 224,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "ack-note",
+                      "text": "**Acceptance rule**\nAcknowledge only after the event is durably recorded.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 128,
+                        "y": 448,
+                        "width": 288,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "dispatcher",
+                      "type": "process",
+                      "text": "Subscription dispatcher",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 512,
+                        "y": 176,
+                        "width": 288,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "expand",
+                      "type": "document-stack",
+                      "text": "One delivery per active endpoint",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 528,
+                        "y": 304,
+                        "width": 256,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "delivery-queue",
+                      "type": "database",
+                      "text": "Durable delivery queue",
+                      "color": "gray",
+                      "geometry": {
+                        "x": 528,
+                        "y": 432,
+                        "width": 256,
+                        "height": 80
+                      }
+                    }
+                  }
+                ],
+                "view": "ingress"
+              },
+              "resultText": "APPLIED · 7 ops\n  1. addObject product\n  2. addObject api\n  3. addObject event-store\n  4. addSticky ack-note\n  5. addObject dispatcher\n  6. addObject expand\n  7. addObject delivery-queue\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 80,64 1840×1104\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 864,112 448×416\n      (empty)\n    recovery section \"4 · Retry & recovery\" orange 1344,112 544×704\n      (empty)\n    control section \"Tenant controls & secrets\" 96,560 736×304\n      (empty)\n    visibility section \"Status & operations\" green 864,848 1024×288\n      (empty)\nEDGES\n  (none)\nDELTA\n  ingress  96,112 352×416 → 112,128 336×416\n  dispatch  480,112 352×416 → 496,128 336×416\n  + product  icon 128,176 96×96 \"Product service\"\n  + api  process 256,176 160×80 \"Internal ingress API\"\n  + event-store  database 160,336 224×96 \"Durable event store\"\n  + ack-note  sticky 128,448 288×64 \"**Acceptance rule**\\nAcknowledge only after the event is durably recorded.\"\n  + dispatcher  process 512,176 288×80 \"Subscription dispatcher\"\n  + expand  document-stack 528,304 256×96 \"One delivery per active endpoint\"\n  + delivery-queue  database 528,432 256×80 \"Durable delivery queue\"\nBOARD DIFF · base → draft · 14 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  updateSection page-frame  moved · resized · retexted\nLINTS · +5 −0\n  + W1 crowding: product and api sit 32px apart side by side where wires and labels need ≥80px of corridor to route between them (open the product↔api corridor to ≥80px)\n  + W2 crowding: product and event-store sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the product↔event-store corridor to ≥96px)\n  + W3 crowding: api and event-store sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the api↔event-store corridor to ≥96px)\n  + W4 crowding: dispatcher and expand sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the dispatcher↔expand corridor to ≥96px)\n  + W5 crowding: expand and delivery-queue sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the expand↔delivery-queue corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.13.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.13.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-24T23:31:16.689Z",
+          "thinking": "**Planning layout resizing and section adjustments**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_kHXpvDJTLbTu4lNlRadpqm80|fc_0e134130d544e259016a63f5bac7f0819b83187ba774fbaad0",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "worker",
+                      "type": "process",
+                      "text": "Delivery worker",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 896,
+                        "y": 176,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "secret-load",
+                      "type": "icon",
+                      "icon": "key",
+                      "text": "Load active tenant secret",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 1120,
+                        "y": 160,
+                        "width": 112,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "sign",
+                      "type": "predefined-process",
+                      "text": "Sign exact payload",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 928,
+                        "y": 336,
+                        "width": 160,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "endpoint",
+                      "type": "icon",
+                      "icon": "globe",
+                      "text": "Customer endpoint",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 1152,
+                        "y": 320,
+                        "width": 112,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "request-contract",
+                      "text": "**Request contract**\nSigned exact payload + stable idempotency key",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 896,
+                        "y": 448,
+                        "width": 368,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "response",
+                      "type": "decision",
+                      "text": "2xx?",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 176,
+                        "width": 144,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "complete",
+                      "type": "pill",
+                      "text": "Complete",
+                      "color": "green",
+                      "geometry": {
+                        "x": 1584,
+                        "y": 176,
+                        "width": 160,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "retryable",
+                      "type": "decision",
+                      "text": "Retryable?",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 336,
+                        "width": 144,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "scheduler",
+                      "type": "process",
+                      "text": "Retry scheduler",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1584,
+                        "y": 336,
+                        "width": 240,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "dlq",
+                      "type": "database",
+                      "text": "Dead-letter queue",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 528,
+                        "width": 192,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "replay",
+                      "type": "process",
+                      "text": "Inspect & replay",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1632,
+                        "y": 528,
+                        "width": 192,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "dlq-record",
+                      "text": "**Preserve intact**\nPayload · endpoint · attempt history · last error · original event identity",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 672,
+                        "width": 448,
+                        "height": 96
+                      }
+                    }
+                  }
+                ],
+                "view": "delivery"
+              },
+              "resultText": "APPLIED · 12 ops\n  1. addObject worker\n  2. addObject secret-load\n  3. addObject sign\n  4. addObject endpoint\n  5. addSticky request-contract\n  6. addObject response\n  7. addObject complete\n  8. addObject retryable\n  9. addObject scheduler\n  10. addObject dlq\n  11. addObject replay\n  12. addSticky dlq-record\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 80,64 1840×1104\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 880,112 416×432\n      worker process \"Delivery worker\" teal 896,176 176×80\n      secret-load icon \"Load active tenant secret\" teal 1120,160 112×112 icon=key\n      sign predefined-process \"Sign exact payload\" teal 928,336 160×80\n      endpoint icon \"Customer endpoint\" blue 1152,320 112×112 icon=globe\n      request-contract sticky \"**Request contract** Signed exact payload + stable idempotency key\" 896,448 368×64\n    recovery section \"4 · Retry & recovery\" orange 1360,128 496×672\n      response decision \"2xx?\" orange 1376,176 144×96\n      complete pill \"Complete\" green 1584,176 160×64\n      retryable decision \"Retryable?\" orange 1376,336 144×96\n      scheduler process \"Retry scheduler\" orange 1584,336 240×80\n      dlq database \"Dead-letter queue\" red 1376,528 192×96\n      replay process \"Inspect & replay\" orange 1632,528 192×80\n      dlq-record sticky \"**Preserve intact** Payload · endpoint · attempt history · last error · original event identity\" 1376,672 448×96\n    control section \"Tenant controls & secrets\" 96,560 736×304\n      (empty)\n    visibility section \"Status & operations\" green 864,848 1024×288\n      (empty)\nEDGES\n  (none)\nDELTA\n  delivery  864,112 448×416 → 880,112 416×432\n  recovery  1344,112 544×704 → 1360,128 496×672\n  + worker  process 896,176 176×80 \"Delivery worker\"\n  + secret-load  icon 1120,160 112×112 \"Load active tenant secret\"\n  + sign  predefined-process 928,336 160×80 \"Sign exact payload\"\n  + endpoint  icon 1152,320 112×112 \"Customer endpoint\"\n  + request-contract  sticky 896,448 368×64 \"**Request contract**\\nSigned exact payload + stable idempotency key\"\n  + response  decision 1376,176 144×96 \"2xx?\"\n  + complete  pill 1584,176 160×64 \"Complete\"\n  + retryable  decision 1376,336 144×96 \"Retryable?\"\n  + scheduler  process 1584,336 240×80 \"Retry scheduler\"\n  + dlq  database 1376,528 192×96 \"Dead-letter queue\"\n  + replay  process 1632,528 192×80 \"Inspect & replay\"\n  + dlq-record  sticky 1376,672 448×96 \"**Preserve intact**\\nPayload · endpoint · attempt history · last error · original event identity\"\nBOARD DIFF · base → draft · 26 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  addObject worker\n  addObject secret-load\n  addObject sign\n  addObject endpoint\n  addSticky request-contract\n  addObject response\n  addObject complete\n  addObject retryable\n  addObject scheduler\n  addObject dlq\n  addObject replay\n  addSticky dlq-record\n  updateSection page-frame  moved · resized · retexted\nLINTS · +8 −0\n  + W6 crowding: worker and secret-load sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the worker↔secret-load corridor to ≥80px)\n  + W7 crowding: worker and sign sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the worker↔sign corridor to ≥96px)\n  + W8 crowding: secret-load and endpoint sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the secret-load↔endpoint corridor to ≥96px)\n  + W9 crowding: sign and endpoint sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the sign↔endpoint corridor to ≥80px)\n  + W10 crowding: response and complete sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the response↔complete corridor to ≥80px)\n  + W11 crowding: response and retryable sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the response↔retryable corridor to ≥96px)\n  + W12 crowding: retryable and scheduler sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the retryable↔scheduler corridor to ≥80px)\n  + W13 crowding: dlq and replay sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the dlq↔replay corridor to ≥80px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.17.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.17.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-24T23:31:27.799Z",
+          "thinking": "**Adding control visibility nodes and connections**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iMXjzG2DxBjo6wJ9lEnMa4AC|fc_0e134130d544e259016a63f5c8675c819bb3e5a4b007d4af7c",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "endpoint-config",
+                      "type": "process",
+                      "text": "Endpoint config",
+                      "geometry": {
+                        "x": 128,
+                        "y": 624,
+                        "width": 192,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "pause",
+                      "type": "decision",
+                      "text": "Paused?",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 384,
+                        "y": 608,
+                        "width": 144,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "held",
+                      "type": "database",
+                      "text": "Retained deliveries",
+                      "geometry": {
+                        "x": 592,
+                        "y": 608,
+                        "width": 192,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "secrets",
+                      "type": "database",
+                      "text": "Tenant signing secrets",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 128,
+                        "y": 752,
+                        "width": 240,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "resume-note",
+                      "text": "Paused endpoints keep their deliveries; resuming releases them for dispatch.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 432,
+                        "y": 752,
+                        "width": 352,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "history",
+                      "type": "document-stack",
+                      "text": "Tenant-visible delivery history",
+                      "color": "green",
+                      "geometry": {
+                        "x": 912,
+                        "y": 928,
+                        "width": 256,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "metrics",
+                      "type": "icon",
+                      "icon": "activity",
+                      "text": "Operational metrics",
+                      "color": "green",
+                      "geometry": {
+                        "x": 1232,
+                        "y": 912,
+                        "width": 112,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "ops",
+                      "type": "icon",
+                      "icon": "person",
+                      "text": "Operator",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1440,
+                        "y": 912,
+                        "width": 112,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "replay-action",
+                      "type": "process",
+                      "text": "Replay DLQ delivery",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1616,
+                        "y": 928,
+                        "width": 224,
+                        "height": 80
+                      }
+                    }
+                  }
+                ],
+                "view": "control"
+              },
+              "resultText": "APPLIED · 9 ops\n  1. addObject endpoint-config\n  2. addObject pause\n  3. addObject held\n  4. addObject secrets\n  5. addSticky resume-note\n  6. addObject history\n  7. addObject metrics\n  8. addObject ops\n  9. addObject replay-action\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 96,64 1808×1024\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 880,112 416×432\n      worker process \"Delivery worker\" teal 896,176 176×80\n      secret-load icon \"Load active tenant secret\" teal 1120,160 112×112 icon=key\n      sign predefined-process \"Sign exact payload\" teal 928,336 160×80\n      endpoint icon \"Customer endpoint\" blue 1152,320 112×112 icon=globe\n      request-contract sticky \"**Request contract** Signed exact payload + stable idempotency key\" 896,448 368×64\n    recovery section \"4 · Retry & recovery\" orange 1360,128 496×672\n      response decision \"2xx?\" orange 1376,176 144×96\n      complete pill \"Complete\" green 1584,176 160×64\n      retryable decision \"Retryable?\" orange 1376,336 144×96\n      scheduler process \"Retry scheduler\" orange 1584,336 240×80\n      dlq database \"Dead-letter queue\" red 1376,528 192×96\n      replay process \"Inspect & replay\" orange 1632,528 192×80\n      dlq-record sticky \"**Preserve intact** Payload · endpoint · attempt history · last error · original event identity\" 1376,672 448×96\n    control section \"Tenant controls & secrets\" 112,560 704×304\n      endpoint-config process \"Endpoint config\" 128,624 192×80\n      pause decision \"Paused?\" orange 384,608 144×96\n      held database \"Retained deliveries\" 592,608 192×96\n      secrets database \"Tenant signing secrets\" teal 128,752 240×80\n      resume-note sticky \"Paused endpoints keep their deliveries; resuming releases them for dispatch.\" 432,752 352×80\n    visibility section \"Status & operations\" green 896,864 976×192\n      history document-stack \"Tenant-visible delivery history\" green 912,928 256×96\n      metrics icon \"Operational metrics\" green 1232,912 112×112 icon=activity\n      ops icon \"Operator\" orange 1440,912 112×112 icon=person\n      replay-action process \"Replay DLQ delivery\" orange 1616,928 224×80\nEDGES\n  (none)\nDELTA\n  page-frame  80,64 1840×1104 → 96,64 1808×1024\n  control  96,560 736×304 → 112,560 704×304\n  visibility  864,848 1024×288 → 896,864 976×192\n  + endpoint-config  process 128,624 192×80 \"Endpoint config\"\n  + pause  decision 384,608 144×96 \"Paused?\"\n  + held  database 592,608 192×96 \"Retained deliveries\"\n  + secrets  database 128,752 240×80 \"Tenant signing secrets\"\n  + resume-note  sticky 432,752 352×80 \"Paused endpoints keep their deliveries; resuming releases them for dispatch.\"\n  + history  document-stack 912,928 256×96 \"Tenant-visible delivery history\"\n  + metrics  icon 1232,912 112×112 \"Operational metrics\"\n  + ops  icon 1440,912 112×112 \"Operator\"\n  + replay-action  process 1616,928 224×80 \"Replay DLQ delivery\"\nBOARD DIFF · base → draft · 35 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  addObject worker\n  addObject secret-load\n  addObject sign\n  addObject endpoint\n  addSticky request-contract\n  addObject response\n  addObject complete\n  addObject retryable\n  addObject scheduler\n  addObject dlq\n  addObject replay\n  addSticky dlq-record\n  addObject endpoint-config\n  addObject pause\n  addObject held\n  addObject secrets\n  addSticky resume-note\n  addObject history\n  addObject metrics\n  addObject ops\n  addObject replay-action\n  updateSection page-frame  moved · resized · retexted\nLINTS · +5 −0\n  + W14 crowding: endpoint-config and pause sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the endpoint-config↔pause corridor to ≥80px)\n  + W15 crowding: endpoint-config and secrets sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the endpoint-config↔secrets corridor to ≥96px)\n  + W16 crowding: pause and held sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the pause↔held corridor to ≥80px)\n  + W17 crowding: history and metrics sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the history↔metrics corridor to ≥80px)\n  + W18 crowding: ops and replay-action sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the ops↔replay-action corridor to ≥80px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.21.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.21.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-24T23:31:51.908Z",
+          "thinking": "**Mapping connection anchors**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_o6k5urKIaX2YOXHVoPjtgnUB|fc_0e134130d544e259016a63f5d2ac7c819b9c37dac280007a55",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c1",
+                      "from": {
+                        "objectId": "product",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "api",
+                        "anchor": "left"
+                      },
+                      "label": "publish event",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c2",
+                      "from": {
+                        "objectId": "api",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "event-store",
+                        "anchor": "top"
+                      },
+                      "label": "record before ACK",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c3",
+                      "from": {
+                        "objectId": "event-store",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "dispatcher",
+                        "anchor": "left"
+                      },
+                      "label": "accepted event",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c4",
+                      "from": {
+                        "objectId": "dispatcher",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "expand",
+                        "anchor": "top"
+                      },
+                      "label": "expand subscriptions",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c5",
+                      "from": {
+                        "objectId": "expand",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "delivery-queue",
+                        "anchor": "top"
+                      },
+                      "label": "enqueue deliveries",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c6",
+                      "from": {
+                        "objectId": "delivery-queue",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "worker",
+                        "anchor": "left"
+                      },
+                      "label": "claim delivery",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c7",
+                      "from": {
+                        "objectId": "worker",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "secret-load",
+                        "anchor": "left"
+                      },
+                      "label": "load active secret",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c8",
+                      "from": {
+                        "objectId": "secret-load",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "sign",
+                        "anchor": "top"
+                      },
+                      "label": "sign exact payload",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c9",
+                      "from": {
+                        "objectId": "sign",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "endpoint",
+                        "anchor": "left"
+                      },
+                      "label": "POST + idempotency key",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c10",
+                      "from": {
+                        "objectId": "endpoint",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "response",
+                        "anchor": "left"
+                      },
+                      "label": "response / failure",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c11",
+                      "from": {
+                        "objectId": "response",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "complete",
+                        "anchor": "left"
+                      },
+                      "label": "yes",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c12",
+                      "from": {
+                        "objectId": "response",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "retryable",
+                        "anchor": "top"
+                      },
+                      "label": "no",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c13",
+                      "from": {
+                        "objectId": "retryable",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "scheduler",
+                        "anchor": "left"
+                      },
+                      "label": "timeout / network / retryable",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c14",
+                      "from": {
+                        "objectId": "scheduler",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "delivery-queue",
+                        "anchor": "right"
+                      },
+                      "label": "exponential backoff + jitter · max attempts",
+                      "style": "dashed",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c15",
+                      "from": {
+                        "objectId": "retryable",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "dlq",
+                        "anchor": "top"
+                      },
+                      "label": "permanent / exhausted",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c16",
+                      "from": {
+                        "objectId": "dlq",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "replay",
+                        "anchor": "left"
+                      },
+                      "label": "inspect",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c17",
+                      "from": {
+                        "objectId": "endpoint-config",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "pause",
+                        "anchor": "left"
+                      },
+                      "label": "state",
+                      "color": "gray"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c18",
+                      "from": {
+                        "objectId": "pause",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "held",
+                        "anchor": "left"
+                      },
+                      "label": "yes · retain",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c19",
+                      "from": {
+                        "objectId": "held",
+                        "anchor": "top"
+                      },
+                      "to": {
+                        "objectId": "delivery-queue",
+                        "anchor": "bottom"
+                      },
+                      "label": "resume",
+                      "style": "dashed",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c20",
+                      "from": {
+                        "objectId": "secrets",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "secret-load",
+                        "anchor": "bottom"
+                      },
+                      "label": "tenant-scoped active secret",
+                      "style": "dashed",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c21",
+                      "from": {
+                        "objectId": "complete",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "history",
+                        "anchor": "top"
+                      },
+                      "label": "attempt + outcome",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c22",
+                      "from": {
+                        "objectId": "replay",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "replay-action",
+                        "anchor": "top"
+                      },
+                      "label": "operator replay",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c23",
+                      "from": {
+                        "objectId": "history",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "metrics",
+                        "anchor": "left"
+                      },
+                      "label": "metrics",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "c24",
+                      "from": {
+                        "objectId": "ops",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "replay-action",
+                        "anchor": "left"
+                      },
+                      "label": "replay unchanged identity",
+                      "color": "orange"
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 24 ops\n  1. addConnection c1\n  2. addConnection c2\n  3. addConnection c3\n  4. addConnection c4\n  5. addConnection c5\n  6. addConnection c6\n  7. addConnection c7\n  8. addConnection c8\n  9. addConnection c9\n  10. addConnection c10\n  11. addConnection c11\n  12. addConnection c12\n  13. addConnection c13\n  14. addConnection c14\n  15. addConnection c15\n  16. addConnection c16\n  17. addConnection c17\n  18. addConnection c18\n  19. addConnection c19\n  20. addConnection c20\n  21. addConnection c21\n  22. addConnection c22\n  23. addConnection c23\n  24. addConnection c24\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 96,64 1808×1024\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 880,112 416×432\n      worker process \"Delivery worker\" teal 896,176 176×80\n      secret-load icon \"Load active tenant secret\" teal 1120,160 112×112 icon=key\n      sign predefined-process \"Sign exact payload\" teal 928,336 160×80\n      endpoint icon \"Customer endpoint\" blue 1152,320 112×112 icon=globe\n      request-contract sticky \"**Request contract** Signed exact payload + stable idempotency key\" 896,448 368×64\n    recovery section \"4 · Retry & recovery\" orange 1360,128 496×672\n      response decision \"2xx?\" orange 1376,176 144×96\n      complete pill \"Complete\" green 1584,176 160×64\n      retryable decision \"Retryable?\" orange 1376,336 144×96\n      scheduler process \"Retry scheduler\" orange 1584,336 240×80\n      dlq database \"Dead-letter queue\" red 1376,528 192×96\n      replay process \"Inspect & replay\" orange 1632,528 192×80\n      dlq-record sticky \"**Preserve intact** Payload · endpoint · attempt history · last error · original event identity\" 1376,672 448×96\n    control section \"Tenant controls & secrets\" 112,560 704×304\n      endpoint-config process \"Endpoint config\" 128,624 192×80\n      pause decision \"Paused?\" orange 384,608 144×96\n      held database \"Retained deliveries\" 592,608 192×96\n      secrets database \"Tenant signing secrets\" teal 128,752 240×80\n      resume-note sticky \"Paused endpoints keep their deliveries; resuming releases them for dispatch.\" 432,752 352×80\n    visibility section \"Status & operations\" green 896,864 976×192\n      history document-stack \"Tenant-visible delivery history\" green 912,928 256×96\n      metrics icon \"Operational metrics\" green 1232,912 112×112 icon=activity\n      ops icon \"Operator\" orange 1440,912 112×112 icon=person\n      replay-action process \"Replay DLQ delivery\" orange 1616,928 224×80\nEDGES\n  c1 product→api \"publish event\" blue anchors=right→left\n  c2 api→event-store \"record before ACK\" blue anchors=bottom→top\n  c3 event-store→dispatcher \"accepted event\" violet anchors=right→left\n  c4 dispatcher→expand \"expand subscriptions\" violet anchors=bottom→top\n  c5 expand→delivery-queue \"enqueue deliveries\" violet anchors=bottom→top\n  c6 delivery-queue→worker \"claim delivery\" teal anchors=right→left\n  c7 worker→secret-load \"load active secret\" teal anchors=right→left\n  c8 secret-load→sign \"sign exact payload\" teal anchors=bottom→top\n  c9 sign→endpoint \"POST + idempotency key\" blue anchors=right→left\n  c10 endpoint→response \"response / failure\" orange anchors=right→left\n  c11 response→complete \"yes\" green anchors=right→left\n  c12 response→retryable \"no\" orange anchors=bottom→top\n  c13 retryable→scheduler \"timeout / network / retryable\" orange anchors=right→left\n  c14 scheduler→delivery-queue \"exponential backoff + jitter · max attempts\" dashed orange anchors=left→right\n  c15 retryable→dlq \"permanent / exhausted\" red anchors=bottom→top\n  c16 dlq→replay \"inspect\" orange anchors=right→left\n  c17 endpoint-config→pause \"state\" anchors=right→left\n  c18 pause→held \"yes · retain\" orange anchors=right→left\n  c19 held→delivery-queue \"resume\" dashed violet anchors=top→bottom\n  c20 secrets→secret-load \"tenant-scoped active secret\" dashed teal anchors=right→bottom\n  c21 complete→history \"attempt + outcome\" green anchors=bottom→top\n  c22 replay→replay-action \"operator replay\" orange anchors=bottom→top\n  c23 history→metrics \"metrics\" green anchors=right→left\n  c24 ops→replay-action \"replay unchanged identity\" orange anchors=right→left\nDELTA\n  + c1  product → api\n  + c2  api → event-store\n  + c3  event-store → dispatcher\n  + c4  dispatcher → expand\n  + c5  expand → delivery-queue\n  + c6  delivery-queue → worker\n  + c7  worker → secret-load\n  + c8  secret-load → sign\n  + c9  sign → endpoint\n  + c10  endpoint → response\n  + c11  response → complete\n  + c12  response → retryable\n  + c13  retryable → scheduler\n  + c14  scheduler → delivery-queue\n  + c15  retryable → dlq\n  + c16  dlq → replay\n  + c17  endpoint-config → pause\n  + c18  pause → held\n  + c19  held → delivery-queue\n  + c20  secrets → secret-load\n  + c21  complete → history\n  + c22  replay → replay-action\n  + c23  history → metrics\n  + c24  ops → replay-action\nBOARD DIFF · base → draft · 59 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  addObject worker\n  addObject secret-load\n  addObject sign\n  addObject endpoint\n  addSticky request-contract\n  addObject response\n  addObject complete\n  addObject retryable\n  addObject scheduler\n  addObject dlq\n  addObject replay\n  addSticky dlq-record\n  addObject endpoint-config\n  addObject pause\n  addObject held\n  addObject secrets\n  addSticky resume-note\n  addObject history\n  addObject metrics\n  addObject ops\n  addObject replay-action\n  updateSection page-frame  moved · resized · retexted\n  addConnection c1\n  addConnection c2\n  addConnection c3\n  addConnection c4\n  addConnection c5\n  addConnection c6\n  addConnection c7\n  addConnection c8\n  addConnection c9\n  addConnection c10\n  addConnection c11\n  addConnection c12\n  addConnection c13\n  addConnection c14\n  addConnection c15\n  addConnection c16\n  addConnection c17\n  addConnection c18\n  addConnection c19\n  addConnection c20\n  addConnection c21\n  addConnection c22\n  addConnection c23\n  addConnection c24\nLINTS · +41 −0\n  + E1 covered-content: label \"claim delivery\" chip on c6 covers expand (route c6 around expand or move the label with a waypoint)\n  + E2 covered-content: label \"exponential backoff + jitter · max attempts\" chip on c14 covers dlq (route c14 around dlq or move the label with a waypoint)\n  + E3 covered-content: label \"record before ACK\" chip on c2 overlaps label \"accepted event\" chip on c3 (separate the two edges (spacing or waypoints) so both labels read)\n  + E4 covered-content: label \"exponential backoff + jitter · max attempts\" chip on c14 overlaps label \"attempt + outcome\" chip on c21 (separate the two edges (spacing or waypoints) so both labels read)\n  + E5 covered-content: label \"response / failure\" chip on c10 lies on c8's path for 30px (move the label with a waypoint or reroute c8 so the chip owns its wire)\n  + E6 covered-content: label \"response / failure\" chip on c10 lies on c20's path for 57px (move the label with a waypoint or reroute c20 so the chip owns its wire)\n  + E7 covered-content: label \"no\" chip on c12 lies on c14's path for 43px (move the label with a waypoint or reroute c14 so the chip owns its wire)\n  + E8 covered-content: label \"no\" chip on c12 lies on c21's path for 43px (move the label with a waypoint or reroute c21 so the chip owns its wire)\n  + E9 covered-content: label \"timeout / network / retryable\" chip on c13 lies on c14's path for 31px (move the label with a waypoint or reroute c14 so the chip owns its wire)\n  + E10 covered-content: label \"exponential backoff + jitter · max attempts\" chip on c14 lies on c20's path for 30px (move the label with a waypoint or reroute c20 so the chip owns its wire)\n  + E11 covered-content: label \"exponential backoff + jitter · max attempts\" chip on c14 lies on c21's path for 309px (move the label with a waypoint or reroute c21 so the chip owns its wire)\n  + E12 covered-content: label \"permanent / exhausted\" chip on c15 lies on c21's path for 30px (move the label with a waypoint or reroute c21 so the chip owns its wire)\n  + E13 covered-content: label \"tenant-scoped active secret\" chip on c20 lies on c21's path for 30px (move the label with a waypoint or reroute c21 so the chip owns its wire)\n  + E14 covered-content: label \"attempt + outcome\" chip on c21 lies on c14's path for 187px (move the label with a waypoint or reroute c14 so the chip owns its wire)\n  + E15 covered-content: label \"attempt + outcome\" chip on c21 lies on c20's path for 30px (move the label with a waypoint or reroute c20 so the chip owns its wire)\n  + W1 covered-content: label \"record before ACK\" chip on c2 sits within 16px of product (give the chip clear air — nudge product or reroute c2)\n  + W2 covered-content: label \"accepted event\" chip on c3 sits within 16px of expand (give the chip clear air — nudge expand or reroute c3)\n  + W3 covered-content: label \"claim delivery\" chip on c6 sits within 16px of sign (give the chip clear air — nudge sign or reroute c6)\n  + W4 covered-content: label \"response / failure\" chip on c10 sits within 16px of secret-load (give the chip clear air — nudge secret-load or reroute c10)\n  + W5 covered-content: label \"response / failure\" chip on c10 sits within 16px of label \"no\" chip on c12 (separate the two edges so the chips read as two labels)\n  + W6 covered-content: label \"claim delivery\" chip on c6 sits within 16px of c8's path (offset c8 or move the label so it cannot read as c8's label)\n  + W7 covered-content: label \"response / failure\" chip on c10 sits within 16px of c14's path (offset c14 or move the label so it cannot read as c14's label)\n  + W8 covered-content: label \"response / failure\" chip on c10 sits within 16px of c21's path (offset c21 or move the label so it cannot read as c21's label)\n  + W9 broken-edges: c14 and c21 run co-linear for 208px (0px apart) (offset one route so the two wires read separately)\n  + W10 broken-edges: connector c6 hugs the right border of dispatch for 256px (route c6 clear of dispatch's frame so it reads as a wire, not a border)\n  + W11 broken-edges: connector c21 hugs the left border of recovery for 260px (route c21 clear of recovery's frame so it reads as a wire, not a border)\n  + W12 broken-edges: 7 connector crossings board-wide (threshold 6) (regroup the clusters so connected nodes sit near each other)\n  + W13 unreadable-labels: label \"publish event\" chip on c1 (149×30px) bleeds onto product and api: 32px of corridor where the chip needs 181px (open the product↔api corridor to ≥181px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"api\",\"patch\":{\"geometry\":{\"x\":416,\"y\":176,\"width\":160,\"height\":80}}}\n  + W14 unreadable-labels: label \"expand subscriptions\" chip on c4 (216×30px) bleeds onto dispatcher and expand: 48px of corridor where the chip needs 62px (open the dispatcher↔expand corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"expand\",\"patch\":{\"geometry\":{\"x\":528,\"y\":320,\"width\":256,\"height\":96}}}\n  + W15 unreadable-labels: label \"enqueue deliveries\" chip on c5 (197×30px) bleeds onto expand and delivery-queue: 32px of corridor where the chip needs 62px (open the expand↔delivery-queue corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"delivery-queue\",\"patch\":{\"geometry\":{\"x\":528,\"y\":464,\"width\":256,\"height\":80}}}\n  + W16 unreadable-labels: label \"load active secret\" chip on c7 (197×30px) bleeds onto worker and secret-load: 48px of corridor where the chip needs 229px (open the worker↔secret-load corridor to ≥229px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"secret-load\",\"patch\":{\"geometry\":{\"x\":1312,\"y\":160,\"width\":112,\"height\":112}}}\n  + W17 unreadable-labels: label \"sign exact payload\" chip on c8 (197×30px) bleeds onto secret-load: 64px of corridor where the chip needs 62px (open the secret-load↔sign corridor to ≥62px so the chip and its 16px margins fit)\n  + W18 unreadable-labels: label \"POST + idempotency key\" chip on c9 (235×30px) bleeds onto sign and endpoint: 64px of corridor where the chip needs 268px (open the sign↔endpoint corridor to ≥268px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"endpoint\",\"patch\":{\"geometry\":{\"x\":1360,\"y\":320,\"width\":112,\"height\":112}}}\n  + W19 unreadable-labels: label \"response / failure\" chip on c10 (197×30px) bleeds onto endpoint and response: 112px of corridor where the chip needs 229px (open the endpoint↔response corridor to ≥229px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"response\",\"patch\":{\"geometry\":{\"x\":1504,\"y\":176,\"width\":144,\"height\":96}}}\n  + W20 unreadable-labels: label \"yes\" chip on c11 (53×30px) bleeds onto response and complete: 64px of corridor where the chip needs 85px (open the response↔complete corridor to ≥85px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"complete\",\"patch\":{\"geometry\":{\"x\":1616,\"y\":176,\"width\":160,\"height\":64}}}\n  + W21 unreadable-labels: label \"timeout / network / retryable\" chip on c13 (302×30px) bleeds onto retryable and scheduler: 64px of corridor where the chip needs 335px (open the retryable↔scheduler corridor to ≥335px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"scheduler\",\"patch\":{\"geometry\":{\"x\":1856,\"y\":336,\"width\":240,\"height\":80}}}\n  + W22 unreadable-labels: label \"inspect\" chip on c16 (91×30px) bleeds onto dlq and replay: 64px of corridor where the chip needs 124px (open the dlq↔replay corridor to ≥124px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"replay\",\"patch\":{\"geometry\":{\"x\":1696,\"y\":528,\"width\":192,\"height\":80}}}\n  + W23 unreadable-labels: label \"state\" chip on c17 (72×30px) bleeds onto endpoint-config and pause: 64px of corridor where the chip needs 104px (open the endpoint-config↔pause corridor to ≥104px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"pause\",\"patch\":{\"geometry\":{\"x\":432,\"y\":608,\"width\":144,\"height\":96}}}\n  + W24 unreadable-labels: label \"yes · retain\" chip on c18 (139×30px) bleeds onto pause and held: 64px of corridor where the chip needs 172px (open the pause↔held corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"held\",\"patch\":{\"geometry\":{\"x\":704,\"y\":608,\"width\":192,\"height\":96}}}\n  + W25 unreadable-labels: label \"metrics\" chip on c23 (91×30px) bleeds onto history and metrics: 64px of corridor where the chip needs 124px (open the history↔metrics corridor to ≥124px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"metrics\",\"patch\":{\"geometry\":{\"x\":1296,\"y\":912,\"width\":112,\"height\":112}}}\n  + W26 unreadable-labels: label \"replay unchanged identity\" chip on c24 (264×30px) bleeds onto ops and replay-action: 64px of corridor where the chip needs 296px (open the ops↔replay-action corridor to ≥296px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"replay-action\",\"patch\":{\"geometry\":{\"x\":1856,\"y\":928,\"width\":224,\"height\":80}}}\nROUTES\n  c1  anchors right→left  path 246,220 → 256,220  through none\n  c2  anchors bottom→top  path 336,256 → 336,280 → 336,296 → 272,296 → 272,312 → 272,336  through none\n  c3  anchors right→left  path 384,384 → 408,384 → 448,384 → 448,216 → 488,216 → 512,216  through none\n  c4  anchors bottom→top  path 656,256 → 656,304  through none\n  c5  anchors bottom→top  path 656,400 → 656,432  through none\n  c6  anchors right→left  path 784,472 → 808,472 → 840,472 → 840,216 → 872,216 → 896,216  through none\n  c7  anchors right→left  path 1072,216 → 1092,216  through none\n  c8  anchors bottom→top  path 1176,314 → 1176,317 → 1280,317 → 1280,140 → 876,140 → 876,276 → 908,276 → 908,316 → 1008,316 → 1008,336  through none\n  c9  anchors right→left  path 1088,376 → 1129,376  through none\n  c10  anchors right→left  path 1264,376 → 1288,376 → 1320,376 → 1320,224 → 1352,224 → 1376,224  through none\n  c11  anchors right→left  path 1520,224 → 1544,224 → 1552,224 → 1552,208 → 1560,208 → 1584,208  through none\n  c12  anchors bottom→top  path 1448,272 → 1448,336  through none\n  c13  anchors right→left  path 1520,380 → 1584,380  through none\n  c14  anchors left→right  path 1584,376 → 1564,376 → 1564,316 → 1316,316 → 1316,564 → 860,564 → 860,532 → 804,532 → 804,472 → 784,472  through none\n  c15  anchors bottom→top  path 1448,432 → 1448,456 → 1448,480 → 1472,480 → 1472,504 → 1472,528  through none\n  c16  anchors right→left  path 1568,572 → 1632,572  through none\n  c17  anchors right→left  path 320,660 → 384,660  through none\n  c18  anchors right→left  path 528,656 → 592,656  through none\n  c19  anchors top→bottom  path 688,608 → 688,584 → 688,560 → 656,560 → 656,536 → 656,512  through none\n  c20  anchors right→bottom  path 368,792 → 412,792 → 412,732 → 1280,732 → 1280,476 → 1307,476 → 1307,300 → 1280,300 → 1280,317 → 1176,317 → 1176,314  through none\n  c21  anchors bottom→top  path 1664,240 → 1664,260 → 1564,260 → 1564,316 → 1356,316 → 1356,576 → 892,576 → 892,584 → 1040,584 → 1040,928  through none\n  c22  anchors bottom→top  path 1728,608 → 1728,628 → 1844,628 → 1844,908 → 1728,908 → 1728,928  through none\n  c23  anchors right→left  path 1168,972 → 1200,972  through none\n  c24  anchors right→left  path 1552,968 → 1616,968  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.25.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.25.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-07-24T23:32:00.779Z",
+          "thinking": "**Removing problematic labels to fix errors**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XoTd2Y4EsVUJgzf6xCzEx3vf|fc_0e134130d544e259016a63f5edd3d4819bb998ccd78446e3c9",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c2",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c3",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c6",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c8",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c10",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c12",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c13",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c14",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c15",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c20",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "c21",
+                    "patch": {
+                      "label": ""
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 11 ops\n  1. updateConnection c2\n  2. updateConnection c3\n  3. updateConnection c6\n  4. updateConnection c8\n  5. updateConnection c10\n  6. updateConnection c12\n  7. updateConnection c13\n  8. updateConnection c14\n  9. updateConnection c15\n  10. updateConnection c20\n  11. updateConnection c21\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 96,64 1808×1024\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 880,112 416×432\n      worker process \"Delivery worker\" teal 896,176 176×80\n      secret-load icon \"Load active tenant secret\" teal 1120,160 112×112 icon=key\n      sign predefined-process \"Sign exact payload\" teal 928,336 160×80\n      endpoint icon \"Customer endpoint\" blue 1152,320 112×112 icon=globe\n      request-contract sticky \"**Request contract** Signed exact payload + stable idempotency key\" 896,448 368×64\n    recovery section \"4 · Retry & recovery\" orange 1360,128 496×672\n      response decision \"2xx?\" orange 1376,176 144×96\n      complete pill \"Complete\" green 1584,176 160×64\n      retryable decision \"Retryable?\" orange 1376,336 144×96\n      scheduler process \"Retry scheduler\" orange 1584,336 240×80\n      dlq database \"Dead-letter queue\" red 1376,528 192×96\n      replay process \"Inspect & replay\" orange 1632,528 192×80\n      dlq-record sticky \"**Preserve intact** Payload · endpoint · attempt history · last error · original event identity\" 1376,672 448×96\n    control section \"Tenant controls & secrets\" 112,560 704×304\n      endpoint-config process \"Endpoint config\" 128,624 192×80\n      pause decision \"Paused?\" orange 384,608 144×96\n      held database \"Retained deliveries\" 592,608 192×96\n      secrets database \"Tenant signing secrets\" teal 128,752 240×80\n      resume-note sticky \"Paused endpoints keep their deliveries; resuming releases them for dispatch.\" 432,752 352×80\n    visibility section \"Status & operations\" green 896,864 976×192\n      history document-stack \"Tenant-visible delivery history\" green 912,928 256×96\n      metrics icon \"Operational metrics\" green 1232,912 112×112 icon=activity\n      ops icon \"Operator\" orange 1440,912 112×112 icon=person\n      replay-action process \"Replay DLQ delivery\" orange 1616,928 224×80\nEDGES\n  c1 product→api \"publish event\" blue anchors=right→left\n  c2 api→event-store — blue anchors=bottom→top\n  c3 event-store→dispatcher — violet anchors=right→left\n  c4 dispatcher→expand \"expand subscriptions\" violet anchors=bottom→top\n  c5 expand→delivery-queue \"enqueue deliveries\" violet anchors=bottom→top\n  c6 delivery-queue→worker — teal anchors=right→left\n  c7 worker→secret-load \"load active secret\" teal anchors=right→left\n  c8 secret-load→sign — teal anchors=bottom→top\n  c9 sign→endpoint \"POST + idempotency key\" blue anchors=right→left\n  c10 endpoint→response — orange anchors=right→left\n  c11 response→complete \"yes\" green anchors=right→left\n  c12 response→retryable — orange anchors=bottom→top\n  c13 retryable→scheduler — orange anchors=right→left\n  c14 scheduler→delivery-queue — dashed orange anchors=left→right\n  c15 retryable→dlq — red anchors=bottom→top\n  c16 dlq→replay \"inspect\" orange anchors=right→left\n  c17 endpoint-config→pause \"state\" anchors=right→left\n  c18 pause→held \"yes · retain\" orange anchors=right→left\n  c19 held→delivery-queue \"resume\" dashed violet anchors=top→bottom\n  c20 secrets→secret-load — dashed teal anchors=right→bottom\n  c21 complete→history — green anchors=bottom→top\n  c22 replay→replay-action \"operator replay\" orange anchors=bottom→top\n  c23 history→metrics \"metrics\" green anchors=right→left\n  c24 ops→replay-action \"replay unchanged identity\" orange anchors=right→left\nDELTA\n  c2  label \"record before ACK\" → \"\"\n  c3  label \"accepted event\" → \"\"\n  c6  label \"claim delivery\" → \"\"\n  c8  label \"sign exact payload\" → \"\"\n  c10  label \"response / failure\" → \"\"\n  c12  label no → \"\"\n  c13  label \"timeout / network / retryable\" → \"\"\n  c14  label \"exponential backoff + jitter · max attempts\" → \"\"\n  c15  label \"permanent / exhausted\" → \"\"\n  c20  label \"tenant-scoped active secret\" → \"\"\n  c21  label \"attempt + outcome\" → \"\"\nBOARD DIFF · base → draft · 59 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  addObject worker\n  addObject secret-load\n  addObject sign\n  addObject endpoint\n  addSticky request-contract\n  addObject response\n  addObject complete\n  addObject retryable\n  addObject scheduler\n  addObject dlq\n  addObject replay\n  addSticky dlq-record\n  addObject endpoint-config\n  addObject pause\n  addObject held\n  addObject secrets\n  addSticky resume-note\n  addObject history\n  addObject metrics\n  addObject ops\n  addObject replay-action\n  updateSection page-frame  moved · resized · retexted\n  addConnection c1\n  addConnection c2\n  addConnection c3\n  addConnection c4\n  addConnection c5\n  addConnection c6\n  addConnection c7\n  addConnection c8\n  addConnection c9\n  addConnection c10\n  addConnection c11\n  addConnection c12\n  addConnection c13\n  addConnection c14\n  addConnection c15\n  addConnection c16\n  addConnection c17\n  addConnection c18\n  addConnection c19\n  addConnection c20\n  addConnection c21\n  addConnection c22\n  addConnection c23\n  addConnection c24\nLINTS · +0 −26\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content, − E9 covered-content, − E10 covered-content, − E11 covered-content, − E12 covered-content, − E13 covered-content, − E14 covered-content, − E15 covered-content, − W1 covered-content, − W2 covered-content, − W3 covered-content, − W4 covered-content, − W5 covered-content, − W6 covered-content, − W7 covered-content, − W8 covered-content, − W17 unreadable-labels, − W19 unreadable-labels, − W21 unreadable-labels  (resolved)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.29.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.29.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-07-24T23:32:05.501Z",
+          "thinking": "**Reviewing final diagnostics**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_M2Rkz8Vu4DOwjkv4YwPxIBJS|fc_0e134130d544e259016a63f5f53480819bbdfe2946e4dfa970",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 0 ops\n  (no ops — look only)\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Reliable webhook delivery\" white 96,64 1808×1024\n    ingress section \"1 · Durable ingress\" blue 112,128 336×416\n      product icon \"Product service\" blue 128,176 96×96 icon=package\n      api process \"Internal ingress API\" blue 256,176 160×80\n      event-store database \"Durable event store\" 160,336 224×96\n      ack-note sticky \"**Acceptance rule** Acknowledge only after the event is durably recorded.\" 128,448 288×64\n    dispatch section \"2 · Fan-out & queue\" violet 496,128 336×416\n      dispatcher process \"Subscription dispatcher\" violet 512,176 288×80\n      expand document-stack \"One delivery per active endpoint\" violet 528,304 256×96\n      delivery-queue database \"Durable delivery queue\" 528,432 256×80\n    delivery section \"3 · Signed delivery\" teal 880,112 416×432\n      worker process \"Delivery worker\" teal 896,176 176×80\n      secret-load icon \"Load active tenant secret\" teal 1120,160 112×112 icon=key\n      sign predefined-process \"Sign exact payload\" teal 928,336 160×80\n      endpoint icon \"Customer endpoint\" blue 1152,320 112×112 icon=globe\n      request-contract sticky \"**Request contract** Signed exact payload + stable idempotency key\" 896,448 368×64\n    recovery section \"4 · Retry & recovery\" orange 1360,128 496×672\n      response decision \"2xx?\" orange 1376,176 144×96\n      complete pill \"Complete\" green 1584,176 160×64\n      retryable decision \"Retryable?\" orange 1376,336 144×96\n      scheduler process \"Retry scheduler\" orange 1584,336 240×80\n      dlq database \"Dead-letter queue\" red 1376,528 192×96\n      replay process \"Inspect & replay\" orange 1632,528 192×80\n      dlq-record sticky \"**Preserve intact** Payload · endpoint · attempt history · last error · original event identity\" 1376,672 448×96\n    control section \"Tenant controls & secrets\" 112,560 704×304\n      endpoint-config process \"Endpoint config\" 128,624 192×80\n      pause decision \"Paused?\" orange 384,608 144×96\n      held database \"Retained deliveries\" 592,608 192×96\n      secrets database \"Tenant signing secrets\" teal 128,752 240×80\n      resume-note sticky \"Paused endpoints keep their deliveries; resuming releases them for dispatch.\" 432,752 352×80\n    visibility section \"Status & operations\" green 896,864 976×192\n      history document-stack \"Tenant-visible delivery history\" green 912,928 256×96\n      metrics icon \"Operational metrics\" green 1232,912 112×112 icon=activity\n      ops icon \"Operator\" orange 1440,912 112×112 icon=person\n      replay-action process \"Replay DLQ delivery\" orange 1616,928 224×80\nEDGES\n  c1 product→api \"publish event\" blue anchors=right→left\n  c2 api→event-store — blue anchors=bottom→top\n  c3 event-store→dispatcher — violet anchors=right→left\n  c4 dispatcher→expand \"expand subscriptions\" violet anchors=bottom→top\n  c5 expand→delivery-queue \"enqueue deliveries\" violet anchors=bottom→top\n  c6 delivery-queue→worker — teal anchors=right→left\n  c7 worker→secret-load \"load active secret\" teal anchors=right→left\n  c8 secret-load→sign — teal anchors=bottom→top\n  c9 sign→endpoint \"POST + idempotency key\" blue anchors=right→left\n  c10 endpoint→response — orange anchors=right→left\n  c11 response→complete \"yes\" green anchors=right→left\n  c12 response→retryable — orange anchors=bottom→top\n  c13 retryable→scheduler — orange anchors=right→left\n  c14 scheduler→delivery-queue — dashed orange anchors=left→right\n  c15 retryable→dlq — red anchors=bottom→top\n  c16 dlq→replay \"inspect\" orange anchors=right→left\n  c17 endpoint-config→pause \"state\" anchors=right→left\n  c18 pause→held \"yes · retain\" orange anchors=right→left\n  c19 held→delivery-queue \"resume\" dashed violet anchors=top→bottom\n  c20 secrets→secret-load — dashed teal anchors=right→bottom\n  c21 complete→history — green anchors=bottom→top\n  c22 replay→replay-action \"operator replay\" orange anchors=bottom→top\n  c23 history→metrics \"metrics\" green anchors=right→left\n  c24 ops→replay-action \"replay unchanged identity\" orange anchors=right→left\nDELTA · none\nBOARD DIFF · base → draft · 59 ops\n  addSection ingress\n  addSection dispatch\n  addSection delivery\n  addSection recovery\n  addSection control\n  addSection visibility\n  addObject product\n  addObject api\n  addObject event-store\n  addSticky ack-note\n  addObject dispatcher\n  addObject expand\n  addObject delivery-queue\n  addObject worker\n  addObject secret-load\n  addObject sign\n  addObject endpoint\n  addSticky request-contract\n  addObject response\n  addObject complete\n  addObject retryable\n  addObject scheduler\n  addObject dlq\n  addObject replay\n  addSticky dlq-record\n  addObject endpoint-config\n  addObject pause\n  addObject held\n  addObject secrets\n  addSticky resume-note\n  addObject history\n  addObject metrics\n  addObject ops\n  addObject replay-action\n  updateSection page-frame  moved · resized · retexted\n  addConnection c1\n  addConnection c2\n  addConnection c3\n  addConnection c4\n  addConnection c5\n  addConnection c6\n  addConnection c7\n  addConnection c8\n  addConnection c9\n  addConnection c10\n  addConnection c11\n  addConnection c12\n  addConnection c13\n  addConnection c14\n  addConnection c15\n  addConnection c16\n  addConnection c17\n  addConnection c18\n  addConnection c19\n  addConnection c20\n  addConnection c21\n  addConnection c22\n  addConnection c23\n  addConnection c24\nLINTS · +0 −0 (33 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-992Z_019f9677-7ce0-72a5-9c92-6462e388e7a7.33.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-07-24T23:32:11.252Z",
+          "thinking": "**Finalizing warning ID naming scheme**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_b1kOZXar5B120Zwhd2daDxXX|fc_0e134130d544e259016a63f5fa70e0819bae75678e840fcad3",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Built the complete reliable-webhook delivery architecture; knowingly shipping diagnostics W1–W33 for tight label corridors, crowding, and a few long/crossing recovery routes."
+              },
+              "resultText": "Committed: Built the complete reliable-webhook delivery architecture; knowingly shipping diagnostics W1–W33 for tight label corridors, crowding, and a few long/crossing recovery routes. (59 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

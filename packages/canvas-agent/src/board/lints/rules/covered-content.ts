@@ -4,9 +4,9 @@
  *
  * Checks, all on real geometry (chips are the renderer's own chips at the
  * router's own label point):
- * - box-on-box (error): sibling boxes (same parent; sections, stickies, and
- *   annotation markers exempt) whose intersection exceeds 25% of the smaller
- *   box or covers a box's text center;
+ * - box-on-box (error): sibling boxes (same parent; sections and stickies
+ *   exempt) whose intersection exceeds 25% of the smaller box or covers a
+ *   box's text center;
  * - chip-on-box (error) / chip-near-box (warning): a label chip over a third
  *   box's face; contact inside the 16px clearance margin is the warning;
  * - chip-on-chip (error) / chip-near-chip (warning): same margin logic;
@@ -60,7 +60,7 @@ const GUIDANCE = `Nothing sits on content. Blocking (error tier):
 - a label chip on a box face, on another chip, or lying along another edge's wire.
 Even ${CHIP_CLEARANCE}px of kissing contact reads as merged (warning tier).
 Fix it by routing around the crowd, moving the label with a waypoint, or giving the region air.
-Stickies and annotation markers float above the diagram and are exempt.`;
+Stickies float above the diagram and are exempt.`;
 
 export const rule: LayoutRule = {
   id: "covered-content",

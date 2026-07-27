@@ -18,15 +18,17 @@
         "b-r6-evidence-8"
       ],
       "props": {
-        "covers": "fan centers a hub over its children on one shared register, evenly pitched and never closer than 64px to the hub, expanded bottom-up with nested fans first.",
+        "covers": "Parent-child composition centers the parent over peer children, repeats one child gap and size, and reserves a readable corridor for direct labeled edges.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "fan",
           "hub",
-          "child register",
-          "pitch",
-          "detectFans"
+          "child centerline",
+          "uniform gap",
+          "parent centering",
+          "direct edge labels",
+          "arrow corridor"
         ]
       }
     },
@@ -52,7 +54,7 @@
       },
       "text": [
         {
-          "insert": "A fan centers the hub over its children; the children sit on one shared centerline, evenly spaced, and never closer than 64px to the hub."
+          "insert": "Center the parent over its children. Make peer children the same size, repeat one exact gap, align their centers, and leave enough air for each labeled edge to read."
         }
       ]
     },
@@ -63,68 +65,26 @@
       "props": {},
       "text": [
         {
-          "insert": "Detect:",
+          "insert": "Mechanism:",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " a node whose outgoing edges include two or more targets sharing a register ("
+          "insert": " the "
         },
         {
-          "insert": "FAN_REGISTER_TOLERANCE",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "FAN_REGISTER_TOLERANCE"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " = 16px) strictly on one side (S/N/E/W), with the hub's main-axis center within max(64, 25% of span) of the children's midpoint ("
-        },
-        {
-          "insert": "detectFans",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "detectFans"
-            }
-          }
-        },
-        {
-          "insert": "). "
-        },
-        {
-          "insert": "Spell:",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "fan 17 dir=S: 18 19",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". "
-        },
-        {
-          "insert": "Expand,",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " bottom-up, nested fans first:"
+          "insert": " supplies parent centering, peer uniformity, air, and wire guidance. There is no fan operation, automatic fan pass, or dedicated fan diagnostic. Build the containing section in the section skeleton, place the parent and children in that section's content batch, judge the render, and add their connections during the connection step:"
         }
       ]
     },
@@ -137,7 +97,7 @@
       },
       "text": [
         {
-          "insert": "Children share one register on the fan side; a moved child carries its whole fan subtree rigidly."
+          "insert": "Children that play the same role share one size and one repeated gap, with centers on a line. Copy the first child's digest geometry to place its peers."
         }
       ]
     },
@@ -150,7 +110,7 @@
       },
       "text": [
         {
-          "insert": "Hubs bottom-anchor onto children top-anchors: the children's register always clears the hub by at least 64px — never overlap (intent-2: layer-1 pentagon bottoms at 1312, action tops at 1424)."
+          "insert": "Open the parent-to-child corridor for routed wires and their labels. Crowding warns below the sibling corridor floor; covered-content and unreadable-labels catch collisions and chip-fit failures. The warning floor is not the target."
         }
       ]
     },
@@ -163,7 +123,7 @@
       },
       "text": [
         {
-          "insert": "Even pitch. When hub and children share one section — a local template — pitch normalizes to the widest solved child subtree + 64, so nested fan trees compose compactly (intent-2's layer tree derives its 640 pitch from its grandchildren). When children straddle section boundaries, the existing spread is never compressed past unrelated content — only widened."
+          "insert": "Label the parent-child relationships directly on their edges. Use faces that point along the flow, keep two runs from sharing a line, and inspect the returned ROUTES block for crossings through boxes."
         }
       ]
     },
@@ -176,16 +136,7 @@
       },
       "text": [
         {
-          "insert": "The hub centers over the children's midpoint (intent-2: "
-        },
-        {
-          "insert": "classify-intent-layered",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " at x=3168 — the exact midpoint of the layer-1 centers 2208..4128)."
+          "insert": "Center the parent over the children as a group. If unequal child content forces a wider member, resize the peer set first and then recalculate the group midpoint from the exact digest geometry."
         }
       ]
     },
@@ -196,33 +147,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: "
-        },
-        {
-          "insert": "intent-classification-2",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/intent-classification-2.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": "'s three-level layer tree (9 fans, nesting 3 deep); intent-1's decision fans; v2-flow's chevron fan; the researcher's spawn fan. The example-fan board in the "
-        },
-        {
-          "insert": "fan reference",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/10-language/80-fan",
-              "label": "fan"
-            }
-          }
-        },
-        {
-          "insert": " demonstrates the geometry."
+          "insert": "Verification: inspect the section close-up for the peer signal, then the full-board render for flow and balance. The latest BOARD digest and ROUTES block, not a remembered earlier turn, are the geometric truth."
         }
       ]
     }

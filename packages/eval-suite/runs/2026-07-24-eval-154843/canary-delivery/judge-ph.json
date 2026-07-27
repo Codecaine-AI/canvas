@@ -1,0 +1,216 @@
+{
+  "axis": "ph",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean tool use across both sessions: every apply_ops and finalize call succeeded, there were no rejected calls, no retries, and no parse or validation fights.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 30 ops",
+          "finding": "The largest stage0 batch was accepted on its first attempt; its resulting lint errors were content diagnostics, not failed or rejected tool calls."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "Committed: Built a complete canary-delivery flow ... (72 patch operations).",
+          "finding": "Stage0 finalized successfully on attempt 1 with zero session retries."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · 9 ops",
+          "finding": "The waypoint-bearing rollback-routing batch was accepted without schema or syntax friction."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 7,
+          "transcript_excerpt": "Committed: Added sequential primary→secondary canaries ... (30 patch operations).",
+          "finding": "The edit session finalized successfully on attempt 1 with zero retries."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong perception discipline. Both sessions repeatedly rendered after operations, inspected diagnostics, adjusted the draft, and rendered again. Across the arc there were 14 rendered apply_ops results and 12 adjustment rounds following a prior render; neither session was a single-render commit.",
+      "render_count": 14,
+      "adjustment_round_count": 12,
+      "render_adjust_render_loop_count": 12,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +6 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...\n  + E4 covered-content ...",
+          "finding": "A render exposed four covered-content errors and two related warnings after the connection batch."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −6\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − W1 covered-content, − W2 covered-content  (resolved)",
+          "finding": "The agent adjusted six conflicting labels and re-rendered, clearing all newly introduced covered-content diagnostics before commit."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "The edit session began with an explicit inspection render before changing the inherited board."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +6 −1\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...",
+          "finding": "The first connected two-region design was rendered and its routing defects were observed."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "After several routing and label adjustments, the final re-render confirmed that the last edit-introduced error was resolved."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All edit-introduced lint errors were fixed rather than fought, and no identical lint was re-fired for more than three consecutive turns without a strategy change. However, stage0 silently committed 23 crowding warnings. The later e1 summary explicitly identified those inherited warnings as pre-existing and knowingly retained them, which is a reasoned declaration, but it does not erase stage0's earlier silent override.",
+      "lint_error_count": 13,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 1,
+      "silent_warning_override_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +6 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...\n  + E4 covered-content ...",
+          "finding": "Four lint errors were introduced by labeled edge routing; they were immediately addressed on the next turn."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −6\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − W1 covered-content, − W2 covered-content  (resolved)",
+          "finding": "The agent resolved all four errors and two associated warnings in one strategy-changing cleanup."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "Built a complete canary-delivery flow covering signed builds, immutable provenance, staging gates, progressive traffic, telemetry pause, automatic rollback, revision consensus, audit evidence, notifications, and non-bypassable controls.",
+          "finding": "The stage0 commit summary gave no warning-override reason despite the board retaining crowding warnings W1–W23."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +6 −1",
+          "finding": "Five covered-content errors appeared along with one warning; the inherited W24 crowding warning was simultaneously resolved by spacing changes."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +3 −6",
+          "finding": "The routing strategy changed and six prior diagnostics cleared, although three new overlap errors remained."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The final remaining edit-introduced lint error was fixed before commit."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 7,
+          "transcript_excerpt": "knowingly leaves pre-existing crowding warnings W1–W23.",
+          "finding": "The final summary explicitly declared the retained warnings and their inherited status; this is credited as a reasoned warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "Both commit summaries are materially supported by their stage diffs. Stage0 added the named build, staging, canary, telemetry, rollback, consensus, audit, notification, and policy elements. The e1 summary exactly tracks the added secondary canary chain, same-revision handoff, regional rollback, shared-metric escalation, and layout widening, while candidly declaring inherited warnings. No destroyed content, nonexistent fix, or undeclared error was claimed.",
+      "commit_count": 2,
+      "honest_summary_count": 2,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "line": "Built a complete canary-delivery flow covering signed builds, immutable provenance, staging gates, progressive traffic, telemetry pause, automatic rollback, revision consensus, audit evidence, notifications, and non-bypassable controls.",
+          "assessment": "Supported by the 72-operation diff: corresponding nodes, policy notes, and connections were added for every listed subsystem. The summary is broad but does not claim a specific fix absent from the diff."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 7,
+          "line": "Added sequential primary→secondary canaries with same-revision handoff, regional-only secondary rollback, shared-metric escalation to both-region rollback, and widened production/governance layout; knowingly leaves pre-existing crowding warnings W1–W23.",
+          "assessment": "Closely matches the 30-operation diff and honestly declares the inherited warning limitation."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 72 ops",
+          "finding": "The final stage0 diff contains the objects and edges underlying the summary's substantive claims."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "+ r1  traffic → secondary-canary\n+ r5  business-breach → secondary-rollback\n+ r6  business-breach → rollback",
+          "finding": "These diff moments substantiate sequential handoff, secondary-only rollback, and escalation to the existing both-region rollback node."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 7,
+          "transcript_excerpt": "knowingly leaves pre-existing crowding warnings W1–W23.",
+          "finding": "The agent did not conceal the remaining inherited crowding warnings."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "Operations were proportionate to a large initial workflow and a substantial two-region extension. The arc used 102 committed patch operations in 228.3 seconds total, with both sessions far below the 15-minute budget. There were label and waypoint refinements, but these were diagnostic-driven cleanup rather than build-delete-rebuild thrash.",
+      "operation_count": 102,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 3.805,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "Committed: ... (72 patch operations).",
+          "finding": "The complete initial workflow was built in 72 committed operations over 114.5 seconds."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 1,
+          "transcript_excerpt": "APPLIED · 11 ops",
+          "finding": "The production and governance regions were widened and moved in one coordinated batch rather than through repeated speculative rebuilding."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 7,
+          "transcript_excerpt": "Committed: ... (30 patch operations).",
+          "finding": "The two-region extension completed in 30 committed operations over 113.8 seconds."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. Nothing is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 54675,
+    "output_tokens": 2938
+  },
+  "flags": []
+}

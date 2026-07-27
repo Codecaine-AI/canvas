@@ -35,7 +35,6 @@ export const ALL_OBJECT_TYPES = [
   "process",
   "decision",
   "sticky",
-  "annotation-marker",
   "document",
   "database",
   "section",

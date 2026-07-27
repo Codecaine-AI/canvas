@@ -1,0 +1,1012 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-104726.backpressured-data-pipeline",
+  "title": "2026-07-25-eval-104726 · backpressured-data-pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Backpressured analytics data pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 64,
+        "width": 3008,
+        "height": 1552
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Event sources",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 128,
+        "width": 592,
+        "height": 176
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "section",
+      "text": "2 · Secure ingest",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 912,
+        "y": 128,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "validation",
+      "type": "section",
+      "text": "3 · Validate & classify",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 112,
+        "width": 608,
+        "height": 400
+      }
+    },
+    {
+      "id": "durability",
+      "type": "section",
+      "text": "4 · Durable admission",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2480,
+        "y": 128,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "transform",
+      "type": "section",
+      "text": "5 · Ordered transform",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 672,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "failure",
+      "type": "section",
+      "text": "6 · Repair lanes",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 912,
+        "y": 672,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "delivery",
+      "type": "section",
+      "text": "7 · Dual delivery",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 672,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "warehouse",
+      "type": "section",
+      "text": "8 · Warehouse commit",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2480,
+        "y": 672,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "9 · Query serving",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1216,
+        "width": 608,
+        "height": 176
+      }
+    },
+    {
+      "id": "backpressure",
+      "type": "section",
+      "text": "10 · Backpressure control",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 912,
+        "y": 1216,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "operations",
+      "type": "section",
+      "text": "11 · Operations",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1696,
+        "y": 1216,
+        "width": 608,
+        "height": 368
+      }
+    },
+    {
+      "id": "guarantees",
+      "type": "section",
+      "text": "12 · Replay guarantees",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2480,
+        "y": 1216,
+        "width": 608,
+        "height": 336
+      }
+    },
+    {
+      "id": "app-producers",
+      "type": "icon",
+      "text": "Application producers",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 224,
+        "height": 96
+      },
+      "icon": "send"
+    },
+    {
+      "id": "partner-uploads",
+      "type": "document-stack",
+      "text": "Partner batch uploads",
+      "color": "blue",
+      "parentId": "sources",
+      "geometry": {
+        "x": 464,
+        "y": 176,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "ingest-gateway",
+      "type": "predefined-process",
+      "text": "Ingest gateway",
+      "color": "blue",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 928,
+        "y": 176,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "auth",
+      "type": "process",
+      "text": "Authenticate producer",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1264,
+        "y": 176,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "attach-metadata",
+      "type": "process",
+      "text": "Attach tenant + receipt metadata",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1024,
+        "y": 368,
+        "width": 384,
+        "height": 96
+      }
+    },
+    {
+      "id": "schema-registry",
+      "type": "database",
+      "text": "Schema registry",
+      "color": "orange",
+      "parentId": "validation",
+      "geometry": {
+        "x": 1712,
+        "y": 176,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "schema-check",
+      "type": "decision",
+      "text": "Schema + record valid?",
+      "color": "orange",
+      "parentId": "validation",
+      "geometry": {
+        "x": 2016,
+        "y": 160,
+        "width": 256,
+        "height": 128
+      }
+    },
+    {
+      "id": "reject-response",
+      "type": "document",
+      "text": "Reject with reason",
+      "color": "red",
+      "parentId": "validation",
+      "geometry": {
+        "x": 1872,
+        "y": 384,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "durable-log",
+      "type": "database",
+      "text": "Partitioned durable log",
+      "color": "teal",
+      "parentId": "durability",
+      "geometry": {
+        "x": 2496,
+        "y": 176,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "quarantine-store",
+      "type": "database",
+      "text": "Unknown-schema quarantine",
+      "color": "orange",
+      "parentId": "durability",
+      "geometry": {
+        "x": 2832,
+        "y": 176,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "retention-limit",
+      "type": "process",
+      "text": "Retention safety limit",
+      "color": "red",
+      "parentId": "durability",
+      "geometry": {
+        "x": 2624,
+        "y": 368,
+        "width": 320,
+        "height": 96
+      }
+    },
+    {
+      "id": "transform-workers",
+      "type": "predefined-process",
+      "text": "Stateless transform workers",
+      "color": "violet",
+      "parentId": "transform",
+      "geometry": {
+        "x": 144,
+        "y": 720,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "normalize-redact",
+      "type": "process",
+      "text": "Normalize + remove sensitive fields",
+      "parentId": "transform",
+      "geometry": {
+        "x": 480,
+        "y": 720,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "reference-data",
+      "type": "database",
+      "text": "Versioned reference data",
+      "color": "violet",
+      "parentId": "transform",
+      "geometry": {
+        "x": 272,
+        "y": 912,
+        "width": 320,
+        "height": 96
+      }
+    },
+    {
+      "id": "dead-letter",
+      "type": "database",
+      "text": "Dead-letter stream + context",
+      "color": "orange",
+      "parentId": "failure",
+      "geometry": {
+        "x": 928,
+        "y": 720,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "repair-replay",
+      "type": "process",
+      "text": "Repair + replay",
+      "color": "orange",
+      "parentId": "failure",
+      "geometry": {
+        "x": 1264,
+        "y": 720,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "identity-preserved",
+      "type": "process",
+      "text": "Preserve tenant + event identity",
+      "parentId": "failure",
+      "geometry": {
+        "x": 1024,
+        "y": 912,
+        "width": 384,
+        "height": 96
+      }
+    },
+    {
+      "id": "object-storage",
+      "type": "database",
+      "text": "Low-cost object storage",
+      "color": "teal",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1712,
+        "y": 720,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "loading-queue",
+      "type": "database",
+      "text": "Warehouse loading queue",
+      "color": "teal",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2048,
+        "y": 720,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "replay-source",
+      "type": "process",
+      "text": "Replay when transform logic changes",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1808,
+        "y": 912,
+        "width": 384,
+        "height": 96
+      }
+    },
+    {
+      "id": "warehouse-loader",
+      "type": "predefined-process",
+      "text": "Idempotent batch loaders",
+      "color": "blue",
+      "parentId": "warehouse",
+      "geometry": {
+        "x": 2496,
+        "y": 720,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "load-checkpoint",
+      "type": "database",
+      "text": "Load checkpoint",
+      "parentId": "warehouse",
+      "geometry": {
+        "x": 2832,
+        "y": 720,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "completed-partitions",
+      "type": "process",
+      "text": "Publish completed partitions",
+      "color": "green",
+      "parentId": "warehouse",
+      "geometry": {
+        "x": 2624,
+        "y": 912,
+        "width": 320,
+        "height": 96
+      }
+    },
+    {
+      "id": "query-service",
+      "type": "predefined-process",
+      "text": "Tenant query service",
+      "color": "green",
+      "parentId": "query",
+      "geometry": {
+        "x": 144,
+        "y": 1264,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "result-cache",
+      "type": "database",
+      "text": "Result cache",
+      "color": "green",
+      "parentId": "query",
+      "geometry": {
+        "x": 480,
+        "y": 1264,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "queue-expands",
+      "type": "process",
+      "text": "1 · Loading queue expands",
+      "color": "orange",
+      "parentId": "backpressure",
+      "geometry": {
+        "x": 928,
+        "y": 1264,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "reduce-transform",
+      "type": "process",
+      "text": "2 · Reduce transform consumption",
+      "color": "orange",
+      "parentId": "backpressure",
+      "geometry": {
+        "x": 1264,
+        "y": 1264,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "throttle-ingest",
+      "type": "process",
+      "text": "3 · Ingest returns explicit throttle",
+      "color": "red",
+      "parentId": "backpressure",
+      "geometry": {
+        "x": 1024,
+        "y": 1456,
+        "width": 384,
+        "height": 96
+      }
+    },
+    {
+      "id": "stage-metrics",
+      "type": "process",
+      "text": "Lag · rejection · quarantine",
+      "color": "yellow",
+      "parentId": "operations",
+      "geometry": {
+        "x": 1712,
+        "y": 1264,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "flow-metrics",
+      "type": "process",
+      "text": "Retry · throughput",
+      "color": "yellow",
+      "parentId": "operations",
+      "geometry": {
+        "x": 2048,
+        "y": 1264,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "operational-alerts",
+      "type": "icon",
+      "text": "Operational alerts",
+      "color": "orange",
+      "parentId": "operations",
+      "geometry": {
+        "x": 1808,
+        "y": 1456,
+        "width": 384,
+        "height": 96
+      },
+      "icon": "bolt"
+    },
+    {
+      "id": "dedup-key",
+      "type": "icon",
+      "text": "Original tenant + event identity",
+      "color": "gray",
+      "parentId": "guarantees",
+      "geometry": {
+        "x": 2496,
+        "y": 1264,
+        "width": 256,
+        "height": 96
+      },
+      "icon": "key"
+    },
+    {
+      "id": "replay-dedup",
+      "type": "process",
+      "text": "Downstream deduplication",
+      "color": "green",
+      "parentId": "guarantees",
+      "geometry": {
+        "x": 2832,
+        "y": 1264,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "guarantee-note",
+      "type": "sticky",
+      "text": "### Delivery guarantees\n- No loss under slowdown\n- Partition order preserved\n- Repairable, identity-safe replay",
+      "color": "yellow",
+      "parentId": "guarantees",
+      "geometry": {
+        "x": 2576,
+        "y": 1408,
+        "width": 384,
+        "height": 112
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-app-ingest",
+      "from": {
+        "objectId": "app-producers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest-gateway",
+        "anchor": "left"
+      },
+      "label": "events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-batch-ingest",
+      "from": {
+        "objectId": "partner-uploads",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest-gateway",
+        "anchor": "left"
+      },
+      "label": "batches",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-gateway-auth",
+      "from": {
+        "objectId": "ingest-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth",
+        "anchor": "left"
+      },
+      "label": "authenticate",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-auth-meta",
+      "from": {
+        "objectId": "auth",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "attach-metadata",
+        "anchor": "top"
+      },
+      "label": "accepted",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-meta-check",
+      "from": {
+        "objectId": "attach-metadata",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "schema-check",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-registry-check",
+      "from": {
+        "objectId": "schema-registry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "schema-check",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-check-log",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "durable-log",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-check-quarantine",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "quarantine-store",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-check-reject",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "reject-response",
+        "anchor": "top"
+      },
+      "label": "malformed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-workers-normalize",
+      "from": {
+        "objectId": "transform-workers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "normalize-redact",
+        "anchor": "left"
+      },
+      "label": "consume",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ref-enrich",
+      "from": {
+        "objectId": "reference-data",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "normalize-redact",
+        "anchor": "bottom"
+      },
+      "label": "enrich",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-transform-dlq",
+      "from": {
+        "objectId": "normalize-redact",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dead-letter",
+        "anchor": "left"
+      },
+      "label": "failure",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-transform-object",
+      "from": {
+        "objectId": "normalize-redact",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "object-storage",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-transform-queue",
+      "from": {
+        "objectId": "normalize-redact",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "loading-queue",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-dlq-repair",
+      "from": {
+        "objectId": "dead-letter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "repair-replay",
+        "anchor": "left"
+      },
+      "label": "repair",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-repair-identity",
+      "from": {
+        "objectId": "repair-replay",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "identity-preserved",
+        "anchor": "top"
+      },
+      "label": "preserve IDs",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-object-replay",
+      "from": {
+        "objectId": "object-storage",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "replay-source",
+        "anchor": "top"
+      },
+      "label": "replay source",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-queue-loader",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "warehouse-loader",
+        "anchor": "left"
+      },
+      "label": "idempotent batches",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-loader-checkpoint",
+      "from": {
+        "objectId": "warehouse-loader",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "load-checkpoint",
+        "anchor": "left"
+      },
+      "label": "commit + update",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-checkpoint-publish",
+      "from": {
+        "objectId": "load-checkpoint",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "completed-partitions",
+        "anchor": "top"
+      },
+      "label": "complete",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-query-cache",
+      "from": {
+        "objectId": "query-service",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "result-cache",
+        "anchor": "left"
+      },
+      "label": "common queries",
+      "style": "solid",
+      "arrow": "both",
+      "color": "green"
+    },
+    {
+      "id": "e-pressure-reduce",
+      "from": {
+        "objectId": "queue-expands",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reduce-transform",
+        "anchor": "left"
+      },
+      "label": "then",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-reduce-throttle",
+      "from": {
+        "objectId": "reduce-transform",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "throttle-ingest",
+        "anchor": "top"
+      },
+      "label": "finally",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-metrics-alerts",
+      "from": {
+        "objectId": "stage-metrics",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "operational-alerts",
+        "anchor": "top"
+      },
+      "label": "signals",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-flow-alerts",
+      "from": {
+        "objectId": "flow-metrics",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "operational-alerts",
+        "anchor": "top"
+      },
+      "label": "signals",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-identity-dedup",
+      "from": {
+        "objectId": "dedup-key",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "replay-dedup",
+        "anchor": "left"
+      },
+      "label": "stable key",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    }
+  ],
+  "annotations": []
+}

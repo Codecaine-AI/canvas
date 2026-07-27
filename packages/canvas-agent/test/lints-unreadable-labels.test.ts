@@ -16,7 +16,6 @@ describe("unreadable-labels lint", () => {
     expect(unreadableLabels.id).toBe("unreadable-labels");
     expect(unreadableLabels.tier).toBe("warning");
     expect(unreadableLabels.guidance).toContain("breathing margin");
-    expect(typeof unreadableLabels.quickfix).toBe("function");
   });
 
   test("a chip that fits with its margins is clean — no generosity floor", () => {
@@ -131,66 +130,34 @@ describe("unreadable-labels lint", () => {
     expect(mixed[0]!.message).toContain("bleeds onto b");
   });
 
-  test("quickfix widens by the true deficit, landing on the 16px grid", () => {
-    // Gap 44, needed 73 → deficit 29 → beta 204+29 = 233, snapped UP to the
-    // absolute 16px grid (the canvas snaps every patched geometry there):
-    // beta moves 204 → 240 and the chip fits with both margins (gap 80 ≥ 73).
-    const document = makeDocument(
+  test("opening the corridor to the true deficit clears the finding", () => {
+    // Gap 44 where the 41px chip needs 73: the finding stands. Widened to the
+    // next 16px stop that clears it (beta 204 → 240, gap 80), it is clean.
+    const tight = makeDocument(
       [box("alpha", 0, 0), box("beta", 204, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    const diagnostic = runDiagnostics(document).find((entry) => entry.rule === "unreadable-labels")!;
-    expect(diagnostic.quickfixAvailable).toBe(true);
+    expect(unreadableLabels.check(tight)).toHaveLength(1);
 
-    const operations = unreadableLabels.quickfix!(document, diagnostic);
-    expect(operations).toEqual([{
-      type: "updateObject",
-      objectId: "beta",
-      patch: { geometry: { x: 240, y: 0, width: 160, height: 96 } },
-    }]);
-
-    const fixed = makeDocument(
+    const opened = makeDocument(
       [box("alpha", 0, 0), box("beta", 240, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    expect(unreadableLabels.check(fixed)).toHaveLength(0);
+    expect(unreadableLabels.check(opened)).toHaveLength(0);
   });
 
-  test("quickfix widens vertical runs along y, moving the later endpoint", () => {
-    // Stacked pair, gap 44 along y: the chip is 30 tall, needed 30+32 = 62,
-    // deficit 18 → bottom 140+18 = 158, snapped up → 160 (gap 64 ≥ 62).
-    const document = makeDocument(
+  test("opening a vertical run along y clears the finding", () => {
+    // Stacked pair, gap 44 along y where the 30px chip needs 62; opened to 64.
+    const tight = makeDocument(
       [box("top", 0, 0), box("bottom", 0, 140)],
       [{ ...connect("edge", "top", "bottom"), label: "X" }],
     );
-    const diagnostic = runDiagnostics(document).find((entry) => entry.rule === "unreadable-labels")!;
-    const operations = unreadableLabels.quickfix!(document, diagnostic);
-    expect(operations).toEqual([{
-      type: "updateObject",
-      objectId: "bottom",
-      patch: { geometry: { x: 0, y: 160, width: 160, height: 96 } },
-    }]);
+    expect(unreadableLabels.check(tight)).toHaveLength(1);
 
-    const fixed = makeDocument(
+    const opened = makeDocument(
       [box("top", 0, 0), box("bottom", 0, 160)],
       [{ ...connect("edge", "top", "bottom"), label: "X" }],
     );
-    expect(unreadableLabels.check(fixed)).toHaveLength(0);
-  });
-
-  test("quickfix returns no ops when the finding no longer applies", () => {
-    const stale = {
-      id: "W1",
-      rule: "unreadable-labels",
-      severity: "warning" as const,
-      at: ["e", "a", "b"],
-      message: 'label "X" chip on e (41×30px) bleeds onto a and b: 44px of corridor where the chip needs 73px',
-      quickfixAvailable: true,
-    };
-    const cleanDocument = makeDocument(
-      [box("a", 0, 0), box("b", 320, 0)],
-      [{ ...connect("e", "a", "b"), label: "X" }],
-    );
-    expect(unreadableLabels.quickfix!(cleanDocument, stale)).toEqual([]);
+    expect(unreadableLabels.check(opened)).toHaveLength(0);
   });
 });

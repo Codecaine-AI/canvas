@@ -25,6 +25,7 @@ export type {
   CanvasShapeDirection,
   InteractiveCanvasObjectType,
 } from "./schema/object-types";
+export { CANVAS_ICON_GLYPHS } from "./schema/object-types";
 export { CANVAS_COLORS, CANVAS_HUES, isCanvasColor } from "./schema/colors";
 export type { CanvasColor, CanvasHue } from "./schema/colors";
 export type { CanvasObjectStyle, CanvasSectionStrokeStyle } from "./schema/style";
@@ -36,7 +37,9 @@ export type {
   InteractiveCanvasConnection,
 } from "./schema/connections";
 export type {
+  CanvasAnnotationAuthor,
   CanvasAnnotationIntent,
+  CanvasAnnotationReply,
   CanvasAnnotationStatus,
   CanvasAnnotationTarget,
   InteractiveCanvasAnnotation,

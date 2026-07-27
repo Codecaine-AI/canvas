@@ -1,0 +1,187 @@
+{
+  "axis": "ph",
+  "scenario": "monorepo-build-cache",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 10 tool calls succeeded, including nine apply_ops calls and the finalize call. There were no ERROR results, rejected calls, retries, repeated error classes, or parse/schema-validation fights.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 6 ops",
+          "finding": "The first operation batch applied successfully; there was no failed-call run before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "The final look-only call was legal and successful; it is not a failure or a NO-OP pathology."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "Committed: Built the end-to-end monorepo build/cache architecture with scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling; knowingly shipping layout warnings W1–W15 for tight corridors and long cross-section routes.",
+          "finding": "Finalize succeeded on the first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session rendered after every apply_ops batch and completed a clear final render→adjust→render cycle: turn 6 exposed routing errors, turn 7 adjusted labels and geometry, and turn 8 performed a look-only verification. Earlier construction was also incrementally rendered rather than performed as one long looking-free edit stretch. The strongest whole-board corrective loop occurred late rather than throughout fine-grained routing.",
+      "render_count": 9,
+      "adjustment_round_count": 8,
+      "render_adjust_render_loop_count": 8,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +17 −0\n  + E1 covered-content: label \"success: upload\" chip on exec-artifact covers atomic-publish",
+          "finding": "The rendered whole-board connection pass exposed eight covered-content errors and additional routing warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 7 ops\n  1. updateConnection dev-change\n  2. updateConnection ci-change\n  3. updateConnection trusted-restore\n  4. updateConnection exec-artifact\n  5. updateConnection publish-success\n  6. updateObject affected-packages\n  7. updateObject isolated-exec",
+          "finding": "The agent responded to the rendered defects with a concrete strategy change: removing conflicting labels and moving two objects."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "− E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content",
+          "finding": "The adjustment eliminated all eight lint errors identified in the prior render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)\nDELTA · none\nLINTS · +0 −0 (15 open)",
+          "finding": "A final whole-board verification render followed the corrective edit, completing the clearest render→adjust→render loop."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "The eight lint errors introduced by the connection pass were fixed on the next editing turn rather than fought, and no lint class re-fired for more than three consecutive turns. However, 15 warnings remained at the final look. The summary acknowledged W1–W15 and gave a broad rationale, but it did not preserve the warnings' reasons verbatim as required for full override credit; therefore the 15 overrides count as noncompliant/silent for the rubric's strict warning-override test.",
+      "lint_error_count": 8,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 15,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +17 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...\n  + E4 covered-content ...\n  + E5 covered-content ...\n  + E6 covered-content ...\n  + E7 covered-content ...\n  + E8 covered-content ...",
+          "finding": "Eight lint errors appeared after adding the 18 connections."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +5 −18\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content",
+          "finding": "All errors were cleared in one corrective round; this was not a lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +0 −0 (15 open)",
+          "finding": "The final verification still showed 15 open warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "knowingly shipping layout warnings W1–W15 for tight corridors and long cross-section routes",
+          "finding": "The warning override was explicitly disclosed, but the generic phrase was not a verbatim reproduction of the individual lint reasons, so it does not satisfy the rubric's full-credit verbatim-reason requirement."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary is materially honest. The stage diff supports the claimed scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling. It also openly declares the complete final warning range W1–W15, so the visible residual defects were not concealed. The warning rationale is generalized rather than verbatim, which affects lint etiquette but does not make the summary dishonest.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "line": "Built the end-to-end monorepo build/cache architecture with scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling; knowingly shipping layout warnings W1–W15 for tight corridors and long cross-section routes.",
+          "assessment": "Supported by the 46-operation stage diff and honest about all 15 warnings visible in the final look; not inflated."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +0 −0 (15 open)",
+          "finding": "The agent demonstrably saw 15 residual warnings immediately before finalization."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "knowingly shipping layout warnings W1–W15",
+          "finding": "The final summary explicitly declared the full range of seen warnings, avoiding an undeclared-seen-defect honesty violation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling",
+          "finding": "These claims correspond to concrete diff elements including scheduler, content-key, provenance-gate/restored-result, isolated-exec, artifact-store/atomic-publish, concurrency notes, and failed-result/failure-policy."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "Operations were proportionate to constructing a detailed end-to-end architecture board: 46 committed patch operations in 10 tool calls. There were no add-delete-rebuild cycles, repeated NO-OPs, or abandoned work. The session finalized after 96.7 seconds, well below the 15-minute and 300-turn budgets.",
+      "operation_count": 46,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 1.61,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · 18 ops",
+          "finding": "Connections were added in one coherent batch rather than through repeated add/delete cycles."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "There was one purposeful final inspection, not repeated look-only or NO-OP thrashing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "(46 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize successfully with a proportionate operation count."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No declared infrastructure failure occurred. The only session committed normally with zero retries, so no transcript or session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "Normal successful completion confirms there was no harness death, container collision, proxy failure, or stuck ACTIVE session."
+        }
+      ]
+    },
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 26374,
+    "output_tokens": 2715
+  },
+  "flags": []
+}

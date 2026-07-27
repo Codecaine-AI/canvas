@@ -40,7 +40,6 @@ import { predefinedProcessDef } from "./shapes/flowchart/predefined-process";
 import { summingJunctionDef } from "./shapes/flowchart/summing-junction";
 import { trapezoidDef } from "./shapes/flowchart/trapezoid";
 import { iconDef } from "./shapes/icon/def";
-import { annotationMarkerDef } from "./shapes/misc/annotation-marker";
 import { pillDef } from "./shapes/misc/pill";
 
 /**
@@ -264,7 +263,6 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   "rounded-rect": processDef,
   ellipse: ellipseDef,
   diamond: decisionDef,
-  marker: annotationMarkerDef,
   document: documentDef,
   database: databaseDef,
   pill: pillDef,
@@ -299,7 +297,6 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   ellipseDef,
   rectangleDef,
   decisionDef,
-  annotationMarkerDef,
   documentDef,
   databaseDef,
   pillDef,

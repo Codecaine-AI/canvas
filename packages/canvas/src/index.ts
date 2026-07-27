@@ -73,6 +73,14 @@ export type { TextPlacement } from "./objects/text-slots";
 export * from "./navigation/use-canvas-viewport";
 export * from "./stage/viewport";
 export { renderDocumentToSvg } from "./render/static-svg";
+export {
+  connectionPaintedBounds,
+  objectPaintedBounds,
+  paintedBounds,
+} from "./render/painted-bounds";
+export type { Rect } from "./render/painted-bounds";
+export { renderBoardView, renderSectionView } from "./render/views";
+export type { RenderedView, RenderViewOptions } from "./render/views";
 export type {
   RenderDocumentToSvg,
   RenderedSvg,

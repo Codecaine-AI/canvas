@@ -36,6 +36,7 @@ function annotation(
     intent: "agent-request",
     status: "open",
     createdBy: "human",
+    replies: [],
     ...overrides,
   };
 }
@@ -57,6 +58,10 @@ const document: InteractiveCanvasDocument = {
     annotation("ordinary-note", "card", { intent: "note" }),
     annotation("resolved", "card", { status: "resolved" }),
     annotation("applied", "card", { status: "applied" }),
+    annotation("agent-asked", "card", {
+      createdBy: "agent",
+      replies: [{ id: "reply-1", author: "human", body: "the retry path" }],
+    }),
   ],
 };
 
@@ -66,6 +71,7 @@ describe("pendingNotes", () => {
       "open-card",
       "open-section",
       "empty-text",
+      "agent-asked",
     ]);
   });
 
@@ -76,18 +82,36 @@ describe("pendingNotes", () => {
         body: "Body for open-card",
         target: { kind: "object", objectId: "card" },
         targetLabel: "Token card",
+        createdBy: "human",
+        status: "open",
+        replies: [],
       },
       {
         id: "open-section",
         body: "Body for open-section",
         target: { kind: "object", objectId: "section" },
         targetLabel: 'Section "Billing"',
+        createdBy: "human",
+        status: "open",
+        replies: [],
       },
       {
         id: "empty-text",
         body: "Body for empty-text",
         target: { kind: "object", objectId: "empty" },
         targetLabel: "Database",
+        createdBy: "human",
+        status: "open",
+        replies: [],
+      },
+      {
+        id: "agent-asked",
+        body: "Body for agent-asked",
+        target: { kind: "object", objectId: "card" },
+        targetLabel: "Token card",
+        createdBy: "agent",
+        status: "open",
+        replies: [{ id: "reply-1", author: "human", body: "the retry path" }],
       },
     ]);
   });

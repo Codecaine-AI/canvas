@@ -14,7 +14,7 @@
         "b-group-canvas-4"
       ],
       "props": {
-        "covers": "The group statement: wraps two or more loose items that share one slot, each placed by its own at= compass; also the spelling of an empty region. A single item never needs a wrapper.",
+        "covers": "The group notation: wraps two or more loose items that share one slot, each placed by its own at= compass; also the spelling of an empty region. A single item never needs a wrapper.",
         "format": "mdx",
         "type": "reference",
         "concepts": [

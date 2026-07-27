@@ -6,6 +6,7 @@ import {
   type InteractiveCanvasState,
 } from "../actions";
 import type {
+  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -67,6 +68,33 @@ function makeState(): InteractiveCanvasState {
     ],
   };
   return createInteractiveCanvasState(document);
+}
+
+function makeAnnotation(
+  overrides: Partial<InteractiveCanvasAnnotation> & { id: string },
+): InteractiveCanvasAnnotation {
+  return {
+    target: { kind: "object", objectId: "a" },
+    intent: "agent-request",
+    body: "Opening post",
+    status: "open",
+    createdBy: "human",
+    replies: [],
+    ...overrides,
+  };
+}
+
+function makeThreadState(): InteractiveCanvasState {
+  const state = makeState();
+  return createInteractiveCanvasState({
+    ...state.document,
+    annotations: [
+      makeAnnotation({
+        id: "annotation-existing",
+        replies: [{ id: "reply-1", author: "human", body: "First reply" }],
+      }),
+    ],
+  });
 }
 
 function apply(
@@ -142,6 +170,143 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.document.connections).toHaveLength(0);
     expect(next.lastChange?.changedObjectIds).toEqual(["a"]);
     expect(next.lastChange?.changedConnectionIds.sort()).toEqual(["conn-ab", "conn-ca"]);
+  });
+
+  it("removeObject drops the whole thread anchored to the removed object", () => {
+    const state = makeThreadState();
+    const next = apply(state, [{ type: "removeObject", objectId: "a" }]);
+
+    expect(state.document.annotations?.[0]?.replies).toHaveLength(1);
+    expect(next.document.annotations).toEqual([]);
+  });
+
+  it("adds an anchored annotation and skips colliding ids or missing targets", () => {
+    const state = makeThreadState();
+    const next = apply(state, [
+      {
+        type: "addAnnotation",
+        annotation: makeAnnotation({
+          id: "annotation-existing",
+          target: { kind: "object", objectId: "b" },
+        }),
+      },
+      {
+        type: "addAnnotation",
+        annotation: makeAnnotation({
+          id: "annotation-missing-object",
+          target: { kind: "object", objectId: "missing" },
+        }),
+      },
+      {
+        type: "addAnnotation",
+        annotation: makeAnnotation({
+          id: "annotation-missing-connection",
+          target: { kind: "connection", connectionId: "missing" },
+        }),
+      },
+      {
+        type: "addAnnotation",
+        annotation: makeAnnotation({
+          id: "annotation-agent",
+          target: { kind: "connection", connectionId: "conn-ab" },
+          createdBy: "agent",
+        }),
+      },
+    ]);
+
+    expect(next.document.annotations?.map((annotation) => annotation.id)).toEqual([
+      "annotation-existing",
+      "annotation-agent",
+    ]);
+    expect(next.document.annotations?.[1]).toMatchObject({
+      target: { kind: "connection", connectionId: "conn-ab" },
+      createdBy: "agent",
+      replies: [],
+    });
+    expect(next.lastChange?.changedAnnotationIds).toEqual(["annotation-agent"]);
+  });
+
+  it("adds an annotation targeting an object created earlier in the same patch", () => {
+    const state = makeState();
+    const next = apply(state, [
+      {
+        type: "addObject",
+        object: makeObject({ id: "d", geometry: { x: 320, y: 192, width: 96, height: 64 } }),
+      },
+      {
+        type: "addAnnotation",
+        annotation: makeAnnotation({
+          id: "annotation-d",
+          target: { kind: "object", objectId: "d" },
+          createdBy: "agent",
+        }),
+      },
+    ]);
+
+    expect(next.document.annotations?.map((annotation) => annotation.id)).toEqual([
+      "annotation-d",
+    ]);
+    expect(next.lastChange?.changedAnnotationIds).toEqual(["annotation-d"]);
+  });
+
+  it("appends a unique reply and skips unknown annotations or duplicate reply ids", () => {
+    const state = makeThreadState();
+    const next = apply(state, [
+      {
+        type: "appendAnnotationReply",
+        annotationId: "missing",
+        reply: { id: "reply-missing", author: "agent", body: "Skipped" },
+      },
+      {
+        type: "appendAnnotationReply",
+        annotationId: "annotation-existing",
+        reply: { id: "reply-1", author: "agent", body: "Duplicate" },
+      },
+      {
+        type: "appendAnnotationReply",
+        annotationId: "annotation-existing",
+        reply: { id: "reply-2", author: "agent", body: "Second reply" },
+      },
+    ]);
+
+    expect(next.document.annotations?.[0]?.replies).toEqual([
+      { id: "reply-1", author: "human", body: "First reply" },
+      { id: "reply-2", author: "agent", body: "Second reply" },
+    ]);
+    expect(next.lastChange?.changedAnnotationIds).toEqual(["annotation-existing"]);
+  });
+
+  it("sets annotation status and skips unknown or unchanged annotations", () => {
+    const state = makeThreadState();
+    const next = apply(state, [
+      {
+        type: "setAnnotationStatus",
+        annotationId: "missing",
+        status: "resolved",
+      },
+      {
+        type: "setAnnotationStatus",
+        annotationId: "annotation-existing",
+        status: "open",
+      },
+      {
+        type: "setAnnotationStatus",
+        annotationId: "annotation-existing",
+        status: "resolved",
+      },
+    ]);
+
+    expect(next.document.annotations?.[0]?.status).toBe("resolved");
+    expect(next.lastChange?.changedAnnotationIds).toEqual(["annotation-existing"]);
+    expect(
+      apply(next, [
+        {
+          type: "setAnnotationStatus",
+          annotationId: "annotation-existing",
+          status: "resolved",
+        },
+      ]),
+    ).toBe(next);
   });
 
   it("skips operations referencing unknown ids but applies the rest", () => {
@@ -256,10 +421,10 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.selection).toEqual({ kind: "objects", objectIds: ["b"] });
   });
 
-  it("grows a section when an object is added inside it", () => {
+  it("keeps a section's geometry when an object is added inside it", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
-      id: "auto-fit-add",
+      id: "section-add-inside",
       mode: "diagram",
       objects: [
         makeObject({
@@ -285,22 +450,23 @@ describe("canvas.applyAgentPatch", () => {
       },
     ]);
 
+    // Membership is derived from geometry; the frame itself does not move.
     expect(next.document.objects.find((object) => object.id === "second")?.parentId).toBe(
       "section",
     );
     expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
       x: 496,
       y: 16,
-      width: 208,
+      width: 144,
       height: 144,
     });
-    expect(next.lastChange?.changedObjectIds.sort()).toEqual(["second", "section"]);
+    expect(next.lastChange?.changedObjectIds).toEqual(["second"]);
   });
 
-  it("shrinks a section when an object moves out", () => {
+  it("keeps a section's geometry when an object moves out of it", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
-      id: "auto-fit-move-out",
+      id: "section-move-out",
       mode: "diagram",
       objects: [
         makeObject({
@@ -325,18 +491,19 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.document.objects.find((object) => object.id === "second")?.parentId ?? null).toBe(
       null,
     );
+    // The frame does not shrink to hug what is left.
     expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
       x: 496,
       y: 16,
-      width: 144,
+      width: 208,
       height: 144,
     });
   });
 
-  it("fits nested sections innermost-first so geometry cascades outward", () => {
+  it("leaves nested sections at the geometry they were given", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
-      id: "auto-fit-nested",
+      id: "nested-sections",
       mode: "diagram",
       objects: [
         makeObject({
@@ -364,26 +531,27 @@ describe("canvas.applyAgentPatch", () => {
       },
     ]);
 
+    expect(next.document.objects.find((object) => object.id === "second")?.parentId).toBe("inner");
     expect(next.document.objects.find((object) => object.id === "inner")?.geometry).toEqual({
       x: 496,
       y: 112,
-      width: 208,
+      width: 144,
       height: 144,
     });
     expect(next.document.objects.find((object) => object.id === "outer")?.geometry).toEqual({
       x: 480,
       y: 64,
-      width: 256,
+      width: 192,
       height: 224,
     });
-    expect(next.lastChange?.changedObjectIds.sort()).toEqual(["inner", "outer", "second"]);
+    expect(next.lastChange?.changedObjectIds).toEqual(["second"]);
   });
 
-  it("never auto-fits a background-locked page frame", () => {
+  it("keeps a background-locked page frame at the size it was given", () => {
     const frameGeometry = { x: 0, y: 0, width: 800, height: 600 };
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
-      id: "auto-fit-frame",
+      id: "page-frame-hold",
       mode: "diagram",
       objects: [
         makeObject({
@@ -410,11 +578,11 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.lastChange?.changedObjectIds).toEqual(["inside"]);
   });
 
-  it("lets an explicit in-batch section resize win over auto-fit", () => {
+  it("applies a section resize exactly as written, whatever the children do", () => {
     const explicitGeometry = { x: 496, y: 16, width: 320, height: 256 };
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
-      id: "auto-fit-explicit-resize",
+      id: "section-explicit-resize",
       mode: "diagram",
       objects: [
         makeObject({

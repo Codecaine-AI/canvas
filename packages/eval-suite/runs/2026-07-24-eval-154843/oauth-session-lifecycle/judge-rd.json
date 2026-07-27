@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "oauth-session-lifecycle",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board has stronger regional grouping and semantic color but loses finish through crowded or clipped corridor labels, several long detours, and tangled routing in the audit area.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 7,
+        "note": "The four major sections occupy the frame effectively with useful outer margins, though the broad gap between the top and middle regions and uneven lower section widths create mild imbalance."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 5.5,
+        "note": "FAIL: Nodes generally have air, but many white edge-label chips run behind or too near nodes, clipping phrases such as the top login sequence and crowding labels around provider integration and the audit flows."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Four clearly titled tinted regions provide strong functional grouping, with nested trust-boundary and audit annotations adding meaningful hierarchy."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Blue, teal, purple, orange, green, and red are applied consistently enough to distinguish lifecycle families, success, expiry, and invalidation rather than serving as decoration."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "FAIL: No crosshair junctions are visible, but several arrowheads terminate awkwardly at bends or crowded joins, and the lower-right revocation wiring merges ambiguously around the invalidation and audit paths."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Major rows and section headers register well, but the spacious upper flow, sparse middle region, dense refresh block, and compressed audit block produce uneven visual rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "FAIL: Most local runs are readable, but the teal and purple cross-section marathons are long, while the orange and red routes in the audit area overlap, double back, and crowd multiple arrowheads."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 second at 7.0, and the board under grade third at 6.5."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 724
+  },
+  "flags": []
+}

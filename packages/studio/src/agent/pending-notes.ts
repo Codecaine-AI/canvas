@@ -1,15 +1,25 @@
 import {
   objectTypeDefaults,
+  type CanvasAnnotationAuthor,
+  type CanvasAnnotationReply,
+  type CanvasAnnotationStatus,
   type CanvasAnnotationTarget,
   type CanvasSelection,
   type InteractiveCanvasDocument,
 } from "@codecaine-ai/canvas";
 
+/** One open annotation thread, as the agent panel lists it. */
 export interface PendingNote {
   id: string;
+  /** The thread's opening post. */
   body: string;
   target: CanvasAnnotationTarget;
   targetLabel: string;
+  /** Who opened the thread — a request from the user, or a question from the agent. */
+  createdBy: CanvasAnnotationAuthor;
+  status: CanvasAnnotationStatus;
+  /** Everything said since the opening post, oldest first. */
+  replies: CanvasAnnotationReply[];
 }
 
 export function targetLabel(
@@ -45,13 +55,17 @@ export function targetLabelForSelection(
   return targetLabel(document, { kind: "object", objectId });
 }
 
+/** The open agent-request threads on the board, whoever opened them. */
 export function pendingNotes(document: InteractiveCanvasDocument): PendingNote[] {
   return (document.annotations ?? [])
     .filter(({ intent, status }) => intent === "agent-request" && status === "open")
-    .map(({ id, body, target }) => ({
+    .map(({ id, body, target, createdBy, status, replies }) => ({
       id,
       body,
       target,
       targetLabel: targetLabel(document, target),
+      createdBy,
+      status,
+      replies,
     }));
 }

@@ -1,0 +1,1052 @@
+{
+  "container_id": "fccd9c81-5df9-5247-941a-06b2a9952e9e",
+  "pi_sessions": [
+    {
+      "piSessionId": "019f9677-7e35-7125-bb74-fff16deb45ed",
+      "file": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.jsonl",
+      "startedAt": "2026-07-24T23:30:41.333Z",
+      "userMessages": [
+        {
+          "text": "# Monorepo build and cache\n\nOur monorepo build service supports local developers and CI. A change detector maps modified files to affected packages, and a build-graph service expands those packages to include required dependents and orders tasks by dependency. The scheduler assigns ready tasks to an elastic worker pool while allowing unrelated branches of the graph to run concurrently.\n\nBefore running a task, a worker calculates a content key from its sources, declared environment, toolchain version, command, and dependency outputs. It checks the remote cache and restores a matching result when one exists. A miss executes in an isolated workspace, uploads immutable outputs to the artifact store, and publishes the cache entry only after the task succeeds. Failed tasks are never cached, block their dependents, and return logs to the requesting developer or CI job. Cache entries carry provenance so results from untrusted forks cannot be reused by protected builds, and concurrent workers calculating the same key must converge without corrupting the entry.\n",
+          "timestamp": "2026-07-24T23:30:41.337Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-24T23:30:53.184Z",
+          "thinking": "**Designing staged diagram layout**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BTVuKwrOatlWvN4BkRycuvgL|fc_0355709dbcc9c1a8016a63f5a634a08198a2fdbbbd79154197",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "page-frame",
+                    "patch": {
+                      "text": "Monorepo build & cache",
+                      "geometry": {
+                        "x": 32,
+                        "y": 32,
+                        "width": 1920,
+                        "height": 1200
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "request-scope",
+                      "text": "1 · Request & scope",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 80,
+                        "y": 112,
+                        "width": 336,
+                        "height": 432
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "graph-plan",
+                      "text": "2 · Build graph & scheduling",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 448,
+                        "y": 112,
+                        "width": 432,
+                        "height": 432
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "task-run",
+                      "text": "3 · Task execution",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 912,
+                        "y": 112,
+                        "width": 512,
+                        "height": 720
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "cache-trust",
+                      "text": "4 · Remote cache & trust",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 1456,
+                        "y": 112,
+                        "width": 448,
+                        "height": 720
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "outcomes",
+                      "text": "5 · Outcomes",
+                      "color": "green",
+                      "geometry": {
+                        "x": 448,
+                        "y": 880,
+                        "width": 976,
+                        "height": 272
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 6 ops\n  1. updateSection page-frame\n  2. addSection request-scope\n  3. addSection graph-plan\n  4. addSection task-run\n  5. addSection cache-trust\n  6. addSection outcomes\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 64,64 1872×1120\n    request-scope section \"1 · Request & scope\" blue 80,112 336×432\n      (empty)\n    graph-plan section \"2 · Build graph & scheduling\" violet 448,112 432×432\n      (empty)\n    task-run section \"3 · Task execution\" orange 912,112 512×720\n      (empty)\n    cache-trust section \"4 · Remote cache & trust\" teal 1456,112 448×720\n      (empty)\n    outcomes section \"5 · Outcomes\" green 448,880 976×272\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  32,32 1920×1200 → 64,64 1872×1120\n  page-frame  text \"2026-07-24-eval-183037 · monorepo-build-cache\" → \"Monorepo build & cache\"\n  + request-scope  section 80,112 336×432 \"1 · Request & scope\"\n  + graph-plan  section 448,112 432×432 \"2 · Build graph & scheduling\"\n  + task-run  section 912,112 512×720 \"3 · Task execution\"\n  + cache-trust  section 1456,112 448×720 \"4 · Remote cache & trust\"\n  + outcomes  section 448,880 976×272 \"5 · Outcomes\"\nBOARD DIFF · base → draft · 6 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  updateSection page-frame  moved · resized · retexted\nDIAGNOSTICS · clean\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.9.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.9.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-24T23:31:02.599Z",
+          "thinking": "**Implementing section-by-section object addition**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dMUyjoJFLC0YGZpHcde4N4jE|fc_0355709dbcc9c1a8016a63f5b104908198befe7f05f9aab3f4",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "developer",
+                      "type": "icon",
+                      "icon": "person",
+                      "text": "Local developer",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 112,
+                        "y": 176,
+                        "width": 112,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "ci-job",
+                      "type": "icon",
+                      "icon": "terminal",
+                      "text": "CI job",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 272,
+                        "y": 176,
+                        "width": 112,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "change-detector",
+                      "type": "process",
+                      "text": "Change detector",
+                      "color": "white",
+                      "geometry": {
+                        "x": 128,
+                        "y": 336,
+                        "width": 240,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "affected-packages",
+                      "type": "document-stack",
+                      "text": "Affected packages",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 144,
+                        "y": 448,
+                        "width": 208,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "request-scope"
+              },
+              "resultText": "APPLIED · 4 ops\n  1. addObject developer\n  2. addObject ci-job\n  3. addObject change-detector\n  4. addObject affected-packages\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,64 1856×1120\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 448,112 432×432\n      (empty)\n    task-run section \"3 · Task execution\" orange 912,112 512×720\n      (empty)\n    cache-trust section \"4 · Remote cache & trust\" teal 1456,112 448×720\n      (empty)\n    outcomes section \"5 · Outcomes\" green 448,880 976×272\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  64,64 1872×1120 → 80,64 1856×1120\n  request-scope  80,112 336×432 → 96,128 320×416\n  + developer  icon 112,176 112×96 \"Local developer\"\n  + ci-job  icon 272,176 112×96 \"CI job\"\n  + change-detector  process 128,336 240×64 \"Change detector\"\n  + affected-packages  document-stack 144,448 208×64 \"Affected packages\"\nBOARD DIFF · base → draft · 10 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  updateSection page-frame  moved · resized · retexted\nLINTS · +4 −0\n  + W1 crowding: developer and ci-job sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the developer↔ci-job corridor to ≥80px)\n  + W2 crowding: developer and change-detector sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the developer↔change-detector corridor to ≥96px)\n  + W3 crowding: ci-job and change-detector sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the ci-job↔change-detector corridor to ≥96px)\n  + W4 crowding: change-detector and affected-packages sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the change-detector↔affected-packages corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.13.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.13.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-24T23:31:08.292Z",
+          "thinking": "**Planning warnings fix with graph nodes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IK0WNMZiCkU0GAMezSuzftca|fc_0355709dbcc9c1a8016a63f5b99f0081989469489ba69b7054",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "graph-service",
+                      "type": "process",
+                      "text": "Build-graph service",
+                      "color": "white",
+                      "geometry": {
+                        "x": 496,
+                        "y": 176,
+                        "width": 336,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "expanded-graph",
+                      "type": "document-stack",
+                      "text": "Dependents expanded",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 528,
+                        "y": 320,
+                        "width": 272,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "scheduler",
+                      "type": "process",
+                      "text": "Dependency-aware scheduler",
+                      "color": "white",
+                      "geometry": {
+                        "x": 496,
+                        "y": 464,
+                        "width": 336,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "graph-plan"
+              },
+              "resultText": "APPLIED · 3 ops\n  1. addObject graph-service\n  2. addObject expanded-graph\n  3. addObject scheduler\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,64 1856×1120\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 912,112 512×720\n      (empty)\n    cache-trust section \"4 · Remote cache & trust\" teal 1456,112 448×720\n      (empty)\n    outcomes section \"5 · Outcomes\" green 448,880 976×272\n      (empty)\nEDGES\n  (none)\nDELTA\n  graph-plan  448,112 432×432 → 480,128 384×432\n  + graph-service  process 496,176 336×64 \"Build-graph service\"\n  + expanded-graph  document-stack 528,320 272×64 \"Dependents expanded\"\n  + scheduler  process 496,464 336×64 \"Dependency-aware scheduler\"\nBOARD DIFF · base → draft · 13 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  updateSection page-frame  moved · resized · retexted\nLINTS · +2 −0\n  + W5 crowding: graph-service and expanded-graph sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the graph-service↔expanded-graph corridor to ≥96px)\n  + W6 crowding: expanded-graph and scheduler sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the expanded-graph↔scheduler corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.17.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.17.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-24T23:31:17.428Z",
+          "thinking": "**Integrating cache and execution components**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Zy0vxzGHKo91AGIPkfmQUHar|fc_0355709dbcc9c1a8016a63f5bff8d88198a53d30d70763516a",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "worker-pool",
+                      "type": "icon",
+                      "icon": "server",
+                      "text": "Elastic worker pool",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 944,
+                        "y": 176,
+                        "width": 128,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "parallel-note",
+                      "text": "**Concurrency**\nUnrelated graph branches run in parallel.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1120,
+                        "y": 176,
+                        "width": 272,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "content-key",
+                      "type": "predefined-process",
+                      "text": "Calculate content key",
+                      "color": "white",
+                      "geometry": {
+                        "x": 976,
+                        "y": 336,
+                        "width": 384,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "key-inputs",
+                      "text": "**Key inputs**\nSources · environment · toolchain · command · dependency outputs",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 976,
+                        "y": 448,
+                        "width": 384,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "cache-lookup",
+                      "type": "decision",
+                      "text": "Cache hit?",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1072,
+                        "y": 592,
+                        "width": 192,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "isolated-exec",
+                      "type": "process",
+                      "text": "Execute in isolated workspace",
+                      "color": "white",
+                      "geometry": {
+                        "x": 960,
+                        "y": 752,
+                        "width": 416,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "task-run"
+              },
+              "resultText": "APPLIED · 6 ops\n  1. addObject worker-pool\n  2. addSticky parallel-note\n  3. addObject content-key\n  4. addSticky key-inputs\n  5. addObject cache-lookup\n  6. addObject isolated-exec\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,64 1856×1120\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×720\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,752 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1456,112 448×720\n      (empty)\n    outcomes section \"5 · Outcomes\" green 448,880 976×272\n      (empty)\nEDGES\n  (none)\nDELTA\n  task-run  912,112 512×720 → 928,128 496×720\n  + worker-pool  icon 944,176 128×96 \"Elastic worker pool\"\n  + parallel-note  sticky 1120,176 272×96 \"**Concurrency**\\nUnrelated graph branches run in parallel.\"\n  + content-key  predefined-process 976,336 384×64 \"Calculate content key\"\n  + key-inputs  sticky 976,448 384×96 \"**Key inputs**\\nSources · environment · toolchain · command · dependency outputs\"\n  + cache-lookup  decision 1072,592 192×112 \"Cache hit?\"\n  + isolated-exec  process 960,752 416×64 \"Execute in isolated workspace\"\nBOARD DIFF · base → draft · 19 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  updateSection page-frame  moved · resized · retexted\nLINTS · +2 −0\n  + W7 crowding: worker-pool and content-key sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the worker-pool↔content-key corridor to ≥96px)\n  + W8 crowding: cache-lookup and isolated-exec sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the cache-lookup↔isolated-exec corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.21.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.21.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-24T23:31:26.477Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JD0TOFen6mQw3nmz8Dwxji5n|fc_0355709dbcc9c1a8016a63f5c9271081989c196ea7b2293916",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "remote-cache",
+                      "type": "database",
+                      "text": "Remote cache",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 1520,
+                        "y": 176,
+                        "width": 320,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "provenance-gate",
+                      "type": "decision",
+                      "text": "Provenance trusted?",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 1568,
+                        "y": 320,
+                        "width": 224,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "artifact-store",
+                      "type": "database",
+                      "text": "Immutable artifact store",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1520,
+                        "y": 496,
+                        "width": 320,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "atomic-publish",
+                      "type": "predefined-process",
+                      "text": "Publish cache entry atomically",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1504,
+                        "y": 640,
+                        "width": 352,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "convergence-note",
+                      "text": "**Same-key safety**\nConcurrent workers converge on one immutable entry—no corruption.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1504,
+                        "y": 752,
+                        "width": 352,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "cache-trust"
+              },
+              "resultText": "APPLIED · 5 ops\n  1. addObject remote-cache\n  2. addObject provenance-gate\n  3. addObject artifact-store\n  4. addObject atomic-publish\n  5. addSticky convergence-note\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,80 1840×1104\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×720\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,752 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1488,128 400×720\n      remote-cache database \"Remote cache\" teal 1520,176 320×80\n      provenance-gate decision \"Provenance trusted?\" teal 1568,320 224×112\n      artifact-store database \"Immutable artifact store\" white 1520,496 320×80\n      atomic-publish predefined-process \"Publish cache entry atomically\" white 1504,640 352×64\n      convergence-note sticky \"**Same-key safety** Concurrent workers converge on one immutable entry—no corruption.\" 1504,752 352×64\n    outcomes section \"5 · Outcomes\" green 448,880 976×272\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  80,64 1856×1120 → 80,80 1840×1104\n  cache-trust  1456,112 448×720 → 1488,128 400×720\n  + remote-cache  database 1520,176 320×80 \"Remote cache\"\n  + provenance-gate  decision 1568,320 224×112 \"Provenance trusted?\"\n  + artifact-store  database 1520,496 320×80 \"Immutable artifact store\"\n  + atomic-publish  predefined-process 1504,640 352×64 \"Publish cache entry atomically\"\n  + convergence-note  sticky 1504,752 352×64 \"**Same-key safety**\\nConcurrent workers converge on one immutable entry—no corruption.\"\nBOARD DIFF · base → draft · 24 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  addObject remote-cache\n  addObject provenance-gate\n  addObject artifact-store\n  addObject atomic-publish\n  addSticky convergence-note\n  updateSection page-frame  moved · resized · retexted\nLINTS · +3 −0\n  + W9 crowding: remote-cache and provenance-gate sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the remote-cache↔provenance-gate corridor to ≥96px)\n  + W10 crowding: provenance-gate and artifact-store sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the provenance-gate↔artifact-store corridor to ≥96px)\n  + W11 crowding: artifact-store and atomic-publish sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the artifact-store↔atomic-publish corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.25.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.25.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-07-24T23:31:33.941Z",
+          "thinking": "**Defining outcome states**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CJ2M0eEsVUO6wz94iUQHKQ9S|fc_0355709dbcc9c1a8016a63f5d1cf3881988cd03e093d463d57",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "restored-result",
+                      "type": "pill",
+                      "text": "Restore cached result",
+                      "color": "green",
+                      "geometry": {
+                        "x": 496,
+                        "y": 944,
+                        "width": 240,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "successful-result",
+                      "type": "pill",
+                      "text": "Successful outputs",
+                      "color": "green",
+                      "geometry": {
+                        "x": 816,
+                        "y": 944,
+                        "width": 240,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "failed-result",
+                      "type": "octagon",
+                      "text": "Task failed",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1136,
+                        "y": 928,
+                        "width": 144,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "failure-policy",
+                      "text": "**Failure policy**\nNever cached · blocks dependents · logs returned to developer or CI",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1088,
+                        "y": 1056,
+                        "width": 288,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "outcomes"
+              },
+              "resultText": "APPLIED · 4 ops\n  1. addObject restored-result\n  2. addObject successful-result\n  3. addObject failed-result\n  4. addSticky failure-policy\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,80 1840×1104\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×720\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,752 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1488,128 400×720\n      remote-cache database \"Remote cache\" teal 1520,176 320×80\n      provenance-gate decision \"Provenance trusted?\" teal 1568,320 224×112\n      artifact-store database \"Immutable artifact store\" white 1520,496 320×80\n      atomic-publish predefined-process \"Publish cache entry atomically\" white 1504,640 352×64\n      convergence-note sticky \"**Same-key safety** Concurrent workers converge on one immutable entry—no corruption.\" 1504,752 352×64\n    outcomes section \"5 · Outcomes\" green 480,880 928×272\n      restored-result pill \"Restore cached result\" green 496,944 240×64\n      successful-result pill \"Successful outputs\" green 816,944 240×64\n      failed-result octagon \"Task failed\" red 1136,928 144×96\n      failure-policy sticky \"**Failure policy** Never cached · blocks dependents · logs returned to developer or CI\" red 1088,1056 288×64\nEDGES\n  (none)\nDELTA\n  outcomes  448,880 976×272 → 480,880 928×272\n  + restored-result  pill 496,944 240×64 \"Restore cached result\"\n  + successful-result  pill 816,944 240×64 \"Successful outputs\"\n  + failed-result  octagon 1136,928 144×96 \"Task failed\"\n  + failure-policy  sticky 1088,1056 288×64 \"**Failure policy**\\nNever cached · blocks dependents · logs returned to developer or CI\"\nBOARD DIFF · base → draft · 28 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  addObject remote-cache\n  addObject provenance-gate\n  addObject artifact-store\n  addObject atomic-publish\n  addSticky convergence-note\n  addObject restored-result\n  addObject successful-result\n  addObject failed-result\n  addSticky failure-policy\n  updateSection page-frame  moved · resized · retexted\nLINTS · +0 −0 (11 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.29.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.29.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-07-24T23:31:53.595Z",
+          "thinking": "**Planning main flow and branches**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_igojYuvRCzwJ1qHTf0ZEYSp3|fc_0355709dbcc9c1a8016a63f5d914f88198b80c679221a99740",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "dev-change",
+                      "from": {
+                        "objectId": "developer",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "change-detector",
+                        "anchor": "top"
+                      },
+                      "label": "modified files",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "ci-change",
+                      "from": {
+                        "objectId": "ci-job",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "change-detector",
+                        "anchor": "top"
+                      },
+                      "label": "modified files",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "change-affected",
+                      "from": {
+                        "objectId": "change-detector",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "affected-packages",
+                        "anchor": "top"
+                      },
+                      "label": "maps to",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "affected-graph",
+                      "from": {
+                        "objectId": "affected-packages",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "graph-service",
+                        "anchor": "left"
+                      },
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "graph-expanded",
+                      "from": {
+                        "objectId": "graph-service",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "expanded-graph",
+                        "anchor": "top"
+                      },
+                      "label": "required dependents",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "expanded-scheduler",
+                      "from": {
+                        "objectId": "expanded-graph",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "scheduler",
+                        "anchor": "top"
+                      },
+                      "label": "ordered DAG",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "scheduler-workers",
+                      "from": {
+                        "objectId": "scheduler",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "worker-pool",
+                        "anchor": "left"
+                      },
+                      "label": "ready tasks",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "worker-key",
+                      "from": {
+                        "objectId": "worker-pool",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "content-key",
+                        "anchor": "top"
+                      },
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "key-lookup",
+                      "from": {
+                        "objectId": "content-key",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "cache-lookup",
+                        "anchor": "top"
+                      },
+                      "label": "lookup key",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "lookup-remote",
+                      "from": {
+                        "objectId": "cache-lookup",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "remote-cache",
+                        "anchor": "left"
+                      },
+                      "label": "check",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "remote-provenance",
+                      "from": {
+                        "objectId": "remote-cache",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "provenance-gate",
+                        "anchor": "top"
+                      },
+                      "label": "entry + provenance",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "trusted-restore",
+                      "from": {
+                        "objectId": "provenance-gate",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "restored-result",
+                        "anchor": "top"
+                      },
+                      "label": "trusted hit",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "miss-execute",
+                      "from": {
+                        "objectId": "cache-lookup",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "isolated-exec",
+                        "anchor": "top"
+                      },
+                      "label": "miss",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "exec-artifact",
+                      "from": {
+                        "objectId": "isolated-exec",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "artifact-store",
+                        "anchor": "left"
+                      },
+                      "label": "success: upload",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "artifact-publish",
+                      "from": {
+                        "objectId": "artifact-store",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "atomic-publish",
+                        "anchor": "top"
+                      },
+                      "label": "immutable outputs",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "publish-success",
+                      "from": {
+                        "objectId": "atomic-publish",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "successful-result",
+                        "anchor": "top"
+                      },
+                      "label": "publish after success",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "exec-failed",
+                      "from": {
+                        "objectId": "isolated-exec",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "failed-result",
+                        "anchor": "top"
+                      },
+                      "label": "failure",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "failure-policy-edge",
+                      "from": {
+                        "objectId": "failed-result",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "failure-policy",
+                        "anchor": "top"
+                      },
+                      "arrow": "none",
+                      "style": "dashed",
+                      "color": "red"
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 18 ops\n  1. addConnection dev-change\n  2. addConnection ci-change\n  3. addConnection change-affected\n  4. addConnection affected-graph\n  5. addConnection graph-expanded\n  6. addConnection expanded-scheduler\n  7. addConnection scheduler-workers\n  8. addConnection worker-key\n  9. addConnection key-lookup\n  10. addConnection lookup-remote\n  11. addConnection remote-provenance\n  12. addConnection trusted-restore\n  13. addConnection miss-execute\n  14. addConnection exec-artifact\n  15. addConnection artifact-publish\n  16. addConnection publish-success\n  17. addConnection exec-failed\n  18. addConnection failure-policy-edge\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,80 1840×1104\n    request-scope section \"1 · Request & scope\" blue 96,128 320×416\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,448 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×720\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,752 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1488,128 400×720\n      remote-cache database \"Remote cache\" teal 1520,176 320×80\n      provenance-gate decision \"Provenance trusted?\" teal 1568,320 224×112\n      artifact-store database \"Immutable artifact store\" white 1520,496 320×80\n      atomic-publish predefined-process \"Publish cache entry atomically\" white 1504,640 352×64\n      convergence-note sticky \"**Same-key safety** Concurrent workers converge on one immutable entry—no corruption.\" 1504,752 352×64\n    outcomes section \"5 · Outcomes\" green 480,880 928×272\n      restored-result pill \"Restore cached result\" green 496,944 240×64\n      successful-result pill \"Successful outputs\" green 816,944 240×64\n      failed-result octagon \"Task failed\" red 1136,928 144×96\n      failure-policy sticky \"**Failure policy** Never cached · blocks dependents · logs returned to developer or CI\" red 1088,1056 288×64\nEDGES\n  dev-change developer→change-detector \"modified files\" blue anchors=bottom→top\n  ci-change ci-job→change-detector \"modified files\" blue anchors=bottom→top\n  change-affected change-detector→affected-packages \"maps to\" blue anchors=bottom→top\n  affected-graph affected-packages→graph-service — violet anchors=right→left\n  graph-expanded graph-service→expanded-graph \"required dependents\" violet anchors=bottom→top\n  expanded-scheduler expanded-graph→scheduler \"ordered DAG\" violet anchors=bottom→top\n  scheduler-workers scheduler→worker-pool \"ready tasks\" orange anchors=right→left\n  worker-key worker-pool→content-key — orange anchors=bottom→top\n  key-lookup content-key→cache-lookup \"lookup key\" orange anchors=bottom→top\n  lookup-remote cache-lookup→remote-cache \"check\" teal anchors=right→left\n  remote-provenance remote-cache→provenance-gate \"entry + provenance\" teal anchors=bottom→top\n  trusted-restore provenance-gate→restored-result \"trusted hit\" green anchors=bottom→top\n  miss-execute cache-lookup→isolated-exec \"miss\" orange anchors=bottom→top\n  exec-artifact isolated-exec→artifact-store \"success: upload\" teal anchors=right→left\n  artifact-publish artifact-store→atomic-publish \"immutable outputs\" teal anchors=bottom→top\n  publish-success atomic-publish→successful-result \"publish after success\" green anchors=bottom→top\n  exec-failed isolated-exec→failed-result \"failure\" red anchors=bottom→top\n  failure-policy-edge failed-result→failure-policy — dashed red arrow=none anchors=bottom→top\nDELTA\n  + dev-change  developer → change-detector\n  + ci-change  ci-job → change-detector\n  + change-affected  change-detector → affected-packages\n  + affected-graph  affected-packages → graph-service\n  + graph-expanded  graph-service → expanded-graph\n  + expanded-scheduler  expanded-graph → scheduler\n  + scheduler-workers  scheduler → worker-pool\n  + worker-key  worker-pool → content-key\n  + key-lookup  content-key → cache-lookup\n  + lookup-remote  cache-lookup → remote-cache\n  + remote-provenance  remote-cache → provenance-gate\n  + trusted-restore  provenance-gate → restored-result\n  + miss-execute  cache-lookup → isolated-exec\n  + exec-artifact  isolated-exec → artifact-store\n  + artifact-publish  artifact-store → atomic-publish\n  + publish-success  atomic-publish → successful-result\n  + exec-failed  isolated-exec → failed-result\n  + failure-policy-edge  failed-result → failure-policy\nBOARD DIFF · base → draft · 46 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  addObject remote-cache\n  addObject provenance-gate\n  addObject artifact-store\n  addObject atomic-publish\n  addSticky convergence-note\n  addObject restored-result\n  addObject successful-result\n  addObject failed-result\n  addSticky failure-policy\n  updateSection page-frame  moved · resized · retexted\n  addConnection dev-change\n  addConnection ci-change\n  addConnection change-affected\n  addConnection affected-graph\n  addConnection graph-expanded\n  addConnection expanded-scheduler\n  addConnection scheduler-workers\n  addConnection worker-key\n  addConnection key-lookup\n  addConnection lookup-remote\n  addConnection remote-provenance\n  addConnection trusted-restore\n  addConnection miss-execute\n  addConnection exec-artifact\n  addConnection artifact-publish\n  addConnection publish-success\n  addConnection exec-failed\n  addConnection failure-policy-edge\nLINTS · +17 −0\n  + E1 covered-content: label \"success: upload\" chip on exec-artifact covers atomic-publish (route exec-artifact around atomic-publish or move the label with a waypoint)\n  + E2 covered-content: label \"modified files\" chip on dev-change overlaps label \"modified files\" chip on ci-change (separate the two edges (spacing or waypoints) so both labels read)\n  + E3 covered-content: label \"modified files\" chip on dev-change lies on ci-change's path for 62px (move the label with a waypoint or reroute ci-change so the chip owns its wire)\n  + E4 covered-content: label \"modified files\" chip on ci-change lies on dev-change's path for 62px (move the label with a waypoint or reroute dev-change so the chip owns its wire)\n  + E5 covered-content: label \"trusted hit\" chip on trusted-restore lies on publish-success's path for 30px (move the label with a waypoint or reroute publish-success so the chip owns its wire)\n  + E6 covered-content: label \"success: upload\" chip on exec-artifact lies on lookup-remote's path for 31px (move the label with a waypoint or reroute lookup-remote so the chip owns its wire)\n  + E7 covered-content: label \"success: upload\" chip on exec-artifact lies on trusted-restore's path for 30px (move the label with a waypoint or reroute trusted-restore so the chip owns its wire)\n  + E8 covered-content: label \"publish after success\" chip on publish-success lies on trusted-restore's path for 164px (move the label with a waypoint or reroute trusted-restore so the chip owns its wire)\n  + W1 covered-content: label \"publish after success\" chip on publish-success sits within 16px of failed-result (give the chip clear air — nudge failed-result or reroute publish-success)\n  + W2 covered-content: label \"lookup key\" chip on key-lookup sits within 16px of scheduler-workers's path (offset scheduler-workers or move the label so it cannot read as scheduler-workers's label)\n  + W3 broken-edges: trusted-restore and exec-artifact run co-linear for 248px (4px apart) (offset one route so the two wires read separately)\n  + W4 broken-edges: trusted-restore and publish-success run co-linear for 368px (0px apart) (offset one route so the two wires read separately)\n  + W5 broken-edges: connector affected-graph hugs the right border of request-scope for 272px (route affected-graph clear of request-scope's frame so it reads as a wire, not a border)\n  + W6 unreadable-labels: label \"modified files\" chip on dev-change (158×30px) bleeds onto change-detector: 64px of corridor where the chip needs 62px (open the developer↔change-detector corridor to ≥62px so the chip and its 16px margins fit)\n  + W7 unreadable-labels: label \"modified files\" chip on ci-change (158×30px) bleeds onto change-detector: 64px of corridor where the chip needs 62px (open the ci-job↔change-detector corridor to ≥62px so the chip and its 16px margins fit)\n  + W8 unreadable-labels: label \"maps to\" chip on change-affected (91×30px) bleeds onto change-detector and affected-packages: 48px of corridor where the chip needs 62px (open the change-detector↔affected-packages corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"affected-packages\",\"patch\":{\"geometry\":{\"x\":144,\"y\":464,\"width\":208,\"height\":64}}}\n  + W9 unreadable-labels: label \"miss\" chip on miss-execute (62×30px) bleeds onto cache-lookup and isolated-exec: 48px of corridor where the chip needs 62px (open the cache-lookup↔isolated-exec corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"isolated-exec\",\"patch\":{\"geometry\":{\"x\":960,\"y\":768,\"width\":416,\"height\":64}}}\nROUTES\n  dev-change  anchors bottom→top  path 168,296 → 168,320 → 168,316 → 248,316 → 248,312 → 248,336  through none\n  ci-change  anchors bottom→top  path 328,296 → 328,320 → 328,316 → 248,316 → 248,312 → 248,336  through none\n  change-affected  anchors bottom→top  path 248,400 → 248,448  through none\n  affected-graph  anchors right→left  path 352,480 → 376,480 → 424,480 → 424,208 → 472,208 → 496,208  through none\n  graph-expanded  anchors bottom→top  path 664,240 → 664,320  through none\n  expanded-scheduler  anchors bottom→top  path 664,384 → 664,464  through none\n  scheduler-workers  anchors right→left  path 832,496 → 856,496 → 888,496 → 888,224 → 920,224 → 944,224  through none\n  worker-key  anchors bottom→top  path 1008,296 → 1008,320 → 1008,316 → 1168,316 → 1168,312 → 1168,336  through none\n  key-lookup  anchors bottom→top  path 1168,400 → 1168,428 → 956,428 → 956,564 → 1168,564 → 1168,592  through none\n  lookup-remote  anchors right→left  path 1264,648 → 1288,648 → 1392,648 → 1392,216 → 1496,216 → 1520,216  through none\n  remote-provenance  anchors bottom→top  path 1680,256 → 1680,320  through none\n  trusted-restore  anchors bottom→top  path 1680,432 → 1680,476 → 1812,476 → 1812,488 → 1444,488 → 1444,1028 → 756,1028 → 756,924 → 616,924 → 616,944  through none\n  miss-execute  anchors bottom→top  path 1168,704 → 1168,752  through none\n  exec-artifact  anchors right→left  path 1376,784 → 1400,784 → 1448,784 → 1448,536 → 1496,536 → 1520,536  through none\n  artifact-publish  anchors bottom→top  path 1680,576 → 1680,640  through none\n  publish-success  anchors bottom→top  path 1680,704 → 1680,732 → 1484,732 → 1484,1028 → 1076,1028 → 1076,924 → 936,924 → 936,944  through none\n  exec-failed  anchors bottom→top  path 1168,816 → 1168,840 → 1168,874 → 1208,874 → 1208,908 → 1208,932  through none\n  failure-policy-edge  anchors bottom→top  path 1208,1020 → 1208,1044 → 1208,1038 → 1232,1038 → 1232,1032 → 1232,1056  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.33.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.33.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-07-24T23:32:02.052Z",
+          "thinking": "**Planning labels removal to fix errors**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5lJxVFWwXOkFVbWdAZq8n1ht|fc_0355709dbcc9c1a8016a63f5ef2d7c8198b1276f6512d66c32",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "dev-change",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "ci-change",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "trusted-restore",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "exec-artifact",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "publish-success",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "affected-packages",
+                    "patch": {
+                      "geometry": {
+                        "x": 144,
+                        "y": 464,
+                        "width": 208,
+                        "height": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "isolated-exec",
+                    "patch": {
+                      "geometry": {
+                        "x": 960,
+                        "y": 768,
+                        "width": 416,
+                        "height": 64
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 7 ops\n  1. updateConnection dev-change\n  2. updateConnection ci-change\n  3. updateConnection trusted-restore\n  4. updateConnection exec-artifact\n  5. updateConnection publish-success\n  6. updateObject affected-packages\n  7. updateObject isolated-exec\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,80 1840×1104\n    request-scope section \"1 · Request & scope\" blue 96,128 320×432\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,464 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×736\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,768 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1488,128 400×720\n      remote-cache database \"Remote cache\" teal 1520,176 320×80\n      provenance-gate decision \"Provenance trusted?\" teal 1568,320 224×112\n      artifact-store database \"Immutable artifact store\" white 1520,496 320×80\n      atomic-publish predefined-process \"Publish cache entry atomically\" white 1504,640 352×64\n      convergence-note sticky \"**Same-key safety** Concurrent workers converge on one immutable entry—no corruption.\" 1504,752 352×64\n    outcomes section \"5 · Outcomes\" green 480,880 928×272\n      restored-result pill \"Restore cached result\" green 496,944 240×64\n      successful-result pill \"Successful outputs\" green 816,944 240×64\n      failed-result octagon \"Task failed\" red 1136,928 144×96\n      failure-policy sticky \"**Failure policy** Never cached · blocks dependents · logs returned to developer or CI\" red 1088,1056 288×64\nEDGES\n  dev-change developer→change-detector — blue anchors=bottom→top\n  ci-change ci-job→change-detector — blue anchors=bottom→top\n  change-affected change-detector→affected-packages \"maps to\" blue anchors=bottom→top\n  affected-graph affected-packages→graph-service — violet anchors=right→left\n  graph-expanded graph-service→expanded-graph \"required dependents\" violet anchors=bottom→top\n  expanded-scheduler expanded-graph→scheduler \"ordered DAG\" violet anchors=bottom→top\n  scheduler-workers scheduler→worker-pool \"ready tasks\" orange anchors=right→left\n  worker-key worker-pool→content-key — orange anchors=bottom→top\n  key-lookup content-key→cache-lookup \"lookup key\" orange anchors=bottom→top\n  lookup-remote cache-lookup→remote-cache \"check\" teal anchors=right→left\n  remote-provenance remote-cache→provenance-gate \"entry + provenance\" teal anchors=bottom→top\n  trusted-restore provenance-gate→restored-result — green anchors=bottom→top\n  miss-execute cache-lookup→isolated-exec \"miss\" orange anchors=bottom→top\n  exec-artifact isolated-exec→artifact-store — teal anchors=right→left\n  artifact-publish artifact-store→atomic-publish \"immutable outputs\" teal anchors=bottom→top\n  publish-success atomic-publish→successful-result — green anchors=bottom→top\n  exec-failed isolated-exec→failed-result \"failure\" red anchors=bottom→top\n  failure-policy-edge failed-result→failure-policy — dashed red arrow=none anchors=bottom→top\nDELTA\n  request-scope  96,128 320×416 → 96,128 320×432\n  task-run  928,128 496×720 → 928,128 496×736\n  affected-packages  144,448 → 144,464\n  isolated-exec  960,752 → 960,768\n  dev-change  label \"modified files\" → \"\"\n  ci-change  label \"modified files\" → \"\"\n  trusted-restore  label \"trusted hit\" → \"\"\n  exec-artifact  label \"success: upload\" → \"\"\n  publish-success  label \"publish after success\" → \"\"\nBOARD DIFF · base → draft · 46 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  addObject remote-cache\n  addObject provenance-gate\n  addObject artifact-store\n  addObject atomic-publish\n  addSticky convergence-note\n  addObject restored-result\n  addObject successful-result\n  addObject failed-result\n  addSticky failure-policy\n  updateSection page-frame  moved · resized · retexted\n  addConnection dev-change\n  addConnection ci-change\n  addConnection change-affected\n  addConnection affected-graph\n  addConnection graph-expanded\n  addConnection expanded-scheduler\n  addConnection scheduler-workers\n  addConnection worker-key\n  addConnection key-lookup\n  addConnection lookup-remote\n  addConnection remote-provenance\n  addConnection trusted-restore\n  addConnection miss-execute\n  addConnection exec-artifact\n  addConnection artifact-publish\n  addConnection publish-success\n  addConnection exec-failed\n  addConnection failure-policy-edge\nLINTS · +5 −18\n  + W2 broken-edges: trusted-restore and publish-success run co-linear for 140px (0px apart) (offset one route so the two wires read separately)\n  + W3 broken-edges: connector affected-graph hugs the right border of request-scope for 288px (route affected-graph clear of request-scope's frame so it reads as a wire, not a border)\n  + W4 broken-edges: connector trusted-restore hugs the right border of cache-trust for 216px (route trusted-restore clear of cache-trust's frame so it reads as a wire, not a border)\n  + W8 crowding: change-detector and affected-packages sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the change-detector↔affected-packages corridor to ≥96px)\n  + W12 crowding: cache-lookup and isolated-exec sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the cache-lookup↔isolated-exec corridor to ≥96px)\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content, − W1 covered-content, − W3 broken-edges, − W4 broken-edges, − W5 broken-edges, − W6 unreadable-labels, − W7 unreadable-labels, − W8 unreadable-labels, − W9 unreadable-labels, − W13 crowding, − W17 crowding  (resolved)\nROUTES\n  change-affected  anchors bottom→top  path 248,400 → 248,464  through none\n  affected-graph  anchors right→left  path 352,496 → 376,496 → 424,496 → 424,208 → 472,208 → 496,208  through none\n  miss-execute  anchors bottom→top  path 1168,704 → 1168,768  through none\n  exec-artifact  anchors right→left  path 1376,800 → 1400,800 → 1448,800 → 1448,536 → 1496,536 → 1520,536  through none\n  exec-failed  anchors bottom→top  path 1168,832 → 1168,856 → 1168,882 → 1208,882 → 1208,908 → 1208,932  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.37.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.37.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-07-24T23:32:07.466Z",
+          "thinking": "**Gathering final diagnostics**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YoHp8jJF30IWvKKSPnW5Kl2Y|fc_0355709dbcc9c1a8016a63f5f70ba48198b4d5809476ba1e1c",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 0 ops\n  (no ops — look only)\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"Monorepo build & cache\" white 80,80 1840×1104\n    request-scope section \"1 · Request & scope\" blue 96,128 320×432\n      developer icon \"Local developer\" blue 112,176 112×96 icon=person\n      ci-job icon \"CI job\" blue 272,176 112×96 icon=terminal\n      change-detector process \"Change detector\" white 128,336 240×64\n      affected-packages document-stack \"Affected packages\" blue 144,464 208×64\n    graph-plan section \"2 · Build graph & scheduling\" violet 480,128 384×432\n      graph-service process \"Build-graph service\" white 496,176 336×64\n      expanded-graph document-stack \"Dependents expanded\" violet 528,320 272×64\n      scheduler process \"Dependency-aware scheduler\" white 496,464 336×64\n    task-run section \"3 · Task execution\" orange 928,128 496×736\n      worker-pool icon \"Elastic worker pool\" orange 944,176 128×96 icon=server\n      parallel-note sticky \"**Concurrency** Unrelated graph branches run in parallel.\" 1120,176 272×96\n      content-key predefined-process \"Calculate content key\" white 976,336 384×64\n      key-inputs sticky \"**Key inputs** Sources · environment · toolchain · command · dependency outputs\" 976,448 384×96\n      cache-lookup decision \"Cache hit?\" orange 1072,592 192×112\n      isolated-exec process \"Execute in isolated workspace\" white 960,768 416×64\n    cache-trust section \"4 · Remote cache & trust\" teal 1488,128 400×720\n      remote-cache database \"Remote cache\" teal 1520,176 320×80\n      provenance-gate decision \"Provenance trusted?\" teal 1568,320 224×112\n      artifact-store database \"Immutable artifact store\" white 1520,496 320×80\n      atomic-publish predefined-process \"Publish cache entry atomically\" white 1504,640 352×64\n      convergence-note sticky \"**Same-key safety** Concurrent workers converge on one immutable entry—no corruption.\" 1504,752 352×64\n    outcomes section \"5 · Outcomes\" green 480,880 928×272\n      restored-result pill \"Restore cached result\" green 496,944 240×64\n      successful-result pill \"Successful outputs\" green 816,944 240×64\n      failed-result octagon \"Task failed\" red 1136,928 144×96\n      failure-policy sticky \"**Failure policy** Never cached · blocks dependents · logs returned to developer or CI\" red 1088,1056 288×64\nEDGES\n  dev-change developer→change-detector — blue anchors=bottom→top\n  ci-change ci-job→change-detector — blue anchors=bottom→top\n  change-affected change-detector→affected-packages \"maps to\" blue anchors=bottom→top\n  affected-graph affected-packages→graph-service — violet anchors=right→left\n  graph-expanded graph-service→expanded-graph \"required dependents\" violet anchors=bottom→top\n  expanded-scheduler expanded-graph→scheduler \"ordered DAG\" violet anchors=bottom→top\n  scheduler-workers scheduler→worker-pool \"ready tasks\" orange anchors=right→left\n  worker-key worker-pool→content-key — orange anchors=bottom→top\n  key-lookup content-key→cache-lookup \"lookup key\" orange anchors=bottom→top\n  lookup-remote cache-lookup→remote-cache \"check\" teal anchors=right→left\n  remote-provenance remote-cache→provenance-gate \"entry + provenance\" teal anchors=bottom→top\n  trusted-restore provenance-gate→restored-result — green anchors=bottom→top\n  miss-execute cache-lookup→isolated-exec \"miss\" orange anchors=bottom→top\n  exec-artifact isolated-exec→artifact-store — teal anchors=right→left\n  artifact-publish artifact-store→atomic-publish \"immutable outputs\" teal anchors=bottom→top\n  publish-success atomic-publish→successful-result — green anchors=bottom→top\n  exec-failed isolated-exec→failed-result \"failure\" red anchors=bottom→top\n  failure-policy-edge failed-result→failure-policy — dashed red arrow=none anchors=bottom→top\nDELTA · none\nBOARD DIFF · base → draft · 46 ops\n  addSection request-scope\n  addSection graph-plan\n  addSection task-run\n  addSection cache-trust\n  addSection outcomes\n  addObject developer\n  addObject ci-job\n  addObject change-detector\n  addObject affected-packages\n  addObject graph-service\n  addObject expanded-graph\n  addObject scheduler\n  addObject worker-pool\n  addSticky parallel-note\n  addObject content-key\n  addSticky key-inputs\n  addObject cache-lookup\n  addObject isolated-exec\n  addObject remote-cache\n  addObject provenance-gate\n  addObject artifact-store\n  addObject atomic-publish\n  addSticky convergence-note\n  addObject restored-result\n  addObject successful-result\n  addObject failed-result\n  addSticky failure-policy\n  updateSection page-frame  moved · resized · retexted\n  addConnection dev-change\n  addConnection ci-change\n  addConnection change-affected\n  addConnection affected-graph\n  addConnection graph-expanded\n  addConnection expanded-scheduler\n  addConnection scheduler-workers\n  addConnection worker-key\n  addConnection key-lookup\n  addConnection lookup-remote\n  addConnection remote-provenance\n  addConnection trusted-restore\n  addConnection miss-execute\n  addConnection exec-artifact\n  addConnection artifact-publish\n  addConnection publish-success\n  addConnection exec-failed\n  addConnection failure-policy-edge\nLINTS · +0 −0 (15 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-41-333Z_019f9677-7e35-7125-bb74-fff16deb45ed.41.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-07-24T23:32:13.916Z",
+          "thinking": "**Finalizing warning IDs for message**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JKUw5Fxzs5JErDZeVovdqjwO|fc_0355709dbcc9c1a8016a63f5fca1e88198ba36e97509c5867a",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Built the end-to-end monorepo build/cache architecture with scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling; knowingly shipping layout warnings W1–W15 for tight corridors and long cross-section routes."
+              },
+              "resultText": "Committed: Built the end-to-end monorepo build/cache architecture with scheduling, content-key lookup, trusted restore, isolated execution, immutable publication, concurrency safety, and failure handling; knowingly shipping layout warnings W1–W15 for tight corridors and long cross-section routes. (46 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

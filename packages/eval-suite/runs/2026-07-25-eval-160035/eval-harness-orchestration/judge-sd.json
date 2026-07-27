@@ -1,0 +1,729 @@
+{
+  "axis": "sd",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeScopeDiscipline",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "edits": [
+      {
+        "stage": "e1",
+        "verdict": {
+          "requested_changes": [
+            {
+              "requirement": "Re-run scenarios when their results swing between comparable runs.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "Requires re-running scenarios whose results swing between comparable runs."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[swing-gate], connections.added[c-movement-swing]",
+                  "observation": "Adds a 'Comparable-run swing?' decision fed by the existing Threshold movement process."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-retry-scheduler]",
+                  "observation": "Adds a dashed flow labeled 're-run scenario' from the retry process back to Suite scheduler."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "assembly/comparison stability flow and orange dashed return path",
+                  "observation": "The post-edit board visibly communicates swing detection followed by a scenario re-run loop."
+                }
+              ],
+              "note": "The requested trigger and re-run behavior are structurally communicated rather than merely mentioned in a label."
+            },
+            {
+              "requirement": "Subject swing-triggered re-runs to a bounded retry allowance.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "Specifies that re-runs are subject to a bounded retry allowance."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[retry-budget]",
+                  "observation": "Adds a predefined process labeled 'Bounded retry allowance'."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-swing-retry, c-retry-scheduler]",
+                  "observation": "Places the bounded allowance between swing detection and the scheduler re-run loop."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[comparison-rule].text",
+                  "observation": "States that swinging results are re-run 'within a bounded allowance'."
+                }
+              ],
+              "note": "Both the node sequence and explanatory contract make the bound explicit."
+            },
+            {
+              "requirement": "Record the observed variance across attempts.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2",
+                  "observation": "Requires recording observed variance across attempts."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[attempt-variance]",
+                  "observation": "Adds a document object labeled 'Observed attempt variance'."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-retry-variance, c-variance-verdict-store]",
+                  "observation": "Connects bounded retries to the variance document and then to Verdicts + evidence with the label 'retain variance'."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "5b Variance outcome and dashed retention path",
+                  "observation": "The variance artifact and its audit-storage path are visible in the post-edit board."
+                }
+              ],
+              "note": "Variance is shown as a produced document and retained record, fully communicating the requested recording behavior."
+            },
+            {
+              "requirement": "If a result remains unstable, mark it as unstable on the scorecard instead of silently averaging the attempts.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3",
+                  "observation": "Requires explicit unstable scorecard marking and prohibits silently averaging attempts."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[unstable-result], connections.added[c-variance-unstable, c-unstable-scorecard]",
+                  "observation": "Adds an 'Unstable result' state downstream of attempt variance and connects it directly to the scorecard."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[scorecard]",
+                  "observation": "Renames 'Run scorecard' to 'Run scorecard · stability'."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[comparison-rule].text",
+                  "observation": "Explicitly states that a result remaining unstable is marked unstable on the scorecard and is 'never silently averaged'."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "red Unstable result path to Run scorecard · stability",
+                  "observation": "The post-edit image visibly communicates the unstable outcome reaching the scorecard."
+                }
+              ],
+              "note": "The unstable state, destination, and no-averaging rule are all explicit."
+            }
+          ],
+          "changes": [
+            {
+              "object_id": "canvas.description",
+              "object_kind": "document",
+              "classification": "requested",
+              "what_changed": "Rewrote the canvas description to summarize comparable-run swing re-runs, bounded allowance, retained variance, explicit unstable marking, and variance auditability.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "pre_json",
+                  "locator": "description",
+                  "observation": "The prior description contained no unstable-result retry or variance behavior."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "description",
+                  "observation": "The new description explicitly summarizes all requested stability behaviors."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "updated board intent",
+                  "observation": "The summary declares that board intent was updated."
+                }
+              ]
+            },
+            {
+              "object_id": "stability-retry",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added section '5a · Swing detection & retries' to group swing detection and bounded retry behavior.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[stability-retry]",
+                  "observation": "New orange section contains the swing gate and retry allowance."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "Added bounded swing re-runs",
+                  "observation": "The grouped retry addition is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "variance-outcome",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added section '5b · Variance outcome' to group observed variance and the unstable result.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[variance-outcome]",
+                  "observation": "New red section contains attempt-variance and unstable-result objects."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "retained attempt variance, explicit unstable scorecard marking",
+                  "observation": "The grouped variance outcome is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "swing-gate",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added decision 'Comparable-run swing?'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[swing-gate]",
+                  "observation": "Adds the explicit trigger decision required by the instruction."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "bounded swing re-runs",
+                  "observation": "Swing detection is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "retry-budget",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added process 'Bounded retry allowance'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[retry-budget]",
+                  "observation": "Adds the requested bounded retry control."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "Added bounded swing re-runs",
+                  "observation": "The bounded retry control is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "attempt-variance",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added document 'Observed attempt variance'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[attempt-variance]",
+                  "observation": "Adds an explicit variance record for the retry attempts."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "retained attempt variance",
+                  "observation": "The variance artifact is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "unstable-result",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added red octagonal state 'Unstable result'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[unstable-result]",
+                  "observation": "Adds the requested persistent-instability outcome."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "explicit unstable scorecard marking",
+                  "observation": "The unstable outcome is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "page-frame",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Increased frame height from 1760 to 2208.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[page-frame].geometry.height",
+                  "observation": "Height increases by 448 to contain the expanded comparison region and displaced lower sections."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "overall canvas frame",
+                  "observation": "The taller frame keeps all added and existing sections within the board."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "The summary acknowledges related layout changes and warnings."
+                }
+              ]
+            },
+            {
+              "object_id": "assembly-comparison",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Increased section height from 448 to 736 to contain the added stability flow.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[assembly-comparison].geometry.height",
+                  "observation": "The section grows by 288 while retaining its prior position and width."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 5",
+                  "observation": "The added 5a and 5b subsections occupy the new lower portion."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "Added bounded swing re-runs, retained attempt variance",
+                  "observation": "The expansion accommodates declared additions."
+                }
+              ]
+            },
+            {
+              "object_id": "audit-retention",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the whole Audit & retention section downward from y=1248 to y=1616.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[audit-retention].geometry.y",
+                  "observation": "The section moves down 368 without resizing or restyling."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "lower-left board region",
+                  "observation": "The move clears space for the expanded section 5 and its variance-retention route."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "audit storage; spacing and routing warnings",
+                  "observation": "Audit storage and related spacing are declared."
+                }
+              ]
+            },
+            {
+              "object_id": "baseline-lifecycle",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the whole Baseline lifecycle section downward from y=1248 to y=1616.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[baseline-lifecycle].geometry.y",
+                  "observation": "The section moves down 368 without other redesign."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "lower-right board region",
+                  "observation": "The movement prevents overlap with the enlarged assembly/comparison section."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "scorecard",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Changed label from 'Run scorecard' to 'Run scorecard · stability'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[scorecard].text",
+                  "observation": "The label now explicitly signals stability status."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "explicit unstable scorecard marking",
+                  "observation": "The scorecard update is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "comparison-rule",
+              "object_kind": "object",
+              "classification": "collateral_rework",
+              "what_changed": "Replaced the prior comparison-contract explanation with stability retry, variance, unstable-marking, and no-averaging language, dropping the prior prose about assembler merging, chosen-baseline comparison, and threshold narration.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[comparison-rule].text",
+                  "observation": "The entire explanatory body after fingerprint matching is replaced, including deletion of prior threshold-narration wording not required by the edit."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "Comparison contract sticky",
+                  "observation": "The sticky now focuses on stability behavior; existing assembler, baseline, and threshold nodes still preserve the prior architecture."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "updated board intent",
+                  "observation": "The text rewrite is broadly declared, although removal of the prior explanatory detail is not separately identified."
+                }
+              ]
+            },
+            {
+              "object_id": "artifact-store",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 with its parent audit section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[artifact-store].geometry.y",
+                  "observation": "Only vertical position changes, matching the audit section's 368-pixel move."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing movement is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "transcript-store",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 with its parent audit section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[transcript-store].geometry.y",
+                  "observation": "Only vertical position changes, matching the audit section's move."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing movement is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "verdict-store",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 to remain in the relocated audit section and receive the variance-retention path.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[verdict-store].geometry.y",
+                  "observation": "Only vertical position changes, matching the parent-section move."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "audit storage",
+                  "observation": "The variance audit-storage work is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "retention-rule",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1456 to y=1824 with the Audit & retention section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[retention-rule].geometry.y",
+                  "observation": "Only vertical position changes by the same 368 pixels as its parent."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "promote-run",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 with the Baseline lifecycle section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[promote-run].geometry.y",
+                  "observation": "Only vertical position changes, preserving the lifecycle structure."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "chosen-baseline",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 with the Baseline lifecycle section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[chosen-baseline].geometry.y",
+                  "observation": "Only vertical position changes; label, size, and relationships remain intact."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "future-runs",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved downward from y=1344 to y=1712 with the Baseline lifecycle section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[future-runs].geometry.y",
+                  "observation": "Only vertical position changes; its direction and meaning remain unchanged."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "spacing and routing warnings W1–W28",
+                  "observation": "Related spacing is acknowledged."
+                }
+              ]
+            },
+            {
+              "object_id": "c-movement-swing",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added flow from Threshold movement to Comparable-run swing?.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-movement-swing]",
+                  "observation": "Introduces swing detection after comparable threshold movement."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "bounded swing re-runs",
+                  "observation": "The swing-trigger flow is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-swing-retry",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added flow from Comparable-run swing? to Bounded retry allowance.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-swing-retry]",
+                  "observation": "Structurally subjects detected swings to the retry allowance."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "bounded swing re-runs",
+                  "observation": "The bounded retry flow is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-retry-variance",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added flow from Bounded retry allowance to Observed attempt variance.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-retry-variance]",
+                  "observation": "Shows retry attempts producing the recorded variance."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "retained attempt variance",
+                  "observation": "The variance-producing flow is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-variance-unstable",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added flow from Observed attempt variance to Unstable result.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-variance-unstable]",
+                  "observation": "Communicates that retained attempt observations can resolve to persistent instability."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "explicit unstable scorecard marking",
+                  "observation": "The unstable outcome flow is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-retry-scheduler",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added orange dashed feedback connection from Bounded retry allowance to Suite scheduler labeled 're-run scenario'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-retry-scheduler]",
+                  "observation": "Explicitly implements the requested scenario re-run loop."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "orange dashed route from section 5a to Suite scheduler",
+                  "observation": "The re-run feedback path is visible across the board."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "Added bounded swing re-runs",
+                  "observation": "The feedback path is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-unstable-scorecard",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added red flow from Unstable result to Run scorecard · stability.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-unstable-scorecard]",
+                  "observation": "Directly communicates scorecard marking for a persistent unstable result."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "red route from Unstable result to scorecard",
+                  "observation": "The unstable-to-scorecard relationship is visibly explicit."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "explicit unstable scorecard marking",
+                  "observation": "The connection is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "c-variance-verdict-store",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added dashed connection from Observed attempt variance to Verdicts + evidence labeled 'retain variance'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[c-variance-verdict-store]",
+                  "observation": "Makes the requested variance recording persistent and auditable."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "retained attempt variance, audit storage",
+                  "observation": "The storage connection is explicitly declared."
+                }
+              ]
+            }
+          ],
+          "collateral_change_count": 1,
+          "scope_summary": "All four atomic stability requirements landed: comparable-run swing detection, bounded scenario re-runs, retained attempt variance, and explicit unstable scorecard marking without silent averaging. The largest in-scope effect is the new 5a/5b stability subsystem with scheduler feedback, scorecard output, and audit retention. Most geometry changes are necessary accommodations that expand section 5 and shift the two lower sections intact. The sole collateral effect is replacement of the comparison-rule prose, which drops prior explanatory wording about assembler merging, chosen-baseline comparison, and threshold narration; the existing nodes and connections preserve that architecture, so the impact is minor.",
+          "scoring_status": "scored",
+          "exclusion_reason": null,
+          "score": 8
+        }
+      }
+    ],
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 30681,
+    "output_tokens": 5917
+  },
+  "flags": []
+}

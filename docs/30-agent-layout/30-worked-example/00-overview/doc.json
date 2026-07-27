@@ -22,18 +22,18 @@
         "b-worked-stepper-body-12"
       ],
       "props": {
-        "covers": "Overview and index of the seven-step worked example: one board built program-first, each step an edit to the layout program — a lane and a stage, the runner grid, the board hub, a score column, one align line, a fan plus arrows, and the final 2x2 board edit — each step a child page with its program, prose, and solved board.",
+        "covers": "Overview and index of the seven-stage worked example: one board built through section-skeleton, per-section content, connection, and review batches, with fresh board digests, local deltas, cumulative board diffs, lint changes, routed truth, request status, and painted-extent renders.",
         "format": "mdx",
         "type": "design",
         "concepts": [
           "worked example",
-          "layout program",
-          "hug lane",
-          "grid",
-          "align",
-          "fan",
-          "arrows",
-          "diff overlay"
+          "apply_ops",
+          "pushed perception",
+          "atomic operation batch",
+          "auto-fit",
+          "section close-up",
+          "production routes",
+          "cumulative board diff"
         ]
       }
     },
@@ -57,49 +57,16 @@
       "props": {},
       "text": [
         {
-          "insert": "A small runner-and-score board built up program-first: every step below edits the layout program, never a coordinate. On each step the solver re-derives all geometry from scratch — "
+          "insert": "A small runner-and-score board grows through ordered "
         },
         {
-          "insert": "expandSketch",
+          "insert": "apply_ops",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "expandSketch"
-            }
+            "code": true
           }
         },
         {
-          "insert": " lays out the boxes and "
-        },
-        {
-          "insert": "routeSketchEdges",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "routeSketchEdges"
-            }
-          }
-        },
-        {
-          "insert": " routes the arrows — into the same 1024x576 frame the board generator uses ("
-        },
-        {
-          "insert": "WORKED_SIZE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/scripts/generate-docs-boards.ts",
-              "symbol": "WORKED_SIZE"
-            }
-          }
-        },
-        {
-          "insert": "). Each step is its own page showing the program verbatim and the solved board; the rule ids in the prose refer to the "
+          "insert": " calls against one session draft, grouped into seven incremental instructions. For each instruction, the model studies the latest pushed digest and render, sends the complete section skeleton needed by that instruction, fills one section per batch while judging each result, adds connections after the nodes exist, and reviews bottom-up. Each page shows the ordered JSON call payloads for that stage and the frozen board illustration after it. The harness validates each whole batch before mutation, snaps geometry to the 16px grid, reconciles section membership from geometry, auto-fits affected sections, and routes connections. The fresh BOARD digest, DELTA, lint state, and renders tell the model what actually happened. The "
         },
         {
           "insert": "rulebook",
@@ -112,7 +79,7 @@
           }
         },
         {
-          "insert": " (R1-R10)."
+          "insert": " documents how the named R1-R10 concerns are owned by the aesthetic, operation mechanics, and diagnostics."
         }
       ]
     },
@@ -148,7 +115,7 @@
           }
         },
         {
-          "insert": " — one row split at 1:4 — a config lane pinned NW at its natural size, three stacked pills, and a stage placeholder."
+          "insert": " — establish the Config and Stage sections first, then add three stacked pills and a placeholder sticky."
         }
       ]
     },
@@ -171,7 +138,7 @@
           }
         },
         {
-          "insert": " — the stage becomes the runner loop — a 1x4 grid at the loose 96 gap, ending in a decision cell."
+          "insert": " — replace the placeholder stage with four evenly spaced runner nodes ending in a decision."
         }
       ]
     },
@@ -194,7 +161,7 @@
           }
         },
         {
-          "insert": " — the stage band splits vertically, stacking the loop over a board hub with its own 1x3 grid of database stores."
+          "insert": " — trim and move the runner row upward, then add a Board — hub section with three database stores."
         }
       ]
     },
@@ -217,7 +184,7 @@
           }
         },
         {
-          "insert": " — a third root band adds the score gate as a 3x1 vertical chain; the pinned config lane keeps its natural size."
+          "insert": " — add the Score gate section, reflow the existing bands, and build its three-node vertical chain."
         }
       ]
     },
@@ -230,17 +197,17 @@
       },
       "text": [
         {
-          "insert": "Step 5 — Line up the hero row",
+          "insert": "Step 5 — Review the hero row",
           "attributes": {
             "reference": {
               "kind": "doc",
               "path": "30-agent-layout/30-worked-example/05-step-hero-row",
-              "label": "Step 5 — Line up the hero row"
+              "label": "Step 5 — Review the hero row"
             }
           }
         },
         {
-          "insert": " — one added align line puts cli and objdiff on a shared horizontal centerline across section boundaries."
+          "insert": " — use an empty batch with view to examine the Score gate without mutating the board, and judge whether the intended shared centerline reads clearly."
         }
       ]
     },
@@ -263,7 +230,7 @@
           }
         },
         {
-          "insert": " — the score gate gains two outcome pills, a fan centers the regress decision over them, and the arrows block declares every connection."
+          "insert": " — compact the score chain and add two outcome pills, judge that render, then add ten routed connections after all endpoints exist."
         }
       ]
     },
@@ -286,7 +253,7 @@
           }
         },
         {
-          "insert": " — the board grid goes 1x3 to 2x2 with a new cache cell; the lattice re-solves and the rest of the board stays put."
+          "insert": " — explicitly reposition the three stores into a 2x2 arrangement, add cache, review the routed consequence, and finalize the cumulative proposal."
         }
       ]
     },
@@ -299,7 +266,7 @@
       },
       "text": [
         {
-          "insert": "How the steps show locality"
+          "insert": "How pushed results show locality"
         }
       ]
     },
@@ -310,7 +277,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The lab's interactive stepper (deleted with the lab) diffed the two solved boards object by object between steps: every object whose geometry changed got a highlight ring, moved and unchanged counts sat beside the step annotation, and program lines new to the step were highlighted in the code pane. The locality it made visible still holds when comparing each step's board with the next — a structural edit like "
+          "insert": "Every successful edit batch and pure look carries a fresh BOARD digest. Each accepted batch also separates DELTA—the before-to-after changes from this call—from BOARD DIFF, the cumulative baseline-to-draft operations a committed finalize proposes. That makes locality explicit. A structural stage such as "
         },
         {
           "insert": "step 4",
@@ -323,7 +290,7 @@
           }
         },
         {
-          "insert": "'s third root band re-solves whole bands, while "
+          "insert": " moves and resizes whole bands through a skeleton batch followed by one content batch per touched section. "
         },
         {
           "insert": "step 5",
@@ -331,12 +298,12 @@
             "reference": {
               "kind": "doc",
               "path": "30-agent-layout/30-worked-example/05-step-hero-row",
-              "label": "Step 5 — Line up the hero row"
+              "label": "Step 5 — Review the hero row"
             }
           }
         },
         {
-          "insert": "'s single align line and "
+          "insert": " is a pure look: its empty DELTA and fresh BOARD digest accompany a section close-up and no fresh full-board render. "
         },
         {
           "insert": "step 7",
@@ -349,7 +316,7 @@
           }
         },
         {
-          "insert": "'s grid edit leave most of the board unchanged."
+          "insert": " changes only the hub stores and the route affected by the moved saves endpoint, while the cumulative BOARD DIFF still carries the entire seven-step proposal."
         }
       ]
     }

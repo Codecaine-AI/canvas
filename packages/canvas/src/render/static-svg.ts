@@ -21,13 +21,19 @@
  * `outlineSpecFor`/`outlinePolygonForSpec` for shape silhouettes,
  * `routeConnection` for elbow connector paths, the palette role tables for
  * every color, and the text-slot system for text placement — so a static
- * render matches the app. Known approximations (v1): text wrapping uses the
- * repo's shared char-width heuristic rather than real font metrics; sticky
- * text renders as plain lines (no markdown); flowchart silhouettes whose
- * outline is the plain bbox (document, database, folder, …) render as the
- * base rounded rect. Icon objects render their real Nucleo glyph via the
- * pure registry (objects/shapes/icon/icon-glyphs.ts), falling back to a
- * neutral rounded rect only for unknown glyph ids.
+ * render matches the app. Body-text line breaks and ellipsis decisions use
+ * real Inter advance widths (render/text-metrics.ts over the generated glyph
+ * table), sticky text lays out as its markdown line boxes
+ * (render/sticky-text.ts mirroring objects/sticky/markdown.tsx), and the
+ * flowchart types whose live defs draw custom inline-SVG silhouettes
+ * (document, database, folder, document-stack, cylinder-horizontal,
+ * internal-storage, page-corner, predefined-process) draw the same
+ * silhouette geometry here. Icon objects render their real Nucleo glyph via
+ * the pure registry (objects/shapes/icon/icon-glyphs.ts), falling back to a
+ * neutral rounded rect only for unknown glyph ids. Known approximations:
+ * measurement ignores kerning/ligatures (marginally conservative), and the
+ * section title chip and connection label chip keep their char-count width
+ * heuristics — those ARE the live stage's own sizing rules.
  */
 
 import {
@@ -66,6 +72,7 @@ import {
   resolveTextSlot,
   slotLineHeightPx,
   titleChipMaxWidthPx,
+  titleChipScale,
   type LocalRect,
   type SlotTypography,
   type TextSlot,
@@ -81,6 +88,15 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
+import { STICKY_MARKDOWN_MONO_FONT } from "../objects/sticky/markdown-editing";
+import { interCharWidthPx, measureInterTextPx } from "./text-metrics";
+import {
+  layoutStickyText,
+  STICKY_CODE_MONO_ADVANCE_EM,
+  STICKY_LINE_PITCH_PX,
+  type StickyTextRow,
+  type StickyTextSegment,
+} from "./sticky-text";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -132,8 +148,10 @@ const CONNECTION_LABEL_TEXT_COLOR = OBJECT_TEXT_COLOR;
 const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
 
 /**
- * Average glyph width as a fraction of font size — the repo-wide wrap
- * heuristic (objects/text-slots.ts BELOW_TEXT_CHAR_WIDTH_PX = 15 * 0.62).
+ * Average glyph width as a fraction of font size — the char-count heuristic
+ * the SECTION TITLE CHIP sizes itself with, live and here (objects/
+ * text-slots.ts estimateTitleChipWidthPx). Body-text wrapping does NOT use
+ * this: it measures real Inter advances (render/text-metrics.ts).
  */
 const CHAR_WIDTH_RATIO = 0.62;
 
@@ -197,17 +215,69 @@ function idSlug(value: string): string {
   return slug.length > 0 ? slug : "canvas";
 }
 
+/**
+ * Strict-interior overlap between an element rect and the camera viewBox,
+ * matching the rasterizer's own viewport test (see the guard in the resvg
+ * wrapper): filtered elements and nested `<svg>`s whose rect has no interior
+ * intersection with the viewBox abort resvg natively when clipped to an empty
+ * IntRect. Elements that fail this check must render without those features
+ * (sticky without its shadow filter, icon as its fallback rect) so every
+ * emitted SVG is rasterizer-safe regardless of how far the camera is cropped.
+ */
+function paintsInsideViewBox(
+  rect: { x: number; y: number; width: number; height: number },
+  viewBox: CanvasBounds,
+): boolean {
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    rect.x < viewBox.x + viewBox.width &&
+    rect.x + rect.width > viewBox.x &&
+    rect.y < viewBox.y + viewBox.height &&
+    rect.y + rect.height > viewBox.y
+  );
+}
+
 // ---------------------------------------------------------------------------
-// Text layout — the string-producing twin of text-slots.ts's
-// estimateWrappedText (same greedy algorithm and char-width heuristic, but
-// keeping the actual line strings so we can emit <tspan>s).
+// Text layout — greedy word wrap on REAL Inter advance widths
+// (render/text-metrics.ts), mirroring the browser's word-wrap-then-
+// break-word behavior for body text (objects/object-shell.tsx renders slot
+// text with white-space: pre-wrap + overflow-wrap: break-word): lines break
+// at spaces, and a single word wider than the box breaks intra-word at the
+// overflow point. Whitespace runs collapse to single spaces, matching the
+// wrapped-line model the text-slot estimators use.
 // ---------------------------------------------------------------------------
 
-function wrapTextLines(text: string, availableWidthPx: number, fontSizePx: number): string[] {
+/** Longest prefix of `word` that fits `widthPx` (min 1 codepoint). */
+function overflowBreakIndex(
+  word: string,
+  widthPx: number,
+  fontSizePx: number,
+  fontWeight: number,
+): number {
+  const codePoints = [...word];
+  let used = 0;
+  let taken = 0;
+  let endIndex = 0;
+  for (const char of codePoints) {
+    const charWidth = measureInterTextPx(char, fontSizePx, fontWeight);
+    if (taken > 0 && used + charWidth > widthPx) break;
+    used += charWidth;
+    taken += 1;
+    endIndex += char.length;
+  }
+  return endIndex;
+}
+
+function wrapTextLines(
+  text: string,
+  availableWidthPx: number,
+  fontSizePx: number,
+  fontWeight: number,
+): string[] {
   if (text === "") return [];
-  const charWidth = fontSizePx * CHAR_WIDTH_RATIO;
-  const width = Math.max(charWidth, availableWidthPx);
-  const maxChars = Math.max(1, Math.floor(width / charWidth));
+  const width = Math.max(1, availableWidthPx);
+  const spaceWidth = measureInterTextPx(" ", fontSizePx, fontWeight);
   const lines: string[] = [];
 
   for (const hardLine of text.split("\n")) {
@@ -217,24 +287,32 @@ function wrapTextLines(text: string, availableWidthPx: number, fontSizePx: numbe
       continue;
     }
     let current = "";
+    let currentWidth = 0;
     for (let word of words) {
-      // Break words longer than the line onto their own chunked lines.
-      while (word.length > maxChars) {
+      let wordWidth = measureInterTextPx(word, fontSizePx, fontWeight);
+      // Break words wider than the line at the overflow point.
+      while (wordWidth > width) {
         if (current !== "") {
           lines.push(current);
           current = "";
+          currentWidth = 0;
         }
-        lines.push(word.slice(0, maxChars));
-        word = word.slice(maxChars);
+        const breakIndex = overflowBreakIndex(word, width, fontSizePx, fontWeight);
+        lines.push(word.slice(0, breakIndex));
+        word = word.slice(breakIndex);
+        wordWidth = measureInterTextPx(word, fontSizePx, fontWeight);
       }
       if (word === "") continue;
       if (current === "") {
         current = word;
-      } else if ((current.length + 1 + word.length) * charWidth <= width) {
+        currentWidth = wordWidth;
+      } else if (currentWidth + spaceWidth + wordWidth <= width) {
         current = `${current} ${word}`;
+        currentWidth += spaceWidth + wordWidth;
       } else {
         lines.push(current);
         current = word;
+        currentWidth = wordWidth;
       }
     }
     if (current !== "") lines.push(current);
@@ -243,12 +321,26 @@ function wrapTextLines(text: string, availableWidthPx: number, fontSizePx: numbe
   return lines;
 }
 
-/** Clamp wrapped lines to the slot rect, ellipsizing the last visible line (mirrors the app's line-clamp). */
-function clampLines(lines: string[], maxLines: number): string[] {
+/**
+ * Clamp wrapped lines to the slot rect, ellipsizing the last visible line
+ * (mirrors the app's -webkit-line-clamp): trailing characters drop until the
+ * line plus the ellipsis — measured at its real advance — fits the width.
+ */
+function clampLines(
+  lines: string[],
+  maxLines: number,
+  widthPx: number,
+  fontSizePx: number,
+  fontWeight: number,
+): string[] {
   if (lines.length <= maxLines) return lines;
   const clamped = lines.slice(0, maxLines);
   const lastIndex = clamped.length - 1;
-  clamped[lastIndex] = `${(clamped[lastIndex] ?? "").replace(/\s+$/, "")}…`;
+  let last = (clamped[lastIndex] ?? "").replace(/\s+$/, "");
+  while (last !== "" && measureInterTextPx(`${last}…`, fontSizePx, fontWeight) > widthPx) {
+    last = last.slice(0, -1).replace(/\s+$/, "");
+  }
+  clamped[lastIndex] = `${last}…`;
   return clamped;
 }
 
@@ -265,11 +357,11 @@ function renderSlotTextBlock(
 ): string {
   if (text === "" || rect.width <= 0) return "";
   const lineHeight = slotLineHeightPx(typography);
-  let lines = wrapTextLines(text, rect.width, typography.fontSizePx);
+  let lines = wrapTextLines(text, rect.width, typography.fontSizePx, typography.fontWeight);
   if (lines.length === 0) return "";
   if (options?.clampToRect !== false && rect.height > 0) {
     const maxLines = Math.max(1, Math.floor(rect.height / lineHeight));
-    lines = clampLines(lines, maxLines);
+    lines = clampLines(lines, maxLines, rect.width, typography.fontSizePx, typography.fontWeight);
   }
 
   const blockHeight = lines.length * lineHeight;
@@ -357,7 +449,6 @@ function textSlotForObject(object: InteractiveCanvasObject): TextSlot | null {
   if (object.type === "icon") return BELOW_TEXT_SLOT;
   if (object.type === "arrow-shape") return ARROW_SHAPE_TEXT_SLOT;
   if (object.type === "chevron") return CHEVRON_TEXT_SLOT;
-  if (effectiveRenderShape(object) === "note") return INSET_BODY_TEXT_SLOT;
   return CENTER_TEXT_SLOT;
 }
 
@@ -372,6 +463,8 @@ function effectiveRenderShape(object: InteractiveCanvasObject): string {
 
 function renderObjectText(object: InteractiveCanvasObject): string {
   if (object.text === "") return "";
+  // Sticky notes render their text as markdown line boxes, not plain slot text.
+  if (effectiveRenderShape(object) === "note") return renderStickyMarkdownText(object);
   const slot = textSlotForObject(object);
   if (!slot) return "";
   const resolved = resolveTextSlot(slot, object);
@@ -392,6 +485,157 @@ function renderObjectText(object: InteractiveCanvasObject): string {
 
 function polygonPointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${fmt(point.x)},${fmt(point.y)}`).join(" ");
+}
+
+// ---------------------------------------------------------------------------
+// Sticky markdown — line boxes from render/sticky-text.ts (which mirrors the
+// live StickyMarkdown renderer), emitted as one <text> plus code-chip
+// background rects. Only the geometry-bearing pieces are exact; the chip
+// visuals approximate the live CSS tastefully (same tint, radius, size).
+// ---------------------------------------------------------------------------
+
+/** Code chip visuals — mirrors the inline `<code>` CSS in objects/sticky/markdown.tsx. */
+const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
+const STICKY_CODE_CHIP_RADIUS_PX = 3;
+/** Chip height in em of the code font size (approximates the inline box's height). */
+const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
+
+/** Approximate advance of one already-laid-out sticky character, for tail trimming. */
+function stickySegmentCharWidthPx(segment: StickyTextSegment, char: string): number {
+  if (segment.style === "code") return segment.fontSizePx * STICKY_CODE_MONO_ADVANCE_EM;
+  return interCharWidthPx(char.codePointAt(0)!, segment.fontSizePx, segment.fontWeight);
+}
+
+/**
+ * Ellipsizes a clamped sticky row in place (mirrors -webkit-line-clamp):
+ * trailing characters drop until the row plus the ellipsis fits the slot
+ * width, then the ellipsis is appended to the final segment.
+ */
+function ellipsizeStickyRow(row: StickyTextRow, slotWidthPx: number): void {
+  const ellipsisWidth = measureInterTextPx("…", row.fontSizePx, row.fontWeight);
+  const rowEnd = () => {
+    const last = row.segments[row.segments.length - 1];
+    return last ? last.xPx + last.widthPx : row.indentPx;
+  };
+  while (row.segments.length > 0 && rowEnd() + ellipsisWidth > slotWidthPx) {
+    const last = row.segments[row.segments.length - 1]!;
+    const chars = [...last.text];
+    const removed = chars.pop();
+    if (removed === undefined || chars.length === 0) {
+      row.segments.pop();
+      continue;
+    }
+    last.text = chars.join("");
+    last.widthPx -= stickySegmentCharWidthPx(last, removed);
+  }
+  const last = row.segments[row.segments.length - 1];
+  if (last && last.style !== "code") {
+    last.text = `${last.text}…`;
+    last.widthPx += ellipsisWidth;
+  } else {
+    row.segments.push({
+      text: "…",
+      style: "plain",
+      xPx: rowEnd(),
+      widthPx: ellipsisWidth,
+      fontSizePx: row.fontSizePx,
+      fontWeight: row.fontWeight,
+    });
+  }
+}
+
+/**
+ * Sticky body text as its markdown line stack: per-line font size/weight,
+ * bullet glyph columns, depth indentation and 36px line pitch mirroring the
+ * live StickyMarkdown layout, wrapped on real Inter advances. Rows beyond
+ * the slot's height clamp are dropped and the last visible row ellipsized —
+ * the same overflow the live -webkit-line-clamp shows.
+ */
+function renderStickyMarkdownText(object: InteractiveCanvasObject): string {
+  const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object);
+  if (resolved.hidden) return "";
+  const rect = {
+    x: object.geometry.x + resolved.rect.x,
+    y: object.geometry.y + resolved.rect.y,
+    width: resolved.rect.width,
+    height: resolved.rect.height,
+  };
+  if (rect.width <= 0 || rect.height <= 0) return "";
+  const typography = resolved.typography;
+
+  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx);
+  const maxRows = Math.max(1, Math.floor(rect.height / STICKY_LINE_PITCH_PX));
+  const clamped = rows.slice(0, maxRows);
+  if (rows.length > maxRows && clamped.length > 0) {
+    ellipsizeStickyRow(clamped[clamped.length - 1]!, rect.width);
+  }
+
+  const chipRects: string[] = [];
+  const tspans: string[] = [];
+  clamped.forEach((row, rowIndex) => {
+    const centerY = rect.y + rowIndex * STICKY_LINE_PITCH_PX + STICKY_LINE_PITCH_PX / 2;
+    if (row.bullet) {
+      tspans.push(
+        tag(
+          "tspan",
+          {
+            x: rect.x + row.bullet.xPx,
+            y: centerY,
+            ...(row.fontSizePx !== typography.fontSizePx ? { "font-size": row.fontSizePx } : null),
+          },
+          escapeXml(row.bullet.glyph),
+        ),
+      );
+    }
+    for (const segment of row.segments) {
+      if (segment.text === "") continue;
+      if (segment.style === "code") {
+        const chipHeight = segment.fontSizePx * STICKY_CODE_CHIP_HEIGHT_EM;
+        chipRects.push(
+          tag("rect", {
+            x: rect.x + segment.xPx,
+            y: centerY - chipHeight / 2,
+            width: segment.widthPx,
+            height: chipHeight,
+            rx: STICKY_CODE_CHIP_RADIUS_PX,
+            fill: "#000000",
+            "fill-opacity": STICKY_CODE_CHIP_FILL_OPACITY,
+          }),
+        );
+      }
+      tspans.push(
+        tag(
+          "tspan",
+          {
+            x: rect.x + segment.xPx,
+            y: centerY,
+            ...(segment.fontSizePx !== typography.fontSizePx
+              ? { "font-size": segment.fontSizePx }
+              : null),
+            ...(segment.fontWeight !== typography.fontWeight
+              ? { "font-weight": segment.fontWeight }
+              : null),
+            ...(segment.style === "code" ? { "font-family": STICKY_MARKDOWN_MONO_FONT } : null),
+          },
+          escapeXml(segment.text),
+        ),
+      );
+    }
+  });
+  if (tspans.length === 0) return "";
+
+  const text = tag(
+    "text",
+    {
+      fill: typography.color,
+      "font-size": typography.fontSizePx,
+      "font-weight": typography.fontWeight,
+      "text-anchor": "start",
+      "dominant-baseline": "central",
+    },
+    tspans.join(""),
+  );
+  return chipRects.join("") + text;
 }
 
 // ---------------------------------------------------------------------------
@@ -476,18 +720,364 @@ function renderIconGlyph(
   );
 }
 
+// ---------------------------------------------------------------------------
+// Custom flowchart silhouettes — the eight types whose live defs draw their
+// own inline-SVG (or CSS) silhouette instead of an outline-module polygon.
+// Geometry is mirrored from each def (the def modules are .tsx/React and
+// cannot be imported here); each helper carries a pointer to its source of
+// truth. The live inline SVGs draw in object-local px with the stroke
+// centered on the path, so these emit the same paths translated to world
+// coordinates. Anchor/overlap geometry stays bbox in both worlds — only the
+// drawn shape differs from the base rounded rect.
+// ---------------------------------------------------------------------------
+
+type ShapePaint = { fill: string; border: string };
+type WorldRect = { x: number; y: number; width: number; height: number };
+
+/** Mirrors DOCUMENT_GEOMETRY in objects/shapes/flowchart/document.tsx. */
+const DOCUMENT_GEOMETRY = { waveShoulderYRatio: 0.82, waveCrestYRatio: 0.96 } as const;
+/** Mirrors DOCUMENT_STACK_GEOMETRY in objects/shapes/flowchart/document-stack.tsx. */
+const DOCUMENT_STACK_OFFSET_RATIO = 0.06;
+const DOCUMENT_STACK_BACK_PAGE_OPACITY = 0.82;
+/** Mirrors FOLDER_GEOMETRY in objects/shapes/flowchart/folder.tsx. */
+const FOLDER_GEOMETRY = { tabWidthRatio: 0.38, tabTopRatio: 0.08, tabBottomRatio: 0.24 } as const;
+/** Mirrors PREDEFINED_PROCESS_GEOMETRY in objects/shapes/flowchart/predefined-process.tsx. */
+const PREDEFINED_PROCESS_GEOMETRY = {
+  cornerRadiusPx: 5,
+  barWidthPx: 4,
+  barInsetRatio: 0.047,
+} as const;
+/** Internal-storage rule inset — mirrors the 15% left/top rules in objects/shapes/flowchart/internal-storage.tsx. */
+const INTERNAL_STORAGE_RULE_INSET_RATIO = 0.15;
+/** Page-corner fold — mirrors the clip-path polygon in objects/shapes/flowchart/page-corner.tsx. */
+const PAGE_CORNER_FOLD = { foldXRatio: 0.76, foldYRatio: 0.24 } as const;
+
+/** Mirrors documentWavyPath in objects/shapes/flowchart/document.tsx, in world coordinates. */
+function documentWavyPath(x: number, y: number, width: number, height: number): string {
+  const right = x + width;
+  const shoulderY = y + height * DOCUMENT_GEOMETRY.waveShoulderYRatio;
+  const crestY = y + height * DOCUMENT_GEOMETRY.waveCrestYRatio;
+  return [
+    `M ${fmt(x)} ${fmt(y)}`,
+    `L ${fmt(right)} ${fmt(y)}`,
+    `L ${fmt(right)} ${fmt(shoulderY)}`,
+    `C ${fmt(x + width * 0.83)} ${fmt(shoulderY)} ${fmt(x + width * 0.83)} ${fmt(crestY)} ${fmt(x + width * 0.66)} ${fmt(crestY)}`,
+    `C ${fmt(x + width * 0.5)} ${fmt(crestY)} ${fmt(x + width * 0.5)} ${fmt(shoulderY)} ${fmt(x + width * 0.33)} ${fmt(shoulderY)}`,
+    `C ${fmt(x + width * 0.16)} ${fmt(shoulderY)} ${fmt(x + width * 0.16)} ${fmt(crestY)} ${fmt(x)} ${fmt(crestY)}`,
+    "Z",
+  ].join(" ");
+}
+
+function silhouettePath(
+  d: string,
+  paint: ShapePaint,
+  strokeWidth: number,
+  extra?: Record<string, string | number | undefined>,
+): string {
+  return tag("path", {
+    d,
+    fill: paint.fill,
+    stroke: paint.border,
+    "stroke-width": strokeWidth,
+    ...extra,
+  });
+}
+
+/** Wavy-bottom document (objects/shapes/flowchart/document.tsx). */
+function renderDocumentSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
+  return silhouettePath(
+    documentWavyPath(rect.x, rect.y, rect.width, rect.height),
+    paint,
+    strokeWidth,
+    { "stroke-linejoin": "round" },
+  );
+}
+
+/** Two offset wavy pages, back page dimmed (objects/shapes/flowchart/document-stack.tsx). */
+function renderDocumentStackSilhouette(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string {
+  const offsetX = rect.width * DOCUMENT_STACK_OFFSET_RATIO;
+  const offsetY = rect.height * DOCUMENT_STACK_OFFSET_RATIO;
+  const pageWidth = rect.width - offsetX;
+  const pageHeight = rect.height - offsetY;
+  return (
+    silhouettePath(documentWavyPath(rect.x, rect.y, pageWidth, pageHeight), paint, strokeWidth, {
+      "stroke-linejoin": "round",
+      opacity: DOCUMENT_STACK_BACK_PAGE_OPACITY,
+    }) +
+    silhouettePath(
+      documentWavyPath(rect.x + offsetX, rect.y + offsetY, pageWidth, pageHeight),
+      paint,
+      strokeWidth,
+      { "stroke-linejoin": "round" },
+    )
+  );
+}
+
+/** Cylinder: lid ellipse over a curved-cap body (objects/shapes/flowchart/database.tsx). */
+function renderDatabaseSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
+  const left = rect.x + rect.width * 0.04;
+  const right = rect.x + rect.width * 0.96;
+  const lidY = rect.y + rect.height * 0.22;
+  const lidControlY = rect.y + rect.height * 0.12;
+  const bottomY = rect.y + rect.height * 0.78;
+  const bottomControlY = rect.y + rect.height * 0.88;
+  const bodyPath = [
+    `M ${fmt(left)} ${fmt(lidY)}`,
+    `C ${fmt(left)} ${fmt(lidControlY)} ${fmt(right)} ${fmt(lidControlY)} ${fmt(right)} ${fmt(lidY)}`,
+    `L ${fmt(right)} ${fmt(bottomY)}`,
+    `C ${fmt(right)} ${fmt(bottomControlY)} ${fmt(left)} ${fmt(bottomControlY)} ${fmt(left)} ${fmt(bottomY)}`,
+    "Z",
+  ].join(" ");
+  return (
+    silhouettePath(bodyPath, paint, strokeWidth) +
+    tag("ellipse", {
+      cx: rect.x + rect.width * 0.5,
+      cy: lidY,
+      rx: rect.width * 0.46,
+      ry: rect.height * 0.12,
+      fill: paint.fill,
+      stroke: paint.border,
+      "stroke-width": strokeWidth,
+    })
+  );
+}
+
+/** Tab + body outline (objects/shapes/flowchart/folder.tsx). */
+function renderFolderSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
+  const tabWidth = rect.width * FOLDER_GEOMETRY.tabWidthRatio;
+  const tabTop = rect.height * FOLDER_GEOMETRY.tabTopRatio;
+  const tabBottom = rect.height * FOLDER_GEOMETRY.tabBottomRatio;
+  const d = [
+    `M ${fmt(rect.x)} ${fmt(rect.y + tabTop)}`,
+    `H ${fmt(rect.x + tabWidth)}`,
+    `V ${fmt(rect.y + tabBottom)}`,
+    `H ${fmt(rect.x + rect.width)}`,
+    `V ${fmt(rect.y + rect.height)}`,
+    `H ${fmt(rect.x)}`,
+    "Z",
+  ].join(" ");
+  return silhouettePath(d, paint, strokeWidth, { "stroke-linejoin": "round" });
+}
+
+/** Rounded-cap body + two open side curves (objects/shapes/flowchart/cylinder-horizontal.tsx). */
+function renderCylinderHorizontalSilhouette(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string {
+  const px = (value: number) => rect.x + (rect.width * value) / 100;
+  const py = (value: number) => rect.y + (rect.height * value) / 100;
+  const outerPath = [
+    `M ${fmt(px(18))} ${fmt(py(5))}`,
+    `H ${fmt(px(82))}`,
+    `C ${fmt(px(92))} ${fmt(py(5))} ${fmt(px(98))} ${fmt(py(25))} ${fmt(px(98))} ${fmt(py(50))}`,
+    `C ${fmt(px(98))} ${fmt(py(75))} ${fmt(px(92))} ${fmt(py(95))} ${fmt(px(82))} ${fmt(py(95))}`,
+    `H ${fmt(px(18))}`,
+    `C ${fmt(px(8))} ${fmt(py(95))} ${fmt(px(2))} ${fmt(py(75))} ${fmt(px(2))} ${fmt(py(50))}`,
+    `C ${fmt(px(2))} ${fmt(py(25))} ${fmt(px(8))} ${fmt(py(5))} ${fmt(px(18))} ${fmt(py(5))}`,
+    "Z",
+  ].join(" ");
+  const sideCurve = (edge: number, bulge: number, inner: number) =>
+    [
+      `M ${fmt(px(edge))} ${fmt(py(5))}`,
+      `C ${fmt(px(bulge))} ${fmt(py(5))} ${fmt(px(inner))} ${fmt(py(25))} ${fmt(px(inner))} ${fmt(py(50))}`,
+      `C ${fmt(px(inner))} ${fmt(py(75))} ${fmt(px(bulge))} ${fmt(py(95))} ${fmt(px(edge))} ${fmt(py(95))}`,
+    ].join(" ");
+  const openCurve = (d: string) =>
+    tag("path", { d, fill: "none", stroke: paint.border, "stroke-width": strokeWidth });
+  return (
+    silhouettePath(outerPath, paint, strokeWidth, { "stroke-linejoin": "round" }) +
+    openCurve(sideCurve(18, 28, 34)) +
+    openCurve(sideCurve(82, 72, 66))
+  );
+}
+
+/** The base rounded rect of the bbox tier (CSS border-box border → half-stroke inset). */
+function bboxRoundedRect(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+  cornerRadiusPx: number,
+): string {
+  const inset = strokeWidth / 2;
+  return tag("rect", {
+    x: rect.x + inset,
+    y: rect.y + inset,
+    width: Math.max(0, rect.width - strokeWidth),
+    height: Math.max(0, rect.height - strokeWidth),
+    rx: Math.max(0, cornerRadiusPx - inset),
+    fill: paint.fill,
+    stroke: paint.border,
+    "stroke-width": strokeWidth,
+  });
+}
+
+/**
+ * Base rect + inset "L" divider rules (objects/shapes/flowchart/
+ * internal-storage.tsx): each rule is a border-colored bar at 15% of the
+ * padding box (the border-box inset by the CSS border, i.e. the stroke),
+ * half a predefined-process bar thick.
+ */
+function renderInternalStorageSilhouette(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string {
+  const ruleThickness = PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2;
+  const innerX = rect.x + strokeWidth;
+  const innerY = rect.y + strokeWidth;
+  const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
+  const innerHeight = Math.max(0, rect.height - strokeWidth * 2);
+  return (
+    bboxRoundedRect(rect, paint, strokeWidth, BASE_CORNER_RADIUS_PX) +
+    tag("rect", {
+      x: innerX + innerWidth * INTERNAL_STORAGE_RULE_INSET_RATIO,
+      y: innerY,
+      width: ruleThickness,
+      height: innerHeight,
+      fill: paint.border,
+    }) +
+    tag("rect", {
+      x: innerX,
+      y: innerY + innerHeight * INTERNAL_STORAGE_RULE_INSET_RATIO,
+      width: innerWidth,
+      height: ruleThickness,
+      fill: paint.border,
+    })
+  );
+}
+
+/**
+ * Rounded rect + two inner vertical bars (objects/shapes/flowchart/
+ * predefined-process.tsx): border-colored 4px bars inset barInsetRatio of the
+ * padding-box width from each side, spanning the padding box's height.
+ */
+function renderPredefinedProcessSilhouette(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string {
+  const innerX = rect.x + strokeWidth;
+  const innerY = rect.y + strokeWidth;
+  const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
+  const innerHeight = Math.max(0, rect.height - strokeWidth * 2);
+  const barInset = innerWidth * PREDEFINED_PROCESS_GEOMETRY.barInsetRatio;
+  const bar = (x: number) =>
+    tag("rect", {
+      x,
+      y: innerY,
+      width: PREDEFINED_PROCESS_GEOMETRY.barWidthPx,
+      height: innerHeight,
+      fill: paint.border,
+    });
+  return (
+    bboxRoundedRect(rect, paint, strokeWidth, PREDEFINED_PROCESS_GEOMETRY.cornerRadiusPx) +
+    bar(innerX + barInset) +
+    bar(innerX + innerWidth - barInset - PREDEFINED_PROCESS_GEOMETRY.barWidthPx)
+  );
+}
+
+/**
+ * Rect with the top-right corner folded off (objects/shapes/flowchart/
+ * page-corner.tsx clip-path). The live CSS clip cuts the button's border
+ * along the fold, so the diagonal edge shows bare fill with no stroke —
+ * mirrored here by filling the full fold polygon and stroking only the
+ * un-clipped perimeter. Drawn on the half-stroke-inset rect like every
+ * CSS-border shape; the live corner radii (2/8px) are approximated square.
+ */
+function renderPageCornerSilhouette(
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string {
+  const inset = strokeWidth / 2;
+  const left = rect.x + inset;
+  const top = rect.y + inset;
+  const right = rect.x + rect.width - inset;
+  const bottom = rect.y + rect.height - inset;
+  const width = Math.max(0, right - left);
+  const height = Math.max(0, bottom - top);
+  const foldX = left + width * PAGE_CORNER_FOLD.foldXRatio;
+  const foldY = top + height * PAGE_CORNER_FOLD.foldYRatio;
+  const fillPath = [
+    `M ${fmt(left)} ${fmt(top)}`,
+    `L ${fmt(foldX)} ${fmt(top)}`,
+    `L ${fmt(right)} ${fmt(foldY)}`,
+    `L ${fmt(right)} ${fmt(bottom)}`,
+    `L ${fmt(left)} ${fmt(bottom)}`,
+    "Z",
+  ].join(" ");
+  const borderPath = [
+    `M ${fmt(right)} ${fmt(foldY)}`,
+    `L ${fmt(right)} ${fmt(bottom)}`,
+    `L ${fmt(left)} ${fmt(bottom)}`,
+    `L ${fmt(left)} ${fmt(top)}`,
+    `L ${fmt(foldX)} ${fmt(top)}`,
+  ].join(" ");
+  return (
+    tag("path", { d: fillPath, fill: paint.fill }) +
+    tag("path", {
+      d: borderPath,
+      fill: "none",
+      stroke: paint.border,
+      "stroke-width": strokeWidth,
+    })
+  );
+}
+
+/** Dispatch for the custom silhouettes; null falls through to the shared tiers. */
+function renderCustomSilhouette(
+  renderShape: string,
+  rect: WorldRect,
+  paint: ShapePaint,
+  strokeWidth: number,
+): string | null {
+  switch (renderShape) {
+    case "document":
+      return renderDocumentSilhouette(rect, paint, strokeWidth);
+    case "document-stack":
+      return renderDocumentStackSilhouette(rect, paint, strokeWidth);
+    case "database":
+      return renderDatabaseSilhouette(rect, paint, strokeWidth);
+    case "folder":
+      return renderFolderSilhouette(rect, paint, strokeWidth);
+    case "cylinder-horizontal":
+      return renderCylinderHorizontalSilhouette(rect, paint, strokeWidth);
+    case "internal-storage":
+      return renderInternalStorageSilhouette(rect, paint, strokeWidth);
+    case "predefined-process":
+      return renderPredefinedProcessSilhouette(rect, paint, strokeWidth);
+    case "page-corner":
+      return renderPageCornerSilhouette(rect, paint, strokeWidth);
+    default:
+      return null;
+  }
+}
+
 /**
  * The shape body silhouette. Polygon/ellipse outline kinds stroke the true
  * outline exactly like the app's SVG silhouettes (stroke centered on the
  * path). Bbox kinds mimic the CSS border-box border by insetting the rect by
  * half the stroke width.
  */
-function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: string | null): string {
+function renderShapeBody(
+  object: InteractiveCanvasObject,
+  stickyShadowFilterId: string | null,
+  viewBox: CanvasBounds,
+): string {
   const geometry = object.geometry;
   const renderShape = effectiveRenderShape(object);
+  // Rasterizer safety: filter references and nested <svg>s are only legal on
+  // elements that actually intersect the viewBox (paintsInsideViewBox).
+  const insideViewBox = paintsInsideViewBox(geometry, viewBox);
 
   // Sticky note ("note" render shape): flat square sticky fill, no border,
-  // down-biased shadow (objects/sticky/def.tsx STICKY_GEOMETRY).
+  // down-biased shadow (objects/sticky/def.tsx STICKY_GEOMETRY). A sticky
+  // wholly outside the viewBox draws without the shadow filter.
   if (renderShape === "note") {
     const fill = resolveStickyFill(object.color ?? FIRST_USE_COLORS.sticky);
     return tag("rect", {
@@ -496,7 +1086,9 @@ function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: 
       width: geometry.width,
       height: geometry.height,
       fill,
-      ...(stickyShadowFilterId ? { filter: `url(#${stickyShadowFilterId})` } : null),
+      ...(stickyShadowFilterId && insideViewBox
+        ? { filter: `url(#${stickyShadowFilterId})` }
+        : null),
     });
   }
 
@@ -505,8 +1097,10 @@ function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: 
 
   // Icon glyph family: render the real Nucleo glyph via the pure registry
   // (objects/shapes/icon/icon-glyphs.ts), mirroring IconShapeBody.tsx.
-  // Unknown/missing glyph id falls through to the neutral-rect bbox tier.
-  if (renderShape === "icon" || object.type === "icon") {
+  // Unknown/missing glyph id — or a glyph wholly outside the viewBox, whose
+  // nested <svg> would be rasterizer-unsafe — falls through to the
+  // neutral-rect bbox tier.
+  if ((renderShape === "icon" || object.type === "icon") && insideViewBox) {
     const glyphMarkup = renderIconGlyph(object, colors.fill, colors.border);
     if (glyphMarkup !== null) return glyphMarkup;
   }
@@ -526,6 +1120,11 @@ function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: 
       "stroke-width": strokeWidth,
     });
   }
+
+  // Custom flowchart silhouettes — types whose live defs draw inline-SVG/CSS
+  // silhouettes rather than an outline-module polygon.
+  const custom = renderCustomSilhouette(renderShape, geometry, colors, strokeWidth);
+  if (custom !== null) return custom;
 
   const spec = outlineSpecFor(object);
 
@@ -577,19 +1176,9 @@ function renderShapeBody(object: InteractiveCanvasObject, stickyShadowFilterId: 
     });
   }
 
-  // Bbox tier: the base rounded-rect trim (2px CSS radius track — the CSS
-  // border paints inside the box, so inset by half the stroke).
-  const inset = strokeWidth / 2;
-  return tag("rect", {
-    x: geometry.x + inset,
-    y: geometry.y + inset,
-    width: Math.max(0, geometry.width - strokeWidth),
-    height: Math.max(0, geometry.height - strokeWidth),
-    rx: Math.max(0, BASE_CORNER_RADIUS_PX - inset),
-    fill: colors.fill,
-    stroke: colors.border,
-    "stroke-width": strokeWidth,
-  });
+  // Bbox tier: the base rounded-rect trim (the CSS border paints inside the
+  // box, so inset by half the stroke).
+  return bboxRoundedRect(geometry, colors, strokeWidth, BASE_CORNER_RADIUS_PX);
 }
 
 // ---------------------------------------------------------------------------
@@ -630,16 +1219,22 @@ function renderSectionBackdrop(section: InteractiveCanvasObject): string {
   });
 }
 
-function renderSectionTitleChip(section: InteractiveCanvasObject): string {
+function renderSectionTitleChip(section: InteractiveCanvasObject, scale = 1): string {
   if (section.text === "") return "";
   const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
-  // Static render is zoom 1 → chip scale 1 (titleChipScale(1) === 1).
-  const maxWidth = titleChipMaxWidthPx(section.geometry.width, 1);
+  const maxWidth = titleChipMaxWidthPx(section.geometry.width, scale);
   const estimated = estimateTitleChipWidthPx(section.text);
   const chipWidth = Math.min(estimated, maxWidth);
   if (chipWidth <= 0) return "";
-  const chipX = section.geometry.x + TITLE_CHIP.insetFromSectionCornerPx;
-  const chipY = section.geometry.y + TITLE_CHIP.insetFromSectionCornerPx;
+  // The live chip counter-scales via a top-left-origin CSS transform pinned
+  // at the section-corner inset (SectionTitleChip.tsx + the chip CSS in
+  // objects/section/def.tsx). Mirror that exactly: at scale 1 the chip is
+  // drawn in absolute world coordinates; otherwise the same natural-size
+  // markup is wrapped in a translate-to-anchor + scale group.
+  const anchorX = section.geometry.x + TITLE_CHIP.insetFromSectionCornerPx;
+  const anchorY = section.geometry.y + TITLE_CHIP.insetFromSectionCornerPx;
+  const chipX = scale === 1 ? anchorX : 0;
+  const chipY = scale === 1 ? anchorY : 0;
   const borderInset = TITLE_CHIP.borderWidthPx / 2;
 
   // Ellipsize when the estimated natural width exceeds the section's budget
@@ -676,7 +1271,13 @@ function renderSectionTitleChip(section: InteractiveCanvasObject): string {
     },
     escapeXml(label),
   );
-  return rect + text;
+  const markup = rect + text;
+  if (scale === 1) return markup;
+  return tag(
+    "g",
+    { transform: `translate(${fmt(anchorX)} ${fmt(anchorY)}) scale(${fmt(scale)})` },
+    markup,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -728,10 +1329,34 @@ function arrowheadPolygon(
   return tag("polygon", { points: polygonPointsAttribute(points), fill: color });
 }
 
+/**
+ * World-space rect of a connection's label chip: fixed 30px height and the
+ * min-41px char-width heuristic, centered on the route's halfway point —
+ * the same chip the stage draws (connectors/Connector.tsx). The label chip
+ * does NOT counter-scale with zoom: the stage renders it at natural document
+ * size at every zoom level, so every consumer of this rect (the renderer
+ * itself, painted-extent cameras) treats it as fixed world geometry.
+ */
+export function connectionLabelChipRect(
+  label: string,
+  center: CanvasPoint,
+): { x: number; y: number; width: number; height: number } {
+  const width = Math.max(
+    CONNECTION_LABEL_MIN_WIDTH_PX,
+    label.length * CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX + CONNECTION_LABEL_PADDING_X_PX * 2,
+  );
+  return {
+    x: center.x - width / 2,
+    y: center.y - CONNECTION_LABEL_HEIGHT_PX / 2,
+    width,
+    height: CONNECTION_LABEL_HEIGHT_PX,
+  };
+}
+
 function renderConnector(
   connection: InteractiveCanvasConnection,
   objectsById: Map<string, InteractiveCanvasObject>,
-  obstacles: InteractiveCanvasObject[],
+  obstacles: ReadonlyArray<InteractiveCanvasObject>,
 ): string {
   const fromObject = objectsById.get(connection.from.objectId);
   const toObject = objectsById.get(connection.to.objectId);
@@ -775,17 +1400,14 @@ function renderConnector(
   // (connectors/Connector.tsx).
   const label = connection.label?.trim() ? connection.label : null;
   if (label) {
-    const labelWidth = Math.max(
-      CONNECTION_LABEL_MIN_WIDTH_PX,
-      label.length * CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX + CONNECTION_LABEL_PADDING_X_PX * 2,
-    );
+    const chip = connectionLabelChipRect(label, routed.labelPoint);
     const { x, y } = routed.labelPoint;
     parts.push(
       tag("rect", {
-        x: x - labelWidth / 2,
-        y: y - CONNECTION_LABEL_HEIGHT_PX / 2,
-        width: labelWidth,
-        height: CONNECTION_LABEL_HEIGHT_PX,
+        x: chip.x,
+        y: chip.y,
+        width: chip.width,
+        height: chip.height,
         rx: CONNECTION_LABEL_RADIUS_PX,
         fill: CONNECTION_LABEL_BACKGROUND,
         stroke: CONNECTION_LABEL_BORDER,
@@ -820,6 +1442,40 @@ type RenderContent = {
   connections: InteractiveCanvasConnection[];
 };
 
+/**
+ * Content selection for a section-scoped crop: every connection touching the
+ * included set is retained — boundary-crossing edges draw up to the crop edge
+ * and are clipped by the viewBox, never dropped — and the outside endpoint
+ * objects of retained connections are included too (rendered clipped), both
+ * because the router needs their geometry and because a partially-visible
+ * edge must aim at its true endpoint.
+ *
+ * `excludeEndpointId` names an object that must NOT be pulled in as a
+ * boundary endpoint (the content-fit crop omits its own section frame).
+ */
+function sectionScopedContent(
+  document: InteractiveCanvasDocument,
+  includedIds: ReadonlySet<string>,
+  options?: { excludeEndpointId?: string },
+): { objects: InteractiveCanvasObject[]; connections: InteractiveCanvasConnection[] } {
+  const connections = document.connections.filter(
+    (connection) =>
+      includedIds.has(connection.from.objectId) || includedIds.has(connection.to.objectId),
+  );
+  const retainedIds = new Set(includedIds);
+  for (const connection of connections) {
+    retainedIds.add(connection.from.objectId);
+    retainedIds.add(connection.to.objectId);
+  }
+  if (options?.excludeEndpointId !== undefined && !includedIds.has(options.excludeEndpointId)) {
+    retainedIds.delete(options.excludeEndpointId);
+  }
+  return {
+    objects: document.objects.filter((object) => retainedIds.has(object.id)),
+    connections,
+  };
+}
+
 function selectContent(
   document: InteractiveCanvasDocument,
   options: RenderStaticSvgOptions,
@@ -852,13 +1508,14 @@ function selectContent(
       padding ?? DEFAULT_CONTENT_FIT_PADDING_PX,
     );
     if (fitted) {
+      // Boundary-crossing connections are retained: the viewBox clips them at
+      // the crop edge instead of dropping them. Their outside endpoint objects
+      // come along (clipped) so the router draws the true route. The crop
+      // section itself stays excluded — this fit deliberately omits the frame,
+      // so edges attached to the frame itself have no drawable endpoint here.
       return {
         bounds: fitted,
-        objects: members,
-        connections: document.connections.filter(
-          (connection) =>
-            includedIds.has(connection.from.objectId) && includedIds.has(connection.to.objectId),
-        ),
+        ...sectionScopedContent(document, includedIds, { excludeEndpointId: sectionId }),
       };
     }
     // Empty/unknown section: fall through to the frame crop's semantics.
@@ -873,13 +1530,11 @@ function selectContent(
     if (sectionBounds) {
       const includedIds = sectionDescendantIds(document, sectionId);
       includedIds.add(sectionId);
+      // Boundary-crossing connections are retained and visibly clipped at the
+      // crop edge (see sectionScopedContent).
       return {
         bounds: sectionBounds,
-        objects: document.objects.filter((object) => includedIds.has(object.id)),
-        connections: document.connections.filter(
-          (connection) =>
-            includedIds.has(connection.from.objectId) && includedIds.has(connection.to.objectId),
-        ),
+        ...sectionScopedContent(document, includedIds),
       };
     }
     // Unknown/non-section id: fall back to the whole document (same semantics
@@ -916,23 +1571,50 @@ function resolvePixelSize(
 }
 
 // ---------------------------------------------------------------------------
-// Entry point
+// Entry points
 // ---------------------------------------------------------------------------
 
-export const renderDocumentToSvg: RenderDocumentToSvg = (
+/**
+ * A fully-resolved render pass: explicit camera bounds plus the exact content
+ * to draw. `selectContent` produces one for the option-driven entry point;
+ * the named views (render/views.ts) build their own.
+ */
+export interface RenderScene {
+  /** Camera viewBox in world coordinates. */
+  bounds: CanvasBounds;
+  objects: InteractiveCanvasObject[];
+  connections: InteractiveCanvasConnection[];
+  /**
+   * The router's obstacle set. Cameras that show a slice of a larger board
+   * pass the WHOLE board here so every drawn route is identical to the route
+   * the full board paints — a crop is a camera, not a re-layout.
+   */
+  obstacles: ReadonlyArray<InteractiveCanvasObject>;
+  /**
+   * Effective zoom (rendered px per world px) driving the section title
+   * chips' counter-scale — the same titleChipScale curve the live stage
+   * applies. Connection label chips never scale (the stage draws them at
+   * natural size at every zoom).
+   */
+  chipZoom: number;
+}
+
+/** Renders a fully-resolved scene. Shared core of every SVG entry point. */
+export function renderSceneToSvg(
   document: InteractiveCanvasDocument,
-  options: RenderStaticSvgOptions = {},
-): RenderedSvg => {
-  const content = selectContent(document, options);
-  const { bounds } = content;
+  scene: RenderScene,
+  options: Pick<RenderStaticSvgOptions, "width" | "height" | "background"> = {},
+): RenderedSvg {
+  const { bounds } = scene;
   const { width, height } = resolvePixelSize(bounds, options);
+  const chipScale = titleChipScale(scene.chipZoom);
 
   // The stage's five-tier layer cake, minus interactive tiers: section
   // backdrops → connectors → non-section objects → section title chips.
-  const ordered = paintOrderedObjects(content.objects);
+  const ordered = paintOrderedObjects(scene.objects);
   const sections = ordered.filter((object) => object.type === "section");
   const nonSections = ordered.filter((object) => object.type !== "section");
-  const objectsById = new Map(content.objects.map((object) => [object.id, object]));
+  const objectsById = new Map(scene.objects.map((object) => [object.id, object]));
 
   const hasSticky = nonSections.some((object) => effectiveRenderShape(object) === "note");
   const stickyShadowFilterId = hasSticky ? `${idSlug(document.id)}-sticky-shadow` : null;
@@ -963,14 +1645,14 @@ export const renderDocumentToSvg: RenderDocumentToSvg = (
   }
 
   for (const section of sections) parts.push(renderSectionBackdrop(section));
-  for (const connection of content.connections) {
-    parts.push(renderConnector(connection, objectsById, content.objects));
+  for (const connection of scene.connections) {
+    parts.push(renderConnector(connection, objectsById, scene.obstacles));
   }
   for (const object of nonSections) {
-    parts.push(renderShapeBody(object, stickyShadowFilterId));
+    parts.push(renderShapeBody(object, stickyShadowFilterId, bounds));
     parts.push(renderObjectText(object));
   }
-  for (const section of sections) parts.push(renderSectionTitleChip(section));
+  for (const section of sections) parts.push(renderSectionTitleChip(section, chipScale));
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +
@@ -981,4 +1663,18 @@ export const renderDocumentToSvg: RenderDocumentToSvg = (
     `</svg>`;
 
   return { svg, width, height };
+}
+
+export const renderDocumentToSvg: RenderDocumentToSvg = (
+  document: InteractiveCanvasDocument,
+  options: RenderStaticSvgOptions = {},
+): RenderedSvg => {
+  const content = selectContent(document, options);
+  return renderSceneToSvg(
+    document,
+    // Option-driven renders route against the selected content only and draw
+    // title chips at their natural document size (chip scale 1).
+    { ...content, obstacles: content.objects, chipZoom: 1 },
+    options,
+  );
 };

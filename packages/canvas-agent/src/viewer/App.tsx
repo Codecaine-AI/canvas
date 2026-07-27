@@ -2,26 +2,21 @@ import { useEffect, useState } from "react";
 import { Sidebar, type View } from "./components/Sidebar";
 import { navigate } from "./lib/navigation";
 import { AgentConfigPage } from "./pages/AgentConfigPage";
-import { SessionPage } from "./pages/SessionPage";
 import { TracesPage } from "./pages/TracesPage";
 
 /**
- * The viewer shell: a persistent sidebar around three views over the harness's
+ * The viewer shell: a persistent sidebar around two views over the harness's
  * kernel APIs, addressed by pathname (the simplest honest routing for a
- * three-page tool):
+ * two-page tool):
  *
  *   /traces          session list + live trace viewer   (also "/")
- *   /session?id=…    one session's trace detail
  *   /config          agent manifest + prompt lab
  *
- * The session page keeps reading `?id=` from location.search, exactly as it
- * did inside studio. The whole app is the agent operator surface, so the
- * dark instrument token set (agent-theme.css) applies at :root — no scoping
- * wrapper.
+ * The whole app is the agent operator surface, so the dark instrument token
+ * set (agent-theme.css) applies at :root — no scoping wrapper.
  */
 
 function parseView(pathname: string): View {
-  if (pathname === "/session" || pathname.startsWith("/session/")) return "session";
   if (pathname === "/config" || pathname.startsWith("/config/")) return "config";
   return "traces";
 }
@@ -31,8 +26,8 @@ function currentUrl(): string {
 }
 
 export function App() {
-  // Track the full pathname+search so back/forward between two sessions
-  // (same view, different ?id=) still remounts the page.
+  // Track the full pathname+search so back/forward across query changes
+  // still remounts the page.
   const [url, setUrl] = useState(currentUrl);
 
   useEffect(() => {
@@ -42,8 +37,7 @@ export function App() {
   }, []);
 
   const view = parseView(url.split("?")[0] ?? "/");
-  const ActivePage =
-    view === "session" ? SessionPage : view === "config" ? AgentConfigPage : TracesPage;
+  const ActivePage = view === "config" ? AgentConfigPage : TracesPage;
 
   return (
     <div className="flex h-screen">

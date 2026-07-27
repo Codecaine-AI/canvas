@@ -1,5 +1,5 @@
 /**
- * The digest completeness invariant: everything the six op kinds can write is
+ * The digest completeness invariant: everything the op surface can write is
  * either RENDERED by the digest when set to a non-default value, covered by
  * the header's elided-defaults LEGEND, or represented STRUCTURALLY (parentId
  * as tree indentation). The coverage maps below are compile-time exhaustive
@@ -142,6 +142,26 @@ describe("digest completeness invariant", () => {
     expect(digest).toContain(
       '  flow a→b "handoff" dashed orange arrow=both role="escalation" anchors=right→top pos=auto→0.25,0 wp=100,48→220,48',
     );
+  });
+
+  test("text fields render in full — nothing is truncated", () => {
+    const longText = `alpha ${"x".repeat(300)} omega`;
+    const longLabel = `route ${"y".repeat(200)} end`;
+    const longRole = `role-${"z".repeat(120)}`;
+    const digest = formatBoardDigest(makeDocument(
+      [
+        { ...box("wordy", 0, 0), text: `multi\n${longText}` },
+        { ...box("scribe", 320, 0, 176, 128, "sticky"), author: `Ford ${"a".repeat(80)}` },
+      ],
+      [{ ...connect("edge", "wordy", "scribe"), label: longLabel, role: longRole }],
+    ));
+
+    // Whitespace collapses to one line, but every character survives.
+    expect(digest).toContain(`multi ${longText}`);
+    expect(digest).toContain(longLabel);
+    expect(digest).toContain(longRole);
+    expect(digest).toContain(`Ford ${"a".repeat(80)}`);
+    expect(digest).not.toMatch(/…\(\+\d+ch\)/);
   });
 
   test("explicit default values are elided (lossless via the legend)", () => {

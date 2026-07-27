@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-25-eval-160035",
+  "tier": "system",
+  "scenario": "trace-ingestion-pipeline",
+  "board_id": "eval.2026-07-25-eval-160035.trace-ingestion-pipeline",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-25T21:00:37.736Z",
+      "finished_at": "2026-07-25T21:04:52.004Z",
+      "wall_ms": 254879,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "191d8cc4-7424-45b7-bf1e-9ab9fc0e5a76"
+    ]
+  },
+  "finished_at": "2026-07-25T21:04:52.615Z",
+  "exit_code": 0
+}

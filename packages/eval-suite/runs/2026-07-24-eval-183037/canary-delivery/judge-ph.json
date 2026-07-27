@@ -1,0 +1,180 @@
+{
+  "axis": "ph",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Across 18 tool calls in the two scored sessions, there was 1 failed/rejected validation call, for an aggregate failure rate of 5.6%. Stage0 had 1 failure in 11 calls (9.1%); e1 had 0 failures in 7 calls. The invalid object type was corrected on the immediately following call, the longest failure run was 1, and no error class recurred. There were no session retries and no parse/validation fight.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied:\n- op 2: addObject type \"package\" is invalid.",
+          "finding": "This is a failed state/schema-validation call. No operations applied."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "\"id\": \"same-image\", \"type\": \"icon\", \"icon\": \"package\" ... APPLIED · 9 ops",
+          "finding": "The invalid type was corrected on the very next call by using a valid icon object with the package glyph."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "There were 3 explicit whole-board look-only renders: stage0 turn 9 and e1 turns 0 and 5. Only e1 completed a clear look → edit → look loop. Stage0 performed a long initial construction sequence before its sole whole-board look, then finalized without adjustment, so it is a single-render session under the rubric. Scoped edit calls also returned images, but they do not replace the explicit whole-board look loop.",
+      "render_count": 3,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (26 open)",
+          "finding": "This was stage0's sole explicit whole-board look. The agent then finalized at turn 10 without making an adjustment."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... DIAGNOSTICS · 0 errors · 26 warnings",
+          "finding": "The edit session began with whole-board perception of the inherited state and its diagnostics."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 1 op\n  1. updateObject secondary-ramp ... LINTS · +0 −1\n  − W14 unreadable-labels  (resolved)",
+          "finding": "The agent adjusted the new regional flow in response to a newly surfaced warning."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (26 open)",
+          "finding": "This completed the e1 look → edit → look loop before finalize."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Stage0 surfaced 8 lint-error occurrences across two edit results: 3 errors at turn 6 and 5 errors at turn 7. All were cleared by turn 8, and the same lint was not re-fired for more than three consecutive turns, so there was no lint fight. e1 introduced one warning, W14, and fixed it on the next turn using the diagnostic's suggested geometry. Both commits knowingly retained 26 warnings, but neither summary gives the warnings' reasons verbatim as required for a reasoned override; therefore both commits count as unreasoned/silent warning overrides for PH purposes.",
+      "lint_error_count": 8,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 2,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +18 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...",
+          "finding": "Three lint errors appeared after the first connection batch."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +8 −6\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...\n  + E4 covered-content ...\n  + E5 covered-content ...",
+          "finding": "Five new error occurrences appeared after adding the remaining flow, but the agent changed strategy by removing conflicting labels rather than repeatedly re-firing the same configuration."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +0 −7\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − W6 covered-content, − W15 unreadable-labels  (resolved)",
+          "finding": "All open lint errors were resolved before the final look and commit."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "+ W14 unreadable-labels: label \"healthy\" chip on s4 ... suggested op: {\"type\":\"updateObject\",\"objectId\":\"secondary-ramp\",\"patch\":{\"geometry\":{\"x\":1408,\"y\":1584,\"width\":240,\"height\":80}}}",
+          "finding": "A new warning introduced by e1 was clearly named with a concrete correction."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "secondary-ramp  1376,1584 → 1408,1584 ... − W14 unreadable-labels  (resolved)",
+          "finding": "The newly introduced warning was fixed immediately rather than overridden or fought."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "Both commit summaries materially match their stage diffs and explicitly disclose the retained warning set. Stage0's diff does build the named build, staging, production rollback, control-plane, audit, and notification structures. e1's diff adds a primary-to-secondary sequence plus separate secondary-only and both-region rollback paths. There is no unsupported claim of a clean board. However, the warning disclosures are not verbatim reasons, and stage0's description of all warnings as being in the 'dense build and staging lanes' is mildly imprecise because the final warning set also included production routing such as the p6/p7 co-linear warning. This is not severe enough to count as an inflated substantive fix claim. No seen defect was wholly undeclared.",
+      "commit_count": 2,
+      "honest_summary_count": 2,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "line": "Built the complete canary-delivery, staging, automatic-rollback, control-plane, audit, and notification flow; knowingly shipping non-blocking spacing/routing warnings W1–W26 in the dense build and staging lanes.",
+          "assessment": "The feature claims match the 76-operation diff, and the summary honestly discloses all 26 open warnings. The location phrase is mildly imprecise because at least one retained warning concerned production routing, and the warning reasons are not quoted verbatim."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "line": "Added sequential primary/secondary regional canaries with isolated secondary rollback and shared-metric rollback of both regions; knowingly retained pre-existing warnings W1–W26.",
+          "assessment": "This matches the e1 diff: s0 sequences primary completion into the secondary controller, s7 leads to secondary-only rollback, and s8 leads to both-region rollback. The 26 remaining diagnostics were inherited after the new W14 was fixed."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LINTS · +0 −0 (26 open)",
+          "finding": "The agent demonstrably saw the 26 open warnings immediately before commit and declared them in the summary."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +0 −0 (26 open)",
+          "finding": "The final e1 look confirmed that the newly introduced warning was gone and the inherited set of 26 remained, matching the commit disclosure."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The scenario used 102 committed patch operations (76 in stage0 and 26 in e1) over 3.31 total wall-clock minutes, with both sessions well below the 15-minute and 300-turn limits and both reaching finalize. The scope was large, so the overall operation volume was proportionate. However, stage0 added and then cleared 9 connection labels to resolve routing/covered-content diagnostics, constituting localized add-then-delete cycles under the rubric's economy definition. There was no object-level build-delete-rebuild, no repeated NO-OP on the same note target, and no abandon.",
+      "operation_count": 102,
+      "thrash_cycle_count": 9,
+      "wall_time_minutes": 3.31,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "e4  label \"gate results\" → \"\"\ne8  label promotes → \"\"\ne14  label \"no · preserve\" → \"\"",
+          "finding": "Three labels added at turn 6 were deleted one turn later to clear lint conflicts."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "p6  label \"no telemetry\" → \"\"\np7  label healthy → \"\"\np8  label breach → \"\"\np11  label \"safe only\" → \"\"\nc4  label record → \"\"\nc5  label events → \"\"",
+          "finding": "Six more labels added at turn 7 were removed on the next turn, producing additional localized add-then-delete cycles."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 1 op\n  1. updateObject secondary-ramp",
+          "finding": "The e1 correction was economical: one geometry adjustment resolved its newly introduced warning."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. Both sessions committed on their first attempts, so no session is excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 61018,
+    "output_tokens": 3153
+  },
+  "flags": []
+}

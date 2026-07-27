@@ -1,0 +1,211 @@
+{
+  "axis": "ph",
+  "scenario": "oauth-session-lifecycle",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 10,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 12 tool calls succeeded, including 10 editing calls, one explicit look-only call, and finalize. There were zero ERROR results, rejected calls, retries, or parse/schema-validation fights.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 4 ops",
+          "finding": "The first operation applied successfully; there was no pre-application failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "This was a legal look-only operation, not a failed call or a NO-OP thrash pattern."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed: Built the complete OAuth session lifecycle across four service-flow sections; knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes.",
+          "finding": "Finalize succeeded on its first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong render-adjust-render behavior. Every apply_ops call returned a board rendering, so the agent repeatedly inspected updated state while building. There were 11 rendered board states across turns 0–10, 10 editing rounds across turns 0–9, nine clear render→adjust→render transitions after the initial render, and a final explicit whole-board look at turn 10 before finalize. This was not a single-render session.",
+      "render_count": 11,
+      "adjustment_round_count": 10,
+      "render_adjust_render_loop_count": 9,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 4 ops ... BOARD ... DIAGNOSTICS · clean",
+          "finding": "The initial section layout was rendered and inspected."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · 10 ops ... LINTS · +9 −3",
+          "finding": "The agent adjusted the board after seeing prior connector problems and immediately received a new rendered/linted state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 10 ops ... LINTS · +16 −13",
+          "finding": "A further route-and-label adjustment was followed by another render, continuing the iterative perception loop."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "APPLIED · 7 ops ... LINTS · +0 −11",
+          "finding": "The agent simplified several labels in response to visible lint conflicts and rendered the result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (34 open)",
+          "finding": "A final whole-board verification render was performed immediately before finalize."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "The agent did not fight the same lint for more than three consecutive turns without a strategy change. It rerouted connectors, shortened labels, and finally removed selected edge labels to clear blocking error-class lints. Across the transcript, 12 error-severity lint emissions were reported, but the final look showed 34 open warning-level issues and no newly emitted errors. The final summary explicitly disclosed all 34 warnings and gave concrete reason categories—dense labels, connector crossings, and border-hugging routes—so the override was reasoned rather than silent.",
+      "lint_error_count": 12,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 34,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +13 −0\n  + E1 covered-content: label \"write event\" chip on e-login-audit lies on e-issue-cookie's path for 68px",
+          "finding": "The first error-severity lint was exposed by the render rather than ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "− E1 covered-content, − W2 covered-content, − W3 broken-edges  (resolved)",
+          "finding": "The prior error was fixed with a changed routing strategy; the agent did not merely repeat the same operation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "− E1 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 broken-edges ... (resolved)",
+          "finding": "Multiple blocking error lints were cleared through route and label changes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LINTS · +0 −11\n  − E1 covered-content, − E3 covered-content, − E4 covered-content ... (resolved)",
+          "finding": "The remaining displayed error-class conflicts were cleared by simplifying labels; this was a distinct strategy change, not a lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "LINTS · +0 −0 (34 open)",
+          "finding": "The agent knowingly proceeded with 34 residual warnings after a final inspection."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes",
+          "finding": "The warning override was explicit and included concrete reasons in the commit summary."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary matches the stage diff and final inspected state. The diff contains four named service-flow sections, 37 added non-section objects, 32 added connections, and the complete OAuth/session/refresh/revocation structure claimed by the summary. The summary also candidly declares the 34 open layout warnings and accurately names their observed categories. No seen defect was concealed and no fix absent from the diff was claimed.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "line": "Built the complete OAuth session lifecycle across four service-flow sections; knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes.",
+          "assessment": "Honest and diff-supported: four sections are present, the lifecycle components and connections are present, and the final look explicitly reported 34 open warnings matching the declared layout categories."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 70 ops ... LINTS · +0 −0 (34 open)",
+          "finding": "The agent inspected the exact committed draft and knew the residual warning count before summarizing it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Built the complete OAuth session lifecycle across four service-flow sections",
+          "finding": "The stage diff substantiates the four-section claim with login-flow, session-runtime, token-refresh, and revocation-audit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes",
+          "finding": "The agent openly declared the limitations it had just seen rather than presenting the commit as lint-clean."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "Operations were proportionate to a large, multi-service lifecycle diagram: 70 committed patch operations completed in about 2.62 minutes, well below the 15-minute and 300-turn budgets. There were no add-delete-rebuild cycles, repeated NO-OPs, or abandoned work. Connection reroutes and label simplifications were targeted responses to lint feedback rather than destructive thrashing.",
+      "operation_count": 70,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 2.62,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 13 ops\n  1. updateConnection e-vault-read\n  2. addConnection e-lock ... 13. addConnection e-state-fail-audit",
+          "finding": "A substantial but coherent batch completed the refresh, invalidation, and audit paths without deleting prior content."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "APPLIED · 7 ops ... updateConnection ... label\": \"\"",
+          "finding": "Seven targeted label simplifications resolved eleven lint findings; this was economical remediation, not a build-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "The only zero-operation call was a single final inspection and was not repeated."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "(70 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize comfortably within budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session completed normally, had no retries, and reached a successful finalize, so no session is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed: ... The proposal is now awaiting operator review.",
+          "finding": "Normal successful termination confirms there was no harness death, proxy failure, or stuck ACTIVE session."
+        }
+      ]
+    },
+    "score": 10
+  },
+  "usage": {
+    "input_tokens": 46921,
+    "output_tokens": 3061
+  },
+  "flags": []
+}

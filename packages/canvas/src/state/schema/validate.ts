@@ -1,6 +1,11 @@
 "use client";
 
-import type { InteractiveCanvasAnnotation, CanvasAnnotationTarget } from "./annotations";
+import type {
+  CanvasAnnotationAuthor,
+  CanvasAnnotationReply,
+  CanvasAnnotationTarget,
+  InteractiveCanvasAnnotation,
+} from "./annotations";
 import type {
   CanvasConnectionEndpoint,
   CanvasConnectionStyle,
@@ -44,6 +49,10 @@ function isId(value: unknown): value is string {
   return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,96}$/.test(value);
 }
 
+function normalizeAnnotationAuthor(value: unknown): CanvasAnnotationAuthor {
+  return value === "agent" || value === "system" ? value : "human";
+}
+
 function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectType {
   return (
     // W6 — "rectangle" replaces the legacy "container" type:
@@ -51,7 +60,6 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "process" ||
     value === "decision" ||
     value === "sticky" ||
-    value === "annotation-marker" ||
     value === "document" ||
     value === "database" ||
     value === "section" ||
@@ -549,6 +557,28 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         issues.push({ path: `${path}.target`, message: "Unsupported annotation target." });
         continue;
       }
+      const replies: CanvasAnnotationReply[] = [];
+      const replyIds = new Set<string>();
+      if (Array.isArray(rawAnnotation.replies)) {
+        for (const rawReply of rawAnnotation.replies) {
+          if (
+            !isRecord(rawReply) ||
+            typeof rawReply.id !== "string" ||
+            rawReply.id.length === 0 ||
+            typeof rawReply.body !== "string" ||
+            replyIds.has(rawReply.id)
+          ) {
+            continue;
+          }
+          replyIds.add(rawReply.id);
+          replies.push({
+            id: rawReply.id,
+            author: normalizeAnnotationAuthor(rawReply.author),
+            body: rawReply.body,
+            createdAt: typeof rawReply.createdAt === "string" ? rawReply.createdAt : undefined,
+          });
+        }
+      }
       annotations.push({
         id: rawAnnotation.id,
         target: normalizedTarget,
@@ -558,12 +588,10 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
           rawAnnotation.status === "applied" || rawAnnotation.status === "resolved"
             ? rawAnnotation.status
             : "open",
-        createdBy:
-          rawAnnotation.createdBy === "agent" || rawAnnotation.createdBy === "system"
-            ? rawAnnotation.createdBy
-            : "human",
+        createdBy: normalizeAnnotationAuthor(rawAnnotation.createdBy),
         createdAt:
           typeof rawAnnotation.createdAt === "string" ? rawAnnotation.createdAt : undefined,
+        replies,
       });
     }
   }
@@ -574,6 +602,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     schemaVersion: 1,
     id: value.id as string,
     title: typeof value.title === "string" ? value.title : undefined,
+    description: typeof value.description === "string" ? value.description : undefined,
     mode: "diagram",
     viewport: isRecord(value.viewport)
       ? {

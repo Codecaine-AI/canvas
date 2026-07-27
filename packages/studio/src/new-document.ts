@@ -10,11 +10,7 @@ const PAGE_FRAME_MARGIN = 32;
 const DEFAULT_DOCUMENT_SIZE = { width: 1200, height: 720 } as const;
 
 function isRootPageFrame(object: InteractiveCanvasObject): boolean {
-  return (
-    object.type === "section" &&
-    object.locked === "background" &&
-    object.parentId == null
-  );
+  return object.type === "section" && object.parentId == null;
 }
 
 function pageFrameGeometry(
@@ -53,9 +49,10 @@ function pageFrameGeometry(
 }
 
 /**
- * Adds the one background section that owns every otherwise top-level object.
- * Existing background frames are preserved so loaded project boards remain
- * stable across repeated save-adapter passes.
+ * Adds the one base section that owns every otherwise top-level object — an
+ * ordinary section, renamable and resizable like any other. An existing root
+ * section is preserved so loaded project boards remain stable across
+ * repeated save-adapter passes.
  */
 export function withRootPageFrame(
   document: InteractiveCanvasDocument,
@@ -70,7 +67,6 @@ export function withRootPageFrame(
     parentId: null,
     geometry: pageFrameGeometry(document, document.objects),
     style: { shape: "section" },
-    locked: "background",
   };
 
   const objects = [

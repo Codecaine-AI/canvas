@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { CanvasPoint } from "../../../../state/geometry";
+import type {
+  CanvasAnnotationAuthor,
+  InteractiveCanvasAnnotation,
+} from "../../../../state/schema";
 import { EDITOR_STYLE } from "../../components/editor-style";
 
 const POPUP_ENTER_ANIMATION =
@@ -31,12 +35,52 @@ export interface AnnotationPopupProps {
   targetLabel: string;
   onSave: (body: string) => void;
   onCancel: () => void;
+  /** The thread already open on this target, if there is one. */
+  thread?: InteractiveCanvasAnnotation;
+  /** Appends one human turn to `thread`. Required for the thread to accept replies. */
+  onReply?: (body: string) => void;
 }
 
-/** Dark screen-space note composer mounted at the annotate click point. */
-export function AnnotationPopup({ anchor, targetLabel, onSave, onCancel }: AnnotationPopupProps) {
+const AUTHOR_LABELS: Record<CanvasAnnotationAuthor, string> = {
+  human: "You",
+  agent: "Agent",
+  system: "System",
+};
+
+interface Turn {
+  id: string;
+  author: CanvasAnnotationAuthor;
+  body: string;
+}
+
+/** The thread as turns, oldest first: the opening post, then every reply. */
+function threadTurns(thread: InteractiveCanvasAnnotation): Turn[] {
+  return [
+    { id: thread.id, author: thread.createdBy, body: thread.body },
+    ...thread.replies.map((reply) => ({
+      id: reply.id,
+      author: reply.author,
+      body: reply.body,
+    })),
+  ];
+}
+
+/**
+ * Dark screen-space annotation popup mounted at the annotate click point. With
+ * no thread on the target it composes the opening post; with one it shows the
+ * conversation and its box posts the next reply.
+ */
+export function AnnotationPopup({
+  anchor,
+  targetLabel,
+  onSave,
+  onCancel,
+  thread,
+  onReply,
+}: AnnotationPopupProps) {
   const [body, setBody] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const replying = thread !== undefined && onReply !== undefined;
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -44,6 +88,15 @@ export function AnnotationPopup({ anchor, targetLabel, onSave, onCancel }: Annot
 
   const stopPointerPropagation = (event: PointerEvent<HTMLDivElement>) => {
     event.stopPropagation();
+  };
+
+  const submit = (value: string) => {
+    if (replying) {
+      onReply(value);
+      setBody("");
+      return;
+    }
+    onSave(value);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -56,7 +109,7 @@ export function AnnotationPopup({ anchor, targetLabel, onSave, onCancel }: Annot
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
     event.stopPropagation();
-    if (body.trim()) onSave(body);
+    if (body.trim()) submit(body);
   };
 
   return (
@@ -92,10 +145,49 @@ export function AnnotationPopup({ anchor, targetLabel, onSave, onCancel }: Annot
         >
           {targetLabel}
         </div>
+        {thread ? (
+          <ol
+            data-annotation-thread={thread.id}
+            aria-label="Annotation thread"
+            style={{
+              margin: "0 0 8px",
+              maxHeight: 168,
+              overflowY: "auto",
+              listStyle: "none",
+              padding: 0,
+            }}
+          >
+            {threadTurns(thread).map((turn) => (
+              <li key={turn.id} data-annotation-turn={turn.id} style={{ marginBottom: 7 }}>
+                <div
+                  style={{
+                    color: "rgba(255,255,255,0.56)",
+                    font: "600 10px/1.2 ui-sans-serif, system-ui, sans-serif",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {AUTHOR_LABELS[turn.author]}
+                </div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    color: "#FFFFFF",
+                    font: "500 13px/1.45 ui-sans-serif, system-ui, sans-serif",
+                    overflowWrap: "anywhere",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {turn.body}
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : null}
         <textarea
           ref={textareaRef}
-          aria-label="Note for the agent"
-          placeholder="Note for the agent…"
+          aria-label={replying ? "Reply to the agent" : "Note for the agent"}
+          placeholder={replying ? "Reply…" : "Note for the agent…"}
           rows={3}
           value={body}
           onChange={(event) => setBody(event.target.value)}

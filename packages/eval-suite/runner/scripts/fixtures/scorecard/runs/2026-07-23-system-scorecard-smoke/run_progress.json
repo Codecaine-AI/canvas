@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "tier": "system",
+  "status": "completed",
+  "started_at": "2026-07-23T00:00:00.000Z",
+  "finished_at": "2026-07-23T00:10:00.000Z",
+  "scenarios": {
+    "incident-response": {
+      "status": "graded",
+      "stages_done": ["stage0"],
+      "pid": null,
+      "finished_at": "2026-07-23T00:10:00.000Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

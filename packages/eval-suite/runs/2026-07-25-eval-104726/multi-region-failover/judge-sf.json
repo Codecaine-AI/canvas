@@ -1,0 +1,541 @@
+{
+  "axis": "sf",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 4,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system operates a customer-facing commerce API in three regions.",
+        "brief_evidence": "“We operate a customer-facing commerce API in three regions.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “A multi-region...commerce architecture” and three containers named “Region A,” “Region B,” and “Region C,” each with an ingress/API gateway and commerce services.",
+        "note": "The three-region commerce domain and API-facing architecture are clear."
+      },
+      {
+        "brief_element": "Global DNS and an anycast edge route users to the nearest healthy regional ingress.",
+        "brief_evidence": "“Global DNS and an anycast edge route users to the nearest healthy regional ingress.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Global health-based traffic routing” flow orders Global DNS → resolve → Anycast edge → route by health → Nearest healthy region → one of the regional ingress/API gateways.",
+        "note": "This is the clearest complete end-to-end path recovered from the board."
+      },
+      {
+        "brief_element": "Every region contains a web application, API gateway, identity cache, catalog service, cart service, checkout service, order service, worker pool, event bus, Redis cluster, regional relational order database, and observability collector.",
+        "brief_evidence": "“Each region has a web application, API gateway, identity cache, catalog service, cart service, checkout service, order service, worker pool, event bus, Redis cluster, and an independent observability collector...” The order database is later described as regional.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "For Regions A, B, and C, the reconstruction lists “Ingress · API gateway,” “Web app + identity cache,” “Catalog · cart · checkout,” “Order service · workers,” “Event bus + DLQ,” “Redis cluster,” “Regional order DB,” and “Regional collector.”",
+        "note": "The component inventory survives, although most responsibilities and internal interactions are not shown."
+      },
+      {
+        "brief_element": "Each region and its independent observability collector are spread across multiple availability zones.",
+        "brief_evidence": "“...an independent observability collector spread across multiple availability zones.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "All regional boundaries are labeled “multi-AZ,” and each contains a “Regional collector.”",
+        "note": "The regional multi-AZ boundary is explicit, but the collector's independence and its own multi-AZ distribution are not explicitly recovered."
+      },
+      {
+        "brief_element": "Regional service discovery and circuit breakers isolate a failing instance or availability zone so it does not take down the region.",
+        "brief_evidence": "“Regional service discovery and circuit breakers keep a failing instance or zone from taking down the region.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Each region contains “Discovery · circuit breakers,” and the control plane recognizes instance and AZ scopes. No reconstructed flow explains local isolation or continued regional service.",
+        "note": "The mechanisms are visible, but their failure-containment responsibility is not communicated."
+      },
+      {
+        "brief_element": "Catalog reads use a globally replicated document store.",
+        "brief_evidence": "“Catalog reads come from a globally replicated document store...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Global document store” is recovered, while the uncertainty list says no arrows identify its producers, consumers, or synchronization paths.",
+        "note": "The store exists, but neither catalog ownership nor global replication is established."
+      },
+      {
+        "brief_element": "During inter-region isolation, catalog reads may continue from a local document-store replica.",
+        "brief_evidence": "“...and may continue from a local replica during inter-region isolation.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for local catalog replicas or isolation-mode catalog reads.",
+        "note": "A key degraded-read behavior is absent."
+      },
+      {
+        "brief_element": "Cart data is stored in a multi-region key-value store.",
+        "brief_evidence": "“Cart data uses a multi-region key-value store...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Multi-region cart KV · conditional writes” in the global data boundary.",
+        "note": "The global cart storage mechanism is explicit."
+      },
+      {
+        "brief_element": "Each cart has an owner in the multi-region key-value store.",
+        "brief_evidence": "“...with per-cart ownership...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for per-cart ownership.",
+        "note": "The write-ownership model cannot be recovered."
+      },
+      {
+        "brief_element": "Cart updates use conditional writes so concurrent updates are detected.",
+        "brief_evidence": "“...and conditional writes so concurrent updates are detected.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The component and constraints explicitly recover “conditional writes,” but no entry states that they detect concurrent updates.",
+        "note": "The mechanism survives, but its concurrency semantics do not."
+      },
+      {
+        "brief_element": "Checkout creates each customer's orders in a single writable home region selected for that customer.",
+        "brief_evidence": "“Checkout creates orders in a single writable home region selected for each customer.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for customer-specific home-region selection or checkout routing to that region.",
+        "note": "The primary order-write ownership boundary is absent."
+      },
+      {
+        "brief_element": "The home region atomically commits an order and its outbox event to its regional relational database.",
+        "brief_evidence": "“The home region commits an order and its outbox event atomically to its regional relational database...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The reconstruction only identifies regional order databases and order workers; no matching entry exists for an atomic order-plus-outbox transaction.",
+        "note": "The core transactional guarantee and outbox creation are not recoverable."
+      },
+      {
+        "brief_element": "Database changes are streamed from the home-region database to warm replicas in the other two regions.",
+        "brief_evidence": "“...then streams database changes to warm replicas in the other two regions.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "contradicted",
+        "reconstruction_evidence": "The reconstruction claims a “Regional order database to replication bridge” flow ending at “Replication bridge · dedupe · quarantine,” rather than streaming database changes to two warm relational replicas.",
+        "note": "The only depicted database-originating cross-region path is assigned to the event replication bridge, producing a materially different replication design."
+      },
+      {
+        "brief_element": "Payment requests pass through a global payment adapter.",
+        "brief_evidence": "“Payment requests go through a global payment adapter...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a global “Payment adapter · idempotency key” and a request path from it to payment providers.",
+        "note": "The adapter and its provider-facing direction are clear."
+      },
+      {
+        "brief_element": "The payment adapter assigns an idempotency key before calling a provider.",
+        "brief_evidence": "“...that assigns an idempotency key before calling...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed payment flow starts at “Payment adapter · idempotency key” and then points to the providers; its responsibility says it applies the key before provider handling.",
+        "note": "The required ordering is recovered."
+      },
+      {
+        "brief_element": "The global payment adapter can call either of two external payment providers.",
+        "brief_evidence": "“...either of two external payment providers.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Payment providers A / B” as two options reached from the payment adapter.",
+        "note": "The two-provider boundary is clear, though selection and failover behavior are not."
+      },
+      {
+        "brief_element": "A global control plane receives health signals from synthetic probes.",
+        "brief_evidence": "“A global control plane receives health signals from synthetic probes...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Failover control plane” contains “Probes · collectors · DB / bus monitors” feeding the failure-classification sequence.",
+        "note": "Probe input to the control plane is clear."
+      },
+      {
+        "brief_element": "The global control plane receives health signals from regional collectors.",
+        "brief_evidence": "“...regional collectors...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Regional collectors are present in all three regions, and “collectors” are explicitly listed in the monitoring input to the control plane.",
+        "note": "The board communicates the signal source, although no dedicated connector from each collector is described."
+      },
+      {
+        "brief_element": "The global control plane receives health signals from database replication monitors.",
+        "brief_evidence": "“...database replication monitors...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The monitoring component says “DB / bus monitors,” but does not specify database replication monitoring.",
+        "note": "Database monitoring is visible, but the replication-specific responsibility is softened."
+      },
+      {
+        "brief_element": "The global control plane receives health signals from event-bus lag monitors.",
+        "brief_evidence": "“...and event-bus lag monitors.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The control plane includes “DB / bus monitors,” but the reconstruction does not state that bus lag is measured.",
+        "note": "The monitored subsystem survives, while the critical lag metric does not."
+      },
+      {
+        "brief_element": "The control plane distinguishes instance failure, availability-zone failure, regional service failure, database write failure, and full regional isolation.",
+        "brief_evidence": "“It distinguishes an instance failure, availability-zone failure, regional service failure, database write failure, and full regional isolation.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The classification box is recovered as “Instance · AZ · service · DB · ...”; the reconstruction explicitly says the scope after DB is truncated.",
+        "note": "Instance, AZ, service, and database scopes survive, but database-write semantics and full regional isolation are not recoverable."
+      },
+      {
+        "brief_element": "The control plane can automatically remove a region from new traffic.",
+        "brief_evidence": "“The control plane can remove a region from new traffic automatically...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Health-based routing to a nearest healthy region is recovered, but no reconstruction entry connects the control plane to route withdrawal or identifies automatic removal from new traffic.",
+        "note": "The external routing result is inferable, but control-plane ownership and automation are missing."
+      },
+      {
+        "brief_element": "Promoting a relational replica to writer requires a failover lease from a quorum store.",
+        "brief_evidence": "“...promoting a relational replica to writer requires a failover lease from the quorum store...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The promotion sequence runs through “Quorum writer lease · one holder” before reaching “Lag ≤ RPO → promote replica.”",
+        "note": "The lease-before-promotion gate is communicated."
+      },
+      {
+        "brief_element": "Replica promotion also requires confirmation that replication lag is within the recovery-point objective.",
+        "brief_evidence": "“...and confirmation that replication lag is within the recovery-point objective.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The explicit condition is “Lag ≤ RPO → promote replica,” following the writer-lease stage.",
+        "note": "The RPO promotion condition and ordering are clear."
+      },
+      {
+        "brief_element": "Only one region may hold the writer lease.",
+        "brief_evidence": "“Only one region may hold the writer lease.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed key component is labeled “Quorum writer lease · one holder.”",
+        "note": "Single-writer lease exclusivity is explicit."
+      },
+      {
+        "brief_element": "DNS and edge routing change after replica promotion.",
+        "brief_evidence": "“DNS and edge routing change after promotion...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects successful promotion back to Global DNS or the anycast edge.",
+        "note": "The required post-promotion routing transition is absent."
+      },
+      {
+        "brief_element": "After promotion, the order coordinator resumes from the promoted outbox.",
+        "brief_evidence": "“...and the order coordinator resumes from the promoted outbox...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for an order coordinator, a promoted outbox, or resumption from outbox state.",
+        "note": "The main recovery continuation mechanism is absent."
+      },
+      {
+        "brief_element": "Resuming from the promoted outbox must not issue duplicate payments.",
+        "brief_evidence": "“...without issuing duplicate payments.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Payment idempotency keys are recovered, but no reconstruction entry links them to outbox resumption or guarantees duplicate-free payment during failover.",
+        "note": "A relevant mechanism is shown, but the cross-component recovery guarantee is not."
+      },
+      {
+        "brief_element": "During complete loss of a customer's home region, existing carts remain available from the global cart store.",
+        "brief_evidence": "“During a full home-region loss, existing carts remain available from the global store...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "A global cart KV is present, but no matching reconstruction entry states continued cart availability during full home-region loss.",
+        "note": "The degraded-mode availability outcome is not communicated."
+      },
+      {
+        "brief_element": "During complete home-region loss, catalog remains readable.",
+        "brief_evidence": "“...catalog stays readable...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that catalog remains readable during home-region loss.",
+        "note": "The catalog degraded-mode guarantee is absent."
+      },
+      {
+        "brief_element": "During complete home-region loss, checkout pauses until the writer lease moves.",
+        "brief_evidence": "“...and checkout pauses until the writer lease moves.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for checkout pausing or for its dependency on writer-lease transfer.",
+        "note": "This critical safety behavior is not recoverable."
+      },
+      {
+        "brief_element": "Requests that already carry an order ID may be retried safely.",
+        "brief_evidence": "“Requests already carrying an order id may be retried safely.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for order-ID-based safe retries.",
+        "note": "Payment idempotency alone does not recover the broader order request retry contract."
+      },
+      {
+        "brief_element": "Events crossing regions pass through a replication bridge.",
+        "brief_evidence": "“Events crossing regions use a replication bridge...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Replication bridge · dedupe · quarantine” is recovered, but the only visible inbound flow is interpreted as originating from a regional order database, and the reconstruction says the payload is ambiguous.",
+        "note": "The bridge exists, but its event-crossing role and sources are not reliably communicated."
+      },
+      {
+        "brief_element": "The cross-region event replication bridge deduplicates events.",
+        "brief_evidence": "“...with deduplication...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The bridge is explicitly labeled “Replication bridge · dedupe · quarantine.”",
+        "note": "Deduplication is clear."
+      },
+      {
+        "brief_element": "The bridge quarantines events with incompatible schemas.",
+        "brief_evidence": "“...quarantine for schema incompatibility...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The bridge label includes “quarantine,” but the reconstruction does not identify schema incompatibility as its trigger.",
+        "note": "The mechanism survives without the condition that activates it."
+      },
+      {
+        "brief_element": "The cross-region event bridge provides replay controls.",
+        "brief_evidence": "“...and replay controls.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for replay controls on the replication bridge.",
+        "note": "Replay is also absent from the recovered flows."
+      },
+      {
+        "brief_element": "A dead-letter service in each region retains worker messages after retries are exhausted.",
+        "brief_evidence": "“A dead-letter service retains exhausted worker messages in each region...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Every region contains “Event bus + DLQ,” but no reconstruction entry identifies a dead-letter service, worker-message ownership, exhausted retries, or retention behavior.",
+        "note": "Only regional DLQ presence is recovered."
+      },
+      {
+        "brief_element": "The regional dead-letter service copies metadata for exhausted messages to the operations account.",
+        "brief_evidence": "“...and copies their metadata to the operations account.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for metadata copying or an operations account.",
+        "note": "The cross-account operational record path is absent."
+      },
+      {
+        "brief_element": "Configuration, feature flags, signing keys, and service identities originate in the control plane.",
+        "brief_evidence": "“Configuration, feature flags, signing keys, and service identities originate in the control plane...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for configuration, feature flags, signing keys, service identities, or their control-plane origin.",
+        "note": "The configuration and identity ownership boundary is wholly absent."
+      },
+      {
+        "brief_element": "Control-plane configuration and identity material are cached regionally with explicit expiry behavior.",
+        "brief_evidence": "“...but are cached regionally with explicit expiry behavior.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The regional identity cache is visible, but no matching reconstruction entry states that the listed control-plane material is cached there or describes expiry behavior.",
+        "note": "A component name alone does not recover the cache's source or expiry contract."
+      },
+      {
+        "brief_element": "Expired identity material stops privileged writes.",
+        "brief_evidence": "“Expired identity material stops privileged writes...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for identity expiry or privileged-write shutdown.",
+        "note": "The security fail-closed behavior is absent."
+      },
+      {
+        "brief_element": "When identity material expires, public health checks remain available.",
+        "brief_evidence": "“...while allowing public health checks.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for the public-health-check exception during identity expiry.",
+        "note": "The intended partial-service boundary is absent."
+      },
+      {
+        "brief_element": "Routing changes, lease decisions, database promotions, provider failover, replay, and operator overrides emit audit events to an immutable global audit store.",
+        "brief_evidence": "“Audit events from routing changes, lease decisions, database promotion, provider failover, replay, and operator overrides enter an immutable global audit store.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "An “Immutable audit store” receives a dashed “decisions + overrides” path from the classification box. No reconstructed evidence covers routing changes, lease decisions, database promotion, provider failover, or replay individually.",
+        "note": "The immutable destination and a subset of audit sources survive, but the full audit coverage does not."
+      },
+      {
+        "brief_element": "Paging receives the same failover milestones.",
+        "brief_evidence": "“Paging...receive[s] the same failover milestones.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The control plane contains “Paging · incident · status milestones,” but the uncertainty list says it is not connected to the failover sequence.",
+        "note": "Presence is clear; receipt of the same milestones is not."
+      },
+      {
+        "brief_element": "Incident records receive the same failover milestones.",
+        "brief_evidence": "“...incident records...receive the same failover milestones.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The control plane contains “Paging · incident · status milestones,” without arrows or semantics showing incident-record updates.",
+        "note": "The label suggests incident handling but not the specified shared event feed."
+      },
+      {
+        "brief_element": "The status service receives the same failover milestones.",
+        "brief_evidence": "“...and the status service receive the same failover milestones.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction includes “status milestones,” but no connected status service or milestone delivery flow.",
+        "note": "The status concept is visible, while service ownership and delivery are ambiguous."
+      },
+      {
+        "brief_element": "Recovery procedures cover failback as well as failover.",
+        "brief_evidence": "“Recovery must cover failback as well as failover.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A replica recovery and validation sequence is recovered, followed by a truncated “Separate controlle...” destination.",
+        "note": "A rejoin/failback path is suggested, but its final ownership-return semantics are not fully readable."
+      },
+      {
+        "brief_element": "A recovered region first rejoins as a read replica.",
+        "brief_evidence": "“The recovered region rejoins first as a read replica...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The recovered sequence explicitly begins “Read replica → catch up → checksums → shadow traffic.”",
+        "note": "The first rejoin role is clear."
+      },
+      {
+        "brief_element": "The rejoining read replica catches up before progressing.",
+        "brief_evidence": "“...catches up...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The ordered recovery sequence explicitly places “catch up” after “Read replica.”",
+        "note": "The ordering is clear."
+      },
+      {
+        "brief_element": "The recovered region validates database checksums before serving users.",
+        "brief_evidence": "“...validates checksums...” and “...before it can serve users.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sequence includes “checksums” before shadow traffic, but the reconstruction does not identify database scope or explicitly prohibit user service before validation.",
+        "note": "The validation step survives; the hard serving gate is only implied."
+      },
+      {
+        "brief_element": "The recovered region validates event offsets before serving users.",
+        "brief_evidence": "“...validates...event offsets...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for event-offset validation.",
+        "note": "Only checksum validation is visible."
+      },
+      {
+        "brief_element": "The recovered region receives shadow traffic before it can serve users.",
+        "brief_evidence": "“...and receives shadow traffic before it can serve users.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sequence ends with “shadow traffic,” but it does not show a subsequent user-serving state or explicitly state that shadow traffic is a prerequisite.",
+        "note": "The ordered test stage is clear, while the serving gate is not fully explicit."
+      },
+      {
+        "brief_element": "Returning writer ownership is a separate controlled operation.",
+        "brief_evidence": "“Returning writer ownership is a separate controlled operation...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The recovery sequence points to a visibly truncated box labeled “Separate controlle...”; its full label and responsibility cannot be recovered.",
+        "note": "The board strongly suggests this rule but truncation prevents exact recovery."
+      },
+      {
+        "brief_element": "Writer ownership never returns merely because the original region becomes healthy again.",
+        "brief_evidence": "“...it is never implied merely because the original region is healthy again.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for the prohibition against automatic writer return upon restored health.",
+        "note": "The critical anti-failback-automation constraint is absent."
+      },
+      {
+        "brief_element": "Capacity safeguards prevent the two surviving regions from accepting traffic beyond their tested limits.",
+        "brief_evidence": "“Capacity safeguards prevent the two surviving regions from accepting more traffic than their tested limits...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The control plane includes “Capacity guard + load shedding,” but no reconstruction entry identifies the two-survivor condition or tested capacity limits.",
+        "note": "The safeguard mechanism is named without its operational threshold."
+      },
+      {
+        "brief_element": "Load shedding protects checkout and order recovery ahead of catalog personalization.",
+        "brief_evidence": "“...and load shedding protects checkout and order recovery ahead of catalog personalization.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Capacity guard + load shedding” is present, but no reconstruction entry states the service-priority order.",
+        "note": "Load shedding survives, but its business-critical prioritization does not."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "A solid replication flow runs from Region B's regional order database to the event replication bridge.",
+        "reconstruction_evidence": "The reconstruction names a “Regional order database to replication bridge” flow and says the solid purple line originates beneath Region B's “Regional order DB” and terminates at “Replication bridge · dedupe · quarantine.”",
+        "why_unsupported": "The brief separates relational database change streaming to warm relational replicas from cross-region event replication through the bridge. It does not route regional database replication into the event bridge or single out Region B."
+      },
+      {
+        "claim": "The per-region DLQ is specifically an event dead-letter queue.",
+        "reconstruction_evidence": "A constraint states, “An event dead-letter queue exists in every depicted region,” based on the label “Event bus + DLQ.”",
+        "why_unsupported": "The brief specifies a dead-letter service retaining exhausted worker messages. Co-location with the event bus does not establish that the DLQ is specifically for event-bus events."
+      }
+    ],
+    "strongest_transmitted_behavior": "The board most successfully communicates global health-based entry routing—Global DNS through the anycast edge to the nearest healthy regional ingress—and the gated failover promotion sequence requiring a single-holder quorum writer lease plus replication lag within RPO.",
+    "most_consequential_loss": "The commerce transaction and recovery continuity path is not recoverable: customer home-region ownership, atomic order-and-outbox commit, streaming to two warm relational replicas, checkout pause during writer loss, post-promotion route changes, and outbox-based duplicate-free resumption are missing or, for database replication, depicted as a different bridge flow.",
+    "overall_summary": "The reconstruction accurately conveys the multi-region topology, regional component inventory, global traffic routing, payment-adapter idempotency, basic monitoring inputs, lease/RPO promotion gates, audit-store presence, and the early failback validation sequence. However, most internal application/data paths are unconnected, so the board reads as a collection of architectural capabilities rather than an implementable commerce failover system. Critical ownership, transactional, degraded-mode, recovery-continuation, configuration-expiry, dead-letter, and capacity-priority semantics require substantial inference. The claimed database-to-replication-bridge path conflicts with the brief's separation of relational replica streaming and event replication. Because the principal commerce order-processing and recovery flow cannot be reconstructed end to end, the main-flow cap of 4 applies.",
+    "score": 4
+  },
+  "usage": {
+    "input_tokens": 12780,
+    "output_tokens": 12341
+  },
+  "flags": []
+}

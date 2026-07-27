@@ -1,0 +1,186 @@
+{
+  "axis": "ph",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "One validation rejection occurred and was corrected immediately on the next turn. There were no metadata-level session retries, no repeated rejected syntax, and no parse/validation fight.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied:\n- op 7: addObject type \"archive\" is invalid.",
+          "finding": "Single rejected call caused by using an invalid object type."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "**Resending archive icon glyph** ... \"type\": \"icon\", \"icon\": \"archive\" ... APPLIED · 11 ops",
+          "finding": "The rejection was corrected immediately by changing the invalid archive object type to a supported icon; there was no validation fight."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong iterative perception loop. Successful operation rounds repeatedly returned rendered images, and the agent adjusted geometry, routing, and labels in response to visible/linted conditions before rendering again. Ten turns produced rendered output, with 11 image payloads total because turn 10 returned two views. This was not a single-render session.",
+      "render_count": 11,
+      "adjustment_round_count": 9,
+      "render_adjust_render_loop_count": 9,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "LINTS · +5 −0 ... crowding",
+          "finding": "The early rendered layout exposed five spacing warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "**Assessing section gap adjustments** ... LINTS · +0 −5 ... (resolved)",
+          "finding": "The agent adjusted the intake geometry after the prior render and re-rendered, resolving all five warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 26 ops ... LINTS · +21 −1",
+          "finding": "The first comprehensive connection render exposed extensive edge-label and routing diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "**Shortening and fixing label names** ... APPLIED · 15 ops ... LINTS · +16 −18",
+          "finding": "The agent responded to the connection render by shortening labels and attempting a waypoint adjustment, then re-rendered."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "**Removing problematic route labels to fix errors** ... LINTS · +2 −16",
+          "finding": "A further render-driven adjustment removed remaining colliding labels and reduced diagnostics to two warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "**Cleaning up labels** ... LINTS · +0 −2 ... (resolved)",
+          "finding": "The final adjustment removed the last two warning-producing labels and returned a clean rendered state, including two image payloads."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively rather than fought. The transcript introduced 18 error-severity lint instances across the two major connection-routing passes, but subsequent strategy changes—shortening labels, removing labels, and adjusting a route—cleared them. No identical lint was re-fired for more than three consecutive turns. The final render reported all remaining warnings resolved, so there was no warning override requiring a commit-summary reason.",
+      "lint_error_count": 18,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "LINTS · +0 −5\n  − W1 crowding, − W2 crowding, − W3 crowding, − W4 crowding, − W5 crowding  (resolved)",
+          "finding": "The first spacing warnings were fixed rather than ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +21 −1\n  + E1 covered-content ... + E11 covered-content",
+          "finding": "The large connection pass introduced 11 error-severity covered-content findings plus warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +16 −18\n  + E1 covered-content ... + E8 covered-content",
+          "finding": "Seven error-severity findings remained or were reported after the first routing/label strategy change; this was a short skirmish, not a repeated no-strategy-change fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LINTS · +2 −16 ... − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E8 covered-content",
+          "finding": "Removing problematic labels cleared all remaining error-severity diagnostics and left only two warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "LINTS · +0 −2\n  − W3 unreadable-labels, − W4 unreadable-labels  (resolved)",
+          "finding": "The last two warnings were fixed before commit; no warning was silently overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary is broad but materially matches the stage diff. The diff contains five named sections and concrete objects or annotations for transactional outbox intake, durable fan-out, three-way coordination, terminal cancellation/timeout handling, late-success compensation rules, fulfillment/shipping/notifications/read models, idempotency, DLQ repair/replay, and observability. The final lint report was clean, so describing the board as clean is not contradicted by the transcript. No seen defect was committed undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "line": "Built a clean five-stage event-driven order fulfillment board covering transactional outbox intake, durable fan-out, payment/inventory/fraud coordination, cancellation and late-event rules, fulfillment/shipping/notifications/read models, and idempotency, DLQ replay, and observability operations.",
+          "assessment": "Honest and supported by the 64-operation stage diff and the final clean lint state."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "LINTS · +0 −2 ... (resolved)",
+          "finding": "The final inspected state had no outstanding lint diagnostics, supporting the summary's use of \"clean.\""
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Built a clean five-stage event-driven order fulfillment board covering transactional outbox intake, durable fan-out, payment/inventory/fraud coordination, cancellation and late-event rules, fulfillment/shipping/notifications/read models, and idempotency, DLQ replay, and observability operations.",
+          "finding": "The summary accurately enumerates content present in the diff, including five sections, coordinator/terminal logic, replay invariants, and operational signals."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The work was proportionate to a complex architecture-board request: 64 committed patch operations completed in about 2.91 minutes, far below the 15-minute budget. There was some label churn—full labels were shortened and then removed—but no material build-delete-rebuild cycle or object-level thrashing.",
+      "operation_count": 64,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 2.91,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "**Shortening and fixing label names** ... APPLIED · 15 ops",
+          "finding": "The agent tried a targeted label-shortening strategy after connection diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "**Removing problematic route labels to fix errors** ... APPLIED · 18 ops",
+          "finding": "Some label work was subsequently removed, creating minor churn, but this was a focused cleanup rather than a board rebuild."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed ... (64 patch operations).",
+          "finding": "The final patch size was reasonable for the five-stage, multi-consumer architecture requested."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No declared infrastructure failure occurred. The only rejected call was an agent-authored validation mistake and is included in scoring. The session committed successfully without retry.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 39016,
+    "output_tokens": 2526
+  },
+  "flags": []
+}

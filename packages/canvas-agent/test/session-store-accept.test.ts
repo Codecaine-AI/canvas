@@ -43,6 +43,7 @@ function makeStore(status: AgentSessionStatus): LayoutSessionStore {
     events: [],
     subscribers: new Set(),
     runPromise: null,
+    requests: [],
   };
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([[session.id, session]]);

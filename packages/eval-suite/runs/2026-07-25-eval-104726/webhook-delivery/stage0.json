@@ -1,0 +1,858 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-104726.webhook-delivery",
+  "title": "2026-07-25-eval-104726 · webhook-delivery",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Reliable webhook delivery · multi-tenant architecture",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 64,
+        "width": 2320,
+        "height": 1584
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ingress",
+      "type": "section",
+      "text": "1 · Durable ingress",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 128,
+        "width": 624,
+        "height": 352
+      }
+    },
+    {
+      "id": "fanout",
+      "type": "section",
+      "text": "2 · Subscription fan-out",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 944,
+        "y": 128,
+        "width": 624,
+        "height": 352
+      }
+    },
+    {
+      "id": "queue",
+      "type": "section",
+      "text": "3 · Durable delivery queue",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 112,
+        "width": 624,
+        "height": 384
+      }
+    },
+    {
+      "id": "failure",
+      "type": "section",
+      "text": "6 · Dead-letter handling",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 688,
+        "width": 624,
+        "height": 352
+      }
+    },
+    {
+      "id": "retry",
+      "type": "section",
+      "text": "5 · Retry policy",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 944,
+        "y": 672,
+        "width": 624,
+        "height": 384
+      }
+    },
+    {
+      "id": "delivery",
+      "type": "section",
+      "text": "4 · Signed delivery",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 688,
+        "width": 624,
+        "height": 368
+      }
+    },
+    {
+      "id": "visibility",
+      "type": "section",
+      "text": "7 · Status & operations",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1248,
+        "width": 624,
+        "height": 368
+      }
+    },
+    {
+      "id": "control",
+      "type": "section",
+      "text": "8 · Endpoint control & replay",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 944,
+        "y": 1248,
+        "width": 624,
+        "height": 368
+      }
+    },
+    {
+      "id": "legend",
+      "type": "sticky",
+      "text": "## Delivery guarantees\n- Accept only after durable event write\n- Stable event identity across retries and replay\n- Exact payload signed per active tenant secret",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1728,
+        "y": 1216,
+        "width": 672,
+        "height": 240
+      }
+    },
+    {
+      "id": "producer",
+      "type": "icon",
+      "text": "Product service",
+      "color": "blue",
+      "parentId": "ingress",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 224,
+        "height": 80
+      },
+      "icon": "send"
+    },
+    {
+      "id": "ingress-api",
+      "type": "process",
+      "text": "Internal ingress API",
+      "color": "blue",
+      "parentId": "ingress",
+      "geometry": {
+        "x": 496,
+        "y": 176,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "event-store",
+      "type": "database",
+      "text": "Durable event store",
+      "color": "teal",
+      "parentId": "ingress",
+      "geometry": {
+        "x": 320,
+        "y": 352,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "dispatcher",
+      "type": "process",
+      "text": "Dispatcher",
+      "color": "violet",
+      "parentId": "fanout",
+      "geometry": {
+        "x": 960,
+        "y": 176,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "subscriptions",
+      "type": "database",
+      "text": "Active subscriptions",
+      "color": "violet",
+      "parentId": "fanout",
+      "geometry": {
+        "x": 1312,
+        "y": 176,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "delivery-records",
+      "type": "document-stack",
+      "text": "One delivery / endpoint",
+      "color": "violet",
+      "parentId": "fanout",
+      "geometry": {
+        "x": 1136,
+        "y": 352,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "delivery-queue",
+      "type": "database",
+      "text": "Durable queue",
+      "color": "teal",
+      "parentId": "queue",
+      "geometry": {
+        "x": 1776,
+        "y": 176,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "pause-gate",
+      "type": "decision",
+      "text": "Endpoint active?",
+      "color": "yellow",
+      "parentId": "queue",
+      "geometry": {
+        "x": 2128,
+        "y": 160,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "retained",
+      "type": "internal-storage",
+      "text": "Retain while paused",
+      "color": "teal",
+      "parentId": "queue",
+      "geometry": {
+        "x": 1952,
+        "y": 368,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "worker",
+      "type": "process",
+      "text": "Delivery worker",
+      "color": "green",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1776,
+        "y": 736,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "secret-store",
+      "type": "database",
+      "text": "Active tenant secret",
+      "color": "violet",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2128,
+        "y": 736,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "sign-send",
+      "type": "process",
+      "text": "Sign exact payload + send",
+      "color": "green",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1952,
+        "y": 928,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "classify",
+      "type": "decision",
+      "text": "2xx / retryable / permanent",
+      "color": "yellow",
+      "parentId": "retry",
+      "geometry": {
+        "x": 960,
+        "y": 720,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "process",
+      "text": "Exponential backoff + jitter",
+      "color": "yellow",
+      "parentId": "retry",
+      "geometry": {
+        "x": 1312,
+        "y": 736,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "attempt-cap",
+      "type": "octagon",
+      "text": "Maximum attempts",
+      "color": "orange",
+      "parentId": "retry",
+      "geometry": {
+        "x": 1136,
+        "y": 928,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "dlq",
+      "type": "database",
+      "text": "Dead-letter queue",
+      "color": "orange",
+      "parentId": "failure",
+      "geometry": {
+        "x": 144,
+        "y": 736,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "failure-envelope",
+      "type": "document-stack",
+      "text": "Payload · endpoint · history · last error",
+      "color": "orange",
+      "parentId": "failure",
+      "geometry": {
+        "x": 496,
+        "y": 736,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "terminal-failure",
+      "type": "process",
+      "text": "Permanent / exhausted",
+      "color": "red",
+      "parentId": "failure",
+      "geometry": {
+        "x": 320,
+        "y": 928,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "status-history",
+      "type": "database",
+      "text": "Tenant-visible status history",
+      "color": "gray",
+      "parentId": "visibility",
+      "geometry": {
+        "x": 144,
+        "y": 1296,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "metrics",
+      "type": "icon",
+      "text": "Operational metrics",
+      "color": "teal",
+      "parentId": "visibility",
+      "geometry": {
+        "x": 496,
+        "y": 1296,
+        "width": 224,
+        "height": 96
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "outcome-stream",
+      "type": "document",
+      "text": "Attempts + outcomes",
+      "color": "gray",
+      "parentId": "visibility",
+      "geometry": {
+        "x": 320,
+        "y": 1488,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "endpoint-config",
+      "type": "process",
+      "text": "Pause / resume endpoint",
+      "color": "pink",
+      "parentId": "control",
+      "geometry": {
+        "x": 960,
+        "y": 1296,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "operator-console",
+      "type": "icon",
+      "text": "Inspect DLQ",
+      "color": "pink",
+      "parentId": "control",
+      "geometry": {
+        "x": 1312,
+        "y": 1296,
+        "width": 224,
+        "height": 96
+      },
+      "icon": "display"
+    },
+    {
+      "id": "replay",
+      "type": "process",
+      "text": "Replay with original event ID",
+      "color": "green",
+      "parentId": "control",
+      "geometry": {
+        "x": 1136,
+        "y": 1488,
+        "width": 224,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": {
+        "objectId": "producer",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingress-api",
+        "anchor": "left"
+      },
+      "label": "publish",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "c2",
+      "from": {
+        "objectId": "ingress-api",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "event-store",
+        "anchor": "top"
+      },
+      "label": "durable write before ACK",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "c3",
+      "from": {
+        "objectId": "event-store",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dispatcher",
+        "anchor": "left"
+      },
+      "label": "committed event",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "c4",
+      "from": {
+        "objectId": "subscriptions",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "dispatcher",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "c5",
+      "from": {
+        "objectId": "dispatcher",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "delivery-records",
+        "anchor": "top"
+      },
+      "label": "expand per endpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "c6",
+      "from": {
+        "objectId": "delivery-records",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "delivery-queue",
+        "anchor": "left"
+      },
+      "label": "enqueue",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "c7",
+      "from": {
+        "objectId": "delivery-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pause-gate",
+        "anchor": "left"
+      },
+      "label": "dequeue",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "c8",
+      "from": {
+        "objectId": "pause-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retained",
+        "anchor": "top"
+      },
+      "label": "paused",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "c9",
+      "from": {
+        "objectId": "pause-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "worker",
+        "anchor": "top"
+      },
+      "label": "active",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "c10",
+      "from": {
+        "objectId": "worker",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "sign-send",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "c11",
+      "from": {
+        "objectId": "secret-store",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "sign-send",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "c12",
+      "from": {
+        "objectId": "sign-send",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "classify",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "c13",
+      "from": {
+        "objectId": "classify",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "c14",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "attempt-cap",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "c15",
+      "from": {
+        "objectId": "attempt-cap",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "delivery-queue",
+        "anchor": "bottom"
+      },
+      "label": "attempts remain",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "c16",
+      "from": {
+        "objectId": "classify",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "terminal-failure",
+        "anchor": "right"
+      },
+      "label": "permanent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "c17",
+      "from": {
+        "objectId": "attempt-cap",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "terminal-failure",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "c18",
+      "from": {
+        "objectId": "terminal-failure",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "failure-envelope",
+        "anchor": "bottom"
+      },
+      "label": "preserve context",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "c19",
+      "from": {
+        "objectId": "failure-envelope",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "dlq",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "c20",
+      "from": {
+        "objectId": "classify",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "outcome-stream",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "c21",
+      "from": {
+        "objectId": "outcome-stream",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "status-history",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "c22",
+      "from": {
+        "objectId": "outcome-stream",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "metrics",
+        "anchor": "bottom"
+      },
+      "label": "metrics",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "c23",
+      "from": {
+        "objectId": "dlq",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "operator-console",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "c24",
+      "from": {
+        "objectId": "operator-console",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "replay",
+        "anchor": "top"
+      },
+      "label": "replay selected",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "c25",
+      "from": {
+        "objectId": "replay",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "delivery-queue",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "c26",
+      "from": {
+        "objectId": "endpoint-config",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "pause-gate",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink"
+    }
+  ],
+  "annotations": []
+}

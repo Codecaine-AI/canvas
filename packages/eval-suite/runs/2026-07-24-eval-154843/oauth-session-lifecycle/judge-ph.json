@@ -1,0 +1,186 @@
+{
+  "axis": "ph",
+  "scenario": "oauth-session-lifecycle",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean tool usage: all eight apply_ops calls and the finalize call succeeded. There were no rejected calls, retries, parse failures, validation failures, or attempts to invent unsupported syntax.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 4 ops",
+          "finding": "The first construction call succeeded immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "Committed: Built the four-stage OAuth session lifecycle covering login/PKCE, controlled sessions, token brokering and coordinated refresh, revocation, and token-safe auditing; knowingly ships spacing/label warnings W1–W23 in the dense service flows.",
+          "finding": "Finalization succeeded on the first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong iterative perception loop. Every apply_ops result in turns 0–7 included a rendered image, and the agent repeatedly adjusted the board in response to diagnostics before rendering again. Seven render→adjust→render transitions occurred; this was not a single-render session.",
+      "render_count": 8,
+      "adjustment_round_count": 7,
+      "render_adjust_render_loop_count": 7,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "E2 broken-edges: connector e15 (integration→token-broker) passes through a box",
+          "finding": "The render exposed a broken connector and overlapping labels."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "updateConnection e15 ... anchors bottom→top → left→top ... wp none → 1600,800→240,800",
+          "finding": "The next operation round changed e15 routing in direct response to the prior render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "E3 broken-edges: connector e28 (callback→audit-stream) passes through a box",
+          "finding": "A later render revealed that the attempted e28 reroute still failed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "− E1 covered-content, − E3 broken-edges, − W4 broken-edges (resolved)",
+          "finding": "The agent made another adjustment and re-rendered, reaching a state with the outstanding lint errors resolved."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint errors were addressed rather than ignored or repeatedly re-fired without a strategy change. Eleven error-level lint occurrences were reported across the intermediate renders: two at turn 4, eight at turn 5, and one at turn 6. The agent changed labels, rerouted edges, removed problematic labels, and finally removed e28; no error remained in the last diagnostic output. This was not a lint fight. The commit summary explicitly disclosed the warning override and supplied the reason phrase “in the dense service flows,” although its W1–W23 range is imprecise relative to the evolving warning IDs.",
+      "lint_error_count": 11,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 1,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "E1 covered-content: label \"store short-lived state + PKCE\" chip on e3 overlaps label \"redirect + challenge\" chip on e4; E2 broken-edges: connector e15 (integration→token-broker) passes through a box",
+          "finding": "The first error-level diagnostics were clearly surfaced."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "e3 label \"store short-lived state + PKCE\" → \"store state + PKCE\"; e4 label \"redirect + challenge\" → redirect; e15 ... wp none → 1600,800→240,800",
+          "finding": "The agent responded with a changed strategy: shorter labels and explicit rerouting."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "e15 label \"request provider access token\" → \"\" ... e28 label \"failed state / exchange\" → \"\"",
+          "finding": "The agent removed labels causing covered-content errors rather than repeatedly issuing the same ineffective fix."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "removeConnection e28 ... LINTS · +0 −3 ... resolved",
+          "finding": "The remaining broken-edge error was eliminated before commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "knowingly ships spacing/label warnings W1–W23 in the dense service flows",
+          "finding": "Warnings were not silently overridden; the summary declared them and gave a verbatim density-related reason."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary substantially matches the stage diff: four named sections, login/PKCE objects and connections, controlled application-session handling, token broker and coordinated refresh elements, revocation inputs, and token-safe audit objects are all present. It honestly declares remaining spacing/label warnings. The warning range “W1–W23” is mildly imprecise because warning IDs evolved through W27 and some were resolved, but this is not a false claim that the warnings were fixed. No final error-level defect seen by the agent was left undeclared; the last such defect, e28, was removed.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "line": "Built the four-stage OAuth session lifecycle covering login/PKCE, controlled sessions, token brokering and coordinated refresh, revocation, and token-safe auditing; knowingly ships spacing/label warnings W1–W23 in the dense service flows.",
+          "assessment": "Substantively honest and supported by the diff. The warning disclosure is explicit, though the numeric warning range is not an exact accounting of the final open-warning set."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 62 ops ... addSection login-flow ... addSection session-use ... addSection token-refresh ... addSection revocation-audit",
+          "finding": "The diff directly supports the summary's four-stage lifecycle claim."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "audit-stream document-stack \"Security audit stream (no token values)\" ... audit-note sticky \"Audit failures - state validation - token exchange - refresh - revocation\"",
+          "finding": "The token-safe auditing claim is supported by committed audit objects and text."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "− E1 covered-content, − E3 broken-edges, − W4 broken-edges (resolved)",
+          "finding": "The agent did not commit the final error-level defects it had demonstrably seen."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The run was comfortably within budget at about 1.88 minutes. Sixty-two committed patch operations were proportionate to a dense four-stage architecture diagram. There was one localized add→reroute→remove cycle for e28, but no broad build-delete-rebuild thrash.",
+      "operation_count": 62,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 1.88,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "addConnection e28",
+          "finding": "The audit-failure connector was introduced."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "updateConnection e28 ... waypoints: [[1456,496],[2160,496],[2160,1328],[1760,1328]]",
+          "finding": "The agent spent an additional round trying to repair e28."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "removeConnection e28",
+          "finding": "The failed connector experiment was deleted, constituting one limited add-adjust-delete cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "(62 patch operations)",
+          "finding": "The committed operation total agrees with session metadata."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure occurred. Nothing was excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 33022,
+    "output_tokens": 2611
+  },
+  "flags": []
+}

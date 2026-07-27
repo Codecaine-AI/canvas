@@ -92,7 +92,6 @@ describe("broken-edges lint", () => {
     expect(brokenEdges.id).toBe("broken-edges");
     expect(brokenEdges.tier).toBe("error");
     expect(brokenEdges.guidance).toContain("blocks commit");
-    expect(brokenEdges.quickfix).toBeUndefined();
   });
 
   // --- ported from rules-edge-clarity ---

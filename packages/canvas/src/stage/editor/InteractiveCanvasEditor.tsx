@@ -254,6 +254,16 @@ export function InteractiveCanvasEditor({
   const annotationPopupTarget = annotateMode.popup
     ? state.document.objects.find((object) => object.id === annotateMode.popup?.objectId)
     : undefined;
+  // An object already carrying an open thread reopens the conversation rather
+  // than starting a second one beside it.
+  const annotationPopupThread = annotateMode.popup
+    ? state.document.annotations?.find(
+      (annotation) =>
+        annotation.status === "open"
+        && annotation.target.kind === "object"
+        && annotation.target.objectId === annotateMode.popup?.objectId,
+    )
+    : undefined;
   const selectedConnectionId = state.selection.kind === "connection" ? state.selection.connectionId : null;
   const selectedConnection = state.document.connections.find(
     (connection) => connection.id === selectedConnectionId,
@@ -592,6 +602,16 @@ export function InteractiveCanvasEditor({
                 targetLabel={annotationTargetLabel(annotationPopupTarget)}
                 onSave={annotateMode.saveAnnotation}
                 onCancel={annotateMode.cancelPopup}
+                thread={annotationPopupThread}
+                onReply={(body) => {
+                  if (!annotationPopupThread) return;
+                  dispatch({
+                    type: "canvas.appendAnnotationReply",
+                    annotationId: annotationPopupThread.id,
+                    author: "human",
+                    body,
+                  });
+                }}
               />
             ) : null}
             {annotateMode.hint ? (

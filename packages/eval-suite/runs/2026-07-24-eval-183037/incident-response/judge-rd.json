@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "incident-response",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board adds stronger lane tinting and phase identity but loses finish through visibly truncated text, uneven lane spacing, and conspicuous long detour edges.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6.5,
+        "note": "The four phases occupy most of the inner frame, but the narrow third and fourth lanes are separated by a disproportionately large empty horizontal gap."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6,
+        "note": "Most nodes and chips have usable breathing room, but several labels are cramped or clipped, including “Verify & resol...,” “Learn & foll...,” “Mitigati on...,” and “Real incid....”"
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Distinct blue, orange, green, and purple tinted phase regions perform clear grouping work and make the incident-response sequence immediately scannable."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Color is consistent by phase and transitions are easy to follow, though the yellow decision/task boxes introduce a secondary convention whose semantics are not fully clear."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Failure is visible in the oversized orange U-shaped return at the bottom of phase 1, an apparently open-ended orange run beside mitigation, and several arrowheads that terminate without a clean node attachment."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "The lane headers and vertical stacks establish a basic rhythm, but lane widths, header widths, internal registers, and density vary awkwardly, especially between the packed first lane and sparse fourth lane."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Most local vertical flows read cleanly, but the orange return loop and the purple preserve-record route make large border-like detours, while some connectors appear disconnected or ambiguously attached."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness (7.5) ranks first, intent-classification-2 (7.0) second, and the board under grade (6.0) third."
+  },
+  "usage": {
+    "input_tokens": 16242,
+    "output_tokens": 778
+  },
+  "flags": []
+}

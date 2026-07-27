@@ -14,13 +14,14 @@
         "b-step7-canvas-4"
       ],
       "props": {
-        "covers": "Step 7 of the worked example: the edit the walkthrough was built for — the board grid goes 1x3 to 2x2 with a new cache cell, the lattice re-solves, and the rest of the board stays put.",
+        "covers": "Step 7 of the worked example: a four-operation content batch turns the board stores into a 2×2 peer group, adds cache, reviews pushed state, and names every surviving warning in the gated finalize.",
         "format": "mdx",
         "type": "design",
         "concepts": [
           "worked example",
-          "grid edit",
-          "re-solve",
+          "apply_ops",
+          "grid",
+          "finalize",
           "locality",
           "stability"
         ]
@@ -46,25 +47,34 @@
       "props": {},
       "text": [
         {
-          "insert": "The edit the walkthrough was built for: the board grid goes "
+          "insert": "The final edit is deliberately local: the agent changes "
         },
         {
-          "insert": "1x3",
+          "insert": "board",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " to "
+          "insert": " content by moving epochs, artifacts, and saves into equal 2×2 cells and adding cache as the fourth peer. The children drive the frame, so Board — hub auto-fits after the batch instead of being hand-resized to chase them. The coordinates are only 16px-grid quantization; the meaning comes from copied peer sizes, shared rows and columns, and one repeated group gap. DELTA exposes snapped child geometry, reconciled parentId, and any resulting section fit. The rest of the composition stays put. APPLIED accounts for all four operations, the fresh BOARD digest shows the complete current draft, and BOARD DIFF shows the cumulative baseline-to-draft proposal. LINTS reports diagnostic changes, ROUTES reports the recomputed saves-to-objdiff route because its endpoint moved, REQUESTS shows the current queue, and the document change pushes a fresh full-board render. "
         },
         {
-          "insert": "2x2",
+          "insert": "view",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " with a new cache cell. The lattice re-solves around the new cell and the rest of the board stays put (R4) — the program never said where anything was, so nothing else had a coordinate to lose (R10)."
+          "insert": " also adds the board close-up for bottom-up review. If that close-up or a lint exposes a problem, the agent sends another apply_ops batch—using a ready-to-send suggested op when one is provided—and reviews the next pushed result. Once the edited scope has zero error-tier diagnostics and every REQUESTS entry has been disposed with resolve_request, "
+        },
+        {
+          "insert": "finalize({ outcome: \"committed\", message: \"Add the cache store; deliberately override W1 anti-parallel routing and W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12, and W13 crowding in this compact fixture.\" })",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " proposes the same cumulative operations shown in BOARD DIFF for operator review. This message names every warning that survives on the frozen board; a reference-quality board would open those corridors and eliminate the anti-parallel pair."
         }
       ]
     },
@@ -73,11 +83,11 @@
       "flavour": "code",
       "children": [],
       "props": {
-        "language": "text"
+        "language": "json"
       },
       "text": [
         {
-          "insert": "row 1|4|2\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  col 2|1\n    section 5 text=loop label=\"Runner loop\"\n      grid 1x4 gap=96\n        item 6 text=cli type=process size=M\n        item 7 text=sched type=process size=M\n        item 8 text=workers type=process size=M\n        item 9 text=match type=decision size=M\n    section 10 text=board label=\"Board — hub\"\n      grid 2x2 gap=64\n        item 11 text=epochs type=database size=M\n        item 12 text=artifacts type=database size=M\n        item 13 text=saves type=database size=M\n        item 20 text=cache type=database size=M\n  section 14 text=score label=\"Score gate\"\n    col 2|1\n      grid 3x1 gap=64\n        item 15 text=objdiff type=process size=M\n        item 16 text=qa type=process size=M\n        item 17 text=regress type=decision size=M\n      group\n        item 18 text=absorb type=pill size=S at=SW\n        item 19 text=reject type=pill size=S at=SE\n\nalign y: 6 15\nfan 17 dir=S: 18 19\n\narrows\n  6 > 7\n  7 > 8\n  8 > 9\n  9 > 15\n  15 > 16\n  16 > 17\n  17 > 18\n  17 > 19\n  9 > 8\n  13 > 15"
+          "insert": "{\n  \"ops\": [\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"epochs\",\n      \"patch\": {\n        \"geometry\": { \"x\": 384, \"y\": 448, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"artifacts\",\n      \"patch\": {\n        \"geometry\": { \"x\": 464, \"y\": 448, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"saves\",\n      \"patch\": {\n        \"geometry\": { \"x\": 384, \"y\": 528, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"addObject\",\n      \"object\": {\n        \"id\": \"cache\",\n        \"type\": \"database\",\n        \"text\": \"cache\",\n        \"geometry\": { \"x\": 464, \"y\": 528, \"width\": 48, \"height\": 48 }\n      }\n    }\n  ],\n  \"view\": \"board\"\n}"
         }
       ]
     },

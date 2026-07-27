@@ -10,6 +10,11 @@
       "children": [
         "b-r2-title-1",
         "b-r2-card-2",
+        "b-r2-rungs-heading-9",
+        "b-r2-rung-pad-10",
+        "b-r2-rung-sibling-11",
+        "b-r2-rung-section-12",
+        "b-r2-rung-shape-13",
         "b-r2-flush-3",
         "b-r2-packed-4",
         "b-r2-spaced-5",
@@ -18,14 +23,17 @@
         "b-r2-classify-8"
       ],
       "props": {
-        "covers": "Sibling gaps come from the closed ladder {0, 32, 64, 96} — flush, packed, spaced, loose — with 128+ cluster corridors from GUTTER_LADDER, and gap classification is semantic rather than nearest-rung.",
+        "covers": "Spacing is semantic and local: one exact gap repeats within a peer group, a wider exact gutter repeats between sections, the ladder names each rung from section padding up through the section gutter, and the crowding lint marks the minimum arrow corridor rather than a target spacing amount.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "spacing ladder",
-          "gap classification",
-          "gutter ladder",
-          "cluster corridor"
+          "uniform gaps",
+          "spacing rungs",
+          "peer signaling",
+          "section gutters",
+          "ink density",
+          "arrow corridors",
+          "crowding lint"
         ]
       }
     },
@@ -47,11 +55,76 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Gaps come from a closed ladder"
+        "title": "One repeated gap per group"
       },
       "text": [
         {
-          "insert": "Sibling gaps come from the closed ladder {0, 32, 64, 96}; separation between unrelated clusters is at least 128."
+          "insert": "Choose a gap wide enough for the group's content, wires, and labels, then repeat it exactly. The repetition is the signal that the members are peers."
+        }
+      ]
+    },
+    "b-r2-rungs-heading-9": {
+      "id": "b-r2-rungs-heading-9",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The rungs"
+        }
+      ]
+    },
+    "b-r2-rung-pad-10": {
+      "id": "b-r2-rung-pad-10",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Section padding — 48px of air between a section border and the nearest child, on every side. It is the shortest rung: a frame sits closer to its own children than any two peers sit to each other, which is what makes the frame read as theirs."
+        }
+      ]
+    },
+    "b-r2-rung-sibling-11": {
+      "id": "b-r2-rung-sibling-11",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Sibling gaps — 144px between side-by-side peers, 72px between stacked peers. Against a 288×96 node that is half a node width across and three quarters of a node height down, so a row repeats on a 432px pitch and a column on a 168px pitch."
+        }
+      ]
+    },
+    "b-r2-rung-section-12": {
+      "id": "b-r2-rung-section-12",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Section-to-section gutters — 144px across, 160px down. The horizontal gutter matches the sibling gap because separate columns already read as separate; the vertical gutter is more than twice the stacked sibling gap, and that jump is what tells a reader where one section ends and the next begins."
+        }
+      ]
+    },
+    "b-r2-rung-shape-13": {
+      "id": "b-r2-rung-shape-13",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "What the ladder adds up to — a board whose node area is about 15% of its board area. Air is the majority of a finished board; hold the rungs, keep two or three nodes in a section, and that ratio arrives on its own. A board reading well above it was built by tightening the rungs."
         }
       ]
     },
@@ -64,7 +137,7 @@
       },
       "text": [
         {
-          "insert": "0 (\"flush\") — repeated template cells: ink-diagrams' twelve 288x80 table cells tile with zero gap on both axes."
+          "insert": "Uniformity carries meaning: same size plus the same gap says that nodes are peers. A near-match reads as an accidental exception."
         }
       ]
     },
@@ -77,7 +150,7 @@
       },
       "text": [
         {
-          "insert": "32 (\"packed\") — stacked chips and pills: gc's config pills sit at pitch 96 = 64 height + 32 gap; v2's memory predefined-process stack (raw gap 59) reads as packed, not spaced."
+          "insert": "Content comes first: size each box for its label with comfortable padding, then make peers match the largest member before setting the repeated pitch."
         }
       ]
     },
@@ -90,21 +163,7 @@
       },
       "text": [
         {
-          "insert": "64 (\"spaced\") — the default sibling gap inside a leaf ("
-        },
-        {
-          "insert": "ITEM_GAP = 64",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "ITEM_GAP"
-            }
-          }
-        },
-        {
-          "insert": "): gc's db row (pitch 352 = 288 + 64) and gc's PR stack (pitch 144 = 80 + 64)."
+          "insert": "Copy instead of estimating: use a peer's exact digest size and pitch so the next member lands on the same register and gap."
         }
       ]
     },
@@ -117,7 +176,7 @@
       },
       "text": [
         {
-          "insert": "96 (\"loose\") — chain steps with room for connector labels: agent-flows-2's function-call chain (pitch ~176 = 80 + 96)."
+          "insert": "Every label and routed wire owns clear air. Within a section, centers stay on one line; between sections, use one wider gutter and repeat that gutter too."
         }
       ]
     },
@@ -130,21 +189,7 @@
       },
       "text": [
         {
-          "insert": "128 and up (\"cluster\") — the root-level corridor between unrelated groups: "
-        },
-        {
-          "insert": "GUTTER_LADDER = [128, 96, 64, 32]",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "GUTTER_LADDER"
-            }
-          }
-        },
-        {
-          "insert": " by split depth."
+          "insert": "The crowding warning marks the corridor floor for sibling nodes: under 80px side by side or under 48px stacked. These thresholds protect route clearance; they are not preferred spacing values — the rungs above are."
         }
       ]
     },
@@ -155,21 +200,46 @@
       "props": {},
       "text": [
         {
-          "insert": "Gap classification is semantic, not nearest-rung: "
+          "insert": "Mechanism: the "
         },
         {
-          "insert": "gapClass",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "gapClass"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " reads raw gaps under 16 as 0, under 64 as 32, under 96 as 64, and up to 112 as 96. A sub-64 gap is adjacent in the corpus and must stay adjacent after the round trip."
+          "insert": " owns the uniform-gap signal, and the system prompt names the rung amounts a composition starts from. The "
+        },
+        {
+          "insert": "crowding",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/crowding.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "unreadable-labels",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/unreadable-labels.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and covered-content lints measure corridor, chip fit, and collisions. The plan phase explicitly says the crowding warning is a floor, not the target."
         }
       ]
     }

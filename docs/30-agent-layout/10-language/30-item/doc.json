@@ -17,14 +17,14 @@
         "b-item-canvas-7"
       ],
       "props": {
-        "covers": "The item statement: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
+        "covers": "The item notation: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "item",
           "compass placement",
           "at=",
-          "size ladder",
+          "content-first sizing",
           "reference numbers"
         ]
       }
@@ -49,7 +49,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A real object on the board — one per line, every field labeled. An item says what it is and where it sits by compass, never by pixel coordinates; the solver turns that into geometry. Fields, in fixed order:"
+          "insert": "A real object on the board — one per line, every field labeled. In this descriptive notation, an item says what it is and where it sits by compass rather than by pixel coordinates. The size label is human shorthand: live add geometry and geometry patches carry a complete finite {x, y, width, height}. The agent chooses dimensions from content and role, then matches peers by copying exact digest geometry; the 16px grid quantizes geometry rather than prescribing a size or spacing amount. Fields, in fixed order:"
         }
       ]
     },
@@ -78,12 +78,12 @@
           [
             "type=",
             "yes",
-            "any canvas shape type (process, sticky, decision, database, pill, ...)"
+            "a type from the closed canvas roster (process, decision, database, pill, ...); sticky denotes the note kind, and icon requires a roster glyph"
           ],
           [
             "size=",
             "yes",
-            "S, M, L (0.72× / 1× / 1.35× of the type's base size)"
+            "S, M, L as qualitative role sizes in this notation; live types carry no default-size guidance"
           ],
           [
             "at=",

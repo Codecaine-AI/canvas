@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-24-eval-183037",
+  "tier": "system",
+  "scenario": "multi-region-failover",
+  "board_id": "eval.2026-07-24-eval-183037.multi-region-failover",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-24T23:30:39.295Z",
+      "finished_at": "2026-07-24T23:33:58.195Z",
+      "wall_ms": 199581,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "0aa99005-c406-48e7-a266-bef975c860ca"
+    ]
+  },
+  "finished_at": "2026-07-24T23:33:58.876Z",
+  "exit_code": 0
+}

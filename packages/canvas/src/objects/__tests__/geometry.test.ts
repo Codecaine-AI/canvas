@@ -219,7 +219,6 @@ describe("inscribedTextRect", () => {
       { type: "hexagon", x1: width * 0.22 + 8, x2: width * 0.78 - 8, y1: height * 0.1, y2: height * 0.9 },
       { type: "off-page-connector", x1: width * 0.08, x2: width * 0.92, y1: height * 0.06, y2: height * 0.58 },
       { type: "manual-input", x1: width * 0.08, x2: width * 0.92, y1: height * 0.25 + 8, y2: height * 0.92 },
-      { type: "annotation-marker", x1: width * 0.15, x2: width * 0.85, y1: height * 0.15, y2: height * 0.85 },
       { type: "pentagon", x1: width * 0.22, x2: width * 0.78, y1: height * 0.24, y2: height * 0.88 },
       { type: "octagon", x1: width * 0.19, x2: width * 0.81, y1: height * 0.19, y2: height * 0.81 },
     ];

@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board offers stronger tinted grouping and semantic color but uses its frame less efficiently, leaving oversized empty regions and rendering labels comparatively small at full-board scale.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "FAIL: The upper fleet occupies only part of its tall container, while the governance section is an especially deep, mostly empty band and the lower edge of the overall frame remains unused."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Chips generally have clear air and sequential stages are well separated, though the excessive spacing across the giant canvas makes several labels and nodes feel underscaled rather than comfortably readable."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Tinted blue, orange, purple, teal, amber, and pink regions clearly distinguish admission, placement, boot, lifecycle, health, controls, outputs, and governance responsibilities."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Color is restrained and meaningfully consistent, with teal dashed capacity/health flows, red-orange failure paths, green readiness, and distinct hues for lifecycle and output families."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7.5,
+        "note": "No crosshair junctions, exposed waypoints, or orphaned badges are visible; arrowheads terminate cleanly on nodes, although the small standalone edge chips visually approach floating-label territory."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The four top stages and three middle support regions hold strong registers, but the very sparse governance strip and uneven vertical density weaken the board-wide rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6.5,
+        "note": "Most routes are clean and crossings are minimal, but the long dashed teal runs between lower support regions and upper boot stages create conspicuous cross-board marathons."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness ranks first, intent-classification-2 second, and the board under grade third because its clean grouping and routing do not overcome its weaker frame use and oversized dead bands."
+  },
+  "usage": {
+    "input_tokens": 16615,
+    "output_tokens": 733
+  },
+  "flags": []
+}

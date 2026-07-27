@@ -14,7 +14,7 @@
         "b-r1-evidence-4"
       ],
       "props": {
-        "covers": "Every emitted coordinate, extent, corridor width, and pitch snaps to a 16px grid; GRID = 16 in the expander, split allocation runs on 16px units, and the elbow router walks the same lattice.",
+        "covers": "The 16px grid is geometry quantization: patched object rectangles snap to it, while spacing is chosen from content and repeated peer geometry rather than from a grid-derived target.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -42,11 +42,11 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Everything snaps to a 16px grid"
+        "title": "Geometry quantizes to a 16px grid"
       },
       "text": [
         {
-          "insert": "Every emitted coordinate, extent, corridor width, and pitch snaps to a 16px grid. Offsets finer than 16px are authoring noise, never intent."
+          "insert": "Object geometry uses the 16px grid as a snap unit. It does not prescribe a gap, corridor width, or pitch: choose those for the content and flow, then express the resulting rectangles on-grid."
         }
       ]
     },
@@ -57,49 +57,48 @@
       "props": {},
       "text": [
         {
-          "insert": "Enforcement: "
+          "insert": "Mechanism: the "
         },
         {
-          "insert": "GRID = 16",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "GRID"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " in the expander; split allocation runs on 16px units through "
+          "insert": " tells the agent to work in 16px grid units and to match peers by copying exact digest geometry. The op path applies "
         },
         {
-          "insert": "allocateWeightedUnits",
+          "insert": "CANVAS_GRID_SIZE = 16",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/units.ts",
-              "symbol": "allocateWeightedUnits"
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "CANVAS_GRID_SIZE"
             }
           }
         },
         {
-          "insert": "; hug rects snap up to 16; fan pitch snaps up to 16. The elbow router walks the same lattice ("
+          "insert": " through "
         },
         {
-          "insert": "ROUTE_GRID",
+          "insert": "snapGeometry",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "ROUTE_GRID"
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "snapGeometry"
             }
           }
         },
         {
-          "insert": ")."
+          "insert": " to complete geometry patches. Connection anchors, endpoint fractions, and waypoints are steering fields rather than object rectangles, so R1 must not be turned into a universal spacing or route-coordinate rule."
         }
       ]
     },
@@ -110,29 +109,16 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: 88.3% of objects across the reference boards sit exactly on the grid, and the misses are hand-drag noise — "
+          "insert": "Operational check: a geometry patch supplies the complete finite "
         },
         {
-          "insert": "v2-flow",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": "'s "
-        },
-        {
-          "insert": "sticky-overall-context",
+          "insert": "{x, y, width, height}",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " at x=810.4 reads as 816."
+          "insert": " rectangle. Operation results and looks report the post-snap geometry in their digest rows, which is the value to copy when matching peers."
         }
       ]
     }

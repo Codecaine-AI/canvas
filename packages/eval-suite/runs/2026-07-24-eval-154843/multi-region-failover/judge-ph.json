@@ -1,0 +1,192 @@
+{
+  "axis": "ph",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Three apply_ops calls were rejected for invalid object types. Each was corrected on the immediately following turn, with no repeated syntax fight, no session retry, and no failed finalize call.",
+      "failed_call_count": 3,
+      "rejected_call_count": 3,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 2: addObject type \"cloud\" is invalid.",
+          "finding": "Rejected type was immediately corrected at turn 2 by changing the DNS object to type \"icon\" with icon \"cloud\"."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 9: addObject type \"archive\" is invalid.",
+          "finding": "Rejected type was immediately corrected at turn 5 by using type \"icon\" with icon \"archive\"."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 5: addObject type \"archive\" is invalid.",
+          "finding": "The same invalid object type recurred once in a later batch, but it was again corrected immediately at turn 9; this was minor validation friction rather than a consecutive tool-surface fight."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session had a strong iterative perception loop. Successful operation rounds repeatedly returned rendered images, and the agent continued adjusting layout, containment, content, and connections before rendering again. There were 11 render-producing tool calls containing 12 image payloads; the two images on turn 13 came from one call and therefore do not constitute an additional adjustment loop.",
+      "render_count": 12,
+      "adjustment_round_count": 10,
+      "render_adjust_render_loop_count": 10,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 7 ops ... images: [image/png]",
+          "finding": "Initial section skeleton was rendered before subsequent content additions."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "LINTS · +4 −0 ... + E1 containment: writer-return extends 96px past the base section page-frame",
+          "finding": "The rendered recovery layout exposed a containment error that the agent addressed in the next adjustment round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "APPLIED · 4 ops ... − E1 containment (resolved)",
+          "finding": "The agent resized the recovery section and moved the failback objects, then obtained another render confirming the containment error was resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "APPLIED · 28 ops ... LINTS · +26 −0 ... + E1 covered-content ... + E2 broken-edges ... + E3 broken-edges",
+          "finding": "A connection pass was rendered and diagnosed rather than committed immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "APPLIED · 3 ops ... − E1 covered-content, − E2 broken-edges, − E3 broken-edges, − W1 covered-content (resolved)",
+          "finding": "The agent adjusted the rendered connection state by removing three problematic connections and re-rendered before finalization."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All error-level lint findings were fixed rather than fought: one containment error from turn 10 and three connection errors from turn 12 were resolved on the next respective turns. There was no same-lint sequence exceeding three consecutive turns. However, many spacing, label-routing, and broken-edge warnings remained at commit. The summary acknowledged them but supplied no verbatim reason for overriding them, so this counts as one silently reasoned warning-override decision under the rubric rather than a good reasoned override.",
+      "lint_error_count": 4,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "+ E1 containment: writer-return extends 96px past the base section page-frame",
+          "finding": "Error was not ignored; turn 11 moved the object inside the enlarged recovery section."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "− E1 containment (resolved)",
+          "finding": "Containment error was fixed immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 broken-edges ... + E3 broken-edges",
+          "finding": "The connection batch introduced three error-level lint findings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "− E1 covered-content, − E2 broken-edges, − E3 broken-edges, − W1 covered-content (resolved)",
+          "finding": "All error-level connection findings were removed on the next turn; there was no lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "knowingly ships spacing/label-routing warnings W1–W37",
+          "finding": "The warning override was disclosed, but the summary did not state a reason for accepting the warnings. The rubric requires a verbatim reason in the summary for positive warning-override credit."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary substantially matches the stage diff: the diff contains global routing and control-plane sections, three regional stacks, global data and payment components, lease/RPO safeguards, and failover/failback elements. The summary also explicitly disclosed the remaining spacing and label-routing warnings. Its warning identifier range is broad and does not preserve the final turn's renumbered warning presentation exactly, but it is not materially deceptive. No demonstrably seen defect was left wholly undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "line": "Built the multi-region commerce failover architecture, regional stacks, global data/payment paths, control-plane lease safeguards, and failback runbook; knowingly ships spacing/label-routing warnings W1–W37.",
+          "assessment": "Supported by the diff and candid about the residual warning class. The line does not falsely claim a clean lint state, though it gives no reason for accepting the warnings."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "I’m realizing there are many warnings. We could ship knowingly, but I'm wondering about the desired fix. It seems too much to handle.",
+          "finding": "The agent demonstrably knew warnings were accumulating; the final summary disclosed that limitation rather than concealing it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 98 ops",
+          "finding": "The final draft contains the architecture elements claimed in the summary, including regional sections, data/payment objects, control-plane safeguards, and recovery/failback objects."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Committed: Built the multi-region commerce failover architecture, regional stacks, global data/payment paths, control-plane lease safeguards, and failback runbook; knowingly ships spacing/label-routing warnings W1–W37. (98 patch operations).",
+          "finding": "Commit count and operation count align with the final draft and session metadata."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The run completed in about 3.8 minutes, well inside the 15-minute budget. Ninety-eight committed patch operations were proportionate to a dense architecture diagram. There was one limited add-then-remove correction involving three connections, but not a wholesale build-delete-rebuild cycle, so it does not rise to rubric-level ops thrash.",
+      "operation_count": 98,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 3.8,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "APPLIED · 28 ops ... addConnection e-cap-shed ... addConnection e-route-b ... addConnection e-route-c",
+          "finding": "A large connection batch introduced three error-producing connections."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "APPLIED · 3 ops ... removeConnection e-cap-shed ... removeConnection e-route-b ... removeConnection e-route-c",
+          "finding": "The three problematic connections were removed immediately. This is a bounded corrective cycle, not broad architectural thrashing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "(98 patch operations)",
+          "finding": "Final operation count matches the metadata and is plausible for the scope."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. The sole session committed successfully and is fully included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 54120,
+    "output_tokens": 2689
+  },
+  "flags": []
+}

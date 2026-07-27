@@ -1,0 +1,17 @@
+{
+  "complexity": 2,
+  "page": {
+    "width": 1920,
+    "height": 1200
+  },
+  "edits": [
+    {
+      "title": "Unstable scenario results",
+      "instruction": "The harness now re-runs scenarios whose results swing between comparable runs, subject to a bounded retry allowance. It records the observed variance across attempts. If a result remains unstable, the scorecard marks it as unstable instead of silently averaging the attempts into a single result."
+    }
+  ],
+  "tags": [
+    "process",
+    "evaluation"
+  ]
+}

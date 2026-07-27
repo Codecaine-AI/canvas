@@ -1,56 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-
 import {
   boardStateSnapshot,
+  bootPerception,
   emitSessionEvent,
-  toolApplyOps,
-  toolApplyQuickfix,
-  type LayoutSession,
+  toolFinalize,
 } from "../src/service/session";
-import type { LayoutToolRenderResult } from "../src/service/tool-runtime";
-import type { AgentPatchOperation } from "../src/protocol";
-import { resolveScope } from "../src/board/scope";
+import { diffDocuments } from "../src/board/doc-diff";
+import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
-
-function makeSession(
-  baseline: InteractiveCanvasDocument,
-  requestedScopeIds: string[],
-): LayoutSession {
-  const scopeResolution = resolveScope(baseline, requestedScopeIds);
-  return {
-    id: "perception-session",
-    canvasId: "synthetic",
-    canvasPath: "/tmp/perception.canvas.json",
-    baseline,
-    baselineHash: "test-hash",
-    scopeResolution,
-    scopeIds: new Set(scopeResolution.scopeObjectIds),
-    draft: baseline,
-    proposalCount: 0,
-    proposal: null,
-    status: "running",
-    error: null,
-    instruction: "Edit the selected board objects",
-    annotations: [],
-    viewport: undefined,
-    containerId: "perception-container",
-    sessionDir: "/tmp/perception-session",
-    events: [],
-    subscribers: new Set(),
-    runPromise: null,
-    exemplarShown: true,
-    lastDiagnostics: undefined,
-  };
-}
-
-function applyOps(
-  session: LayoutSession,
-  operations: AgentPatchOperation[],
-): LayoutToolRenderResult {
-  return toolApplyOps(session, operations, emitSessionEvent);
-}
 
 describe("spawn board-state snapshot", () => {
   test("carries the full digest plus the full lint report as one string", () => {
@@ -59,7 +17,7 @@ describe("spawn board-state snapshot", () => {
       [box("alpha", 0, 0), box("beta", 208, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "go" }],
     );
-    const session = makeSession(baseline, ["alpha", "beta"]);
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
 
     const snapshot = boardStateSnapshot(session);
 
@@ -68,11 +26,14 @@ describe("spawn board-state snapshot", () => {
     expect(snapshot).toContain("\n\nDIAGNOSTICS ·");
     // 48px gap under a "go" chip — the full lint report rides along.
     expect(snapshot).toContain("unreadable-labels");
+    // Findings carry a measured prose remedy, leaving the operation choice to the model.
+    expect(snapshot).toContain("open the alpha↔beta corridor");
+    expect(snapshot).not.toContain("suggested op:");
   });
 
   test("recomputes from the current draft, so refinements get a fresh snapshot", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
-    const session = makeSession(baseline, ["alpha"]);
+    const session = makeTestSession(baseline, ["alpha"]);
 
     const first = boardStateSnapshot(session);
     session.draft = makeDocument([{ ...box("alpha", 0, 0), text: "renamed alpha" }]);
@@ -83,41 +44,87 @@ describe("spawn board-state snapshot", () => {
   });
 });
 
-describe("apply_ops DELTA block", () => {
-  test("reports moves, recolors, adds, and removes from the before/after documents", () => {
+describe("spawn boot perception", () => {
+  const PNG_SIGNATURE = "89504e470d0a1a0a";
+
+  test("carries the board render (base64 PNG) alongside the board-state text", () => {
+    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    const boot = bootPerception(session);
+
+    expect(boot.boardState).toContain("BOARD ·");
+    expect(boot.boardState).not.toContain("board render unavailable");
+    expect(typeof boot.images.board).toBe("string");
+    const png = Buffer.from(boot.images.board!, "base64");
+    expect(png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
+  });
+
+  test("attaches the house-style exemplar as a PNG when the exemplar canvas exists", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    const session = makeTestSession(baseline, ["alpha"]);
+
+    const boot = bootPerception(session);
+
+    expect(typeof boot.images.exemplar).toBe("string");
+    const png = Buffer.from(boot.images.exemplar!, "base64");
+    expect(png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
+  });
+
+  test("a failed board render degrades to text-only and notes it in board_state", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    const session = makeTestSession(baseline, ["alpha"]);
+    // Non-finite geometry defeats the renderer/rasterizer without crashing boot.
+    session.draft = makeDocument([{
+      ...box("alpha", 0, 0),
+      geometry: { x: Number.NaN, y: 0, width: 160, height: 96 },
+    }]);
+
+    const boot = bootPerception(session);
+
+    expect(boot.images.board).toBeUndefined();
+    expect(boot.boardState).toContain("board render unavailable at spawn");
+    expect(boot.boardState).toContain("call look for a fresh full-board render");
+  });
+});
+
+describe("DELTA block", () => {
+  test("reports moves, recolors, adds, and removes in their operation results", () => {
     const baseline = makeDocument([
       box("alpha", 0, 0),
       box("beta", 320, 0),
       box("gamma", 640, 0),
     ]);
-    const session = makeSession(baseline, ["alpha", "beta", "gamma"]);
+    const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
-    const result = applyOps(session, [
-      {
-        type: "updateObject",
-        objectId: "beta",
-        patch: { geometry: { x: 320, y: 240, width: 160, height: 96 } },
+    const moved = runOp(session, "update_object", {
+      objectId: "beta",
+      patch: { geometry: { x: 320, y: 240, width: 160, height: 96 } },
+    });
+    const recolored = runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { color: "blue" },
+    });
+    const added = runOp(session, "add_object", {
+      object: {
+        id: "note",
+        type: "rectangle",
+        text: "hello",
+        geometry: { x: 960, y: 0, width: 160, height: 96 },
       },
-      { type: "updateObject", objectId: "alpha", patch: { color: "blue" } },
-      {
-        type: "addObject",
-        object: {
-          id: "note",
-          type: "rectangle",
-          text: "hello",
-          geometry: { x: 960, y: 0, width: 160, height: 96 },
-        },
-      },
-      { type: "removeObject", objectId: "gamma" },
-    ]);
+    });
+    const removed = runOp(session, "remove_object", { objectId: "gamma" });
 
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · 4 ops");
-    expect(result.text).toContain("DELTA");
-    expect(result.text).toContain("beta  320,0 → 320,240");
-    expect(result.text).toContain("alpha  color gray → blue");
-    expect(result.text).toContain('+ note  rectangle 960,0 160×96 "hello"');
-    expect(result.text).toContain("− gamma");
+    expect(moved.isError).toBeUndefined();
+    expect(moved.text).toContain("APPLIED · update_object beta");
+    expect(moved.text).toContain("DELTA");
+    expect(moved.text).toContain("beta  320,0 → 320,240");
+    expect(recolored.text).toContain("APPLIED · update_object alpha");
+    expect(recolored.text).toContain("alpha  color gray → blue");
+    expect(added.text).toContain("APPLIED · add_object note");
+    expect(added.text).toContain('+ note  rectangle 960,0 160×96 "hello"');
+    expect(removed.text).toContain("APPLIED · remove_object gamma");
+    expect(removed.text).toContain("− gamma");
   });
 
   test("shows membership-reconciliation parentId moves the op payload never named", () => {
@@ -125,20 +132,19 @@ describe("apply_ops DELTA block", () => {
     const sectionB = box("section-b", 500, 0, 400, 320, "section");
     const child = { ...box("child", 80, 112), parentId: "section-a" };
     const baseline = makeDocument([sectionA, sectionB, child]);
-    const session = makeSession(baseline, ["section-a", "section-b"]);
+    const session = makeTestSession(baseline, ["section-a", "section-b"]);
 
-    const result = applyOps(session, [{
-      type: "updateObject",
+    const result = runOp(session, "update_object", {
       objectId: "child",
       patch: { geometry: { x: 576, y: 112, width: 160, height: 96 } },
-    }]);
+    });
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("child  80,112 → 576,112");
     expect(result.text).toContain("child  parentId section-a → section-b");
   });
 
-  test("reports connection channel changes, adds, and removes", () => {
+  test("reports connection channel changes, additions, and removals per operation", () => {
     const baseline = makeDocument(
       [box("alpha", 0, 0), box("beta", 480, 0), box("gamma", 960, 0)],
       [
@@ -146,85 +152,314 @@ describe("apply_ops DELTA block", () => {
         connect("beta-gamma", "beta", "gamma"),
       ],
     );
-    const session = makeSession(baseline, ["alpha", "beta", "gamma"]);
+    const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
-    const result = applyOps(session, [
-      {
-        type: "updateConnection",
-        connectionId: "alpha-beta",
-        patch: { label: "after", color: "orange" },
+    const updated = runOp(session, "update_connection", {
+      connectionId: "alpha-beta",
+      patch: { label: "after", color: "orange" },
+    });
+    const removed = runOp(session, "remove_connection", {
+      connectionId: "beta-gamma",
+    });
+    const added = runOp(session, "add_connection", {
+      connection: {
+        id: "alpha-gamma",
+        from: { objectId: "alpha" },
+        to: { objectId: "gamma" },
       },
-      { type: "removeConnection", connectionId: "beta-gamma" },
-      {
-        type: "addConnection",
-        connection: { id: "alpha-gamma", from: { objectId: "alpha" }, to: { objectId: "gamma" } },
+    });
+
+    expect(updated.isError).toBeUndefined();
+    expect(updated.text).toContain("APPLIED · update_connection alpha-beta");
+    expect(updated.text).toContain("alpha-beta  label before → after");
+    expect(updated.text).toContain("alpha-beta  color gray → orange");
+    expect(removed.text).toContain("APPLIED · remove_connection beta-gamma");
+    expect(removed.text).toContain("− beta-gamma");
+    expect(added.text).toContain("APPLIED · add_connection alpha-gamma");
+    expect(added.text).toContain("+ alpha-gamma  alpha → gamma");
+  });
+
+  test("makes connection steering visible: waypoints, anchors, and position fractions", () => {
+    const baseline = makeDocument(
+      [box("alpha", 0, 0), box("beta", 480, 0)],
+      [connect("alpha-beta", "alpha", "beta")],
+    );
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    const result = runOp(session, "update_connection", {
+      connectionId: "alpha-beta",
+      patch: {
+        from: { objectId: "alpha", anchor: "bottom" },
+        to: { objectId: "beta", anchor: "left", position: [0, 0.25] },
+        waypoints: [[240, 160]],
       },
-    ]);
+    });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("alpha-beta  label before → after");
-    expect(result.text).toContain("alpha-beta  color gray → orange");
-    expect(result.text).toContain("− beta-gamma");
-    expect(result.text).toContain("+ alpha-gamma  alpha → gamma");
+    expect(result.text).toContain("alpha-beta  anchors auto→auto → bottom→left");
+    expect(result.text).toContain("alpha-beta  pos auto→auto → auto→0,0.25");
+    expect(result.text).toContain("alpha-beta  wp none → 240,160");
+    expect(result.pngs).toBeUndefined();
+    // The steered connection's true route rides with the operation.
+    expect(result.text).toContain("ROUTES");
+    expect(result.text).toMatch(/alpha-beta {2}anchors \w+→\w+ {2}path /);
   });
 });
 
-describe("apply_ops LINTS delta", () => {
-  test("first apply reports the full list; later applies report +new/−resolved", () => {
-    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
-    const session = makeSession(baseline, ["alpha", "beta"]);
+describe("ROUTES block", () => {
+  test("reports the routed truth for a connection whose endpoint object moved", () => {
+    const baseline = makeDocument(
+      [box("alpha", 0, 0), box("beta", 480, 0), box("gamma", 960, 400)],
+      [
+        connect("alpha-beta", "alpha", "beta"),
+        connect("beta-gamma", "beta", "gamma"),
+      ],
+    );
+    const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
-    // Round 1 — introduce a covered-content error (beta 75% onto alpha).
-    const round1 = applyOps(session, [{
-      type: "updateObject",
+    const result = runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { geometry: { x: 0, y: 240, width: 160, height: 96 } },
+    });
+
+    expect(result.isError).toBeUndefined();
+    const routes = result.text.split("ROUTES")[1]!;
+    // alpha moved: alpha-beta re-reports; beta-gamma is untouched.
+    expect(routes).toContain("alpha-beta  anchors ");
+    expect(routes).toContain("  path ");
+    expect(routes).toContain("  through ");
+    expect(routes).not.toContain("beta-gamma");
+  });
+
+  test("channel-only edits produce no ROUTES block", () => {
+    const baseline = makeDocument(
+      [box("alpha", 0, 0), box("beta", 480, 0)],
+      [connect("alpha-beta", "alpha", "beta")],
+    );
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    const result = runOp(session, "update_connection", {
+      connectionId: "alpha-beta",
+      patch: { label: "flows" },
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).not.toContain("ROUTES");
+  });
+
+  test("names true non-endpoint boxes the routed path crosses", () => {
+    const baseline = makeDocument(
+      [
+        box("source", 0, 0),
+        box("target", 480, 0),
+        box("blocker", 240, 0),
+      ],
+      [connect("wire", "source", "target")],
+    );
+    const session = makeTestSession(baseline, ["source", "target"]);
+
+    const result = runOp(session, "update_connection", {
+      connectionId: "wire",
+      patch: { waypoints: [[200, 48], [440, 48]] },
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("through blocker");
+  });
+});
+
+describe("BOARD DIFF block", () => {
+  test("is cumulative base → draft with one compact line per changed entity", () => {
+    const baseline = makeDocument([
+      box("alpha", 0, 0),
+      box("beta", 320, 0),
+      box("gamma", 640, 0),
+    ]);
+    const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
+
+    runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { text: "first pass" },
+    });
+    runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { geometry: { x: 0, y: 240, width: 160, height: 96 } },
+    });
+    runOp(session, "remove_object", { objectId: "gamma" });
+    runOp(session, "add_object", {
+      object: {
+        id: "note",
+        type: "rectangle",
+        text: "hi",
+        geometry: { x: 960, y: 0, width: 160, height: 96 },
+      },
+    });
+    const result = look(session);
+
+    expect(result.isError).toBeUndefined();
+    // Cumulative: the retext and move share one base-to-draft line.
+    expect(result.text).toContain("updateObject alpha  moved · retexted");
+    expect(result.text).toContain("addObject note");
+    expect(result.text).toContain("removeObject gamma");
+    expect(result.text).not.toContain("updateObject beta");
+  });
+
+  test("renders section and sticky ops in the model-facing grammar", () => {
+    const section = { ...box("home", 0, 0, 480, 320, "section"), text: "Home" };
+    const sticky = { ...box("note", 600, 0, 176, 128, "sticky"), text: "Remember" };
+    const baseline = makeDocument([section, sticky]);
+    const session = makeTestSession(baseline, ["home", "note"]);
+
+    runOp(session, "update_section", {
+      sectionId: "home",
+      patch: { text: "Renamed home" },
+    });
+    runOp(session, "remove_sticky", { stickyId: "note" });
+    runOp(session, "add_section", {
+      section: {
+        id: "annex",
+        text: "Annex",
+        geometry: { x: 0, y: 400, width: 480, height: 320 },
+      },
+    });
+    const result = look(session);
+
+    expect(result.isError).toBeUndefined();
+    // BOARD DIFF classifies internal object patches into their entity-kind names.
+    expect(result.text).toContain("BOARD DIFF · base → draft · 3 ops");
+    expect(result.text).toContain("addSection annex");
+    expect(result.text).toContain("updateSection home  retexted");
+    expect(result.text).toContain("removeSticky note");
+    expect(result.text).not.toContain("updateObject home");
+    expect(result.text).not.toContain("removeObject note");
+  });
+
+  test("matches the operations a committed finalize proposes", () => {
+    const baseline = makeDocument([
+      box("alpha", 0, 0),
+      box("beta", 320, 0),
+    ]);
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { text: "renamed", color: "teal" },
+    });
+    runOp(session, "add_object", {
+      object: {
+        id: "note",
+        type: "rectangle",
+        text: "hi",
+        geometry: { x: 640, y: 0, width: 160, height: 96 },
+      },
+    });
+    const result = look(session);
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("updateObject alpha  retexted · recolored");
+    expect(result.text).toContain("addObject note");
+
+    const expected = diffDocuments(session.baseline, session.draft);
+    const finalized = toolFinalize(session, "committed", "Renamed and annotated", emitSessionEvent);
+    expect(finalized.isError).toBeUndefined();
+    expect(session.proposal!.operations).toEqual(expected);
+  });
+});
+
+describe("LINTS delta", () => {
+  test("operations report +new/−resolved while look reports the complete list", () => {
+    const baseline = makeDocument([
+      // This covered pair is already present before the operation.
+      box("existing-a", 0, 0),
+      box("existing-b", 40, 0),
+      box("alpha", 1000, 0),
+      box("beta", 1480, 0),
+    ]);
+    const session = makeTestSession(
+      baseline,
+      ["existing-a", "existing-b", "alpha", "beta"],
+    );
+
+    // Introduce a second covered-content error (beta 75% onto alpha).
+    const introduced = runOp(session, "update_object", {
       objectId: "beta",
-      patch: { geometry: { x: 40, y: 0, width: 160, height: 96 } },
-    }]);
-    expect(round1.isError).toBeUndefined();
-    // First apply of the session: full-list behavior, not a delta.
-    expect(round1.text).toContain("DIAGNOSTICS · 1 error");
-    expect(round1.text).toContain("covered-content");
-    expect(round1.text).not.toContain("LINTS ·");
+      patch: { geometry: { x: 1040, y: 0, width: 160, height: 96 } },
+    });
+    expect(introduced.isError).toBeUndefined();
+    expect(introduced.text).toContain("LINTS · +1 −0");
+    expect(introduced.text).toContain("+ E2 covered-content");
+    expect(introduced.text).not.toContain("E1 covered-content");
+    expect(introduced.text).not.toContain("DIAGNOSTICS ·");
+    expect(session.lastDiagnostics).toHaveLength(2);
+
+    const wholeBoard = look(session);
+    expect(wholeBoard.text).toContain("DIAGNOSTICS · 2 errors");
+    expect(wholeBoard.text).toContain("E1 covered-content");
+    expect(wholeBoard.text).toContain("E2 covered-content");
+    expect(wholeBoard.text).not.toContain("LINTS ·");
+
+    // Fix it: the finding resolves and is reported as −.
+    const resolved = runOp(session, "update_object", {
+      objectId: "beta",
+      patch: { geometry: { x: 1480, y: 0, width: 160, height: 96 } },
+    });
+    expect(resolved.isError).toBeUndefined();
+    expect(resolved.text).toContain("LINTS · +0 −1");
+    expect(resolved.text).toContain("− E2 covered-content");
+    expect(resolved.text).toContain("(resolved)");
+    expect(resolved.text).not.toContain("DIAGNOSTICS ·");
     expect(session.lastDiagnostics).toHaveLength(1);
 
-    // Round 2 — fix it: the finding resolves and is reported as −.
-    const round2 = applyOps(session, [{
-      type: "updateObject",
-      objectId: "beta",
-      patch: { geometry: { x: 480, y: 0, width: 160, height: 96 } },
-    }]);
-    expect(round2.isError).toBeUndefined();
-    expect(round2.text).toContain("LINTS · +0 −1");
-    expect(round2.text).toContain("− E1 covered-content");
-    expect(round2.text).toContain("(resolved)");
-    expect(round2.text).not.toContain("DIAGNOSTICS ·");
-    expect(session.lastDiagnostics).toHaveLength(0);
-
-    // Round 3 — nothing changes lint-wise: clean, no noise.
-    const round3 = applyOps(session, [{
-      type: "updateObject",
+    // An edit that changes no lints reports the delta while one finding remains open.
+    const clean = runOp(session, "update_object", {
       objectId: "alpha",
       patch: { text: "renamed" },
-    }]);
-    expect(round3.isError).toBeUndefined();
-    expect(round3.text).toContain("LINTS · clean");
+    });
+    expect(clean.isError).toBeUndefined();
+    expect(clean.text).toContain("LINTS · +0 −0 (1 open)");
+    expect(clean.text).not.toContain("E1 covered-content");
   });
 
   test("new findings after the baseline are listed in full with +", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
-    const session = makeSession(baseline, ["alpha", "beta"]);
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    // Round 1 — channel-only, clean baseline.
-    applyOps(session, [{ type: "updateObject", objectId: "alpha", patch: { color: "teal" } }]);
+    // Establish the clean lint state with a channel edit.
+    runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { color: "teal" },
+    });
 
-    // Round 2 — introduce the overlap.
-    const round2 = applyOps(session, [{
-      type: "updateObject",
+    const introduced = runOp(session, "update_object", {
       objectId: "beta",
       patch: { geometry: { x: 40, y: 0, width: 160, height: 96 } },
-    }]);
-    expect(round2.text).toContain("LINTS · +1 −0");
-    expect(round2.text).toContain("  + E1 covered-content:");
+    });
+    expect(introduced.text).toContain("LINTS · +1 −0");
+    expect(introduced.text).toContain("  + E1 covered-content:");
+  });
+
+  test("added findings carry prose suggestions without structured fixes", () => {
+    const baseline = makeDocument(
+      [box("alpha", 0, 0), box("beta", 480, 0)],
+      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
+    );
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    // A whole-board read establishes the clean diagnostic state.
+    look(session);
+
+    // Close the corridor to 44px: both findings explain the measured remedy in prose.
+    const introduced = runOp(session, "update_object", {
+      objectId: "beta",
+      patch: { geometry: { x: 204, y: 0, width: 160, height: 96 } },
+    });
+    // Both the label-fit and arrow-corridor findings land in this delta.
+    expect(introduced.text).toContain("LINTS · +2 −0");
+    expect(introduced.text).toContain("+ W1 unreadable-labels:");
+    expect(introduced.text).toContain("+ W2 crowding:");
+    expect(introduced.text).toContain("open the alpha↔beta corridor to ≥");
+    expect(introduced.text).not.toContain("suggested op:");
+    expect(introduced.text).not.toContain('"type":"updateObject"');
+    expect(introduced.text).not.toContain("[quickfix]");
   });
 
   test("fingerprint matching survives id renumbering", () => {
@@ -235,87 +470,109 @@ describe("apply_ops LINTS delta", () => {
       box("b1", 2000, 0),
       box("b2", 2040, 0),
     ]);
-    const session = makeSession(baseline, ["a1", "a2", "b1", "b2"]);
+    const session = makeTestSession(baseline, ["a1", "a2", "b1", "b2"]);
 
-    // Round 1 — baseline carries both errors.
-    const round1 = applyOps(session, [{
-      type: "updateObject",
-      objectId: "a1",
-      patch: { text: "pair a" },
-    }]);
-    expect(round1.text).toContain("DIAGNOSTICS · 2 errors");
+    const initial = look(session);
+    expect(initial.text).toContain("DIAGNOSTICS · 2 errors");
     expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.id)).toEqual(["E1", "E2"]);
 
-    // Round 2 — fix pair a. The surviving b-pair finding renumbers E2 → E1,
+    // Fix pair a. The surviving b-pair finding renumbers E2 → E1,
     // but it is the same finding: not new, not resolved.
-    const round2 = applyOps(session, [{
-      type: "updateObject",
+    const resolved = runOp(session, "update_object", {
       objectId: "a2",
       patch: { geometry: { x: 480, y: 0, width: 160, height: 96 } },
-    }]);
-    expect(round2.text).toContain("LINTS · +0 −1");
-    expect(round2.text).toContain("− E1 covered-content");
-    expect(round2.text).not.toContain("+ E1 covered-content");
+    });
+    expect(resolved.text).toContain("LINTS · +0 −1");
+    expect(resolved.text).toContain("− E1 covered-content");
+    expect(resolved.text).not.toContain("+ E1 covered-content");
     expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.id)).toEqual(["E1"]);
   });
 });
 
-describe("apply_ops auto close-up", () => {
-  test("geometry changes attach a close-up png of the touched region", () => {
-    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
-    const session = makeSession(baseline, ["alpha", "beta"]);
+describe("rendered perception", () => {
+  test("look returns the current full-board render and a requested section close-up", () => {
+    const section = { ...box("home", 0, 0, 480, 320, "section"), text: "Home" };
+    const child = { ...box("child", 64, 96), parentId: "home" };
+    const baseline = makeDocument([section, child]);
+    const session = makeTestSession(baseline, ["home"]);
 
-    const result = applyOps(session, [{
-      type: "updateObject",
+    const edited = runOp(session, "update_object", {
+      objectId: "child",
+      patch: { geometry: { x: 96, y: 128, width: 160, height: 96 } },
+    });
+    expect(edited.isError).toBeUndefined();
+    expect(edited.pngs).toBeUndefined();
+
+    const result = look(session, "home");
+
+    expect(result.isError).toBeUndefined();
+    expect(result.pngs).toHaveLength(2);
+    expect(result.pngs![0]!.length).toBeGreaterThan(0);
+    expect(result.pngs![1]!.length).toBeGreaterThan(0);
+  });
+
+  test("an applied operation renders only its requested section close-up", () => {
+    const section = { ...box("home", 0, 0, 480, 320, "section"), text: "Home" };
+    const child = { ...box("child", 64, 96), parentId: "home" };
+    const baseline = makeDocument([section, child]);
+    const session = makeTestSession(baseline, ["home"]);
+
+    const result = runOp(session, "update_object", {
+      objectId: "child",
+      patch: { geometry: { x: 96, y: 128, width: 160, height: 96 } },
+      view: "home",
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.pngs).toHaveLength(1);
+    expect(result.pngs![0]!.length).toBeGreaterThan(0);
+  });
+
+  test("an operation that changes nothing is a no-op without perception or an event", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    const session = makeTestSession(baseline, ["alpha"]);
+    const draftBefore = session.draft;
+
+    const result = runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { text: "alpha" },
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toMatch(/^NO-OP · update_object alpha — [^\n]+$/);
+    expect(result.text.split("\n")).toHaveLength(1);
+    expect(result.text).not.toContain("DELTA");
+    expect(result.text).not.toContain("LINTS");
+    expect(result.pngs).toBeUndefined();
+    expect(session.draft).toBe(draftBefore);
+    expect(session.events).toEqual([]);
+  });
+
+  test("look reflects both geometric and channel edits in its full-board render", () => {
+    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+
+    const geometric = runOp(session, "update_object", {
       objectId: "beta",
       patch: { geometry: { x: 480, y: 240, width: 160, height: 96 } },
-    }]);
+    });
+    expect(geometric.isError).toBeUndefined();
+    expect(geometric.pngs).toBeUndefined();
+
+    const channelOnly = runOp(session, "update_object", {
+      objectId: "alpha",
+      patch: { color: "violet", text: "renamed" },
+    });
+    expect(channelOnly.isError).toBeUndefined();
+    expect(channelOnly.pngs).toBeUndefined();
+    expect(channelOnly.text).toContain("alpha  color gray → violet");
+
+    const result = look(session);
 
     expect(result.isError).toBeUndefined();
-    expect(result.png).toBeInstanceOf(Buffer);
-    expect(result.png!.length).toBeGreaterThan(0);
-  });
-
-  test("channel-only edits get no image", () => {
-    const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 480, 0)],
-      [connect("alpha-beta", "alpha", "beta")],
-    );
-    const session = makeSession(baseline, ["alpha", "beta"]);
-
-    const result = applyOps(session, [
-      { type: "updateObject", objectId: "alpha", patch: { color: "violet", text: "renamed" } },
-      { type: "updateConnection", connectionId: "alpha-beta", patch: { label: "flows" } },
-    ]);
-
-    expect(result.isError).toBeUndefined();
-    expect(result.png).toBeUndefined();
-    expect(result.text).toContain("alpha  color gray → violet");
-    expect(result.text).toContain("alpha-beta  label — → flows");
-  });
-});
-
-describe("apply_quickfix perception", () => {
-  test("shares the DELTA + LINTS-delta + close-up result path", () => {
-    // Labeled pair 44px apart — the rendered 41px chip needs 73px, so the
-    // quickfix pushes beta right by the grid-snapped deficit (geometry change).
-    const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 204, 0)],
-      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
-    );
-    const session = makeSession(baseline, ["alpha", "beta"]);
-    // Simulate a prior apply so the quickfix round reports a delta.
-    session.lastDiagnostics = undefined;
-    const seed = applyOps(session, [{ type: "updateObject", objectId: "alpha", patch: { text: "alpha" } }]);
-    expect(seed.text).toContain("DIAGNOSTICS · 0 errors · 1 warning");
-
-    const result = toolApplyQuickfix(session, "W1", emitSessionEvent);
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · quickfix W1 (unreadable-labels) · 1 op");
-    expect(result.text).toContain("beta  204,0 → 240,0");
-    expect(result.text).toContain("LINTS · +0 −1");
-    expect(result.text).toContain("− W1 unreadable-labels");
-    expect(result.png).toBeInstanceOf(Buffer);
+    expect(result.text).toContain("updateObject alpha  retexted · recolored");
+    expect(result.text).toContain("updateObject beta  moved");
+    expect(result.pngs).toHaveLength(1);
+    expect(result.pngs![0]!.length).toBeGreaterThan(0);
   });
 });

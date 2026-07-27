@@ -1,0 +1,10 @@
+Pick up the agent-run UX design work in the canvas repo — this is a design session, not implementation; don't write any product code or delegate to Codex. Read packages/canvas-agent/AGENT-RUN-UX-PLAN.md first (written 2026-07-23, nothing built) — the full proposal with per-piece file lists and blast radius. There's also a memory entry (agent-run-ux-plan).
+
+Context: the canvas agent currently locks the board (camera-only + scrim) during a run, shows progress only as a re-fetched draft.svg snapshot, and navigating to another board rejects the running session (packages/studio/src/App.tsx route-leave handler, ~line 441). The plan has five pieces:
+
+A — sessions survive navigation (detach, don't reject), per-canvas session index + list route, "Agent working" / "Ready to review" badges on the home-grid cards.
+B — stream each apply_ops batch as an ops SSE event; studio folds them into a client-side shadow doc rendered by real stage components (replaces the SVG refetch). Accept/reject stays atomic. Key constraint: the wire format must encode field-clears explicitly (JSON drops undefined own-properties — the open "clear-only-patch transport caveat").
+C — playback queue pacing streamed ops, entrance tween generalized from animate-section-fit, agent-cursor glyph, edge indicators for off-screen work.
+D — CameraLockPill narrates the current activity line.
+E — step-replay debug rail: scrubber over buffered ops events, board state at step k = fold batches 0..k, shared component for the studio sidebar and the trace viewer (:4830).
+We're refining the design before any build. Work with me on the parts still soft: the open questions at the end of the doc (parked-proposal re-entry camera behavior; multiple runs per board; whether accepted runs keep a pointer to their session so the step rail stays reachable from history), the interaction details of the playback experience in C (pacing, cursor behavior, what "watching the agent work" should actually feel like), and the step-rail UI in E. Sketches, mockups, and doc revisions are the deliverables — update AGENT-RUN-UX-PLAN.md in place as decisions land.

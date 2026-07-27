@@ -11,9 +11,10 @@ import {
 export interface AgentSidebarProps {
   status: AgentSessionViewStatus;
   onClose(): void;
-  queue: Omit<QueueViewProps, "pinningTargetLabel">;
+  queue: Omit<QueueViewProps, "description" | "pinningTargetLabel">;
   session: Omit<SessionViewProps, "status">;
   acceptedResult?: AgentAcceptedNotice | null;
+  description?: string;
   pinningTargetLabel?: string | null;
 }
 
@@ -46,6 +47,7 @@ export function AgentSidebar({
   queue,
   session,
   acceptedResult = null,
+  description,
   pinningTargetLabel,
 }: AgentSidebarProps) {
   const showQueue = status === "idle" || status === "accepted" || status === "rejected";
@@ -94,7 +96,11 @@ export function AgentSidebar({
               ) : null}
             </div>
           ) : null}
-          <QueueView {...queue} pinningTargetLabel={pinningTargetLabel} />
+          <QueueView
+            {...queue}
+            description={description}
+            pinningTargetLabel={pinningTargetLabel}
+          />
         </div>
       ) : (
         <SessionView {...session} status={status} />

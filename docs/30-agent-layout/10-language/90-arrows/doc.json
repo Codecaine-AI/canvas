@@ -15,7 +15,7 @@
         "b-arrows-canvas-5"
       ],
       "props": {
-        "covers": "The arrows block: one from > to line per connection, by reference number, mandatory and always last. Arrows declare connections, never paths — routing belongs to the solver.",
+        "covers": "The arrows block is compact descriptive notation: one from > to line per connection, by reference number, conventionally placed last. It names connection intent; the production router chooses the route, steered when needed with anchors, endpoint positions, and waypoints.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -73,7 +73,7 @@
           }
         },
         {
-          "insert": " header. The block is mandatory and always last."
+          "insert": " header. By convention, this descriptive block appears last."
         }
       ]
     },
@@ -83,11 +83,11 @@
       "children": [],
       "props": {
         "severity": "hard",
-        "title": "Arrows declare connections, never paths"
+        "title": "Arrow notation declares connection intent"
       },
       "text": [
         {
-          "insert": "There is deliberately no way to say where a line bends. Routing is the solver's job: the router computes every route — forward flow through the corridors, feedback loops around the outside (rule R9)."
+          "insert": "The from > to lines do not encode bends. On the live board, the production router computes the path. Steer minimally and in order: try an endpoint anchor, then an endpoint position, then waypoints when the corridor demands them. For each connection a batch touches, the ROUTES block reports the true polyline and names every box it crosses in through. Label the edge directly, enter and exit on faces that follow the flow, and keep separate runs from sharing a line. When a route detours or hugs a frame, open the corridor before adding steering."
         }
       ]
     },

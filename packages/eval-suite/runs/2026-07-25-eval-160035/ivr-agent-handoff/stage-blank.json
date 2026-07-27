@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-160035.ivr-agent-handoff",
+  "title": "2026-07-25-eval-160035 · ivr-agent-handoff",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1664,
+    "height": 1064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-25-eval-160035 · ivr-agent-handoff",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 1600,
+        "height": 1000
+      },
+      "style": {
+        "shape": "section"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-24-eval-183037",
+  "tier": "system",
+  "scenario": "backpressured-data-pipeline",
+  "board_id": "eval.2026-07-24-eval-183037.backpressured-data-pipeline",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-24T23:30:39.296Z",
+      "finished_at": "2026-07-24T23:33:06.679Z",
+      "wall_ms": 147863,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "bfe8737a-2a69-48af-9be3-fe526a06665f"
+    ]
+  },
+  "finished_at": "2026-07-24T23:33:07.159Z",
+  "exit_code": 0
+}

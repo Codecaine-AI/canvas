@@ -155,10 +155,6 @@ const INSCRIBED_TEXT_RECTS_BY_TYPE: Partial<
       height * 0.92,
     );
   },
-  "annotation-marker": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.15, width * 0.85, height * 0.15, height * 0.85);
-  },
   pentagon: (object) => {
     const { width, height } = object.geometry;
     return rectFromRanges(width * 0.22, width * 0.78, height * 0.24, height * 0.88);

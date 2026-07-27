@@ -1,0 +1,953 @@
+{
+  "axis": "rc",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The board depicts a fleet of disposable execution environments used by agents to invoke tools and code.",
+        "brief_evidence": "“diagram of how our fleet of disposable execution environments works for agents that invoke tools and code”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board; title, Agent request, placement/boot/lifecycle sections",
+            "observation": "The titled fleet diagram follows an agent request through placement, execution controls, lifecycle, and destruction."
+          },
+          {
+            "source": "json",
+            "locator": "canvas title/description; objects agent, placement_svc, lease lifecycle states",
+            "observation": "The description explicitly identifies disposable environments for agent tools/code, and the object structure depicts that system."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "An agent sends the placement service an image and resource class.",
+        "brief_evidence": "“An agent sends the placement service an image and resource class.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-left Request & fair admission and Placement sections",
+            "observation": "Agent request flows to “Image + resource class,” then by a “submit” arrow to “Placement service.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects agent, request, placement_svc; connections e_agent_req and e_req_place",
+            "observation": "The request object is labeled “Image + resource class” and is directionally connected to the placement service."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The placement service first attempts to claim a compatible environment from the warm pool.",
+        "brief_evidence": "“The service first claims a compatible environment from the warm pool”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Placement to Warm hit or cold boot flow",
+            "observation": "The primary admitted path reaches “Claim compatible warm env” before the cold-provisioning miss path."
+          },
+          {
+            "source": "json",
+            "locator": "object warm_claim; connection e_quota_warm",
+            "observation": "The warm-claim process is explicitly labeled and connected from the admission path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "On a warm-pool hit, the claimed environment is returned immediately.",
+        "brief_evidence": "“returning it immediately on a hit”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm hit or cold boot section and its arrow into Ready",
+            "observation": "A warm environment goes directly to Ready, but neither the path nor a note says “hit” or “immediately.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection e_warm_prov from warm_claim to st_ready; searched labels and notes",
+            "observation": "A direct warm_claim-to-Ready connection exists, but JSON contains no explicit immediate-return qualifier."
+          }
+        ],
+        "note": "The direct path conveys a warm success, but the stated immediate-return guarantee is not explicit."
+      },
+      {
+        "id": "R5",
+        "requirement": "On a warm-pool miss, placement selects a healthy host with capacity.",
+        "brief_evidence": "“On a miss, it selects a healthy host with capacity”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health and Warm hit or cold boot sections",
+            "observation": "“Healthy hosts + capacity” influences “Select host + cold provision” through a dashed edge labeled “capacity.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects healthy_hosts and cold_boot; connection e_hosts_cold",
+            "observation": "Healthy host capacity is directionally supplied to the cold-provisioning step."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "On a miss, the service provisions a cold environment.",
+        "brief_evidence": "“provisions a cold environment”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm hit or cold boot section",
+            "observation": "A process labeled “Select host + cold provision” leads to the Provisioning state."
+          },
+          {
+            "source": "json",
+            "locator": "object cold_boot; connection e_cold_prov",
+            "observation": "Cold provisioning is explicitly represented and connected to lifecycle provisioning."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "On a cold miss, the request remains waiting until boot completes.",
+        "brief_evidence": "“keeps the request waiting until boot completes”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Miss behavior note in Warm hit or cold boot section",
+            "observation": "The note states, “Request waits fairly until boot completes,” and the cold path is labeled “miss · wait.”"
+          },
+          {
+            "source": "json",
+            "locator": "object wait_note; connection e_cold_prov",
+            "observation": "Both the waiting outcome and its association with the miss path are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Each environment progresses through provisioning, ready, leased, idle, draining, and destroyed states.",
+        "brief_evidence": "“Each environment progresses through provisioning, ready, leased, idle, draining, and destroyed states.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lease lifecycle section",
+            "observation": "All six named states appear with directional lifecycle arrows."
+          },
+          {
+            "source": "json",
+            "locator": "objects st_provision, st_ready, st_leased, st_idle, st_draining, st_destroyed; lifecycle connections",
+            "observation": "The complete stated state set and progression are encoded."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "A lease has a fixed term.",
+        "brief_evidence": "“A lease has a fixed term”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The governance note explicitly says “Fixed-term lease.”"
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "Fixed-term lease behavior is stated verbatim."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "A lease remains valid only while the agent sends renewal heartbeats.",
+        "brief_evidence": "“stays valid only while the agent sends renewal heartbeats”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The note states that renewal heartbeats preserve lease validity."
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "“renewal heartbeats preserve validity” clearly represents the condition."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "When renewals stop, the environment is reclaimed and destroyed.",
+        "brief_evidence": "“When renewals stop, the reclaimer takes the environment and destroys it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Governance note and red Leased-to-Destroyed lifecycle edge",
+            "observation": "The note says “No renewal ... → reclaim and destroy,” reinforced by a direct red path from Leased to Destroyed."
+          },
+          {
+            "source": "json",
+            "locator": "object governance; connection e_l_destroy",
+            "observation": "No-renewal reclamation/destruction semantics and the terminal transition are both present."
+          }
+        ],
+        "note": "The reclaimer is not a separately labeled component, but the full required reclaim-and-destroy behavior is unambiguous."
+      },
+      {
+        "id": "R12",
+        "requirement": "A reclaimed environment never returns to the warm pool.",
+        "brief_evidence": "“it never returns a reclaimed instance to the pool”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The note explicitly states, “Reclaimed instances never return to pool.”"
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "The no-return rule is stated verbatim."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Filesystem and process state from a prior tenant must not survive reclamation.",
+        "brief_evidence": "“because filesystem and process state from a prior tenant must not survive”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The note states that local filesystem/process state is ephemeral."
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "Ephemeral local filesystem and process state is explicitly recorded alongside the no-return rule."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Every environment has an absolute maximum age.",
+        "brief_evidence": "“Every environment also has an absolute maximum age.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The governance note says “absolute max age → reclaim and destroy.”"
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "Absolute maximum age and its terminal consequence are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Image releases retire older instances by marking them draining.",
+        "brief_evidence": "“Image releases retire older instances by marking them draining”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Governance note and Draining lifecycle state",
+            "observation": "The note states “Image release → mark draining,” and a Draining state is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object governance; object st_draining",
+            "observation": "The image-release trigger and draining outcome are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Image-retired instances are destroyed after active leases end without interrupting live work.",
+        "brief_evidence": "“destroying them after active leases end, without interrupting live work”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Governance note and lifecycle flow",
+            "observation": "The note says “destroy after active lease ends,” which unambiguously encodes non-interruption of active work."
+          },
+          {
+            "source": "json",
+            "locator": "object governance text; connections e_l_i, e_i_drain, e_d_destroy",
+            "observation": "Destruction is deferred until the active lease ends and proceeds through draining."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Every tool call receives a timeout.",
+        "brief_evidence": "“Within a lease, every tool call receives a timeout”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tool-call controls section",
+            "observation": "The control process is labeled “Timeout · memory · CPU.”"
+          },
+          {
+            "source": "json",
+            "locator": "object limits",
+            "observation": "Timeout is explicitly included in the tool-call limits object."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Every tool call receives a memory ceiling.",
+        "brief_evidence": "“every tool call receives a ... memory ceiling”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tool-call controls section",
+            "observation": "The limits process explicitly includes memory."
+          },
+          {
+            "source": "json",
+            "locator": "object limits",
+            "observation": "“Timeout · memory · CPU” represents a memory control for tool calls."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Every tool call receives a CPU cap.",
+        "brief_evidence": "“every tool call receives a ... CPU cap”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tool-call controls section",
+            "observation": "The limits process explicitly includes CPU."
+          },
+          {
+            "source": "json",
+            "locator": "object limits",
+            "observation": "“Timeout · memory · CPU” represents a CPU control for tool calls."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Every tool call receives a network policy.",
+        "brief_evidence": "“every tool call receives a ... network policy”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Network & outputs section",
+            "observation": "An allowlist egress proxy expresses an outbound network restriction, but the board does not explicitly attach a network policy to every tool call."
+          },
+          {
+            "source": "json",
+            "locator": "object egress_proxy; searched tool-call-control objects and connections",
+            "observation": "The JSON has an egress control but no object or edge stating per-call network-policy assignment."
+          }
+        ],
+        "note": "The concrete egress policy is present, but the universal per-tool-call policy qualifier is missing."
+      },
+      {
+        "id": "R21",
+        "requirement": "Egress is limited to allowlisted destinations through a proxy.",
+        "brief_evidence": "“Egress is limited to allowlisted destinations through a proxy.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Network & outputs section",
+            "observation": "A process is explicitly labeled “Allowlist egress proxy.”"
+          },
+          {
+            "source": "json",
+            "locator": "object egress_proxy",
+            "observation": "The object combines the allowlist, egress, and proxy requirements in one clear label."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "The runtime kills an overlong tool call.",
+        "brief_evidence": "“The runtime kills an overlong call”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tool-call controls section",
+            "observation": "The limits process points to “Kill overlong call.”"
+          },
+          {
+            "source": "json",
+            "locator": "object runtime_kill; connection e_limits_kill",
+            "observation": "An explicit overlong-call kill action is connected to runtime limits."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "A killed overlong call is reported as a timeout rather than a tool error.",
+        "brief_evidence": "“reports a timeout rather than a tool error”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Result semantics note in Tool-call controls",
+            "observation": "The note explicitly says a killed call reports timeout, not a tool error."
+          },
+          {
+            "source": "json",
+            "locator": "object timeout_note",
+            "observation": "The required result semantics are stated verbatim."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "The runtime streams capped output to the agent.",
+        "brief_evidence": "“It streams capped output to the agent”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Network & outputs section and top-left Agent request",
+            "observation": "A “Capped output stream” is shown, but no return connection or label identifies the agent as its destination."
+          },
+          {
+            "source": "json",
+            "locator": "object capped_stream; searched connections involving capped_stream and agent",
+            "observation": "capped_stream connects only from egress_proxy and to artifact_store; there is no stream-to-agent connection."
+          }
+        ],
+        "note": "Output capping and streaming are represented, but the required agent endpoint is missing."
+      },
+      {
+        "id": "R25",
+        "requirement": "Durable files are stored in an artifact store keyed by session.",
+        "brief_evidence": "“durable files go to an artifact store keyed by session”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Network & outputs section",
+            "observation": "“Capped output stream” connects to “Session artifact store” with the label “durable files by session.”"
+          },
+          {
+            "source": "json",
+            "locator": "object artifact_store; connection e_stream_art",
+            "observation": "The artifact store is session-labeled and the incoming durable-files relation is keyed by session."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Environment-local state is ephemeral.",
+        "brief_evidence": "“because local state is ephemeral”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals note",
+            "observation": "The governance note explicitly calls local filesystem/process state ephemeral."
+          },
+          {
+            "source": "json",
+            "locator": "object governance text",
+            "observation": "Ephemeral local state is directly stated."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "The warm-pool supervisor watches host capacity.",
+        "brief_evidence": "“The warm-pool supervisor watches host capacity”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health section and dashed capacity path",
+            "observation": "The supervisor is shown alongside “Healthy hosts + capacity,” with capacity feeding cold placement."
+          },
+          {
+            "source": "json",
+            "locator": "objects pool_supervisor and healthy_hosts; connection e_hosts_cold",
+            "observation": "The supply-management region explicitly contains host-capacity data and its use in placement."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "The warm-pool supervisor watches pool depth.",
+        "brief_evidence": "“The warm-pool supervisor watches ... pool depth”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed supervisor-to-warm-claim path",
+            "observation": "The warm-pool supervisor has an influence path labeled “adjust pool depth,” necessarily identifying pool depth as its managed signal."
+          },
+          {
+            "source": "json",
+            "locator": "connection e_super_pool",
+            "observation": "The supervisor-to-pool connection is explicitly labeled “adjust pool depth.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "The warm-pool supervisor watches demand.",
+        "brief_evidence": "“The warm-pool supervisor watches ... demand”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health section and all dashed supervisory paths",
+            "observation": "The section shows the supervisor, host capacity, pool-depth adjustment, and quarantine, but no demand signal or demand input."
+          },
+          {
+            "source": "json",
+            "locator": "object pool_supervisor; all connections involving pool_supervisor; global search of object and connection text",
+            "observation": "No object, note, label, or connection contains “demand” or an equivalent demand-observation signal."
+          }
+        ],
+        "note": "The demand input that should govern warm-pool sizing is missing."
+      },
+      {
+        "id": "R30",
+        "requirement": "The warm-pool supervisor adjusts pre-booted supply.",
+        "brief_evidence": "“then adjusts pre-booted supply”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health to Claim compatible warm env dashed path",
+            "observation": "The supervisor influences the warm claim path through “adjust pool depth,” representing adjustment of warm pre-booted supply."
+          },
+          {
+            "source": "json",
+            "locator": "connection e_super_pool from pool_supervisor to warm_claim",
+            "observation": "The directed supervisory relationship explicitly adjusts warm-pool depth."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Repeated boot failures quarantine a host.",
+        "brief_evidence": "“Repeated boot failures quarantine a host”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health section",
+            "observation": "A red arrow labeled “repeated boot failure” leads to “Quarantine failed host.”"
+          },
+          {
+            "source": "json",
+            "locator": "object quarantine; connection e_hosts_quar",
+            "observation": "The trigger and quarantine outcome are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "A quarantined host is removed from placement.",
+        "brief_evidence": "“remove it from placement”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health and Placement sections",
+            "observation": "The host is shown entering quarantine, but there is no exclusion edge, crossed-out placement relation, or note saying quarantine removes it from placement."
+          },
+          {
+            "source": "json",
+            "locator": "object quarantine and all connections involving it",
+            "observation": "quarantine has only the incoming repeated-failure edge; no JSON relationship encodes removal or exclusion from placement."
+          }
+        ],
+        "note": "Quarantine is clear, but its required placement-exclusion consequence is not explicit."
+      },
+      {
+        "id": "R33",
+        "requirement": "Per-tenant quotas limit concurrent environments.",
+        "brief_evidence": "“Per-tenant quotas limit concurrent environments”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tenant quota gate and governance note",
+            "observation": "The request path passes through a tenant quota gate, and the note says quotas cover concurrent environments."
+          },
+          {
+            "source": "json",
+            "locator": "object quota_gate; object governance; connection e_place_quota",
+            "observation": "Concurrent-environment quota enforcement is explicit and placed in the admission path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Per-tenant quotas limit aggregate runtime.",
+        "brief_evidence": "“Per-tenant quotas limit ... aggregate runtime”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tenant quota gate and governance note",
+            "observation": "The note explicitly says quotas cover aggregate runtime."
+          },
+          {
+            "source": "json",
+            "locator": "object governance text; object quota_gate",
+            "observation": "Aggregate-runtime quota scope is stated and associated with the admission gate."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Requests exceeding either tenant quota wait fairly.",
+        "brief_evidence": "“requests beyond either limit wait fairly”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Request & fair admission heading, Tenant quota gate, and governance note",
+            "observation": "The admission area is explicitly framed as fair admission, and the governance note states “excess waits fairly.”"
+          },
+          {
+            "source": "json",
+            "locator": "section intake text; objects quota_gate and governance",
+            "observation": "Fair waiting for quota excess is explicit in the governance text and contextualized by the quota gate."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Over-quota requests do not consume capacity reserved for other tenants.",
+        "brief_evidence": "“instead of consuming capacity reserved for other tenants”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tenant quota gate, Request & fair admission, and governance note",
+            "observation": "Fair waiting and quota gating are shown, but no label or note explicitly identifies protected capacity reserved for other tenants."
+          },
+          {
+            "source": "json",
+            "locator": "objects quota_gate and governance; searched all object/connection text for reserved capacity",
+            "observation": "The JSON states excess waits fairly but contains no explicit reserved-capacity or non-consumption qualifier."
+          }
+        ],
+        "note": "Admission gating implies capacity protection, but the stated cross-tenant reserved-capacity boundary is not fully represented."
+      },
+      {
+        "id": "R37",
+        "requirement": "Operations monitor boot latency.",
+        "brief_evidence": "“Operations monitor boot latency”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals section",
+            "observation": "A metric pill is labeled “Boot latency.”"
+          },
+          {
+            "source": "json",
+            "locator": "object m_boot",
+            "observation": "Boot latency is explicitly listed as an operations signal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "Operations monitor lease reclamations.",
+        "brief_evidence": "“Operations monitor ... lease reclamations”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals section",
+            "observation": "A metric pill is labeled “Lease reclamations.”"
+          },
+          {
+            "source": "json",
+            "locator": "object m_reclaim",
+            "observation": "Lease reclamations are explicitly listed as an operations signal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "Operations monitor tool timeouts.",
+        "brief_evidence": "“Operations monitor ... tool timeouts”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals section",
+            "observation": "A metric pill is labeled “Tool timeouts.”"
+          },
+          {
+            "source": "json",
+            "locator": "object m_timeout",
+            "observation": "Tool timeouts are explicitly listed as an operations signal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R40",
+        "requirement": "Operations monitor escape-attempt signals.",
+        "brief_evidence": "“Operations monitor ... escape-attempt signals”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Operations & governance signals section",
+            "observation": "A metric pill is labeled “Escape-attempt signals.”"
+          },
+          {
+            "source": "json",
+            "locator": "object m_escape",
+            "observation": "Escape-attempt signals are explicitly listed as an operations signal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "The diagram makes clear how placement governs an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how placement ... govern[s] an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top primary flow from Agent request through Placement, boot, lifecycle, and Destroyed",
+            "observation": "The left-to-right request path visibly reaches placement, environment acquisition, lifecycle, and destruction."
+          },
+          {
+            "source": "json",
+            "locator": "primary objects and connections e_agent_req through lifecycle connections",
+            "observation": "The canvas encodes a directional end-to-end request and placement flow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R42",
+        "requirement": "The diagram makes clear how lease lifecycle enforcement governs an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how ... lease lifecycle enforcement ... govern[s] an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lease lifecycle section and governance note",
+            "observation": "Lifecycle states, release/end transitions, direct destruction, heartbeat rules, maximum age, and image draining are all visible."
+          },
+          {
+            "source": "json",
+            "locator": "lifecycle state objects, lifecycle connections, governance object",
+            "observation": "Lifecycle enforcement and terminal behavior are comprehensively encoded."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R43",
+        "requirement": "The diagram makes clear how resource and network controls govern an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how ... resource and network controls ... govern[s] an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tool-call controls and Network & outputs sections",
+            "observation": "Timeout, memory, CPU, kill behavior, and allowlisted proxy controls are clear, but these sections are not connected to the leased environment or tool-call path."
+          },
+          {
+            "source": "json",
+            "locator": "objects limits, runtime_kill, egress_proxy; searched connections to st_leased or agent",
+            "observation": "The controls exist, but no JSON edge attaches them to the environment lifecycle or lease."
+          }
+        ],
+        "note": "The controls themselves are represented, but their governing attachment to an environment within a lease is visually isolated."
+      },
+      {
+        "id": "R44",
+        "requirement": "The diagram makes clear how warm-pool management governs an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how ... warm-pool management ... govern[s] an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health section and dashed adjust-pool-depth path",
+            "observation": "Warm-pool supervision is connected to warm claiming, but the required demand input is absent."
+          },
+          {
+            "source": "json",
+            "locator": "pool_supervisor and e_super_pool; global search for demand",
+            "observation": "Supply adjustment is shown, while demand-based governance is not."
+          }
+        ],
+        "note": "Management is substantially shown, but not all stated supervisory inputs are covered."
+      },
+      {
+        "id": "R45",
+        "requirement": "The diagram makes clear how host quarantine governs an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how ... host quarantine ... govern[s] an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Warm pool & host health section",
+            "observation": "Repeated failure leading to quarantine is clear, but quarantine is not connected back to placement exclusion."
+          },
+          {
+            "source": "json",
+            "locator": "object quarantine; connection e_hosts_quar; searched outgoing quarantine connections",
+            "observation": "The quarantine node has no outgoing relation that governs placement."
+          }
+        ],
+        "note": "The trigger and quarantine state are shown, but the placement-governance effect is incomplete."
+      },
+      {
+        "id": "R46",
+        "requirement": "The diagram makes clear how tenant quotas govern an environment from request through destruction.",
+        "brief_evidence": "“The diagram should make clear how ... tenant quotas govern an environment from request through destruction.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Placement section and governance note",
+            "observation": "The primary request flow passes through a tenant quota gate, with quota scope and fair waiting stated in the governance note."
+          },
+          {
+            "source": "json",
+            "locator": "object quota_gate; connections e_place_quota and e_quota_warm; governance object",
+            "observation": "Quota enforcement is explicitly part of the admission path before environment consumption."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.8963,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R29",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "Lease lifecycle and destruction semantics: all six states, fixed-term heartbeat validity, no-renewal reclamation, absolute maximum age, image-release draining, deferred destruction, and no reuse of reclaimed state are represented clearly.",
+    "most_consequential_gap": "Warm-pool supervision lacks the required demand signal (R29), so the board does not fully represent demand-driven pre-booted supply management.",
+    "coverage_summary": "The board covers the end-to-end request, warm/cold placement, lifecycle and destruction contract, runtime limits, output persistence, quotas, quarantine trigger, and operational metrics. Coverage is reduced by the absent demand input and by partial qualifiers around immediate warm-hit return, per-call network policy, output delivery to the agent, quarantine-based placement exclusion, and reserved-capacity protection.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 13124,
+    "output_tokens": 9574
+  },
+  "flags": []
+}

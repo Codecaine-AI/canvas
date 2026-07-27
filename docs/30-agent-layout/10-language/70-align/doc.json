@@ -16,7 +16,7 @@
         "b-align-contrast-canvas-6"
       ],
       "props": {
-        "covers": "The align statement: two or more objects share one centerline (y = horizontal, x = vertical), across branches of the tree — shown with and without the align line on the same program.",
+        "covers": "The descriptive align pattern: two or more objects share one centerline (y = horizontal, x = vertical), across branches of the tree — shown with and without the alignment.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -47,7 +47,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Main value is the axis ("
+          "insert": "In this descriptive notation, the main value is the axis ("
         },
         {
           "insert": "y",
@@ -74,7 +74,7 @@
           }
         },
         {
-          "insert": " and two or more references. Members may live in different branches of the tree — that is the point: a shared centerline across section boundaries is something nesting alone can never say (rule R5)."
+          "insert": " and two or more references. Members may live in different branches of the tree — that is the point: a shared centerline across section boundaries is something nesting alone can never say. The shared register makes uniformity informative: peers align exactly, while an off-register object reads as a deliberate exception. On the live board, copy the digest's exact peer coordinates instead of estimating a near match."
         }
       ]
     },
@@ -107,7 +107,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The same program without the "
+          "insert": "The same arrangement without the "
         },
         {
           "insert": "align",

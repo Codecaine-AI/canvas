@@ -1,0 +1,427 @@
+{
+  "axis": "rc",
+  "scenario": "incident-response",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The SaaS team needs a lightweight incident-response process.",
+        "brief_evidence": "We need a lightweight incident-response process for a SaaS team.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board, especially the four numbered phase regions",
+            "observation": "The board presents one compact, sequential workflow divided into Detect & mobilize, Coordinate & mitigate, Verify & resolve, and Learn & follow up."
+          },
+          {
+            "source": "json",
+            "locator": "objects sections detect, respond, verify, learn; connections e1-e23",
+            "observation": "The canvas encodes a single four-stage incident-response process with a concise set of process objects and directed connections."
+          }
+        ],
+        "note": "The qualitative lightweight character is represented by the compact four-phase workflow rather than by a separate label."
+      },
+      {
+        "id": "R2",
+        "requirement": "Monitoring sends an alert to the alert manager.",
+        "brief_evidence": "Monitoring sends a high-confidence alert to the alert manager",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, top row",
+            "observation": "A directed arrow labeled alert runs from Monitoring to Alert manager groups duplicates."
+          },
+          {
+            "source": "json",
+            "locator": "objects monitor and alert-manager; connection e1",
+            "observation": "Connection e1 is a forward arrow from monitor to alert-manager and is labeled alert."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The alert sent by monitoring is high-confidence.",
+        "brief_evidence": "Monitoring sends a high-confidence alert to the alert manager",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, Monitoring-to-alert-manager path",
+            "observation": "The path is labeled only alert; no high-confidence qualifier appears."
+          },
+          {
+            "source": "json",
+            "locator": "objects monitor and alert-manager, connection e1, and all object text/connection labels",
+            "observation": "No object text, note, annotation, or connection label contains high-confidence or an equivalent qualification."
+          }
+        ],
+        "note": "The alert path is present, but its stated confidence constraint is omitted."
+      },
+      {
+        "id": "R4",
+        "requirement": "The alert manager groups duplicate alerts.",
+        "brief_evidence": "the alert manager, which groups duplicates",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, top-center process",
+            "observation": "The process is labeled Alert manager groups duplicates."
+          },
+          {
+            "source": "json",
+            "locator": "object alert-manager",
+            "observation": "The process object's text is Alert manager groups duplicates."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The alert manager pages the primary on-call engineer.",
+        "brief_evidence": "and pages the primary on-call engineer",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, alert manager to primary on-call",
+            "observation": "A forward path leads from the alert-manager process to Page primary on-call."
+          },
+          {
+            "source": "json",
+            "locator": "object primary; connection e2",
+            "observation": "Object primary is labeled Page primary on-call, and e2 connects alert-manager to primary."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The on-call engineer acknowledges the page.",
+        "brief_evidence": "The on-call engineer acknowledges the page",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, primary on-call and Ack ≤ 5 min? decision",
+            "observation": "The primary page flows directly into an acknowledgement decision; its acknowledged branch continues to triage."
+          },
+          {
+            "source": "json",
+            "locator": "objects primary and ack; connections e3 and e5",
+            "observation": "The primary page connects to Ack ≤ 5 min?, whose normal branch connects to Initial triage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "After acknowledging, the on-call engineer performs an initial triage.",
+        "brief_evidence": "performs an initial triage",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, acknowledgement decision to Initial triage",
+            "observation": "The acknowledgement decision has a directed path to Initial triage."
+          },
+          {
+            "source": "json",
+            "locator": "object triage; connection e5",
+            "observation": "Connection e5 runs from ack to triage, whose text is Initial triage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Initial triage must either resolve a false alarm or declare an incident.",
+        "brief_evidence": "and either resolves a false alarm or declares an incident",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, Real incident? decision",
+            "observation": "Initial triage leads to Real incident?, with no leading to Resolve false alarm and yes leading to Declare incident."
+          },
+          {
+            "source": "json",
+            "locator": "objects incident-check, false-resolve, declare; connections e7-e9",
+            "observation": "Triage connects to the incident decision; its no branch connects to false-resolve and its yes branch connects to declare."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Declaring an incident creates a shared incident record.",
+        "brief_evidence": "A declared incident creates a shared incident record",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Transition from Detect & mobilize to Coordinate & mitigate",
+            "observation": "Declare incident points directly to Shared incident record."
+          },
+          {
+            "source": "json",
+            "locator": "objects declare and record; connection e10",
+            "observation": "Forward connection e10 runs from declare to the Shared incident record document."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "A declared incident assigns a service owner.",
+        "brief_evidence": "and assigns a service owner",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate region, top row",
+            "observation": "Shared incident record points to Assign service owner."
+          },
+          {
+            "source": "json",
+            "locator": "object owner; connection e11",
+            "observation": "Connection e11 runs from record to owner, which is labeled Assign service owner."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "The service owner investigates the incident and applies mitigation.",
+        "brief_evidence": "a service owner who investigates and applies mitigation",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate region, right-hand role path and Parallel roles note",
+            "observation": "Assign service owner flows to Investigate and then Apply mitigation; the note states Service owner: diagnosis + mitigation."
+          },
+          {
+            "source": "json",
+            "locator": "objects owner, investigate, mitigate, roles-note; connections e12-e13",
+            "observation": "The owner-to-investigate-to-mitigate sequence is explicit, and roles-note assigns diagnosis and mitigation to the service owner."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The on-call engineer coordinates the response.",
+        "brief_evidence": "The on-call engineer coordinates the response",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate region, left-hand role path",
+            "observation": "An object is labeled On-call coordinates, and the Parallel roles note assigns coordination to the on-call role."
+          },
+          {
+            "source": "json",
+            "locator": "objects coordinate and roles-note; connection e14",
+            "observation": "The coordinate object states On-call coordinates; roles-note states On-call: coordination + comms."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "The on-call engineer keeps the public status page current while the service owner works.",
+        "brief_evidence": "and keeps the public status page current while the service owner works",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate region, parallel left and right paths",
+            "observation": "On-call coordinates leads via keep current to Update public status page, alongside the service-owner investigation and mitigation path; the note explicitly identifies Parallel roles."
+          },
+          {
+            "source": "json",
+            "locator": "objects coordinate, status, investigate, mitigate, roles-note; connections e12-e15",
+            "observation": "The status-update path and owner work path coexist in the same response stage, and roles-note explicitly describes them as parallel roles."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Mitigation must be verified against the same monitoring signals before the incident can be resolved.",
+        "brief_evidence": "Mitigation is verified against the same monitoring signals before the incident can be resolved.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate to Verify & resolve path",
+            "observation": "Apply mitigation flows to Verify same monitoring signals, then Mitigation verified?, and only the passes branch reaches Resolve incident."
+          },
+          {
+            "source": "json",
+            "locator": "objects mitigate, verify-signals, verify-ok, resolve; connections e16, e17, e19",
+            "observation": "The directed sequence requires mitigation to pass same-signal verification before reaching resolution."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "If verification fails, ownership returns to the service owner for another mitigation attempt.",
+        "brief_evidence": "If verification fails, ownership returns to the service owner for another mitigation attempt.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Verify & resolve decision and orange return loop",
+            "observation": "The non-passing branch from Mitigation verified? loops back to Apply mitigation; the adjacent role note assigns mitigation to the service owner."
+          },
+          {
+            "source": "json",
+            "locator": "connection e18; objects mitigate and roles-note",
+            "observation": "Connection e18 returns from verify-ok to mitigate, and roles-note states Service owner: diagnosis + mitigation."
+          }
+        ],
+        "note": "Although the failure branch is not text-labeled fails, it is the only alternative to the explicitly labeled passes branch and returns to the service owner's mitigation responsibility."
+      },
+      {
+        "id": "R16",
+        "requirement": "Resolution closes the public status update.",
+        "brief_evidence": "Resolution closes the public update",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Verify & resolve region, lower sequence",
+            "observation": "Resolve incident points directly to Close public update."
+          },
+          {
+            "source": "json",
+            "locator": "objects resolve and close-status; connection e20",
+            "observation": "Forward connection e20 runs from resolve to close-status."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Resolution preserves the incident timeline in the incident record.",
+        "brief_evidence": "preserves the timeline in the incident record",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Close public update to Learn & follow up transition",
+            "observation": "Close public update leads to Preserve timeline through an edge labeled preserve record, but the destination is not explicitly labeled as being within the shared incident record."
+          },
+          {
+            "source": "json",
+            "locator": "objects timeline and record; connection e21; searched all connections",
+            "observation": "Object timeline says Preserve timeline and e21 is labeled preserve record, but there is no direct connection or explicit textual qualifier linking timeline preservation to object record."
+          }
+        ],
+        "note": "Timeline preservation is clear, but the specific storage boundary 'in the incident record' is only indirectly suggested."
+      },
+      {
+        "id": "R18",
+        "requirement": "Resolution schedules a post-incident review.",
+        "brief_evidence": "and schedules a post-incident review",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Learn & follow up region",
+            "observation": "The post-resolution learning sequence contains Schedule post-incident review."
+          },
+          {
+            "source": "json",
+            "locator": "object pir; connections e21-e22",
+            "observation": "The resolution aftermath reaches timeline and then pir, whose text is Schedule post-incident review."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Actions from the post-incident review enter the follow-up tracker.",
+        "brief_evidence": "whose actions enter the follow-up tracker",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Learn & follow up region, review-to-tracker path",
+            "observation": "Schedule post-incident review points to Follow-up tracker through an arrow labeled actions."
+          },
+          {
+            "source": "json",
+            "locator": "objects pir and actions; connection e23",
+            "observation": "Connection e23 runs from pir to actions, is labeled actions, and terminates at Follow-up tracker."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "If the primary on-call engineer does not acknowledge within five minutes, the alert manager escalates to the secondary on-call engineer.",
+        "brief_evidence": "If the primary on-call engineer does not acknowledge within five minutes, the alert manager escalates to the secondary on-call engineer.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & mobilize region, Ack ≤ 5 min? decision and Page secondary branch",
+            "observation": "The five-minute acknowledgement decision has an alternate orange path to Page secondary, which then rejoins triage."
+          },
+          {
+            "source": "json",
+            "locator": "objects ack and secondary; connections e4 and e6; searched associated labels and annotations",
+            "observation": "Ack ≤ 5 min? connects to Page secondary, but e4 is unlabeled and no note explicitly says that the alert manager performs the escalation."
+          }
+        ],
+        "note": "The timeout and secondary paging behavior are present, but the stated actor attribution to the alert manager is not explicit."
+      }
+    ],
+    "coverage_fraction": 0.9211,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The core alert-to-response and mitigation-verification workflow is strongly covered: duplicate grouping, primary paging, acknowledgement and triage, false-alarm versus incident branching, record and owner creation, parallel coordination/status duties, mitigation, same-signal verification, and retry.",
+    "most_consequential_gap": "The escalation path does not explicitly identify the alert manager as the actor that escalates to the secondary on-call engineer; the incident-record boundary for preserved timeline data is also only implicit.",
+    "coverage_summary": "Weighted coverage is 35/38. Nearly the entire operational lifecycle is represented, including failure retry and learning follow-up. The high-confidence alert qualifier is absent, while alert-manager ownership of escalation and storage of the preserved timeline specifically in the incident record are partial. No absent or contradicted system-defining requirement triggers a cap.",
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 12198,
+    "output_tokens": 4632
+  },
+  "flags": []
+}

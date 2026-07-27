@@ -1,0 +1,613 @@
+{
+  "axis": "rc",
+  "scenario": "webhook-delivery",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The webhook delivery subsystem must support multiple tenants.",
+        "brief_evidence": "We are building a multi-tenant webhook delivery subsystem.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Delivery & retry loop and Status & operations regions",
+            "observation": "The board shows an \"Active tenant secret\" and \"Tenant-visible status history,\" establishing tenant-scoped delivery and visibility."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=secret], objects[id=status-history]",
+            "observation": "Object texts are \"Active tenant secret\" and \"Tenant-visible status history.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Product services must publish webhook events through an internal ingress API.",
+        "brief_evidence": "Product services publish webhook events through an internal ingress API",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "1 · Durable ingress",
+            "observation": "Product services connect to Internal ingress API through an arrow labeled \"publish event.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=product], objects[id=ingress-api], connections[id=e1]",
+            "observation": "Connection e1 runs from product to ingress-api and is labeled \"publish event.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The ingress transaction must durably record each accepted event before acknowledging it.",
+        "brief_evidence": "the ingress transaction must durably record each accepted event before acknowledging it",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "1 · Durable ingress",
+            "observation": "Internal ingress API flows through \"persist transactionally\" to Durable event record and only then through \"durable\" to Acknowledge accepted; the transactional-boundary note repeats the ordering."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e2], connections[id=e3], objects[id=ingress-note]",
+            "observation": "e2 persists to event-store, e3 proceeds from event-store to accepted, and the note says to persist before returning success."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "A dispatcher must expand each event into exactly one delivery per subscribed endpoint.",
+        "brief_evidence": "A dispatcher expands the event into one delivery per subscribed endpoint",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "2 · Fan-out & endpoint state",
+            "observation": "Dispatcher connects to Subscriptions + endpoint config with the label \"expand subscriptions,\" but the one-delivery-per-endpoint cardinality is not stated."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dispatcher], objects[id=endpoint-config], connections[id=e5]; searched all object texts, labels, notes, and annotations",
+            "observation": "The expansion relationship is present, but no text or encoding specifies exactly one delivery for each subscribed endpoint."
+          }
+        ],
+        "note": "Subscription expansion is recognizable, but the stated one-to-one delivery cardinality is missing."
+      },
+      {
+        "id": "R5",
+        "requirement": "The dispatcher must put expanded deliveries on a durable queue.",
+        "brief_evidence": "and puts those deliveries on a durable queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "2 · Fan-out & endpoint state",
+            "observation": "The fan-out path terminates at a component labeled \"Durable delivery queue,\" which then feeds the worker."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=delivery-queue], connections[id=e26], connections[id=e9]",
+            "observation": "The durable delivery queue receives the endpoint-processing path and connects onward to the delivery worker."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "Delivery workers must load the tenant's active signing secret.",
+        "brief_evidence": "Delivery workers load the tenant's active signing secret",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "Delivery worker connects to Active tenant secret with the label \"load active secret.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=worker], objects[id=secret], connections[id=e10]",
+            "observation": "e10 runs from worker to secret and is labeled \"load active secret.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Delivery workers must sign the exact payload.",
+        "brief_evidence": "sign the exact payload",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The delivery path contains a process explicitly labeled \"Sign exact payload.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=sign], connections[id=e11]",
+            "observation": "The secret connects to the object whose text is \"Sign exact payload.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Delivery workers must call the customer endpoint.",
+        "brief_evidence": "and call the customer endpoint",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "Sign exact payload connects directly to the Customer endpoint."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=customer], connections[id=e12]",
+            "observation": "e12 runs from sign to customer."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Each customer endpoint call must include an idempotency key.",
+        "brief_evidence": "with an idempotency key",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire Delivery & retry loop, ingress identity note, replay path, and all visible connection labels",
+            "observation": "The board shows signing, endpoint invocation, stable event identity, and replay identity, but nowhere labels or otherwise encodes an idempotency key on the endpoint call."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all objects[*].text, connections[*].label, annotations, and the sign-to-customer connection e12",
+            "observation": "No object, note, annotation, or connection label contains or represents an idempotency key; e12 has an empty label."
+          }
+        ],
+        "note": "The endpoint call is present, but its required idempotency key is wholly omitted."
+      },
+      {
+        "id": "R10",
+        "requirement": "A 2xx response must complete the delivery.",
+        "brief_evidence": "A 2xx response completes the delivery.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The \"2xx response?\" decision has a green path to \"Complete delivery.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=response], objects[id=complete], connections[id=e14]",
+            "observation": "e14 connects the 2xx decision to Complete delivery."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "Timeouts must return through the retry scheduler.",
+        "brief_evidence": "Timeouts ... return through a retry scheduler",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The Retry policy note explicitly says timeouts use the retry policy, adjacent to the Retry scheduler."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=retry-note], objects[id=retry-scheduler], connections[id=e15]",
+            "observation": "The note names timeouts, and the non-success path enters retry-scheduler."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Network failures must return through the retry scheduler.",
+        "brief_evidence": "network failures ... return through a retry scheduler",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The path to Retry scheduler is labeled \"retryable / network,\" and the Retry policy note names network failures."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e15], objects[id=retry-note]",
+            "observation": "e15 enters retry-scheduler with label \"retryable / network\"; the note explicitly includes network failures."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Retryable responses must return through the retry scheduler.",
+        "brief_evidence": "retryable responses return through a retry scheduler",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The response decision connects to Retry scheduler through the path labeled \"retryable / network.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e15], objects[id=retry-note]",
+            "observation": "e15 connects response to retry-scheduler, and the note explicitly names retryable responses."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Retries must use exponential backoff.",
+        "brief_evidence": "using exponential backoff",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The Retry policy note explicitly states \"exponential backoff.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=retry-note]",
+            "observation": "The note text specifies exponential backoff."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Retries must add jitter to the backoff.",
+        "brief_evidence": "with jitter",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The retry path and policy note state \"backoff + jitter.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e16], objects[id=retry-note]",
+            "observation": "e16 is labeled \"backoff + jitter,\" and the policy note repeats jitter."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Retries must enforce a maximum attempt count.",
+        "brief_evidence": "and a maximum attempt count",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "3 · Delivery & retry loop",
+            "observation": "The Retry policy note states a maximum attempt count, and the flow includes \"Attempts remain?\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=attempt-limit], objects[id=retry-note]",
+            "observation": "The attempt-limit decision and policy text jointly encode the maximum-attempt constraint."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Permanent failures must go to a dead-letter queue.",
+        "brief_evidence": "Permanent failures ... go to a dead-letter queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Response decision between Delivery & retry loop and Dead letters & replay",
+            "observation": "The response decision has a retryable/network path to the scheduler and a separate red direct path to the Dead-letter queue, unambiguously encoding the non-retryable/permanent branch."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e15], connections[id=e19], objects[id=dlq]",
+            "observation": "Retryable/network outcomes use e15, while the distinct direct red response-to-DLQ connection e19 represents the permanent-failure branch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Deliveries whose retries are exhausted must go to a dead-letter queue.",
+        "brief_evidence": "exhausted retries go to a dead-letter queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Attempts remain? decision and Dead-letter queue",
+            "observation": "The attempts decision has a red path to the Dead-letter queue and a loop back to the worker when attempts remain."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e17], connections[id=e18]",
+            "observation": "e17 loops from attempt-limit to worker, while e18 sends the other branch to dlq."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Dead-lettered deliveries must preserve the payload intact.",
+        "brief_evidence": "with the payload ... intact",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay, Preserved intact note",
+            "observation": "The note explicitly lists \"Payload\" under \"Preserved intact.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dlq-note]",
+            "observation": "The note text says \"Preserved intact\" and lists Payload."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Dead-lettered deliveries must preserve the endpoint intact.",
+        "brief_evidence": "with the ... endpoint ... intact",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay, Preserved intact note",
+            "observation": "The note explicitly lists \"endpoint\" under \"Preserved intact.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dlq-note]",
+            "observation": "The note lists endpoint among preserved fields."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Dead-lettered deliveries must preserve the attempt history intact.",
+        "brief_evidence": "with the ... attempt history ... intact",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay, Preserved intact note",
+            "observation": "The note explicitly lists \"attempt history\" under \"Preserved intact.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dlq-note]",
+            "observation": "The note lists attempt history among preserved fields."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Dead-lettered deliveries must preserve the last error intact.",
+        "brief_evidence": "with the ... last error intact",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay, Preserved intact note",
+            "observation": "The note explicitly lists \"last error\" under \"Preserved intact.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dlq-note]",
+            "observation": "The note lists last error among preserved fields."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Operators must be able to inspect dead-lettered deliveries.",
+        "brief_evidence": "Operators can inspect ... dead-lettered deliveries",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay",
+            "observation": "An Operator actor connects to the \"Inspect delivery\" operation adjacent to the Dead-letter queue."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=operator], objects[id=inspect], connections[id=e20]",
+            "observation": "e20 connects the operator to Inspect delivery."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Operators must be able to replay dead-lettered deliveries.",
+        "brief_evidence": "Operators can ... replay dead-lettered deliveries",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "4 · Dead letters & replay and replay return path",
+            "observation": "Inspect delivery connects to Replay delivery, which returns to the Durable delivery queue."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=replay], connections[id=e21], connections[id=e22]",
+            "observation": "The inspection flow enters Replay delivery, and e22 requeues it."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Replaying a dead-lettered delivery must not change its original event identity.",
+        "brief_evidence": "without changing their original event identity",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Replay path and Preserved intact note",
+            "observation": "The replay return path is labeled \"replay · same event identity,\" and the note says replay keeps the original event identity."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e22], objects[id=dlq-note]",
+            "observation": "e22 says \"same event identity,\" and the note explicitly states that replay keeps the original identity."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Endpoint configuration must support a paused state.",
+        "brief_evidence": "Endpoint configuration can be paused",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "2 · Fan-out & endpoint state",
+            "observation": "Endpoint configuration flows into a decision labeled \"Endpoint paused?\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=endpoint-config], objects[id=paused-check], connections[id=e6]",
+            "observation": "The active endpoint configuration is explicitly checked for a paused state."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Deliveries for paused endpoints must be retained until the endpoint is resumed.",
+        "brief_evidence": "paused endpoints retain deliveries until they are resumed",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "2 · Fan-out & endpoint state, paused note and resumed path",
+            "observation": "The note says resume releases paused deliveries, and the decision path is labeled \"no / resumed,\" establishing retention followed by release on resume."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=paused-note], connections[id=e8], connections[id=e25]",
+            "observation": "The paused branch reaches the note stating that resume releases paused deliveries, while e25 is labeled \"no / resumed.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "Every delivery attempt and outcome must feed tenant-visible status history.",
+        "brief_evidence": "Delivery attempts and outcomes feed tenant-visible status history",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "5 · Status & operations",
+            "observation": "The region contains Tenant-visible status history and a note stating, \"Every delivery attempt and outcome updates both views.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=status-history], objects[id=outcomes-note]",
+            "observation": "The status-history object is tenant-visible, and the note explicitly covers every attempt and outcome."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Every delivery attempt and outcome must feed operational metrics.",
+        "brief_evidence": "Delivery attempts and outcomes feed ... operational metrics.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "5 · Status & operations",
+            "observation": "Operational metrics is connected to the status view, and the note says every delivery attempt and outcome updates both views."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics], objects[id=outcomes-note], connections[id=e24]",
+            "observation": "The metrics object is present; the note explicitly says every attempt and outcome updates both views."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9464,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R9",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "Failure, retry, dead-letter, and recovery semantics are especially complete: the board covers retry-triggering conditions, exponential backoff with jitter, attempt exhaustion, permanent-failure routing, intact DLQ contents, operator inspection, replay, and identity preservation.",
+    "most_consequential_gap": "The customer endpoint call has no idempotency key, omitting a system-defining duplicate-delivery safety mechanism explicitly required by the brief.",
+    "coverage_summary": "Nearly the full ingress, fan-out, signing, delivery, retry, dead-letter, pause/resume, and observability contract is represented. Subscription expansion lacks the explicit one-delivery-per-endpoint cardinality, and the idempotency key is entirely absent. Weighted coverage is 53/56, but the absent system-defining idempotency requirement applies the RC cap of 6.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 14195,
+    "output_tokens": 6457
+  },
+  "flags": []
+}

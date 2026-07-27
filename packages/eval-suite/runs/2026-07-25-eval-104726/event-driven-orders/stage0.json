@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-104726.event-driven-orders",
+  "title": "2026-07-25-eval-104726 · event-driven-orders",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Event-driven order fulfillment",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 80,
+        "width": 2896,
+        "height": 1568
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "section",
+      "text": "1 · Order intake & transactional outbox",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 128,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "backbone",
+      "type": "section",
+      "text": "2 · Durable event backbone",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1168,
+        "y": 128,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "consumers",
+      "type": "section",
+      "text": "3 · Parallel decision consumers",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 128,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "coordination",
+      "type": "section",
+      "text": "4 · Order coordination",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 688,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "compensation",
+      "type": "section",
+      "text": "5 · Cancellation & compensation",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1168,
+        "y": 688,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "fulfillment",
+      "type": "section",
+      "text": "6 · Fulfillment & shipping",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 688,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "experiences",
+      "type": "section",
+      "text": "7 · Customer experiences",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1248,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "reliability",
+      "type": "section",
+      "text": "8 · Consumer reliability",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1168,
+        "y": 1248,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "operations",
+      "type": "section",
+      "text": "9 · Operations & observability",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2208,
+        "y": 1248,
+        "width": 768,
+        "height": 368
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "pill",
+      "text": "API gateway",
+      "color": "blue",
+      "parentId": "intake",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-service",
+      "type": "process",
+      "text": "Order service\nvalidate · IDs · idempotency",
+      "color": "blue",
+      "parentId": "intake",
+      "geometry": {
+        "x": 576,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-db-outbox",
+      "type": "database",
+      "text": "Order DB + outbox\natomic pending + OrderPlaced",
+      "color": "teal",
+      "parentId": "intake",
+      "geometry": {
+        "x": 368,
+        "y": 368,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "outbox-relay",
+      "type": "process",
+      "text": "Outbox relay",
+      "color": "teal",
+      "parentId": "backbone",
+      "geometry": {
+        "x": 1184,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "event-bus",
+      "type": "cylinder-horizontal",
+      "text": "Durable event bus",
+      "color": "teal",
+      "parentId": "backbone",
+      "geometry": {
+        "x": 1616,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "event-contract",
+      "type": "document",
+      "text": "Event envelope\nid · correlation · causation",
+      "color": "gray",
+      "parentId": "backbone",
+      "geometry": {
+        "x": 1408,
+        "y": 368,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "payment-consumer",
+      "type": "process",
+      "text": "Payment consumer\nPaymentAuthorized / Failed",
+      "color": "violet",
+      "parentId": "consumers",
+      "geometry": {
+        "x": 2224,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "inventory-consumer",
+      "type": "process",
+      "text": "Inventory consumer\nReserved / Unavailable",
+      "color": "violet",
+      "parentId": "consumers",
+      "geometry": {
+        "x": 2656,
+        "y": 176,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "fraud-consumer",
+      "type": "process",
+      "text": "Fraud consumer\nCleared / Rejected",
+      "color": "violet",
+      "parentId": "consumers",
+      "geometry": {
+        "x": 2448,
+        "y": 368,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "coordinator",
+      "type": "process",
+      "text": "Order coordinator\nwait for all 3 results",
+      "color": "blue",
+      "parentId": "coordination",
+      "geometry": {
+        "x": 144,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "terminal-check",
+      "type": "decision",
+      "text": "Terminal or timed out?",
+      "color": "yellow",
+      "parentId": "coordination",
+      "geometry": {
+        "x": 576,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-outcome",
+      "type": "process",
+      "text": "OrderConfirmed\nor OrderCancelled",
+      "color": "blue",
+      "parentId": "coordination",
+      "geometry": {
+        "x": 368,
+        "y": 928,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "void-payment",
+      "type": "process",
+      "text": "Void authorization",
+      "color": "orange",
+      "parentId": "compensation",
+      "geometry": {
+        "x": 1184,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "release-stock",
+      "type": "process",
+      "text": "Release inventory",
+      "color": "orange",
+      "parentId": "compensation",
+      "geometry": {
+        "x": 1616,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "late-success",
+      "type": "decision",
+      "text": "Late success?\ncompensate, never reopen",
+      "color": "orange",
+      "parentId": "compensation",
+      "geometry": {
+        "x": 1408,
+        "y": 928,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "fulfillment-consumer",
+      "type": "process",
+      "text": "Fulfillment consumer\ncreate warehouse work",
+      "color": "green",
+      "parentId": "fulfillment",
+      "geometry": {
+        "x": 2224,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "packed-event",
+      "type": "document",
+      "text": "Packed",
+      "color": "green",
+      "parentId": "fulfillment",
+      "geometry": {
+        "x": 2656,
+        "y": 736,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "shipping-consumer",
+      "type": "process",
+      "text": "Shipping consumer\nlabel · tracking · Shipped",
+      "color": "green",
+      "parentId": "fulfillment",
+      "geometry": {
+        "x": 2448,
+        "y": 928,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "notification-consumer",
+      "type": "process",
+      "text": "Notification consumer\nconfirm · cancel · ship",
+      "color": "pink",
+      "parentId": "experiences",
+      "geometry": {
+        "x": 144,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "timeline-projector",
+      "type": "process",
+      "text": "Read-model projector",
+      "color": "pink",
+      "parentId": "experiences",
+      "geometry": {
+        "x": 576,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "query-api",
+      "type": "pill",
+      "text": "Query API\ncustomer order timeline",
+      "color": "blue",
+      "parentId": "experiences",
+      "geometry": {
+        "x": 368,
+        "y": 1488,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "idempotency-store",
+      "type": "database",
+      "text": "Processed event IDs",
+      "color": "yellow",
+      "parentId": "reliability",
+      "geometry": {
+        "x": 1184,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "retry-policy",
+      "type": "predefined-process",
+      "text": "Bounded retries",
+      "color": "yellow",
+      "parentId": "reliability",
+      "geometry": {
+        "x": 1616,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "dead-letter-queue",
+      "type": "database",
+      "text": "Dead-letter queue",
+      "color": "orange",
+      "parentId": "reliability",
+      "geometry": {
+        "x": 1408,
+        "y": 1488,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "repair-replay",
+      "type": "process",
+      "text": "Operator repair & replay\npreserve event id + causation",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 2224,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "document-stack",
+      "text": "Traces · correlation · lag\nretries · compensation",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 2656,
+        "y": 1296,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "observability",
+      "type": "icon",
+      "text": "Observability platform",
+      "color": "teal",
+      "parentId": "operations",
+      "geometry": {
+        "x": 2448,
+        "y": 1488,
+        "width": 288,
+        "height": 96
+      },
+      "icon": "activity"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-api-order",
+      "from": {
+        "objectId": "api-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "order-service",
+        "anchor": "left"
+      },
+      "label": "submit order",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-order-db",
+      "from": {
+        "objectId": "order-service",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "order-db-outbox",
+        "anchor": "top"
+      },
+      "label": "single transaction",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-db-relay",
+      "from": {
+        "objectId": "order-db-outbox",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "outbox-relay",
+        "anchor": "left"
+      },
+      "label": "unpublished rows",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-relay-bus",
+      "from": {
+        "objectId": "outbox-relay",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "event-bus",
+        "anchor": "left"
+      },
+      "label": "publish OrderPlaced",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-bus-payment",
+      "from": {
+        "objectId": "event-bus",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "payment-consumer",
+        "anchor": "left"
+      },
+      "label": "at-least-once",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-bus-fraud",
+      "from": {
+        "objectId": "event-bus",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fraud-consumer",
+        "anchor": "left"
+      },
+      "label": "OrderPlaced",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-coordinate-check",
+      "from": {
+        "objectId": "coordinator",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "terminal-check",
+        "anchor": "left"
+      },
+      "label": "results or timeout",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-check-outcome",
+      "from": {
+        "objectId": "terminal-check",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "order-outcome",
+        "anchor": "top"
+      },
+      "label": "confirm / cancel",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-failure-comp",
+      "from": {
+        "objectId": "order-outcome",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "late-success",
+        "anchor": "left"
+      },
+      "label": "failure or late success",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-confirm-fulfill",
+      "from": {
+        "objectId": "order-outcome",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fulfillment-consumer",
+        "anchor": "left"
+      },
+      "label": "OrderConfirmed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-fulfill-packed",
+      "from": {
+        "objectId": "fulfillment-consumer",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "packed-event",
+        "anchor": "left"
+      },
+      "label": "warehouse work → Packed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-packed-ship",
+      "from": {
+        "objectId": "packed-event",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "shipping-consumer",
+        "anchor": "top"
+      },
+      "label": "buy label · record tracking",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-events-notify",
+      "from": {
+        "objectId": "order-outcome",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "notification-consumer",
+        "anchor": "top"
+      },
+      "label": "confirmed / cancelled",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e-project-query",
+      "from": {
+        "objectId": "timeline-projector",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "query-api",
+        "anchor": "top"
+      },
+      "label": "customer timeline",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-retry-dlq",
+      "from": {
+        "objectId": "retry-policy",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "dead-letter-queue",
+        "anchor": "top"
+      },
+      "label": "retries exhausted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-dlq-repair",
+      "from": {
+        "objectId": "dead-letter-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "repair-replay",
+        "anchor": "left"
+      },
+      "label": "repair & replay",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-telemetry-observe",
+      "from": {
+        "objectId": "telemetry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "observability",
+        "anchor": "top"
+      },
+      "label": "metrics + traces",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    }
+  ],
+  "annotations": []
+}

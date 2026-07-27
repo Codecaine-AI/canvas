@@ -1,4 +1,4 @@
-.PHONY: studio studio-web docs harness traces
+.PHONY: studio studio-evals studio-web docs harness traces eval eval-clean
 
 # Build and launch the native Mac studio app WITH the agent running:
 # the canvas-agent harness boots on :4820 alongside (skipped if one is
@@ -17,6 +17,12 @@ studio:
 		trap 'kill $$HARNESS_PID 2>/dev/null' EXIT INT TERM; \
 		VITE_STUDIO_DEV_PAGES=1 bun run --cwd packages/studio studio; \
 	fi
+
+# viewer for eval-suite boards (canvases/evals/); read-only by convention while a run is active.
+studio-evals: export CANVAS_DIR = $(CURDIR)/canvases/evals
+studio-evals:
+	mkdir -p "$(CANVAS_DIR)"
+	CANVAS_DIR="$(CANVAS_DIR)" $(MAKE) studio
 
 # Run the canvas-agent layout harness alone (sibling Bun service on :4820;
 # studio's agent proxy fronts it, so the browser only ever talks to the
@@ -82,3 +88,14 @@ docs:
 		echo "docs: live checkout not found, using vendored tools/docs-framework"; \
 		bun tools/docs-framework/packages/docs-cli/src/index.ts serve --root docs --port 4810 --theme-locked; \
 	fi
+
+# Run the eval suite end-to-end; the runner spawns its services.
+eval: RUN_ID := $(shell date +%Y-%m-%d)-eval-$(shell date +%H%M%S)
+eval:
+	@echo "eval: starting run $(RUN_ID) in $(CURDIR)/packages/eval-suite/runs"
+	bun run --cwd packages/eval-suite/runner src/cli.ts suite --run-id "$(RUN_ID)"
+	@echo "eval: finished run $(RUN_ID) in $(CURDIR)/packages/eval-suite/runs"
+
+# Remove all eval-suite runs.
+eval-clean:
+	bun run --cwd packages/eval-suite/runner src/cli.ts clean --all

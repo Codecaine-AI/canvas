@@ -1,0 +1,664 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-104726.monorepo-build-cache",
+  "title": "2026-07-25-eval-104726 · monorepo-build-cache",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Monorepo build & cache",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 240,
+        "y": 64,
+        "width": 2048,
+        "height": 1552
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "section",
+      "text": "1 · Request & impact",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 256,
+        "y": 144,
+        "width": 336,
+        "height": 368
+      }
+    },
+    {
+      "id": "graph",
+      "type": "section",
+      "text": "2 · Build graph",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1040,
+        "y": 144,
+        "width": 336,
+        "height": 368
+      }
+    },
+    {
+      "id": "schedule",
+      "type": "section",
+      "text": "3 · Scheduling",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1824,
+        "y": 112,
+        "width": 336,
+        "height": 560
+      }
+    },
+    {
+      "id": "key-cache",
+      "type": "section",
+      "text": "4 · Key & cache lookup",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 256,
+        "y": 736,
+        "width": 336,
+        "height": 592
+      }
+    },
+    {
+      "id": "execute",
+      "type": "section",
+      "text": "5 · Execute & publish",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1040,
+        "y": 736,
+        "width": 336,
+        "height": 592
+      }
+    },
+    {
+      "id": "policy",
+      "type": "section",
+      "text": "6 · Trust, contention & result",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1824,
+        "y": 736,
+        "width": 336,
+        "height": 576
+      }
+    },
+    {
+      "id": "request",
+      "type": "pill",
+      "text": "Developer / CI request",
+      "color": "blue",
+      "parentId": "intake",
+      "geometry": {
+        "x": 272,
+        "y": 192,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "detect",
+      "type": "process",
+      "text": "Detect modified files",
+      "color": "white",
+      "parentId": "intake",
+      "geometry": {
+        "x": 272,
+        "y": 384,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "affected",
+      "type": "process",
+      "text": "Map to affected packages",
+      "color": "white",
+      "parentId": "graph",
+      "geometry": {
+        "x": 1056,
+        "y": 192,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "expand",
+      "type": "process",
+      "text": "Expand required dependents",
+      "color": "white",
+      "parentId": "graph",
+      "geometry": {
+        "x": 1056,
+        "y": 384,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "order",
+      "type": "predefined-process",
+      "text": "Order tasks by dependency",
+      "color": "violet",
+      "parentId": "schedule",
+      "geometry": {
+        "x": 1840,
+        "y": 160,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "process",
+      "text": "Schedule ready tasks",
+      "color": "white",
+      "parentId": "schedule",
+      "geometry": {
+        "x": 1840,
+        "y": 352,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "workers",
+      "type": "icon",
+      "text": "Elastic worker pool",
+      "color": "orange",
+      "parentId": "schedule",
+      "geometry": {
+        "x": 1840,
+        "y": 544,
+        "width": 288,
+        "height": 96
+      },
+      "icon": "server"
+    },
+    {
+      "id": "content-key",
+      "type": "process",
+      "text": "Calculate content key",
+      "color": "teal",
+      "parentId": "key-cache",
+      "geometry": {
+        "x": 272,
+        "y": 784,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "cache-check",
+      "type": "decision",
+      "text": "Remote cache hit?",
+      "color": "yellow",
+      "parentId": "key-cache",
+      "geometry": {
+        "x": 272,
+        "y": 976,
+        "width": 288,
+        "height": 128
+      }
+    },
+    {
+      "id": "restore",
+      "type": "process",
+      "text": "Restore matching result",
+      "color": "green",
+      "parentId": "key-cache",
+      "geometry": {
+        "x": 272,
+        "y": 1200,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "isolated-run",
+      "type": "process",
+      "text": "Run in isolated workspace",
+      "color": "white",
+      "parentId": "execute",
+      "geometry": {
+        "x": 1056,
+        "y": 784,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "task-success",
+      "type": "decision",
+      "text": "Task succeeds?",
+      "color": "yellow",
+      "parentId": "execute",
+      "geometry": {
+        "x": 1056,
+        "y": 976,
+        "width": 288,
+        "height": 128
+      }
+    },
+    {
+      "id": "artifact-store",
+      "type": "database",
+      "text": "Upload immutable outputs",
+      "color": "teal",
+      "parentId": "execute",
+      "geometry": {
+        "x": 1056,
+        "y": 1200,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "provenance",
+      "type": "process",
+      "text": "Verify cache provenance",
+      "color": "pink",
+      "parentId": "policy",
+      "geometry": {
+        "x": 1840,
+        "y": 784,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "converge",
+      "type": "process",
+      "text": "Atomic publish / converge",
+      "color": "white",
+      "parentId": "policy",
+      "geometry": {
+        "x": 1840,
+        "y": 976,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "result",
+      "type": "document",
+      "text": "Outputs or failure logs",
+      "color": "blue",
+      "parentId": "policy",
+      "geometry": {
+        "x": 1840,
+        "y": 1168,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "key-inputs",
+      "type": "sticky",
+      "text": "**Content key inputs**\n- sources + dependency outputs\n- declared environment\n- toolchain version + command",
+      "color": "yellow",
+      "parentId": "key-detail",
+      "geometry": {
+        "x": 1744,
+        "y": 1376,
+        "width": 480,
+        "height": 176
+      }
+    },
+    {
+      "id": "key-detail",
+      "type": "section",
+      "text": "Key composition",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1728,
+        "y": 1328,
+        "width": 528,
+        "height": 256
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "request",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "detect",
+        "anchor": "top"
+      },
+      "label": "starts build",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "detect",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "affected",
+        "anchor": "left"
+      },
+      "label": "modified files",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "affected",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "expand",
+        "anchor": "top"
+      },
+      "label": "seed packages",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "expand",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "order",
+        "anchor": "left"
+      },
+      "label": "expanded graph",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "order",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "top"
+      },
+      "label": "dependency order",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "workers",
+        "anchor": "top"
+      },
+      "label": "ready tasks",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "content-key",
+        "anchor": "top"
+      },
+      "label": "dispatch each task",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1984,
+          688
+        ],
+        [
+          416,
+          688
+        ]
+      ]
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "content-key",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "cache-check",
+        "anchor": "top"
+      },
+      "label": "key",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "cache-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "isolated-run",
+        "anchor": "left"
+      },
+      "label": "miss",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "cache-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "provenance",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink",
+      "waypoints": [
+        [
+          608,
+          1040
+        ],
+        [
+          608,
+          704
+        ],
+        [
+          1760,
+          704
+        ],
+        [
+          1760,
+          832
+        ]
+      ]
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "provenance",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "restore",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1680,
+          832
+        ],
+        [
+          1680,
+          1360
+        ],
+        [
+          640,
+          1360
+        ],
+        [
+          640,
+          1248
+        ]
+      ]
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "isolated-run",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "task-success",
+        "anchor": "top"
+      },
+      "label": "execute",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "task-success",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "artifact-store",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "artifact-store",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "converge",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          1456,
+          1248
+        ],
+        [
+          1456,
+          1120
+        ],
+        [
+          1760,
+          1120
+        ],
+        [
+          1760,
+          1024
+        ]
+      ]
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "converge",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "result",
+        "anchor": "top"
+      },
+      "label": "single valid cache entry",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "task-success",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "result",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1424,
+          1040
+        ],
+        [
+          1424,
+          1144
+        ],
+        [
+          1728,
+          1144
+        ],
+        [
+          1728,
+          1224
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

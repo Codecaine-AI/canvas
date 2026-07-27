@@ -15,7 +15,7 @@
         "b-section-canvas-5"
       ],
       "props": {
-        "covers": "The section statement: a real container object with a label and exactly one child; the frame is automatic (64px label band, 48px padding) and the section shrinks to fit its content.",
+        "covers": "The section notation: a real container object with a title and one nested composition; the frame is closed around its children with fit_section, and sections give every idea a home while serving as addressable, linkable units.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -47,7 +47,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Fields, in fixed order: number, "
+          "insert": "For reading this descriptive notation, fields appear in fixed order: number, "
         },
         {
           "insert": "text=",
@@ -74,7 +74,7 @@
           }
         },
         {
-          "insert": " preserves a document label that is explicitly undefined — distinct from no "
+          "insert": " denotes a label that is explicitly unspecified — distinct from no "
         },
         {
           "insert": "label=",
@@ -92,7 +92,7 @@
           }
         },
         {
-          "insert": " indented child. Sections are real document objects with membership logic: everything inside becomes their children on the board. Sections are also the one shape never placed as an "
+          "insert": " indented composition in this notation. Sections are real document objects with membership logic: objects captured by their geometry become their children when membership is reconciled. Sections are also the one shape never placed as an "
         },
         {
           "insert": "item",
@@ -126,7 +126,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The frame is automatic: a 64px band at the top for the label, 48px of padding, and the section shrinks to fit its content (rule R3). Nest sections for hierarchy."
+          "insert": "On the live board, the section's text renders as its title chip; the chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given; fit_section closes one around the children already inside it, and only that section, when the region is finished. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
         }
       ]
     },

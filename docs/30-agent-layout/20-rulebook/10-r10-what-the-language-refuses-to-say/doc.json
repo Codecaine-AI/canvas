@@ -13,14 +13,15 @@
         "b-r10-body-3"
       ],
       "props": {
-        "covers": "The language has no way to write a raw coordinate; its one known blind spot is cross-column interleaving finer than the ladder, measurable as the dominant residual loss on gc-decomp-harness.",
+        "covers": "The operation language carries concrete geometry rather than abstract align, fan, grid, or gap constraints; the aesthetic supplies relational intent, while fresh digests and renders provide the evidence used to judge it.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "no raw coordinates",
-          "blind spot",
-          "cross-column interleaving",
-          "register offset"
+          "concrete geometry",
+          "relational intent",
+          "operation surface",
+          "fresh BOARD digest",
+          "render judgment"
         ]
       }
     },
@@ -42,11 +43,11 @@
       "flavour": "observation",
       "children": [],
       "props": {
-        "title": "Absolute registers are never spelled"
+        "title": "Relations are not operation fields"
       },
       "text": [
         {
-          "insert": "The language has no way to write a raw coordinate. Its one known blind spot: cross-column interleaving finer than the ladder — a row threading between another column's rows."
+          "insert": "The operation surface expresses concrete entities, and every geometry edit uses a complete finite rectangle. It has no align, fan, lattice, equal-gap, or importance-size field; those meanings come from deliberate repeated geometry, section structure, labels, and color."
         }
       ]
     },
@@ -57,43 +58,34 @@
       "props": {},
       "text": [
         {
-          "insert": "The corpus makes the blind spot measurable: gc's hero row at y=392 threads between pill rows at 96 pitch across a corridor, and the above/below facts flip on 16-48px differences. That interleave is not representable and is the dominant residual loss on "
+          "insert": "The "
         },
         {
-          "insert": "gc-decomp-harness",
+          "insert": "aesthetic",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
+            }
+          }
+        },
+        {
+          "insert": " defines the relational vocabulary: same size plus same gap means peers, a larger box means more important, an off-register box means exception, and a parent centers over its children. The agent realizes those relations with explicit geometry, copying exact peer size and pitch from the latest BOARD digest. Patched rectangles snap to the 16px grid as quantization. Every successful "
+        },
+        {
+          "insert": "the operation surface",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "canvases/gc-decomp-harness.canvas.json"
+              "path": "packages/canvas-agent/src/service/session/perception.ts",
+              "symbol": "operationPerception"
             }
           }
         },
         {
-          "insert": " (90.4% relation against the 93% target). If a future op is added for it, it should be a register offset on "
-        },
-        {
-          "insert": "align",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/10-language/70-align",
-              "label": "align"
-            }
-          }
-        },
-        {
-          "insert": " — e.g. "
-        },
-        {
-          "insert": "align y@+128 of config",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — not raw coordinates."
+          "insert": " result is sized to its own operation; a look returns the whole board, and a refused call carries only its error lines, so a look is how the board is recovered. No diagnostic enforces abstract peer alignment or equal-gap intent: the always-on diagnostics guard physical readability, and the renders remain the composition judge."
         }
       ]
     }

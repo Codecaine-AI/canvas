@@ -15,14 +15,16 @@
         "b-r4-evidence-5"
       ],
       "props": {
-        "covers": "Four or more same-size items become a grid lattice: pixel-identical cells, one shared ladder gap, row and column identity preserved — and the lattice anchors everything placed later.",
+        "covers": "A repeated-cell layout uses the aesthetic's peer signal: size cells to the largest member, copy that geometry exactly, repeat one group gap, and keep row and column centers aligned.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "grid lattice",
           "repeated cells",
           "template members",
-          "detectGrid"
+          "uniformity",
+          "digest geometry",
+          "peer alignment"
         ]
       }
     },
@@ -44,11 +46,11 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Same-size items become a lattice"
+        "title": "Peer cells form a lattice"
       },
       "text": [
         {
-          "insert": "Four or more same-size items become a grid: pixel-identical cells, one shared gap from the ladder, row and column identity preserved — and the lattice anchors everything placed later."
+          "insert": "When items are peers, make their cell geometry match, repeat one exact gap on each group axis, and keep centers on shared row and column lines. The repetition communicates the table structure."
         }
       ]
     },
@@ -59,73 +61,26 @@
       "props": {},
       "text": [
         {
-          "insert": "Detect:",
+          "insert": "Mechanism:",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " at least four same-size items ("
+          "insert": " the "
         },
         {
-          "insert": "GRID_SIZE_TOLERANCE",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "GRID_SIZE_TOLERANCE"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " = 2px) occupying a complete row/column lattice with uniform pitch (registers within "
-        },
-        {
-          "insert": "GRID_REGISTER_TOLERANCE",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "GRID_REGISTER_TOLERANCE"
-            }
-          }
-        },
-        {
-          "insert": " = 8px) — or three for a single row or column ("
-        },
-        {
-          "insert": "detectGrid",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "detectGrid"
-            }
-          }
-        },
-        {
-          "insert": "). "
-        },
-        {
-          "insert": "Spell:",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "grid RxC gap=0|32|64|96",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", cells row-major."
+          "insert": " says same size plus same gap means peers. Size for content first, make every peer match the largest member, and copy a peer's exact digest geometry instead of estimating a near match. The 16px grid quantizes the resulting rectangles; it does not choose the gap."
         }
       ]
     },
@@ -136,13 +91,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Expand:",
+          "insert": "Build:",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " an exact lattice — one shared cell extent, one ladder gap, column and row identity preserved. Template members are pixel-identical in the corpus: every cell in ink's 3x4 table is exactly 288x80, and gc's five config pills are exactly 288x64, so the expander gives all cells one extent and one scale and the registers survive exactly. Grid cells are immovable afterwards — no align shift, fan pitch, or overlap push may move a lattice cell; the lattice anchors those constraints instead."
+          "insert": " the cells in their section's content batch, then judge the pushed render. Keep one reading order, leave air around labels and borders, and preserve the repeated pitch as later content is added. No diagnostic infers a table or normalizes its cells; exact peer sizing and alignment are render-based craft judgments. Crowding still warns when sibling corridors fall below the routing floor."
         }
       ]
     },
@@ -153,33 +108,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: "
-        },
-        {
-          "insert": "ink-diagrams",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/ink-diagrams.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": "' 3x4 flush table (the single largest fidelity loss in DSL v1 — 25% of its adjacency); gc's 5x1 gap=32 pills, 1x3 gap=64 db row, and 3x1 gap=64 PR stack; v2's 4x1 memory stack; the researcher, intent-1, and agent-flows process chains. The example-grid board in the "
-        },
-        {
-          "insert": "grid reference",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/10-language/50-grid",
-              "label": "grid"
-            }
-          }
-        },
-        {
-          "insert": " shows the lattice live."
+          "insert": "Verification: an operation result carries digest rows for what it touched, and a look carries the whole board with exact cell rectangles. Compare widths, heights, and pitch there, then examine a look's render for the row and column signal before continuing."
         }
       ]
     }

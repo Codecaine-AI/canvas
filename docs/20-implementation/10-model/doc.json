@@ -37,7 +37,6 @@
         "b-model-schema-object-types-list-process",
         "b-model-schema-object-types-list-decision",
         "b-model-schema-object-types-list-sticky",
-        "b-model-schema-object-types-list-annotation-marker",
         "b-model-schema-object-types-list-document",
         "b-model-schema-object-types-list-database",
         "b-model-schema-object-types-list-section",
@@ -86,8 +85,6 @@
         "b-model-type-sticky",
         "b-model-type-sticky-p1",
         "b-model-type-sticky-p2",
-        "b-model-type-annotation-marker",
-        "b-model-type-annotation-marker-p1",
         "b-model-type-document",
         "b-model-type-document-p1",
         "b-model-type-document-p2",
@@ -981,34 +978,6 @@
         },
         {
           "insert": " metadata field."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-annotation-marker": {
-      "id": "b-model-schema-object-types-list-annotation-marker",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "annotation-marker",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — a small pinned marker glyph, distinct from the "
-        },
-        {
-          "insert": "annotations",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " collection's note/agent-request records."
         }
       ],
       "children": []
@@ -2938,109 +2907,6 @@
         },
         {
           "insert": ") — every other shape is flat/shadowless per the FigJam parity spec."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-annotation-marker": {
-      "id": "b-model-type-annotation-marker",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "annotation-marker"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-annotation-marker-p1": {
-      "id": "b-model-type-annotation-marker-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "A small pinned marker glyph — distinct from the document's "
-        },
-        {
-          "insert": "annotations",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/document.ts"
-            }
-          }
-        },
-        {
-          "insert": " collection (note/agent-request records with their own lifecycle); this is just a visual pin object placed on the canvas like any other "
-        },
-        {
-          "insert": "InteractiveCanvasObject",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
-            }
-          }
-        },
-        {
-          "insert": ". Default geometry is a small square, "
-        },
-        {
-          "insert": "{ x: 220, y: 220, width: 40, height: 40 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"marker\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": ". Renders as a circular pill ("
-        },
-        {
-          "insert": "border-radius: 999px",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", zero padding), label/body centered."
         }
       ],
       "children": []

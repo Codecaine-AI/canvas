@@ -1,0 +1,748 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.incident-response",
+  "title": "2026-07-24-eval-154843 · incident-response",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1664,
+    "height": 1064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · incident-response",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 80,
+        "y": 64,
+        "width": 1520,
+        "height": 784
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "detection",
+      "type": "section",
+      "text": "1 · Detect & page",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 112,
+        "width": 256,
+        "height": 672
+      }
+    },
+    {
+      "id": "triage",
+      "type": "section",
+      "text": "2 · Acknowledge & triage",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 400,
+        "y": 128,
+        "width": 240,
+        "height": 640
+      }
+    },
+    {
+      "id": "response",
+      "type": "section",
+      "text": "3 · Coordinate & mitigate",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 688,
+        "y": 128,
+        "width": 320,
+        "height": 624
+      }
+    },
+    {
+      "id": "verification",
+      "type": "section",
+      "text": "4 · Verify",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1056,
+        "y": 176,
+        "width": 208,
+        "height": 608
+      }
+    },
+    {
+      "id": "learning",
+      "type": "section",
+      "text": "5 · Resolve & learn",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1328,
+        "y": 112,
+        "width": 240,
+        "height": 704
+      }
+    },
+    {
+      "id": "monitoring",
+      "type": "icon",
+      "text": "Monitoring\nhigh-confidence alert",
+      "color": "blue",
+      "parentId": "detection",
+      "geometry": {
+        "x": 112,
+        "y": 160,
+        "width": 208,
+        "height": 80
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "alert-manager",
+      "type": "process",
+      "text": "Alert manager\ngroup duplicates",
+      "color": "blue",
+      "parentId": "detection",
+      "geometry": {
+        "x": 112,
+        "y": 272,
+        "width": 208,
+        "height": 80
+      }
+    },
+    {
+      "id": "page-primary",
+      "type": "process",
+      "text": "Page primary on-call",
+      "color": "gray",
+      "parentId": "detection",
+      "geometry": {
+        "x": 112,
+        "y": 384,
+        "width": 208,
+        "height": 64
+      }
+    },
+    {
+      "id": "ack-timeout",
+      "type": "decision",
+      "text": "Acknowledged\nwithin 5 min?",
+      "color": "yellow",
+      "parentId": "detection",
+      "geometry": {
+        "x": 128,
+        "y": 496,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "page-secondary",
+      "type": "process",
+      "text": "Escalate to\nsecondary on-call",
+      "color": "orange",
+      "parentId": "detection",
+      "geometry": {
+        "x": 112,
+        "y": 672,
+        "width": 208,
+        "height": 80
+      }
+    },
+    {
+      "id": "oncall-ack",
+      "type": "icon",
+      "text": "On-call acknowledges",
+      "color": "yellow",
+      "parentId": "triage",
+      "geometry": {
+        "x": 416,
+        "y": 176,
+        "width": 192,
+        "height": 80
+      },
+      "icon": "person"
+    },
+    {
+      "id": "initial-triage",
+      "type": "process",
+      "text": "Initial triage",
+      "color": "yellow",
+      "parentId": "triage",
+      "geometry": {
+        "x": 416,
+        "y": 320,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "real-incident",
+      "type": "decision",
+      "text": "Real incident?",
+      "color": "yellow",
+      "parentId": "triage",
+      "geometry": {
+        "x": 432,
+        "y": 464,
+        "width": 160,
+        "height": 112
+      }
+    },
+    {
+      "id": "false-alarm",
+      "type": "pill",
+      "text": "Resolve false alarm",
+      "color": "green",
+      "parentId": "triage",
+      "geometry": {
+        "x": 416,
+        "y": 672,
+        "width": 192,
+        "height": 64
+      }
+    },
+    {
+      "id": "incident-record",
+      "type": "document",
+      "text": "Shared incident record",
+      "color": "orange",
+      "parentId": "response",
+      "geometry": {
+        "x": 720,
+        "y": 176,
+        "width": 240,
+        "height": 80
+      }
+    },
+    {
+      "id": "assign-owner",
+      "type": "process",
+      "text": "Assign service owner",
+      "color": "orange",
+      "parentId": "response",
+      "geometry": {
+        "x": 720,
+        "y": 320,
+        "width": 240,
+        "height": 64
+      }
+    },
+    {
+      "id": "investigate",
+      "type": "process",
+      "text": "Service owner investigates",
+      "color": "orange",
+      "parentId": "response",
+      "geometry": {
+        "x": 704,
+        "y": 464,
+        "width": 144,
+        "height": 80
+      }
+    },
+    {
+      "id": "coordinate",
+      "type": "process",
+      "text": "On-call coordinates response",
+      "color": "blue",
+      "parentId": "response",
+      "geometry": {
+        "x": 864,
+        "y": 464,
+        "width": 112,
+        "height": 80
+      }
+    },
+    {
+      "id": "mitigate",
+      "type": "process",
+      "text": "Apply mitigation",
+      "color": "orange",
+      "parentId": "response",
+      "geometry": {
+        "x": 704,
+        "y": 640,
+        "width": 144,
+        "height": 80
+      }
+    },
+    {
+      "id": "status-page",
+      "type": "document",
+      "text": "Keep public status current",
+      "color": "blue",
+      "parentId": "response",
+      "geometry": {
+        "x": 864,
+        "y": 640,
+        "width": 112,
+        "height": 80
+      }
+    },
+    {
+      "id": "verify-signals",
+      "type": "process",
+      "text": "Verify mitigation against monitoring signals",
+      "color": "violet",
+      "parentId": "verification",
+      "geometry": {
+        "x": 1072,
+        "y": 224,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "verification-pass",
+      "type": "decision",
+      "text": "Signals healthy?",
+      "color": "violet",
+      "parentId": "verification",
+      "geometry": {
+        "x": 1072,
+        "y": 432,
+        "width": 160,
+        "height": 112
+      }
+    },
+    {
+      "id": "verification-rule",
+      "type": "sticky",
+      "text": "**Resolution gate**\nSame signals that alerted must confirm recovery.",
+      "color": "violet",
+      "parentId": "verification",
+      "geometry": {
+        "x": 1072,
+        "y": 640,
+        "width": 160,
+        "height": 112
+      }
+    },
+    {
+      "id": "resolve-incident",
+      "type": "pill",
+      "text": "Resolve incident",
+      "color": "green",
+      "parentId": "learning",
+      "geometry": {
+        "x": 1344,
+        "y": 160,
+        "width": 192,
+        "height": 64
+      }
+    },
+    {
+      "id": "close-status",
+      "type": "document",
+      "text": "Close public update",
+      "color": "green",
+      "parentId": "learning",
+      "geometry": {
+        "x": 1344,
+        "y": 288,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "preserve-timeline",
+      "type": "document",
+      "text": "Preserve timeline in incident record",
+      "color": "green",
+      "parentId": "learning",
+      "geometry": {
+        "x": 1344,
+        "y": 432,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "schedule-pir",
+      "type": "process",
+      "text": "Schedule post-incident review",
+      "color": "green",
+      "parentId": "learning",
+      "geometry": {
+        "x": 1344,
+        "y": 576,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "followup-tracker",
+      "type": "database",
+      "text": "Actions enter follow-up tracker",
+      "color": "teal",
+      "parentId": "learning",
+      "geometry": {
+        "x": 1344,
+        "y": 704,
+        "width": 192,
+        "height": 80
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "monitoring",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "alert-manager",
+        "anchor": "top"
+      },
+      "label": "alert",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "alert-manager",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "page-primary",
+        "anchor": "top"
+      },
+      "label": "group + page",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "page-primary",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ack-timeout",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "ack-timeout",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "oncall-ack",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "ack-timeout",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "page-secondary",
+        "anchor": "top"
+      },
+      "label": "no · 5 min",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "page-secondary",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "oncall-ack",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "oncall-ack",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "initial-triage",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "initial-triage",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "real-incident",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "real-incident",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "false-alarm",
+        "anchor": "top"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "real-incident",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "incident-record",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "incident-record",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "assign-owner",
+        "anchor": "top"
+      },
+      "label": "create",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "assign-owner",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "investigate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "incident-record",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "coordinate",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "investigate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "mitigate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "coordinate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "status-page",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "mitigate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "verify-signals",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "verify-signals",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "verification-pass",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "verification-pass",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "resolve-incident",
+        "anchor": "left"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "verification-pass",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "mitigate",
+        "anchor": "top"
+      },
+      "label": "no · retry",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1024,
+          576
+        ],
+        [
+          776,
+          576
+        ]
+      ]
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "resolve-incident",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "close-status",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "close-status",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "preserve-timeline",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e22",
+      "from": {
+        "objectId": "preserve-timeline",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "schedule-pir",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e23",
+      "from": {
+        "objectId": "schedule-pir",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "followup-tracker",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    }
+  ],
+  "annotations": []
+}

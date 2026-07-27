@@ -120,6 +120,7 @@ function makeConnectionDocument(): InteractiveCanvasDocument {
         body: "Review connector",
         status: "open",
         createdBy: "human",
+        replies: [],
       },
       {
         id: "annotation-object-a",
@@ -128,6 +129,7 @@ function makeConnectionDocument(): InteractiveCanvasDocument {
         body: "Keep object annotation",
         status: "open",
         createdBy: "human",
+        replies: [],
       },
     ],
   };

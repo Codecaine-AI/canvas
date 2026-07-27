@@ -7,8 +7,7 @@ describe("containment lint (moved from rules/ unchanged)", () => {
   test("declares its faces", () => {
     expect(containment.id).toBe("containment");
     expect(containment.tier).toBe("error");
-    expect(containment.guidance).toContain("locked page frame");
-    expect(containment.quickfix).toBeUndefined();
+    expect(containment.guidance).toContain("the base section is the page");
   });
 
   test("a parentId child escaping its section is an error", () => {
@@ -16,7 +15,9 @@ describe("containment lint (moved from rules/ unchanged)", () => {
       box("section", 0, 0, 480, 320, "section"),
       { ...box("child", 400, 96, 184, 96, "process"), parentId: "section" },
     ]));
-    expect(findings).toHaveLength(1);
+    // The lone root section is also the board's base section, so the escape
+    // is reported against both its parent and the page.
+    expect(findings).toHaveLength(2);
     expect(findings[0]).toMatchObject({
       rule: "containment",
       severity: "error",
@@ -34,15 +35,15 @@ describe("containment lint (moved from rules/ unchanged)", () => {
     expect(findings).toHaveLength(0);
   });
 
-  test("overflow past the locked frame beyond 16px is an error; 16px bleed is not", () => {
-    const frame = { ...box("page", 0, 0, 640, 480, "section"), locked: "background" as const };
+  test("overflow past the base section beyond 16px is an error; 16px bleed is not", () => {
+    const frame = box("page", 0, 0, 640, 480, "section");
     const overflowing = containment.check(makeDocument([
       frame,
       box("card", 600, 96, 184, 96, "process"),
     ]));
     expect(overflowing).toHaveLength(1);
     expect(overflowing[0]).toMatchObject({ severity: "error", at: ["card", "page"] });
-    expect(overflowing[0]!.message).toContain("144px past the locked frame page");
+    expect(overflowing[0]!.message).toContain("144px past the base section page");
 
     const bleeding = containment.check(makeDocument([
       frame,
@@ -51,10 +52,11 @@ describe("containment lint (moved from rules/ unchanged)", () => {
     expect(bleeding).toHaveLength(0);
   });
 
-  test("an unlocked section is not a frame; strays outside it carry no finding", () => {
+  test("with several root sections there is no unambiguous page, so strays are clean", () => {
     const findings = containment.check(makeDocument([
       box("section", 0, 0, 480, 320, "section"),
-      box("stray", 900, 900, 184, 96, "process"),  // no parentId, no locked frame
+      box("other", 640, 0, 480, 320, "section"),
+      box("stray", 900, 900, 184, 96, "process"),  // no parentId, no single base section
     ]));
     expect(findings).toHaveLength(0);
   });

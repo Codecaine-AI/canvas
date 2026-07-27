@@ -42,10 +42,6 @@
         "b-shape-ref-type-sticky-p1",
         "b-shape-ref-type-sticky-p2",
         "b-shape-ref-type-sticky-canvas",
-        "b-shape-ref-type-annotation-marker",
-        "b-shape-ref-type-annotation-marker-p1",
-        "b-shape-ref-type-annotation-marker-p2",
-        "b-shape-ref-type-annotation-marker-canvas",
         "b-shape-ref-type-document",
         "b-shape-ref-type-document-p1",
         "b-shape-ref-type-document-p2",
@@ -976,115 +972,6 @@
       "props": {
         "title": "Sticky — anchors & text slot",
         "canvasId": "shape-ref-sticky"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-annotation-marker": {
-      "id": "b-shape-ref-type-annotation-marker",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "annotation-marker"
-        }
-      ]
-    },
-    "b-shape-ref-type-annotation-marker-p1": {
-      "id": "b-shape-ref-type-annotation-marker-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A small pinned marker glyph — a visual pin object, distinct from the document's "
-        },
-        {
-          "insert": "annotations",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " collection. Default geometry is a small square, "
-        },
-        {
-          "insert": "{ width: 40, height: 40 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", rendered as a circle ("
-        },
-        {
-          "insert": "border-radius: 999px",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", zero padding) with the label centered on it."
-        }
-      ]
-    },
-    "b-shape-ref-type-annotation-marker-p2": {
-      "id": "b-shape-ref-type-annotation-marker-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), though at a square 40×40 the four cardinal midpoints lie on the drawn circle anyway. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "40×40",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (240, 220) = [0.5, 0]; right (260, 240) = [1, 0.5]; bottom (240, 260) = [0.5, 1]; left (220, 240) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-annotation-marker-canvas": {
-      "id": "b-shape-ref-type-annotation-marker-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Annotation Marker — anchors & text slot",
-        "canvasId": "shape-ref-annotation-marker"
       },
       "children": []
     },

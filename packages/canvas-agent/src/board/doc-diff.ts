@@ -1,15 +1,21 @@
 /**
- * The document differ: baseline vs draft → the ordered six-op
+ * The document differ: baseline vs draft → the ordered internal
  * CanvasAgentPatchOperation list that becomes the committed proposal
- * (`toolCommit` in service/session/tools.ts is the consumer; studio replays
- * the ops through `canvas.applyAgentPatch` on accept).
+ * (`toolFinalize` in service/session/tools.ts is the consumer; the BOARD
+ * DIFF block renders the same ops per apply, and studio replays them
+ * through `canvas.applyAgentPatch` on accept).
  *
  * Commit always takes this document path. Comparison is order-independent
  * structural equality, so a field written back to an identical value
  * produces no op.
+ *
+ * Channel policy: the document description, connection `waypoints`, and
+ * annotation threads are compared and emitted; `parentId` is omitted because
+ * it is derived from geometry and re-derived on accept.
  */
 import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
 import type {
+  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -60,20 +66,78 @@ function cloneEndpoint(
   };
 }
 
+function cloneWaypoints(
+  waypoints: NonNullable<InteractiveCanvasConnection["waypoints"]>,
+): NonNullable<InteractiveCanvasConnection["waypoints"]> {
+  return waypoints.map(([x, y]): [number, number] => [x, y]);
+}
+
 /**
- * Connector routes are owned by the live router. This applies to newly added
- * connections as well as updates, so document patches never persist a stale
- * set of draft waypoints.
+ * Waypoints are stored agent steering — `updateConnection` accepts them and
+ * the live reducer applies them verbatim — so an added connection carries
+ * them like any other authored channel. Endpoints and waypoints are
+ * deep-copied so later draft mutation cannot reach into an emitted op.
  */
-function cloneConnectionWithoutWaypoints(
+function cloneConnection(
   connection: InteractiveCanvasConnection,
 ): InteractiveCanvasConnection {
-  const { waypoints: _ignored, ...rest } = connection;
   return {
-    ...rest,
+    ...connection,
     from: cloneEndpoint(connection.from),
     to: cloneEndpoint(connection.to),
+    ...(connection.waypoints ? { waypoints: cloneWaypoints(connection.waypoints) } : {}),
   };
+}
+
+/** Deep-copied so a later draft mutation cannot reach into an emitted op. */
+function cloneAnnotation(
+  annotation: InteractiveCanvasAnnotation,
+): InteractiveCanvasAnnotation {
+  return {
+    ...annotation,
+    target: { ...annotation.target },
+    replies: annotation.replies.map((reply) => ({ ...reply })),
+  };
+}
+
+/**
+ * The annotation channel: threads opened on the draft, replies appended to an
+ * existing thread (matched by reply id, oldest first), and status moves. A
+ * thread the draft dropped emits nothing — it disappeared with its target, and
+ * the live reducer cascades it away from the same removal op.
+ */
+function annotationOperations(
+  baseline: InteractiveCanvasDocument,
+  draft: InteractiveCanvasDocument,
+): CanvasAgentPatchOperation[] {
+  const baselineAnnotations = new Map(
+    (baseline.annotations ?? []).map((annotation) => [annotation.id, annotation]),
+  );
+  const operations: CanvasAgentPatchOperation[] = [];
+  for (const annotation of draft.annotations ?? []) {
+    const before = baselineAnnotations.get(annotation.id);
+    if (!before) {
+      operations.push({ type: "addAnnotation", annotation: cloneAnnotation(annotation) });
+      continue;
+    }
+    const beforeReplyIds = new Set(before.replies.map((reply) => reply.id));
+    for (const reply of annotation.replies) {
+      if (beforeReplyIds.has(reply.id)) continue;
+      operations.push({
+        type: "appendAnnotationReply",
+        annotationId: annotation.id,
+        reply: { ...reply },
+      });
+    }
+    if (before.status !== annotation.status) {
+      operations.push({
+        type: "setAnnotationStatus",
+        annotationId: annotation.id,
+        status: annotation.status,
+      });
+    }
+  }
+  return operations;
 }
 
 function objectPatch(
@@ -115,17 +179,23 @@ function connectionPatch(
   if (!structurallyEqual(baseline.from, draft.from)) patch.from = cloneEndpoint(draft.from);
   if (!structurallyEqual(baseline.to, draft.to)) patch.to = cloneEndpoint(draft.to);
   if (baseline.role !== draft.role) patch.role = draft.role;
+  // Waypoints are stored agent steering, so they diff like any other channel.
+  // A draft that drops them emits an explicit `waypoints: undefined` own
+  // property — the reducer merges patches by spread, so that clears the
+  // stored steering.
+  if (!structurallyEqual(baseline.waypoints, draft.waypoints)) {
+    patch.waypoints = draft.waypoints ? cloneWaypoints(draft.waypoints) : undefined;
+  }
 
-  // waypoints are intentionally neither compared nor emitted.
   return patch;
 }
 
 /**
  * Document-level differ used for ops-authored drafts. It preserves every
- * agent-editable document channel named by the harness contract while
- * omitting read-only annotations, derived section membership (`parentId`),
- * and connector routing (`waypoints`) so the live reducer can re-derive the
- * geometry-owned fields.
+ * agent-editable document channel named by the harness contract — including
+ * connection `waypoints`, which are stored steering, and annotation threads —
+ * while omitting derived section membership (`parentId`) so the live reducer
+ * can re-derive the geometry-owned fields.
  */
 export function diffDocuments(
   baseline: InteractiveCanvasDocument,
@@ -145,6 +215,10 @@ export function diffDocuments(
   const removeConnectionOps: CanvasAgentPatchOperation[] = [];
   const removeObjectOps: CanvasAgentPatchOperation[] = [];
   const addConnectionOps: CanvasAgentPatchOperation[] = [];
+  const descriptionOps: CanvasAgentPatchOperation[] = [];
+  if ((baseline.description ?? "") !== (draft.description ?? "")) {
+    descriptionOps.push({ type: "updateDescription", description: draft.description ?? "" });
+  }
 
   // Draft order determines deterministic adds and updates.
   for (const object of draft.objects) {
@@ -169,7 +243,7 @@ export function diffDocuments(
     if (!before) {
       addConnectionOps.push({
         type: "addConnection",
-        connection: cloneConnectionWithoutWaypoints(connection),
+        connection: cloneConnection(connection),
       });
       continue;
     }
@@ -191,12 +265,16 @@ export function diffDocuments(
     }
   }
 
+  // Annotation ops come last: a thread anchors to an object or connection, so
+  // every target the draft still carries already exists by the time they apply.
   return [
+    ...descriptionOps,
     ...addObjectOps,
     ...updateObjectOps,
     ...updateConnectionOps,
     ...removeConnectionOps,
     ...removeObjectOps,
     ...addConnectionOps,
+    ...annotationOperations(baseline, draft),
   ];
 }

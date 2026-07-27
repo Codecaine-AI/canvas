@@ -1,0 +1,573 @@
+{
+  "axis": "sf",
+  "scenario": "trace-ingestion-pipeline",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 7,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a distributed tracing and observability ingestion pipeline.",
+        "brief_evidence": "“We need a diagram of our distributed tracing and observability ingestion pipeline.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose begins “Distributed trace ingestion” and describes collection, regional ingest, durable logging, assembly, sampling, storage, metrics, query, alerting, and saturation handling.",
+        "note": "The overall system domain and purpose are accurately recovered."
+      },
+      {
+        "brief_element": "Instrumented services send spans to a collector agent on every host.",
+        "brief_evidence": "“Instrumented services send spans to a collector agent on every host.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Instrumented services” emitting spans to a “Batch + compress agent” inside “Host instrumentation & outage survival.”",
+        "note": "The service-to-agent relationship is clear, but the explicit deployment constraint of one collector agent on every host is not recovered."
+      },
+      {
+        "brief_element": "Each agent batches spans.",
+        "brief_evidence": "“Each agent batches and compresses spans before forwarding them to the regional ingest tier.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A component named “Batch + compress agent” receives spans, and its responsibility explicitly says it batches incoming spans.",
+        "note": "Batching is directly communicated."
+      },
+      {
+        "brief_element": "Each agent compresses spans.",
+        "brief_evidence": "“Each agent batches and compresses spans before forwarding them to the regional ingest tier.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed component is explicitly named “Batch + compress agent,” with responsibility to compress incoming spans.",
+        "note": "Compression is directly communicated."
+      },
+      {
+        "brief_element": "Agents forward batched and compressed spans to the regional ingest tier.",
+        "brief_evidence": "“Each agent batches and compresses spans before forwarding them to the regional ingest tier.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Primary span ingest” flow sends data from “Batch + compress agent” to “Authenticate” inside the “Regional ingest gate.”",
+        "note": "The direction and regional-ingest destination are clear."
+      },
+      {
+        "brief_element": "When the regional ingest tier is unreachable, the agent buffers batches on local disk.",
+        "brief_evidence": "“If that tier becomes unreachable, the agent buffers batches on local disk.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction shows the agent taking a dashed “buffer on outage” path to a “Bounded disk buffer.”",
+        "note": "Disk buffering on outage is recovered, but the trigger is generalized to “host or ingest outage” rather than specifically regional-ingest unreachability, and the buffered unit is not explicitly identified as batches."
+      },
+      {
+        "brief_element": "The agent drains the locally buffered backlog after the regional ingest tier recovers.",
+        "brief_evidence": "“The agent buffers batches on local disk and drains the backlog after recovery.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Outage buffering and recovery drain” flow includes “Bounded disk buffer” followed by a dashed “drain after recovery” path back toward the outgoing ingest route.",
+        "note": "Recovery and backlog drain are clearly transmitted, although the precise rejoin point is acknowledged as ambiguous."
+      },
+      {
+        "brief_element": "The local disk buffer has bounded capacity.",
+        "brief_evidence": "“The buffer is bounded.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component is explicitly labeled “Bounded disk buffer,” and the constraints list states that the host outage buffer is bounded.",
+        "note": "The capacity boundary is explicit."
+      },
+      {
+        "brief_element": "When the bounded buffer is full, it discards the oldest buffered data first.",
+        "brief_evidence": "“The buffer is bounded and discards its oldest data first when full.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry describes buffer-full behavior, eviction, or oldest-first discarding.",
+        "note": "The overflow policy and its data-loss ordering are absent."
+      },
+      {
+        "brief_element": "The ingest tier authenticates the sending service.",
+        "brief_evidence": "“The ingest tier authenticates the sending service.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The “Regional ingest gate” contains “Authenticate,” which receives data from the agent; the reconstruction says it authenticates incoming data.",
+        "note": "Authentication is recovered, but the authenticated principal is softened from the sending service to the incoming data."
+      },
+      {
+        "brief_element": "The ingest tier enforces the sending service's tenant rate limit.",
+        "brief_evidence": "“The ingest tier ... enforces its tenant rate limit.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The regional gate contains “Tenant rate limit,” and the reconstruction describes it as applying a per-tenant ingest rate limit.",
+        "note": "Per-tenant rate-limit enforcement is clearly communicated."
+      },
+      {
+        "brief_element": "The ingest tier validates the span schema.",
+        "brief_evidence": "“The ingest tier ... validates the span schema.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The regional gate contains “Validate schema” before partitioning and durable logging.",
+        "note": "Schema validation and its place in the successful path are clear."
+      },
+      {
+        "brief_element": "Malformed batches are rejected.",
+        "brief_evidence": "“It rejects malformed batches with a reason the sender can act on.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows a malformed-batch rejection route or outcome; the uncertainty list explicitly says no rejection destination is shown for schema-validation failure.",
+        "note": "Validation is present, but its required failure path is absent."
+      },
+      {
+        "brief_element": "A malformed-batch rejection includes a reason actionable by the sender.",
+        "brief_evidence": "“It rejects malformed batches with a reason the sender can act on.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry mentions a rejection reason, sender feedback, or actionable remediation information.",
+        "note": "The feedback semantics for malformed data are completely lost."
+      },
+      {
+        "brief_element": "Accepted spans enter a durable partitioned log and continue through assembly, post-assembly sampling, and retained-trace storage.",
+        "brief_evidence": "“Accepted spans enter a durable partitioned log...” followed by the assembly, tail-sampling, and storage paragraphs.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction gives a continuous successful route from validation to “Partition by trace ID,” “Durable span log,” “Completion window,” “Restore parent-child tree,” “Root seen or window expired,” “Tail-based sampler,” “Cardinality guard,” and “Hot trace storage,” with aging to cold storage.",
+        "note": "This is the main end-to-end flow. Its architecture, direction, and major ordering are recoverable."
+      },
+      {
+        "brief_element": "The durable log is partitioned by trace identity.",
+        "brief_evidence": "“Accepted spans enter a durable partitioned log keyed by trace identity.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The durable-log subsystem contains “Partition by trace ID” directly before “Durable span log.”",
+        "note": "Trace-identity partitioning is explicit."
+      },
+      {
+        "brief_element": "Every span belonging to one trace is kept in the same partition.",
+        "brief_evidence": "“Keeping every span for a trace in the same partition.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction cites a “Trace locality” note stating “Every span for one trace stays in the same partition.”",
+        "note": "The partition-locality invariant is exactly recovered."
+      },
+      {
+        "brief_element": "Traces can arrive incomplete.",
+        "brief_evidence": "“Traces arrive incomplete and out of order.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The assembly flow explicitly allows “complete / incomplete” output and describes holding spans during a completion window.",
+        "note": "Incomplete trace arrival and output are communicated, though incompleteness is most explicit at emission."
+      },
+      {
+        "brief_element": "Trace spans can arrive out of order.",
+        "brief_evidence": "“Traces arrive incomplete and out of order.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The input route from the durable-log area to assembly is labeled “out of order spans.”",
+        "note": "Out-of-order arrival is explicit."
+      },
+      {
+        "brief_element": "The assembler groups and holds spans by trace identity for a completion window.",
+        "brief_evidence": "“An assembler holds spans by trace identity for a completion window.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The “Trace assembly” subsystem contains “Completion window,” described as holding spans before reconstruction; upstream partitioning is by trace ID.",
+        "note": "The completion-window hold is recovered, but the assembler's own grouping/holding key is not explicitly stated as trace identity."
+      },
+      {
+        "brief_element": "The assembler restores parent-child relationships.",
+        "brief_evidence": "“[The assembler] restores parent-child relationships.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The assembly subsystem includes “Restore parent-child tree,” with responsibility to reconstruct trace structure.",
+        "note": "The relationship-restoration responsibility is explicit."
+      },
+      {
+        "brief_element": "The assembler emits a trace when the root appears.",
+        "brief_evidence": "“[The assembler] emits when the root appears or the window expires.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The assembly gate is labeled “Root seen or window expired” and emits an “assembled trace.”",
+        "note": "The root-seen emission condition is clear."
+      },
+      {
+        "brief_element": "The assembler emits a trace when the completion window expires.",
+        "brief_evidence": "“[The assembler] emits when the root appears or the window expires.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The assembly gate is labeled “Root seen or window expired” and emits an “assembled trace.”",
+        "note": "The expiration emission condition is clear."
+      },
+      {
+        "brief_element": "A trace emitted without a root is marked incomplete.",
+        "brief_evidence": "“A trace without a root is emitted as incomplete.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The assembly flow includes “complete / incomplete” and the condition “Root seen or window expired.”",
+        "note": "Incomplete emission is shown, but the specific causal rule that absence of a root produces the incomplete designation is not explicit."
+      },
+      {
+        "brief_element": "Late spans arriving after emission attach to the stored trace.",
+        "brief_evidence": "“Late spans attach to the stored trace after emission instead of creating a duplicate.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows a late-span route from ingest or assembly to an already stored trace.",
+        "note": "Post-emission update behavior is absent."
+      },
+      {
+        "brief_element": "Late spans do not create duplicate traces.",
+        "brief_evidence": "“Late spans attach to the stored trace after emission instead of creating a duplicate.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states duplicate suppression or trace upsert semantics for late spans.",
+        "note": "The required identity and deduplication outcome is missing."
+      },
+      {
+        "brief_element": "The tail-based sampler makes its retention decision only after trace assembly.",
+        "brief_evidence": "“A tail-based sampler makes the retention decision only after assembly.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “assembled trace” path leaves the assembly subsystem and enters “Tail-based sampler.”",
+        "note": "Post-assembly sampling order is unambiguous."
+      },
+      {
+        "brief_element": "Every trace containing an error is retained.",
+        "brief_evidence": "“It keeps every trace containing an error.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sampling category box says “Errors · slow · small share,” and the saturation policy says “Preserve error traces.”",
+        "note": "Error retention is strongly implied, but the absolute guarantee that every error trace is kept is not explicit."
+      },
+      {
+        "brief_element": "Every trace slower than its service's latency objective is retained.",
+        "brief_evidence": "“[It keeps] every trace slower than its service's latency objective.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sampler's displayed categories include “slow.”",
+        "note": "Slow-trace retention is present, but the threshold is not tied to each service's latency objective and the guarantee that every qualifying trace is retained is softened."
+      },
+      {
+        "brief_element": "A small share of ordinary traffic is retained.",
+        "brief_evidence": "“[It keeps] a small share of ordinary traffic.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sampling category box includes “small share.”",
+        "note": "A small retained share is shown, but it is not explicitly identified as ordinary traffic."
+      },
+      {
+        "brief_element": "Per-tenant retention floors prevent a noisy service from crowding out quiet tenants.",
+        "brief_evidence": "“Per-tenant retention floors stop a noisy service from crowding out quiet tenants.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tenant-fairness note says “Retention floors protect quiet tenants from noisy neighbors.”",
+        "note": "The fairness mechanism and intended effect are accurately recovered."
+      },
+      {
+        "brief_element": "Retained traces enter hot storage.",
+        "brief_evidence": "“Retained traces enter hot storage for recent interactive queries.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A route labeled “retained traces” proceeds through “Cardinality guard” to “Hot trace storage.”",
+        "note": "The retained-trace storage destination is clear."
+      },
+      {
+        "brief_element": "Hot storage supports recent interactive queries.",
+        "brief_evidence": "“Retained traces enter hot storage for recent interactive queries.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Hot trace storage” and separately describes a query experience with trace search.",
+        "note": "Hot storage and query capability are both present, but the board does not explicitly connect hot storage to recent interactive querying."
+      },
+      {
+        "brief_element": "Traces eventually age from hot storage into cheaper cold storage.",
+        "brief_evidence": "“[Retained traces] eventually age into cheaper cold storage.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A directed “age out” path runs from “Hot trace storage” to “Cold trace storage.”",
+        "note": "The hot-to-cold lifecycle is recovered, but the lower-cost property of cold storage is not communicated."
+      },
+      {
+        "brief_element": "Metrics extraction runs in parallel with retention and storage processing.",
+        "brief_evidence": "“In parallel, a metrics extractor processes every trace...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A separate pink “every trace” branch leaves the assembly area for “Metrics extractor,” while a distinct retained-trace branch goes through sampling to storage.",
+        "note": "The parallel branch topology is clear."
+      },
+      {
+        "brief_element": "The metrics extractor processes every trace, including traces later retained and traces later discarded.",
+        "brief_evidence": "“A metrics extractor processes every trace, whether retained or discarded.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The metrics branch is labeled “every trace” and originates before the retained-only storage path.",
+        "note": "The unsampled input scope is clearly communicated."
+      },
+      {
+        "brief_element": "The metrics extractor calculates request-rate series.",
+        "brief_evidence": "“[It calculates] request-rate, error-rate, and latency series.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The extractor points to “Rate · errors · latency.”",
+        "note": "Request-rate output is conveyed as rate."
+      },
+      {
+        "brief_element": "The metrics extractor calculates error-rate series.",
+        "brief_evidence": "“[It calculates] request-rate, error-rate, and latency series.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The extractor points to “Rate · errors · latency.”",
+        "note": "Error-related metrics are explicit, though the label says errors rather than error rate."
+      },
+      {
+        "brief_element": "The metrics extractor calculates latency series.",
+        "brief_evidence": "“[It calculates] request-rate, error-rate, and latency series.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The extractor points to “Rate · errors · latency.”",
+        "note": "Latency output is explicit."
+      },
+      {
+        "brief_element": "Processing every trace prevents sampling bias in the derived metrics.",
+        "brief_evidence": "“...without sampling bias.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The subsystem is named “Unbiased metrics, query & alerting,” and the extractor receives a distinct branch labeled “every trace.”",
+        "note": "Both the mechanism and the unbiased result are communicated."
+      },
+      {
+        "brief_element": "Cardinality control watches attribute values before indexing.",
+        "brief_evidence": "“Cardinality control watches attribute values before indexing...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Cardinality guard” appears before hot trace storage, and the reconstruction describes cardinality control before storage.",
+        "note": "Pre-storage cardinality control is visible, but watching attribute values specifically before indexing is not stated."
+      },
+      {
+        "brief_element": "Cardinality control detects keys whose value sets explode.",
+        "brief_evidence": "“...quarantines keys whose value sets explode...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry describes monitoring per-key value-set growth or an explosion threshold.",
+        "note": "The detection criterion is absent."
+      },
+      {
+        "brief_element": "Exploding-cardinality keys are quarantined.",
+        "brief_evidence": "“...quarantines keys whose value sets explode...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry mentions quarantine or an isolated destination/state for offending keys.",
+        "note": "The cardinality guard is named, but its required action is not recoverable."
+      },
+      {
+        "brief_element": "Quarantining an exploding key preserves the rest of the searchable data.",
+        "brief_evidence": "“...preserving the rest of the searchable data.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that unaffected attributes remain indexed or searchable after a key is quarantined.",
+        "note": "The degraded-mode preservation guarantee is absent."
+      },
+      {
+        "brief_element": "The query service provides trace search.",
+        "brief_evidence": "“The query service provides trace search...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The query-and-alert note explicitly includes “Trace search.”",
+        "note": "The capability is recovered, although a distinct query-service component is not clearly separated."
+      },
+      {
+        "brief_element": "The query service provides service dependency views.",
+        "brief_evidence": "“The query service provides ... service dependency views...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Search · dependencies · series” and a note naming “service dependencies.”",
+        "note": "Service dependency views are clearly communicated."
+      },
+      {
+        "brief_element": "The query service provides the derived request-rate, error-rate, and latency series.",
+        "brief_evidence": "“The query service provides ... the derived series.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The metrics pipeline goes from “Rate · errors · latency” to “Search · dependencies · series,” and the note names “derived series.”",
+        "note": "Availability of the derived series is clear."
+      },
+      {
+        "brief_element": "Alerting evaluates rules against the derived series.",
+        "brief_evidence": "“Alerting evaluates rules against those series...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The query-and-alert note mentions derived series and alerts, but no explicit rule evaluator or series-to-alert control flow is reconstructed.",
+        "note": "Alerting exists, but its rule-evaluation responsibility and input relationship remain implicit."
+      },
+      {
+        "brief_element": "Each alert links to exemplar traces.",
+        "brief_evidence": "“[Alerting] links each alert to exemplar traces.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The query-and-alert note states “alerts linked to exemplar traces.”",
+        "note": "The alert-to-exemplar relationship is explicit."
+      },
+      {
+        "brief_element": "The pipeline measures its own ingest lag.",
+        "brief_evidence": "“The pipeline measures its own ingest lag...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The self-observation subsystem includes “Lag · occupancy · rates · drops.”",
+        "note": "Lag is present, but it is not explicitly qualified as ingest lag."
+      },
+      {
+        "brief_element": "The pipeline measures assembler buffer occupancy.",
+        "brief_evidence": "“The pipeline measures its own ... assembler buffer occupancy...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The self-observation subsystem includes “occupancy.”",
+        "note": "Occupancy is shown, but ownership by the assembler buffer is not explicit."
+      },
+      {
+        "brief_element": "The pipeline measures sampling rates.",
+        "brief_evidence": "“The pipeline measures its own ... sampling rates...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The self-observation subsystem includes “rates.”",
+        "note": "Rates are shown generically, without explicitly identifying them as sampling rates."
+      },
+      {
+        "brief_element": "The pipeline measures drop counts.",
+        "brief_evidence": "“The pipeline measures its own ... drop counts.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The self-observation subsystem includes “drops.”",
+        "note": "Drops are shown, but the count semantics are softened."
+      },
+      {
+        "brief_element": "Load shedding is triggered when saturation persists.",
+        "brief_evidence": "“When saturation persists, load shedding follows a defined priority...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The control flow runs from operational signals to “Persistent saturation” and then to “Load-shedding priority.”",
+        "note": "The persistent-saturation trigger is explicit."
+      },
+      {
+        "brief_element": "Load shedding follows a defined priority order.",
+        "brief_evidence": "“Load shedding follows a defined priority...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The saturation subsystem contains a numbered “Load-shedding priority” list.",
+        "note": "A defined ordering is clearly communicated."
+      },
+      {
+        "brief_element": "Under saturation, ordinary trace retention yields before error traces.",
+        "brief_evidence": "“Ordinary trace retention yields before error traces...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The numbered policy says “Ordinary retention yields first” and “Preserve error traces.”",
+        "note": "The relative priority is clear."
+      },
+      {
+        "brief_element": "Under saturation, ordinary trace retention yields before metrics extraction.",
+        "brief_evidence": "“Ordinary trace retention yields before ... metrics extraction...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The numbered policy says “Ordinary retention yields first” and “Preserve metrics extraction.”",
+        "note": "The relative priority is clear."
+      },
+      {
+        "brief_element": "The saturation policy protects derived series during an incident.",
+        "brief_evidence": "“...protecting the derived series ... needed during an incident.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The load-shedding policy explicitly preserves metrics extraction, and the metrics branch produces rate, error, and latency series.",
+        "note": "Preserving the metrics path communicates protection of the derived series."
+      },
+      {
+        "brief_element": "The saturation policy protects diagnostic evidence during an incident.",
+        "brief_evidence": "“...protecting the ... diagnostic evidence needed during an incident.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The load-shedding policy explicitly says “Preserve error traces.”",
+        "note": "Error traces are clearly identified as protected diagnostic evidence."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "A host outage is a trigger for the local buffering path.",
+        "reconstruction_evidence": "The failure-path trigger is stated as “Host or ingest outage.”",
+        "why_unsupported": "The brief specifies buffering when the regional ingest tier is unreachable. It does not state that a host outage is survivable or that the same buffer path handles host failure."
+      },
+      {
+        "claim": "Rate/error/latency output directly feeds a combined “Search · dependencies · series” component.",
+        "reconstruction_evidence": "The “Every-trace metrics and query pipeline” says “Rate/error/latency output proceeds to ‘Search · dependencies · series.’”",
+        "why_unsupported": "The brief says the query service provides trace search, dependency views, and derived series, but it does not say trace search or dependency views are generated downstream solely from the derived metrics output. Trace search would ordinarily also require trace storage."
+      },
+      {
+        "claim": "A trace is classified as complete or incomplete before reaching the “Root seen or window expired” condition.",
+        "reconstruction_evidence": "The reconstructed assembly flow says the path is “classified by the label ‘complete / incomplete’ and proceeds to Root seen or window expired.”",
+        "why_unsupported": "The brief makes root appearance or window expiry the emission condition, with missing-root status determining incomplete output. It does not support classification occurring before evaluation of that condition."
+      }
+    ],
+    "strongest_transmitted_behavior": "The primary successful architecture is transmitted very well: host-side batching and compression feed an authenticated, rate-limited, schema-validated regional ingest path, then a trace-ID-partitioned durable log, completion-window assembly, post-assembly tail sampling, retained-trace storage, and a parallel every-trace metrics branch. Regional outage buffering and recovery drain are also highly visible.",
+    "most_consequential_loss": "The most consequential loss is post-emission late-span handling: the reconstruction does not show late spans attaching to an existing stored trace or the guarantee that they do not create duplicates. This leaves a system-defining identity, update, and deduplication path unspecified. The malformed-batch rejection path and oldest-first buffer eviction policy are also absent.",
+    "overall_summary": "The reconstruction accurately communicates the system's purpose, ownership boundaries, main end-to-end path, regional-outage survival concept, trace assembly conditions, post-assembly sampling, tenant fairness, hot-to-cold storage, unbiased metrics branch, query capabilities, and saturation priorities. It is suitable for a solid architecture discussion. However, several implementation-significant operational semantics are missing: oldest-first buffer overflow, actionable malformed-batch rejection, late-span attachment and duplicate prevention, cardinality-key quarantine behavior, and the exact ownership of several self-metrics. Sampling guarantees and service-objective semantics are also softened. These losses prevent the board from being a complete implementation plan but do not undermine the main architecture.",
+    "score": 7
+  },
+  "usage": {
+    "input_tokens": 13738,
+    "output_tokens": 12762
+  },
+  "flags": []
+}

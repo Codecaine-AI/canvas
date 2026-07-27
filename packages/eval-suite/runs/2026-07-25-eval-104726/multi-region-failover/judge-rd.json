@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board has similarly clear semantic color and sectioning but weaker frame balance, longer routing detours, and a much larger unproductive central band.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "FAIL: The top traffic strip, middle regional row, and bottom data/control panels leave an oversized empty vertical band through the center and substantial unused space below the committed content."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and edge chips have generous breathing room, although the extreme spacing between the regional row and bottom panels turns useful air into compositional dead space."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Tinted, titled regions clearly separate global traffic, three regional deployments, global data/payments, and the failover control plane, with the repeated regional grouping especially easy to scan."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Blue traffic, teal regional infrastructure, purple shared data, orange control, green success, and red promotion states form a consistent semantic palette rather than decorative noise."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7,
+        "note": "No crosshair junctions or obvious waypoint glyphs are exposed, but the unlabeled blue three-way branch above the regional panels reads somewhat like routing scaffolding."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The three regional panels maintain strong repeated registers, but the bottom panels have unequal widths and baselines, and the isolated middle void breaks the board's vertical rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "FAIL: Edges avoid crossings, but the blue regional fan-out and purple database-to-replication route make long orthogonal detours across large empty areas, while the dashed decisions route spans much of the lower board."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness (7.5) ranks first, intent-classification-2 (7.0) second, and the board under grade (6.5) third."
+  },
+  "usage": {
+    "input_tokens": 16298,
+    "output_tokens": 732
+  },
+  "flags": []
+}

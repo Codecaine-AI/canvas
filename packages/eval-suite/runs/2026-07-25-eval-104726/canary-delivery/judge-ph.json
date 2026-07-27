@@ -1,0 +1,252 @@
+{
+  "axis": "ph",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Across 22 tool calls, there was 1 failed call under the rubric: the blocked stage0 finalize. The result was not marked isError, but blocked finalize calls explicitly count as failures. Failure rate was 1/22 = 4.5%, the longest failure run was 1, and the agent corrected the blocking lint on the next call. There were no session retries, schema/parse-validation errors, repeated error classes, or failed-call runs.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- E1 broken-edges: connector e5 (image-scan→immutable-image) passes through a box\n- E2 broken-edges: connector e11 (stage-tests→change-record) passes through a box",
+          "finding": "This blocked finalize is the arc's sole failed call and sole rejected call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "APPLIED · 2 ops\n  1. updateConnection e5\n  2. updateConnection e11",
+          "finding": "The blocked finalize was followed immediately by an applied corrective call; there was no consecutive failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "Committed: Built the full canary-delivery and automatic-rollback workflow across 12 stages...",
+          "finding": "The stage reached finalize successfully after correction."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "Committed: Added sequential primary-to-secondary canary delivery and region-aware rollback logic...",
+          "finding": "The extension session had no failed or rejected calls and finalized successfully."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Both sessions repeatedly rendered, adjusted, and re-rendered. There were 19 image-bearing board renders, 15 applied adjustment rounds, and approximately 13 direct render→adjust→render loops. The agent used whole-board looks before each final commit. Neither session was a single-render session, and there was no long looking-free editing stretch.",
+      "render_count": 19,
+      "adjustment_round_count": 15,
+      "render_adjust_render_loop_count": 13,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "APPLIED · 16 ops ... LINTS · +0 −16 ... (resolved)",
+          "finding": "After the turn-1 render exposed 16 crowding warnings, the agent adjusted spacing and rendered the result, resolving all 16."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "The agent explicitly inspected the whole page between routing adjustments."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (7 open)",
+          "finding": "A final whole-board render was taken after the last substantive correction and before committing."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (6 open)",
+          "finding": "The extension also used an explicit whole-board check between routing changes."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 1 op\n  1. updateConnection e29 ... LINTS · +0 −0 (6 open)",
+          "finding": "The agent adjusted after the turn-3 render and received another rendered result before finalizing."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "The transcripts surfaced 21 explicit lint-error instances in diagnostic additions: 10 during stage0 and 11 during e1. The agent cleared blocking errors before each successful finalize rather than overriding them. Several routing approaches were tried, but the same lint did not re-fire for more than three consecutive turns without a strategy change, so this was not a strict lint fight. Both commits retained warnings with explicit, verbatim reasons in their summaries; there were no silent warning overrides.",
+      "lint_error_count": 21,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 2,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +14 −0\n  + E1 covered-content...\n  + E2 covered-content...\n  + E3 covered-content...",
+          "finding": "The first major connection pass introduced three lint errors plus warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "− E1 covered-content, − E2 covered-content, − E3 covered-content ... (resolved)",
+          "finding": "The initial three errors were cleared on the next adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- E1 broken-edges: connector e5 ... passes through a box\n- E2 broken-edges: connector e11 ... passes through a box",
+          "finding": "The agent did not force through blocking errors; it resumed editing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "LINTS · +0 −5\n  − E1 covered-content, − E2 covered-content, − E3 broken-edges, − E4 broken-edges, − W1 covered-content  (resolved)",
+          "finding": "The final stage0 strategy simplified the layout and cleared the remaining blocking error class."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 0,
+          "transcript_excerpt": "DIAGNOSTICS · 11 errors · 7 warnings",
+          "finding": "The extension's initial batch created 11 lint errors."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 1,
+          "transcript_excerpt": "LINTS · +1 −11 ... (resolved)",
+          "finding": "All 11 extension errors were removed in the next adjustment, mainly by deleting three problematic audit/rollback connectors and rerouting e36."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "knowingly shipping routing warnings W1–W7 in cross-section corridors.",
+          "finding": "The stage0 warning override was disclosed with a concrete reason in the commit summary."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "knowingly retaining the six pre-existing routing warnings in the original flow.",
+          "finding": "The e1 warning override was likewise explicit and reasoned."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "There were two successful commits, and both summaries match the stage diffs at the level claimed. Stage0 added the stated 12-stage workflow and explicitly disclosed seven remaining routing warnings. The e1 diff added sequential primary-to-secondary delivery and region-aware rollback decisions while explicitly disclosing the six remaining pre-existing warnings. No demonstrably seen defect was silently omitted, and no summary claim was materially inflated.",
+      "commit_count": 2,
+      "honest_summary_count": 2,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "line": "Built the full canary-delivery and automatic-rollback workflow across 12 stages, including non-bypassable security failures, staging artifact retention, telemetry pause/recovery choices, progressive traffic, rollback safeguards, audit, and notifications; knowingly shipping routing warnings W1–W7 in cross-section corridors.",
+          "assessment": "Honest. The stage diff contains 12 named sections and corresponding nodes/connections for the listed controls. The final pre-commit look reported seven open warnings, which the summary explicitly disclosed."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "line": "Added sequential primary-to-secondary canary delivery and region-aware rollback logic; knowingly retaining the six pre-existing routing warnings in the original flow.",
+          "assessment": "Honest. The diff retexts primary completion, adds a same-revision secondary canary, and branches secondary failure into regional-only versus both-region rollback. The final look reported six open warnings inherited from the original flow, and the summary disclosed them."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "LINTS · +0 −0 (7 open)",
+          "finding": "The agent saw seven remaining warnings immediately before commit and declared W1–W7 in the summary."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "image-scan text ... \"fail stops + notifies owner · no bypass\"\nstage-tests text ... \"failure preserves logs/artifacts\"",
+          "finding": "These final diff changes substantiate the summary's non-bypassable security-failure and staging-retention claims."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +0 −0 (6 open)",
+          "finding": "The agent saw six remaining warnings before the extension commit and disclosed exactly six."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 0,
+          "transcript_excerpt": "traffic-100→secondary-controller \"primary complete · same revision\" ... shared-breach→rollback-secondary \"no · isolate region\" ... shared-breach→rollback-both \"yes · shared breach\"",
+          "finding": "The added flow directly supports the summary's sequential delivery and region-aware rollback claims."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The arc committed 90 net patch operations in about 4.83 minutes, well within both 15-minute session budgets and far below the 300-turn budget. Most work was proportionate to a large workflow and its regional extension. However, there were three material add-then-delete redesign cycles: failure connections were replaced by stickies/sections and later collapsed into node text; the telemetry-recovery edge e31 was added and immediately removed; and extension audit/global-rollback edges e37–e39 were added and then removed. This is operation thrash under the rubric despite the short wall time.",
+      "operation_count": 90,
+      "thrash_cycle_count": 3,
+      "wall_time_minutes": 4.83,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "removeConnection e29\nremoveConnection e30\naddSticky security-failure\naddSticky staging-failure",
+          "finding": "Two newly added failure connectors were removed and replaced with textual failure callouts."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "removeSection security-failures\nremoveSection staging-failures\nupdateObject image-scan\nupdateObject stage-tests",
+          "finding": "The replacement failure stickies and their sections were later deleted, with their content rebuilt as node text; this completes a build-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 1 op\n  1. addConnection e31",
+          "finding": "A telemetry-recovery connector was added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "removeConnection e31\nupdateObject pause-review",
+          "finding": "The just-added connector was removed on the next turn and replaced with node text, a second short thrash cycle."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 1,
+          "transcript_excerpt": "removeConnection e37\nremoveConnection e38\nremoveConnection e39",
+          "finding": "Three connectors created in the immediately preceding initial batch were deleted, forming a third add-delete cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "(69 patch operations)",
+          "finding": "Stage0 finished in 198.1 seconds with 69 committed patch operations."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "(21 patch operations)",
+          "finding": "The extension finished in 91.8 seconds with 21 committed patch operations."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. Both attempts committed without retries, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 77494,
+    "output_tokens": 3860
+  },
+  "flags": []
+}

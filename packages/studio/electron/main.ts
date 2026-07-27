@@ -12,6 +12,7 @@ import {
 } from "electron";
 import { createAgentProxyHandler } from "../server/agent-proxy";
 import { createCanvasFileApiHandler } from "../server/canvas-file-api";
+import { createEvalsApiHandler } from "../server/evals-api";
 
 app.setName("Canvas");
 
@@ -40,6 +41,20 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 
 let mainWindow: BrowserWindow | null = null;
 let studioServer: ReturnType<typeof createServer> | null = null;
+
+/**
+ * Server-side twin of the renderer's devPagesEnabled(): unpackaged builds get
+ * dev pages by default, packaged builds opt in with VITE_STUDIO_DEV_PAGES=1
+ * (the same variable that bakes the dev pages into the renderer bundle).
+ */
+function devPagesEnabled(): boolean {
+  return process.env.VITE_STUDIO_DEV_PAGES === "1" || !app.isPackaged;
+}
+
+/** Eval-suite run artifacts, resolved off the repo root like canvases/. */
+function resolveEvalRunsDir(): string {
+  return resolve(__dirname, "../..", "eval-suite", "runs");
+}
 
 function resolveCanvasesDir(): string {
   if (process.env.CANVAS_DIR) {
@@ -133,17 +148,24 @@ async function startStudioServer(canvasesDir: string): Promise<string> {
   // file API's catch-all /api/canvases branch.
   const agentProxyHandler = createAgentProxyHandler({});
   const canvasFileApiHandler = createCanvasFileApiHandler({ canvasesDir });
+  const evalsApiHandler = devPagesEnabled()
+    ? createEvalsApiHandler({ runsDir: resolveEvalRunsDir() })
+    : null;
 
   studioServer = createServer((req, res) => {
     agentProxyHandler(req, res, () => {
       canvasFileApiHandler(req, res, () => {
-        void serveStaticFile(req, res, distDir).catch(() => {
-          if (!res.headersSent) {
-            sendPlainText(res, 500, "Internal server error.");
-          } else {
-            res.destroy();
-          }
-        });
+        const serveStatic = () => {
+          void serveStaticFile(req, res, distDir).catch(() => {
+            if (!res.headersSent) {
+              sendPlainText(res, 500, "Internal server error.");
+            } else {
+              res.destroy();
+            }
+          });
+        };
+        if (evalsApiHandler) evalsApiHandler(req, res, serveStatic);
+        else serveStatic();
       });
     });
   });

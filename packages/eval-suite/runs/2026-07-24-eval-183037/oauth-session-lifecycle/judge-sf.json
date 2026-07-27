@@ -1,0 +1,480 @@
+{
+  "axis": "sf",
+  "scenario": "oauth-session-lifecycle",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 7.5,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system uses an external OAuth provider while retaining control of application sessions.",
+        "brief_evidence": "“Our browser application uses an external OAuth provider while keeping application sessions under our control.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies an “External OAuth provider” separately from the “Secure HTTP-only application cookie,” “API gateway,” and “Session valid?” application-session path.",
+        "note": "The provider/application-session separation and overall purpose are clear."
+      },
+      {
+        "brief_element": "The primary end-to-end login flow is browser → web application → auth gateway/state and PKCE setup → provider redirect/authentication → dedicated callback with authorization code → validation and exchange → token vault → internal account mapping and login audit → application session cookie.",
+        "brief_evidence": "The first paragraph and the first sentence of the second paragraph collectively define the login and application-session establishment sequence.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The “OAuth login and callback” flow recovers Browser → Web application → Auth gateway → Session store → External OAuth provider → Dedicated callback → State valid? → Encrypted token vault → identity mapping → secure application cookie, plus an Auditable login event. However, its uncertainty list says exact redirect/state ownership is obscured, code exchange is not unambiguously assigned to the callback, and the provider-identity mechanism is not shown.",
+        "note": "The full shape and ordering are recognizable, but several responsibility boundaries in the central login flow require inference."
+      },
+      {
+        "brief_element": "The browser starts login through the web application.",
+        "brief_evidence": "“The browser starts login through the web application”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states: “Browser sends ‘start login’ to Web application.”",
+        "note": "Direction and participating components are explicit."
+      },
+      {
+        "brief_element": "The web application asks the auth gateway to initiate the login setup.",
+        "brief_evidence": "“which asks the auth gateway”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states: “Web application sends ‘login request’ to Auth gateway.”",
+        "note": "The request direction is recovered."
+      },
+      {
+        "brief_element": "The auth gateway creates short-lived OAuth state.",
+        "brief_evidence": "“the auth gateway to create a short-lived state”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The Auth gateway responsibility says it “participates in creating short-lived OAuth state,” and the flow places it before a connection labeled “short-lived state.” The uncertainty list says exact arrow ownership around state creation is partly obscured.",
+        "note": "Short-lived state is visible, but exclusive ownership by the auth gateway is softened to participation."
+      },
+      {
+        "brief_element": "The auth gateway creates a PKCE challenge.",
+        "brief_evidence": "“and PKCE challenge”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Session store state + PKCE” and a constraint that callback state uses “short-lived state and PKCE material,” but does not explicitly state that the auth gateway creates the PKCE challenge.",
+        "note": "PKCE exists, but challenge creation and its owner are not directly recovered."
+      },
+      {
+        "brief_element": "The short-lived state and PKCE material are stored in the session store.",
+        "brief_evidence": "“in the session store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Session store state + PKCE” with responsibility to store OAuth state and PKCE material.",
+        "note": "The storage location and stored material are clear."
+      },
+      {
+        "brief_element": "State and PKCE setup occurs before redirecting the browser to the provider.",
+        "brief_evidence": "“before redirecting to the provider”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstructed flow orders Auth gateway and Session store before “redirect” and the External OAuth provider, but the uncertainty list says not every arrowhead around redirect and state creation is independently visible.",
+        "note": "The intended ordering is recoverable, though connector ambiguity prevents an exact reading."
+      },
+      {
+        "brief_element": "The external OAuth provider authenticates the user.",
+        "brief_evidence": "“The provider authenticates the user”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction calls the provider the “external authorization provider in the redirect and authorization-code exchange path,” but no component responsibility or flow step explicitly says that it authenticates the user.",
+        "note": "Provider participation is clear; the user-authentication responsibility is only implicit."
+      },
+      {
+        "brief_element": "The provider returns an authorization code to a dedicated callback service.",
+        "brief_evidence": "“and returns an authorization code to a dedicated callback service.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states: “External OAuth provider returns an ‘authorization code’ to Dedicated callback.”",
+        "note": "Endpoint, direction, artifact, and dedicated callback boundary are all recovered."
+      },
+      {
+        "brief_element": "The callback validates the OAuth state.",
+        "brief_evidence": "“The callback validates state”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Dedicated callback “initiates state validation,” with a “validate state” path to “State valid?” and verifier information from the session store.",
+        "note": "The callback's role in state validation is communicated."
+      },
+      {
+        "brief_element": "The callback exchanges the authorization code.",
+        "brief_evidence": "“exchanges the code”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The valid branch reads “exchange code + store tokens,” but the uncertainty list explicitly says the picture does not unambiguously assign code exchange to the Dedicated callback rather than another point on the connector.",
+        "note": "The operation is present, but its required owner is ambiguous."
+      },
+      {
+        "brief_element": "The authorization-code exchange uses the PKCE verifier.",
+        "brief_evidence": "“using the PKCE verifier”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers PKCE material in the session store and a line labeled “state verifier,” but no flow explicitly connects a PKCE verifier to the code-exchange operation.",
+        "note": "PKCE is visible, but its verifier's use during exchange is not explicitly recoverable."
+      },
+      {
+        "brief_element": "The callback sends provider tokens to an encrypted token vault.",
+        "brief_evidence": "“and sends the provider tokens to an encrypted token vault.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The “Encrypted token vault” receives the successful “exchange code + store tokens” path and is understood to store provider tokens. The reconstruction's uncertainty list says exact operation ownership along this path is not unambiguous.",
+        "note": "Encrypted storage of provider tokens is clear, but the callback-to-vault sending responsibility is not fully explicit."
+      },
+      {
+        "brief_element": "The auth gateway maps the provider identity to an internal account.",
+        "brief_evidence": "“The auth gateway maps the provider identity to an internal account”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A component labeled “Map provider identity to internal account” follows a “provider identity” connection, but the reconstruction does not assign that mapping component to the Auth gateway.",
+        "note": "The mapping behavior is recovered; required ownership by the auth gateway is not."
+      },
+      {
+        "brief_element": "The auth gateway writes an auditable login event.",
+        "brief_evidence": "“writes an auditable login event”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an “Auditable login event” reached by “write event,” but it does not clearly state that the Auth gateway performs the write.",
+        "note": "The audit event survives, while ownership is ambiguous."
+      },
+      {
+        "brief_element": "The auth gateway issues the browser an application session cookie.",
+        "brief_evidence": "“and issues the browser a ... application session cookie.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The flow establishes a “secure app session” that reaches “Secure HTTP-only application cookie,” but it does not explicitly show the Auth gateway issuing that cookie to the Browser.",
+        "note": "Cookie establishment is recovered, but issuer and recipient direction require inference."
+      },
+      {
+        "brief_element": "The application session cookie is secure.",
+        "brief_evidence": "“a secure ... application session cookie”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component is explicitly labeled “Secure HTTP-only application cookie.”",
+        "note": "The security attribute is directly readable."
+      },
+      {
+        "brief_element": "The application session cookie is HTTP-only.",
+        "brief_evidence": "“HTTP-only application session cookie”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component is explicitly labeled “Secure HTTP-only application cookie.”",
+        "note": "The HTTP-only constraint is directly readable."
+      },
+      {
+        "brief_element": "Application requests enter through the API gateway.",
+        "brief_evidence": "“Requests enter through the API gateway”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The application request flow says the cookie sends “request + cookie” to the API gateway.",
+        "note": "The request ingress boundary is clear."
+      },
+      {
+        "brief_element": "The API gateway validates the application session.",
+        "brief_evidence": "“which validates the application session”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The API gateway invokes “validate session” at the “Session valid?” decision.",
+        "note": "Validation responsibility and sequence are clear."
+      },
+      {
+        "brief_element": "For a valid session, the API gateway passes the internal user identity downstream.",
+        "brief_evidence": "“passes only the internal user identity ... to downstream services.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The valid branch produces “Internal user ID + authorization context,” which is sent as “identity + auth context” to Downstream application services.",
+        "note": "The downstream identity handoff is explicit."
+      },
+      {
+        "brief_element": "For a valid session, the API gateway passes authorization context downstream.",
+        "brief_evidence": "“passes only the ... authorization context to downstream services.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The valid branch produces “Internal user ID + authorization context,” followed by “identity + auth context” to Downstream application services.",
+        "note": "The authorization-context handoff is explicit."
+      },
+      {
+        "brief_element": "Only internal identity and authorization context, rather than provider credentials, are passed to general downstream services.",
+        "brief_evidence": "“passes only the internal user identity and authorization context to downstream services.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The normal request path passes only “identity + auth context,” and the Trust boundary note says provider tokens never reach general application services.",
+        "note": "The credential-minimization boundary is strongly communicated."
+      },
+      {
+        "brief_element": "A token broker retrieves provider access tokens.",
+        "brief_evidence": "“Provider access tokens are retrieved by a token broker”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “Token broker” that mediates provider-token retrieval and a broker-only connection to the encrypted token vault.",
+        "note": "The broker and its retrieval responsibility are clear."
+      },
+      {
+        "brief_element": "Provider access tokens are retrieved only when a downstream integration needs one.",
+        "brief_evidence": "“only when a downstream integration needs one”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Downstream application services indicate “provider integration needed,” leading to Downstream integration and then “request provider token” from Token broker. The Token handling note says retrieval occurs only for integrations.",
+        "note": "The on-demand integration trigger is explicit."
+      },
+      {
+        "brief_element": "Provider tokens never reach the browser.",
+        "brief_evidence": "“they never reach the browser”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Trust boundary note explicitly states: “Provider tokens never reach the browser or general application services.”",
+        "note": "The browser credential boundary is exact."
+      },
+      {
+        "brief_element": "Provider tokens never reach general application services.",
+        "brief_evidence": "“or general application services.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Trust boundary note explicitly states that provider tokens never reach general application services.",
+        "note": "The general-service credential boundary is exact."
+      },
+      {
+        "brief_element": "The system detects when a provider token nears expiry.",
+        "brief_evidence": "“When a provider token nears expiry”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The broker flows through “check expiry” to a “Near expiry?” decision.",
+        "note": "The refresh trigger is directly represented."
+      },
+      {
+        "brief_element": "A refresh coordinator handles near-expiry refreshes.",
+        "brief_evidence": "“a refresh coordinator”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “yes” branch from “Near expiry?” goes to “Refresh coordinator.”",
+        "note": "Trigger and coordinator ownership are clear."
+      },
+      {
+        "brief_element": "The refresh coordinator takes a per-account lock.",
+        "brief_evidence": "“takes a per-account lock”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The refresh path proceeds from Refresh coordinator into a region labeled “Per-account lock.”",
+        "note": "Lock scope and placement in the refresh path are recovered."
+      },
+      {
+        "brief_element": "The provider token is refreshed once while holding the per-account coordination lock.",
+        "brief_evidence": "“refreshes it once”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The coordinated path contains “Per-account lock” and “Refresh once.”",
+        "note": "Single-flight refresh behavior is strongly communicated."
+      },
+      {
+        "brief_element": "After a successful refresh, the stored refresh token is rotated.",
+        "brief_evidence": "“rotates the stored refresh token”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The successful route from “Refresh valid?” is labeled “rotate token” and reaches “Rotate stored refresh token.”",
+        "note": "Success condition and rotation action are clear."
+      },
+      {
+        "brief_element": "Concurrent callers waiting on the refresh are awakened with the new result.",
+        "brief_evidence": "“and wakes concurrent callers with the new result.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The path labeled “publish new result” reaches “Wake concurrent callers with new result.”",
+        "note": "The refresh fan-out/recovery behavior is explicit."
+      },
+      {
+        "brief_element": "An invalid refresh revokes the application session.",
+        "brief_evidence": "“An invalid refresh revokes the application session”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red failure route leaves the refresh-validity area and enters “Invalidate active sessions + cached auth context.”",
+        "note": "The required failure route and session outcome are recovered."
+      },
+      {
+        "brief_element": "An invalid refresh requires the user to log in again.",
+        "brief_evidence": "“and requires login again.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The invalid-refresh route reaches session invalidation, which then points to “Require login again.”",
+        "note": "The terminal failure outcome is explicit."
+      },
+      {
+        "brief_element": "Explicit logout invalidates active sessions.",
+        "brief_evidence": "“Explicit logout ... invalidate active sessions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red path from “Explicit logout” reaches “Invalidate active sessions + cached auth context.”",
+        "note": "Trigger and session-invalidation outcome are explicit."
+      },
+      {
+        "brief_element": "Explicit logout invalidates cached authorization context.",
+        "brief_evidence": "“Explicit logout ... invalidate ... cached authorization context.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Explicit logout routes to “Invalidate active sessions + cached auth context.”",
+        "note": "The cached-context effect is explicit."
+      },
+      {
+        "brief_element": "Administrator revocation invalidates active sessions.",
+        "brief_evidence": "“administrator revocation ... invalidate active sessions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red path from “Administrator revocation” reaches the session and cached-context invalidation box.",
+        "note": "Trigger and session-invalidation outcome are explicit."
+      },
+      {
+        "brief_element": "Administrator revocation invalidates cached authorization context.",
+        "brief_evidence": "“administrator revocation ... invalidate ... cached authorization context.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Administrator revocation routes to “Invalidate active sessions + cached auth context.”",
+        "note": "The cached-context effect is explicit."
+      },
+      {
+        "brief_element": "Provider revocation notifications invalidate active sessions.",
+        "brief_evidence": "“provider revocation notifications all invalidate active sessions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red path from “Provider revocation notification” reaches the session and cached-context invalidation box.",
+        "note": "The provider-originated trigger and session effect are explicit."
+      },
+      {
+        "brief_element": "Provider revocation notifications invalidate cached authorization context.",
+        "brief_evidence": "“provider revocation notifications all invalidate ... cached authorization context.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Provider revocation notification routes to “Invalidate active sessions + cached auth context.”",
+        "note": "The cached-context effect is explicit."
+      },
+      {
+        "brief_element": "Failed state checks are sent to the security audit stream.",
+        "brief_evidence": "“Failed state checks ... go to the security audit stream”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a dashed “failed state / exchange” audit route and an Audit failures note listing “state check,” in the section containing “Security audit stream (no token values).”",
+        "note": "The audit destination is recoverable despite some connector overlap."
+      },
+      {
+        "brief_element": "Failed token exchanges are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... token exchanges ... go to the security audit stream”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “failed state / exchange” route and an Audit failures note listing “token exchange...” adjacent to the Security audit stream.",
+        "note": "The failure class and audit destination are recoverable."
+      },
+      {
+        "brief_element": "Failed refreshes are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... refreshes ... go to the security audit stream”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that a failed refresh is sent to the Security audit stream. The invalid-refresh failure path only records invalidation and login-again behavior.",
+        "note": "Refresh failure handling is recovered operationally, but its mandatory audit route is absent."
+      },
+      {
+        "brief_element": "Failed revocations are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... revocations go to the security audit stream”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies revocation failure, distinguishes it from a successful revocation trigger, or routes such a failure to the Security audit stream.",
+        "note": "The board communicates successful revocation-driven invalidation, not revocation-operation failures."
+      },
+      {
+        "brief_element": "Security audit records do not expose token values.",
+        "brief_evidence": "“without exposing token values.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The audit component is explicitly labeled “Security audit stream (no token values).”",
+        "note": "The audit confidentiality constraint is exact."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "Failed OAuth state validation or token exchange invalidates active application sessions and cached authorization context.",
+        "reconstruction_evidence": "The first failure path says the dashed “failed state / exchange” route reaches “Invalidate active sessions + cached auth context.”",
+        "why_unsupported": "The brief requires failed state checks and token exchanges to be audited without token values, but does not say those failures invalidate any already-active application sessions or cached authorization context."
+      },
+      {
+        "claim": "Failed OAuth state validation or token exchange requires login again as a separate terminal recovery action.",
+        "reconstruction_evidence": "The first failure path gives the outcome: sessions are invalidated, “login is required again,” and the failure is audited.",
+        "why_unsupported": "The brief explicitly requires login again only for an invalid refresh. A failed login callback naturally prevents completion of that login, but the stated invalidation-and-reauthentication outcome is more specific than the brief."
+      },
+      {
+        "claim": "Explicit logout always leads to a separate “Require login again” outcome.",
+        "reconstruction_evidence": "The Explicit logout failure path is reconstructed as “Explicit logout → Invalidate active sessions + cached auth context → Require login again.”",
+        "why_unsupported": "The brief says logout invalidates sessions and cached authorization context; it does not specify a forced reauthentication outcome after logout."
+      },
+      {
+        "claim": "Administrator revocation always leads to a separate “Require login again” outcome.",
+        "reconstruction_evidence": "The Administrator revocation failure path ends at “Require login again.”",
+        "why_unsupported": "The brief specifies invalidation but does not expressly state this terminal outcome for administrator revocation."
+      },
+      {
+        "claim": "Provider revocation notification always leads to a separate “Require login again” outcome.",
+        "reconstruction_evidence": "The Provider revocation notification failure path ends at “Require login again.”",
+        "why_unsupported": "The brief specifies invalidation but does not expressly state this terminal outcome for provider revocation notifications."
+      },
+      {
+        "claim": "Provider identity is passed from or derived through the encrypted token vault.",
+        "reconstruction_evidence": "The reconstruction observes that the connection between “Encrypted token vault” and identity mapping is labeled “provider identity.”",
+        "why_unsupported": "The brief says the auth gateway maps provider identity and that provider tokens are sent to the vault; it does not define the vault as the source or carrier of provider identity."
+      }
+    ],
+    "strongest_transmitted_behavior": "The broker-only provider-token path and coordinated refresh protocol are transmitted especially well: integrations trigger on-demand broker retrieval, near-expiry tokens enter a per-account single-refresh path, successful refresh rotates the stored refresh token, concurrent callers receive the new result, and invalid refresh invalidates the application session and requires login again.",
+    "most_consequential_loss": "The central login flow loses precise responsibility boundaries: the reconstruction does not clearly show that the auth gateway creates both state and the PKCE challenge, that the callback performs the code exchange using the PKCE verifier and sends the tokens to the vault, or that the auth gateway owns identity mapping, login-event writing, and cookie issuance. It also omits audit routing for failed refreshes and failed revocations.",
+    "overall_summary": "The reconstruction communicates the complete architecture and nearly all critical operational paths: external OAuth login, dedicated callback and state validation, encrypted token storage, application-session validation at the API gateway, isolation of provider tokens behind a broker, coordinated single-flight refresh, and the three revocation triggers. It is highly usable for design discussion. Fidelity falls short of implementation-level precision because several system-defining ownership and PKCE-exchange relationships in the login path remain ambiguous, two required audit failure classes are missing, and the reconstruction adds unsupported invalidation or forced-login outcomes to state/exchange failures and all revocation triggers.",
+    "score": 7.5
+  },
+  "usage": {
+    "input_tokens": 13141,
+    "output_tokens": 12338
+  },
+  "flags": []
+}

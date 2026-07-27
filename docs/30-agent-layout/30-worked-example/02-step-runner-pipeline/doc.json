@@ -14,13 +14,14 @@
         "b-step2-canvas-4"
       ],
       "props": {
-        "covers": "Step 2 of the worked example: the stage becomes the runner loop — a 1x4 grid of identical cells at the loose 96 gap, ending in a decision cell.",
+        "covers": "Step 2 of the worked example: a structural batch replaces the temporary stage with Runner loop, then a section-fill batch adds the left-to-right row and reviews its render.",
         "format": "mdx",
         "type": "design",
         "concepts": [
           "worked example",
-          "grid",
-          "gap ladder",
+          "apply_ops",
+          "section replacement",
+          "uniform peer gap",
           "decision"
         ]
       }
@@ -45,16 +46,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The stage becomes the runner loop: "
-        },
-        {
-          "insert": "grid 1x4 gap=96",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — one row of four identical cells at the loose 96 gap (R4, R2), ending in a decision cell. The new section frames itself with R3 trim; the config lane does not move."
+          "insert": "After studying the latest step-1 result, the agent replaces the temporary stage in a structural batch. removeSection disposes stage and cascades through its placeholder; addSection establishes Runner loop in the same skeleton position. The agent judges that pushed render before a second call fills Runner loop with three process nodes and the terminal decision. Same role means the nodes copy one size, one centerline, and one repeated group gap from digest geometry; the 16px grid only quantizes those choices. The section gives the row a home and remains an addressable unit, while Config stays untouched. Each successful call pushes APPLIED, a fresh BOARD digest, DELTA, cumulative BOARD DIFF, LINTS, and REQUESTS; the fill call also pushes a fresh full-board render and the requested Runner loop close-up. No connection is touched, so ROUTES is absent. A crowding warning means the repeated gap is below the arrow-corridor floor, even when the row looks uniform."
         }
       ]
     },
@@ -63,11 +55,11 @@
       "flavour": "code",
       "children": [],
       "props": {
-        "language": "text"
+        "language": "json"
       },
       "text": [
         {
-          "insert": "row 1|4\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  section 5 text=loop label=\"Runner loop\"\n    grid 1x4 gap=96\n      item 6 text=cli type=process size=M\n      item 7 text=sched type=process size=M\n      item 8 text=workers type=process size=M\n      item 9 text=match type=decision size=M\n\narrows"
+          "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"removeSection\",\n        \"sectionId\": \"stage\"\n      },\n      {\n        \"type\": \"addSection\",\n        \"section\": {\n          \"id\": \"loop\",\n          \"text\": \"Runner loop\",\n          \"color\": \"gray\",\n          \"geometry\": { \"x\": 304, \"y\": 0, \"width\": 720, \"height\": 576 }\n        }\n      }\n    ]\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"cli\",\n          \"type\": \"process\",\n          \"text\": \"cli\",\n          \"geometry\": { \"x\": 352, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"sched\",\n          \"type\": \"process\",\n          \"text\": \"sched\",\n          \"geometry\": { \"x\": 528, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"workers\",\n          \"type\": \"process\",\n          \"text\": \"workers\",\n          \"geometry\": { \"x\": 704, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"match\",\n          \"type\": \"decision\",\n          \"text\": \"match\",\n          \"geometry\": { \"x\": 880, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      }\n    ],\n    \"view\": \"loop\"\n  }\n]"
         }
       ]
     },

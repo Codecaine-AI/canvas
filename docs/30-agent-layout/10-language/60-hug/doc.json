@@ -16,7 +16,7 @@
         "b-hug-contrast-canvas-6"
       ],
       "props": {
-        "covers": "The hug= field: a direct child of a split keeps its natural content size and pins to a corner of its band instead of stretching to fill it — shown with and without hug on the same program.",
+        "covers": "The descriptive hug= pattern: a direct child of a split keeps its natural content size and pins to a corner of its band instead of stretching to fill it — shown with and without the pin.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -47,7 +47,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Any line that is a direct child of a split may end with "
+          "insert": "In this descriptive notation, any line that is a direct child of a split may end with "
         },
         {
           "insert": "hug=<corner>",
@@ -56,16 +56,7 @@
           }
         },
         {
-          "insert": ": the child keeps its natural content size and pins to that corner of its band instead of stretching to fill it (rule R7). This replaces the old "
-        },
-        {
-          "insert": "@corner",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " suffix on weights."
+          "insert": ": the child keeps its natural content size and pins to that corner of its band instead of stretching to fill it."
         }
       ]
     },
@@ -98,7 +89,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The same program without "
+          "insert": "The same arrangement without "
         },
         {
           "insert": "hug=NW",

@@ -7,5 +7,6 @@ dist-electron/
 # canvas-agent harness runtime state (machine-local)
 .agent-kernel/
 .pi-agent/
+canvases/evals/
 
 .DS_Store

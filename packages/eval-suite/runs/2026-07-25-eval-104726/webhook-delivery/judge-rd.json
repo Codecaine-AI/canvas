@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "webhook-delivery",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification reference, this board offers stronger tinted grouping and semantic color but loses finish through several oversized cross-board routes and a less balanced use of the frame.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The eight numbered regions occupy the full canvas, but a broad central-to-lower-right band remains largely empty while the upper flow and lower-left clusters carry most of the visual mass."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Nodes and most pill labels have generous breathing room, though the long green, magenta, orange, and gray corridors compete in the central gap rather than reading as clean sequential lanes."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Distinct tinted and titled regions clearly organize ingress, fan-out, queueing, signing, retry, dead-letter, operations, and replay, with mostly two to three nodes per section."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Blue, purple, teal, green, amber, orange, gray, and magenta consistently distinguish functional families and outcomes, although the number of simultaneous hues makes the global flow busier than either reference."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6.5,
+        "note": "No crosshair junction glyphs or orphaned badges are visible, but several arrows terminate after very long waypointed runs, and the dashed magenta replay route reads partly like exposed routing machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The upper regions share a strong horizontal register and internal node alignment is orderly, but the staggered lower sections and isolated delivery-guarantees card weaken the overall rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Failure: multiple perimeter-scale detours dominate the composition, including the magenta loop from replay toward the queue, the green route spanning signing, admission, and replay, and the top-right dashed teal return."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness ranks first, intent-classification-2 second, and the board under grade third because its richer grouping does not offset its conspicuous routing detours and frame imbalance."
+  },
+  "usage": {
+    "input_tokens": 15136,
+    "output_tokens": 772
+  },
+  "flags": []
+}

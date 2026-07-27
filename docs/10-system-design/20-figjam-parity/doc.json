@@ -1743,16 +1743,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Default size 120x120 (square — a plus reads oddly at non-square aspects). Text slot: none recommended — a plus's center intersection is too small for a meaningful text slot at typical sizes; treat as a decorative/marker shape like "
-        },
-        {
-          "insert": "annotation-marker",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", not a label-bearing one. Connection anchors: 12-point polygon, true-outline tier. Style surface: standard fill/stroke. Suggested name: new "
+          "insert": "Default size 120x120 (square — a plus reads oddly at non-square aspects). Text slot: none recommended — a plus's center intersection is too small for a meaningful text slot at typical sizes; treat it as a decorative shape, not a label-bearing one. Connection anchors: 12-point polygon, true-outline tier. Style surface: standard fill/stroke. Suggested name: new "
         },
         {
           "insert": "type: \"plus\"",
@@ -2738,16 +2729,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Default size 90x90 (small — these are junction glyphs, always roughly circular and compact, matching FigJam's own scale for this symbol pair). Text slot: none — these are pure junction glyphs, no label area, similar to "
-        },
-        {
-          "insert": "annotation-marker",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". Connection anchors: circular true-outline. Style surface: fill/stroke only, no strokeStyle variation needed (junction glyphs are always solid). Shipped types: "
+          "insert": "Default size 90x90 (small — these are junction glyphs, always roughly circular and compact, matching FigJam's own scale for this symbol pair). Text slot: none — these are pure junction glyphs with no label area. Connection anchors: circular true-outline. Style surface: fill/stroke only, no strokeStyle variation needed (junction glyphs are always solid). Shipped types: "
         },
         {
           "insert": "type: \"or-junction\"",

@@ -1,0 +1,1786 @@
+{
+  "container_id": "cd1a8689-ce59-57ec-8d92-2aa4f8332c75",
+  "pi_sessions": [
+    {
+      "piSessionId": "019f9677-7a57-729b-a1a7-e590da4f7ec8",
+      "file": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.jsonl",
+      "startedAt": "2026-07-24T23:30:40.343Z",
+      "userMessages": [
+        {
+          "text": "# OAuth session lifecycle across services\n\nOur browser application uses an external OAuth provider while keeping application sessions under our control. The browser starts login through the web application, which asks the auth gateway to create a short-lived state and PKCE challenge in the session store before redirecting to the provider. The provider authenticates the user and returns an authorization code to a dedicated callback service. The callback validates state, exchanges the code using the PKCE verifier, and sends the provider tokens to an encrypted token vault.\n\nThe auth gateway maps the provider identity to an internal account, writes an auditable login event, and issues the browser a secure, HTTP-only application session cookie. Requests enter through the API gateway, which validates the application session and passes only the internal user identity and authorization context to downstream services. Provider access tokens are retrieved by a token broker only when a downstream integration needs one; they never reach the browser or general application services.\n\nWhen a provider token nears expiry, a refresh coordinator takes a per-account lock, refreshes it once, rotates the stored refresh token, and wakes concurrent callers with the new result. An invalid refresh revokes the application session and requires login again. Explicit logout, administrator revocation, and provider revocation notifications all invalidate active sessions and cached authorization context. Failed state checks, token exchanges, refreshes, and revocations go to the security audit stream without exposing token values.\n",
+          "timestamp": "2026-07-24T23:30:40.348Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-24T23:30:47.548Z",
+          "thinking": "**Planning diagram sections layout**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_PEFHdqQlKzKnPr5ud1foqt4Q|fc_05899dfc4849136d016a63f5a42648819891c9e2c1869c1448",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "login-flow",
+                      "text": "1 · OAuth login and callback",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 96,
+                        "y": 112,
+                        "width": 2080,
+                        "height": 336
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "session-runtime",
+                      "text": "2 · Application session and request path",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 96,
+                        "y": 496,
+                        "width": 2080,
+                        "height": 288
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "token-refresh",
+                      "text": "3 · Provider token use and coordinated refresh",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 96,
+                        "y": 832,
+                        "width": 1312,
+                        "height": 480
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "revocation-audit",
+                      "text": "4 · Revocation and security audit",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1456,
+                        "y": 832,
+                        "width": 720,
+                        "height": 480
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 4 ops\n  1. addSection login-flow\n  2. addSection session-runtime\n  3. addSection token-refresh\n  4. addSection revocation-audit\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 80,64 2128×1280\n    login-flow section \"1 · OAuth login and callback\" blue 96,112 2080×336\n      (empty)\n    session-runtime section \"2 · Application session and request path\" teal 96,496 2080×288\n      (empty)\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 96,832 1312×480\n      (empty)\n    revocation-audit section \"4 · Revocation and security audit\" orange 1456,832 720×480\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  32,32 2240×1400 → 80,64 2128×1280\n  + login-flow  section 96,112 2080×336 \"1 · OAuth login and callback\"\n  + session-runtime  section 96,496 2080×288 \"2 · Application session and request path\"\n  + token-refresh  section 96,832 1312×480 \"3 · Provider token use and coordinated refresh\"\n  + revocation-audit  section 1456,832 720×480 \"4 · Revocation and security audit\"\nBOARD DIFF · base → draft · 5 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  updateSection page-frame  moved · resized\nDIAGNOSTICS · clean\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.9.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.9.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-24T23:31:00.767Z",
+          "thinking": "**Planning login section structure**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hGnGR7NHpBrhguL6JsurC1Hj|fc_05899dfc4849136d016a63f5ac7e888198a7a92a18f0135b6e",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "browser",
+                      "type": "icon",
+                      "icon": "display",
+                      "text": "Browser",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 144,
+                        "y": 192,
+                        "width": 112,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "web-app",
+                      "type": "process",
+                      "text": "Web application",
+                      "color": "white",
+                      "geometry": {
+                        "x": 336,
+                        "y": 192,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "auth-gateway",
+                      "type": "process",
+                      "text": "Auth gateway",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 608,
+                        "y": 192,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "session-store",
+                      "type": "database",
+                      "text": "Session store\nstate + PKCE",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 864,
+                        "y": 176,
+                        "width": 176,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "oauth-provider",
+                      "type": "icon",
+                      "icon": "globe",
+                      "text": "External OAuth provider",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1136,
+                        "y": 176,
+                        "width": 144,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "callback-service",
+                      "type": "predefined-process",
+                      "text": "Dedicated callback",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 192,
+                        "width": 192,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "token-vault",
+                      "type": "database",
+                      "text": "Encrypted token vault",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1648,
+                        "y": 176,
+                        "width": 176,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "account-map",
+                      "type": "process",
+                      "text": "Map provider identity\nto internal account",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1904,
+                        "y": 176,
+                        "width": 208,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "state-check",
+                      "type": "decision",
+                      "text": "State valid?",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1376,
+                        "y": 320,
+                        "width": 160,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "login-audit",
+                      "type": "document",
+                      "text": "Auditable login event",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1872,
+                        "y": 320,
+                        "width": 208,
+                        "height": 96
+                      }
+                    }
+                  }
+                ],
+                "view": "login-flow"
+              },
+              "resultText": "APPLIED · 10 ops\n  1. addObject browser\n  2. addObject web-app\n  3. addObject auth-gateway\n  4. addObject session-store\n  5. addObject oauth-provider\n  6. addObject callback-service\n  7. addObject token-vault\n  8. addObject account-map\n  9. addObject state-check\n  10. addObject login-audit\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 80,80 2128×1264\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 96,496 2080×288\n      (empty)\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 96,832 1312×480\n      (empty)\n    revocation-audit section \"4 · Revocation and security audit\" orange 1456,832 720×480\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  80,64 2128×1280 → 80,80 2128×1264\n  login-flow  96,112 2080×336 → 128,128 2016×320\n  + browser  icon 144,192 112×96 \"Browser\"\n  + web-app  process 336,192 176×80 \"Web application\"\n  + auth-gateway  process 608,192 176×80 \"Auth gateway\"\n  + session-store  database 864,176 176×112 \"Session store\\nstate + PKCE\"\n  + oauth-provider  icon 1136,176 144×112 \"External OAuth provider\"\n  + callback-service  predefined-process 1376,192 192×80 \"Dedicated callback\"\n  + token-vault  database 1648,176 176×112 \"Encrypted token vault\"\n  + account-map  process 1904,176 208×112 \"Map provider identity\\nto internal account\"\n  + state-check  decision 1376,320 160×96 \"State valid?\"\n  + login-audit  document 1872,320 208×96 \"Auditable login event\"\nBOARD DIFF · base → draft · 15 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  updateSection page-frame  moved · resized\nLINTS · +2 −0\n  + W1 crowding: callback-service and state-check sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the callback-service↔state-check corridor to ≥96px)\n  + W2 crowding: account-map and login-audit sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the account-map↔login-audit corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.13.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.13.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-24T23:31:12.160Z",
+          "thinking": "**Adjusting UI component positioning**\n\n**Planning runtime object additions**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yZwdSeYdGI6hrGoYJKPSHERQ|fc_05899dfc4849136d016a63f5bb1910819880bf944cd455041e",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "session-cookie",
+                      "type": "document",
+                      "text": "Secure HTTP-only\napplication cookie",
+                      "color": "green",
+                      "geometry": {
+                        "x": 176,
+                        "y": 592,
+                        "width": 192,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "api-gateway",
+                      "type": "process",
+                      "text": "API gateway",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 512,
+                        "y": 592,
+                        "width": 192,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "session-validator",
+                      "type": "decision",
+                      "text": "Session valid?",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 848,
+                        "y": 576,
+                        "width": 176,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "auth-context",
+                      "type": "document",
+                      "text": "Internal user ID +\nauthorization context",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 1168,
+                        "y": 576,
+                        "width": 224,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "downstream-services",
+                      "type": "predefined-process",
+                      "text": "Downstream application services",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1536,
+                        "y": 592,
+                        "width": 256,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "token-boundary-note",
+                      "text": "**Trust boundary**\n\nProvider tokens never reach the browser or general application services.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1872,
+                        "y": 560,
+                        "width": 240,
+                        "height": 160
+                      }
+                    }
+                  }
+                ],
+                "view": "session-runtime"
+              },
+              "resultText": "APPLIED · 6 ops\n  1. addObject session-cookie\n  2. addObject api-gateway\n  3. addObject session-validator\n  4. addObject auth-context\n  5. addObject downstream-services\n  6. addSticky token-boundary-note\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 80,80 2128×1264\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 96,832 1312×480\n      (empty)\n    revocation-audit section \"4 · Revocation and security audit\" orange 1456,832 720×480\n      (empty)\nEDGES\n  (none)\nDELTA\n  session-runtime  96,496 2080×288 → 160,512 1984×240\n  + session-cookie  document 176,592 192×96 \"Secure HTTP-only\\napplication cookie\"\n  + api-gateway  process 512,592 192×80 \"API gateway\"\n  + session-validator  decision 848,576 176×112 \"Session valid?\"\n  + auth-context  document 1168,576 224×112 \"Internal user ID +\\nauthorization context\"\n  + downstream-services  predefined-process 1536,592 256×80 \"Downstream application services\"\n  + token-boundary-note  sticky 1872,560 240×160 \"**Trust boundary**\\n\\nProvider tokens never reach the browser or general application services.\"\nBOARD DIFF · base → draft · 21 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  updateSection page-frame  moved · resized\nLINTS · +0 −0 (2 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.17.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.17.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-24T23:31:23.746Z",
+          "thinking": "**Adding bottom section**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yEvWCURkyzQ0EuxuWxlOkDIo|fc_05899dfc4849136d016a63f5c2dc388198b6ddc8167bee80f8",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "integration-service",
+                      "type": "predefined-process",
+                      "text": "Downstream integration",
+                      "color": "white",
+                      "geometry": {
+                        "x": 144,
+                        "y": 928,
+                        "width": 224,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "token-broker",
+                      "type": "process",
+                      "text": "Token broker",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 480,
+                        "y": 928,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "expiry-check",
+                      "type": "decision",
+                      "text": "Near expiry?",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 768,
+                        "y": 912,
+                        "width": 176,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "refresh-coordinator",
+                      "type": "process",
+                      "text": "Refresh coordinator",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1056,
+                        "y": 928,
+                        "width": 224,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "account-lock",
+                      "type": "icon",
+                      "icon": "key",
+                      "text": "Per-account lock",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1072,
+                        "y": 1088,
+                        "width": 128,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "provider-refresh",
+                      "type": "process",
+                      "text": "Refresh once",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 800,
+                        "y": 1088,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "rotate-refresh",
+                      "type": "process",
+                      "text": "Rotate stored\nrefresh token",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 496,
+                        "y": 1072,
+                        "width": 192,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "wake-callers",
+                      "type": "process",
+                      "text": "Wake concurrent callers\nwith new result",
+                      "color": "green",
+                      "geometry": {
+                        "x": 176,
+                        "y": 1072,
+                        "width": 224,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "refresh-valid",
+                      "type": "decision",
+                      "text": "Refresh valid?",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 800,
+                        "y": 1216,
+                        "width": 176,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "vault-rule",
+                      "text": "**Token handling**\n\nBroker retrieves provider access tokens only for integrations. Token values are never logged.",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1056,
+                        "y": 1200,
+                        "width": 304,
+                        "height": 112
+                      }
+                    }
+                  }
+                ],
+                "view": "token-refresh"
+              },
+              "resultText": "APPLIED · 10 ops\n  1. addObject integration-service\n  2. addObject token-broker\n  3. addObject expiry-check\n  4. addObject refresh-coordinator\n  5. addObject account-lock\n  6. addObject provider-refresh\n  7. addObject rotate-refresh\n  8. addObject wake-callers\n  9. addObject refresh-valid\n  10. addSticky vault-rule\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1296\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1456,832 720×480\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  80,80 2128×1264 → 112,80 2096×1296\n  token-refresh  96,832 1312×480 → 128,864 1264×480\n  + integration-service  predefined-process 144,928 224×80 \"Downstream integration\"\n  + token-broker  process 480,928 176×80 \"Token broker\"\n  + expiry-check  decision 768,912 176×112 \"Near expiry?\"\n  + refresh-coordinator  process 1056,928 224×80 \"Refresh coordinator\"\n  + account-lock  icon 1072,1088 128×96 \"Per-account lock\"\n  + provider-refresh  process 800,1088 176×80 \"Refresh once\"\n  + rotate-refresh  process 496,1072 192×112 \"Rotate stored\\nrefresh token\"\n  + wake-callers  process 176,1072 224×112 \"Wake concurrent callers\\nwith new result\"\n  + refresh-valid  decision 800,1216 176×96 \"Refresh valid?\"\n  + vault-rule  sticky 1056,1200 304×112 \"**Token handling**\\n\\nBroker retrieves provider access tokens only for integrations. Token values are never logged.\"\nBOARD DIFF · base → draft · 31 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  updateSection page-frame  moved · resized\nLINTS · +5 −0\n  + W3 crowding: integration-service and wake-callers sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the integration-service↔wake-callers corridor to ≥96px)\n  + W4 crowding: token-broker and rotate-refresh sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the token-broker↔rotate-refresh corridor to ≥96px)\n  + W5 crowding: expiry-check and provider-refresh sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the expiry-check↔provider-refresh corridor to ≥96px)\n  + W6 crowding: refresh-coordinator and account-lock sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the refresh-coordinator↔account-lock corridor to ≥96px)\n  + W7 crowding: provider-refresh and refresh-valid sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the provider-refresh↔refresh-valid corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.21.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.21.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-24T23:31:33.165Z",
+          "thinking": "**Identifying need for revocation nodes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_43agK2LNCpkue3RPtgOraz4X|fc_05899dfc4849136d016a63f5ceca4c819897afe63769d53d62",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "logout",
+                      "type": "process",
+                      "text": "Explicit logout",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1504,
+                        "y": 912,
+                        "width": 176,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "admin-revoke",
+                      "type": "process",
+                      "text": "Administrator revocation",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1744,
+                        "y": 912,
+                        "width": 192,
+                        "height": 80
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "provider-webhook",
+                      "type": "process",
+                      "text": "Provider revocation\nnotification",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1984,
+                        "y": 896,
+                        "width": 160,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "invalidation",
+                      "type": "process",
+                      "text": "Invalidate active sessions\n+ cached auth context",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1664,
+                        "y": 1088,
+                        "width": 272,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "reauth",
+                      "type": "off-page-connector",
+                      "text": "Require login again",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1984,
+                        "y": 1104,
+                        "width": 160,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "security-audit",
+                      "type": "database",
+                      "text": "Security audit stream\n(no token values)",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1504,
+                        "y": 1184,
+                        "width": 224,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSticky",
+                    "sticky": {
+                      "id": "audit-events",
+                      "text": "**Audit failures**\n\n- state check\n- token exchange\n- refresh\n- revocation",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 1808,
+                        "y": 1216,
+                        "width": 256,
+                        "height": 112
+                      }
+                    }
+                  }
+                ],
+                "view": "revocation-audit"
+              },
+              "resultText": "APPLIED · 7 ops\n  1. addObject logout\n  2. addObject admin-revoke\n  3. addObject provider-webhook\n  4. addObject invalidation\n  5. addObject reauth\n  6. addObject security-audit\n  7. addSticky audit-events\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  (none)\nDELTA\n  page-frame  112,80 2096×1296 → 112,80 2096×1312\n  revocation-audit  1456,832 720×480 → 1488,848 688×512\n  + logout  process 1504,912 176×80 \"Explicit logout\"\n  + admin-revoke  process 1744,912 192×80 \"Administrator revocation\"\n  + provider-webhook  process 1984,896 160×112 \"Provider revocation\\nnotification\"\n  + invalidation  process 1664,1088 272×112 \"Invalidate active sessions\\n+ cached auth context\"\n  + reauth  off-page-connector 1984,1104 160×96 \"Require login again\"\n  + security-audit  database 1504,1184 224×112 \"Security audit stream\\n(no token values)\"\n  + audit-events  sticky 1808,1216 256×112 \"**Audit failures**\\n\\n- state check\\n- token exchange\\n- refresh\\n- revocation\"\nBOARD DIFF · base → draft · 38 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\nLINTS · +3 −0\n  + W8 crowding: logout and admin-revoke sit 64px apart side by side where wires and labels need ≥80px of corridor to route between them (open the logout↔admin-revoke corridor to ≥80px)\n  + W9 crowding: admin-revoke and provider-webhook sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the admin-revoke↔provider-webhook corridor to ≥80px)\n  + W10 crowding: invalidation and reauth sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the invalidation↔reauth corridor to ≥80px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.25.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.25.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-07-24T23:31:50.649Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6Kv0vQ5tAYHGuBVlGTqBIMAx|fc_05899dfc4849136d016a63f5db7c34819888ecdf7951cdbb9b",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-login-start",
+                      "from": {
+                        "objectId": "browser",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "web-app",
+                        "anchor": "left"
+                      },
+                      "label": "start login",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-web-auth",
+                      "from": {
+                        "objectId": "web-app",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "auth-gateway",
+                        "anchor": "left"
+                      },
+                      "label": "login request",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-create-state",
+                      "from": {
+                        "objectId": "auth-gateway",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "session-store",
+                        "anchor": "left"
+                      },
+                      "label": "create short-lived state + PKCE",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-redirect",
+                      "from": {
+                        "objectId": "session-store",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "oauth-provider",
+                        "anchor": "left"
+                      },
+                      "label": "redirect",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-auth-code",
+                      "from": {
+                        "objectId": "oauth-provider",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "callback-service",
+                        "anchor": "left"
+                      },
+                      "label": "authorization code",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-validate-state",
+                      "from": {
+                        "objectId": "callback-service",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "state-check",
+                        "anchor": "top"
+                      },
+                      "label": "validate state",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-read-pkce",
+                      "from": {
+                        "objectId": "session-store",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "state-check",
+                        "anchor": "left"
+                      },
+                      "label": "state + verifier",
+                      "color": "teal",
+                      "waypoints": [
+                        [
+                          960,
+                          304
+                        ],
+                        [
+                          1296,
+                          304
+                        ],
+                        [
+                          1296,
+                          368
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-token-exchange",
+                      "from": {
+                        "objectId": "state-check",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "token-vault",
+                        "anchor": "bottom"
+                      },
+                      "label": "valid: exchange code + store tokens",
+                      "color": "violet",
+                      "waypoints": [
+                        [
+                          1584,
+                          368
+                        ],
+                        [
+                          1736,
+                          368
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-map-account",
+                      "from": {
+                        "objectId": "token-vault",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "account-map",
+                        "anchor": "left"
+                      },
+                      "label": "provider identity",
+                      "color": "gray"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-login-audit",
+                      "from": {
+                        "objectId": "account-map",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "login-audit",
+                        "anchor": "top"
+                      },
+                      "label": "write event",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-issue-cookie",
+                      "from": {
+                        "objectId": "account-map",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "session-cookie",
+                        "anchor": "top"
+                      },
+                      "label": "issue application session",
+                      "color": "green",
+                      "waypoints": [
+                        [
+                          2144,
+                          464
+                        ],
+                        [
+                          272,
+                          464
+                        ],
+                        [
+                          272,
+                          544
+                        ]
+                      ]
+                    }
+                  }
+                ],
+                "view": "login-flow"
+              },
+              "resultText": "APPLIED · 11 ops\n  1. addConnection e-login-start\n  2. addConnection e-web-auth\n  3. addConnection e-create-state\n  4. addConnection e-redirect\n  5. addConnection e-auth-code\n  6. addConnection e-validate-state\n  7. addConnection e-read-pkce\n  8. addConnection e-token-exchange\n  9. addConnection e-map-account\n  10. addConnection e-login-audit\n  11. addConnection e-issue-cookie\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"issue application session\" green anchors=bottom→top wp=2144,464→272,464→272,544\nDELTA\n  + e-login-start  browser → web-app\n  + e-web-auth  web-app → auth-gateway\n  + e-create-state  auth-gateway → session-store\n  + e-redirect  session-store → oauth-provider\n  + e-auth-code  oauth-provider → callback-service\n  + e-validate-state  callback-service → state-check\n  + e-read-pkce  session-store → state-check\n  + e-token-exchange  state-check → token-vault\n  + e-map-account  token-vault → account-map\n  + e-login-audit  account-map → login-audit\n  + e-issue-cookie  account-map → session-cookie\nBOARD DIFF · base → draft · 49 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\nLINTS · +13 −0\n  + E1 covered-content: label \"write event\" chip on e-login-audit lies on e-issue-cookie's path for 68px (move the label with a waypoint or reroute e-issue-cookie so the chip owns its wire)\n  + W1 covered-content: label \"state + verifier\" chip on e-read-pkce sits within 16px of oauth-provider (give the chip clear air — nudge oauth-provider or reroute e-read-pkce)\n  + W2 covered-content: label \"issue application session\" chip on e-issue-cookie sits within 16px of state-check (give the chip clear air — nudge state-check or reroute e-issue-cookie)\n  + W3 broken-edges: connector e-issue-cookie hugs the bottom border of login-flow for 1860px (route e-issue-cookie clear of login-flow's frame so it reads as a wire, not a border)\n  + W4 unreadable-labels: label \"start login\" chip on e-login-start (130×30px) bleeds onto browser and web-app: 80px of corridor where the chip needs 162px (open the browser↔web-app corridor to ≥162px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"web-app\",\"patch\":{\"geometry\":{\"x\":432,\"y\":192,\"width\":176,\"height\":80}}}\n  + W5 unreadable-labels: label \"login request\" chip on e-web-auth (149×30px) bleeds onto web-app and auth-gateway: 96px of corridor where the chip needs 181px (open the web-app↔auth-gateway corridor to ≥181px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"auth-gateway\",\"patch\":{\"geometry\":{\"x\":704,\"y\":192,\"width\":176,\"height\":80}}}\n  + W6 unreadable-labels: label \"create short-lived state + PKCE\" chip on e-create-state (322×30px) bleeds onto auth-gateway and session-store: 80px of corridor where the chip needs 354px (open the auth-gateway↔session-store corridor to ≥354px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"session-store\",\"patch\":{\"geometry\":{\"x\":1152,\"y\":176,\"width\":176,\"height\":112}}}\n  + W7 unreadable-labels: label \"redirect\" chip on e-redirect (101×30px) bleeds onto session-store and oauth-provider: 96px of corridor where the chip needs 133px (open the session-store↔oauth-provider corridor to ≥133px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"oauth-provider\",\"patch\":{\"geometry\":{\"x\":1184,\"y\":176,\"width\":144,\"height\":112}}}\n  + W8 unreadable-labels: label \"authorization code\" chip on e-auth-code (197×30px) bleeds onto oauth-provider and callback-service: 96px of corridor where the chip needs 229px (open the oauth-provider↔callback-service corridor to ≥229px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"callback-service\",\"patch\":{\"geometry\":{\"x\":1520,\"y\":192,\"width\":192,\"height\":80}}}\n  + W9 unreadable-labels: label \"validate state\" chip on e-validate-state (158×30px) bleeds onto callback-service and state-check: 48px of corridor where the chip needs 62px (open the callback-service↔state-check corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"state-check\",\"patch\":{\"geometry\":{\"x\":1376,\"y\":336,\"width\":160,\"height\":96}}}\n  + W10 unreadable-labels: label \"valid: exchange code + store tokens\" chip on e-token-exchange (360×30px) bleeds onto state-check: 112px of corridor where the chip needs 392px (open the state-check↔token-vault corridor to ≥392px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"token-vault\",\"patch\":{\"geometry\":{\"x\":1936,\"y\":176,\"width\":176,\"height\":112}}}\n  + W11 unreadable-labels: label \"provider identity\" chip on e-map-account (187×30px) bleeds onto token-vault and account-map: 80px of corridor where the chip needs 220px (open the token-vault↔account-map corridor to ≥220px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"account-map\",\"patch\":{\"geometry\":{\"x\":2048,\"y\":176,\"width\":208,\"height\":112}}}\n  + W12 unreadable-labels: label \"write event\" chip on e-login-audit (130×30px) bleeds onto account-map and login-audit: 32px of corridor where the chip needs 62px (open the account-map↔login-audit corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"login-audit\",\"patch\":{\"geometry\":{\"x\":1872,\"y\":352,\"width\":208,\"height\":96}}}\nROUTES\n  e-login-start  anchors right→left  path 256,236 → 336,236  through none\n  e-web-auth  anchors right→left  path 512,232 → 608,232  through none\n  e-create-state  anchors right→left  path 784,232 → 864,232  through none\n  e-redirect  anchors right→left  path 1040,232 → 1136,232  through none\n  e-auth-code  anchors right→left  path 1280,232 → 1376,232  through none\n  e-validate-state  anchors bottom→top  path 1472,272 → 1472,296 → 1456,296 → 1456,320  through none\n  e-read-pkce  anchors bottom→left  path 960,288 → 960,304 → 1296,304 → 1296,368 → 1376,368  through none\n  e-token-exchange  anchors right→bottom  path 1536,368 → 1584,368 → 1736,368 → 1736,288  through none\n  e-map-account  anchors right→left  path 1824,232 → 1904,232  through none\n  e-login-audit  anchors bottom→top  path 2008,288 → 2008,312 → 2008,304 → 1976,304 → 1976,296 → 1976,320  through none\n  e-issue-cookie  anchors bottom→top  path 2008,288 → 2008,308 → 2132,308 → 2132,440 → 272,440 → 272,592  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.29.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.29.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-07-24T23:32:08.975Z",
+          "thinking": "**Fixing reroute and adding concise labels**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dFzzV45n8DS1RVPWUtRmLbqU|fc_05899dfc4849136d016a63f5f1480c8198a5337de518d9735c",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-issue-cookie",
+                    "patch": {
+                      "from": {
+                        "objectId": "account-map",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "session-cookie",
+                        "anchor": "top"
+                      },
+                      "label": "secure app session",
+                      "color": "green",
+                      "waypoints": [
+                        [
+                          2160,
+                          240
+                        ],
+                        [
+                          2160,
+                          480
+                        ],
+                        [
+                          272,
+                          480
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-cookie-api",
+                      "from": {
+                        "objectId": "session-cookie",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "api-gateway",
+                        "anchor": "left"
+                      },
+                      "label": "request + cookie",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-api-validate",
+                      "from": {
+                        "objectId": "api-gateway",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "session-validator",
+                        "anchor": "left"
+                      },
+                      "label": "validate session",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-context",
+                      "from": {
+                        "objectId": "session-validator",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "auth-context",
+                        "anchor": "left"
+                      },
+                      "label": "valid",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-downstream",
+                      "from": {
+                        "objectId": "auth-context",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "downstream-services",
+                        "anchor": "left"
+                      },
+                      "label": "identity + auth context",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-integration",
+                      "from": {
+                        "objectId": "downstream-services",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "integration-service",
+                        "anchor": "top"
+                      },
+                      "label": "provider integration needed",
+                      "color": "violet",
+                      "waypoints": [
+                        [
+                          1664,
+                          800
+                        ],
+                        [
+                          256,
+                          800
+                        ],
+                        [
+                          256,
+                          912
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-broker",
+                      "from": {
+                        "objectId": "integration-service",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "token-broker",
+                        "anchor": "left"
+                      },
+                      "label": "request provider token",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-vault-read",
+                      "from": {
+                        "objectId": "token-vault",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "token-broker",
+                        "anchor": "top"
+                      },
+                      "label": "retrieve on demand",
+                      "color": "violet",
+                      "waypoints": [
+                        [
+                          1736,
+                          464
+                        ],
+                        [
+                          448,
+                          464
+                        ],
+                        [
+                          448,
+                          864
+                        ],
+                        [
+                          568,
+                          864
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-expiry",
+                      "from": {
+                        "objectId": "token-broker",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "expiry-check",
+                        "anchor": "left"
+                      },
+                      "label": "check expiry",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-refresh-needed",
+                      "from": {
+                        "objectId": "expiry-check",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "refresh-coordinator",
+                        "anchor": "left"
+                      },
+                      "label": "yes",
+                      "color": "orange"
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 10 ops\n  1. updateConnection e-issue-cookie\n  2. addConnection e-cookie-api\n  3. addConnection e-api-validate\n  4. addConnection e-context\n  5. addConnection e-downstream\n  6. addConnection e-integration\n  7. addConnection e-broker\n  8. addConnection e-vault-read\n  9. addConnection e-expiry\n  10. addConnection e-refresh-needed\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"secure app session\" green anchors=right→top wp=2160,240→2160,480→272,480\n  e-cookie-api session-cookie→api-gateway \"request + cookie\" teal anchors=right→left\n  e-api-validate api-gateway→session-validator \"validate session\" teal anchors=right→left\n  e-context session-validator→auth-context \"valid\" green anchors=right→left\n  e-downstream auth-context→downstream-services \"identity + auth context\" teal anchors=right→left\n  e-integration downstream-services→integration-service \"provider integration needed\" violet anchors=bottom→top wp=1664,800→256,800→256,912\n  e-broker integration-service→token-broker \"request provider token\" violet anchors=right→left\n  e-vault-read token-vault→token-broker \"retrieve on demand\" violet anchors=bottom→top wp=1736,464→448,464→448,864→568,864\n  e-expiry token-broker→expiry-check \"check expiry\" violet anchors=right→left\n  e-refresh-needed expiry-check→refresh-coordinator \"yes\" orange anchors=right→left\nDELTA\n  e-issue-cookie  anchors bottom→top → right→top\n  e-issue-cookie  wp 2144,464→272,464→272,544 → 2160,240→2160,480→272,480\n  e-issue-cookie  label \"issue application session\" → \"secure app session\"\n  + e-cookie-api  session-cookie → api-gateway\n  + e-api-validate  api-gateway → session-validator\n  + e-context  session-validator → auth-context\n  + e-downstream  auth-context → downstream-services\n  + e-integration  downstream-services → integration-service\n  + e-broker  integration-service → token-broker\n  + e-vault-read  token-vault → token-broker\n  + e-expiry  token-broker → expiry-check\n  + e-refresh-needed  expiry-check → refresh-coordinator\nBOARD DIFF · base → draft · 58 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\n  addConnection e-cookie-api\n  addConnection e-api-validate\n  addConnection e-context\n  addConnection e-downstream\n  addConnection e-integration\n  addConnection e-broker\n  addConnection e-vault-read\n  addConnection e-expiry\n  addConnection e-refresh-needed\nLINTS · +9 −3\n  + E1 covered-content: label \"valid: exchange code + store tokens\" chip on e-token-exchange lies on e-vault-read's path for 30px (move the label with a waypoint or reroute e-vault-read so the chip owns its wire)\n  + E2 covered-content: label \"request + cookie\" chip on e-cookie-api lies on e-vault-read's path for 30px (move the label with a waypoint or reroute e-vault-read so the chip owns its wire)\n  + W2 covered-content: label \"secure app session\" chip on e-issue-cookie sits within 16px of e-vault-read's path (offset e-vault-read or move the label so it cannot read as e-vault-read's label)\n  + W3 covered-content: label \"retrieve on demand\" chip on e-vault-read sits within 16px of e-issue-cookie's path (offset e-issue-cookie or move the label so it cannot read as e-issue-cookie's label)\n  + W13 unreadable-labels: label \"request + cookie\" chip on e-cookie-api (178×30px) bleeds onto session-cookie and api-gateway: 144px of corridor where the chip needs 210px (open the session-cookie↔api-gateway corridor to ≥210px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"api-gateway\",\"patch\":{\"geometry\":{\"x\":592,\"y\":592,\"width\":192,\"height\":80}}}\n  + W14 unreadable-labels: label \"validate session\" chip on e-api-validate (178×30px) bleeds onto api-gateway and session-validator: 144px of corridor where the chip needs 210px (open the api-gateway↔session-validator corridor to ≥210px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"session-validator\",\"patch\":{\"geometry\":{\"x\":928,\"y\":576,\"width\":176,\"height\":112}}}\n  + W15 unreadable-labels: label \"identity + auth context\" chip on e-downstream (245×30px) bleeds onto auth-context and downstream-services: 144px of corridor where the chip needs 277px (open the auth-context↔downstream-services corridor to ≥277px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"downstream-services\",\"patch\":{\"geometry\":{\"x\":1680,\"y\":592,\"width\":256,\"height\":80}}}\n  + W16 unreadable-labels: label \"request provider token\" chip on e-broker (235×30px) bleeds onto integration-service and token-broker: 112px of corridor where the chip needs 268px (open the integration-service↔token-broker corridor to ≥268px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"token-broker\",\"patch\":{\"geometry\":{\"x\":640,\"y\":928,\"width\":176,\"height\":80}}}\n  + W17 unreadable-labels: label \"check expiry\" chip on e-expiry (139×30px) bleeds onto token-broker and expiry-check: 112px of corridor where the chip needs 172px (open the token-broker↔expiry-check corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"expiry-check\",\"patch\":{\"geometry\":{\"x\":832,\"y\":912,\"width\":176,\"height\":112}}}\n  − E1 covered-content, − W2 covered-content, − W3 broken-edges  (resolved)\nROUTES\n  e-issue-cookie  anchors right→top  path 2112,240 → 2160,240 → 2160,480 → 272,480 → 272,592  through none\n  e-cookie-api  anchors right→left  path 368,636 → 512,636  through none\n  e-api-validate  anchors right→left  path 704,632 → 848,632  through none\n  e-context  anchors right→left  path 1024,632 → 1168,632  through none\n  e-downstream  anchors right→left  path 1392,632 → 1536,632  through none\n  e-integration  anchors bottom→top  path 1664,672 → 1664,800 → 256,800 → 256,912 → 256,928  through none\n  e-broker  anchors right→left  path 368,968 → 480,968  through none\n  e-vault-read  anchors bottom→top  path 1736,288 → 1736,464 → 448,464 → 448,864 → 568,864 → 568,928  through none\n  e-expiry  anchors right→left  path 656,968 → 768,968  through none\n  e-refresh-needed  anchors right→left  path 944,968 → 1056,968  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.33.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.33.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-07-24T23:32:26.144Z",
+          "thinking": "**Planning vault-read reroute and connections**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_WikD6PlKEg09IbhWQ6zEnbcv|fc_05899dfc4849136d016a63f5fcc85c819891aa0f2ba8abe220",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-vault-read",
+                    "patch": {
+                      "from": {
+                        "objectId": "token-vault",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "token-broker",
+                        "anchor": "top"
+                      },
+                      "label": "on-demand token",
+                      "color": "violet",
+                      "waypoints": [
+                        [
+                          1416,
+                          304
+                        ],
+                        [
+                          1416,
+                          816
+                        ],
+                        [
+                          568,
+                          816
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-lock",
+                      "from": {
+                        "objectId": "refresh-coordinator",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "account-lock",
+                        "anchor": "top"
+                      },
+                      "label": "lock account",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-refresh-once",
+                      "from": {
+                        "objectId": "account-lock",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "provider-refresh",
+                        "anchor": "right"
+                      },
+                      "label": "single caller",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-refresh-result",
+                      "from": {
+                        "objectId": "provider-refresh",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "refresh-valid",
+                        "anchor": "top"
+                      },
+                      "label": "result",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-rotate",
+                      "from": {
+                        "objectId": "refresh-valid",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "rotate-refresh",
+                        "anchor": "right"
+                      },
+                      "label": "valid: rotate refresh token",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-wake",
+                      "from": {
+                        "objectId": "rotate-refresh",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "wake-callers",
+                        "anchor": "right"
+                      },
+                      "label": "publish new result",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-invalid-refresh",
+                      "from": {
+                        "objectId": "refresh-valid",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "invalidation",
+                        "anchor": "left"
+                      },
+                      "label": "invalid: revoke session",
+                      "color": "red",
+                      "waypoints": [
+                        [
+                          1424,
+                          1264
+                        ],
+                        [
+                          1424,
+                          1144
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-logout-invalidate",
+                      "from": {
+                        "objectId": "logout",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "invalidation",
+                        "anchor": "top"
+                      },
+                      "label": "logout",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-admin-invalidate",
+                      "from": {
+                        "objectId": "admin-revoke",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "invalidation",
+                        "anchor": "top"
+                      },
+                      "label": "revoke",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-provider-invalidate",
+                      "from": {
+                        "objectId": "provider-webhook",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "invalidation",
+                        "anchor": "right"
+                      },
+                      "label": "notification",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-reauth",
+                      "from": {
+                        "objectId": "invalidation",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "reauth",
+                        "anchor": "left"
+                      },
+                      "label": "login required",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-audit-failures",
+                      "from": {
+                        "objectId": "audit-events",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "security-audit",
+                        "anchor": "right"
+                      },
+                      "label": "failed operations",
+                      "style": "dashed",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e-state-fail-audit",
+                      "from": {
+                        "objectId": "state-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "security-audit",
+                        "anchor": "top"
+                      },
+                      "label": "failed state / exchange",
+                      "style": "dashed",
+                      "color": "orange",
+                      "waypoints": [
+                        [
+                          1456,
+                          448
+                        ],
+                        [
+                          1456,
+                          1168
+                        ],
+                        [
+                          1616,
+                          1168
+                        ]
+                      ]
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 13 ops\n  1. updateConnection e-vault-read\n  2. addConnection e-lock\n  3. addConnection e-refresh-once\n  4. addConnection e-refresh-result\n  5. addConnection e-rotate\n  6. addConnection e-wake\n  7. addConnection e-invalid-refresh\n  8. addConnection e-logout-invalidate\n  9. addConnection e-admin-invalidate\n  10. addConnection e-provider-invalidate\n  11. addConnection e-reauth\n  12. addConnection e-audit-failures\n  13. addConnection e-state-fail-audit\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"secure app session\" green anchors=right→top wp=2160,240→2160,480→272,480\n  e-cookie-api session-cookie→api-gateway \"request + cookie\" teal anchors=right→left\n  e-api-validate api-gateway→session-validator \"validate session\" teal anchors=right→left\n  e-context session-validator→auth-context \"valid\" green anchors=right→left\n  e-downstream auth-context→downstream-services \"identity + auth context\" teal anchors=right→left\n  e-integration downstream-services→integration-service \"provider integration needed\" violet anchors=bottom→top wp=1664,800→256,800→256,912\n  e-broker integration-service→token-broker \"request provider token\" violet anchors=right→left\n  e-vault-read token-vault→token-broker \"on-demand token\" violet anchors=bottom→top wp=1416,304→1416,816→568,816\n  e-expiry token-broker→expiry-check \"check expiry\" violet anchors=right→left\n  e-refresh-needed expiry-check→refresh-coordinator \"yes\" orange anchors=right→left\n  e-lock refresh-coordinator→account-lock \"lock account\" orange anchors=bottom→top\n  e-refresh-once account-lock→provider-refresh \"single caller\" blue anchors=left→right\n  e-refresh-result provider-refresh→refresh-valid \"result\" orange anchors=bottom→top\n  e-rotate refresh-valid→rotate-refresh \"valid: rotate refresh token\" violet anchors=left→right\n  e-wake rotate-refresh→wake-callers \"publish new result\" green anchors=left→right\n  e-invalid-refresh refresh-valid→invalidation \"invalid: revoke session\" red anchors=right→left wp=1424,1264→1424,1144\n  e-logout-invalidate logout→invalidation \"logout\" red anchors=bottom→top\n  e-admin-invalidate admin-revoke→invalidation \"revoke\" red anchors=bottom→top\n  e-provider-invalidate provider-webhook→invalidation \"notification\" red anchors=bottom→right\n  e-reauth invalidation→reauth \"login required\" red anchors=right→left\n  e-audit-failures audit-events→security-audit \"failed operations\" dashed orange anchors=left→right\n  e-state-fail-audit state-check→security-audit \"failed state / exchange\" dashed orange anchors=bottom→top wp=1456,448→1456,1168→1616,1168\nDELTA\n  e-vault-read  wp 1736,464→448,464→448,864→568,864 → 1416,304→1416,816→568,816\n  e-vault-read  label \"retrieve on demand\" → \"on-demand token\"\n  + e-lock  refresh-coordinator → account-lock\n  + e-refresh-once  account-lock → provider-refresh\n  + e-refresh-result  provider-refresh → refresh-valid\n  + e-rotate  refresh-valid → rotate-refresh\n  + e-wake  rotate-refresh → wake-callers\n  + e-invalid-refresh  refresh-valid → invalidation\n  + e-logout-invalidate  logout → invalidation\n  + e-admin-invalidate  admin-revoke → invalidation\n  + e-provider-invalidate  provider-webhook → invalidation\n  + e-reauth  invalidation → reauth\n  + e-audit-failures  audit-events → security-audit\n  + e-state-fail-audit  state-check → security-audit\nBOARD DIFF · base → draft · 70 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\n  addConnection e-cookie-api\n  addConnection e-api-validate\n  addConnection e-context\n  addConnection e-downstream\n  addConnection e-integration\n  addConnection e-broker\n  addConnection e-vault-read\n  addConnection e-expiry\n  addConnection e-refresh-needed\n  addConnection e-lock\n  addConnection e-refresh-once\n  addConnection e-refresh-result\n  addConnection e-rotate\n  addConnection e-wake\n  addConnection e-invalid-refresh\n  addConnection e-logout-invalidate\n  addConnection e-admin-invalidate\n  addConnection e-provider-invalidate\n  addConnection e-reauth\n  addConnection e-audit-failures\n  addConnection e-state-fail-audit\nLINTS · +17 −4\n  + E1 covered-content: label \"result\" chip on e-refresh-result overlaps label \"valid: rotate refresh token\" chip on e-rotate (separate the two edges (spacing or waypoints) so both labels read)\n  + E2 covered-content: label \"validate state\" chip on e-validate-state lies on e-vault-read's path for 158px (move the label with a waypoint or reroute e-vault-read so the chip owns its wire)\n  + E3 covered-content: label \"identity + auth context\" chip on e-downstream lies on e-state-fail-audit's path for 30px (move the label with a waypoint or reroute e-state-fail-audit so the chip owns its wire)\n  + E4 covered-content: label \"revoke\" chip on e-admin-invalidate lies on e-logout-invalidate's path for 36px (move the label with a waypoint or reroute e-logout-invalidate so the chip owns its wire)\n  + E5 covered-content: label \"login required\" chip on e-reauth lies on e-provider-invalidate's path for 31px (move the label with a waypoint or reroute e-provider-invalidate so the chip owns its wire)\n  + E6 broken-edges: connector e-invalid-refresh (refresh-valid→invalidation) passes through a box (reroute with waypoints or move the boxes so the path is clear)\n  + W2 covered-content: label \"valid: rotate refresh token\" chip on e-rotate sits within 16px of provider-refresh (give the chip clear air — nudge provider-refresh or reroute e-rotate)\n  + W3 covered-content: label \"invalid: revoke session\" chip on e-invalid-refresh sits within 16px of security-audit (give the chip clear air — nudge security-audit or reroute e-invalid-refresh)\n  + W4 covered-content: label \"valid: rotate refresh token\" chip on e-rotate sits within 16px of e-refresh-result's path (offset e-refresh-result or move the label so it cannot read as e-refresh-result's label)\n  + W5 broken-edges: connector e-vault-read hugs the bottom border of login-flow for 896px (route e-vault-read clear of login-flow's frame so it reads as a wire, not a border)\n  + W6 broken-edges: 8 connector crossings board-wide (threshold 6) (regroup the clusters so connected nodes sit near each other)\n  + W21 unreadable-labels: label \"single caller\" chip on e-refresh-once (149×30px) bleeds onto account-lock and provider-refresh: 96px of corridor where the chip needs 181px (open the account-lock↔provider-refresh corridor to ≥181px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"account-lock\",\"patch\":{\"geometry\":{\"x\":1168,\"y\":1088,\"width\":128,\"height\":96}}}\n  + W22 unreadable-labels: label \"result\" chip on e-refresh-result (82×30px) bleeds onto provider-refresh and refresh-valid: 48px of corridor where the chip needs 62px (open the provider-refresh↔refresh-valid corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"refresh-valid\",\"patch\":{\"geometry\":{\"x\":800,\"y\":1232,\"width\":176,\"height\":96}}}\n  + W23 unreadable-labels: label \"valid: rotate refresh token\" chip on e-rotate (283×30px) bleeds onto refresh-valid and rotate-refresh: 112px of corridor where the chip needs 316px (open the refresh-valid↔rotate-refresh corridor to ≥316px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"refresh-valid\",\"patch\":{\"geometry\":{\"x\":1008,\"y\":1216,\"width\":176,\"height\":96}}}\n  + W24 unreadable-labels: label \"publish new result\" chip on e-wake (197×30px) bleeds onto rotate-refresh and wake-callers: 96px of corridor where the chip needs 229px (open the rotate-refresh↔wake-callers corridor to ≥229px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"rotate-refresh\",\"patch\":{\"geometry\":{\"x\":640,\"y\":1072,\"width\":192,\"height\":112}}}\n  + W25 unreadable-labels: label \"login required\" chip on e-reauth (158×30px) bleeds onto invalidation and reauth: 48px of corridor where the chip needs 191px (open the invalidation↔reauth corridor to ≥191px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"reauth\",\"patch\":{\"geometry\":{\"x\":2128,\"y\":1104,\"width\":160,\"height\":96}}}\n  + W26 unreadable-labels: label \"failed operations\" chip on e-audit-failures (187×30px) bleeds onto audit-events and security-audit: 80px of corridor where the chip needs 220px (open the audit-events↔security-audit corridor to ≥220px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateSticky\",\"stickyId\":\"audit-events\",\"patch\":{\"geometry\":{\"x\":1952,\"y\":1216,\"width\":256,\"height\":112}}}\n  − E1 covered-content, − E2 covered-content, − W2 covered-content, − W3 covered-content  (resolved)\nROUTES\n  e-vault-read  anchors bottom→top  path 1736,288 → 1736,308 → 1628,308 → 1628,232 → 1588,232 → 1588,292 → 1356,292 → 1356,436 → 460,436 → 460,492 → 140,492 → 140,772 → 460,772 → 460,908 → 568,908 → 568,928  through none\n  e-lock  anchors bottom→top  path 1168,1008 → 1168,1032 → 1168,1048 → 1136,1048 → 1136,1064 → 1136,1088  through none\n  e-refresh-once  anchors left→right  path 1062,1132 → 976,1132  through none\n  e-refresh-result  anchors bottom→top  path 888,1168 → 888,1216  through none\n  e-rotate  anchors left→right  path 800,1264 → 776,1264 → 744,1264 → 744,1128 → 712,1128 → 688,1128  through none\n  e-wake  anchors left→right  path 496,1128 → 400,1128  through none\n  e-invalid-refresh  anchors right→left  path 976,1264 → 1424,1264 → 1424,1144 → 1664,1144  through vault-rule\n  e-logout-invalidate  anchors bottom→top  path 1592,992 → 1592,1016 → 1592,1040 → 1800,1040 → 1800,1064 → 1800,1088  through none\n  e-admin-invalidate  anchors bottom→top  path 1840,992 → 1840,1016 → 1840,1040 → 1800,1040 → 1800,1064 → 1800,1088  through none\n  e-provider-invalidate  anchors bottom→right  path 2064,1008 → 2064,1048 → 1956,1048 → 1956,1144 → 1936,1144  through none\n  e-reauth  anchors right→left  path 1936,1148 → 1984,1148  through none\n  e-audit-failures  anchors left→right  path 1808,1272 → 1784,1272 → 1768,1272 → 1768,1240 → 1752,1240 → 1728,1240  through none\n  e-state-fail-audit  anchors bottom→top  path 1456,416 → 1456,448 → 1456,1168 → 1616,1168 → 1616,1184  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.37.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.37.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-07-24T23:32:43.655Z",
+          "thinking": "**Simplifying routes and labels**\n\nI need to simplify or remove labels causing overlaps in the paths. Removing certain labels and adjusting routes may help avoid conflicts, especially around specific waypoints. I'll adjust connections carefully to create clearer paths without losing valuable connections.\n\n**Adjusting routes and labels**\n\nI need to reroute the provider path to avoid the reauthentication label. I'll adjust the routing above certain rules and ensure it passes smoothly while avoiding areas like sticky and audit. I'll also remove long labels to keep things clearer.",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IXmKrVnjBoObcatFSzdnbR2E|fc_05899dfc4849136d016a63f618ab7c819897aa73fc6e00a08b",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-refresh-result",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-rotate",
+                    "patch": {
+                      "label": "rotate token"
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-vault-read",
+                    "patch": {
+                      "label": "broker only",
+                      "waypoints": [
+                        [
+                          1840,
+                          464
+                        ],
+                        [
+                          1440,
+                          464
+                        ],
+                        [
+                          1440,
+                          816
+                        ],
+                        [
+                          568,
+                          816
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-state-fail-audit",
+                    "patch": {
+                      "label": "failed state / exchange",
+                      "waypoints": [
+                        [
+                          2184,
+                          448
+                        ],
+                        [
+                          2184,
+                          1168
+                        ],
+                        [
+                          1616,
+                          1168
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-logout-invalidate",
+                    "patch": {
+                      "label": "logout",
+                      "waypoints": [
+                        [
+                          1592,
+                          1040
+                        ],
+                        [
+                          1648,
+                          1040
+                        ],
+                        [
+                          1648,
+                          1120
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-admin-invalidate",
+                    "patch": {
+                      "label": "admin revoke",
+                      "waypoints": [
+                        [
+                          1840,
+                          1040
+                        ],
+                        [
+                          1800,
+                          1040
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-provider-invalidate",
+                    "patch": {
+                      "to": {
+                        "objectId": "invalidation",
+                        "anchor": "top"
+                      },
+                      "label": "provider notice",
+                      "waypoints": [
+                        [
+                          2064,
+                          1040
+                        ],
+                        [
+                          1904,
+                          1040
+                        ],
+                        [
+                          1904,
+                          1072
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-reauth",
+                    "patch": {
+                      "label": "reauth"
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-invalid-refresh",
+                    "patch": {
+                      "label": "invalid refresh",
+                      "waypoints": [
+                        [
+                          1392,
+                          1328
+                        ],
+                        [
+                          1440,
+                          1328
+                        ],
+                        [
+                          1440,
+                          1072
+                        ],
+                        [
+                          1648,
+                          1072
+                        ],
+                        [
+                          1648,
+                          1144
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-audit-failures",
+                    "patch": {
+                      "label": "audit failures"
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 10 ops\n  1. updateConnection e-refresh-result\n  2. updateConnection e-rotate\n  3. updateConnection e-vault-read\n  4. updateConnection e-state-fail-audit\n  5. updateConnection e-logout-invalidate\n  6. updateConnection e-admin-invalidate\n  7. updateConnection e-provider-invalidate\n  8. updateConnection e-reauth\n  9. updateConnection e-invalid-refresh\n  10. updateConnection e-audit-failures\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"secure app session\" green anchors=right→top wp=2160,240→2160,480→272,480\n  e-cookie-api session-cookie→api-gateway \"request + cookie\" teal anchors=right→left\n  e-api-validate api-gateway→session-validator \"validate session\" teal anchors=right→left\n  e-context session-validator→auth-context \"valid\" green anchors=right→left\n  e-downstream auth-context→downstream-services \"identity + auth context\" teal anchors=right→left\n  e-integration downstream-services→integration-service \"provider integration needed\" violet anchors=bottom→top wp=1664,800→256,800→256,912\n  e-broker integration-service→token-broker \"request provider token\" violet anchors=right→left\n  e-vault-read token-vault→token-broker \"broker only\" violet anchors=bottom→top wp=1840,464→1440,464→1440,816→568,816\n  e-expiry token-broker→expiry-check \"check expiry\" violet anchors=right→left\n  e-refresh-needed expiry-check→refresh-coordinator \"yes\" orange anchors=right→left\n  e-lock refresh-coordinator→account-lock \"lock account\" orange anchors=bottom→top\n  e-refresh-once account-lock→provider-refresh \"single caller\" blue anchors=left→right\n  e-refresh-result provider-refresh→refresh-valid — orange anchors=bottom→top\n  e-rotate refresh-valid→rotate-refresh \"rotate token\" violet anchors=left→right\n  e-wake rotate-refresh→wake-callers \"publish new result\" green anchors=left→right\n  e-invalid-refresh refresh-valid→invalidation \"invalid refresh\" red anchors=right→left wp=1392,1328→1440,1328→1440,1072→1648,1072→1648,1144\n  e-logout-invalidate logout→invalidation \"logout\" red anchors=bottom→top wp=1592,1040→1648,1040→1648,1120\n  e-admin-invalidate admin-revoke→invalidation \"admin revoke\" red anchors=bottom→top wp=1840,1040→1800,1040\n  e-provider-invalidate provider-webhook→invalidation \"provider notice\" red anchors=bottom→top wp=2064,1040→1904,1040→1904,1072\n  e-reauth invalidation→reauth \"reauth\" red anchors=right→left\n  e-audit-failures audit-events→security-audit \"audit failures\" dashed orange anchors=left→right\n  e-state-fail-audit state-check→security-audit \"failed state / exchange\" dashed orange anchors=bottom→top wp=2184,448→2184,1168→1616,1168\nDELTA\n  e-vault-read  wp 1416,304→1416,816→568,816 → 1840,464→1440,464→1440,816→568,816\n  e-vault-read  label \"on-demand token\" → \"broker only\"\n  e-refresh-result  label result → \"\"\n  e-rotate  label \"valid: rotate refresh token\" → \"rotate token\"\n  e-invalid-refresh  wp 1424,1264→1424,1144 → 1392,1328→1440,1328→1440,1072→1648,1072→1648,1144\n  e-invalid-refresh  label \"invalid: revoke session\" → \"invalid refresh\"\n  e-logout-invalidate  wp none → 1592,1040→1648,1040→1648,1120\n  e-admin-invalidate  wp none → 1840,1040→1800,1040\n  e-admin-invalidate  label revoke → \"admin revoke\"\n  e-provider-invalidate  anchors bottom→right → bottom→top\n  e-provider-invalidate  wp none → 2064,1040→1904,1040→1904,1072\n  e-provider-invalidate  label notification → \"provider notice\"\n  e-reauth  label \"login required\" → reauth\n  e-audit-failures  label \"failed operations\" → \"audit failures\"\n  e-state-fail-audit  wp 1456,448→1456,1168→1616,1168 → 2184,448→2184,1168→1616,1168\nBOARD DIFF · base → draft · 70 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\n  addConnection e-cookie-api\n  addConnection e-api-validate\n  addConnection e-context\n  addConnection e-downstream\n  addConnection e-integration\n  addConnection e-broker\n  addConnection e-vault-read\n  addConnection e-expiry\n  addConnection e-refresh-needed\n  addConnection e-lock\n  addConnection e-refresh-once\n  addConnection e-refresh-result\n  addConnection e-rotate\n  addConnection e-wake\n  addConnection e-invalid-refresh\n  addConnection e-logout-invalidate\n  addConnection e-admin-invalidate\n  addConnection e-provider-invalidate\n  addConnection e-reauth\n  addConnection e-audit-failures\n  addConnection e-state-fail-audit\nLINTS · +16 −13\n  + E1 covered-content: label \"lock account\" chip on e-lock overlaps label \"invalid refresh\" chip on e-invalid-refresh (separate the two edges (spacing or waypoints) so both labels read)\n  + E3 covered-content: label \"single caller\" chip on e-refresh-once lies on e-invalid-refresh's path for 30px (move the label with a waypoint or reroute e-invalid-refresh so the chip owns its wire)\n  + E4 covered-content: label \"admin revoke\" chip on e-admin-invalidate lies on e-logout-invalidate's path for 65px (move the label with a waypoint or reroute e-logout-invalidate so the chip owns its wire)\n  + W2 covered-content: label \"rotate token\" chip on e-rotate sits within 16px of provider-refresh (give the chip clear air — nudge provider-refresh or reroute e-rotate)\n  + W3 covered-content: label \"invalid refresh\" chip on e-invalid-refresh sits within 16px of account-lock (give the chip clear air — nudge account-lock or reroute e-invalid-refresh)\n  + W4 covered-content: label \"logout\" chip on e-logout-invalidate sits within 16px of label \"admin revoke\" chip on e-admin-invalidate (separate the two edges so the chips read as two labels)\n  + W5 covered-content: label \"admin revoke\" chip on e-admin-invalidate sits within 16px of label \"provider notice\" chip on e-provider-invalidate (separate the two edges so the chips read as two labels)\n  + W6 covered-content: label \"lock account\" chip on e-lock sits within 16px of e-invalid-refresh's path (offset e-invalid-refresh or move the label so it cannot read as e-invalid-refresh's label)\n  + W7 covered-content: label \"invalid refresh\" chip on e-invalid-refresh sits within 16px of e-lock's path (offset e-lock or move the label so it cannot read as e-lock's label)\n  + W8 covered-content: label \"admin revoke\" chip on e-admin-invalidate sits within 16px of e-provider-invalidate's path (offset e-provider-invalidate or move the label so it cannot read as e-provider-invalidate's label)\n  + W10 broken-edges: connector e-state-fail-audit hugs the bottom border of login-flow for 292px (route e-state-fail-audit clear of login-flow's frame so it reads as a wire, not a border)\n  + W11 broken-edges: connector e-state-fail-audit hugs the left border of revocation-audit for 272px (route e-state-fail-audit clear of revocation-audit's frame so it reads as a wire, not a border)\n  + W12 broken-edges: 8 connector crossings board-wide (threshold 6) (regroup the clusters so connected nodes sit near each other)\n  + W28 unreadable-labels: label \"rotate token\" chip on e-rotate (139×30px) bleeds onto refresh-valid and rotate-refresh: 112px of corridor where the chip needs 172px (open the refresh-valid↔rotate-refresh corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"refresh-valid\",\"patch\":{\"geometry\":{\"x\":864,\"y\":1216,\"width\":176,\"height\":96}}}\n  + W30 unreadable-labels: label \"reauth\" chip on e-reauth (82×30px) bleeds onto invalidation and reauth: 48px of corridor where the chip needs 114px (open the invalidation↔reauth corridor to ≥114px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"reauth\",\"patch\":{\"geometry\":{\"x\":2064,\"y\":1104,\"width\":160,\"height\":96}}}\n  + W31 unreadable-labels: label \"audit failures\" chip on e-audit-failures (158×30px) bleeds onto audit-events and security-audit: 80px of corridor where the chip needs 191px (open the audit-events↔security-audit corridor to ≥191px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateSticky\",\"stickyId\":\"audit-events\",\"patch\":{\"geometry\":{\"x\":1920,\"y\":1216,\"width\":256,\"height\":112}}}\n  − E1 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 broken-edges, − W2 covered-content, − W3 covered-content, − W4 covered-content, − W6 broken-edges, − W22 unreadable-labels, − W23 unreadable-labels, − W25 unreadable-labels, − W26 unreadable-labels  (resolved)\nROUTES\n  e-vault-read  anchors bottom→top  path 1736,288 → 1736,308 → 1628,308 → 1628,232 → 1588,232 → 1588,292 → 1356,292 → 1356,436 → 460,436 → 460,492 → 140,492 → 140,772 → 460,772 → 460,908 → 568,908 → 568,928  through none\n  e-invalid-refresh  anchors right→left  path 976,1264 → 996,1264 → 996,1068 → 1320,1068 → 1320,1144 → 1664,1144  through none\n  e-logout-invalidate  anchors bottom→top  path 1592,992 → 1592,1016 → 1592,1040 → 1800,1040 → 1800,1064 → 1800,1088  through none\n  e-admin-invalidate  anchors bottom→top  path 1840,992 → 1840,1040 → 1800,1040 → 1800,1088  through none\n  e-provider-invalidate  anchors bottom→top  path 2064,1008 → 2064,1040 → 1904,1040 → 1904,1072 → 1904,1088  through none\n  e-state-fail-audit  anchors bottom→top  path 1456,416 → 1456,436 → 1748,436 → 1748,492 → 2164,492 → 2164,876 → 1748,876 → 1748,892 → 1484,892 → 1484,1164 → 1616,1164 → 1616,1184  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.41.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.41.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-07-24T23:32:52.925Z",
+          "thinking": "**Clearing empty labels to resolve errors**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Yl0buWh1OqSia0GhPFe85rFi|fc_05899dfc4849136d016a63f6229fe8819898d3a9b328cf0558",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-lock",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-refresh-once",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-invalid-refresh",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-logout-invalidate",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-admin-invalidate",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-provider-invalidate",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e-reauth",
+                    "patch": {
+                      "label": ""
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 7 ops\n  1. updateConnection e-lock\n  2. updateConnection e-refresh-once\n  3. updateConnection e-invalid-refresh\n  4. updateConnection e-logout-invalidate\n  5. updateConnection e-admin-invalidate\n  6. updateConnection e-provider-invalidate\n  7. updateConnection e-reauth\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"secure app session\" green anchors=right→top wp=2160,240→2160,480→272,480\n  e-cookie-api session-cookie→api-gateway \"request + cookie\" teal anchors=right→left\n  e-api-validate api-gateway→session-validator \"validate session\" teal anchors=right→left\n  e-context session-validator→auth-context \"valid\" green anchors=right→left\n  e-downstream auth-context→downstream-services \"identity + auth context\" teal anchors=right→left\n  e-integration downstream-services→integration-service \"provider integration needed\" violet anchors=bottom→top wp=1664,800→256,800→256,912\n  e-broker integration-service→token-broker \"request provider token\" violet anchors=right→left\n  e-vault-read token-vault→token-broker \"broker only\" violet anchors=bottom→top wp=1840,464→1440,464→1440,816→568,816\n  e-expiry token-broker→expiry-check \"check expiry\" violet anchors=right→left\n  e-refresh-needed expiry-check→refresh-coordinator \"yes\" orange anchors=right→left\n  e-lock refresh-coordinator→account-lock — orange anchors=bottom→top\n  e-refresh-once account-lock→provider-refresh — blue anchors=left→right\n  e-refresh-result provider-refresh→refresh-valid — orange anchors=bottom→top\n  e-rotate refresh-valid→rotate-refresh \"rotate token\" violet anchors=left→right\n  e-wake rotate-refresh→wake-callers \"publish new result\" green anchors=left→right\n  e-invalid-refresh refresh-valid→invalidation — red anchors=right→left wp=1392,1328→1440,1328→1440,1072→1648,1072→1648,1144\n  e-logout-invalidate logout→invalidation — red anchors=bottom→top wp=1592,1040→1648,1040→1648,1120\n  e-admin-invalidate admin-revoke→invalidation — red anchors=bottom→top wp=1840,1040→1800,1040\n  e-provider-invalidate provider-webhook→invalidation — red anchors=bottom→top wp=2064,1040→1904,1040→1904,1072\n  e-reauth invalidation→reauth — red anchors=right→left\n  e-audit-failures audit-events→security-audit \"audit failures\" dashed orange anchors=left→right\n  e-state-fail-audit state-check→security-audit \"failed state / exchange\" dashed orange anchors=bottom→top wp=2184,448→2184,1168→1616,1168\nDELTA\n  e-lock  label \"lock account\" → \"\"\n  e-refresh-once  label \"single caller\" → \"\"\n  e-invalid-refresh  label \"invalid refresh\" → \"\"\n  e-logout-invalidate  label logout → \"\"\n  e-admin-invalidate  label \"admin revoke\" → \"\"\n  e-provider-invalidate  label \"provider notice\" → \"\"\n  e-reauth  label reauth → \"\"\nBOARD DIFF · base → draft · 70 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\n  addConnection e-cookie-api\n  addConnection e-api-validate\n  addConnection e-context\n  addConnection e-downstream\n  addConnection e-integration\n  addConnection e-broker\n  addConnection e-vault-read\n  addConnection e-expiry\n  addConnection e-refresh-needed\n  addConnection e-lock\n  addConnection e-refresh-once\n  addConnection e-refresh-result\n  addConnection e-rotate\n  addConnection e-wake\n  addConnection e-invalid-refresh\n  addConnection e-logout-invalidate\n  addConnection e-admin-invalidate\n  addConnection e-provider-invalidate\n  addConnection e-reauth\n  addConnection e-audit-failures\n  addConnection e-state-fail-audit\nLINTS · +0 −11\n  − E1 covered-content, − E3 covered-content, − E4 covered-content, − W3 covered-content, − W4 covered-content, − W5 covered-content, − W6 covered-content, − W7 covered-content, − W8 covered-content, − W27 unreadable-labels, − W30 unreadable-labels  (resolved)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.45.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.45.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-07-24T23:32:57.855Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_WQ7j0o65TYbs2UkLjJnNV4NM|fc_05899dfc4849136d016a63f62935b481989a9699bfa1f835e0",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 0 ops\n  (no ops — look only)\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-183037 · oauth-session-lifecycle\" white 112,80 2096×1312\n    login-flow section \"1 · OAuth login and callback\" blue 128,128 2016×320\n      browser icon \"Browser\" blue 144,192 112×96 icon=display\n      web-app process \"Web application\" white 336,192 176×80\n      auth-gateway process \"Auth gateway\" blue 608,192 176×80\n      session-store database \"Session store state + PKCE\" teal 864,176 176×112\n      oauth-provider icon \"External OAuth provider\" violet 1136,176 144×112 icon=globe\n      callback-service predefined-process \"Dedicated callback\" blue 1376,192 192×80\n      token-vault database \"Encrypted token vault\" violet 1648,176 176×112\n      account-map process \"Map provider identity to internal account\" white 1904,176 208×112\n      state-check decision \"State valid?\" yellow 1376,320 160×96\n      login-audit document \"Auditable login event\" orange 1872,320 208×96\n    session-runtime section \"2 · Application session and request path\" teal 160,512 1984×240\n      session-cookie document \"Secure HTTP-only application cookie\" green 176,592 192×96\n      api-gateway process \"API gateway\" teal 512,592 192×80\n      session-validator decision \"Session valid?\" yellow 848,576 176×112\n      auth-context document \"Internal user ID + authorization context\" teal 1168,576 224×112\n      downstream-services predefined-process \"Downstream application services\" white 1536,592 256×80\n      token-boundary-note sticky \"**Trust boundary** Provider tokens never reach the browser or general application services.\" 1872,560 240×160\n    token-refresh section \"3 · Provider token use and coordinated refresh\" violet 128,864 1264×480\n      integration-service predefined-process \"Downstream integration\" white 144,928 224×80\n      token-broker process \"Token broker\" violet 480,928 176×80\n      expiry-check decision \"Near expiry?\" yellow 768,912 176×112\n      refresh-coordinator process \"Refresh coordinator\" violet 1056,928 224×80\n      account-lock icon \"Per-account lock\" orange 1072,1088 128×96 icon=key\n      provider-refresh process \"Refresh once\" blue 800,1088 176×80\n      rotate-refresh process \"Rotate stored refresh token\" violet 496,1072 192×112\n      wake-callers process \"Wake concurrent callers with new result\" green 176,1072 224×112\n      refresh-valid decision \"Refresh valid?\" yellow 800,1216 176×96\n      vault-rule sticky \"**Token handling** Broker retrieves provider access tokens only for integrations. Token values are never logged.\" 1056,1200 304×112\n    revocation-audit section \"4 · Revocation and security audit\" orange 1488,848 688×512\n      logout process \"Explicit logout\" white 1504,912 176×80\n      admin-revoke process \"Administrator revocation\" white 1744,912 192×80\n      provider-webhook process \"Provider revocation notification\" violet 1984,896 160×112\n      invalidation process \"Invalidate active sessions + cached auth context\" red 1664,1088 272×112\n      reauth off-page-connector \"Require login again\" orange 1984,1104 160×96\n      security-audit database \"Security audit stream (no token values)\" orange 1504,1184 224×112\n      audit-events sticky \"**Audit failures** - state check - token exchange - refresh - revocation\" 1808,1216 256×112\nEDGES\n  e-login-start browser→web-app \"start login\" blue anchors=right→left\n  e-web-auth web-app→auth-gateway \"login request\" blue anchors=right→left\n  e-create-state auth-gateway→session-store \"create short-lived state + PKCE\" teal anchors=right→left\n  e-redirect session-store→oauth-provider \"redirect\" violet anchors=right→left\n  e-auth-code oauth-provider→callback-service \"authorization code\" violet anchors=right→left\n  e-validate-state callback-service→state-check \"validate state\" orange anchors=bottom→top\n  e-read-pkce session-store→state-check \"state + verifier\" teal anchors=bottom→left wp=960,304→1296,304→1296,368\n  e-token-exchange state-check→token-vault \"valid: exchange code + store tokens\" violet anchors=right→bottom wp=1584,368→1736,368\n  e-map-account token-vault→account-map \"provider identity\" anchors=right→left\n  e-login-audit account-map→login-audit \"write event\" orange anchors=bottom→top\n  e-issue-cookie account-map→session-cookie \"secure app session\" green anchors=right→top wp=2160,240→2160,480→272,480\n  e-cookie-api session-cookie→api-gateway \"request + cookie\" teal anchors=right→left\n  e-api-validate api-gateway→session-validator \"validate session\" teal anchors=right→left\n  e-context session-validator→auth-context \"valid\" green anchors=right→left\n  e-downstream auth-context→downstream-services \"identity + auth context\" teal anchors=right→left\n  e-integration downstream-services→integration-service \"provider integration needed\" violet anchors=bottom→top wp=1664,800→256,800→256,912\n  e-broker integration-service→token-broker \"request provider token\" violet anchors=right→left\n  e-vault-read token-vault→token-broker \"broker only\" violet anchors=bottom→top wp=1840,464→1440,464→1440,816→568,816\n  e-expiry token-broker→expiry-check \"check expiry\" violet anchors=right→left\n  e-refresh-needed expiry-check→refresh-coordinator \"yes\" orange anchors=right→left\n  e-lock refresh-coordinator→account-lock — orange anchors=bottom→top\n  e-refresh-once account-lock→provider-refresh — blue anchors=left→right\n  e-refresh-result provider-refresh→refresh-valid — orange anchors=bottom→top\n  e-rotate refresh-valid→rotate-refresh \"rotate token\" violet anchors=left→right\n  e-wake rotate-refresh→wake-callers \"publish new result\" green anchors=left→right\n  e-invalid-refresh refresh-valid→invalidation — red anchors=right→left wp=1392,1328→1440,1328→1440,1072→1648,1072→1648,1144\n  e-logout-invalidate logout→invalidation — red anchors=bottom→top wp=1592,1040→1648,1040→1648,1120\n  e-admin-invalidate admin-revoke→invalidation — red anchors=bottom→top wp=1840,1040→1800,1040\n  e-provider-invalidate provider-webhook→invalidation — red anchors=bottom→top wp=2064,1040→1904,1040→1904,1072\n  e-reauth invalidation→reauth — red anchors=right→left\n  e-audit-failures audit-events→security-audit \"audit failures\" dashed orange anchors=left→right\n  e-state-fail-audit state-check→security-audit \"failed state / exchange\" dashed orange anchors=bottom→top wp=2184,448→2184,1168→1616,1168\nDELTA · none\nBOARD DIFF · base → draft · 70 ops\n  addSection login-flow\n  addSection session-runtime\n  addSection token-refresh\n  addSection revocation-audit\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject callback-service\n  addObject token-vault\n  addObject account-map\n  addObject state-check\n  addObject login-audit\n  addObject session-cookie\n  addObject api-gateway\n  addObject session-validator\n  addObject auth-context\n  addObject downstream-services\n  addSticky token-boundary-note\n  addObject integration-service\n  addObject token-broker\n  addObject expiry-check\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject provider-refresh\n  addObject rotate-refresh\n  addObject wake-callers\n  addObject refresh-valid\n  addSticky vault-rule\n  addObject logout\n  addObject admin-revoke\n  addObject provider-webhook\n  addObject invalidation\n  addObject reauth\n  addObject security-audit\n  addSticky audit-events\n  updateSection page-frame  moved · resized\n  addConnection e-login-start\n  addConnection e-web-auth\n  addConnection e-create-state\n  addConnection e-redirect\n  addConnection e-auth-code\n  addConnection e-validate-state\n  addConnection e-read-pkce\n  addConnection e-token-exchange\n  addConnection e-map-account\n  addConnection e-login-audit\n  addConnection e-issue-cookie\n  addConnection e-cookie-api\n  addConnection e-api-validate\n  addConnection e-context\n  addConnection e-downstream\n  addConnection e-integration\n  addConnection e-broker\n  addConnection e-vault-read\n  addConnection e-expiry\n  addConnection e-refresh-needed\n  addConnection e-lock\n  addConnection e-refresh-once\n  addConnection e-refresh-result\n  addConnection e-rotate\n  addConnection e-wake\n  addConnection e-invalid-refresh\n  addConnection e-logout-invalidate\n  addConnection e-admin-invalidate\n  addConnection e-provider-invalidate\n  addConnection e-reauth\n  addConnection e-audit-failures\n  addConnection e-state-fail-audit\nLINTS · +0 −0 (34 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T23-30-40-343Z_019f9677-7a57-729b-a1a7-e590da4f7ec8.49.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-07-24T23:33:06.756Z",
+          "thinking": "**Finalizing warning ID naming**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yH3QvurBAPG6MueVHP9jFVvh|fc_05899dfc4849136d016a63f631be2081988786047c1fbbd4b5",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Built the complete OAuth session lifecycle across four service-flow sections; knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes."
+              },
+              "resultText": "Committed: Built the complete OAuth session lifecycle across four service-flow sections; knowingly shipping layout warnings W1–W34 for dense labels, connector crossings, and border-hugging audit/token routes. (70 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

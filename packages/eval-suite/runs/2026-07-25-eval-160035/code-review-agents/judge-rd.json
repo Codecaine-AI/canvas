@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "code-review-agents",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board offers stronger tinted grouping and semantic color but loses finish through larger dead frame areas, several marathon feedback routes, and visible junction/termination artifacts.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The two-row workflow is broadly balanced, but the large empty band below the control panels and unused space at the right leave a substantial portion of the locked frame visually dead."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Nodes and label chips generally have ample breathing room, with clear gaps between stages, though the central long feedback corridors consume air without adding useful visual structure."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Ten lightly tinted, clearly titled regions perform real grouping work, and the two-node section rhythm makes the main lifecycle easy to scan."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Section hues and green, red, orange, and magenta flow semantics are mostly consistent, although the large number of pastel families creates slightly more decorative variation than necessary."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Failure: a star-like junction appears on the dashed magenta stale-check route, while the telemetry connector ends in a conspicuous bracket-like stub and the long red restart route has an awkward terminal bend."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "The four-by-two main-stage grid holds strong horizontal and vertical registers, but the lower control panels sit off that primary rhythm and make the composition feel appended rather than fully integrated."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "Failure: most local arrows are clean, but the located-findings, fresh-run, and future-threshold feedback paths make long cross-board detours whose bends and distant labels weaken immediate traceability."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 second at 7.0, and the board under grade third at 6.5."
+  },
+  "usage": {
+    "input_tokens": 16298,
+    "output_tokens": 775
+  },
+  "flags": []
+}

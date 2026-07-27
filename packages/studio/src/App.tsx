@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } fr
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
+  CheckIcon,
   PlusIcon,
   ShapesIcon,
   TrashIcon,
@@ -37,6 +38,7 @@ import {
 } from "./agent";
 import { GalleryPage } from "./GalleryPage";
 import { DevRail } from "./dev/DevRail";
+import { EvalsPage } from "./dev/EvalsPage";
 import { devPagesEnabled } from "./dev-flag";
 import { navigate } from "./navigation";
 import { withRootPageFrame } from "./new-document";
@@ -63,6 +65,8 @@ type CanvasListItem = {
 type Route =
   | { name: "list" }
   | { name: "gallery" }
+  /** The eval-suite run gallery (dev-pages flag only). */
+  | { name: "evals" }
   | { name: "canvas"; id: string }
   /** A linked docs project's board, addressed by docs-root-relative src. */
   | { name: "project"; src: string; server?: string }
@@ -72,6 +76,9 @@ type Route =
 export function parseRoute(pathname: string, search = ""): Route {
   if (pathname === "/gallery" || pathname === "/gallery/") {
     return { name: "gallery" };
+  }
+  if (pathname === "/evals" || pathname === "/evals/") {
+    return { name: "evals" };
   }
   const match = pathname.match(/^\/(canvas|view|embed)\/([^/]+)\/?$/);
   if (match) {
@@ -115,6 +122,8 @@ function createStarterCanvasDocument(input: {
   id: string;
   title: string;
 }): InteractiveCanvasDocument {
+  // Every new board starts as one empty base section — the backdrop all
+  // content lives on. Rename and resize it like any section.
   return withRootPageFrame({
     schemaVersion: 1,
     id: input.id,
@@ -122,44 +131,8 @@ function createStarterCanvasDocument(input: {
     mode: "diagram",
     size: { width: 960, height: 560 },
     viewport: { x: 0, y: 0, zoom: 1 },
-    objects: [
-      {
-        id: "diagram-frame",
-        type: "section",
-        text: input.title,
-        color: "gray",
-        geometry: { x: 80, y: 80, width: 720, height: 360 },
-        style: { shape: "section" },
-        layout: { mode: "free", padding: 32, gap: 24 },
-      },
-      {
-        id: "start",
-        type: "process",
-        text: "Start",
-        color: "green",
-        parentId: "diagram-frame",
-        geometry: { x: 160, y: 200, width: 160, height: 80 },
-        style: { shape: "rounded-rect" },
-      },
-      {
-        id: "next-step",
-        type: "process",
-        text: "Next step",
-        color: "blue",
-        parentId: "diagram-frame",
-        geometry: { x: 440, y: 200, width: 180, height: 80 },
-        style: { shape: "rounded-rect" },
-      },
-    ],
-    connections: [
-      {
-        id: "start-to-next",
-        from: { objectId: "start", anchor: "right" },
-        to: { objectId: "next-step", anchor: "left" },
-        style: "solid",
-        arrow: "forward",
-      },
-    ],
+    objects: [],
+    connections: [],
     annotations: [],
   });
 }
@@ -211,8 +184,14 @@ function sessionAnnotations(
       intent: "agent-request",
       body: note.body,
       target,
-      status: "open",
-      createdBy: "human",
+      status: note.status,
+      createdBy: note.createdBy,
+      replies: note.replies.map((reply) => ({
+        id: reply.id,
+        author: reply.author,
+        body: reply.body,
+        ...(reply.createdAt === undefined ? {} : { createdAt: reply.createdAt }),
+      })),
     }];
   });
 }
@@ -860,6 +839,7 @@ export function App() {
                     status={agentSession.status}
                     onClose={() => setShowAgent(false)}
                     acceptedResult={agentSession.acceptedResult}
+                    description={activeDocument.description}
                     pinningTargetLabel={
                       editorState?.tool === "annotation"
                         ? targetLabelForSelection(activeDocument, editorState.selection)
@@ -936,6 +916,14 @@ export function App() {
     return <GalleryPage onBack={() => navigate("/")} />;
   }
 
+  if (route.name === "evals") {
+    return devPagesEnabled() ? (
+      <EvalsPage onBack={() => navigate("/")} />
+    ) : (
+      <StatusPage message="Evals are only available with dev pages enabled." />
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-8">
       <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
@@ -946,6 +934,12 @@ export function App() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {devPagesEnabled() ? (
+            <Button type="button" variant="outline" onClick={() => navigate("/evals")}>
+              <CheckIcon className="h-4 w-4" />
+              Evals
+            </Button>
+          ) : null}
           <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
             <ShapesIcon className="h-4 w-4" />
             Object Gallery

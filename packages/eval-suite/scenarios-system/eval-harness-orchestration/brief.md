@@ -1,0 +1,9 @@
+# Offline evaluation harness orchestration
+
+We need a diagram of how our offline evaluation harness executes scenario suites against an AI system and grades the results. Each run starts from a pinned suite containing frozen scenario definitions and a fingerprint of the tested revision, configuration, prompt versions, and rubric versions. Because wording changes invalidate historical comparisons, scenarios receive new versions instead of being edited in place.
+
+A scheduler fans work out to a bounded pool of workers targeting an isolated instance of the system under test, never the shared production instance. Each worker performs a scenario's steps in order and captures both the full transcript and final artifact. Infrastructure failures trigger retries, while failures caused by the tested system's behavior are recorded before the worker continues. Results preserve that distinction so operational faults cannot masquerade as product regressions.
+
+Completed scenarios enter grading immediately. Independent graders score separate criteria concurrently under a global concurrency limit, while an artifact-only grader receives no original request and therefore avoids anchoring on it. Every verdict includes supporting evidence. A verdict without evidence is invalid, is retried, and is flagged if the retry also fails.
+
+An assembler merges valid verdicts into a scorecard and compares it with a chosen baseline, narrating movements that cross a defined threshold. Comparison is permitted only when both runs share the same fingerprint. The harness retains every artifact, transcript, and verdict so disputed scores can be re-examined, and promoting a run makes it the baseline for future compatible runs. The diagram should make clear how a pinned run moves from bounded execution through evidence-backed grading and compatible baseline comparison, while keeping infrastructure failures distinct from product regressions.

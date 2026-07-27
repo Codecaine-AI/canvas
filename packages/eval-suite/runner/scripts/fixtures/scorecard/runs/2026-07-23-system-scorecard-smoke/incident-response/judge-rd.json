@@ -1,0 +1,14 @@
+{
+  "axis": "rd",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "score": 5.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "delta_sentence": "The board is readable but uses the frame less effectively than the reference."
+  },
+  "flags": []
+}

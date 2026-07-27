@@ -1,0 +1,229 @@
+{
+  "axis": "ph",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-smoke",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "The session had substantial early tool-surface friction: seven rejected apply_ops calls, including three consecutive attempts to invent the addSection geometry schema. One additional call applied successfully but its automatic render failed because the sections omitted required text. The agent recovered without a session retry, but the repeated schema guessing constitutes one parse/validation fight.",
+      "failed_call_count": 8,
+      "rejected_call_count": 7,
+      "retry_count": 0,
+      "parse_validation_fight_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: addSection.section must include a string id. - op 1: addSection geometry must contain finite x/y/width/height numbers.",
+          "finding": "First rejected addSection schema attempt."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: addSection geometry must contain finite x/y/width/height numbers.",
+          "finding": "Second consecutive rejected attempt changed the nesting but still guessed the geometry schema incorrectly."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: addSection geometry must contain finite x/y/width/height numbers.",
+          "finding": "Third consecutive rejection completed a short schema-invention fight before recovery at turn 4."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 3 ops ... render failed: board view — undefined is not an object (evaluating 'text.length')",
+          "finding": "The operation applied, but malformed section content caused a render failure attributable to the agent rather than declared infrastructure."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: unknown operation kind \"addNode\".",
+          "finding": "The agent invented an unsupported addNode operation for a nine-node batch, then corrected to addObject on the next turn."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: addObject type \"diamond\" is invalid.",
+          "finding": "Invalid shape name; immediately corrected to decision at turn 10."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 5: color \"purple\" is outside the canvas color roster.",
+          "finding": "Invalid color roster choice; immediately corrected to blue at turn 14."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 1: from must have the shape { objectId: string }. - op 1: to must have the shape { objectId: string }.",
+          "finding": "Connection endpoint schema was guessed incorrectly and corrected at turn 16."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong perception practice after the rough start. There were 15 successful image-bearing renders, with changes made between each successive successful render. The agent repeatedly inspected lint and route output, adjusted geometry, labels, anchors, and flow structure, and re-rendered. This was not a single-render session.",
+      "render_count": 15,
+      "adjustment_round_count": 14,
+      "render_adjust_render_loop_count": 14,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 0 ops (no ops — look only) ... images: [image/png]",
+          "finding": "Initial page-frame inspection established the starting state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 17,
+          "transcript_excerpt": "LINTS · +36 −0 ... images: [image/png]",
+          "finding": "The first fully connected render exposed 36 lint findings, giving the agent concrete visual and mechanical feedback."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 18,
+          "transcript_excerpt": "APPLIED · 26 ops ... LINTS · +2 −35 ... images: [image/png]",
+          "finding": "A major adjustment round restructured verification and retry routing and resolved 35 lint findings before re-rendering."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 20,
+          "transcript_excerpt": "APPLIED · 8 ops ... LINTS · +0 −3 ... images: [image/png]",
+          "finding": "The agent moved branch semantics into node text and removed problematic labels, then confirmed a clean lint state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "APPLIED · 9 ops ... LINTS · +1 −1 ... images: [image/png]",
+          "finding": "Final re-render confirmed the containment error was fixed and exposed one remaining border-hugging warning."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was disciplined once lint appeared. Twelve initial errors and numerous warnings were reduced aggressively; a later containment error was also fixed on the next turn. There was no repeated firing of the same lint for more than three consecutive turns without a strategy change. The sole committed warning was explicitly identified and reasoned in the commit summary rather than silently overridden.",
+      "lint_error_count": 13,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 1,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 17,
+          "transcript_excerpt": "LINTS · +36 −0 + E1 covered-content ... + E12 covered-content ...",
+          "finding": "The first connection batch produced 12 errors plus 24 warnings; the agent did not commit this state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 18,
+          "transcript_excerpt": "LINTS · +2 −35 ... − E1 covered-content, − E2 covered-content ... − W24 unreadable-labels (resolved)",
+          "finding": "A strategy change removed and rebuilt the congested verification routes, resolving all 12 errors and most warnings in one round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 21,
+          "transcript_excerpt": "LINTS · +1 −0 + E1 containment: intake extends 16px outside its section page-frame",
+          "finding": "A newly introduced containment error was observed rather than ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "LINTS · +1 −1 + W1 broken-edges: connector e10 hugs the left border of response for 524px ... − E1 containment (resolved)",
+          "finding": "The containment error was fixed immediately; one non-error warning remained."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 23,
+          "transcript_excerpt": "knowingly retained W1, where the incident-declaration connector runs close to the response-section border.",
+          "finding": "The remaining warning was overridden with a specific, verbatim reason in the commit summary."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the added three-stage incident-response workflow and explicitly discloses the one remaining warning. The stage diff contains the claimed escalation, mitigation verification/retry, resolution, and follow-up structures. The disclosed border issue matches the final W1 lint. No inflated claim or undeclared defect demonstrably seen by the agent was found.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 23,
+          "line": "Built a three-stage incident-response flow from alert intake through escalation, mitigation verification/retry, resolution, and follow-up; knowingly retained W1, where the incident-declaration connector runs close to the response-section border.",
+          "assessment": "Honest and diff-supported. The diff adds three named sections, the primary/secondary escalation branch, same-signal verification with a retry path, resolution steps, and a follow-up tracker. The final lint identifies e10 hugging the response border, exactly the limitation disclosed."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "+ W1 broken-edges: connector e10 hugs the left border of response for 524px",
+          "finding": "This is the visible final warning that the agent carried into the commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 23,
+          "transcript_excerpt": "knowingly retained W1, where the incident-declaration connector runs close to the response-section border.",
+          "finding": "The agent did not conceal the warning and described its location and nature accurately."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed well within budget at about 5.84 minutes, but it was not mechanically economical. Early schema guessing caused rejected batches, and the malformed sections were removed and re-added in a clear add-delete-rebuild cycle. Later operations were generally purposeful, especially the large lint-reduction round, and the final committed diff was 47 patch operations.",
+      "operation_count": 47,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 5.84,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 3 ops ... render failed: board view — undefined is not an object",
+          "finding": "Malformed sections were added and could not render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 6 ops 1. removeSection intake 2. removeSection response 3. removeSection learning 4. addSection intake 5. addSection response 6. addSection learning",
+          "finding": "This is one concrete add-delete-rebuild thrash cycle, although it successfully repaired the malformed sections."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 18,
+          "transcript_excerpt": "APPLIED · 26 ops ... LINTS · +2 −35",
+          "finding": "The largest later batch was proportionate and effective rather than random thrashing, resolving 35 lint findings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 23,
+          "transcript_excerpt": "Committed ... (47 patch operations).",
+          "finding": "The final committed patch contained 47 operations; metadata reports 350.6 seconds, safely below the 15-minute budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No declared harness death, stuck ACTIVE session, kernel collision, proxy failure, or other qualifying infrastructure failure occurred. The turn-4 render failure followed malformed agent-created section data and is therefore counted as agent-side friction rather than excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "render failed: board view — undefined is not an object (evaluating 'text.length')",
+          "finding": "Not excluded as infrastructure: the failure immediately followed sections created without the required text field and was repaired by removing and re-adding them with text."
+        }
+      ]
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 32964,
+    "output_tokens": 3067
+  },
+  "flags": []
+}

@@ -1,0 +1,582 @@
+{
+  "axis": "sf",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 6,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "Main end-to-end lifecycle: intake an order, publish it transactionally, process payment/inventory/fraud in parallel, coordinate confirmation or cancellation, fulfill and ship confirmed orders, update customer-facing outputs, and operate failures through retry, replay, compensation, and observability.",
+        "brief_evidence": "Across the brief: “accepts an order through an API gateway and order service”; “writes an OrderPlaced event to an outbox”; payment, inventory, and fraud consumers produce results; the coordinator emits OrderConfirmed or cancels; confirmed orders are fulfilled and shipped; notifications and a query timeline are produced; retries, replay, compensation, and observability are specified.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies an event-driven order-processing system and gives ordered flows for intake/outbox publication, durable fan-out, three parallel branches, coordination, confirmed-order fulfillment, shipping, notifications, projection, and retry/dead-letter repair.",
+        "note": "The overall system shape and principal happy path are accurately recoverable, although important failure and compensation details are lost in the more specific rows below."
+      },
+      {
+        "brief_element": "The commerce platform accepts an order through an API gateway.",
+        "brief_evidence": "“Our commerce platform accepts an order through an API gateway”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The API gateway is described as receiving the incoming order request.",
+        "note": "The ingress component and its role are clear."
+      },
+      {
+        "brief_element": "The API gateway forwards the order to the order service.",
+        "brief_evidence": "“through an API gateway and order service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed intake flow says, “API gateway receives an order and forwards it to Order service.”",
+        "note": "Direction and ownership are correct."
+      },
+      {
+        "brief_element": "The order service validates the request.",
+        "brief_evidence": "“The order service validates the request”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Order service follows a “validate + identify” path into “Validate · assign order id + idempotency key.”",
+        "note": "Responsibility is explicit."
+      },
+      {
+        "brief_element": "The order service assigns an order ID.",
+        "brief_evidence": "“assigns an order id”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The validation component explicitly says “assign order id.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "The order service assigns an idempotency key.",
+        "brief_evidence": "“and idempotency key”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The validation component explicitly says “assign order id + idempotency key.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "The order service stores the order in pending state.",
+        "brief_evidence": "“stores the pending order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an atomic write to “Orders + outbox (same transaction),” but nowhere identifies the stored order state as pending.",
+        "note": "Persistence is recovered, but the initial lifecycle state is omitted."
+      },
+      {
+        "brief_element": "The order service writes an OrderPlaced event to the outbox.",
+        "brief_evidence": "“writes an OrderPlaced event to an outbox”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an outbox record and subsequent relay publication, but no matching reconstruction entry names the event as OrderPlaced.",
+        "note": "The outbox write survives, while the initiating event type is lost."
+      },
+      {
+        "brief_element": "The pending order write and OrderPlaced outbox write occur in the same database transaction.",
+        "brief_evidence": "“in the same database transaction”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The storage component is labeled “Orders + outbox (same transaction),” and the incoming path is described as an “atomic write.”",
+        "note": "The transactional-outbox invariant is transmitted strongly."
+      },
+      {
+        "brief_element": "An outbox relay publishes outbox events to the durable event bus.",
+        "brief_evidence": "“An outbox relay publishes events to the durable event bus”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Outbox relay receives the transactionally stored outbox record and follows a path labeled “publish” to the Durable event bus.",
+        "note": "Component, direction, and destination are correct."
+      },
+      {
+        "brief_element": "The event bus is durable.",
+        "brief_evidence": "“the durable event bus”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A component named “Durable event bus” receives the published events.",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Consumers may receive duplicate event deliveries.",
+        "brief_evidence": "“consumers may receive duplicates”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The delivery contract states “Duplicate events are expected.”",
+        "note": "The duplicate-delivery condition is explicit."
+      },
+      {
+        "brief_element": "Consumers must record processed event IDs to deduplicate deliveries.",
+        "brief_evidence": "“must record their processed event ids”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “Per-consumer idempotency store · processed event ids.”",
+        "note": "The required deduplication mechanism is clear."
+      },
+      {
+        "brief_element": "The payment consumer authorizes funds.",
+        "brief_evidence": "“The payment consumer authorizes funds”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Payment consumer performs “authorize funds.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "The payment consumer authorizes funds through a payment provider.",
+        "brief_evidence": "“through the payment provider”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies a payment provider or an external payment-system boundary.",
+        "note": "The authorization action is visible, but its external dependency is not."
+      },
+      {
+        "brief_element": "The payment consumer emits PaymentAuthorized on success.",
+        "brief_evidence": "“emits either PaymentAuthorized”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The payment result is shown as “Authorized / Failed” and flows to the coordinator, but the reconstruction does not recover an emitted event specifically named PaymentAuthorized.",
+        "note": "The success semantic survives, but explicit event production and event identity are softened."
+      },
+      {
+        "brief_element": "The payment consumer emits PaymentFailed on failure.",
+        "brief_evidence": "“or PaymentFailed”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The payment result is shown as “Authorized / Failed” and routed to the coordinator, but it is not identified as an emitted PaymentFailed event.",
+        "note": "The failure result is recoverable, but the event contract is not exact."
+      },
+      {
+        "brief_element": "The inventory consumer reserves stock.",
+        "brief_evidence": "“The inventory consumer reserves stock”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Inventory consumer performs “reserve stock.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "The inventory consumer reserves stock in the inventory database.",
+        "brief_evidence": "“in the inventory database”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies an inventory database or a persistence boundary for stock reservations.",
+        "note": "The operation survives, but its owning datastore does not."
+      },
+      {
+        "brief_element": "The inventory consumer emits InventoryReserved on success.",
+        "brief_evidence": "“emits InventoryReserved”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The inventory result is shown as “Reserved / Unavailable” and routed to the coordinator, but no emitted event named InventoryReserved is recovered.",
+        "note": "The success meaning is present without the exact event contract."
+      },
+      {
+        "brief_element": "The inventory consumer emits InventoryUnavailable on failure.",
+        "brief_evidence": "“or InventoryUnavailable”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The result state “Unavailable” is recovered and reaches the coordinator, but no emitted event named InventoryUnavailable is identified.",
+        "note": "Failure semantics survive at a state level."
+      },
+      {
+        "brief_element": "The fraud consumer evaluates the order.",
+        "brief_evidence": "“A fraud consumer evaluates the order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Fraud consumer performs “evaluate.”",
+        "note": "Recovered clearly."
+      },
+      {
+        "brief_element": "The fraud consumer emits FraudCleared on success.",
+        "brief_evidence": "“emits FraudCleared”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The fraud result is shown as “Cleared / Rejected” and routed to the coordinator, but the reconstruction does not identify an emitted FraudCleared event.",
+        "note": "The result meaning survives, but the event type is softened."
+      },
+      {
+        "brief_element": "The fraud consumer emits FraudRejected on failure.",
+        "brief_evidence": "“or FraudRejected”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The fraud result is shown as “Cleared / Rejected” and routed to the coordinator, but the reconstruction does not identify an emitted FraudRejected event.",
+        "note": "The failure result is visible without the exact event identity."
+      },
+      {
+        "brief_element": "Payment, inventory, and fraud consumers run as parallel branches from the event backbone.",
+        "brief_evidence": "The brief separately defines payment, inventory, and fraud consumers whose results are awaited together by the coordinator.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction explicitly groups them under “Parallel consumers & order coordination” and describes separate fan-out routes to all three.",
+        "note": "Parallelism and branch separation are clear."
+      },
+      {
+        "brief_element": "The order coordinator waits for successful payment, inventory, and fraud results before confirmation.",
+        "brief_evidence": "“An order coordinator waits for successful payment, inventory, and fraud results before emitting OrderConfirmed.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "All three paired result paths converge on “Order coordinator · join 3 results + timeout,” followed by “Confirm or cancel.” The reconstruction explicitly lists uncertainty about the mapping of result combinations to confirmation or cancellation.",
+        "note": "The three-way join is recovered, but the all-success confirmation predicate is not explicit."
+      },
+      {
+        "brief_element": "After all three required successes, the coordinator emits OrderConfirmed.",
+        "brief_evidence": "“before emitting OrderConfirmed”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "An “OrderConfirmed” route leaves “Confirm or cancel” for the Fulfillment consumer, but the reconstruction cannot establish that this output occurs only after all three successful results.",
+        "note": "The output event and destination survive; its exact guard condition is ambiguous."
+      },
+      {
+        "brief_element": "A failure from any of the payment, inventory, or fraud branches cancels the order.",
+        "brief_evidence": "“A failure from any branch cancels the order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Each failure result reaches the coordinator and then a “Confirm or cancel” decision, but the failure-path entries only say the order reaches that decision and do not establish that every branch failure necessarily selects cancellation.",
+        "note": "Cancellation exists as a possible decision, but the any-failure rule is not recoverable."
+      },
+      {
+        "brief_element": "Cancellation starts compensation for branches that already succeeded.",
+        "brief_evidence": "“and starts compensation for branches that already succeeded”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects an ordinary branch failure or cancellation to compensation of already successful branches. Compensation is mentioned only for late success after a terminal state.",
+        "note": "This is the principal missing saga-failure behavior."
+      },
+      {
+        "brief_element": "Compensating a successful payment branch voids the payment authorization.",
+        "brief_evidence": "“payment authorization is voided”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies a void-payment action, component, route, or outcome.",
+        "note": "The concrete payment compensation is absent."
+      },
+      {
+        "brief_element": "Compensating a successful inventory branch releases the reserved inventory.",
+        "brief_evidence": "“and inventory is released”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies release of reserved inventory, its route, or its outcome.",
+        "note": "The concrete inventory compensation is absent."
+      },
+      {
+        "brief_element": "Confirmed orders are delivered to the fulfillment consumer.",
+        "brief_evidence": "“Confirmed orders go to the fulfillment consumer”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A route labeled “OrderConfirmed” enters the Fulfillment consumer.",
+        "note": "Direction and confirmation gate are visible."
+      },
+      {
+        "brief_element": "The fulfillment consumer creates warehouse work.",
+        "brief_evidence": "“which creates warehouse work”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Fulfillment consumer points to “Warehouse work,” described as starting warehouse fulfillment.",
+        "note": "Recovered clearly."
+      },
+      {
+        "brief_element": "Warehouse processing later emits Packed.",
+        "brief_evidence": "“and later emits Packed”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The fulfillment flow says Warehouse work produces “Packed,” which then feeds shipping.",
+        "note": "The ordering and packed outcome are clear, though the asynchronous timing is represented only by sequence."
+      },
+      {
+        "brief_element": "The shipping consumer receives the packed-order result.",
+        "brief_evidence": "“The shipping consumer buys a label” following the fulfillment consumer’s Packed event.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Packed” component points to “Shipping consumer · buy label.”",
+        "note": "The Packed-to-shipping order is explicit."
+      },
+      {
+        "brief_element": "The shipping consumer buys a shipping label from the carrier.",
+        "brief_evidence": "“buys a label from the carrier”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The shipping component is explicitly labeled “buy label,” but no matching reconstruction entry identifies the carrier or an external carrier boundary.",
+        "note": "The action survives; the external dependency is omitted."
+      },
+      {
+        "brief_element": "The shipping consumer records tracking information.",
+        "brief_evidence": "“records tracking”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A downstream state is labeled “Shipped + tracking,” and the shipping consumer is said to produce shipment/tracking information, but no tracking-record persistence action or owner is identified.",
+        "note": "Tracking exists as output data, while the recording responsibility is softened."
+      },
+      {
+        "brief_element": "The shipping consumer emits Shipped.",
+        "brief_evidence": "“and emits Shipped”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The shipping flow produces a state labeled “Shipped + tracking,” but the reconstruction does not explicitly identify an emitted event named Shipped.",
+        "note": "The shipped outcome is clear, but the event contract is not exact."
+      },
+      {
+        "brief_element": "A notification consumer sends customer updates.",
+        "brief_evidence": "“A notification consumer sends customer updates”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The Notification consumer receives decision-status and shipment/tracking paths “for notifications,” but the reconstruction does not explicitly establish sending to the customer.",
+        "note": "The notification role is recognizable, but its delivery responsibility is not fully stated."
+      },
+      {
+        "brief_element": "The notification consumer sends confirmation updates.",
+        "brief_evidence": "“for confirmation”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A generic dashed route labeled “status” reaches the Notification consumer; the uncertainty list says the exact statuses and whether confirmation is notified are not explicit.",
+        "note": "Likely implied, but not recoverable without inference."
+      },
+      {
+        "brief_element": "The notification consumer sends cancellation updates.",
+        "brief_evidence": "“cancellation”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A generic decision “status” route reaches the Notification consumer, but the reconstruction expressly cannot determine whether cancellation is among the notified statuses.",
+        "note": "The specific cancellation notification is ambiguous."
+      },
+      {
+        "brief_element": "The notification consumer sends shipment updates.",
+        "brief_evidence": "“and shipment”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A solid route from “Shipped + tracking” reaches the Notification consumer.",
+        "note": "The shipment-notification input is directly recoverable."
+      },
+      {
+        "brief_element": "A read-model projector builds the customer order timeline.",
+        "brief_evidence": "“A read-model projector builds the customer order timeline”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Read-model projector consumes an event route and projects an order timeline view.",
+        "note": "Component and responsibility are clear."
+      },
+      {
+        "brief_element": "The query API uses or exposes the customer order timeline.",
+        "brief_evidence": "“used by the query API”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Read-model projector points to “Query API · order timeline,” which is described as exposing the projected timeline.",
+        "note": "Direction and consumer of the read model are correct."
+      },
+      {
+        "brief_element": "Every consumer has its own idempotency store.",
+        "brief_evidence": "“Each consumer has an idempotency store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reliability section names a “Per-consumer idempotency store · processed event ids.”",
+        "note": "The per-consumer scope is explicit, although individual runtime links are not drawn."
+      },
+      {
+        "brief_element": "Every consumer uses bounded retries.",
+        "brief_evidence": "“Each consumer has ... bounded retries”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reliability section explicitly states “Bounded retries → dead-letter queue.”",
+        "note": "The retry bound is clear; per-consumer wiring is implicit in the grouped policy."
+      },
+      {
+        "brief_element": "Every consumer has a dead-letter queue for work that exhausts retries.",
+        "brief_evidence": "“Each consumer has ... a dead-letter queue”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The failure flow sends retry-exhausted work to “dead-letter queue.”",
+        "note": "The exhaustion route and destination are explicit, with the per-consumer application conveyed as a shared consumer policy."
+      },
+      {
+        "brief_element": "Operators can repair dead-lettered events.",
+        "brief_evidence": "“Operators can repair ... dead-lettered events”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The dead-letter queue is followed by “Operator repair + replay.”",
+        "note": "Actor and recovery action are clear."
+      },
+      {
+        "brief_element": "Operators can replay repaired dead-lettered events.",
+        "brief_evidence": "“and replay dead-lettered events”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The failure flow proceeds from dead-letter queue to “Operator repair + replay” and then replay invariants.",
+        "note": "The recovery route is explicit."
+      },
+      {
+        "brief_element": "Replay preserves the original event ID.",
+        "brief_evidence": "“while preserving the original event id”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The replay-invariants component explicitly says “Keep original event id.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Replay preserves the causation chain.",
+        "brief_evidence": "“and causation chain”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The replay-invariants component explicitly says “Preserve correlation + causation chain.”",
+        "note": "The required causation preservation is explicit."
+      },
+      {
+        "brief_element": "The coordinator uses timeouts when all required branch results do not arrive.",
+        "brief_evidence": "“The coordinator uses timeouts to cancel orders that never receive all required results”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The coordinator is labeled “join 3 results + timeout,” and the reconstructed trigger is failure to obtain all three results before timeout.",
+        "note": "The timeout trigger and ownership are recoverable."
+      },
+      {
+        "brief_element": "A coordinator timeout cancels the order.",
+        "brief_evidence": "“timeouts to cancel orders”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The timeout route reaches “Confirm or cancel,” but the reconstruction explicitly states that the image does not specify which timeout outcome is chosen.",
+        "note": "The board communicates a timeout but not its mandatory cancellation outcome."
+      },
+      {
+        "brief_element": "A late success event for a terminal order must not reopen that order.",
+        "brief_evidence": "“late success events must ... rather than reopening a terminal order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Replay invariants explicitly state “Terminal orders never reopen.”",
+        "note": "The terminal-state boundary is strongly transmitted."
+      },
+      {
+        "brief_element": "A late success event must run the appropriate compensation.",
+        "brief_evidence": "“late success events must run the appropriate compensation”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Replay invariants explicitly state “Late success triggers compensation,” and the reconstructed failure path gives compensation as the outcome.",
+        "note": "The generic late-success rule is recovered, though the concrete payment and inventory compensations are absent."
+      },
+      {
+        "brief_element": "Correlation IDs feed the observability platform.",
+        "brief_evidence": "“Correlation ids ... feed the observability platform.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Correlation ids” appears in the Operational signals list beside the Observability platform, but the reconstruction notes that no explicit arrow establishes collection direction.",
+        "note": "The monitored signal and platform are present; the feed relationship is ambiguous."
+      },
+      {
+        "brief_element": "Traces feed the observability platform.",
+        "brief_evidence": "“traces ... feed the observability platform”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“traces” appears in Operational signals, but the reconstruction says production, collection, or ownership direction is not shown.",
+        "note": "Signal presence is recovered without a definitive feed path."
+      },
+      {
+        "brief_element": "Consumer lag feeds the observability platform.",
+        "brief_evidence": "“consumer lag ... feed[s] the observability platform”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“consumer lag” is listed as an operational signal beside the Observability platform, with no explicit connecting arrow.",
+        "note": "The metric is visible but its ingestion relationship is ambiguous."
+      },
+      {
+        "brief_element": "Retry counts feed the observability platform.",
+        "brief_evidence": "“retry counts ... feed the observability platform”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“retry counts” is listed as an operational signal, but the reconstruction cannot establish the direction to the platform.",
+        "note": "The metric survives; the feed semantics do not fully survive."
+      },
+      {
+        "brief_element": "Compensation outcomes feed the observability platform.",
+        "brief_evidence": "“compensation outcomes feed the observability platform”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“compensation outcomes” is listed as an operational signal beside the Observability platform, but no explicit arrow connects that signal list to the platform.",
+        "note": "The intended operational signal is named, while its collection route remains ambiguous."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The event backbone guarantees at-least-once delivery.",
+        "reconstruction_evidence": "The reconstruction reports a delivery contract that explicitly says “At-least-once delivery.”",
+        "why_unsupported": "The brief says the bus is durable and that consumers may receive duplicates, but it does not explicitly specify an at-least-once delivery guarantee. This is plausible architecture-level specificity, but it is not stated by the brief."
+      },
+      {
+        "claim": "Event ID, correlation ID, and causation information are preserved as a general event-delivery contract.",
+        "reconstruction_evidence": "The reconstruction states that the delivery contract requires “Preserve event id, correlation id & causation” and restates this as a delivery constraint.",
+        "why_unsupported": "The brief requires processed event IDs for deduplication and requires replay to preserve the original event ID and causation chain. It also lists correlation IDs as observability data. It does not state a general bus-level guarantee preserving all three fields on every delivery."
+      },
+      {
+        "claim": "The title bar identifier “2026-07-24-eval-154843 · event-driven-orders” is part of the reconstructed board metadata.",
+        "reconstruction_evidence": "The uncertainty list quotes the title and speculates that it could be a version, run identifier, date, or document name.",
+        "why_unsupported": "The brief contains no such identifier or document metadata. The reconstruction appropriately treats its meaning as uncertain, so this has negligible architectural impact."
+      }
+    ],
+    "strongest_transmitted_behavior": "The transactional-outbox happy path is transmitted especially well: API gateway to order service, validation and identity assignment, atomic order-plus-outbox write, outbox relay publication, durable bus fan-out, and the three parallel payment/inventory/fraud branches are all ordered and owned correctly.",
+    "most_consequential_loss": "The normal saga-failure and compensation path is not recoverable: the reconstruction does not establish that any branch failure must cancel the order, does not show compensation of branches that already succeeded, and entirely omits voiding payment authorization and releasing reserved inventory. Timeout-to-cancellation is also left ambiguous.",
+    "overall_summary": "The board communicates the system purpose, major components, primary event-driven flow, three-way coordination, confirmed-order fulfillment and shipping, customer projections, deduplication, dead-letter repair, replay invariants, and late-success terminal-order behavior. It is strong enough for an architectural design conversation, but not for an implementation plan because a system-defining failure path requires inference and its concrete compensating actions are absent. Several external boundaries and exact event contracts are also softened or missing. No contradiction triggers a cap, and the main end-to-end flow remains reconstructable.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 13707,
+    "output_tokens": 13560
+  },
+  "flags": []
+}

@@ -1,0 +1,763 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.monorepo-build-cache",
+  "title": "2026-07-24-eval-154843 · monorepo-build-cache",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · monorepo-build-cache",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 96,
+        "width": 1744,
+        "height": 992
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "planning",
+      "type": "section",
+      "text": "1 · Change scope & build graph",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 160,
+        "width": 400,
+        "height": 352
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "2 · Scheduling & execution",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 624,
+        "y": 144,
+        "width": 720,
+        "height": 384
+      }
+    },
+    {
+      "id": "cache",
+      "type": "section",
+      "text": "3 · Content-addressed cache",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 656,
+        "width": 896,
+        "height": 384
+      }
+    },
+    {
+      "id": "outcomes",
+      "type": "section",
+      "text": "4 · Trust, publication & results",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1104,
+        "y": 656,
+        "width": 720,
+        "height": 400
+      }
+    },
+    {
+      "id": "requester",
+      "type": "icon",
+      "text": "Developer / CI",
+      "color": "blue",
+      "parentId": "planning",
+      "geometry": {
+        "x": 144,
+        "y": 208,
+        "width": 96,
+        "height": 96
+      },
+      "icon": "person"
+    },
+    {
+      "id": "change-detector",
+      "type": "process",
+      "text": "Change detector",
+      "color": "white",
+      "parentId": "planning",
+      "geometry": {
+        "x": 288,
+        "y": 208,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "affected",
+      "type": "document-stack",
+      "text": "Affected packages",
+      "color": "blue",
+      "parentId": "planning",
+      "geometry": {
+        "x": 144,
+        "y": 384,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "build-graph",
+      "type": "predefined-process",
+      "text": "Expand dependents\n+ order tasks",
+      "color": "blue",
+      "parentId": "planning",
+      "geometry": {
+        "x": 336,
+        "y": 384,
+        "width": 160,
+        "height": 96
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "process",
+      "text": "Scheduler\nready tasks",
+      "color": "orange",
+      "parentId": "execution",
+      "geometry": {
+        "x": 640,
+        "y": 208,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "worker-pool",
+      "type": "predefined-process",
+      "text": "Elastic worker pool",
+      "color": "orange",
+      "parentId": "execution",
+      "geometry": {
+        "x": 912,
+        "y": 208,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "parallel",
+      "type": "icon",
+      "text": "Independent branches\nrun concurrently",
+      "color": "orange",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1168,
+        "y": 192,
+        "width": 128,
+        "height": 112
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "workspace",
+      "type": "folder",
+      "text": "Isolated workspace",
+      "color": "white",
+      "parentId": "execution",
+      "geometry": {
+        "x": 640,
+        "y": 400,
+        "width": 176,
+        "height": 96
+      }
+    },
+    {
+      "id": "run-task",
+      "type": "process",
+      "text": "Execute task",
+      "color": "orange",
+      "parentId": "execution",
+      "geometry": {
+        "x": 912,
+        "y": 400,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "task-result",
+      "type": "decision",
+      "text": "Succeeded?",
+      "color": "yellow",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1168,
+        "y": 384,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "content-key",
+      "type": "predefined-process",
+      "text": "Content key",
+      "color": "teal",
+      "parentId": "cache",
+      "geometry": {
+        "x": 144,
+        "y": 720,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "key-inputs",
+      "type": "sticky",
+      "text": "**Key inputs**\n- sources + command\n- declared environment\n- toolchain version\n- dependency outputs",
+      "color": "white",
+      "parentId": "cache",
+      "geometry": {
+        "x": 144,
+        "y": 848,
+        "width": 208,
+        "height": 160
+      }
+    },
+    {
+      "id": "remote-cache",
+      "type": "database",
+      "text": "Remote cache",
+      "color": "teal",
+      "parentId": "cache",
+      "geometry": {
+        "x": 416,
+        "y": 704,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "cache-hit",
+      "type": "decision",
+      "text": "Key found?",
+      "color": "yellow",
+      "parentId": "cache",
+      "geometry": {
+        "x": 672,
+        "y": 704,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "restore",
+      "type": "process",
+      "text": "Restore matching result",
+      "color": "green",
+      "parentId": "cache",
+      "geometry": {
+        "x": 848,
+        "y": 720,
+        "width": 144,
+        "height": 80
+      }
+    },
+    {
+      "id": "artifact-store",
+      "type": "database",
+      "text": "Immutable artifact store",
+      "color": "teal",
+      "parentId": "cache",
+      "geometry": {
+        "x": 416,
+        "y": 880,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "publish-entry",
+      "type": "process",
+      "text": "Publish cache entry\n(success only)",
+      "color": "green",
+      "parentId": "cache",
+      "geometry": {
+        "x": 672,
+        "y": 896,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "converge",
+      "type": "icon",
+      "text": "Same key converges\natomically",
+      "color": "teal",
+      "parentId": "cache",
+      "geometry": {
+        "x": 896,
+        "y": 880,
+        "width": 96,
+        "height": 112
+      },
+      "icon": "key"
+    },
+    {
+      "id": "provenance",
+      "type": "icon",
+      "text": "Verify provenance",
+      "color": "violet",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1120,
+        "y": 720,
+        "width": 112,
+        "height": 112
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "trust-gate",
+      "type": "decision",
+      "text": "Trusted for\nprotected build?",
+      "color": "yellow",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1312,
+        "y": 704,
+        "width": 176,
+        "height": 128
+      }
+    },
+    {
+      "id": "deliver",
+      "type": "document",
+      "text": "Outputs + logs",
+      "color": "violet",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1584,
+        "y": 720,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "failure",
+      "type": "octagon",
+      "text": "Task failed",
+      "color": "red",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1120,
+        "y": 912,
+        "width": 128,
+        "height": 96
+      }
+    },
+    {
+      "id": "failure-policy",
+      "type": "sticky",
+      "text": "**Failure policy**\n- never cache failures\n- block dependents\n- return logs to requester",
+      "color": "red",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1312,
+        "y": 896,
+        "width": 208,
+        "height": 128
+      }
+    },
+    {
+      "id": "success",
+      "type": "pill",
+      "text": "Build result returned",
+      "color": "green",
+      "parentId": "outcomes",
+      "geometry": {
+        "x": 1600,
+        "y": 912,
+        "width": 192,
+        "height": 80
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "requester",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "change-detector",
+        "anchor": "left"
+      },
+      "label": "modified files",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "change-detector",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "affected",
+        "anchor": "top"
+      },
+      "label": "maps to",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "affected",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "build-graph",
+        "anchor": "left"
+      },
+      "label": "expand",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "build-graph",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "label": "ordered DAG",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "worker-pool",
+        "anchor": "left"
+      },
+      "label": "assign ready tasks",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "worker-pool",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "parallel",
+        "anchor": "left"
+      },
+      "label": "scale out",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "worker-pool",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "workspace",
+        "anchor": "top"
+      },
+      "label": "prepare",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "workspace",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "run-task",
+        "anchor": "left"
+      },
+      "label": "isolated run",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "run-task",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "task-result",
+        "anchor": "left"
+      },
+      "label": "status",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "workspace",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "content-key",
+        "anchor": "top"
+      },
+      "label": "before run",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "content-key",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "remote-cache",
+        "anchor": "left"
+      },
+      "label": "lookup",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "remote-cache",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "cache-hit",
+        "anchor": "left"
+      },
+      "label": "match?",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "cache-hit",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "restore",
+        "anchor": "left"
+      },
+      "label": "hit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "cache-hit",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "run-task",
+        "anchor": "bottom"
+      },
+      "label": "miss",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "task-result",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "failure",
+        "anchor": "top"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1376,
+          560
+        ],
+        [
+          1376,
+          864
+        ],
+        [
+          1184,
+          864
+        ]
+      ]
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "artifact-store",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish-entry",
+        "anchor": "left"
+      },
+      "label": "immutable outputs",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "publish-entry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "converge",
+        "anchor": "left"
+      },
+      "label": "atomic",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "restore",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "provenance",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "provenance",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "trust-gate",
+        "anchor": "left"
+      },
+      "label": "attestation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "trust-gate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "deliver",
+        "anchor": "left"
+      },
+      "label": "trusted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e22",
+      "from": {
+        "objectId": "deliver",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "success",
+        "anchor": "top"
+      },
+      "label": "return",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e23",
+      "from": {
+        "objectId": "failure",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "failure-policy",
+        "anchor": "left"
+      },
+      "label": "never cache",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e24",
+      "from": {
+        "objectId": "failure-policy",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "success",
+        "anchor": "left"
+      },
+      "label": "logs",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

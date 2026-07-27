@@ -1,0 +1,985 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.canary-delivery",
+  "title": "2026-07-24-eval-154843 · canary-delivery",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · canary-delivery",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 128,
+        "width": 2352,
+        "height": 1424
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "build",
+      "type": "section",
+      "text": "1 · Build & attest",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 368,
+        "height": 1040
+      }
+    },
+    {
+      "id": "staging",
+      "type": "section",
+      "text": "2 · Stage & verify",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 656,
+        "y": 176,
+        "width": 368,
+        "height": 1040
+      }
+    },
+    {
+      "id": "production",
+      "type": "section",
+      "text": "3 · Canary production",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1168,
+        "y": 176,
+        "width": 736,
+        "height": 1040
+      }
+    },
+    {
+      "id": "governance",
+      "type": "section",
+      "text": "Control, consensus & evidence",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2032,
+        "y": 192,
+        "width": 416,
+        "height": 1024
+      }
+    },
+    {
+      "id": "policy",
+      "type": "section",
+      "text": "Delivery invariants",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 1328,
+        "width": 2224,
+        "height": 192
+      }
+    },
+    {
+      "id": "source",
+      "type": "document",
+      "text": "Protected branch\nsigned revision",
+      "color": "blue",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 224,
+        "width": 320,
+        "height": 80
+      }
+    },
+    {
+      "id": "coordinator",
+      "type": "process",
+      "text": "Pipeline coordinator",
+      "color": "white",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 352,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "deps",
+      "type": "predefined-process",
+      "text": "Install dependencies",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 464,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "compile",
+      "type": "predefined-process",
+      "text": "Compile",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 576,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "tests",
+      "type": "predefined-process",
+      "text": "Unit + integration tests",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 688,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "scans",
+      "type": "predefined-process",
+      "text": "Composition + image scans",
+      "color": "orange",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 800,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "build-gate",
+      "type": "decision",
+      "text": "All gates pass?",
+      "color": "orange",
+      "parentId": "build",
+      "geometry": {
+        "x": 208,
+        "y": 912,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "registry",
+      "type": "database",
+      "text": "Immutable image + provenance",
+      "color": "green",
+      "parentId": "build",
+      "geometry": {
+        "x": 160,
+        "y": 1088,
+        "width": 320,
+        "height": 96
+      }
+    },
+    {
+      "id": "release-manager",
+      "type": "icon",
+      "text": "Release manager",
+      "color": "teal",
+      "parentId": "staging",
+      "geometry": {
+        "x": 784,
+        "y": 224,
+        "width": 96,
+        "height": 96
+      },
+      "icon": "person"
+    },
+    {
+      "id": "stage-promote",
+      "type": "process",
+      "text": "Promote same image",
+      "color": "white",
+      "parentId": "staging",
+      "geometry": {
+        "x": 672,
+        "y": 384,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "db-check",
+      "type": "decision",
+      "text": "DB compatible?",
+      "color": "orange",
+      "parentId": "staging",
+      "geometry": {
+        "x": 720,
+        "y": 512,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "migrate",
+      "type": "process",
+      "text": "Backward-compatible migration",
+      "color": "teal",
+      "parentId": "staging",
+      "geometry": {
+        "x": 672,
+        "y": 688,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "stage-deploy",
+      "type": "process",
+      "text": "Deploy services",
+      "parentId": "staging",
+      "geometry": {
+        "x": 672,
+        "y": 816,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "stage-tests",
+      "type": "predefined-process",
+      "text": "Smoke + contract tests",
+      "parentId": "staging",
+      "geometry": {
+        "x": 672,
+        "y": 944,
+        "width": 320,
+        "height": 64
+      }
+    },
+    {
+      "id": "stage-gate",
+      "type": "decision",
+      "text": "Staging healthy?",
+      "color": "orange",
+      "parentId": "staging",
+      "geometry": {
+        "x": 720,
+        "y": 1072,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "approval",
+      "type": "document",
+      "text": "Approved change record",
+      "color": "violet",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 224,
+        "width": 288,
+        "height": 80
+      }
+    },
+    {
+      "id": "signature",
+      "type": "process",
+      "text": "Verify image signature",
+      "color": "orange",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 368,
+        "width": 288,
+        "height": 64
+      }
+    },
+    {
+      "id": "canary",
+      "type": "process",
+      "text": "Canary controller · 5%",
+      "color": "violet",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 512,
+        "width": 288,
+        "height": 64
+      }
+    },
+    {
+      "id": "observe",
+      "type": "predefined-process",
+      "text": "Consecutive observation windows",
+      "parentId": "production",
+      "geometry": {
+        "x": 1552,
+        "y": 224,
+        "width": 304,
+        "height": 64
+      }
+    },
+    {
+      "id": "metrics",
+      "type": "sticky",
+      "text": "**Health signals**\n- error rate\n- latency\n- saturation\n- business success",
+      "color": "violet",
+      "parentId": "production",
+      "geometry": {
+        "x": 1552,
+        "y": 352,
+        "width": 304,
+        "height": 176
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "decision",
+      "text": "Telemetry available?",
+      "color": "orange",
+      "parentId": "production",
+      "geometry": {
+        "x": 1592,
+        "y": 592,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "threshold",
+      "type": "decision",
+      "text": "Thresholds healthy?",
+      "color": "orange",
+      "parentId": "production",
+      "geometry": {
+        "x": 1592,
+        "y": 768,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "traffic",
+      "type": "chevron",
+      "text": "25% → 50% → 100%",
+      "color": "green",
+      "parentId": "production",
+      "geometry": {
+        "x": 1536,
+        "y": 944,
+        "width": 336,
+        "height": 80
+      },
+      "direction": "right"
+    },
+    {
+      "id": "rollback",
+      "type": "process",
+      "text": "Freeze + rollback to known-good",
+      "color": "red",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 768,
+        "width": 288,
+        "height": 80
+      }
+    },
+    {
+      "id": "compensate",
+      "type": "process",
+      "text": "Compensate only if declared safe",
+      "color": "orange",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 944,
+        "width": 288,
+        "height": 80
+      }
+    },
+    {
+      "id": "operator-review",
+      "type": "manual-input",
+      "text": "Pause for operator review",
+      "color": "yellow",
+      "parentId": "production",
+      "geometry": {
+        "x": 1184,
+        "y": 1104,
+        "width": 288,
+        "height": 80
+      }
+    },
+    {
+      "id": "router",
+      "type": "icon",
+      "text": "Traffic router",
+      "color": "teal",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2048,
+        "y": 240,
+        "width": 112,
+        "height": 112
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "flags",
+      "type": "icon",
+      "text": "Feature flags",
+      "color": "teal",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2304,
+        "y": 240,
+        "width": 112,
+        "height": 112
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "service-registry",
+      "type": "database",
+      "text": "Service registry",
+      "color": "teal",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2112,
+        "y": 432,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "consensus",
+      "type": "decision",
+      "text": "Active revision agrees?",
+      "color": "orange",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2128,
+        "y": 608,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "audit",
+      "type": "document-stack",
+      "text": "Audit log",
+      "color": "blue",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2048,
+        "y": 816,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "notify",
+      "type": "icon",
+      "text": "Operator notifications",
+      "color": "blue",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2304,
+        "y": 816,
+        "width": 112,
+        "height": 112
+      },
+      "icon": "mail"
+    },
+    {
+      "id": "evidence",
+      "type": "sticky",
+      "text": "**Recorded evidence**\n- rollout state + approvals\n- metric decisions\n- traffic changes\n- rollback actions\n- staging logs + artifacts",
+      "color": "blue",
+      "parentId": "governance",
+      "geometry": {
+        "x": 2048,
+        "y": 1008,
+        "width": 368,
+        "height": 176
+      }
+    },
+    {
+      "id": "inv-security",
+      "type": "sticky",
+      "text": "**Non-bypassable**\nFailed security gates and image-signature verification always stop delivery.",
+      "color": "yellow",
+      "parentId": "policy",
+      "geometry": {
+        "x": 160,
+        "y": 1376,
+        "width": 640,
+        "height": 112
+      }
+    },
+    {
+      "id": "inv-failure",
+      "type": "sticky",
+      "text": "**Failure behavior**\nStop the revision or promotion, preserve evidence, and notify the owner with the failed gate.",
+      "color": "yellow",
+      "parentId": "policy",
+      "geometry": {
+        "x": 928,
+        "y": 1376,
+        "width": 640,
+        "height": 112
+      }
+    },
+    {
+      "id": "inv-operator",
+      "type": "sticky",
+      "text": "**Operator control**\nTelemetry loss pauses rollout. Resume only after recovery, or order rollback.",
+      "color": "yellow",
+      "parentId": "policy",
+      "geometry": {
+        "x": 1696,
+        "y": 1376,
+        "width": 640,
+        "height": 112
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "b1",
+      "from": {
+        "objectId": "source",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "coordinator",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b2",
+      "from": {
+        "objectId": "coordinator",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "deps",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b3",
+      "from": {
+        "objectId": "deps",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "compile",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b4",
+      "from": {
+        "objectId": "compile",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "tests",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b5",
+      "from": {
+        "objectId": "tests",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "scans",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b6",
+      "from": {
+        "objectId": "scans",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "build-gate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "b7",
+      "from": {
+        "objectId": "build-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "registry",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "x1",
+      "from": {
+        "objectId": "registry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "stage-promote",
+        "anchor": "left"
+      },
+      "label": "same digest",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "s1",
+      "from": {
+        "objectId": "release-manager",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "stage-promote",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s2",
+      "from": {
+        "objectId": "stage-promote",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "db-check",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s3",
+      "from": {
+        "objectId": "db-check",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "migrate",
+        "anchor": "top"
+      },
+      "label": "compatible",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "s4",
+      "from": {
+        "objectId": "migrate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "stage-deploy",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s5",
+      "from": {
+        "objectId": "stage-deploy",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "stage-tests",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s6",
+      "from": {
+        "objectId": "stage-tests",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "stage-gate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "x2",
+      "from": {
+        "objectId": "stage-gate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "approval",
+        "anchor": "left"
+      },
+      "label": "healthy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "p1",
+      "from": {
+        "objectId": "approval",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "signature",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p2",
+      "from": {
+        "objectId": "signature",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "canary",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p3",
+      "from": {
+        "objectId": "canary",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "observe",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "p4",
+      "from": {
+        "objectId": "observe",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "telemetry",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p5",
+      "from": {
+        "objectId": "telemetry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "threshold",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p6",
+      "from": {
+        "objectId": "telemetry",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "operator-review",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "p7",
+      "from": {
+        "objectId": "threshold",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "traffic",
+        "anchor": "top"
+      },
+      "label": "healthy windows",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "p8",
+      "from": {
+        "objectId": "threshold",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "rollback",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "p9",
+      "from": {
+        "objectId": "rollback",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "compensate",
+        "anchor": "top"
+      },
+      "label": "if safe",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "g1",
+      "from": {
+        "objectId": "traffic",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "consensus",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "g2",
+      "from": {
+        "objectId": "router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "service-registry",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "both",
+      "color": "teal"
+    },
+    {
+      "id": "g3",
+      "from": {
+        "objectId": "flags",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "service-registry",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "both",
+      "color": "teal"
+    },
+    {
+      "id": "g4",
+      "from": {
+        "objectId": "service-registry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "consensus",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "g5",
+      "from": {
+        "objectId": "consensus",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "audit",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "g6",
+      "from": {
+        "objectId": "consensus",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "notify",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

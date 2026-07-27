@@ -7,13 +7,7 @@
  * test/lints-chip-parity.test.ts. Inflate it by the 16px breathing margin
  * and fire when that rect bleeds onto an endpoint box of the chip's own
  * edge. Chips hitting OTHER boxes, chips, or wires are covered-content's
- * findings; corridor generosity beyond the bare fit is craft, owned by the
- * spacing-and-corridors style topic.
- *
- * Quickfix (opt-in): widen the corridor along the run axis by the true
- * deficit (chip extent plus both margins minus the measured gap), moving the
- * later endpoint up to the next 16px gridline — the same snap the canvas
- * applies to every patched geometry.
+ * findings.
  */
 import {
   CHIP_CLEARANCE,
@@ -31,8 +25,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
-import type { AgentPatchOperation } from "../../../protocol";
-import type { Diagnostic, LayoutRule } from "../types";
+import type { LayoutRule } from "../types";
 
 type Axis = "x" | "y";
 
@@ -93,10 +86,8 @@ function chipFitFinding(
 const GUIDANCE = `A labeled edge renders a fixed-size chip at its route's midpoint, and that chip must fit:
 - when the chip plus its ${CHIP_CLEARANCE}px breathing margin bleeds onto one of its own endpoint
   boxes, the label is physically unreadable;
-- open the corridor (the quickfix does exactly this), reroute, or shorten the label until
-  the rendered chip fits.
-Fitting is measurement, not taste — it is the floor. Reference-quality corridors are far
-more generous; see the spacing-and-corridors style topic.`;
+- open the corridor by moving one endpoint box along the run axis until the gap clears
+  the chip and both margins, reroute, or shorten the label until the rendered chip fits.`;
 
 export const rule: LayoutRule = {
   id: "unreadable-labels",
@@ -119,35 +110,5 @@ export const rule: LayoutRule = {
         suggestion: `open the ${finding.from.id}↔${finding.to.id} corridor to `
           + `≥${Math.ceil(finding.needed)}px so the chip and its ${CHIP_CLEARANCE}px margins fit`,
       }));
-  },
-  quickfix(document, d: Diagnostic): AgentPatchOperation[] {
-    // Re-derive the finding from the current draft (the diagnostic may be stale).
-    const edgeId = d.at[0];
-    const edge = document.connections.find((entry) => entry.id === edgeId);
-    if (!edge) return [];
-    const finding = chipFitFinding(edge, document);
-    if (!finding) return [];
-    const { axis, available, needed, from, to } = finding;
-    const deficit = needed - available;
-    if (deficit <= 0) return [];
-    // Widen by the true deficit, moving the later endpoint along the run
-    // axis; its new position snaps UP to the absolute 16px grid because the
-    // canvas snaps every patched geometry there anyway (snapGeometry,
-    // CANVAS_GRID_SIZE) — emitting the post-snap coordinate keeps the op
-    // stable and never lets nearest-rounding undo part of the deficit.
-    const later = (
-      axis === "x"
-        ? to.geometry.x >= from.geometry.x
-        : to.geometry.y >= from.geometry.y
-    ) ? to : from;
-    const moved = (axis === "x" ? later.geometry.x : later.geometry.y) + deficit;
-    const snapped = Math.ceil(moved / 16) * 16;
-    const geometry = {
-      x: axis === "x" ? snapped : later.geometry.x,
-      y: axis === "y" ? snapped : later.geometry.y,
-      width: later.geometry.width,
-      height: later.geometry.height,
-    };
-    return [{ type: "updateObject", objectId: later.id, patch: { geometry } }];
   },
 };

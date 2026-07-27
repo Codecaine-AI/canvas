@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board offers stronger regional grouping and semantic color but loses finish through denser routing, perimeter-scale dashed runs, and several cramped labels.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 7,
+        "note": "The five numbered regions use most of the committed board coherently, although the shallow reliability strip feels compressed beneath the much larger upper composition."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "Most nodes and chips have readable clearance, but the backbone-to-consumer routes and the OrderConfirmed/status labels crowd region borders and adjacent wires."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Distinct blue, aqua, lavender, orange, and gray tinted regions clearly separate intake, backbone, coordination, fulfillment, and reliability functions."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Blue, teal, purple, orange, and green consistently distinguish flow families and outcomes, though the number of active hues makes the central routing visually busy."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "No crosshair junctions are visible, but the oversized fan-out arrow, multiple lines terminating at shared runs, and dashed routing wrapped around the fulfillment region expose diagram machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "The three parallel consumer columns and fulfillment grid establish strong registers, but the backbone row and bottom observability strip have less consistent spacing and visual rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Local vertical flows are clean, but the long dashed teal perimeter route, extended blue status detour, and several shared horizontal trunks create ambiguous merges and border-hugging marathons."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 next at 7.0, and the board under grade slightly lower at 6.5 because its stronger grouping does not offset its routing and finish defects."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 853
+  },
+  "flags": []
+}

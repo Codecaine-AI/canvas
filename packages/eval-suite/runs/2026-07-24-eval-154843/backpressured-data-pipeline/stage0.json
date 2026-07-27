@@ -1,0 +1,750 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.backpressured-data-pipeline",
+  "title": "2026-07-24-eval-154843 · backpressured-data-pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · backpressured-data-pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 96,
+        "y": 144,
+        "width": 2128,
+        "height": 1216
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Event sources",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 112,
+        "y": 272,
+        "width": 256,
+        "height": 496
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "section",
+      "text": "2 · Ingest & validation",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 400,
+        "y": 192,
+        "width": 368,
+        "height": 720
+      }
+    },
+    {
+      "id": "buffer",
+      "type": "section",
+      "text": "3 · Durable buffering",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 800,
+        "y": 256,
+        "width": 304,
+        "height": 560
+      }
+    },
+    {
+      "id": "transform",
+      "type": "section",
+      "text": "4 · Transform",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 192,
+        "width": 368,
+        "height": 576
+      }
+    },
+    {
+      "id": "serve",
+      "type": "section",
+      "text": "5 · Storage, load & serve",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1536,
+        "y": 192,
+        "width": 656,
+        "height": 608
+      }
+    },
+    {
+      "id": "operations",
+      "type": "section",
+      "text": "Backpressure, replay & operations",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1040,
+        "width": 1984,
+        "height": 288
+      }
+    },
+    {
+      "id": "app-producers",
+      "type": "icon",
+      "text": "Application events",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 144,
+        "y": 320,
+        "width": 176,
+        "height": 128
+      },
+      "icon": "send"
+    },
+    {
+      "id": "partner-batch",
+      "type": "document-stack",
+      "text": "Partner batch uploads",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 128,
+        "y": 608,
+        "width": 208,
+        "height": 128
+      }
+    },
+    {
+      "id": "gateway",
+      "type": "process",
+      "text": "Ingest gateway\nAuth + tenant/receipt metadata",
+      "color": "blue",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 432,
+        "y": 240,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "schema-registry",
+      "type": "database",
+      "text": "Schema registry",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 464,
+        "y": 400,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "schema-check",
+      "type": "decision",
+      "text": "Record valid?",
+      "color": "yellow",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 464,
+        "y": 560,
+        "width": 224,
+        "height": 144
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "database",
+      "text": "Unknown-schema quarantine",
+      "color": "orange",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 416,
+        "y": 768,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "reject",
+      "type": "document",
+      "text": "Reject + reason",
+      "color": "red",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 592,
+        "y": 768,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "durable-log",
+      "type": "database",
+      "text": "Partitioned durable log",
+      "color": "teal",
+      "parentId": "buffer",
+      "geometry": {
+        "x": 816,
+        "y": 304,
+        "width": 256,
+        "height": 144
+      }
+    },
+    {
+      "id": "retention-limit",
+      "type": "decision",
+      "text": "Retention near safety limit?",
+      "color": "yellow",
+      "parentId": "buffer",
+      "geometry": {
+        "x": 832,
+        "y": 624,
+        "width": 224,
+        "height": 160
+      }
+    },
+    {
+      "id": "transform-workers",
+      "type": "predefined-process",
+      "text": "Stateless transform workers\nPartition order",
+      "color": "violet",
+      "parentId": "transform",
+      "geometry": {
+        "x": 1168,
+        "y": 240,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "normalize",
+      "type": "process",
+      "text": "Normalize + remove sensitive fields",
+      "color": "gray",
+      "parentId": "transform",
+      "geometry": {
+        "x": 1168,
+        "y": 432,
+        "width": 288,
+        "height": 112
+      }
+    },
+    {
+      "id": "reference-data",
+      "type": "database",
+      "text": "Versioned reference data",
+      "color": "blue",
+      "parentId": "transform",
+      "geometry": {
+        "x": 1168,
+        "y": 624,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "dead-letter",
+      "type": "database",
+      "text": "Dead-letter stream\nRepair + replay context",
+      "color": "orange",
+      "parentId": "transform",
+      "geometry": {
+        "x": 1344,
+        "y": 624,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "object-storage",
+      "type": "database",
+      "text": "Object storage\nReplay source",
+      "color": "teal",
+      "parentId": "serve",
+      "geometry": {
+        "x": 1552,
+        "y": 240,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "loading-queue",
+      "type": "database",
+      "text": "Warehouse loading queue",
+      "color": "orange",
+      "parentId": "serve",
+      "geometry": {
+        "x": 1808,
+        "y": 240,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "loaders",
+      "type": "predefined-process",
+      "text": "Idempotent batch loaders",
+      "color": "green",
+      "parentId": "serve",
+      "geometry": {
+        "x": 1808,
+        "y": 448,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "checkpoint",
+      "type": "database",
+      "text": "Load checkpoint",
+      "color": "gray",
+      "parentId": "serve",
+      "geometry": {
+        "x": 1552,
+        "y": 448,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "warehouse",
+      "type": "database",
+      "text": "Completed warehouse partitions",
+      "color": "green",
+      "parentId": "serve",
+      "geometry": {
+        "x": 1808,
+        "y": 656,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "query-service",
+      "type": "process",
+      "text": "Query service",
+      "color": "blue",
+      "parentId": "serve",
+      "geometry": {
+        "x": 2016,
+        "y": 448,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "result-cache",
+      "type": "database",
+      "text": "Tenant result cache",
+      "color": "gray",
+      "parentId": "serve",
+      "geometry": {
+        "x": 2016,
+        "y": 656,
+        "width": 144,
+        "height": 112
+      }
+    },
+    {
+      "id": "bp-policy",
+      "type": "sticky",
+      "text": "### Backpressure sequence\n1. Loading queue expands\n2. Transform consumption slows\n3. Ingest returns explicit throttling near retention limit",
+      "color": "orange",
+      "parentId": "operations",
+      "geometry": {
+        "x": 144,
+        "y": 1088,
+        "width": 592,
+        "height": 208
+      }
+    },
+    {
+      "id": "replay-policy",
+      "type": "sticky",
+      "text": "### Identity-safe replay\nQuarantine and dead-letter replay preserve original **tenant ID + event ID** so downstream idempotency and deduplication remain valid.",
+      "color": "yellow",
+      "parentId": "operations",
+      "geometry": {
+        "x": 816,
+        "y": 1088,
+        "width": 592,
+        "height": 208
+      }
+    },
+    {
+      "id": "observability",
+      "type": "sticky",
+      "text": "### Operational signals\nPer-stage **lag · rejection · quarantine · retry · throughput** metrics feed alerts and capacity decisions.",
+      "color": "teal",
+      "parentId": "operations",
+      "geometry": {
+        "x": 1488,
+        "y": 1088,
+        "width": 592,
+        "height": 208
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-app-gw",
+      "from": {
+        "objectId": "app-producers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gateway",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-batch-gw",
+      "from": {
+        "objectId": "partner-batch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gateway",
+        "anchor": "left"
+      },
+      "label": "uploads",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-gw-reg",
+      "from": {
+        "objectId": "gateway",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "schema-registry",
+        "anchor": "top"
+      },
+      "label": "validate",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-reg-check",
+      "from": {
+        "objectId": "schema-registry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "schema-check",
+        "anchor": "top"
+      },
+      "label": "schema result",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-valid-log",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "durable-log",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-unknown",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "quarantine",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-malformed",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "reject",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-log-transform",
+      "from": {
+        "objectId": "durable-log",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-transform-normalize",
+      "from": {
+        "objectId": "transform-workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "normalize",
+        "anchor": "top"
+      },
+      "label": "transform",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ref-enrich",
+      "from": {
+        "objectId": "reference-data",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "normalize",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-failure-dlq",
+      "from": {
+        "objectId": "normalize",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "dead-letter",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-success-object",
+      "from": {
+        "objectId": "normalize",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "object-storage",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-success-queue",
+      "from": {
+        "objectId": "normalize",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "loading-queue",
+        "anchor": "left"
+      },
+      "label": "successful records",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-queue-loaders",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "loaders",
+        "anchor": "top"
+      },
+      "label": "batches",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-loader-checkpoint",
+      "from": {
+        "objectId": "loaders",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "checkpoint",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-loader-warehouse",
+      "from": {
+        "objectId": "loaders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "warehouse",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-warehouse-query",
+      "from": {
+        "objectId": "warehouse",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "query-service",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-query-cache",
+      "from": {
+        "objectId": "query-service",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "result-cache",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-object-replay",
+      "from": {
+        "objectId": "object-storage",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          1520,
+          400
+        ],
+        [
+          1504,
+          400
+        ],
+        [
+          1504,
+          208
+        ],
+        [
+          1488,
+          208
+        ]
+      ]
+    },
+    {
+      "id": "e-retention-watch",
+      "from": {
+        "objectId": "durable-log",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retention-limit",
+        "anchor": "top"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-backpressure-transform",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "top"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1896,
+          176
+        ],
+        [
+          1312,
+          176
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

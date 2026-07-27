@@ -2,8 +2,8 @@
  * Stateful layout-session façade — the one class the routes/cli talk to.
  * Owns session lifecycle (create → running → proposal-ready →
  * accepted/rejected/abandoned/error), reads the baseline canvas file and
- * resolves scope (board/scope.ts), spawns the kernel agent with the four
- * context blocks as sessionData, relays SSE events, and applies the
+ * resolves scope (board/scope.ts), spawns the kernel agent with the context
+ * snapshots and spawn-time boot images as sessionData, relays SSE events, and applies the
  * accept/reject flow — accept re-reads the live file and answers 409 when
  * scoped objects changed underneath the session. Editing mechanics live in
  * ./apply-ops, tool implementations in ./tools, snapshots/gates in ./context.
@@ -22,6 +22,7 @@ import { renderDocumentToSvg } from "../../../../canvas/src/render/static-svg";
 
 import { resolveScope, type ScopeResolution } from "../../board/scope";
 import type { Diagnostic } from "../../board/lints";
+import { runDiagnostics } from "../../board/lints/run";
 import type {
   AcceptAgentSessionResponse,
   AgentProposal,
@@ -33,22 +34,30 @@ import type {
   CreateAgentSessionRequest,
 } from "../../protocol";
 
-import { CANVASES_DIR, REPO_ROOT, AGENT_KERNEL_DIR, createLayoutKernel } from "../kernel";
-import type { LayoutToolRuntime } from "../tool-runtime";
+import type { RequestQueueEntry } from "../../agent/loaders/user-requests";
 import {
-  boardStateSnapshot,
+  AGENT_KERNEL_DIR,
+  AGENT_THINKING_OVERRIDE,
+  CANVASES_DIR,
+  REPO_ROOT,
+  createLayoutKernel,
+} from "../kernel";
+import type { LayoutToolRuntime } from "../tool-runtime";
+import { bootPerception } from "./boot";
+import {
   documentWithinCrop,
   draftWithPageFrame,
   editorSnapshot,
   expandRect,
   renderCropError,
   solvedFrame,
+  syncSessionRequests,
   userRequestsSnapshot,
 } from "./context";
 import { createToolRuntime } from "./tools";
 
 const AGENT_NAME = "layout-editor";
-/** World-space context ring around the scope frame for the camera + inspect. */
+/** World-space context ring around the scope frame for the ghost preview. */
 const CONTEXT_RING = 128;
 /** Raster width for the operator-facing ghost-preview SVG feed. */
 const GHOST_PREVIEW_WIDTH = 1400;
@@ -84,8 +93,11 @@ export interface LayoutSession {
   subscribers: Set<(event: AgentSessionEvent) => void>;
   /** Resolves when the current agent run settles (CLI awaits this). */
   runPromise: Promise<void> | null;
-  /** The house-style exemplar is attached to at most the first `board` result. */
-  exemplarShown?: boolean;
+  /**
+   * The user-request queue with session-level statuses (document + invoke
+   * annotations merged at spawn/refine; resolve_request disposes entries).
+   */
+  requests: RequestQueueEntry[];
   /** Diagnostics attached to the previous apply result, for LINTS delta reporting. */
   lastDiagnostics?: Diagnostic[];
 }
@@ -109,7 +121,7 @@ export function emitSessionEvent(session: LayoutSession, event: AgentSessionEven
 export class LayoutSessionStore {
   readonly kernel: KernelInstance<LayoutToolRuntime>;
 
-  /** Optional sink for render_draft PNGs (the CLI writes them to disk). */
+  /** Optional sink for the pushed board-render PNGs (the CLI writes them to disk). */
   onRender: ((sessionId: string, png: Buffer, index: number) => void) | null = null;
 
   private readonly db: KernelDatabase;
@@ -216,8 +228,12 @@ export class LayoutSessionStore {
       events: [],
       subscribers: new Set(),
       runPromise: null,
-      exemplarShown: false,
+      requests: [],
     };
+    // Every operation reports its lint delta against a baseline, so the session
+    // starts with one: the findings already on the board before the first edit.
+    session.lastDiagnostics = runDiagnostics(session.draft);
+    syncSessionRequests(session);
     this.sessions.set(sessionId, session);
     this.byContainer.set(container.id, session);
 
@@ -252,6 +268,7 @@ export class LayoutSessionStore {
     session.instruction = instruction;
     if (snapshot?.annotations) session.annotations = snapshot.annotations;
     if (snapshot?.viewport) session.viewport = snapshot.viewport;
+    syncSessionRequests(session);
     session.status = "running";
     session.error = null;
     this.emit(session, { type: "status", sessionId, status: "running" });
@@ -360,6 +377,8 @@ export class LayoutSessionStore {
     refine: boolean,
   ): Promise<void> {
     try {
+      // Fresh per run — refinements re-spawn context over the current draft.
+      const boot = bootPerception(session);
       await this.kernel.spawnAgent(AGENT_NAME, instruction, null, {
         containerId: session.containerId,
         trigger: "operator",
@@ -367,15 +386,19 @@ export class LayoutSessionStore {
         workingDir: REPO_ROOT,
         displayLabel: "Layout Editor",
         reuseExistingSession: refine,
+        ...(AGENT_THINKING_OVERRIDE === undefined
+          ? {}
+          : { thinkingLevel: AGENT_THINKING_OVERRIDE }),
         sessionData: {
           editorState: editorSnapshot(session),
           userRequests: userRequestsSnapshot(session),
-          boardState: boardStateSnapshot(session),
+          boardState: boot.boardState,
+          bootImages: boot.images,
         },
       });
       if (session.status === "running") {
         session.status = "error";
-        session.error = "The agent ended its run without committing or abandoning.";
+        session.error = "The agent ended its run without finalizing.";
         this.emit(session, { type: "error", sessionId: session.id, message: session.error });
         this.markContainer(session, "error");
       } else if (session.status === "proposal-ready" || session.status === "abandoned") {

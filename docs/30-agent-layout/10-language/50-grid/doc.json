@@ -14,13 +14,13 @@
         "b-grid-canvas-4"
       ],
       "props": {
-        "covers": "The grid statement: RxC identical cells filled by item lines in row-major order, gap= from the spacing ladder (0/32/64/96); cells keep row and column identity, anchoring later placement.",
+        "covers": "The descriptive grid pattern: RxC identical cells filled in row-major order, with one gap= value repeated exactly; cells keep row and column identity, anchoring later placement.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "grid",
           "gap",
-          "spacing ladder",
+          "uniform gap",
           "lattice",
           "row-major"
         ]
@@ -46,7 +46,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Main value "
+          "insert": "In this descriptive notation, the main value is "
         },
         {
           "insert": "RxC",
@@ -64,7 +64,7 @@
           }
         },
         {
-          "insert": " — the one shared gap between cells, from the spacing ladder: 0 (cells touching — tables), 32 (tight), 64 (standard), 96 (loose). Children are item lines in row-major order; the count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later (rule R4)."
+          "insert": " — the one shared gap repeated exactly between cells. Children are item lines in row-major order; the count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later. On the live board, same size plus the same gap signals peers: choose the gap from content and corridor needs, then copy exact geometry across the group. The crowding diagnostic warns below about 80px between side-by-side sibling boxes or 96px between stacked siblings; those measurements are the physical floor for wires and labels, not prescribed spacing."
         }
       ]
     },

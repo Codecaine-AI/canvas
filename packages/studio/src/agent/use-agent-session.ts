@@ -1,11 +1,14 @@
 import type {
   CanvasAgentPatchOperation,
+  CanvasAnnotationReply,
+  InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas";
 import type {
   AgentPatchOperation,
   AgentProposal,
+  AgentSessionAnnotation,
   AgentSessionEvent,
   AgentSessionMessageRequest,
   AgentSessionViewport,
@@ -128,6 +131,11 @@ export interface UseAgentSessionResult {
   harnessUnavailable: boolean;
   acceptConflict: AgentAcceptConflict | null;
   acceptedResult: AgentAcceptResult | null;
+  /**
+   * The draft's annotation threads as of the last harness announcement — the
+   * agent opening a thread, replying, or closing one mid-run.
+   */
+  draftAnnotations: AgentSessionAnnotation[];
   start(payload: CreateSessionBody): Promise<CreateAgentSessionResponse | null>;
   refine(instruction: string): Promise<boolean>;
   accept(): Promise<AgentAcceptResult | null>;
@@ -148,6 +156,8 @@ interface AgentSessionState {
   failure: AgentSessionFailure | null;
   acceptConflict: AgentAcceptConflict | null;
   acceptedResult: AgentAcceptResult | null;
+  /** The draft's annotation threads as the harness last announced them. */
+  draftAnnotations: AgentSessionAnnotation[];
 }
 
 type StateAction =
@@ -173,6 +183,7 @@ const INITIAL_STATE: AgentSessionState = {
   failure: null,
   acceptConflict: null,
   acceptedResult: null,
+  draftAnnotations: [],
 };
 
 function abandonedState(
@@ -309,6 +320,8 @@ function reduceState(
                 },
               };
           }
+        case "annotations":
+          return { ...next, draftAnnotations: event.annotations };
         case "fitted":
         case "proposal":
         case "delta":
@@ -346,6 +359,11 @@ function toCanvasOperation(
   operation: AgentPatchOperation,
 ): CanvasAgentPatchOperation {
   switch (operation.type) {
+    case "updateDescription":
+      return {
+        type: "updateDescription",
+        description: operation.description,
+      };
     case "addObject":
       return {
         type: "addObject",
@@ -374,6 +392,23 @@ function toCanvasOperation(
       return {
         type: "removeConnection",
         connectionId: operation.connectionId,
+      };
+    case "addAnnotation":
+      return {
+        type: "addAnnotation",
+        annotation: operation.annotation as unknown as InteractiveCanvasAnnotation,
+      };
+    case "appendAnnotationReply":
+      return {
+        type: "appendAnnotationReply",
+        annotationId: operation.annotationId,
+        reply: operation.reply as unknown as CanvasAnnotationReply,
+      };
+    case "setAnnotationStatus":
+      return {
+        type: "setAnnotationStatus",
+        annotationId: operation.annotationId,
+        status: operation.status,
       };
     default: {
       const exhaustive: never = operation;
@@ -647,6 +682,7 @@ export function useAgentSession({
     harnessUnavailable: state.failure?.kind === "harness-unavailable",
     acceptConflict: state.acceptConflict,
     acceptedResult: state.acceptedResult,
+    draftAnnotations: state.draftAnnotations,
     start,
     refine,
     accept,

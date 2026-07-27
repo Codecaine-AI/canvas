@@ -3,80 +3,50 @@ import { join } from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
+import { paintedBounds } from "@codecaine-ai/canvas/render";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import { rasterizeSvgToPng } from "../src/service/render";
 import {
-  createLayoutToolState,
-  emitSessionEvent,
   LayoutSessionStore,
-  toolApplyOps,
-  toolRenderDraft,
+  renderBoardView,
+  renderSectionView,
   type LayoutSession,
-  type LayoutToolState,
 } from "../src/service/session";
-import type {
-  LayoutRenderRequest,
-  LayoutToolRenderResult,
-} from "../src/service/tool-runtime";
-import { resolveScope } from "../src/board/scope";
-import { FIXTURES_DIR } from "./helpers";
+import { FIXTURES_DIR, look, makeTestSession, runOp } from "./helpers";
 
 const PNG_SIGNATURE = "89504e470d0a1a0a";
 
 function makeBubbaStore(): {
   store: LayoutSessionStore;
   session: LayoutSession;
-  state: LayoutToolState;
 } {
   const baseline = JSON.parse(
     readFileSync(join(FIXTURES_DIR, "bubba-voice.canvas.json"), "utf8"),
   ) as InteractiveCanvasDocument;
-  const scopeResolution = resolveScope(baseline, ["section-ml-pending"]);
-  const session: LayoutSession = {
+  const session = makeTestSession(baseline, ["section-ml-pending"], {
     id: "render-session",
     canvasId: "bubba-voice",
     canvasPath: join(FIXTURES_DIR, "bubba-voice.canvas.json"),
-    baseline,
-    baselineHash: "test-hash",
-    scopeResolution,
-    scopeIds: new Set(scopeResolution.scopeObjectIds),
-    draft: baseline,
-    proposalCount: 0,
-    proposal: null,
-    status: "running",
-    error: null,
     instruction: "Nudge Task A to sit centered in the Pending lane.",
-    annotations: [],
-    viewport: undefined,
-    containerId: "render-container",
-    sessionDir: "/tmp/canvas-agent-render-test",
-    events: [],
-    subscribers: new Set(),
-    runPromise: null,
-  };
+  });
 
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([
     [session.id, session],
   ]);
-  return { store, session, state: createLayoutToolState() };
+  return { store, session };
 }
 
-function centerTask(session: LayoutSession): LayoutToolRenderResult {
-  return toolApplyOps(session, [{
-    type: "updateObject",
+function centerTask(
+  session: LayoutSession,
+  view?: string,
+): ReturnType<typeof runOp> {
+  return runOp(session, "update_object", {
     objectId: "task-ml-a",
     patch: { geometry: { x: 1116, y: 614, width: 200, height: 100 } },
-  }], emitSessionEvent);
-}
-
-function renderDraft(
-  session: LayoutSession,
-  state: LayoutToolState,
-  request: LayoutRenderRequest,
-): LayoutToolRenderResult {
-  return toolRenderDraft(session, request, emitSessionEvent, state);
+    view,
+  });
 }
 
 function expectPng(png: Buffer | undefined): asserts png is Buffer {
@@ -85,10 +55,34 @@ function expectPng(png: Buffer | undefined): asserts png is Buffer {
 }
 
 describe("harness render boundary", () => {
-  test("renders the exact bubba-voice session draft and render_draft camera", () => {
-    const { store, session, state } = makeBubbaStore();
+  test("look returns the board render and the requested section close-up", () => {
+    const { session } = makeBubbaStore();
+    const draftBefore = session.draft;
 
-    expect(centerTask(session).isError).not.toBe(true);
+    const result = look(session, "section-ml-pending");
+    expect(result.isError).not.toBe(true);
+
+    // Board render first, section close-up second.
+    expect(result.pngs).toHaveLength(2);
+    expectPng(result.pngs![0]);
+    expectPng(result.pngs![1]);
+    expect(result.pngs![0]).toEqual(
+      rasterizeSvgToPng(renderBoardView(session.draft, { width: 1600 }).svg).png,
+    );
+    expect(result.pngs![1]).toEqual(
+      rasterizeSvgToPng(
+        renderSectionView(session.draft, "section-ml-pending", { width: 1400 }).svg,
+      ).png,
+    );
+    expect(session.draft).toBe(draftBefore);
+    expect(session.events).toEqual([]);
+  });
+
+  test("a mutator with view returns the requested section close-up", () => {
+    const { store, session } = makeBubbaStore();
+
+    const result = centerTask(session, "section-ml-pending");
+    expect(result.isError).not.toBe(true);
     expect(session.draft.objects.find((object) => object.id === "task-ml-a")?.geometry).toEqual({
       x: 1120,
       y: 608,
@@ -96,69 +90,77 @@ describe("harness render boundary", () => {
       height: 96,
     });
 
+    expect(result.pngs).toHaveLength(1);
+    expectPng(result.pngs![0]);
+    expect(result.pngs![0]).toEqual(
+      rasterizeSvgToPng(
+        renderSectionView(session.draft, "section-ml-pending", { width: 1400 }).svg,
+      ).png,
+    );
+
     const ghost = store.draftSvg(session.id);
     expect({ width: ghost.width, height: ghost.height }).toEqual({ width: 1400, height: 778 });
     expect(ghost.svg).toContain('viewBox="784 352 864 480"');
     const ghostPng = rasterizeSvgToPng(ghost.svg);
     expect({ width: ghostPng.width, height: ghostPng.height }).toEqual({ width: 1400, height: 778 });
     expectPng(ghostPng.png);
-
-    const rendered = renderDraft(session, state, { pixelWidth: 1000 });
-    expect(rendered.isError).not.toBe(true);
-    expect(rendered.details).toEqual({
-      crop: { x: 784, y: 352, width: 864, height: 480 },
-      width: 1000,
-      height: 556,
-    });
-    expectPng(rendered.png);
-
-    const secondRecordedWidth = renderDraft(session, state, { pixelWidth: 1200 });
-    expect(secondRecordedWidth.isError).not.toBe(true);
-    expect(secondRecordedWidth.details).toMatchObject({ width: 1200, height: 667 });
-    expectPng(secondRecordedWidth.png);
-
-    const closeUp = renderDraft(session, state, {
-      crop: { x: 912, y: 480, width: 608, height: 160 },
-      pixelWidth: 1000,
-    });
-    expect(closeUp.isError).not.toBe(true);
-    expect(closeUp.details).toEqual({
-      crop: { x: 912, y: 480, width: 608, height: 160 },
-      width: 1000,
-      height: 263,
-    });
-    expectPng(closeUp.png);
   });
 
-  test("returns tool errors for degenerate crops and remains usable", () => {
-    const { session, state } = makeBubbaStore();
-    expect(centerTask(session).isError).not.toBe(true);
-    const invalidRequests: LayoutRenderRequest[] = [
-      { crop: { x: 0, y: 0, width: 0, height: 0 } },
-      { crop: { x: 0, y: 0, width: -1, height: 10 } },
-      { crop: { x: 0, y: 0, width: 10, height: -1 } },
-      { crop: { x: 0, y: 0, width: Number.NaN, height: 10 } },
-      { crop: { x: Number.POSITIVE_INFINITY, y: 0, width: 10, height: 10 } },
-      { crop: { x: 0, y: 0, width: Number.MAX_VALUE, height: Number.MAX_VALUE } },
-      { crop: { x: Number.MAX_VALUE, y: 0, width: 10, height: 10 } },
-      { pixelWidth: Number.NaN },
-    ];
+  test("renderBoardView frames the whole document at the requested width", () => {
+    const { session } = makeBubbaStore();
 
-    const renderingEventsBefore = session.events.filter(
-      (event) => event.type === "rendering",
-    ).length;
-    for (const request of invalidRequests) {
-      const result = renderDraft(session, state, request);
-      expect(result.isError).toBe(true);
-      expect(result.png).toBeUndefined();
+    const view = renderBoardView(session.draft, { width: 1600 });
+
+    expect(view.width).toBe(1600);
+    expect(view.height).toBeGreaterThan(0);
+    expect(view.camera.width).toBeGreaterThan(0);
+    expect(view.camera.height).toBeGreaterThan(0);
+    // Every object sits inside the camera rect.
+    for (const object of session.draft.objects) {
+      const { x, y, width, height } = object.geometry;
+      expect(x).toBeGreaterThanOrEqual(view.camera.x);
+      expect(y).toBeGreaterThanOrEqual(view.camera.y);
+      expect(x + width).toBeLessThanOrEqual(view.camera.x + view.camera.width);
+      expect(y + height).toBeLessThanOrEqual(view.camera.y + view.camera.height);
     }
-    expect(session.events.filter((event) => event.type === "rendering")).toHaveLength(
-      renderingEventsBefore,
-    );
+    expectPng(rasterizeSvgToPng(view.svg).png);
+  });
 
-    const recovered = renderDraft(session, state, { pixelWidth: 1000 });
-    expect(recovered.isError).not.toBe(true);
-    expectPng(recovered.png);
+  test("the board-view camera covers the whole document's painted bounds", () => {
+    const { session } = makeBubbaStore();
+
+    const view = renderBoardView(session.draft, { width: 1600 });
+    const painted = paintedBounds(session.draft);
+
+    // Nothing painted — routed wires, label chips, title chips — is dropped.
+    expect(view.camera.x).toBeLessThanOrEqual(painted.x);
+    expect(view.camera.y).toBeLessThanOrEqual(painted.y);
+    expect(view.camera.x + view.camera.width)
+      .toBeGreaterThanOrEqual(painted.x + painted.width);
+    expect(view.camera.y + view.camera.height)
+      .toBeGreaterThanOrEqual(painted.y + painted.height);
+  });
+
+  test("renderSectionView frames the section and rejects unknown sections", () => {
+    const { session } = makeBubbaStore();
+    const section = session.draft.objects.find(
+      (object) => object.id === "section-ml-pending",
+    )!;
+
+    const view = renderSectionView(session.draft, "section-ml-pending", { width: 1400 });
+
+    expect(view.width).toBe(1400);
+    // The camera covers the section frame (plus padding).
+    expect(view.camera.x).toBeLessThanOrEqual(section.geometry.x);
+    expect(view.camera.y).toBeLessThanOrEqual(section.geometry.y);
+    expect(view.camera.x + view.camera.width)
+      .toBeGreaterThanOrEqual(section.geometry.x + section.geometry.width);
+    expect(view.camera.y + view.camera.height)
+      .toBeGreaterThanOrEqual(section.geometry.y + section.geometry.height);
+    expectPng(rasterizeSvgToPng(view.svg).png);
+
+    expect(() => renderSectionView(session.draft, "no-such-section", { width: 1400 }))
+      .toThrow('"no-such-section" is not a section');
   });
 
   test("rejects off-viewport clip geometry before entering resvg", () => {

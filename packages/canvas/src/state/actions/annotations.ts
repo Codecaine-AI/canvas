@@ -19,8 +19,9 @@ export function handleAddAnnotation(
     intent: action.intent ?? "note",
     body: action.body,
     status: "open",
-    createdBy: "human",
+    createdBy: action.createdBy ?? "human",
     createdAt: new Date().toISOString(),
+    replies: [],
   };
   return withHistory(
     {
@@ -37,6 +38,75 @@ export function handleAddAnnotation(
       changedObjectIds: [],
       changedConnectionIds: [],
       changedAnnotationIds: [id],
+    },
+  );
+}
+
+export function handleAppendAnnotationReply(
+  state: InteractiveCanvasState,
+  action: Extract<CanvasAction, { type: "canvas.appendAnnotationReply" }>,
+): InteractiveCanvasState {
+  const annotation = state.document.annotations?.find(
+    (candidate) => candidate.id === action.annotationId,
+  );
+  const body = action.body.trim();
+  if (!annotation || !body) return state;
+
+  const reply = {
+    id: nextId(
+      "reply",
+      annotation.replies.map((candidate) => candidate.id),
+    ),
+    author: action.author,
+    body,
+    createdAt: new Date().toISOString(),
+  };
+
+  return withHistory(
+    state,
+    {
+      ...state.document,
+      annotations: state.document.annotations?.map((candidate) =>
+        candidate.id === action.annotationId
+          ? { ...candidate, replies: [...candidate.replies, reply] }
+          : candidate,
+      ),
+    },
+    {
+      source: "human",
+      summary: "Replied to annotation",
+      changedObjectIds: [],
+      changedConnectionIds: [],
+      changedAnnotationIds: [action.annotationId],
+    },
+  );
+}
+
+export function handleSetAnnotationStatus(
+  state: InteractiveCanvasState,
+  action: Extract<CanvasAction, { type: "canvas.setAnnotationStatus" }>,
+): InteractiveCanvasState {
+  const annotation = state.document.annotations?.find(
+    (candidate) => candidate.id === action.annotationId,
+  );
+  if (!annotation || annotation.status === action.status) return state;
+
+  return withHistory(
+    state,
+    {
+      ...state.document,
+      annotations: state.document.annotations?.map((candidate) =>
+        candidate.id === action.annotationId
+          ? { ...candidate, status: action.status }
+          : candidate,
+      ),
+    },
+    {
+      source: "human",
+      summary: "Updated annotation status",
+      changedObjectIds: [],
+      changedConnectionIds: [],
+      changedAnnotationIds: [action.annotationId],
     },
   );
 }

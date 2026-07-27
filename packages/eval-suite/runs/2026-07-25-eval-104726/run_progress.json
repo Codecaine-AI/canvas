@@ -1,0 +1,102 @@
+{
+  "run_id": "2026-07-25-eval-104726",
+  "tier": "system",
+  "sut_thinking": "low",
+  "status": "completed",
+  "started_at": "2026-07-25T15:47:27.629Z",
+  "finished_at": "2026-07-25T15:57:16.068Z",
+  "scenarios": {
+    "backpressured-data-pipeline": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38222,
+      "finished_at": "2026-07-25T15:54:25.830Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "canary-delivery": {
+      "status": "graded",
+      "stages_done": [
+        "stage0",
+        "e1"
+      ],
+      "pid": 38223,
+      "finished_at": "2026-07-25T15:57:16.052Z",
+      "outcomes": {
+        "stage0": "committed",
+        "e1": "committed"
+      }
+    },
+    "event-driven-orders": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38224,
+      "finished_at": "2026-07-25T15:53:35.516Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "incident-response": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38225,
+      "finished_at": "2026-07-25T15:51:50.723Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "monorepo-build-cache": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38226,
+      "finished_at": "2026-07-25T15:52:25.175Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "multi-region-failover": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38227,
+      "finished_at": "2026-07-25T15:53:52.431Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "oauth-session-lifecycle": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 38228,
+      "finished_at": "2026-07-25T15:52:42.615Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "webhook-delivery": {
+      "status": "graded",
+      "stages_done": [
+        "stage0",
+        "e1"
+      ],
+      "pid": 38229,
+      "finished_at": "2026-07-25T15:53:52.833Z",
+      "outcomes": {
+        "stage0": "committed",
+        "e1": "committed"
+      }
+    }
+  }
+}

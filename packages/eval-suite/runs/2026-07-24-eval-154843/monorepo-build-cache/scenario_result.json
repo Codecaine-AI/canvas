@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-24-eval-154843",
+  "tier": "system",
+  "scenario": "monorepo-build-cache",
+  "board_id": "eval.2026-07-24-eval-154843.monorepo-build-cache",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-24T20:48:45.193Z",
+      "finished_at": "2026-07-24T20:50:29.679Z",
+      "wall_ms": 104916,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "50ca176d-e71d-4b6d-94c5-091a669aedb5"
+    ]
+  },
+  "finished_at": "2026-07-24T20:50:30.109Z",
+  "exit_code": 0
+}

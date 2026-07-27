@@ -1,65 +1,50 @@
 /**
- * The seven layout-tool implementations behind the runtime (board,
- * apply_ops, apply_quickfix, render_draft, inspect, commit, abandon) and
- * `createToolRuntime`, which binds them to the store's current session.
+ * The layout-tool implementations behind the runtime — typed operation
+ * dispatch, look, update_description, add_annotation, resolve_request, and
+ * finalize — and `createToolRuntime`, which binds them to the store's current
+ * session.
  *
- * Perception here is truth-only: `board` returns the digest + diagnostics
- * (house exemplar image on first call), `inspect` on a connection reports
- * the PRODUCTION router's chosen anchor sides, routed polyline, and any
- * through-boxes alongside the stored fields, and `commit` re-runs the
- * E-tier gate before producing the doc-diff proposal.
+ * Each operation returns perception sized for one operation: its delta, lint
+ * delta, scoped digest, and an optional requested render. `look` is the
+ * deliberate full-board read. Finalize re-runs the E-tier gate and requires
+ * every user-authored request to be disposed before committing; a thread the
+ * agent opened is non-blocking, so an unanswered question never traps the run.
  */
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import { routeConnection } from "../../../../canvas/src/connectors/routing";
-import { renderDocumentToSvg } from "../../../../canvas/src/render/static-svg";
+import { nextId } from "../../../../canvas/src/state/actions/helpers";
+import type {
+  InteractiveCanvasAnnotation,
+  CanvasAnnotationStatus,
+} from "@codecaine-ai/canvas/schema";
 
 import { diffDocuments } from "../../board/doc-diff";
-import { pathBoxViolationIds } from "../../board/lints/geometry";
+import { FINISHING_RULES } from "../../board/lints";
 import { formatDiagnostics, runDiagnostics } from "../../board/lints/run";
-import { LAYOUT_RULES } from "../../board/lints";
+import {
+  formatRequestLine,
+  formatRequestsBlock,
+  targetText,
+} from "../../agent/loaders/user-requests";
 import type {
-  AgentPatchOperation,
   AgentProposal,
+  AgentSessionAnnotation,
   AgentSessionEvent,
 } from "../../protocol";
-import { CANVASES_DIR } from "../kernel";
-import { rasterizeSvgToPng } from "../render";
 import type {
-  LayoutRenderRequest,
   LayoutToolRenderResult,
   LayoutToolRuntime,
   LayoutToolTextResult,
 } from "../tool-runtime";
-import {
-  applyOperationBatch,
-  assembleApplyResult,
-  describePatchOperation,
-  operationValidationErrors,
-  type SessionEventSink,
-} from "./apply-ops";
-import {
-  boardReport,
-  documentWithinCrop,
-  expandRect,
-  renderCropError,
-  scopedDiagnostics,
-  solvedFrame,
-} from "./context";
+import { describePatchOperation } from "./apply-ops";
+import { scopedDiagnostics, syncSessionRequests } from "./context";
+import { toolLook } from "./look";
+import { createOpContext } from "./op-context";
+import type { OperationHost } from "./operation-tool";
+import { findOperationTool } from "./operations";
+import type { SessionEventSink } from "./perception";
 import type { LayoutSession } from "./store";
-
-const CONTEXT_RING = 128;
-const DEFAULT_RENDER_WIDTH = 2000;
-const MIN_RENDER_WIDTH = 200;
-const MAX_RENDER_WIDTH = 4096;
-const EXEMPLAR_CANVAS_ID = "gc-decomp-harness";
 
 export interface LayoutToolState {
   renderCount: number;
-  /** undefined = not attempted, null = missing/unrenderable, Buffer = cached. */
-  exemplarPng: Buffer | null | undefined;
 }
 
 export interface LayoutToolHost {
@@ -69,276 +54,286 @@ export interface LayoutToolHost {
 }
 
 export function createLayoutToolState(): LayoutToolState {
-  return { renderCount: 0, exemplarPng: undefined };
+  return { renderCount: 0 };
 }
 
-function houseStyleExemplar(state: LayoutToolState): Buffer | null {
-  if (state.exemplarPng !== undefined) return state.exemplarPng;
-  const path = join(CANVASES_DIR, `${EXEMPLAR_CANVAS_ID}.canvas.json`);
-  if (!existsSync(path)) {
-    state.exemplarPng = null;
-    return null;
-  }
-  try {
-    const document = JSON.parse(readFileSync(path, "utf8")) as InteractiveCanvasDocument;
-    const pageFrame = document.objects.find(
-      (object) => object.type === "section" && object.locked === "background",
-    );
-    const rendered = renderDocumentToSvg(document, {
-      ...(pageFrame ? { sectionId: pageFrame.id } : {}),
-      fit: "content",
-      padding: 16,
-      width: 1400,
-    });
-    state.exemplarPng = rasterizeSvgToPng(rendered.svg).png;
-  } catch {
-    state.exemplarPng = null;
-  }
-  return state.exemplarPng;
-}
-
-export function toolBoard(
+/**
+ * Dispatch one typed operation against the current draft. An unknown name can
+ * only mean the registered surface and the spec table have drifted apart.
+ */
+export function toolOperation(
   session: LayoutSession,
-  state: LayoutToolState,
+  name: string,
+  params: Record<string, unknown>,
+  emit: SessionEventSink,
+  onRender?: (png: Buffer) => void,
 ): LayoutToolRenderResult {
-  const attachExemplar = !session.exemplarShown;
-  session.exemplarShown = true;
-  const report = boardReport(session);
-  const sections = [report.digest, "", report.diagnosticsText];
-  const png = attachExemplar ? houseStyleExemplar(state) : null;
-  if (png) {
-    sections.push(
-      "",
-      "Reference board (house style): note section tinting, labeled edges, dashed vs solid flows, and margin notes. Aim for this level of finish.",
-    );
+  const tool = findOperationTool(name);
+  if (!tool) {
+    return { isError: true, text: `ERROR · ${name} — not an operation on this surface.` };
   }
-  const errors = report.diagnostics.filter((item) => item.severity === "error").length;
+  const host: OperationHost = {
+    currentSession: () => session,
+    context: (draft) => createOpContext(draft),
+    emit,
+    onRender,
+  };
+  return tool.execute(params, host);
+}
+
+export function toolUpdateDescription(
+  session: LayoutSession,
+  description: string,
+  emit: SessionEventSink,
+): LayoutToolTextResult {
+  const details = { operation: "update_description" };
+  if (typeof description !== "string" || description.trim() === "") {
+    return {
+      isError: true,
+      text: "update_description rejected: description must be a non-empty string.",
+    };
+  }
+  if (session.draft.description === description) {
+    return {
+      text: "NO-OP · update_description — the board description already reads exactly this.",
+      details,
+    };
+  }
+
+  const previous = session.draft.description;
+  session.draft = { ...session.draft, description };
+  const label = "updateDescription";
+  const diagnostics = runDiagnostics(session.draft);
+  emit(session, {
+    type: "proposal",
+    sessionId: session.id,
+    n: session.proposalCount,
+  });
+  emit(session, {
+    type: "delta",
+    sessionId: session.id,
+    n: session.proposalCount,
+    delta: label,
+    lint: formatDiagnostics(diagnostics),
+  });
   return {
-    ...(png ? { png } : {}),
-    text: sections.join("\n"),
-    details: { errors, warnings: report.diagnostics.length - errors },
+    text: [
+      `APPLIED · ${label}`,
+      `DELTA · description ${previous === undefined ? "none" : previous.length} → ${description.length} chars`,
+    ].join("\n"),
+    details,
   };
 }
 
-export function toolApplyOps(
+/** Notify studio that the draft's annotation threads moved. */
+function emitAnnotations(session: LayoutSession, emit: SessionEventSink): void {
+  emit(session, {
+    type: "annotations",
+    sessionId: session.id,
+    annotations: (session.draft.annotations ?? []) as unknown as AgentSessionAnnotation[],
+  });
+}
+
+/**
+ * Open an agent-authored thread on one object. The thread rides the draft like
+ * any board content, joins the request queue labelled `agent`, and never
+ * blocks the run: the question is left behind and the user answers it on their
+ * own time.
+ */
+export function toolAddAnnotation(
   session: LayoutSession,
-  operations: AgentPatchOperation[],
+  objectId: string,
+  body: string,
   emit: SessionEventSink,
-): LayoutToolRenderResult {
-  if (!Array.isArray(operations)) {
-    return { isError: true, text: "apply_ops rejected:\n- ops must be an array." };
+): LayoutToolTextResult {
+  if (typeof objectId !== "string" || objectId.trim() === "") {
+    return {
+      isError: true,
+      text: "add_annotation rejected: objectId must name an object on the board.",
+    };
   }
-  const errors = operationValidationErrors(session, operations);
-  if (errors.length > 0) {
+  if (typeof body !== "string" || body.trim() === "") {
+    return {
+      isError: true,
+      text: "add_annotation rejected: body must be a non-empty question for the user.",
+    };
+  }
+  const target = objectId.trim();
+  if (!session.draft.objects.some((object) => object.id === target)) {
+    return {
+      isError: true,
+      text: `add_annotation rejected: no object "${target}" on the board.`,
+    };
+  }
+
+  const annotations = session.draft.annotations ?? [];
+  const annotation: InteractiveCanvasAnnotation = {
+    id: nextId("annotation", annotations.map((candidate) => candidate.id)),
+    target: { kind: "object", objectId: target },
+    intent: "agent-request",
+    body: body.trim(),
+    status: "open",
+    createdBy: "agent",
+    createdAt: new Date().toISOString(),
+    replies: [],
+  };
+  session.draft = { ...session.draft, annotations: [...annotations, annotation] };
+  syncSessionRequests(session);
+  emitAnnotations(session, emit);
+
+  return {
+    text: [
+      `APPLIED · addAnnotation ${annotation.id}`,
+      `DELTA · thread ${annotation.id} opened on ${targetText(annotation.target)}`
+      + `  agent — ${JSON.stringify(annotation.body)}`,
+      formatRequestsBlock(session.requests),
+    ].join("\n"),
+    details: { operation: "add_annotation", annotationId: annotation.id },
+  };
+}
+
+/** The document status a disposition closes its thread with. */
+const DISPOSITION_STATUS: Record<"done" | "declined", CanvasAnnotationStatus> = {
+  done: "applied",
+  declined: "resolved",
+};
+
+export function toolResolveRequest(
+  session: LayoutSession,
+  id: string,
+  status: "done" | "declined",
+  note: string,
+  emit: SessionEventSink,
+): LayoutToolTextResult {
+  if (typeof id !== "string" || id.trim() === "") {
+    return { isError: true, text: "resolve_request rejected: id must be a non-empty string." };
+  }
+  if (status !== "done" && status !== "declined") {
+    return {
+      isError: true,
+      text: 'resolve_request rejected: status must be "done" or "declined".',
+    };
+  }
+  if (typeof note !== "string" || note.trim() === "") {
+    return {
+      isError: true,
+      text: "resolve_request rejected: note must be a non-empty string — say what you did, or why you declined.",
+    };
+  }
+  const wanted = id.trim();
+  const entry = session.requests.find(
+    (request) => request.alias === wanted || request.annotationId === wanted,
+  );
+  if (!entry) {
     return {
       isError: true,
       text: [
-        "apply_ops rejected; no operations were applied:",
-        ...errors.map((error) => `- ${error}`),
+        `resolve_request rejected: no request "${wanted}" in the queue.`,
+        formatRequestsBlock(session.requests),
       ].join("\n"),
     };
   }
-  const before = session.draft;
-  const { summaryText } = applyOperationBatch(session, operations);
-  return assembleApplyResult(
-    session,
-    before,
-    `APPLIED · ${operations.length} op${operations.length === 1 ? "" : "s"}`,
-    summaryText,
-    { operations: operations.length },
-    emit,
-  );
-}
-
-export function toolApplyQuickfix(
-  session: LayoutSession,
-  diagnosticId: string,
-  emit: SessionEventSink,
-): LayoutToolRenderResult {
-  if (typeof diagnosticId !== "string" || diagnosticId.trim() === "") {
-    return {
-      isError: true,
-      text: "apply_quickfix rejected: diagnosticId must be a non-empty string.",
-    };
-  }
-  const id = diagnosticId.trim();
-  const diagnostics = runDiagnostics(session.draft);
-  const diagnostic = diagnostics.find((entry) => entry.id === id);
-  if (!diagnostic) {
-    return {
-      isError: true,
-      text: `apply_quickfix rejected: no diagnostic "${id}" on the current draft. `
-        + "Ids reset whenever the draft changes — call board and use a current id.",
-    };
-  }
-  const rule = LAYOUT_RULES.find((entry) => entry.id === diagnostic.rule);
-  if (!diagnostic.quickfixAvailable || !rule?.quickfix) {
-    return {
-      isError: true,
-      text: `Diagnostic ${id} (${diagnostic.rule}) offers no quickfix — resolve it with apply_ops instead.`,
-    };
-  }
-  const operations = rule.quickfix(session.draft, diagnostic);
-  if (operations.length === 0) {
-    return {
-      isError: true,
-      text: `Diagnostic ${id} (${diagnostic.rule}) produced no quickfix operations for the current draft.`,
-    };
-  }
-  const validationErrors = operationValidationErrors(session, operations);
-  if (validationErrors.length > 0) {
+  if (entry.status !== "open") {
     return {
       isError: true,
       text: [
-        `apply_quickfix ${id} rejected; no operations were applied:`,
-        ...validationErrors.map((error) => `- ${error}`),
+        `resolve_request rejected: ${entry.alias} is already ${entry.status}.`,
+        formatRequestsBlock(session.requests),
       ].join("\n"),
     };
   }
-  const before = session.draft;
-  const { summaryText } = applyOperationBatch(session, operations);
-  return assembleApplyResult(
-    session,
-    before,
-    `APPLIED · quickfix ${id} (${diagnostic.rule}) · ${operations.length} op${operations.length === 1 ? "" : "s"}`,
-    summaryText,
-    { diagnosticId: id, operations: operations.length },
-    emit,
+  entry.status = status;
+  entry.note = note.trim();
+
+  // The disposition is board content: the note becomes an agent reply in the
+  // thread and the thread closes, so the operator sees it on the board rather
+  // than only in the transcript. An invoke-only request has no thread on the
+  // draft to write to; its disposition stays on the queue entry alone.
+  const thread = session.draft.annotations?.find(
+    (annotation) => annotation.id === entry.annotationId,
   );
+  if (thread) {
+    const reply = {
+      id: nextId("reply", thread.replies.map((candidate) => candidate.id)),
+      author: "agent" as const,
+      body: entry.note,
+      createdAt: new Date().toISOString(),
+    };
+    session.draft = {
+      ...session.draft,
+      annotations: session.draft.annotations?.map((annotation) =>
+        annotation.id === entry.annotationId
+          ? {
+            ...annotation,
+            replies: [...annotation.replies, reply],
+            status: DISPOSITION_STATUS[status],
+          }
+          : annotation),
+    };
+    entry.replies = [...entry.replies, reply];
+    emitAnnotations(session, emit);
+  }
+
+  return {
+    text: formatRequestsBlock(session.requests),
+    details: { id: entry.alias, status },
+  };
 }
 
-export function toolRenderDraft(
+export function toolFinalize(
   session: LayoutSession,
-  request: LayoutRenderRequest,
+  outcome: "committed" | "none",
+  message: string,
   emit: SessionEventSink,
-  state: LayoutToolState,
-  onRender?: (sessionId: string, png: Buffer, index: number) => void,
-): LayoutToolRenderResult {
-  const crop = request.crop ?? expandRect(solvedFrame(session), CONTEXT_RING);
-  const cropError = renderCropError(crop);
-  if (cropError) return { isError: true, text: cropError };
-  if (request.pixelWidth !== undefined && !Number.isFinite(request.pixelWidth)) {
-    return { isError: true, text: "Raster width must be a finite number." };
+): LayoutToolTextResult {
+  if (outcome !== "committed" && outcome !== "none") {
+    return { isError: true, text: 'finalize rejected: outcome must be "committed" or "none".' };
   }
-  const pixelWidth = Math.round(Math.min(
-    MAX_RENDER_WIDTH,
-    Math.max(MIN_RENDER_WIDTH, request.pixelWidth ?? DEFAULT_RENDER_WIDTH),
-  ));
-  emit(session, { type: "rendering", sessionId: session.id, n: session.proposalCount });
-  try {
-    const rendered = renderDocumentToSvg(documentWithinCrop(session.draft, crop), {
-      cropRect: crop,
-      width: pixelWidth,
+  if (typeof message !== "string" || message.trim() === "") {
+    return {
+      isError: true,
+      text: outcome === "committed"
+        ? "finalize rejected: message must be a non-empty one-line summary of what you changed."
+        : "finalize rejected: message must be a non-empty explanation for the operator.",
+    };
+  }
+
+  if (outcome === "none") {
+    session.status = "abandoned";
+    emit(session, {
+      type: "abandoned",
+      sessionId: session.id,
+      reason: message.trim(),
     });
-    const { png, width, height } = rasterizeSvgToPng(rendered.svg);
-    state.renderCount += 1;
-    onRender?.(session.id, png, state.renderCount);
     return {
-      png,
-      text: `Rendered the current draft: world crop x=${Math.round(crop.x)} y=${Math.round(crop.y)} ${Math.round(crop.width)}×${Math.round(crop.height)} at ${width}×${height}px.`,
-      details: { crop, width, height },
-    };
-  } catch (error) {
-    return {
-      isError: true,
-      text: `Rasterization failed: ${error instanceof Error ? error.message : String(error)}`,
+      text: "Run ended without a proposal. The board is untouched.",
+      details: { outcome },
     };
   }
-}
 
-export function toolInspect(
-  session: LayoutSession,
-  objectIds: string[],
-): LayoutToolTextResult {
-  const byId = new Map(session.draft.objects.map((object) => [object.id, object]));
-  const connections = new Map(session.draft.connections.map((connection) => [
-    connection.id,
-    connection,
-  ]));
-  const lines: string[] = [];
-  for (const id of objectIds) {
-    const object = byId.get(id);
-    if (!object) {
-      const connection = connections.get(id);
-      if (connection) {
-        const from = byId.get(connection.from.objectId);
-        const to = byId.get(connection.to.objectId);
-        lines.push(
-          `connection ${id}`,
-          `  stored: from=${connection.from.objectId} anchor=${connection.from.anchor ?? "auto"}`
-          + ` → to=${connection.to.objectId} anchor=${connection.to.anchor ?? "auto"}`
-          + `; waypoints=${formatStoredWaypoints(connection.waypoints)}`
-          + `; label=${connection.label === undefined ? "—" : JSON.stringify(connection.label)}`
-          + ` style=${connection.style ?? "solid"} color=${connection.color ?? "gray"}`
-          + ` arrow=${connection.arrow ?? "forward"}`,
-        );
-        if (!from || !to) {
-          const missing = [
-            !from ? connection.from.objectId : undefined,
-            !to ? connection.to.objectId : undefined,
-          ].filter((objectId): objectId is string => objectId !== undefined);
-          lines.push(`  routed: unavailable (missing endpoint${missing.length === 1 ? "" : "s"} ${missing.join(", ")})`);
-          continue;
-        }
-        const routed = routeConnection(from, to, connection, session.draft.objects);
-        const points = routed.points ?? [routed.start, routed.end];
-        const violations = connection.from.objectId === connection.to.objectId
-          ? []
-          : pathBoxViolationIds(
-            points,
-            connection.from.objectId,
-            connection.to.objectId,
-            session.draft.objects,
-          );
-        lines.push(
-          `  routed: anchors=${routed.startAnchor}→${routed.endAnchor}`
-          + `; path=${formatRoundedPolyline(points)}`
-          + `; through=${violations.length > 0 ? violations.join(",") : "none"}`,
-        );
-        continue;
-      }
-      lines.push(`${id}: not present in the current draft.`);
-      continue;
-    }
-    const { x, y, width, height } = object.geometry;
-    lines.push(`${object.type} ${id}: x=${x} y=${y} w=${width} h=${height}`);
-    lines.push(`  text: ${JSON.stringify(object.text)}`);
-  }
-  return { text: lines.length > 0 ? lines.join("\n") : "No object refs given." };
-}
-
-function formatStoredWaypoints(
-  waypoints: ReadonlyArray<readonly [number, number]> | undefined,
-): string {
-  if (!waypoints || waypoints.length === 0) return "none";
-  return waypoints.map(([x, y]) => `${x},${y}`).join(" → ");
-}
-
-function formatRoundedPolyline(
-  points: ReadonlyArray<{ x: number; y: number }>,
-): string {
-  return points.map((point) => `${Math.round(point.x)},${Math.round(point.y)}`).join(" → ");
-}
-
-export function toolCommit(
-  session: LayoutSession,
-  summary: string,
-  emit: SessionEventSink,
-): LayoutToolTextResult {
-  const report = boardReport(session);
-  const scoped = scopedDiagnostics(session, report.diagnostics);
+  // The finishing registry adds the polish rules that would only nag mid-build.
+  const diagnostics = runDiagnostics(session.draft, FINISHING_RULES);
+  const scoped = scopedDiagnostics(session, diagnostics);
   const blocking = scoped.filter((diagnostic) => diagnostic.severity === "error");
-  if (blocking.length > 0) {
+  // A thread the agent opened is a question left for the user, answered on
+  // their own time — it never gates the commit. User-authored requests do.
+  const openRequests = session.requests.filter(
+    (request) => request.status === "open" && request.createdBy !== "agent",
+  );
+  if (blocking.length > 0 || openRequests.length > 0) {
     return {
       isError: true,
       text: [
-        `Commit blocked: ${blocking.length} error-tier diagnostic${blocking.length === 1 ? "" : "s"} must be resolved first:`,
+        "Finalize blocked; the run continues:",
         ...blocking.map((diagnostic) =>
           `- ${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}`
           + (diagnostic.suggestion ? ` (${diagnostic.suggestion})` : "")),
+        ...openRequests.map((request) =>
+          `- ${formatRequestLine(request)}  (dispose with resolve_request)`),
       ].join("\n"),
     };
   }
+
   const unresolvedWarnings = formatDiagnostics(
     scoped.filter((diagnostic) => diagnostic.severity === "warning"),
   );
@@ -349,7 +344,7 @@ export function toolCommit(
   const proposal: AgentProposal = {
     n: Math.max(1, session.proposalCount),
     operations,
-    summary: summary.trim() || `Edited ${session.scopeIds.size} objects.`,
+    summary: message.trim(),
     delta: operations.length > 0
       ? [
         "Document patch:",
@@ -363,39 +358,36 @@ export function toolCommit(
   emit(session, { type: "proposal-ready", sessionId: session.id, proposal });
   return {
     text: `Committed: ${proposal.summary} (${proposal.operations.length} patch operation${proposal.operations.length === 1 ? "" : "s"}). The proposal is now awaiting operator review.`,
-    details: { operations: proposal.operations.length },
+    details: { outcome, operations: proposal.operations.length },
   };
-}
-
-export function toolAbandon(
-  session: LayoutSession,
-  reason: string,
-  emit: SessionEventSink,
-): LayoutToolTextResult {
-  session.status = "abandoned";
-  emit(session, {
-    type: "abandoned",
-    sessionId: session.id,
-    reason: reason.trim() || "No reason given.",
-  });
-  return { text: "Session abandoned. The board is untouched." };
 }
 
 export function createToolRuntime(host: LayoutToolHost): LayoutToolRuntime {
   const state = createLayoutToolState();
+  const pushRender = (session: LayoutSession) => (png: Buffer) => {
+    state.renderCount += 1;
+    host.onRender(session.id, png, state.renderCount);
+  };
   return {
-    board: () => toolBoard(host.currentSession(), state),
-    applyOps: (operations) => toolApplyOps(host.currentSession(), operations, host.emit),
-    applyQuickfix: (id) => toolApplyQuickfix(host.currentSession(), id, host.emit),
-    renderDraft: (request) => toolRenderDraft(
-      host.currentSession(),
-      request,
-      host.emit,
-      state,
-      host.onRender,
-    ),
-    inspect: (ids) => toolInspect(host.currentSession(), ids),
-    commit: (summary) => toolCommit(host.currentSession(), summary, host.emit),
-    abandon: (reason) => toolAbandon(host.currentSession(), reason, host.emit),
+    operation: (name, params) => {
+      const session = host.currentSession();
+      return toolOperation(session, name, params, host.emit, pushRender(session));
+    },
+    look: (view) => {
+      const session = host.currentSession();
+      return toolLook(session, view, pushRender(session));
+    },
+    updateDescription: (description) => {
+      const session = host.currentSession();
+      return toolUpdateDescription(session, description, host.emit);
+    },
+    addAnnotation: (objectId, body) => {
+      const session = host.currentSession();
+      return toolAddAnnotation(session, objectId, body, host.emit);
+    },
+    resolveRequest: (id, status, note) =>
+      toolResolveRequest(host.currentSession(), id, status, note, host.emit),
+    finalize: (outcome, message) =>
+      toolFinalize(host.currentSession(), outcome, message, host.emit),
   };
 }

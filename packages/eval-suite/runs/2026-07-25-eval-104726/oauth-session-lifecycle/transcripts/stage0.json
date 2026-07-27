@@ -1,0 +1,1378 @@
+{
+  "container_id": "aa4e59d5-506b-5b63-9e06-69e749558b83",
+  "pi_sessions": [
+    {
+      "piSessionId": "019f99f5-ca32-719d-bf89-a5fe58d4104d",
+      "file": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.jsonl",
+      "startedAt": "2026-07-25T15:47:29.970Z",
+      "userMessages": [
+        {
+          "text": "# OAuth session lifecycle across services\n\nOur browser application uses an external OAuth provider while keeping application sessions under our control. The browser starts login through the web application, which asks the auth gateway to create a short-lived state and PKCE challenge in the session store before redirecting to the provider. The provider authenticates the user and returns an authorization code to a dedicated callback service. The callback validates state, exchanges the code using the PKCE verifier, and sends the provider tokens to an encrypted token vault.\n\nThe auth gateway maps the provider identity to an internal account, writes an auditable login event, and issues the browser a secure, HTTP-only application session cookie. Requests enter through the API gateway, which validates the application session and passes only the internal user identity and authorization context to downstream services. Provider access tokens are retrieved by a token broker only when a downstream integration needs one; they never reach the browser or general application services.\n\nWhen a provider token nears expiry, a refresh coordinator takes a per-account lock, refreshes it once, rotates the stored refresh token, and wakes concurrent callers with the new result. An invalid refresh revokes the application session and requires login again. Explicit logout, administrator revocation, and provider revocation notifications all invalidate active sessions and cached authorization context. Failed state checks, token exchanges, refreshes, and revocations go to the security audit stream without exposing token values.\n",
+          "timestamp": "2026-07-25T15:47:29.991Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-25T15:47:44.389Z",
+          "thinking": "**Planning diagram layout and sizing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_0VUYaWoS1R4d2LoS39YUQXPj|fc_0503f4a1381b20c8016a64da984284819ab69b28865b195c88",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "page-frame",
+                    "patch": {
+                      "text": "OAuth session lifecycle across services",
+                      "geometry": {
+                        "x": 32,
+                        "y": 32,
+                        "width": 3008,
+                        "height": 1904
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "login-init",
+                      "text": "1 · Login initiation",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 96,
+                        "y": 112,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "provider-auth",
+                      "text": "2 · Provider authorization",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1088,
+                        "y": 112,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "callback-exchange",
+                      "text": "3 · Callback & token exchange",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 2080,
+                        "y": 112,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "session-issue",
+                      "text": "4 · Identity mapping & session issuance",
+                      "color": "green",
+                      "geometry": {
+                        "x": 96,
+                        "y": 640,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "request-path",
+                      "text": "5 · Application request path",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 1088,
+                        "y": 640,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "token-access",
+                      "text": "6 · Provider token access",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 2080,
+                        "y": 640,
+                        "width": 848,
+                        "height": 368
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "refresh",
+                      "text": "7 · Coordinated refresh",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 96,
+                        "y": 1168,
+                        "width": 1280,
+                        "height": 496
+                      }
+                    }
+                  },
+                  {
+                    "type": "addSection",
+                    "section": {
+                      "id": "invalidation",
+                      "text": "8 · Invalidation & security audit",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1520,
+                        "y": 1168,
+                        "width": 1408,
+                        "height": 496
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 9 ops\n  1. updateSection page-frame\n  2. addSection login-init\n  3. addSection provider-auth\n  4. addSection callback-exchange\n  5. addSection session-issue\n  6. addSection request-path\n  7. addSection token-access\n  8. addSection refresh\n  9. addSection invalidation\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"OAuth session lifecycle across services\" white 32,32 3008×1904\n    login-init section \"1 · Login initiation\" blue 96,112 848×368\n      (empty)\n    provider-auth section \"2 · Provider authorization\" violet 1088,112 848×368\n      (empty)\n    callback-exchange section \"3 · Callback & token exchange\" teal 2080,112 848×368\n      (empty)\n    session-issue section \"4 · Identity mapping & session issuance\" green 96,640 848×368\n      (empty)\n    request-path section \"5 · Application request path\" blue 1088,640 848×368\n      (empty)\n    token-access section \"6 · Provider token access\" orange 2080,640 848×368\n      (empty)\n    refresh section \"7 · Coordinated refresh\" yellow 96,1168 1280×496\n      (empty)\n    invalidation section \"8 · Invalidation & security audit\" red 1520,1168 1408×496\n      (empty)\nEDGES\n  (none)\nDELTA\n  page-frame  32,32 2240×1400 → 32,32 3008×1904\n  page-frame  text \"2026-07-25-eval-104726 · oauth-session-lifecycle\" → \"OAuth session lifecycle across services\"\n  + login-init  section 96,112 848×368 \"1 · Login initiation\"\n  + provider-auth  section 1088,112 848×368 \"2 · Provider authorization\"\n  + callback-exchange  section 2080,112 848×368 \"3 · Callback & token exchange\"\n  + session-issue  section 96,640 848×368 \"4 · Identity mapping & session issuance\"\n  + request-path  section 1088,640 848×368 \"5 · Application request path\"\n  + token-access  section 2080,640 848×368 \"6 · Provider token access\"\n  + refresh  section 96,1168 1280×496 \"7 · Coordinated refresh\"\n  + invalidation  section 1520,1168 1408×496 \"8 · Invalidation & security audit\"\nBOARD DIFF · base → draft · 9 ops\n  addSection login-init\n  addSection provider-auth\n  addSection callback-exchange\n  addSection session-issue\n  addSection request-path\n  addSection token-access\n  addSection refresh\n  addSection invalidation\n  updateSection page-frame  resized · retexted\nDIAGNOSTICS · clean\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.9.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.9.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-25T15:48:13.549Z",
+          "thinking": "**Planning node placement and containment**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EEtmenigbZRZpObxlSccTxtO|fc_0503f4a1381b20c8016a64daa60700819aa16846caaf8017a4",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "browser",
+                      "type": "icon",
+                      "icon": "display",
+                      "text": "Browser",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 144,
+                        "y": 224,
+                        "width": 224,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "web-app",
+                      "type": "process",
+                      "text": "Web application",
+                      "color": "white",
+                      "geometry": {
+                        "x": 512,
+                        "y": 224,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "auth-gateway",
+                      "type": "process",
+                      "text": "Auth gateway",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 144,
+                        "y": 352,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "session-store",
+                      "type": "database",
+                      "text": "Session store: state + PKCE",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 576,
+                        "y": 352,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "oauth-provider",
+                      "type": "icon",
+                      "icon": "globe",
+                      "text": "External OAuth provider",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1152,
+                        "y": 224,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "provider-login",
+                      "type": "process",
+                      "text": "Authenticate user",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1584,
+                        "y": 224,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "auth-code",
+                      "type": "document",
+                      "text": "Authorization code",
+                      "color": "violet",
+                      "geometry": {
+                        "x": 1368,
+                        "y": 352,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "callback",
+                      "type": "process",
+                      "text": "Dedicated callback service",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 2144,
+                        "y": 224,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "validate-exchange",
+                      "type": "predefined-process",
+                      "text": "Validate state + exchange with PKCE",
+                      "color": "white",
+                      "geometry": {
+                        "x": 2576,
+                        "y": 224,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "token-vault",
+                      "type": "database",
+                      "text": "Encrypted token vault",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 2360,
+                        "y": 352,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "identity-map",
+                      "type": "process",
+                      "text": "Map provider identity",
+                      "color": "white",
+                      "geometry": {
+                        "x": 160,
+                        "y": 752,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "login-audit",
+                      "type": "document",
+                      "text": "Auditable login event",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 592,
+                        "y": 752,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "app-session",
+                      "type": "document",
+                      "text": "Secure HTTP-only session cookie",
+                      "color": "green",
+                      "geometry": {
+                        "x": 368,
+                        "y": 880,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "api-gateway",
+                      "type": "process",
+                      "text": "API gateway",
+                      "color": "blue",
+                      "geometry": {
+                        "x": 1152,
+                        "y": 752,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "session-check",
+                      "type": "decision",
+                      "text": "Application session valid?",
+                      "color": "white",
+                      "geometry": {
+                        "x": 1584,
+                        "y": 736,
+                        "width": 288,
+                        "height": 128
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "downstream",
+                      "type": "process",
+                      "text": "Downstream services",
+                      "color": "gray",
+                      "geometry": {
+                        "x": 1368,
+                        "y": 880,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "token-broker",
+                      "type": "process",
+                      "text": "Token broker",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 2144,
+                        "y": 752,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "integration",
+                      "type": "process",
+                      "text": "Downstream integration",
+                      "color": "white",
+                      "geometry": {
+                        "x": 2576,
+                        "y": 752,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "just-in-time-token",
+                      "type": "document",
+                      "text": "Provider access token (just in time)",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 2360,
+                        "y": 880,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "refresh-coordinator",
+                      "type": "process",
+                      "text": "Refresh coordinator",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 160,
+                        "y": 1280,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "account-lock",
+                      "type": "icon",
+                      "icon": "key",
+                      "text": "Per-account lock",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 592,
+                        "y": 1280,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "rotate-token",
+                      "type": "predefined-process",
+                      "text": "Refresh once + rotate refresh token",
+                      "color": "orange",
+                      "geometry": {
+                        "x": 1024,
+                        "y": 1280,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "refresh-result",
+                      "type": "decision",
+                      "text": "Refresh valid?",
+                      "color": "white",
+                      "geometry": {
+                        "x": 592,
+                        "y": 1456,
+                        "width": 288,
+                        "height": 128
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "revoke-sources",
+                      "type": "document-stack",
+                      "text": "Logout · admin · provider notification",
+                      "color": "red",
+                      "geometry": {
+                        "x": 1584,
+                        "y": 1280,
+                        "width": 320,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "invalidate",
+                      "type": "predefined-process",
+                      "text": "Invalidate sessions + cached auth context",
+                      "color": "red",
+                      "geometry": {
+                        "x": 2048,
+                        "y": 1280,
+                        "width": 352,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "security-audit",
+                      "type": "document-stack",
+                      "text": "Security audit stream (no token values)",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 2544,
+                        "y": 1280,
+                        "width": 320,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "login-required",
+                      "type": "pill",
+                      "text": "Login required again",
+                      "color": "red",
+                      "geometry": {
+                        "x": 2048,
+                        "y": 1488,
+                        "width": 352,
+                        "height": 96
+                      }
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 27 ops\n  1. addObject browser\n  2. addObject web-app\n  3. addObject auth-gateway\n  4. addObject session-store\n  5. addObject oauth-provider\n  6. addObject provider-login\n  7. addObject auth-code\n  8. addObject callback\n  9. addObject validate-exchange\n  10. addObject token-vault\n  11. addObject identity-map\n  12. addObject login-audit\n  13. addObject app-session\n  14. addObject api-gateway\n  15. addObject session-check\n  16. addObject downstream\n  17. addObject token-broker\n  18. addObject integration\n  19. addObject just-in-time-token\n  20. addObject refresh-coordinator\n  21. addObject account-lock\n  22. addObject rotate-token\n  23. addObject refresh-result\n  24. addObject revoke-sources\n  25. addObject invalidate\n  26. addObject security-audit\n  27. addObject login-required\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"OAuth session lifecycle across services\" white 112,128 2816×1520\n    login-init section \"1 · Login initiation\" blue 128,176 768×304\n      browser icon \"Browser\" blue 144,224 224×96 icon=display\n      web-app process \"Web application\" white 512,224 288×96\n      auth-gateway process \"Auth gateway\" blue 144,352 288×96\n      session-store database \"Session store: state + PKCE\" teal 576,352 288×96\n    provider-auth section \"2 · Provider authorization\" violet 1136,176 768×304\n      oauth-provider icon \"External OAuth provider\" violet 1152,224 288×96 icon=globe\n      provider-login process \"Authenticate user\" white 1584,224 288×96\n      auth-code document \"Authorization code\" violet 1368,352 288×96\n    callback-exchange section \"3 · Callback & token exchange\" teal 2128,176 768×304\n      callback process \"Dedicated callback service\" teal 2144,224 288×96\n      validate-exchange predefined-process \"Validate state + exchange with PKCE\" white 2576,224 288×96\n      token-vault database \"Encrypted token vault\" orange 2360,352 288×96\n    session-issue section \"4 · Identity mapping & session issuance\" green 144,704 768×304\n      identity-map process \"Map provider identity\" white 160,752 288×96\n      login-audit document \"Auditable login event\" teal 592,752 288×96\n      app-session document \"Secure HTTP-only session cookie\" green 368,880 288×96\n    request-path section \"5 · Application request path\" blue 1136,688 768×320\n      api-gateway process \"API gateway\" blue 1152,752 288×96\n      session-check decision \"Application session valid?\" white 1584,736 288×128\n      downstream process \"Downstream services\" 1368,880 288×96\n    token-access section \"6 · Provider token access\" orange 2128,704 768×304\n      token-broker process \"Token broker\" orange 2144,752 288×96\n      integration process \"Downstream integration\" white 2576,752 288×96\n      just-in-time-token document \"Provider access token (just in time)\" orange 2360,880 288×96\n    refresh section \"7 · Coordinated refresh\" yellow 144,1232 1200×384\n      refresh-coordinator process \"Refresh coordinator\" yellow 160,1280 288×96\n      account-lock icon \"Per-account lock\" yellow 592,1280 288×96 icon=key\n      rotate-token predefined-process \"Refresh once + rotate refresh token\" orange 1024,1280 288×96\n      refresh-result decision \"Refresh valid?\" white 592,1456 288×128\n    invalidation section \"8 · Invalidation & security audit\" red 1568,1232 1328×384\n      revoke-sources document-stack \"Logout · admin · provider notification\" red 1584,1280 320×96\n      invalidate predefined-process \"Invalidate sessions + cached auth context\" red 2048,1280 352×96\n      security-audit document-stack \"Security audit stream (no token values)\" teal 2544,1280 320×96\n      login-required pill \"Login required again\" red 2048,1488 352×96\nEDGES\n  (none)\nDELTA\n  page-frame  32,32 3008×1904 → 112,128 2816×1520\n  login-init  96,112 848×368 → 128,176 768×304\n  provider-auth  1088,112 848×368 → 1136,176 768×304\n  callback-exchange  2080,112 848×368 → 2128,176 768×304\n  session-issue  96,640 848×368 → 144,704 768×304\n  request-path  1088,640 848×368 → 1136,688 768×320\n  token-access  2080,640 848×368 → 2128,704 768×304\n  refresh  96,1168 1280×496 → 144,1232 1200×384\n  invalidation  1520,1168 1408×496 → 1568,1232 1328×384\n  + browser  icon 144,224 224×96 \"Browser\"\n  + web-app  process 512,224 288×96 \"Web application\"\n  + auth-gateway  process 144,352 288×96 \"Auth gateway\"\n  + session-store  database 576,352 288×96 \"Session store: state + PKCE\"\n  + oauth-provider  icon 1152,224 288×96 \"External OAuth provider\"\n  + provider-login  process 1584,224 288×96 \"Authenticate user\"\n  + auth-code  document 1368,352 288×96 \"Authorization code\"\n  + callback  process 2144,224 288×96 \"Dedicated callback service\"\n  + validate-exchange  predefined-process 2576,224 288×96 \"Validate state + exchange with PKCE\"\n  + token-vault  database 2360,352 288×96 \"Encrypted token vault\"\n  + identity-map  process 160,752 288×96 \"Map provider identity\"\n  + login-audit  document 592,752 288×96 \"Auditable login event\"\n  + app-session  document 368,880 288×96 \"Secure HTTP-only session cookie\"\n  + api-gateway  process 1152,752 288×96 \"API gateway\"\n  + session-check  decision 1584,736 288×128 \"Application session valid?\"\n  + downstream  process 1368,880 288×96 \"Downstream services\"\n  + token-broker  process 2144,752 288×96 \"Token broker\"\n  + integration  process 2576,752 288×96 \"Downstream integration\"\n  + just-in-time-token  document 2360,880 288×96 \"Provider access token (just in time)\"\n  + refresh-coordinator  process 160,1280 288×96 \"Refresh coordinator\"\n  + account-lock  icon 592,1280 288×96 \"Per-account lock\"\n  + rotate-token  predefined-process 1024,1280 288×96 \"Refresh once + rotate refresh token\"\n  + refresh-result  decision 592,1456 288×128 \"Refresh valid?\"\n  + revoke-sources  document-stack 1584,1280 320×96 \"Logout · admin · provider notification\"\n  + invalidate  predefined-process 2048,1280 352×96 \"Invalidate sessions + cached auth context\"\n  + security-audit  document-stack 2544,1280 320×96 \"Security audit stream (no token values)\"\n  + login-required  pill 2048,1488 352×96 \"Login required again\"\nBOARD DIFF · base → draft · 36 ops\n  addSection login-init\n  addSection provider-auth\n  addSection callback-exchange\n  addSection session-issue\n  addSection request-path\n  addSection token-access\n  addSection refresh\n  addSection invalidation\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject provider-login\n  addObject auth-code\n  addObject callback\n  addObject validate-exchange\n  addObject token-vault\n  addObject identity-map\n  addObject login-audit\n  addObject app-session\n  addObject api-gateway\n  addObject session-check\n  addObject downstream\n  addObject token-broker\n  addObject integration\n  addObject just-in-time-token\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject rotate-token\n  addObject refresh-result\n  addObject revoke-sources\n  addObject invalidate\n  addObject security-audit\n  addObject login-required\n  updateSection page-frame  moved · resized · retexted\nLINTS · +13 −0\n  + W1 crowding: browser and auth-gateway sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the browser↔auth-gateway corridor to ≥96px)\n  + W2 crowding: web-app and session-store sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the web-app↔session-store corridor to ≥96px)\n  + W3 crowding: oauth-provider and auth-code sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the oauth-provider↔auth-code corridor to ≥96px)\n  + W4 crowding: provider-login and auth-code sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the provider-login↔auth-code corridor to ≥96px)\n  + W5 crowding: callback and token-vault sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the callback↔token-vault corridor to ≥96px)\n  + W6 crowding: validate-exchange and token-vault sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the validate-exchange↔token-vault corridor to ≥96px)\n  + W7 crowding: identity-map and app-session sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the identity-map↔app-session corridor to ≥96px)\n  + W8 crowding: login-audit and app-session sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the login-audit↔app-session corridor to ≥96px)\n  + W9 crowding: api-gateway and downstream sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the api-gateway↔downstream corridor to ≥96px)\n  + W10 crowding: session-check and downstream sit 16px apart stacked where wires and labels need ≥96px of corridor to route between them (open the session-check↔downstream corridor to ≥96px)\n  + W11 crowding: token-broker and just-in-time-token sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the token-broker↔just-in-time-token corridor to ≥96px)\n  + W12 crowding: integration and just-in-time-token sit 32px apart stacked where wires and labels need ≥96px of corridor to route between them (open the integration↔just-in-time-token corridor to ≥96px)\n  + W13 crowding: account-lock and refresh-result sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the account-lock↔refresh-result corridor to ≥96px)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.13.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.13.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-25T15:48:49.772Z",
+          "thinking": "**Adjusting node positions and planning edge routing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_a2tjHiEPnSXUnL3oOawpCXEF|fc_0503f4a1381b20c8016a64dac35c30819aa54e72cfbd51e099",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateObject",
+                    "objectId": "auth-gateway",
+                    "patch": {
+                      "geometry": {
+                        "x": 144,
+                        "y": 416,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "session-store",
+                    "patch": {
+                      "geometry": {
+                        "x": 576,
+                        "y": 416,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "auth-code",
+                    "patch": {
+                      "geometry": {
+                        "x": 1368,
+                        "y": 416,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "token-vault",
+                    "patch": {
+                      "geometry": {
+                        "x": 2360,
+                        "y": 416,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "app-session",
+                    "patch": {
+                      "geometry": {
+                        "x": 368,
+                        "y": 944,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "downstream",
+                    "patch": {
+                      "geometry": {
+                        "x": 1368,
+                        "y": 960,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "just-in-time-token",
+                    "patch": {
+                      "geometry": {
+                        "x": 2360,
+                        "y": 944,
+                        "width": 288,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "refresh-result",
+                    "patch": {
+                      "geometry": {
+                        "x": 592,
+                        "y": 1488,
+                        "width": 288,
+                        "height": 128
+                      }
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e1",
+                      "from": {
+                        "objectId": "browser",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "web-app",
+                        "anchor": "left"
+                      },
+                      "label": "start login",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e2",
+                      "from": {
+                        "objectId": "web-app",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "auth-gateway",
+                        "anchor": "top"
+                      },
+                      "label": "create login transaction",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e3",
+                      "from": {
+                        "objectId": "auth-gateway",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "session-store",
+                        "anchor": "left"
+                      },
+                      "label": "store short-lived state + PKCE",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e4",
+                      "from": {
+                        "objectId": "auth-gateway",
+                        "anchor": "top"
+                      },
+                      "to": {
+                        "objectId": "oauth-provider",
+                        "anchor": "left"
+                      },
+                      "label": "redirect with challenge",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e5",
+                      "from": {
+                        "objectId": "oauth-provider",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "provider-login",
+                        "anchor": "left"
+                      },
+                      "label": "authenticate",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e6",
+                      "from": {
+                        "objectId": "provider-login",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "auth-code",
+                        "anchor": "top"
+                      },
+                      "label": "issue code",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e7",
+                      "from": {
+                        "objectId": "auth-code",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "callback",
+                        "anchor": "left"
+                      },
+                      "label": "callback",
+                      "color": "violet"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e8",
+                      "from": {
+                        "objectId": "callback",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "validate-exchange",
+                        "anchor": "left"
+                      },
+                      "label": "validate state",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e9",
+                      "from": {
+                        "objectId": "validate-exchange",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "token-vault",
+                        "anchor": "top"
+                      },
+                      "label": "encrypt provider tokens",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e10",
+                      "from": {
+                        "objectId": "callback",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "identity-map",
+                        "anchor": "top"
+                      },
+                      "label": "verified provider identity",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e11",
+                      "from": {
+                        "objectId": "identity-map",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "login-audit",
+                        "anchor": "left"
+                      },
+                      "label": "record login",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e12",
+                      "from": {
+                        "objectId": "identity-map",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "app-session",
+                        "anchor": "top"
+                      },
+                      "label": "issue app session",
+                      "color": "green"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e13",
+                      "from": {
+                        "objectId": "app-session",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "api-gateway",
+                        "anchor": "left"
+                      },
+                      "label": "cookie on requests",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e14",
+                      "from": {
+                        "objectId": "api-gateway",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "session-check",
+                        "anchor": "left"
+                      },
+                      "label": "validate session",
+                      "color": "blue"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e15",
+                      "from": {
+                        "objectId": "session-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "downstream",
+                        "anchor": "top"
+                      },
+                      "label": "internal identity + auth context",
+                      "color": "gray"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e16",
+                      "from": {
+                        "objectId": "downstream",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "integration",
+                        "anchor": "left"
+                      },
+                      "label": "integration call",
+                      "color": "gray"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e17",
+                      "from": {
+                        "objectId": "integration",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "token-broker",
+                        "anchor": "right"
+                      },
+                      "label": "needs provider token",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e18",
+                      "from": {
+                        "objectId": "token-broker",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "just-in-time-token",
+                        "anchor": "top"
+                      },
+                      "label": "retrieve from vault",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e19",
+                      "from": {
+                        "objectId": "just-in-time-token",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "integration",
+                        "anchor": "bottom"
+                      },
+                      "label": "token only here",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e20",
+                      "from": {
+                        "objectId": "token-broker",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "refresh-coordinator",
+                        "anchor": "top"
+                      },
+                      "label": "near expiry",
+                      "style": "dashed",
+                      "color": "yellow"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e21",
+                      "from": {
+                        "objectId": "refresh-coordinator",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "account-lock",
+                        "anchor": "left"
+                      },
+                      "label": "lock account",
+                      "color": "yellow"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e22",
+                      "from": {
+                        "objectId": "account-lock",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "rotate-token",
+                        "anchor": "left"
+                      },
+                      "label": "single refresh",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e23",
+                      "from": {
+                        "objectId": "rotate-token",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "refresh-result",
+                        "anchor": "right"
+                      },
+                      "label": "wake concurrent callers",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e24",
+                      "from": {
+                        "objectId": "refresh-result",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "invalidate",
+                        "anchor": "left"
+                      },
+                      "label": "invalid refresh",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e25",
+                      "from": {
+                        "objectId": "revoke-sources",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "invalidate",
+                        "anchor": "left"
+                      },
+                      "label": "revoke",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e26",
+                      "from": {
+                        "objectId": "invalidate",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "login-required",
+                        "anchor": "top"
+                      },
+                      "label": "require login",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e27",
+                      "from": {
+                        "objectId": "validate-exchange",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "security-audit",
+                        "anchor": "top"
+                      },
+                      "label": "failed state / exchange",
+                      "style": "dashed",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e28",
+                      "from": {
+                        "objectId": "refresh-result",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "security-audit",
+                        "anchor": "left"
+                      },
+                      "label": "failed refresh",
+                      "style": "dashed",
+                      "color": "red"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e29",
+                      "from": {
+                        "objectId": "invalidate",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "security-audit",
+                        "anchor": "left"
+                      },
+                      "label": "revocation event",
+                      "style": "dashed",
+                      "color": "red"
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 37 ops\n  1. updateObject auth-gateway\n  2. updateObject session-store\n  3. updateObject auth-code\n  4. updateObject token-vault\n  5. updateObject app-session\n  6. updateObject downstream\n  7. updateObject just-in-time-token\n  8. updateObject refresh-result\n  9. addConnection e1\n  10. addConnection e2\n  11. addConnection e3\n  12. addConnection e4\n  13. addConnection e5\n  14. addConnection e6\n  15. addConnection e7\n  16. addConnection e8\n  17. addConnection e9\n  18. addConnection e10\n  19. addConnection e11\n  20. addConnection e12\n  21. addConnection e13\n  22. addConnection e14\n  23. addConnection e15\n  24. addConnection e16\n  25. addConnection e17\n  26. addConnection e18\n  27. addConnection e19\n  28. addConnection e20\n  29. addConnection e21\n  30. addConnection e22\n  31. addConnection e23\n  32. addConnection e24\n  33. addConnection e25\n  34. addConnection e26\n  35. addConnection e27\n  36. addConnection e28\n  37. addConnection e29\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"OAuth session lifecycle across services\" white 112,128 2816×1552\n    login-init section \"1 · Login initiation\" blue 128,176 768×368\n      browser icon \"Browser\" blue 144,224 224×96 icon=display\n      web-app process \"Web application\" white 512,224 288×96\n      auth-gateway process \"Auth gateway\" blue 144,416 288×96\n      session-store database \"Session store: state + PKCE\" teal 576,416 288×96\n    provider-auth section \"2 · Provider authorization\" violet 1136,176 768×368\n      oauth-provider icon \"External OAuth provider\" violet 1152,224 288×96 icon=globe\n      provider-login process \"Authenticate user\" white 1584,224 288×96\n      auth-code document \"Authorization code\" violet 1376,416 288×96\n    callback-exchange section \"3 · Callback & token exchange\" teal 2128,176 768×368\n      callback process \"Dedicated callback service\" teal 2144,224 288×96\n      validate-exchange predefined-process \"Validate state + exchange with PKCE\" white 2576,224 288×96\n      token-vault database \"Encrypted token vault\" orange 2368,416 288×96\n    session-issue section \"4 · Identity mapping & session issuance\" green 144,704 768×368\n      identity-map process \"Map provider identity\" white 160,752 288×96\n      login-audit document \"Auditable login event\" teal 592,752 288×96\n      app-session document \"Secure HTTP-only session cookie\" green 368,944 288×96\n    request-path section \"5 · Application request path\" blue 1136,688 768×208\n      api-gateway process \"API gateway\" blue 1152,752 288×96\n      session-check decision \"Application session valid?\" white 1584,736 288×128\n    token-access section \"6 · Provider token access\" orange 2128,704 768×368\n      token-broker process \"Token broker\" orange 2144,752 288×96\n      integration process \"Downstream integration\" white 2576,752 288×96\n      just-in-time-token document \"Provider access token (just in time)\" orange 2368,944 288×96\n    refresh section \"7 · Coordinated refresh\" yellow 144,1232 1200×416\n      refresh-coordinator process \"Refresh coordinator\" yellow 160,1280 288×96\n      account-lock icon \"Per-account lock\" yellow 592,1280 288×96 icon=key\n      rotate-token predefined-process \"Refresh once + rotate refresh token\" orange 1024,1280 288×96\n      refresh-result decision \"Refresh valid?\" white 592,1488 288×128\n    invalidation section \"8 · Invalidation & security audit\" red 1568,1232 1328×384\n      revoke-sources document-stack \"Logout · admin · provider notification\" red 1584,1280 320×96\n      invalidate predefined-process \"Invalidate sessions + cached auth context\" red 2048,1280 352×96\n      security-audit document-stack \"Security audit stream (no token values)\" teal 2544,1280 320×96\n      login-required pill \"Login required again\" red 2048,1488 352×96\n    downstream process \"Downstream services\" 1376,960 288×96\nEDGES\n  e1 browser→web-app \"start login\" blue anchors=right→left\n  e2 web-app→auth-gateway \"create login transaction\" blue anchors=bottom→top\n  e3 auth-gateway→session-store \"store short-lived state + PKCE\" teal anchors=right→left\n  e4 auth-gateway→oauth-provider \"redirect with challenge\" violet anchors=top→left\n  e5 oauth-provider→provider-login \"authenticate\" violet anchors=right→left\n  e6 provider-login→auth-code \"issue code\" violet anchors=bottom→top\n  e7 auth-code→callback \"callback\" violet anchors=right→left\n  e8 callback→validate-exchange \"validate state\" teal anchors=right→left\n  e9 validate-exchange→token-vault \"encrypt provider tokens\" orange anchors=bottom→top\n  e10 callback→identity-map \"verified provider identity\" green anchors=bottom→top\n  e11 identity-map→login-audit \"record login\" teal anchors=right→left\n  e12 identity-map→app-session \"issue app session\" green anchors=bottom→top\n  e13 app-session→api-gateway \"cookie on requests\" blue anchors=right→left\n  e14 api-gateway→session-check \"validate session\" blue anchors=right→left\n  e15 session-check→downstream \"internal identity + auth context\" anchors=bottom→top\n  e16 downstream→integration \"integration call\" anchors=right→left\n  e17 integration→token-broker \"needs provider token\" orange anchors=left→right\n  e18 token-broker→just-in-time-token \"retrieve from vault\" orange anchors=bottom→top\n  e19 just-in-time-token→integration \"token only here\" orange anchors=right→bottom\n  e20 token-broker→refresh-coordinator \"near expiry\" dashed yellow anchors=bottom→top\n  e21 refresh-coordinator→account-lock \"lock account\" yellow anchors=right→left\n  e22 account-lock→rotate-token \"single refresh\" orange anchors=right→left\n  e23 rotate-token→refresh-result \"wake concurrent callers\" orange anchors=bottom→right\n  e24 refresh-result→invalidate \"invalid refresh\" red anchors=right→left\n  e25 revoke-sources→invalidate \"revoke\" red anchors=right→left\n  e26 invalidate→login-required \"require login\" red anchors=bottom→top\n  e27 validate-exchange→security-audit \"failed state / exchange\" dashed red anchors=right→top\n  e28 refresh-result→security-audit \"failed refresh\" dashed red anchors=right→left\n  e29 invalidate→security-audit \"revocation event\" dashed red anchors=right→left\nDELTA\n  page-frame  112,128 2816×1520 → 112,128 2816×1552\n  login-init  128,176 768×304 → 128,176 768×368\n  provider-auth  1136,176 768×304 → 1136,176 768×368\n  callback-exchange  2128,176 768×304 → 2128,176 768×368\n  session-issue  144,704 768×304 → 144,704 768×368\n  request-path  1136,688 768×320 → 1136,688 768×208\n  token-access  2128,704 768×304 → 2128,704 768×368\n  refresh  144,1232 1200×384 → 144,1232 1200×416\n  auth-gateway  144,352 → 144,416\n  session-store  576,352 → 576,416\n  auth-code  1368,352 → 1376,416\n  token-vault  2360,352 → 2368,416\n  app-session  368,880 → 368,944\n  downstream  1368,880 → 1376,960\n  downstream  parentId request-path → page-frame\n  just-in-time-token  2360,880 → 2368,944\n  refresh-result  592,1456 → 592,1488\n  + e1  browser → web-app\n  + e2  web-app → auth-gateway\n  + e3  auth-gateway → session-store\n  + e4  auth-gateway → oauth-provider\n  + e5  oauth-provider → provider-login\n  + e6  provider-login → auth-code\n  + e7  auth-code → callback\n  + e8  callback → validate-exchange\n  + e9  validate-exchange → token-vault\n  + e10  callback → identity-map\n  + e11  identity-map → login-audit\n  + e12  identity-map → app-session\n  + e13  app-session → api-gateway\n  + e14  api-gateway → session-check\n  + e15  session-check → downstream\n  + e16  downstream → integration\n  + e17  integration → token-broker\n  + e18  token-broker → just-in-time-token\n  + e19  just-in-time-token → integration\n  + e20  token-broker → refresh-coordinator\n  + e21  refresh-coordinator → account-lock\n  + e22  account-lock → rotate-token\n  + e23  rotate-token → refresh-result\n  + e24  refresh-result → invalidate\n  + e25  revoke-sources → invalidate\n  + e26  invalidate → login-required\n  + e27  validate-exchange → security-audit\n  + e28  refresh-result → security-audit\n  + e29  invalidate → security-audit\nBOARD DIFF · base → draft · 65 ops\n  addSection login-init\n  addSection provider-auth\n  addSection callback-exchange\n  addSection session-issue\n  addSection request-path\n  addSection token-access\n  addSection refresh\n  addSection invalidation\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject provider-login\n  addObject auth-code\n  addObject callback\n  addObject validate-exchange\n  addObject token-vault\n  addObject identity-map\n  addObject login-audit\n  addObject app-session\n  addObject api-gateway\n  addObject session-check\n  addObject downstream\n  addObject token-broker\n  addObject integration\n  addObject just-in-time-token\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject rotate-token\n  addObject refresh-result\n  addObject revoke-sources\n  addObject invalidate\n  addObject security-audit\n  addObject login-required\n  updateSection page-frame  moved · resized · retexted\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection e4\n  addConnection e5\n  addConnection e6\n  addConnection e7\n  addConnection e8\n  addConnection e9\n  addConnection e10\n  addConnection e11\n  addConnection e12\n  addConnection e13\n  addConnection e14\n  addConnection e15\n  addConnection e16\n  addConnection e17\n  addConnection e18\n  addConnection e19\n  addConnection e20\n  addConnection e21\n  addConnection e22\n  addConnection e23\n  addConnection e24\n  addConnection e25\n  addConnection e26\n  addConnection e27\n  addConnection e28\n  addConnection e29\nLINTS · +33 −13\n  + E1 covered-content: label \"failed state / exchange\" chip on e27 covers integration (route e27 around integration or move the label with a waypoint)\n  + E2 covered-content: label \"verified provider identity\" chip on e10 overlaps label \"internal identity + auth context\" chip on e15 (separate the two edges (spacing or waypoints) so both labels read)\n  + E3 covered-content: label \"create login transaction\" chip on e2 lies on e4's path for 254px (move the label with a waypoint or reroute e4 so the chip owns its wire)\n  + E4 covered-content: label \"redirect with challenge\" chip on e4 lies on e2's path for 25px (move the label with a waypoint or reroute e2 so the chip owns its wire)\n  + E5 covered-content: label \"verified provider identity\" chip on e10 lies on e15's path for 128px (move the label with a waypoint or reroute e15 so the chip owns its wire)\n  + E6 covered-content: label \"record login\" chip on e11 lies on e10's path for 30px (move the label with a waypoint or reroute e10 so the chip owns its wire)\n  + E7 covered-content: label \"internal identity + auth context\" chip on e15 lies on e10's path for 331px (move the label with a waypoint or reroute e10 so the chip owns its wire)\n  + E8 covered-content: label \"needs provider token\" chip on e17 lies on e16's path for 35px (move the label with a waypoint or reroute e16 so the chip owns its wire)\n  + E9 covered-content: label \"retrieve from vault\" chip on e18 lies on e16's path for 206px (move the label with a waypoint or reroute e16 so the chip owns its wire)\n  + E10 covered-content: label \"wake concurrent callers\" chip on e23 lies on e24's path for 245px (move the label with a waypoint or reroute e24 so the chip owns its wire)\n  + E11 covered-content: label \"wake concurrent callers\" chip on e23 lies on e28's path for 245px (move the label with a waypoint or reroute e28 so the chip owns its wire)\n  + E12 covered-content: label \"revocation event\" chip on e29 lies on e28's path for 35px (move the label with a waypoint or reroute e28 so the chip owns its wire)\n  + W1 covered-content: label \"issue app session\" chip on e12 sits within 16px of e10's path (offset e10 or move the label so it cannot read as e10's label)\n  + W2 covered-content: label \"cookie on requests\" chip on e13 sits within 16px of e10's path (offset e10 or move the label so it cannot read as e10's label)\n  + W3 covered-content: label \"cookie on requests\" chip on e13 sits within 16px of e20's path (offset e20 or move the label so it cannot read as e20's label)\n  + W4 covered-content: label \"retrieve from vault\" chip on e18 sits within 16px of e20's path (offset e20 or move the label so it cannot read as e20's label)\n  + W5 covered-content: label \"revoke\" chip on e25 sits within 16px of e24's path (offset e24 or move the label so it cannot read as e24's label)\n  + W6 broken-edges: e10 and e15 run co-linear for 208px (4px apart) (offset one route so the two wires read separately)\n  + W7 broken-edges: e10 and e20 run co-linear for 136px (0px apart) (offset one route so the two wires read separately)\n  + W8 broken-edges: e16 and e18 run co-linear for 224px (8px apart) (offset one route so the two wires read separately)\n  + W9 broken-edges: connector e27 hugs the right border of page-frame for 408px (route e27 clear of page-frame's frame so it reads as a wire, not a border)\n  + W10 broken-edges: connector e27 hugs the right border of callback-exchange for 272px (route e27 clear of callback-exchange's frame so it reads as a wire, not a border)\n  + W11 unreadable-labels: label \"start login\" chip on e1 (130×30px) bleeds onto browser and web-app: 144px of corridor where the chip needs 162px (open the browser↔web-app corridor to ≥162px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"web-app\",\"patch\":{\"geometry\":{\"x\":544,\"y\":224,\"width\":288,\"height\":96}}}\n  + W12 unreadable-labels: label \"store short-lived state + PKCE\" chip on e3 (312×30px) bleeds onto auth-gateway and session-store: 144px of corridor where the chip needs 344px (open the auth-gateway↔session-store corridor to ≥344px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"session-store\",\"patch\":{\"geometry\":{\"x\":784,\"y\":416,\"width\":288,\"height\":96}}}\n  + W13 unreadable-labels: label \"authenticate\" chip on e5 (139×30px) bleeds onto oauth-provider and provider-login: 144px of corridor where the chip needs 172px (open the oauth-provider↔provider-login corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"provider-login\",\"patch\":{\"geometry\":{\"x\":1616,\"y\":224,\"width\":288,\"height\":96}}}\n  + W14 unreadable-labels: label \"validate state\" chip on e8 (158×30px) bleeds onto callback and validate-exchange: 144px of corridor where the chip needs 191px (open the callback↔validate-exchange corridor to ≥191px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"validate-exchange\",\"patch\":{\"geometry\":{\"x\":2624,\"y\":224,\"width\":288,\"height\":96}}}\n  + W15 unreadable-labels: label \"record login\" chip on e11 (139×30px) bleeds onto identity-map and login-audit: 144px of corridor where the chip needs 172px (open the identity-map↔login-audit corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"login-audit\",\"patch\":{\"geometry\":{\"x\":624,\"y\":752,\"width\":288,\"height\":96}}}\n  + W16 unreadable-labels: label \"validate session\" chip on e14 (178×30px) bleeds onto api-gateway and session-check: 144px of corridor where the chip needs 210px (open the api-gateway↔session-check corridor to ≥210px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"session-check\",\"patch\":{\"geometry\":{\"x\":1664,\"y\":736,\"width\":288,\"height\":128}}}\n  + W17 unreadable-labels: label \"needs provider token\" chip on e17 (216×30px) bleeds onto integration and token-broker: 144px of corridor where the chip needs 248px (open the integration↔token-broker corridor to ≥248px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"integration\",\"patch\":{\"geometry\":{\"x\":2688,\"y\":752,\"width\":288,\"height\":96}}}\n  + W18 unreadable-labels: label \"token only here\" chip on e19 (168×30px) bleeds onto just-in-time-token: 96px of corridor where the chip needs 62px (open the just-in-time-token↔integration corridor to ≥62px so the chip and its 16px margins fit)\n  + W19 unreadable-labels: label \"lock account\" chip on e21 (139×30px) bleeds onto refresh-coordinator and account-lock: 144px of corridor where the chip needs 172px (open the refresh-coordinator↔account-lock corridor to ≥172px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"account-lock\",\"patch\":{\"geometry\":{\"x\":624,\"y\":1280,\"width\":288,\"height\":96}}}\n  + W20 unreadable-labels: label \"single refresh\" chip on e22 (158×30px) bleeds onto account-lock and rotate-token: 144px of corridor where the chip needs 191px (open the account-lock↔rotate-token corridor to ≥191px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"rotate-token\",\"patch\":{\"geometry\":{\"x\":1072,\"y\":1280,\"width\":288,\"height\":96}}}\n  + W21 unreadable-labels: label \"revocation event\" chip on e29 (178×30px) bleeds onto invalidate and security-audit: 144px of corridor where the chip needs 210px (open the invalidate↔security-audit corridor to ≥210px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"security-audit\",\"patch\":{\"geometry\":{\"x\":2624,\"y\":1280,\"width\":320,\"height\":96}}}\n  − W1 crowding, − W2 crowding, − W3 crowding, − W4 crowding, − W5 crowding, − W6 crowding, − W7 crowding, − W8 crowding, − W9 crowding, − W10 crowding, − W11 crowding, − W12 crowding, − W13 crowding  (resolved)\nROUTES\n  e1  anchors right→left  path 368,272 → 512,272  through none\n  e2  anchors bottom→top  path 656,320 → 656,344 → 656,368 → 288,368 → 288,392 → 288,416  through none\n  e3  anchors right→left  path 432,464 → 576,464  through none\n  e4  anchors top→left  path 288,416 → 288,380 → 1132,380 → 1132,272 → 1152,272  through none\n  e5  anchors right→left  path 1440,272 → 1584,272  through none\n  e6  anchors bottom→top  path 1728,320 → 1728,344 → 1728,368 → 1520,368 → 1520,392 → 1520,416  through none\n  e7  anchors right→left  path 1664,464 → 1688,464 → 1904,464 → 1904,272 → 2120,272 → 2144,272  through none\n  e8  anchors right→left  path 2432,272 → 2576,272  through none\n  e9  anchors bottom→top  path 2720,320 → 2720,344 → 2720,368 → 2512,368 → 2512,392 → 2512,416  through none\n  e10  anchors bottom→top  path 2288,320 → 2288,536 → 2124,536 → 2124,868 → 1924,868 → 1924,916 → 1116,916 → 1116,868 → 468,868 → 468,732 → 304,732 → 304,752  through none\n  e11  anchors right→left  path 448,800 → 592,800  through none\n  e12  anchors bottom→top  path 304,848 → 304,872 → 304,896 → 512,896 → 512,920 → 512,944  through none\n  e13  anchors right→left  path 656,992 → 680,992 → 904,992 → 904,800 → 1128,800 → 1152,800  through none\n  e14  anchors right→left  path 1440,800 → 1584,800  through none\n  e15  anchors bottom→top  path 1728,864 → 1728,888 → 1728,912 → 1520,912 → 1520,936 → 1520,960  through none\n  e16  anchors right→left  path 1664,1008 → 2120,1008 → 2120,904 → 2556,904 → 2556,800 → 2576,800  through none\n  e17  anchors left→right  path 2576,800 → 2432,800  through none\n  e18  anchors bottom→top  path 2288,848 → 2288,872 → 2288,896 → 2512,896 → 2512,920 → 2512,944  through none\n  e19  anchors right→bottom  path 2656,992 → 2680,992 → 2720,992 → 2720,872 → 2720,848  through none\n  e20  anchors bottom→top  path 2288,848 → 2288,868 → 2124,868 → 2124,732 → 1924,732 → 1924,668 → 1116,668 → 1116,732 → 1004,732 → 1004,1260 → 304,1260 → 304,1280  through none\n  e21  anchors right→left  path 448,1328 → 592,1328  through none\n  e22  anchors right→left  path 880,1328 → 1024,1328  through none\n  e23  anchors bottom→right  path 1168,1376 → 1168,1400 → 1168,1552 → 904,1552 → 880,1552  through none\n  e24  anchors right→left  path 880,1552 → 1464,1552 → 1464,1396 → 2028,1396 → 2028,1328 → 2048,1328  through none\n  e25  anchors right→left  path 1904,1328 → 2048,1328  through none\n  e26  anchors bottom→top  path 2224,1376 → 2224,1488  through none\n  e27  anchors right→top  path 2864,272 → 2884,272 → 2884,684 → 2916,684 → 2916,1092 → 2884,1092 → 2884,1260 → 2704,1260 → 2704,1280  through none\n  e28  anchors right→left  path 880,1552 → 1712,1552 → 1712,1396 → 2524,1396 → 2524,1328 → 2544,1328  through none\n  e29  anchors right→left  path 2400,1328 → 2544,1328  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.17.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.17.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-25T15:49:01.756Z",
+          "thinking": "**Removing labels from problematic edges**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_f6HyXd44VKgN1hAFUL9DhcGm|fc_0503f4a1381b20c8016a64dae93610819a83329a209ab7f434",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "request-path",
+                    "patch": {
+                      "geometry": {
+                        "x": 1136,
+                        "y": 688,
+                        "width": 768,
+                        "height": 400
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e2",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e4",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e10",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e11",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e15",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e16",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e17",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e18",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e23",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e24",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e27",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e28",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e29",
+                    "patch": {
+                      "label": ""
+                    }
+                  }
+                ],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 14 ops\n  1. updateSection request-path\n  2. updateConnection e2\n  3. updateConnection e4\n  4. updateConnection e10\n  5. updateConnection e11\n  6. updateConnection e15\n  7. updateConnection e16\n  8. updateConnection e17\n  9. updateConnection e18\n  10. updateConnection e23\n  11. updateConnection e24\n  12. updateConnection e27\n  13. updateConnection e28\n  14. updateConnection e29\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"OAuth session lifecycle across services\" white 112,128 2816×1552\n    login-init section \"1 · Login initiation\" blue 128,176 768×368\n      browser icon \"Browser\" blue 144,224 224×96 icon=display\n      web-app process \"Web application\" white 512,224 288×96\n      auth-gateway process \"Auth gateway\" blue 144,416 288×96\n      session-store database \"Session store: state + PKCE\" teal 576,416 288×96\n    provider-auth section \"2 · Provider authorization\" violet 1136,176 768×368\n      oauth-provider icon \"External OAuth provider\" violet 1152,224 288×96 icon=globe\n      provider-login process \"Authenticate user\" white 1584,224 288×96\n      auth-code document \"Authorization code\" violet 1376,416 288×96\n    callback-exchange section \"3 · Callback & token exchange\" teal 2128,176 768×368\n      callback process \"Dedicated callback service\" teal 2144,224 288×96\n      validate-exchange predefined-process \"Validate state + exchange with PKCE\" white 2576,224 288×96\n      token-vault database \"Encrypted token vault\" orange 2368,416 288×96\n    session-issue section \"4 · Identity mapping & session issuance\" green 144,704 768×368\n      identity-map process \"Map provider identity\" white 160,752 288×96\n      login-audit document \"Auditable login event\" teal 592,752 288×96\n      app-session document \"Secure HTTP-only session cookie\" green 368,944 288×96\n    request-path section \"5 · Application request path\" blue 1136,688 768×400\n      api-gateway process \"API gateway\" blue 1152,752 288×96\n      session-check decision \"Application session valid?\" white 1584,736 288×128\n      downstream process \"Downstream services\" 1376,960 288×96\n    token-access section \"6 · Provider token access\" orange 2128,704 768×368\n      token-broker process \"Token broker\" orange 2144,752 288×96\n      integration process \"Downstream integration\" white 2576,752 288×96\n      just-in-time-token document \"Provider access token (just in time)\" orange 2368,944 288×96\n    refresh section \"7 · Coordinated refresh\" yellow 144,1232 1200×416\n      refresh-coordinator process \"Refresh coordinator\" yellow 160,1280 288×96\n      account-lock icon \"Per-account lock\" yellow 592,1280 288×96 icon=key\n      rotate-token predefined-process \"Refresh once + rotate refresh token\" orange 1024,1280 288×96\n      refresh-result decision \"Refresh valid?\" white 592,1488 288×128\n    invalidation section \"8 · Invalidation & security audit\" red 1568,1232 1328×384\n      revoke-sources document-stack \"Logout · admin · provider notification\" red 1584,1280 320×96\n      invalidate predefined-process \"Invalidate sessions + cached auth context\" red 2048,1280 352×96\n      security-audit document-stack \"Security audit stream (no token values)\" teal 2544,1280 320×96\n      login-required pill \"Login required again\" red 2048,1488 352×96\nEDGES\n  e1 browser→web-app \"start login\" blue anchors=right→left\n  e2 web-app→auth-gateway — blue anchors=bottom→top\n  e3 auth-gateway→session-store \"store short-lived state + PKCE\" teal anchors=right→left\n  e4 auth-gateway→oauth-provider — violet anchors=top→left\n  e5 oauth-provider→provider-login \"authenticate\" violet anchors=right→left\n  e6 provider-login→auth-code \"issue code\" violet anchors=bottom→top\n  e7 auth-code→callback \"callback\" violet anchors=right→left\n  e8 callback→validate-exchange \"validate state\" teal anchors=right→left\n  e9 validate-exchange→token-vault \"encrypt provider tokens\" orange anchors=bottom→top\n  e10 callback→identity-map — green anchors=bottom→top\n  e11 identity-map→login-audit — teal anchors=right→left\n  e12 identity-map→app-session \"issue app session\" green anchors=bottom→top\n  e13 app-session→api-gateway \"cookie on requests\" blue anchors=right→left\n  e14 api-gateway→session-check \"validate session\" blue anchors=right→left\n  e15 session-check→downstream — anchors=bottom→top\n  e16 downstream→integration — anchors=right→left\n  e17 integration→token-broker — orange anchors=left→right\n  e18 token-broker→just-in-time-token — orange anchors=bottom→top\n  e19 just-in-time-token→integration \"token only here\" orange anchors=right→bottom\n  e20 token-broker→refresh-coordinator \"near expiry\" dashed yellow anchors=bottom→top\n  e21 refresh-coordinator→account-lock \"lock account\" yellow anchors=right→left\n  e22 account-lock→rotate-token \"single refresh\" orange anchors=right→left\n  e23 rotate-token→refresh-result — orange anchors=bottom→right\n  e24 refresh-result→invalidate — red anchors=right→left\n  e25 revoke-sources→invalidate \"revoke\" red anchors=right→left\n  e26 invalidate→login-required \"require login\" red anchors=bottom→top\n  e27 validate-exchange→security-audit — dashed red anchors=right→top\n  e28 refresh-result→security-audit — dashed red anchors=right→left\n  e29 invalidate→security-audit — dashed red anchors=right→left\nDELTA\n  request-path  1136,688 768×208 → 1136,688 768×400\n  downstream  parentId page-frame → request-path\n  e2  label \"create login transaction\" → \"\"\n  e4  label \"redirect with challenge\" → \"\"\n  e10  label \"verified provider identity\" → \"\"\n  e11  label \"record login\" → \"\"\n  e15  label \"internal identity + auth context\" → \"\"\n  e16  label \"integration call\" → \"\"\n  e17  label \"needs provider token\" → \"\"\n  e18  label \"retrieve from vault\" → \"\"\n  e23  label \"wake concurrent callers\" → \"\"\n  e24  label \"invalid refresh\" → \"\"\n  e27  label \"failed state / exchange\" → \"\"\n  e28  label \"failed refresh\" → \"\"\n  e29  label \"revocation event\" → \"\"\nBOARD DIFF · base → draft · 65 ops\n  addSection login-init\n  addSection provider-auth\n  addSection callback-exchange\n  addSection session-issue\n  addSection request-path\n  addSection token-access\n  addSection refresh\n  addSection invalidation\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject provider-login\n  addObject auth-code\n  addObject callback\n  addObject validate-exchange\n  addObject token-vault\n  addObject identity-map\n  addObject login-audit\n  addObject app-session\n  addObject api-gateway\n  addObject session-check\n  addObject downstream\n  addObject token-broker\n  addObject integration\n  addObject just-in-time-token\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject rotate-token\n  addObject refresh-result\n  addObject revoke-sources\n  addObject invalidate\n  addObject security-audit\n  addObject login-required\n  updateSection page-frame  moved · resized · retexted\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection e4\n  addConnection e5\n  addConnection e6\n  addConnection e7\n  addConnection e8\n  addConnection e9\n  addConnection e10\n  addConnection e11\n  addConnection e12\n  addConnection e13\n  addConnection e14\n  addConnection e15\n  addConnection e16\n  addConnection e17\n  addConnection e18\n  addConnection e19\n  addConnection e20\n  addConnection e21\n  addConnection e22\n  addConnection e23\n  addConnection e24\n  addConnection e25\n  addConnection e26\n  addConnection e27\n  addConnection e28\n  addConnection e29\nLINTS · +1 −20\n  + W4 broken-edges: connector e10 hugs the right border of login-init for 340px (route e10 clear of login-init's frame so it reads as a wire, not a border)\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content, − E9 covered-content, − E10 covered-content, − E11 covered-content, − E12 covered-content, − W1 covered-content, − W2 covered-content, − W4 covered-content, − W6 broken-edges, − W7 broken-edges, − W15 unreadable-labels, − W17 unreadable-labels, − W21 unreadable-labels  (resolved)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.21.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.21.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-25T15:49:05.403Z",
+          "thinking": "**Reviewing final diagnostics**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vC66kgRA4rxm4Y84Bn1RzDHd|fc_0503f4a1381b20c8016a64daf12474819aa5d2dab2a959f61d",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [],
+                "view": "page-frame"
+              },
+              "resultText": "APPLIED · 0 ops\n  (no ops — look only)\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"OAuth session lifecycle across services\" white 112,128 2816×1552\n    login-init section \"1 · Login initiation\" blue 128,176 768×368\n      browser icon \"Browser\" blue 144,224 224×96 icon=display\n      web-app process \"Web application\" white 512,224 288×96\n      auth-gateway process \"Auth gateway\" blue 144,416 288×96\n      session-store database \"Session store: state + PKCE\" teal 576,416 288×96\n    provider-auth section \"2 · Provider authorization\" violet 1136,176 768×368\n      oauth-provider icon \"External OAuth provider\" violet 1152,224 288×96 icon=globe\n      provider-login process \"Authenticate user\" white 1584,224 288×96\n      auth-code document \"Authorization code\" violet 1376,416 288×96\n    callback-exchange section \"3 · Callback & token exchange\" teal 2128,176 768×368\n      callback process \"Dedicated callback service\" teal 2144,224 288×96\n      validate-exchange predefined-process \"Validate state + exchange with PKCE\" white 2576,224 288×96\n      token-vault database \"Encrypted token vault\" orange 2368,416 288×96\n    session-issue section \"4 · Identity mapping & session issuance\" green 144,704 768×368\n      identity-map process \"Map provider identity\" white 160,752 288×96\n      login-audit document \"Auditable login event\" teal 592,752 288×96\n      app-session document \"Secure HTTP-only session cookie\" green 368,944 288×96\n    request-path section \"5 · Application request path\" blue 1136,688 768×400\n      api-gateway process \"API gateway\" blue 1152,752 288×96\n      session-check decision \"Application session valid?\" white 1584,736 288×128\n      downstream process \"Downstream services\" 1376,960 288×96\n    token-access section \"6 · Provider token access\" orange 2128,704 768×368\n      token-broker process \"Token broker\" orange 2144,752 288×96\n      integration process \"Downstream integration\" white 2576,752 288×96\n      just-in-time-token document \"Provider access token (just in time)\" orange 2368,944 288×96\n    refresh section \"7 · Coordinated refresh\" yellow 144,1232 1200×416\n      refresh-coordinator process \"Refresh coordinator\" yellow 160,1280 288×96\n      account-lock icon \"Per-account lock\" yellow 592,1280 288×96 icon=key\n      rotate-token predefined-process \"Refresh once + rotate refresh token\" orange 1024,1280 288×96\n      refresh-result decision \"Refresh valid?\" white 592,1488 288×128\n    invalidation section \"8 · Invalidation & security audit\" red 1568,1232 1328×384\n      revoke-sources document-stack \"Logout · admin · provider notification\" red 1584,1280 320×96\n      invalidate predefined-process \"Invalidate sessions + cached auth context\" red 2048,1280 352×96\n      security-audit document-stack \"Security audit stream (no token values)\" teal 2544,1280 320×96\n      login-required pill \"Login required again\" red 2048,1488 352×96\nEDGES\n  e1 browser→web-app \"start login\" blue anchors=right→left\n  e2 web-app→auth-gateway — blue anchors=bottom→top\n  e3 auth-gateway→session-store \"store short-lived state + PKCE\" teal anchors=right→left\n  e4 auth-gateway→oauth-provider — violet anchors=top→left\n  e5 oauth-provider→provider-login \"authenticate\" violet anchors=right→left\n  e6 provider-login→auth-code \"issue code\" violet anchors=bottom→top\n  e7 auth-code→callback \"callback\" violet anchors=right→left\n  e8 callback→validate-exchange \"validate state\" teal anchors=right→left\n  e9 validate-exchange→token-vault \"encrypt provider tokens\" orange anchors=bottom→top\n  e10 callback→identity-map — green anchors=bottom→top\n  e11 identity-map→login-audit — teal anchors=right→left\n  e12 identity-map→app-session \"issue app session\" green anchors=bottom→top\n  e13 app-session→api-gateway \"cookie on requests\" blue anchors=right→left\n  e14 api-gateway→session-check \"validate session\" blue anchors=right→left\n  e15 session-check→downstream — anchors=bottom→top\n  e16 downstream→integration — anchors=right→left\n  e17 integration→token-broker — orange anchors=left→right\n  e18 token-broker→just-in-time-token — orange anchors=bottom→top\n  e19 just-in-time-token→integration \"token only here\" orange anchors=right→bottom\n  e20 token-broker→refresh-coordinator \"near expiry\" dashed yellow anchors=bottom→top\n  e21 refresh-coordinator→account-lock \"lock account\" yellow anchors=right→left\n  e22 account-lock→rotate-token \"single refresh\" orange anchors=right→left\n  e23 rotate-token→refresh-result — orange anchors=bottom→right\n  e24 refresh-result→invalidate — red anchors=right→left\n  e25 revoke-sources→invalidate \"revoke\" red anchors=right→left\n  e26 invalidate→login-required \"require login\" red anchors=bottom→top\n  e27 validate-exchange→security-audit — dashed red anchors=right→top\n  e28 refresh-result→security-audit — dashed red anchors=right→left\n  e29 invalidate→security-audit — dashed red anchors=right→left\nDELTA · none\nBOARD DIFF · base → draft · 65 ops\n  addSection login-init\n  addSection provider-auth\n  addSection callback-exchange\n  addSection session-issue\n  addSection request-path\n  addSection token-access\n  addSection refresh\n  addSection invalidation\n  addObject browser\n  addObject web-app\n  addObject auth-gateway\n  addObject session-store\n  addObject oauth-provider\n  addObject provider-login\n  addObject auth-code\n  addObject callback\n  addObject validate-exchange\n  addObject token-vault\n  addObject identity-map\n  addObject login-audit\n  addObject app-session\n  addObject api-gateway\n  addObject session-check\n  addObject downstream\n  addObject token-broker\n  addObject integration\n  addObject just-in-time-token\n  addObject refresh-coordinator\n  addObject account-lock\n  addObject rotate-token\n  addObject refresh-result\n  addObject revoke-sources\n  addObject invalidate\n  addObject security-audit\n  addObject login-required\n  updateSection page-frame  moved · resized · retexted\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection e4\n  addConnection e5\n  addConnection e6\n  addConnection e7\n  addConnection e8\n  addConnection e9\n  addConnection e10\n  addConnection e11\n  addConnection e12\n  addConnection e13\n  addConnection e14\n  addConnection e15\n  addConnection e16\n  addConnection e17\n  addConnection e18\n  addConnection e19\n  addConnection e20\n  addConnection e21\n  addConnection e22\n  addConnection e23\n  addConnection e24\n  addConnection e25\n  addConnection e26\n  addConnection e27\n  addConnection e28\n  addConnection e29\nLINTS · +0 −0 (14 open)\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-25T15-47-29-970Z_019f99f5-ca32-719d-bf89-a5fe58d4104d.25.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-07-25T15:49:11.805Z",
+          "thinking": "**Finalizing warning message IDs**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7Sg0X8EOw6zJ76WiLukotOfo|fc_0503f4a1381b20c8016a64daf62730819a9db289c70a59095c",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Built the complete OAuth session lifecycle across eight service stages, including PKCE/state handling, token isolation, session validation, coordinated refresh, revocation, and token-safe auditing; knowingly shipping routing/label warnings W3, W4, W5, W8, W9, W10, W11, W12, W13, W14, W16, W18, W19, and W20."
+              },
+              "resultText": "Committed: Built the complete OAuth session lifecycle across eight service stages, including PKCE/state handling, token isolation, session validation, coordinated refresh, revocation, and token-safe auditing; knowingly shipping routing/label warnings W3, W4, W5, W8, W9, W10, W11, W12, W13, W14, W16, W18, W19, and W20. (65 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,447 @@
+{
+  "axis": "rc",
+  "scenario": "incident-response",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Provide a lightweight incident-response process for a SaaS team.",
+        "brief_evidence": "We need a lightweight incident-response process for a SaaS team.",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board, especially the five numbered sections from “1 · Detect & page” through “5 · Resolve & learn”",
+            "observation": "The board presents a compact incident-response process in five stages, supporting the lightweight-process portion, but it does not identify the operational team as a SaaS team."
+          },
+          {
+            "source": "json",
+            "locator": "final_canvas.title, mode, section objects detection/triage/response/verification/learning, and all object text",
+            "observation": "The canvas is an incident-response diagram with five process sections. A search of object and section text finds no “SaaS” or equivalent team-scope label."
+          }
+        ],
+        "note": "The lightweight incident-response process is recognizable, but the stated SaaS-team scope is not represented."
+      },
+      {
+        "id": "R2",
+        "requirement": "Monitoring sends a high-confidence alert to the alert manager.",
+        "brief_evidence": "Monitoring sends a high-confidence alert to the alert manager",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & page section, top",
+            "observation": "A “Monitoring high-confidence alert” component points to “Alert manager group duplicates” through an arrow labeled “alert.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects monitoring and alert-manager; connection e1",
+            "observation": "Object monitoring is labeled “Monitoring\\nhigh-confidence alert,” and e1 is a forward connection from monitoring to alert-manager labeled “alert.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The alert manager groups duplicate alerts.",
+        "brief_evidence": "which groups duplicates",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & page section, Alert manager box",
+            "observation": "The component is labeled “Alert manager group duplicates.”"
+          },
+          {
+            "source": "json",
+            "locator": "object alert-manager",
+            "observation": "The alert-manager object's text is “Alert manager\\ngroup duplicates.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The alert manager pages the primary on-call engineer.",
+        "brief_evidence": "and pages the primary on-call engineer.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & page section, Alert manager to Page primary on-call",
+            "observation": "A directed path labeled “group + page” leads from the alert manager to “Page primary on-call.”"
+          },
+          {
+            "source": "json",
+            "locator": "object page-primary; connection e2",
+            "observation": "e2 runs forward from alert-manager to page-primary with label “group + page”; page-primary says “Page primary on-call.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The on-call engineer acknowledges the page.",
+        "brief_evidence": "The on-call engineer acknowledges the page",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Transition from Detect & page to Acknowledge & triage",
+            "observation": "The acknowledgment decision routes to a component labeled “On-call acknowledges”; the secondary escalation route also rejoins that acknowledgment."
+          },
+          {
+            "source": "json",
+            "locator": "object oncall-ack; connections e4 and e6",
+            "observation": "The oncall-ack object says “On-call acknowledges,” with incoming forward paths from the acknowledgment-timeout decision and secondary escalation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The on-call engineer performs an initial triage after acknowledging.",
+        "brief_evidence": "performs an initial triage",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Acknowledge & triage section",
+            "observation": "“On-call acknowledges” points downward to “Initial triage.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects oncall-ack and initial-triage; connection e7",
+            "observation": "e7 is a forward connection from oncall-ack to initial-triage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Initial triage results in either resolving a false alarm or declaring a real incident.",
+        "brief_evidence": "and either resolves a false alarm or declares an incident.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Acknowledge & triage section, Real incident? decision",
+            "observation": "Initial triage leads to “Real incident?” The “no” branch reaches “Resolve false alarm,” while the other branch enters the incident-response path."
+          },
+          {
+            "source": "json",
+            "locator": "objects initial-triage, real-incident, false-alarm; connections e8, e9, and e10",
+            "observation": "e8 leads from triage to the real-incident decision; e9's “no” branch reaches false-alarm; e10 routes the other branch to the incident record."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Declaring an incident creates a shared incident record.",
+        "brief_evidence": "A declared incident creates a shared incident record",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Real incident? decision to Coordinate & mitigate section",
+            "observation": "The incident branch leads to “Shared incident record,” followed by a connector labeled “create.”"
+          },
+          {
+            "source": "json",
+            "locator": "object incident-record; connections e10 and e11",
+            "observation": "e10 connects real-incident to incident-record, whose text is “Shared incident record”; e11 continues from it with label “create.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "A declared incident assigns a service owner.",
+        "brief_evidence": "and assigns a service owner",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate section, beneath Shared incident record",
+            "observation": "The created incident record flows directly to “Assign service owner.”"
+          },
+          {
+            "source": "json",
+            "locator": "object assign-owner; connection e11",
+            "observation": "e11 is a forward connection from incident-record to assign-owner, and the target text is “Assign service owner.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The service owner investigates the incident.",
+        "brief_evidence": "who investigates",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate section, service-owner branch",
+            "observation": "“Assign service owner” flows to “Service owner investigates.”"
+          },
+          {
+            "source": "json",
+            "locator": "object investigate; connection e12",
+            "observation": "e12 connects assign-owner to investigate, whose text explicitly says “Service owner investigates.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "The service owner applies mitigation.",
+        "brief_evidence": "and applies mitigation.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate section, service-owner branch",
+            "observation": "The “Service owner investigates” step points directly to “Apply mitigation,” preserving the stated owner responsibility."
+          },
+          {
+            "source": "json",
+            "locator": "objects investigate and mitigate; connection e14",
+            "observation": "e14 is a forward connection from the explicitly owner-labeled investigation step to “Apply mitigation.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The on-call engineer coordinates the incident response.",
+        "brief_evidence": "The on-call engineer coordinates the response",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate section, blue parallel branch",
+            "observation": "A separate component is labeled “On-call coordinates response.”"
+          },
+          {
+            "source": "json",
+            "locator": "object coordinate; connection e13",
+            "observation": "The coordinate object says “On-call coordinates response” and is reached from the shared incident record."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "The on-call engineer keeps the public status page current while the service owner works.",
+        "brief_evidence": "and keeps the public status page current while the service owner works.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Coordinate & mitigate section, parallel service-owner and on-call branches",
+            "observation": "The incident record splits into parallel branches: service-owner investigation and mitigation on the left, and on-call coordination followed by “Keep public status current” on the right."
+          },
+          {
+            "source": "json",
+            "locator": "connections e12-e15 and objects investigate, mitigate, coordinate, status-page",
+            "observation": "The owner sequence assign-owner→investigate→mitigate and on-call sequence incident-record→coordinate→status-page are represented as concurrent sibling branches."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Mitigation is verified against the same monitoring signals that produced the alert.",
+        "brief_evidence": "Mitigation is verified against the same monitoring signals",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Verify section",
+            "observation": "“Apply mitigation” flows to “Verify mitigation against monitoring signals,” and the resolution-gate note states that the same signals that alerted must confirm recovery."
+          },
+          {
+            "source": "json",
+            "locator": "object verify-signals, object verification-rule, and connection e16",
+            "observation": "e16 connects mitigation to verification; verification-rule says “Same signals that alerted must confirm recovery.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The incident cannot be resolved until mitigation verification succeeds.",
+        "brief_evidence": "before the incident can be resolved.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Verify section to Resolve & learn section",
+            "observation": "The only path to “Resolve incident” is the “yes” branch from “Signals healthy?” The resolution-gate note reinforces the constraint."
+          },
+          {
+            "source": "json",
+            "locator": "objects verification-pass, verification-rule, resolve-incident; connection e18",
+            "observation": "e18 connects verification-pass to resolve-incident only on label “yes”; the rule note explicitly calls this a resolution gate."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "If verification fails, ownership returns to the service owner for another mitigation attempt.",
+        "brief_evidence": "If verification fails, ownership returns to the service owner for another mitigation attempt.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed retry path from Signals healthy? back to Apply mitigation",
+            "observation": "The “no · retry” path loops from failed verification back to “Apply mitigation,” which is the mitigation step on the service-owner work branch."
+          },
+          {
+            "source": "json",
+            "locator": "connection e19 plus objects investigate and mitigate",
+            "observation": "e19 is a dashed forward connection from verification-pass to mitigate labeled “no · retry.” The mitigate step is downstream of the explicitly labeled “Service owner investigates” step via e14."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Resolving the incident closes the public status update.",
+        "brief_evidence": "Resolution closes the public update",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Resolve & learn section, top two steps",
+            "observation": "“Resolve incident” points directly to “Close public update.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects resolve-incident and close-status; connection e20",
+            "observation": "e20 is a forward connection from resolve-incident to close-status, whose text is “Close public update.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Resolution preserves the incident timeline in the shared incident record.",
+        "brief_evidence": "preserves the timeline in the incident record",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Resolve & learn section, beneath Close public update",
+            "observation": "The resolution sequence includes “Preserve timeline in incident record.”"
+          },
+          {
+            "source": "json",
+            "locator": "object preserve-timeline; connection e21",
+            "observation": "The preserve-timeline object contains the full requirement text and follows close-status through e21."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Resolution schedules a post-incident review.",
+        "brief_evidence": "and schedules a post-incident review",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Resolve & learn section, lower middle",
+            "observation": "The resolution sequence contains “Schedule post-incident review.”"
+          },
+          {
+            "source": "json",
+            "locator": "object schedule-pir; connection e22",
+            "observation": "schedule-pir is labeled “Schedule post-incident review” and follows timeline preservation through e22."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Actions from the post-incident review enter the follow-up tracker.",
+        "brief_evidence": "whose actions enter the follow-up tracker.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Resolve & learn section, bottom",
+            "observation": "“Schedule post-incident review” points to “Actions enter follow-up tracker.”"
+          },
+          {
+            "source": "json",
+            "locator": "object followup-tracker; connection e23",
+            "observation": "e23 connects schedule-pir to followup-tracker, whose text is “Actions enter follow-up tracker.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "If the primary on-call engineer does not acknowledge within five minutes, the alert manager escalates to the secondary on-call engineer.",
+        "brief_evidence": "If the primary on-call engineer does not acknowledge within five minutes, the alert manager escalates to the secondary on-call engineer.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Detect & page section, acknowledgment-timeout branch",
+            "observation": "After “Page primary on-call,” the decision “Acknowledged within 5 min?” has a downward branch labeled “no · 5 min” to “Escalate to secondary on-call.” This branch is contained in the alert-manager detection/page stage."
+          },
+          {
+            "source": "json",
+            "locator": "objects page-primary, ack-timeout, page-secondary; connections e3 and e5; parent section detection",
+            "observation": "e3 routes primary paging to the five-minute acknowledgment decision, and e5 routes failure to page-secondary with label “no · 5 min.” All three objects are under the “1 · Detect & page” section containing the alert manager."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9878,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The core operational and failure/recovery flow is comprehensively covered: alert ingestion and deduplication, primary/secondary paging, acknowledgment and triage, incident declaration, parallel owner/on-call responsibilities, same-signal verification, failed-verification retry, and resolution-to-learning follow-through.",
+    "most_consequential_gap": "R1 is only partial because the board represents a compact incident-response process but never states that it is specifically for a SaaS team.",
+    "coverage_summary": "All 20 system-defining requirements are represented, including the five-minute secondary escalation and failed-verification mitigation loop. The only incomplete item is the supporting SaaS-team scope qualifier in R1, so the board is nearly complete but not a perfect visual acceptance record of every stated qualifier.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 12310,
+    "output_tokens": 4971
+  },
+  "flags": []
+}

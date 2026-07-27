@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-23-system-smoke",
+  "tier": "system",
+  "scenario": "incident-response",
+  "board_id": "eval.2026-07-23-system-smoke.incident-response",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-24T01:06:37.600Z",
+      "finished_at": "2026-07-24T01:12:28.221Z",
+      "wall_ms": 351068,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "d3260134-1067-4fad-bba9-6deedb7d2170"
+    ]
+  },
+  "finished_at": "2026-07-24T01:12:28.668Z",
+  "exit_code": 0
+}

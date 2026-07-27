@@ -89,6 +89,7 @@ export function characterizationDocuments(): Array<{
       status: "open",
       body: "Keep this as the entry point",
       createdBy: "human",
+      replies: [],
     },
     {
       id: "request-edge",
@@ -97,6 +98,7 @@ export function characterizationDocuments(): Array<{
       status: "applied",
       body: "Make the relationship clearer",
       createdBy: "human",
+      replies: [],
     },
     {
       id: "request-region",
@@ -105,6 +107,7 @@ export function characterizationDocuments(): Array<{
       status: "resolved",
       body: "Use this area for outcomes",
       createdBy: "human",
+      replies: [],
     },
   ] satisfies InteractiveCanvasAnnotation[];
 
@@ -146,14 +149,8 @@ export function characterizationDocuments(): Array<{
     color: "yellow" as const,
     parentId: "page-all",
   };
-  const markerAll = {
-    ...box("marker-all", 1040, 120, 32, 32, "annotation-marker"),
-    text: "Marker",
-    color: "red" as const,
-    parentId: "page-all",
-  };
   const comprehensive = makeDocument(
-    [nestedFrame, pageAll, sectionAll, nodeA, nodeB, stickyAll, markerAll],
+    [nestedFrame, pageAll, sectionAll, nodeA, nodeB, stickyAll],
     [
       {
         ...connect("edge-forward", "node-a", "node-b"),
@@ -188,6 +185,7 @@ export function characterizationDocuments(): Array<{
       status: "open",
       body: "Object annotation",
       createdBy: "human",
+      replies: [],
     },
     {
       id: "all-connection",
@@ -196,6 +194,7 @@ export function characterizationDocuments(): Array<{
       status: "applied",
       body: "Connection request",
       createdBy: "human",
+      replies: [],
     },
     {
       id: "all-region",
@@ -204,6 +203,7 @@ export function characterizationDocuments(): Array<{
       status: "resolved",
       body: "Region request",
       createdBy: "human",
+      replies: [],
     },
   ] satisfies InteractiveCanvasAnnotation[];
 

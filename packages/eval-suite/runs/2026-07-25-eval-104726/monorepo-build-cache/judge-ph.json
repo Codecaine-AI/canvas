@@ -1,0 +1,229 @@
+{
+  "axis": "ph",
+  "scenario": "monorepo-build-cache",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 11 tool calls succeeded, including 8 editing calls, 2 look-only calls, and finalize. There were no ERROR results, rejected calls, retries, repeated validation errors, or parse/schema fights. Failure rate was 0/11 (0%), with longest failure run 0.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 7 ops",
+          "finding": "The first call applied successfully; there was no failed-call run before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "Committed: Built the monorepo build/cache flow with impact analysis, graph scheduling, cache hit/miss execution, provenance, atomic publication, failure handling, and key inputs; knowingly ships W1 (the dispatch label remains close to the provenance route).",
+          "finding": "Finalize succeeded on the first attempt and was not blocked or rejected."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong iterative perception loop. Ten apply_ops calls returned rendered board images: eight adjustment rounds at turns 0–7 followed by two explicit look-only reviews at turns 8–9. After the first rendered state, each subsequent edit was informed by the preceding render/diagnostics and itself produced another render, yielding seven clear render→adjust→render loops. The session was not a single-render session, although the two consecutive final looks contained no adjustment between them and therefore count as review rather than additional iteration.",
+      "render_count": 10,
+      "adjustment_round_count": 8,
+      "render_adjust_render_loop_count": 7,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "LINTS · +10 −0",
+          "finding": "The rendered node layout exposed ten crowding warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "LINTS · +0 −10 ... (resolved)",
+          "finding": "The agent adjusted spacing immediately after perceiving the warnings and re-rendered to verify that all ten were resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +15 −0",
+          "finding": "The first complete connection render exposed routing, overlap, and broken-edge problems."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +0 −4 ... (resolved)",
+          "finding": "Further routing and label adjustments were rendered and reduced the diagnostics to one remaining warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "The agent performed an explicit whole-board final review after the last adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "A second, policy-focused look investigated the one remaining lint; because no edit occurred between turns 8 and 9, this was review rather than another iteration loop."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively rather than fought. Fifteen error-severity lint findings were surfaced across the routing iterations—8 at turn 4, 6 newly surfaced at turn 5, and 1 newly surfaced at turn 6—and all were resolved before commit. The ten initial crowding warnings were also fixed in one strategy change. No identical lint re-fired for more than three consecutive turns without a strategy change. One warning remained open and was overridden with an explicit reason in the commit summary; there was no silent warning override.",
+      "lint_error_count": 15,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 1,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "LINTS · +10 −0",
+          "finding": "Ten crowding warnings were introduced by the initial node placement."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "− W1 crowding, − W2 crowding, − W3 crowding, − W4 crowding, − W5 crowding, − W6 crowding, − W7 crowding, − W8 crowding, − W9 crowding, − W10 crowding  (resolved)",
+          "finding": "All ten crowding warnings were fixed in the next adjustment round rather than repeatedly re-fired."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +15 −0",
+          "finding": "The first edge pass exposed 8 error-severity and 7 warning-severity routing findings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +10 −15",
+          "finding": "The routing strategy changed and all 15 prior findings were resolved, although 10 new findings appeared."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +0 −4\n  − E1 covered-content, − W2 covered-content, − W3 broken-edges, − W4 broken-edges  (resolved)",
+          "finding": "The remaining error and associated warnings were cleared by removing the problematic cache-hit edge and its conflicting label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +0 −0 (1 open)",
+          "finding": "Final review showed one warning still open."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "knowingly ships W1 (the dispatch label remains close to the provenance route)",
+          "finding": "The sole remaining warning was explicitly acknowledged with a concrete reason in the commit summary."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary matches the stage diff and final board structure. The diff contains impact detection, dependent expansion and dependency ordering, scheduling and workers, cache hit/miss branches, provenance verification, isolated execution, immutable artifact upload, atomic convergence, failure routing, and a key-input sticky. The summary also candidly declares the one known warning. No seen defect was left undeclared and no materially inflated claim was found.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "line": "Built the monorepo build/cache flow with impact analysis, graph scheduling, cache hit/miss execution, provenance, atomic publication, failure handling, and key inputs; knowingly ships W1 (the dispatch label remains close to the provenance route).",
+          "assessment": "Honest and supported by the 41-operation stage diff. The limitation clause accurately discloses the one open warning observed during final review."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +0 −0 (1 open)",
+          "finding": "The agent demonstrably saw that one warning remained before committing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "**Investigating missing lint warning**",
+          "finding": "The second final look shows an honest attempt to identify the remaining warning rather than ignoring it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "knowingly ships W1 (the dispatch label remains close to the provenance route)",
+          "finding": "The known remaining issue was declared rather than concealed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "(41 patch operations)",
+          "finding": "The committed patch size agrees with the metadata and stage diff."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed result used 41 patch operations and completed in about 2.29 minutes, comfortably inside the 15-minute and 300-turn budgets. Work was generally proportionate for a detailed architecture diagram. There was one localized add-adjust-remove cycle: e17 was added at turn 4, rerouted at turns 5 and 6, then removed at turn 7. This is mild edge-routing thrash, but not a broad build-delete-rebuild cycle. The two final zero-op looks targeted different views and were used to investigate the remaining lint, so they are not repeated same-target NO-OP thrash.",
+      "operation_count": 41,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 2.29,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "+ e17  restore → result",
+          "finding": "The cache-hit result edge was initially added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "e17  anchors right→left → bottom→bottom",
+          "finding": "The same edge was substantially rerouted after lint feedback."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "e17  wp 416,1312→1984,1312 → 416,1328→1984,1328",
+          "finding": "A second adjustment attempted to clear border-hugging diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "− e17",
+          "finding": "The edge was ultimately removed, constituting one localized add-adjust-remove thrash cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "(41 patch operations)",
+          "finding": "The session finalized successfully with a proportionate committed patch and did not approach either budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session completed normally, finalized successfully, had zero retries, and is included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "The kernel session reached a normal committed terminal state; there is no stuck ACTIVE transcript, harness death, collision, or proxy failure to exclude."
+        }
+      ]
+    },
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 31119,
+    "output_tokens": 3224
+  },
+  "flags": []
+}

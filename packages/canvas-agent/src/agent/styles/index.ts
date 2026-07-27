@@ -6,29 +6,17 @@
  *
  * Style topics are craft prose only — they never produce diagnostics; the
  * lint registry owns that surface.
+ * The registry also carries the craft targets, the structured dimensions the
+ * style guide renders beside the prose topics.
  */
 import type { StyleTopic } from "./types";
 
-import { style as spacingAndCorridors } from "./spacing-and-corridors";
-import { style as gridDiscipline } from "./grid-discipline";
-import { style as sectionFraming } from "./section-framing";
-import { style as registersAndRhythm } from "./registers-and-rhythm";
-import { style as fanComposition } from "./fan-composition";
-import { style as colorSemantics } from "./color-semantics";
-import { style as connectorsAndLabels } from "./connectors-and-labels";
-import { style as treeEdgeEntry } from "./tree-edge-entry";
-import { style as lanesAndCorridors } from "./lanes-and-corridors";
+import { style as aesthetic } from "./aesthetic";
 
+export { CRAFT_TARGETS } from "./craft-targets";
+export type { CraftTargets } from "./types";
 export type { StyleTopic } from "./types";
 
 export const STYLE_TOPICS: readonly StyleTopic[] = [
-  spacingAndCorridors,
-  gridDiscipline,
-  sectionFraming,
-  registersAndRhythm,
-  fanComposition,
-  colorSemantics,
-  connectorsAndLabels,
-  treeEdgeEntry,
-  lanesAndCorridors,
+  aesthetic,
 ];

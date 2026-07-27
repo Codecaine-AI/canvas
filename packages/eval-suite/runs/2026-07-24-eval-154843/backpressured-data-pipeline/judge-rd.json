@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "backpressured-data-pipeline",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board provides stronger tinted stage grouping but loses finish through a large empty middle band, several cramped routing merges, and truncated node text.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "FAIL: The main pipeline is packed into the upper half while a very large empty horizontal band separates it from the bottom operations panel."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "Most nodes and label chips have adequate breathing room, but the transform-to-storage interface compresses several colored routes and the storage cluster is visibly tighter than the earlier stages."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Distinct blue, teal, purple, green, and orange-tinted regions clearly organize the five pipeline stages and the separate operations commentary."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Color is varied and largely semantic across stages and outcomes, with green success, red rejection, orange warning or exception, and consistent flow-family hues."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "FAIL: Although there are no crosshair glyphs, multiple arrows converge ambiguously near the transform/storage boundary, and the query-service/cache area reads like exposed routing plumbing."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Stage headers and major containers align cleanly, but uneven container widths, the dense right-hand cluster, and the detached bottom panel interrupt the otherwise left-to-right rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "FAIL: The orange dashed return route makes a long top-border detour, teal and orange runs crowd together between transform and storage, and several short opposing arrows are difficult to parse quickly."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness (7.5) ranks first, intent-classification-2 (7.0) second, and the board under grade (6.5) third."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 675
+  },
+  "flags": []
+}

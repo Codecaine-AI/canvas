@@ -4,13 +4,13 @@ import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import { formatDiagnostics, runDiagnostics as runAll } from "../src/board/lints/run";
 import type { Diagnostic, LayoutRule } from "../src/board/lints/types";
-import { box, makeDocument } from "./synthetic";
+import { box, connect, makeDocument } from "./synthetic";
 
 // Framework tests exercise the runner (ordering, ids, formatting), so they run
 // against two minimal fixture rules. Full-registry behavior belongs to the
 // per-lint test files, which would otherwise break these pins every time a
 // lint is added.
-type Finding = Omit<Diagnostic, "id" | "quickfixAvailable">;
+type Finding = Omit<Diagnostic, "id">;
 
 const spacingRule: LayoutRule = {
   id: "spacing",
@@ -41,7 +41,6 @@ const spacingRule: LayoutRule = {
     }
     return findings;
   },
-  quickfix: () => [],
 };
 
 const containmentRule: LayoutRule = {
@@ -98,13 +97,11 @@ describe("runDiagnostics", () => {
       rule: "containment",
       severity: "error",
       at: ["child", "section"],
-      quickfixAvailable: false,
     });
     expect(diagnostics[1]).toMatchObject({
       rule: "spacing",
       severity: "warning",
       at: ["a", "b"],
-      quickfixAvailable: true,
     });
     expect(diagnostics[1]!.message).toContain("44px");
     expect(diagnostics[1]!.suggestion).toBe("nearest rungs 32 / 64");
@@ -139,7 +136,7 @@ describe("runDiagnostics", () => {
 });
 
 describe("formatDiagnostics", () => {
-  test("formats counts, ids, suggestions, and quickfix markers", () => {
+  test("formats counts, ids, and suggestions", () => {
     const document = makeDocument([
       ...offLadderObjects(),
       ...escapedChildObjects(),
@@ -148,7 +145,25 @@ describe("formatDiagnostics", () => {
 
     expect(text).toContain("DIAGNOSTICS · 1 error · 1 warning");
     expect(text).toContain("E1 containment: child extends");
-    expect(text).toContain("W1 spacing: gap a↔b 44px off the ladder (axis x) (nearest rungs 32 / 64) [quickfix]");
+    expect(text).toContain("W1 spacing: gap a↔b 44px off the ladder (axis x) (nearest rungs 32 / 64)");
+    expect(text).not.toContain("[quickfix]");
+    expect(text).not.toContain("suggested op:");
+  });
+
+  test("renders a finding's prose suggestion without structured operations", () => {
+    const document = makeDocument(
+      [box("alpha", 0, 0), box("beta", 204, 0)],
+      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
+    );
+    const text = formatDiagnostics(runAll(document));
+
+    expect(text).toContain("W1 unreadable-labels:");
+    expect(text).toContain(
+      "(open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)",
+    );
+    expect(text).not.toContain('"operations"');
+    expect(text).not.toContain("suggested op:");
+    expect(text).not.toContain("[quickfix]");
   });
 
   test("an empty list renders as clean", () => {

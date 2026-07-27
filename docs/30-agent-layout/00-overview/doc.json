@@ -31,17 +31,17 @@
         "b-overview-siblings-21"
       ],
       "props": {
-        "covers": "How one AI-driven canvas edit works end to end: the fitter derives a disposable layout program from the saved document, the AI proposes structural changes, and the deterministic solver and router turn them into the geometry the AI reviews.",
+        "covers": "How a scoped AI-driven canvas edit moves from operator instruction to a validated cumulative proposal: boot perception, typed id-addressed operations, tiered results, deliberate inspection, request disposal, and finalize gating.",
         "format": "mdx",
         "type": "design",
         "concepts": [
-          "layout program",
-          "fitter",
-          "solver",
-          "router",
-          "derived view",
-          "agent editing loop",
-          "canvas-agent"
+          "scoped canvas edit",
+          "deliberate perception",
+          "typed operations",
+          "explicit section fit",
+          "user-request queue",
+          "painted-extent camera",
+          "cumulative proposal"
         ]
       }
     },
@@ -65,21 +65,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The AI works with structure, not pixel coordinates. The canvas document is the single source of truth. The layout program is a derived, disposable view: "
-        },
-        {
-          "insert": "fitSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "fitSketch"
-            }
-          }
-        },
-        {
-          "insert": " reads the saved board fresh for every edit, and the program is thrown away afterward, so it can never go stale. Fit, solve, and routing are deterministic — the same document and program produce the same result every time. The AI is the only judgment in the loop: it decides what should change, and the deterministic tools decide where every pixel and line lands."
+          "insert": "An edit starts when the operator selects canvas objects and tells the studio what should change. The harness resolves that scope, opens a draft from the current document, and gives the model a complete textual and visual starting point. The model edits the draft directly through validated, id-addressed operations. Each applied operation returns a focused account of its effect, while look returns fresh whole-board state and renders for deliberate review. The saved board is not changed until a cumulative proposal passes the run gates and the operator accepts it."
         }
       ]
     },
@@ -103,7 +89,7 @@
       "props": {},
       "text": [
         {
-          "insert": "One edit, from your command to the updated board. Solid arrows are calls; dashed arrows are derived views coming back."
+          "insert": "The studio owns the operator-facing session. The harness owns the baseline, scope, draft, request queue, and tool runtime. The model supplies layout judgment, while look asks the canvas renderer for the same routed visual truth used by the product."
         }
       ]
     },
@@ -112,12 +98,12 @@
       "flavour": "mermaid",
       "children": [],
       "props": {
-        "title": "One edit, in order",
-        "caption": "The AI is the only judgment in the loop. The fitter, solver, and router are deterministic, and the document is the one saved thing."
+        "title": "One scoped edit, from instruction to proposal",
+        "caption": "The model edits a session draft through typed single-operation tools and uses look for whole-board judgment; finalize proposes the cumulative baseline-to-draft diff."
       },
       "text": [
         {
-          "insert": "sequenceDiagram\n  participant You\n  participant AI as The AI\n  participant Fitter\n  participant Document\n  participant Solver\n  participant Router\n  You->>AI: your command + what you have selected\n  AI->>Fitter: fit the document\n  Fitter->>Document: read\n  Document-->>Fitter: geometry + intent\n  Fitter-->>AI: the program — identical every time\n  Router-->>AI: a picture of the current board\n  loop repeat until it looks right\n    AI->>Solver: a one-line change to the program\n    Solver->>Document: write geometry + intent — one save\n    Document->>Router: new geometry\n    Router-->>AI: a fresh picture — the AI reviews it\n  end\n  AI-->>You: done — the board updates in front of you"
+          "insert": "sequenceDiagram\n  participant Studio as Operator / Studio\n  participant Harness as Harness session\n  participant Model\n  participant Renderer as Canvas renderer\n  Studio->>Harness: select objects, instruct, create session\n  Harness->>Harness: resolve scope, copy baseline, inject page frame, sync requests\n  Harness->>Renderer: renderBoardView(current draft)\n  Renderer-->>Harness: full-board PNG\n  Harness-->>Model: five context blocks + board image + exemplar + vocabulary sheet\n  loop study, edit, and review\n    Model->>Harness: typed mutator({ operation fields, view? })\n    Harness->>Harness: validate one operation\n    alt operation applies\n      Harness->>Harness: apply, reconcile membership, diff, lint\n      opt view supplied\n        Harness->>Renderer: render changed board\n        Renderer-->>Harness: painted-extent PNG\n      end\n      Harness-->>Model: APPLIED + DELTA + lint delta + scoped digest + optional render\n    else legal operation has nothing to do\n      Harness-->>Model: NO-OP + note only\n    else state validation fails\n      Harness-->>Model: ERROR + error lines only\n    end\n    Model->>Harness: look({ view? })\n    Harness->>Renderer: render full board and optional section close-up\n    Renderer-->>Harness: 1600px board + optional 1400px close-up\n    Harness-->>Model: full BOARD + BOARD DIFF + LINTS + ROUTES + REQUESTS + renders\n  end\n  opt dispose each user request\n    Model->>Harness: resolve_request(id, status, note)\n    Harness-->>Model: updated REQUESTS queue\n  end\n  Model->>Harness: finalize(committed, message)\n  Harness->>Harness: run scoped error gate, check requests, diff baseline to draft\n  alt error lint or open request remains\n    Harness-->>Model: blocked; run continues\n  else gates pass\n    Harness-->>Studio: proposal-ready(cumulative patch)\n    Studio-->>Studio: operator reviews the proposed board change\n  end"
         }
       ]
     },
@@ -143,13 +129,13 @@
       },
       "text": [
         {
-          "insert": "You say what should change.",
+          "insert": "The operator defines the task and its starting scope.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " Your command — plus anything you have selected — tells the AI what you want to accomplish."
+          "insert": " The selection expands through selected sections to their descendants. The harness records the resulting object ids, scope frame, and boundary-connection count, then creates a draft. A frameless document receives a locked background page frame in the draft."
         }
       ]
     },
@@ -162,13 +148,13 @@
       },
       "text": [
         {
-          "insert": "The fitter reads the current board.",
+          "insert": "The model boots with current perception.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " It turns the saved canvas into the compact layout language: groups, rows, columns, grids, lanes, shared centerlines, and arrows. It does not interpret your command; it gives the AI a structural view of what is already there."
+          "insert": " Five blocks arrive in order: editor_state, user_requests, capabilities, style_guide, and board_state. Nested XML children are indented four spaces. The capabilities block groups sections, stickies, objects, and connections; every kind has its description, operations, named functionality, and tips, while objects adds generated vocabulary and connections adds generated fields. The style guide carries one nested aesthetic topic: “Calm and uniform — uniformity is information.” It treats matched size and gap as a peer signal, sizes content first, repeats one gap per group, uses the 16px grid only for quantization, leaves air, groups through sections, reserves red for failure and green for success, and labels edges directly. board_state supplies the full digest and diagnostics. The image hook adds the current full-board render first, the house exemplar second, and the vocabulary contact sheet third; the sheet renders every type, icon glyph, and color plus connection demonstrations, including a wire ending on a section."
         }
       ]
     },
@@ -181,13 +167,13 @@
       },
       "text": [
         {
-          "insert": "The AI reads structure and sees the result.",
+          "insert": "The model studies first, then edits through typed tools.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " The language explains how the board is organized. A screenshot, SVG, or other rendering shows how it actually looks. The AI uses both views together."
+          "insert": " Thirteen typed mutators provide add, update, and remove for sections, stickies, objects, and connections, plus fit_section; each call names one operation. look is the read-only inspection tool. Section and sticky operations imply their type, while object operations cover the closed shape-and-icon type roster. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line: the agent chooses complete finite geometry for the content and role."
         }
       ]
     },
@@ -200,13 +186,13 @@
       },
       "text": [
         {
-          "insert": "It changes, solves, and checks.",
+          "insert": "The harness applies mechanics and pushes truth back.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " The AI makes a small change to the language. The solver turns that change into geometry, the router redraws the lines, and a fresh rendering comes back for review. The loop repeats until the board looks right."
+          "insert": " After every operation, section membership is reconciled from geometry. Sections hold exactly the geometry they are given and close around their children only when fit_section names them; ancestors keep their slack until named too. An applied operation returns its APPLIED line, the document-derived DELTA exposing reconciled parentId and anchor, endpoint-position, or waypoint steering changes, the lint delta, and a digest scoped to the touched section, with a render only when view was supplied. A no-op returns its note, and an error returns its error lines; neither changes the draft. look returns the whole board: a fresh digest, cumulative BOARD DIFF, complete lint list, routed truth, request queue, full-board render, and a requested section close-up. Lints explain what is wrong in prose; the model chooses the fix."
         }
       ]
     },
@@ -219,13 +205,13 @@
       },
       "text": [
         {
-          "insert": "The AI tells you it is done.",
+          "insert": "The model disposes requests and finalizes.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " When the structure and the rendered result both look right, the AI stops iterating and returns the finished board."
+          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires zero error-tier findings and no open requests, and proposes the cumulative baseline-to-draft patch. The agent fixes each warning or deliberately overrides it and names every surviving warning id in the finalize message. outcome none ends without a proposal and explains why."
         }
       ]
     },
@@ -234,11 +220,11 @@
       "flavour": "observation",
       "children": [],
       "props": {
-        "title": "The handoff is simple"
+        "title": "The handoff is a cumulative patch"
       },
       "text": [
         {
-          "insert": "The fitter reads. The AI decides. The solver places. The router draws."
+          "insert": "The model works on a session draft. BOARD DIFF is rendered from the same internal baseline-to-draft operations that a successful finalize proposes, so the operator reviews the change the model has been seeing throughout the run."
         }
       ]
     },
@@ -249,77 +235,7 @@
       "props": {},
       "text": [
         {
-          "insert": "In code, one pass through the loop is "
-        },
-        {
-          "insert": "fitSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "fitSketch"
-            }
-          }
-        },
-        {
-          "insert": " (document to structure), "
-        },
-        {
-          "insert": "serializeSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "serializeSketch"
-            }
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "parseSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/serialize.ts",
-              "symbol": "parseSketch"
-            }
-          }
-        },
-        {
-          "insert": " (the byte-exact program text the AI reads and rewrites), "
-        },
-        {
-          "insert": "expandSketch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "expandSketch"
-            }
-          }
-        },
-        {
-          "insert": " (program to geometry), and "
-        },
-        {
-          "insert": "routeSketchEdges",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "routeSketchEdges"
-            }
-          }
-        },
-        {
-          "insert": " (geometry to connector paths). Everything except the model call is a pure function."
+          "insert": "There are exactly sixteen tools: section, sticky, object, and connection add/update/remove mutators; fit_section; look; resolve_request; and finalize. The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. There is no separate rules section; required behavior lives in phase constraints. workflow organizes work into six state-driven phases: understand, survey, plan, build, finish, and finalize, with each phase carrying its objective, steps, and constraints. Build places the section skeleton first, fills one section at a time while judging a render, closes each finished region with fit_section, then adds connections, labels, and styling. Finish uses look to review touched sections and the full board, disposes requests, and resolves diagnostics."
         }
       ]
     },
@@ -345,13 +261,13 @@
       },
       "text": [
         {
-          "insert": "The program is a view, not a file.",
+          "insert": "Perception is deliberate.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " The language is derived fresh from the document on every edit and thrown away after. It can never go stale."
+          "insert": " look is the model's whole-board recall affordance and the deliberate step back for composition judgment. Its board digest is an indented containment tree followed by one EDGES block; the legend declares elided defaults, and object text is never truncated. Each look returns fresh whole-board state, cumulative change, complete lints, routed truth, requests, and renders; operation results stay focused on the region they touched."
         }
       ]
     },
@@ -364,13 +280,13 @@
       },
       "text": [
         {
-          "insert": "Intent lives inside the document.",
+          "insert": "Operations are semantic at the boundary and mechanical underneath.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " Grids, lanes, shared centerlines, and fans are saved next to the geometry in the same file, so they cannot drift apart."
+          "insert": " The model writes thirteen entity-specific operation kinds. They lower to the six object-and-connection patch kinds used by the draft applier, document differ, and studio proposal wire. Geometry snaps to the 16px grid, and parentId supplied by the model is not authoritative because containment is reconciled from placement."
         }
       ]
     },
@@ -383,13 +299,13 @@
       },
       "text": [
         {
-          "insert": "Your hands stay on the canvas.",
+          "insert": "The camera frames what is painted.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " Dragging a box edits geometry directly. A reconcile pass then checks whether the stored intents still hold."
+          "insert": " renderBoardView measures object rectangles, routed polylines, connection-label chips, zoom-scaled section-title chips, and icon captions, then adds padding. renderSectionView retains every painted item intersecting its camera; boundary-crossing connections remain visible to the frame edge and are clipped there rather than dropped."
         }
       ]
     },
@@ -402,13 +318,13 @@
       },
       "text": [
         {
-          "insert": "Who owns what.",
+          "insert": "Diagnostics measure legibility; the model judges composition.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " The AI owns structure and intent. The solver owns every pixel. The router owns every line. You own anything, any time."
+          "insert": " Five always-on diagnostics check covered content, containment, broken edges, unreadable labels, and crowding against production geometry, and a committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Error-tier findings block a committed finalize in the edited scope. Warning-tier findings do not block, but the model must fix them or name each deliberate override in the finalize message."
         }
       ]
     },
@@ -421,7 +337,7 @@
       },
       "text": [
         {
-          "insert": "Pipeline home and sibling docs"
+          "insert": "Code home and architecture record"
         }
       ]
     },
@@ -432,42 +348,46 @@
       "props": {},
       "text": [
         {
-          "insert": "The pipeline lives in "
+          "insert": "The canvas-agent's document math lives under "
         },
         {
-          "insert": "packages/canvas-agent",
+          "insert": "packages/canvas-agent/src/board",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent"
+              "path": "packages/canvas-agent/src/board"
             }
           }
         },
         {
-          "insert": " (pure math under "
+          "insert": ": the digest, lints, document diff, and scope resolver. The model-facing prompt, context assembly, capability rosters, single aesthetic topic, and tool declarations live under "
         },
         {
-          "insert": "src/pipeline",
+          "insert": "packages/canvas-agent/src/agent",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline"
+              "path": "packages/canvas-agent/src/agent"
             }
           }
         },
         {
-          "insert": "); the boards in these docs regenerate with "
+          "insert": ". Named cameras and static rendering live under "
         },
         {
-          "insert": "bun run --cwd packages/canvas-agent generate:docs-boards",
+          "insert": "packages/canvas/src/render",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render"
+            }
           }
         },
         {
-          "insert": ". The old layout-lab playground is deleted; its interactive surface returns as the studio agent pages."
+          "insert": ". Embedded documentation boards are frozen artifacts; the studio agent pages are the interactive surface."
         }
       ]
     },
@@ -478,43 +398,16 @@
       "props": {},
       "text": [
         {
-          "insert": "The rest of this section: the language reference ("
+          "insert": "For the implementation record behind this front-door flow, continue to "
         },
         {
-          "insert": "10-language",
+          "insert": "40-kernel — Agent kernel architecture",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "), the rulebook ("
-        },
-        {
-          "insert": "20-rulebook",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), the worked example ("
-        },
-        {
-          "insert": "30-worked-example",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), and the kernel architecture ("
-        },
-        {
-          "insert": "40-kernel",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ")."
+          "insert": "."
         }
       ]
     }

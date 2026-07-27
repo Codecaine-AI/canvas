@@ -1,0 +1,781 @@
+{
+  "axis": "sd",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeScopeDiscipline",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "edits": [
+      {
+        "stage": "e1",
+        "verdict": {
+          "requested_changes": [
+            {
+              "requirement": "Represent production as two distinct regions with separate primary and secondary canary stages.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "The instruction states that production now runs in two regions."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[canary, observe, threshold, traffic]; objects.added[secondary-canary, secondary-observe, secondary-health]",
+                  "observation": "The existing rollout is explicitly relabeled as primary, while a separate secondary canary, observation stage, and regional health decision are added."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "Canary production section",
+                  "observation": "The production section visibly contains distinct primary and secondary rollout paths."
+                }
+              ],
+              "note": "Both production regions are structurally represented rather than merely mentioned in labels."
+            },
+            {
+              "requirement": "The primary-region canary must complete before a secondary-region canary begins.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2, clause 1",
+                  "observation": "The primary canary must complete before the secondary canary begins."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[r1]",
+                  "observation": "A forward connection runs from the primary traffic completion object to secondary-canary."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "connections[id=r1]",
+                  "observation": "The source is traffic, labeled 'Primary · 25% → 50% → 100%', and the destination is secondary-canary."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "Canary production, primary traffic chevron to secondary canary",
+                  "observation": "The visible arrow places the secondary canary after the primary reaches its rollout-completion chevron."
+                }
+              ],
+              "note": "The board communicates an explicit primary-to-secondary sequence."
+            },
+            {
+              "requirement": "The secondary-region canary must use the same revision as the completed primary-region rollout.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2, clause 2",
+                  "observation": "The secondary canary must begin with the same revision."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[id=secondary-canary].text",
+                  "observation": "The new process is labeled 'Secondary canary · same revision · 5%'."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[r1]",
+                  "observation": "The secondary canary is reached directly from the completed primary rollout, reinforcing the handoff rather than depicting an independent revision source."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "same-revision handoff",
+                  "observation": "The summary explicitly declares the same-revision handoff."
+                }
+              ],
+              "note": "The same-revision requirement is communicated by both the handoff topology and the secondary-canary label."
+            },
+            {
+              "requirement": "On a secondary-region failure without a shared business-metric breach, roll back only the secondary region.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3, main clause",
+                  "observation": "A secondary-region failure should normally roll back only that region."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "connections[id=r4, r5] and objects[id=business-breach, secondary-rollback]",
+                  "observation": "Secondary-health failure leads to the shared-business-metric decision; its 'no · regional only' branch leads to 'Rollback secondary region only'."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "right side of Canary production section",
+                  "observation": "The visible failure path descends from secondary health through the business-metric decision to the regional-only rollback."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "regional-only secondary rollback",
+                  "observation": "The summary declares this behavior."
+                }
+              ],
+              "note": "The regional rollback is represented as a real conditional path, not only as explanatory text."
+            },
+            {
+              "requirement": "If the shared business metric breaches after a secondary-region failure, roll back both regions to the last known-good image.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3, exception clause",
+                  "observation": "A shared business-metric breach escalates the response to both regions and the last known-good image."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[id=metrics, business-breach, rollback]",
+                  "observation": "The metric card identifies business success as cross-region, the decision asks whether the shared business metric breached, and the escalation target is labeled 'Both regions → last known-good image'."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[r6]",
+                  "observation": "The alternate branch from business-breach routes to the both-region rollback object."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "red escalation path across Canary production",
+                  "observation": "A red path visibly connects the shared-business decision to the both-region rollback process."
+                }
+              ],
+              "note": "Although the r6 branch has no explicit 'yes' label, it is the alternate branch to the explicitly labeled 'no' branch and is clearly routed to the requested escalation target."
+            }
+          ],
+          "changes": [
+            {
+              "object_id": "secondary-canary",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a secondary-region canary process labeled as using the same revision at 5%.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-canary]",
+                  "observation": "Added 'Secondary canary · same revision · 5%' inside production."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "sequential primary→secondary canaries with same-revision handoff",
+                  "observation": "The addition is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-observe",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added separate secondary-region observation windows.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-observe]",
+                  "observation": "Added 'Secondary observation windows' after the secondary canary."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "sequential primary→secondary canaries",
+                  "observation": "This stage is part of the declared secondary canary flow."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-health",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a decision for secondary-region health.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-health]",
+                  "observation": "Added the decision 'Secondary region healthy?'."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3",
+                  "observation": "A secondary-region failure branch plainly requires a secondary health/failure determination."
+                }
+              ]
+            },
+            {
+              "object_id": "business-breach",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a decision testing whether the shared business metric breached.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=business-breach]",
+                  "observation": "Added 'Shared business metric breached?'."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "shared-metric escalation",
+                  "observation": "The decision is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-rollback",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the secondary-region-only rollback action.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-rollback]",
+                  "observation": "Added 'Rollback secondary region only'."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "regional-only secondary rollback",
+                  "observation": "The action is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "page-frame",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Expanded the page frame width from 2352 to 2960.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=page-frame].geometry.width",
+                  "observation": "Width increased by 608 while height and origin remained unchanged."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "overall board frame",
+                  "observation": "The wider frame contains the expanded production section and displaced governance section."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The summary declares the overall widening accommodation."
+                }
+              ]
+            },
+            {
+              "object_id": "production",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Expanded the production section width from 736 to 1200.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=production].geometry.width",
+                  "observation": "The production section gained 464 pixels of width to hold the secondary-region flow."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The production widening is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "governance",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the governance section right from x=2032 to x=2560 without resizing it.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=governance].geometry.x",
+                  "observation": "The section shifted 528 pixels right to clear the widened production section."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance layout change is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "policy",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Expanded the policy section width from 2224 to 2912 to span the widened page.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=policy].geometry.width",
+                  "observation": "Only the policy container width changed; its policy contents did not move or change."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "Delivery invariants section",
+                  "observation": "The expanded container continues spanning the widened board."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "This is part of the declared board-width accommodation."
+                }
+              ]
+            },
+            {
+              "object_id": "canary",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing canary controller as the primary canary controller.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=canary].text",
+                  "observation": "Text changed from 'Canary controller · 5%' to 'Primary canary controller · 5%'."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "primary→secondary canaries",
+                  "observation": "The primary/secondary distinction is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "observe",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the original observation stage as primary observation windows.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=observe].text",
+                  "observation": "Text changed from generic consecutive observation windows to 'Primary observation windows'."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2",
+                  "observation": "Distinguishing the completed primary canary from the separate secondary canary directly supports the requested sequence."
+                }
+              ]
+            },
+            {
+              "object_id": "metrics",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled health signals as shared and identified business success as cross-region.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=metrics].text",
+                  "observation": "The card now says 'Shared health signals' and 'business success (cross-region)'."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "shared-metric escalation",
+                  "observation": "The shared metric semantics are declared."
+                }
+              ]
+            },
+            {
+              "object_id": "threshold",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing threshold decision as primary-region thresholds.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=threshold].text",
+                  "observation": "Text changed from 'Thresholds healthy?' to 'Primary thresholds healthy?'."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2",
+                  "observation": "The primary label distinguishes this decision from the newly added secondary-region health decision."
+                }
+              ]
+            },
+            {
+              "object_id": "traffic",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing rollout completion chevron as the primary rollout.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=traffic].text",
+                  "observation": "Text changed to 'Primary · 25% → 50% → 100%'."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "connections[id=r1]",
+                  "observation": "This primary completion object is the direct predecessor of the secondary canary."
+                }
+              ]
+            },
+            {
+              "object_id": "rollback",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the shared rollback action as returning both regions to the last known-good image.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=rollback].text",
+                  "observation": "Text changed from generic freeze/rollback to 'Both regions → last known-good image'."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "both-region rollback",
+                  "observation": "The both-region rollback is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "router",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the traffic-router object 528 pixels right with the governance section.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=router].geometry.x",
+                  "observation": "x changed from 2048 to 2576; all other properties remained unchanged."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "flags",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the feature-flags object 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=flags].geometry.x",
+                  "observation": "x changed from 2304 to 2832 with no semantic or style change."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "service-registry",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the service registry 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=service-registry].geometry.x",
+                  "observation": "x changed from 2112 to 2640 with all other properties preserved."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "consensus",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the consensus decision 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=consensus].geometry.x",
+                  "observation": "x changed from 2128 to 2656; its text, type, and size were preserved."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "audit",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the audit-log object 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=audit].geometry.x",
+                  "observation": "x changed from 2048 to 2576 with no semantic change."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "notify",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved operator notifications 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=notify].geometry.x",
+                  "observation": "x changed from 2304 to 2832 with no semantic or style change."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "evidence",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Moved the recorded-evidence card 528 pixels right with governance.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=evidence].geometry.x",
+                  "observation": "x changed from 2048 to 2576; its text and dimensions were preserved."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "widened production/governance layout",
+                  "observation": "The governance relocation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "r1",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a forward handoff from completed primary rollout to the secondary canary.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r1]",
+                  "observation": "Connects traffic to secondary-canary."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "sequential primary→secondary canaries with same-revision handoff",
+                  "observation": "The connection is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "r2",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the secondary-canary-to-secondary-observation flow.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r2]",
+                  "observation": "Connects secondary-canary to secondary-observe."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "sequential primary→secondary canaries",
+                  "observation": "This is part of the declared secondary canary flow."
+                }
+              ]
+            },
+            {
+              "object_id": "r3",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the secondary-observation-to-secondary-health flow.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r3]",
+                  "observation": "Connects secondary-observe to secondary-health."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3",
+                  "observation": "The secondary failure behavior requires a health result after its canary observation."
+                }
+              ]
+            },
+            {
+              "object_id": "r4",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the secondary health-failure branch to the shared-business-metric decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r4]",
+                  "observation": "A red connection labeled 'failure' runs from secondary-health to business-breach."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "shared-metric escalation",
+                  "observation": "The conditional escalation is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "r5",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the no-breach branch to secondary-region-only rollback.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r5]",
+                  "observation": "The branch labeled 'no · regional only' connects business-breach to secondary-rollback."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "regional-only secondary rollback",
+                  "observation": "The regional-only behavior is declared."
+                }
+              ]
+            },
+            {
+              "object_id": "r6",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the alternate shared-metric-breach branch to the both-region rollback action.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=r6]",
+                  "observation": "A red routed connection runs from business-breach to rollback, whose post-edit text specifies both regions and the last known-good image."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "shared-metric escalation to both-region rollback",
+                  "observation": "The escalation connection is explicitly declared."
+                }
+              ]
+            },
+            {
+              "object_id": "p7",
+              "object_kind": "connection",
+              "classification": "collateral_rework",
+              "what_changed": "Removed the existing 'healthy windows' label from the primary-threshold-to-primary-traffic connection.",
+              "impact": "minor",
+              "declared": false,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.changed[id=p7].label",
+                  "observation": "The label changed from 'healthy windows' to an empty string; endpoints and styling were unchanged."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "entire instruction",
+                  "observation": "The instruction does not request removal of this primary-path label, and the secondary addition did not structurally require its removal."
+                }
+              ]
+            },
+            {
+              "object_id": "g1",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Rerouted the governance handoff from primary traffic completion to a healthy secondary-region result and added the label 'healthy'.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.changed[id=g1]",
+                  "observation": "The source changed from traffic to secondary-health and the label changed from empty to 'healthy'; the destination remains consensus."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2",
+                  "observation": "Because the secondary canary follows primary completion, downstream governance plainly must occur after the secondary result rather than bypass it."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "sequential primary→secondary canaries",
+                  "observation": "The rerouting supports the declared sequential flow."
+                }
+              ]
+            }
+          ],
+          "collateral_change_count": 1,
+          "scope_summary": "The largest in-scope effect is the complete secondary-region canary and conditional rollback branch, including the primary-to-secondary same-revision handoff, regional-only rollback, and shared-metric escalation to both-region rollback. Widening production and moving governance intact were necessary accommodations for that added path. The only out-of-scope effect is removal of the existing p7 'healthy windows' label, a minor local loss of explicitness that does not alter the prior architecture.",
+          "scoring_status": "scored",
+          "exclusion_reason": null,
+          "score": 8
+        }
+      }
+    ],
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 30538,
+    "output_tokens": 6594
+  },
+  "flags": []
+}

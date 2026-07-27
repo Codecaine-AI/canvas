@@ -4,7 +4,6 @@ import type {
   KernelTraceSessionListResponse,
   KernelTraceSessionSummary,
 } from "@agent-kernel/viewer-core";
-import { navigate } from "../lib/navigation";
 import { AgentSurface } from "../components/AgentSurface";
 import { TraceDetailView } from "../components/TraceDetailView";
 import { traceSessionDetailPath, traceSessionListPath } from "../lib/kernel-api";
@@ -75,9 +74,6 @@ export function TracesPage() {
               session={session}
               selected={session.id === activeId}
               onSelect={() => setSelectedId(session.id)}
-              onOpen={() =>
-                navigate(`/session?id=${encodeURIComponent(session.id)}`)
-              }
             />
           ))}
         </div>
@@ -99,12 +95,10 @@ function SessionRow({
   session,
   selected,
   onSelect,
-  onOpen,
 }: {
   session: KernelTraceSessionSummary;
   selected: boolean;
   onSelect: () => void;
-  onOpen: () => void;
 }) {
   const title = session.topic ?? session.label;
   return (
@@ -128,20 +122,12 @@ function SessionRow({
           {session.updatedAt ?? session.createdAt ?? ""}
         </span>
       </button>
-      <div className="flex items-center gap-1.5 pr-2">
+      <div className="flex items-center pr-2">
         <span
           className={`rounded-[2px] border px-1.5 py-0.5 text-[10px] font-bold uppercase ${statusClass(session.status)}`}
         >
           {session.status}
         </span>
-        <button
-          type="button"
-          onClick={onOpen}
-          title="Open this session's detail page"
-          className="rounded-[2px] border border-border px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
-        >
-          Open
-        </button>
       </div>
     </div>
   );

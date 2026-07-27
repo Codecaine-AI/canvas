@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-07-24-eval-183037",
+  "status": "running",
+  "fingerprint": {
+    "repo": "3751f3e+dirty",
+    "model": "codex-lb/gpt-5.6-sol @ low",
+    "prompt": "e8dd8e1f",
+    "lints": "b7d1096d",
+    "styles": "5ff78f2e"
+  },
+  "previous_run": {
+    "run_id": "2026-07-24-eval-154843",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 10,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "judge_calibration": {
+    "gc": 7.5,
+    "intent": 7,
+    "targets": {
+      "gc": 7.5,
+      "intent": 7
+    }
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "SD",
+      "order": 4
+    },
+    {
+      "code": "PH",
+      "order": 5
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "backpressured-data-pipeline",
+      "label": "backpressured-data-pipeline",
+      "status": "graded",
+      "scores": {
+        "SF": 8.5,
+        "RC": 9,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": 0.5,
+        "RC": 1,
+        "RD": 0,
+        "SD": null,
+        "PH": -4
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "canary-delivery",
+      "label": "canary-delivery",
+      "status": "graded",
+      "scores": {
+        "SF": 5,
+        "RC": 9,
+        "RD": 6.5,
+        "SD": 9,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": -2,
+        "RC": 1,
+        "RD": -1,
+        "SD": 1,
+        "PH": -1
+      },
+      "flags": []
+    },
+    {
+      "id": "event-driven-orders",
+      "label": "event-driven-orders",
+      "status": "graded",
+      "scores": {
+        "SF": 8,
+        "RC": 9,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 10
+      },
+      "deltas": {
+        "SF": 2,
+        "RC": 3,
+        "RD": 0,
+        "SD": null,
+        "PH": 1.5
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "incident-response",
+      "label": "incident-response",
+      "status": "graded",
+      "scores": {
+        "SF": 8.5,
+        "RC": 8,
+        "RD": 6,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": 0.5,
+        "RC": -1,
+        "RD": -0.5,
+        "SD": null,
+        "PH": -1
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "monorepo-build-cache",
+      "label": "monorepo-build-cache",
+      "status": "graded",
+      "scores": {
+        "SF": 7.5,
+        "RC": 8,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": 1,
+        "RC": -1,
+        "RD": -0.5,
+        "SD": null,
+        "PH": 1
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "multi-region-failover",
+      "label": "multi-region-failover",
+      "status": "graded",
+      "scores": {
+        "SF": 7.5,
+        "RC": 8,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": 0.5,
+        "RC": 0,
+        "RD": 1,
+        "SD": null,
+        "PH": -1
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "oauth-session-lifecycle",
+      "label": "oauth-session-lifecycle",
+      "status": "graded",
+      "scores": {
+        "SF": 7.5,
+        "RC": 8,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 10
+      },
+      "deltas": {
+        "SF": 0,
+        "RC": 2,
+        "RD": 0,
+        "SD": null,
+        "PH": 2
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "webhook-delivery",
+      "label": "webhook-delivery",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 6,
+        "RD": 5.5,
+        "SD": 7,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": 0,
+        "RC": 0,
+        "RD": 0,
+        "SD": -2,
+        "PH": -2
+      },
+      "flags": []
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 7.44,
+      "RC": 8.13,
+      "RD": 6.31,
+      "SD": 8,
+      "PH": 6.5
+    },
+    "deltas": {
+      "SF": 0.31,
+      "RC": 0.63,
+      "RD": -0.12,
+      "SD": -0.5,
+      "PH": -0.56
+    },
+    "flags": []
+  },
+  "movements": [
+    {
+      "scenario": "backpressured-data-pipeline",
+      "axis": "RC",
+      "previous": 8,
+      "current": 9,
+      "delta": 1,
+      "evidence": "Thirty-five of thirty-six atomic requirements are fully represented. The remaining supporting requirement is partial because the quarantine branch is visually isolated but its non-blocking effect on known traffic is not stated explicitly. No system-defining requirement is absent or contradicted, so no cap applies."
+    },
+    {
+      "scenario": "backpressured-data-pipeline",
+      "axis": "PH",
+      "previous": 9,
+      "current": 5,
+      "delta": -4,
+      "evidence": "One of 10 tool calls failed validation, for a 10% failure rate. The longest failure run was 1. The malformed waypoint structure was corrected on the immediately following call, and the same error class did not recur. Session metadata reports no harness/session retry."
+    },
+    {
+      "scenario": "canary-delivery",
+      "axis": "SF",
+      "previous": 7,
+      "current": 5,
+      "delta": -2,
+      "evidence": "Most stated build, staging, canary, audit, notification, and operator-control behaviors are individually recoverable, including the same immutable artifact, gate failures, staging preservation, metric set, traffic ramp, telemetry pause, automatic rollback, and non-bypass constraints. Important details are softened around registry publication, approval ownership, active-revision agreement, and migration-controller compensation safety. More seriously, the reconstruction adds a second regional rollout and new rollback-scoping policy, contradicting the brief's single canary operational story. The main happy path remains recognizable, but the invented regional topology would lead to a materially different production design."
+    },
+    {
+      "scenario": "canary-delivery",
+      "axis": "RC",
+      "previous": 8,
+      "current": 9,
+      "delta": 1,
+      "evidence": "The board represents nearly the entire brief across protected build and supply-chain gates, staging promotion and failure preservation, production canary progression, automatic rollback, control-plane consistency, auditing, notifications, and telemetry-loss operator handling. The sole partial requirement is the missing migration-controller responsibility on the otherwise complete safe-compensation path."
+    },
+    {
+      "scenario": "canary-delivery",
+      "axis": "RD",
+      "previous": 7.5,
+      "current": 6.5,
+      "delta": -1,
+      "evidence": "Compared with intent-classification-2, this board offers stronger semantic grouping and richer operational detail, but loses equivalent finish through denser corridors, visibly truncated text, and less balanced use of the frame."
+    },
+    {
+      "scenario": "canary-delivery",
+      "axis": "SD",
+      "previous": 8,
+      "current": 9,
+      "delta": 1,
+      "evidence": "All atomic requests landed: the prior production flow was identified as primary, a separate secondary canary was added, the same revision is handed off only after primary completion, and secondary failure branches correctly between regional-only and both-region rollback. The largest in-scope effect is the new 3B secondary-region flow and its nine connections. There is no out-of-scope redesign; the only extra diff is the page-frame height increase, which is the minimum necessary accommodation to contain the added region. The commit summary declares the regional canaries and rollback policies represented by the diff."
+    },
+    {
+      "scenario": "canary-delivery",
+      "axis": "PH",
+      "previous": 6,
+      "current": 5,
+      "delta": -1,
+      "evidence": "Across 18 tool calls in the two scored sessions, there was 1 failed/rejected validation call, for an aggregate failure rate of 5.6%. Stage0 had 1 failure in 11 calls (9.1%); e1 had 0 failures in 7 calls. The invalid object type was corrected on the immediately following call, the longest failure run was 1, and no error class recurred. There were no session retries and no parse/validation fight."
+    },
+    {
+      "scenario": "event-driven-orders",
+      "axis": "SF",
+      "previous": 6,
+      "current": 8,
+      "delta": 2,
+      "evidence": "The reconstruction recovers the complete system shape, the primary happy path, all major components, branch outcomes, cancellation and ordinary compensation behavior, fulfillment progression, reliability controls, replay, and observability. It is strong enough for an actionable architecture discussion. The principal fidelity gap is the unreadable late-success/terminal-order rule. Additional supporting losses include the distinct intake idempotency-key semantic, explicit ownership of Packed and Shipped emission, tracking persistence, and the customer-facing send action of notifications. The reconstruction also introduces a potentially misleading Notification-consumer-to-projector dependency and several delivery/processing guarantees that are more specific than the brief."
+    },
+    {
+      "scenario": "event-driven-orders",
+      "axis": "RC",
+      "previous": 6,
+      "current": 9,
+      "delta": 3,
+      "evidence": "Weighted coverage is 64.5 of 66.0 (P = 0.9773). All system-defining requirements are represented except for the partial identifier-specificity in R3; notification triggers are complete, but R27 only implies rather than explicitly shows sending updates to a customer. No requirement is absent or contradicted, so no cap applies. The board is complete enough to serve as a visual acceptance record with two small clarity gaps."
+    },
+    {
+      "scenario": "event-driven-orders",
+      "axis": "PH",
+      "previous": 8.5,
+      "current": 10,
+      "delta": 1.5,
+      "evidence": "Mechanically clean. All 12 tool calls in the sole session succeeded: 11 apply_ops calls, including one look-only call, and one finalize call. There were no ERROR results, rejected finalize or resolve_request calls, repeated validation errors, or retries. Failure rate was 0/12 (0%), and the longest failure run was 0."
+    },
+    {
+      "scenario": "incident-response",
+      "axis": "RC",
+      "previous": 9,
+      "current": 8,
+      "delta": -1,
+      "evidence": "Weighted coverage is 35/38. Nearly the entire operational lifecycle is represented, including failure retry and learning follow-up. The high-confidence alert qualifier is absent, while alert-manager ownership of escalation and storage of the preserved timeline specifically in the incident record are partial. No absent or contradicted system-defining requirement triggers a cap."
+    },
+    {
+      "scenario": "incident-response",
+      "axis": "PH",
+      "previous": 6,
+      "current": 5,
+      "delta": -1,
+      "evidence": "There was 1 failed tool call out of 9 total tool calls, for an 11.1% failure rate. The rejected call was a schema-validation failure caused by an invalid object type. It was corrected on the immediately following call, with no repeated error class, no consecutive failure run beyond 1, no session retry, and no parse/validation fight."
+    },
+    {
+      "scenario": "monorepo-build-cache",
+      "axis": "SF",
+      "previous": 6.5,
+      "current": 7.5,
+      "delta": 1,
+      "evidence": "The reconstruction recovers the complete architectural shape and almost all critical happy-path and cache-miss behavior. Dependency ordering, ready-task scheduling, parallel graph branches, key composition, remote-cache lookup, isolated execution, immutable outputs, success-gated publication, and uncached failure are usable for engineering discussion. Fidelity falls short of full actionability because requester-bound failure logs are absent, the exact protected-build/untrusted-fork policy is softened into a generic provenance check, and same-key convergence/no-corruption semantics are truncated and partly inferred. No system-defining contradiction is present."
+    },
+    {
+      "scenario": "monorepo-build-cache",
+      "axis": "RC",
+      "previous": 9,
+      "current": 8,
+      "delta": -1,
+      "evidence": "The board represents nearly the entire requested monorepo build-and-cache contract, including graph expansion, dependency scheduling, elastic parallel execution, key construction, remote-cache lookup and restore, isolated miss execution, immutable artifacts, failure semantics, provenance, and same-key convergence. Three system-defining requirements are partial: the change detector lacks an explicit modified-files input (R2), success-before-publication is not explicitly ordered (R13), and the trust gate omits the specific untrusted-fork/protected-build boundary (R18). No requirement is absent or contradicted, so no cap applies."
+    },
+    {
+      "scenario": "monorepo-build-cache",
+      "axis": "PH",
+      "previous": 5,
+      "current": 6,
+      "delta": 1,
+      "evidence": "Mechanically clean: all 10 tool calls succeeded, including nine apply_ops calls and the finalize call. There were no ERROR results, rejected calls, retries, repeated error classes, or parse/schema-validation fights."
+    },
+    {
+      "scenario": "multi-region-failover",
+      "axis": "RD",
+      "previous": 5.5,
+      "current": 6.5,
+      "delta": 1,
+      "evidence": "Compared with the nearer intent-classification-2 reference, this board provides stronger region tinting and semantic color but lacks its spacious hierarchy, with denser labels and several harder-to-follow routed connections."
+    },
+    {
+      "scenario": "multi-region-failover",
+      "axis": "PH",
+      "previous": 6,
+      "current": 5,
+      "delta": -1,
+      "evidence": "Two schema-validation rejections occurred among 14 total tool calls, for a 14.3% failed-call rate. Each rejection was corrected on the immediately following call, the longest failure run was 1, and no error class repeated after being named. There were no session-level retries."
+    },
+    {
+      "scenario": "oauth-session-lifecycle",
+      "axis": "RC",
+      "previous": 6,
+      "current": 8,
+      "delta": 2,
+      "evidence": "The board covers nearly the entire OAuth session lifecycle and all stated failure/recovery paths. The main gaps are qualifier-level responsibility and endpoint details: provider user authentication is implicit, PKCE-verifier use in the exchange is not explicit, and the account mapping, login audit, and cookie issuance are not unambiguously assigned to the auth gateway. No requirement is absent or contradicted, so no cap applies."
+    },
+    {
+      "scenario": "oauth-session-lifecycle",
+      "axis": "PH",
+      "previous": 8,
+      "current": 10,
+      "delta": 2,
+      "evidence": "Mechanically clean: all 12 tool calls succeeded, including 10 editing calls, one explicit look-only call, and finalize. There were zero ERROR results, rejected calls, retries, or parse/schema-validation fights."
+    },
+    {
+      "scenario": "webhook-delivery",
+      "axis": "SD",
+      "previous": 9,
+      "current": 7,
+      "delta": -2,
+      "evidence": "All three atomic requests landed: endpoint-scoped configuration feeds an allowance gate, over-limit deliveries wait in dedicated storage without consuming retries, and resumed retained deliveries route through the same gate. The largest in-scope effect is insertion of a complete endpoint-allowance stage between the queue and signed delivery. Most downstream movement is necessary accommodation for that inserted stage. The largest out-of-scope effect is the rigid 368-pixel rightward shift of the Status & operations section and its four children; it preserves prior meaning but creates five minor collateral-rework rows."
+    },
+    {
+      "scenario": "webhook-delivery",
+      "axis": "PH",
+      "previous": 8,
+      "current": 6,
+      "delta": -2,
+      "evidence": "Across 15 tool calls, there was 1 failed/rejected call, for an arc-wide failure rate of 6.7%. The only failure was a waypoint schema-validation rejection in e1 turn 1; it was corrected on the immediately following call, with no repeated error class, no consecutive failure run beyond 1, and no metadata-level session retry."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

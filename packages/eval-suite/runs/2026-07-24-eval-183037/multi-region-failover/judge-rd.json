@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board provides stronger region tinting and semantic color but lacks its spacious hierarchy, with denser labels and several harder-to-follow routed connections.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 7,
+        "note": "The major traffic, regional, global-service, control, and failover bands use the frame broadly, though the upper and outer margins are somewhat oversized."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6,
+        "note": "Most nodes have adequate breathing room, but several chips and annotations are cramped against wires or nearby objects, especially around Region A, the global-data row, and the control-plane flows."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Distinct tinted containers clearly separate the traffic edge, three regional deployments, global data, control plane, and failover operations; the repeated regional panels are especially easy to scan."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Blue, orange, purple, green, and red are used consistently enough to distinguish routing, control, data, recovery, and failure concepts, although the number of simultaneous hues adds visual load."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "No crosshair junction glyphs appear, but several arrowheads terminate at bends or crowded boundaries, and some partially obscured labels make routing mechanics conspicuous."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The three regional panels and bottom recovery sequence hold strong registers, but density jumps sharply between sparse regional interiors and crowded global/control sections, producing uneven rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "The main top corridor is clean, but long inter-section runs, close parallel paths, boundary-hugging routes, and label collisions around the lower middle make several dependencies difficult to trace."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 second at 7.0, and the denser board under grade third at 6.5."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 749
+  },
+  "flags": []
+}

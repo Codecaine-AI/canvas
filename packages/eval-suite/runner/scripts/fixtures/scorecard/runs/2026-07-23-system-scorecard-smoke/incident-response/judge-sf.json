@@ -1,0 +1,10 @@
+{
+  "axis": "sf",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "score": 7,
+  "verdict": {
+    "overall_summary": "The system's primary flow is recoverable, with some secondary paths left ambiguous."
+  },
+  "flags": []
+}

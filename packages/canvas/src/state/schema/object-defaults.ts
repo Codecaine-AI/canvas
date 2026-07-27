@@ -43,7 +43,7 @@ export interface ObjectTypeDefaults {
  * The defaults table. Values are the long-standing per-type defaults (W2/W5
  * placement briefs); geometry x/y is 160,160 for the shape family with the
  * documented exceptions (rectangle/section backdrop at 80,80, sticky at
- * 180,180, annotation-marker at 220,220).
+ * 180,180).
  */
 export const OBJECT_TYPE_DEFAULTS: Readonly<
   Record<InteractiveCanvasObjectType, ObjectTypeDefaults>
@@ -52,7 +52,6 @@ export const OBJECT_TYPE_DEFAULTS: Readonly<
   process: { geometry: { x: 160, y: 160, width: 184, height: 96 }, shape: "rounded-rect", label: "Process" },
   decision: { geometry: { x: 160, y: 160, width: 160, height: 112 }, shape: "diamond", label: "Decision" },
   sticky: { geometry: { x: 180, y: 180, width: 176, height: 128 }, shape: "note", label: "Sticky" },
-  "annotation-marker": { geometry: { x: 220, y: 220, width: 40, height: 40 }, shape: "marker", label: "Annotation" },
   document: { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "document", label: "Document" },
   database: { geometry: { x: 160, y: 160, width: 140, height: 120 }, shape: "database", label: "Database" },
   // W2 — sections default large (they're meant to wrap other objects, so a

@@ -55,8 +55,8 @@ function fixtureLines(): unknown[] {
         content: [
           { type: "thinking", thinking: "Plan the move." },
           { type: "thinking", thinking: "Then render." },
-          { type: "toolCall", id: "call_a|fc_1", name: "propose_program", arguments: { program: "section 1" } },
-          { type: "toolCall", id: "call_b|fc_2", name: "render_draft", arguments: { pixelWidth: 100 } },
+          { type: "toolCall", id: "call_a|fc_1", name: "propose_plan", arguments: { program: "section 1" } },
+          { type: "toolCall", id: "call_b|fc_2", name: "render_map", arguments: { pixelWidth: 100 } },
         ],
       },
     },
@@ -66,7 +66,7 @@ function fixtureLines(): unknown[] {
       message: {
         role: "toolResult",
         toolCallId: "call_a|fc_1",
-        toolName: "propose_program",
+        toolName: "propose_plan",
         isError: false,
         timestamp: "2026-01-01T00:00:02.500Z",
         content: [{ type: "text", text: "applied" }],
@@ -78,7 +78,7 @@ function fixtureLines(): unknown[] {
       message: {
         role: "toolResult",
         toolCallId: "call_b|fc_2",
-        toolName: "render_draft",
+        toolName: "render_map",
         isError: false,
         timestamp: "2026-01-01T00:00:03.000Z",
         content: [
@@ -95,7 +95,7 @@ function fixtureLines(): unknown[] {
         timestamp: "2026-01-01T00:00:04.000Z",
         content: [
           { type: "text", text: "Looks good, one more tweak." },
-          { type: "toolCall", id: "call_c|fc_3", name: "propose_program", arguments: { program: "bad" } },
+          { type: "toolCall", id: "call_c|fc_3", name: "propose_plan", arguments: { program: "bad" } },
         ],
       },
     },
@@ -105,7 +105,7 @@ function fixtureLines(): unknown[] {
       message: {
         role: "toolResult",
         toolCallId: "call_c|fc_3",
-        toolName: "propose_program",
+        toolName: "propose_plan",
         isError: true,
         content: [{ type: "text", text: "parse error" }],
       },
@@ -181,7 +181,7 @@ describe("transcript route", () => {
     expect(turn0.toolCalls).toHaveLength(2);
     expect(turn0.toolCalls[0]).toEqual({
       toolUseId: "call_a|fc_1",
-      toolName: "propose_program",
+      toolName: "propose_plan",
       params: { program: "section 1" },
       resultText: "applied",
       isError: false,
@@ -189,7 +189,7 @@ describe("transcript route", () => {
     });
     expect(turn0.toolCalls[1]).toEqual({
       toolUseId: "call_b|fc_2",
-      toolName: "render_draft",
+      toolName: "render_map",
       params: { pixelWidth: 100 },
       resultText: "rendered",
       isError: false,
@@ -202,7 +202,7 @@ describe("transcript route", () => {
     expect(turn1.toolCalls).toEqual([
       {
         toolUseId: "call_c|fc_3",
-        toolName: "propose_program",
+        toolName: "propose_plan",
         params: { program: "bad" },
         resultText: "parse error",
         isError: true,

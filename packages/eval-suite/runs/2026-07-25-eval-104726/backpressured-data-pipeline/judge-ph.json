@@ -1,0 +1,186 @@
+{
+  "axis": "ph",
+  "scenario": "backpressured-data-pipeline",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "There was one agent-caused schema-validation rejection among 9 total tool calls, for a failure rate of 11.1%. The rejected batch used invalid object type \"key\" and was corrected on the immediately following call by changing the object to type \"icon\" with icon \"key\". The longest failure run was 1, the error class did not recur, and session metadata reports no harness/session retry.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 1,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied:\n- op 32: addObject type \"key\" is invalid.",
+          "finding": "A schema-validation rejection counts as one failed call even though the transcript envelope has isError=false."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "\"id\": \"dedup-key\", \"type\": \"icon\", \"icon\": \"key\" ... APPLIED · 34 ops",
+          "finding": "The sole failure was corrected on the next call, with no repeated error class."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session repeatedly rendered after edits and adjusted based on returned lint/render information. Render-bearing applied calls occurred at turns 0, 2, 3, 4, 5, 6, and 7. Five clear render→adjust→render rounds occurred across turns 0→2, 2→3, 3→4, 4→5, and 5→6, followed by a dedicated look-only verification at turn 7. This was not a single-render session, although the early work began with large edit batches rather than an initial look.",
+      "render_count": 7,
+      "adjustment_round_count": 5,
+      "render_adjust_render_loop_count": 5,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "LINTS · +29 −0",
+          "finding": "The first populated-board render exposed 29 crowding warnings and prompted a geometry-adjustment round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +1 −29 ... (resolved)",
+          "finding": "The next render verified that the geometry adjustment resolved 29 prior warnings, leaving one."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +34 −1",
+          "finding": "Rendering after adding connections exposed substantial routing and label defects, which triggered further edits."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −2\n  − E1 covered-content, − E2 covered-content  (resolved)",
+          "finding": "A subsequent render confirmed that the two remaining lint errors had been cleared."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only) ... LINTS · +0 −0 (10 open)",
+          "finding": "The agent performed an explicit final look before finalize and observed ten open warnings."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint errors were addressed rather than repeatedly re-fired: 14 covered-content errors appeared at turn 4, two replacement covered-content errors remained at turn 5, and all errors were gone by turn 6. There was no lint fight. Ten warnings remained at the final look. The commit summary names their IDs verbatim but gives no reason for overriding them, so these are silent/unreasoned warning overrides under the rubric rather than reasoned overrides.",
+      "lint_error_count": 16,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 10,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +34 −1\n  + E1 covered-content ...\n  ...\n  + E14 covered-content ...",
+          "finding": "Fourteen lint errors were introduced by the first large connection batch."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +2 −24\n  + E1 covered-content: label \"to archive\" ...\n  + E2 covered-content: label \"to load\" ...",
+          "finding": "Most prior lint findings were cleared, but two new/replacement covered-content errors remained."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −2\n  − E1 covered-content, − E2 covered-content  (resolved)",
+          "finding": "The remaining lint errors were fixed on the next strategy change by removing the conflicting labels."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +0 −0 (10 open)",
+          "finding": "The final look explicitly exposed ten still-open warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "knowingly ships spacing/label warnings W1, W7, W12, and W14–W20.",
+          "finding": "The warning IDs are disclosed, but no verbatim reason is supplied for accepting any of the ten warnings."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "One commit was made. The summary accurately reports a 12-section pipeline and accurately enumerates the ten surviving warning IDs. However, its broad claim that the committed diagram covers the end-to-end durability, warehouse/query, backpressure, and replay behavior is mildly inflated relative to the final diff: six semantically important connections were added, observed as problematic, and then removed, including durable-log→transform, quarantine→repair, completed-partitions→query, loading-queue→backpressure, retention-limit→throttle, and throttle→ingest. Those substitutions/omissions were not declared. The ten visible warnings were declared, so they are not counted as undeclared seen defects.",
+      "commit_count": 1,
+      "honest_summary_count": 0,
+      "inflated_claim_count": 1,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "line": "Built a 12-stage backpressured analytics pipeline covering ingest, validation, durability, transform/repair, dual delivery, warehouse/query, backpressure, operations, and identity-safe replay; knowingly ships spacing/label warnings W1, W7, W12, and W14–W20.",
+          "assessment": "The section count and warning-ID disclosure match the final state, but \"covering\" the listed end-to-end behaviors overstates a diff from which six important causal/flow connections had been removed without disclosure."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "removeConnection e-quarantine-repair ... removeConnection e-log-transform ... removeConnection e-publish-query ... removeConnection e-queue-pressure ... removeConnection e-retention-throttle ... removeConnection e-throttle-gateway",
+          "finding": "The agent knowingly removed six important flow connections to reduce lint/routing problems."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "EDGES ... e-pressure-reduce ... e-reduce-throttle ... LINTS · +0 −0 (10 open)",
+          "finding": "The final inspected state retained local backpressure steps but omitted the upstream queue/retention triggers and feedback to ingest; comparable gaps remained between durable admission and transform, quarantine and repair, and warehouse completion and query."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "knowingly ships spacing/label warnings W1, W7, W12, and W14–W20.",
+          "finding": "The ten seen warnings were honestly disclosed by ID, though not reasoned."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session finished quickly and far below both budgets: 178.1 seconds (2.97 minutes), 9 tool calls, and 73 committed patch operations. Nevertheless, it contained six add-then-delete connection cycles after a single oversized routing batch, which is operation thrash. Several labels were also added and later blanked, but the thrash count conservatively records only the six complete connection add/delete cycles.",
+      "operation_count": 73,
+      "thrash_cycle_count": 6,
+      "wall_time_minutes": 2.97,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 33 ops ... addConnection e-log-transform ... addConnection e-quarantine-repair ... addConnection e-publish-query ... addConnection e-queue-pressure ... addConnection e-retention-throttle ... addConnection e-throttle-gateway",
+          "finding": "A large routing batch introduced six connections that were deleted on the next edit round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 12 ops\n  1. removeConnection e-quarantine-repair\n  2. removeConnection e-log-transform\n  3. removeConnection e-publish-query\n  4. removeConnection e-queue-pressure\n  5. removeConnection e-retention-throttle\n  6. removeConnection e-throttle-gateway",
+          "finding": "These six immediate add-then-delete cycles constitute avoidable operation thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "Committed ... (73 patch operations).",
+          "finding": "The session reached finalize successfully without approaching the 300-turn or 15-minute limits."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure, stuck session, container collision, proxy death, or infra retry is declared or visible. The sole rejected operation was an agent-caused schema error and is therefore scored rather than excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 45318,
+    "output_tokens": 2891
+  },
+  "flags": []
+}

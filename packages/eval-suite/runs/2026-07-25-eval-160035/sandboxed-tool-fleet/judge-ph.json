@@ -1,0 +1,163 @@
+{
+  "axis": "ph",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean. Across the sole committed session, no tool call returned ERROR, no finalize or resolve request was rejected, and no retry or parse/schema-validation fight occurred. APPLIED lint warnings are not counted as failures.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · update_section page-frame",
+          "finding": "The first board mutation succeeded immediately; there was no failed-call run before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed: Built the fleet architecture from request through destruction ... (55 patch operations).",
+          "finding": "Finalize succeeded on its first attempt, with no blocked or rejected commit call."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two explicit whole-board looks formed one genuine look → edit → look loop: the first look exposed two warnings, the agent adjusted one of them, and the second look confirmed that only the deliberately accepted co-linear-route warning remained. However, most construction occurred during a long edit-heavy stretch before the first look, so perception was not interleaved throughout the session.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "DIAGNOSTICS · 0 errors · 2 warnings\n  W1 covered-content: label \"admitted\" chip on e_quota_warm sits within 16px of e_super_pool's path ...\n  W2 broken-edges: e_warm_prov and e_cold_prov run co-linear for 136px (0px apart)",
+          "finding": "This was the first explicit whole-board look, after the bulk of the board had already been constructed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · update_connection e_quota_warm\nDELTA\n  e_quota_warm  label admitted → \"\"\nLINTS · +0 −1\n  − W1 covered-content  (resolved)",
+          "finding": "The agent made a targeted adjustment based on the first render's diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "DIAGNOSTICS · 0 errors · 1 warning\n  W1 broken-edges: e_warm_prov and e_cold_prov run co-linear for 136px (0px apart)",
+          "finding": "The second whole-board look completed the render-adjust-render loop and verified that the covered-content warning was resolved."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively rather than fought. One error-class lint, E1 covered-content, was removed on the next relevant edit. Numerous spacing and label warnings were resolved through geometry changes, rerouting, or label removal. No identical lint re-fired for more than three consecutive turns without a strategy change. The sole final warning was overridden with a specific reason stated verbatim in the commit summary.",
+      "lint_error_count": 1,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 1,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "+ E1 covered-content: label \"no heartbeat / max age\" chip on e_l_destroy lies on e_l_i's path for 133px",
+          "finding": "A lint error was introduced while adding the direct destruction route."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · update_connection e_l_destroy\nDELTA\n  e_l_destroy  label \"no heartbeat / max age\" → \"\"\nLINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The error was fixed directly rather than repeatedly re-triggered."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "− W1 crowding  (resolved)",
+          "finding": "The agent responded to lifecycle-state crowding warnings by resizing and repositioning the state pills."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly ships W1, a short co-linear overlap between the warm-hit and cold-provision routes.",
+          "finding": "The only warning left at commit was explicitly and specifically reasoned in the summary; this is a good warning override under the rubric."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary matches the stage diff and final diagnostics. The diff contains the claimed request/admission, warm and cold placement, lifecycle, runtime/network controls, artifacts, quarantine, and operations elements. The summary also accurately declares the sole remaining warning rather than concealing it. No inflated claim or undeclared seen defect is evident.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "line": "Built the fleet architecture from request through destruction, including quotas, warm/cold placement, lifecycle enforcement, runtime/network controls, artifacts, host quarantine, and operations; knowingly ships W1, a short co-linear overlap between the warm-hit and cold-provision routes.",
+          "assessment": "Honest and specific. The stage diff contains objects and connections supporting every listed subsystem, and the final look reports exactly one broken-edges warning matching the declared short co-linear overlap."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "DIAGNOSTICS · 0 errors · 1 warning\n  W1 broken-edges: e_warm_prov and e_cold_prov run co-linear for 136px (0px apart)",
+          "finding": "The final render established the exact remaining defect that the subsequent commit summary disclosed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly ships W1, a short co-linear overlap between the warm-hit and cold-provision routes.",
+          "finding": "The limitation was declared rather than omitted or minimized into a generic statement."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "Operations were proportionate to a large architecture-diagram request. The committed board used 55 patch operations, with no build-delete-rebuild cycle, repeated NO-OP, or other material thrash. The session finalized in about 4.59 minutes, comfortably below the 15-minute and 300-turn budgets.",
+      "operation_count": 55,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 4.59,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "Adjusting section width and node spacing",
+          "finding": "The geometry updates were targeted lint remediation, not add-delete-rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed: ... (55 patch operations).",
+          "finding": "The session reached finalize successfully with a moderate operation count for the requested multi-subsystem diagram."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session remained usable, had zero retries, and ended with a successful finalize, so no session is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "The transcript ended normally after a successful commit rather than on a stuck tool start, proxy death, or harness failure."
+        }
+      ]
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 48733,
+    "output_tokens": 2368
+  },
+  "flags": []
+}

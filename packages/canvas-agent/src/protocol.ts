@@ -19,7 +19,19 @@ export interface AgentRect {
   height: number;
 }
 
-/** Structural mirror of InteractiveCanvasAnnotation (schema/annotations.ts). */
+/** Structural mirror of CanvasAnnotationReply (schema/annotations.ts). */
+export interface AgentSessionAnnotationReply {
+  id: string;
+  author: "human" | "agent" | "system";
+  body: string;
+  createdAt?: string;
+}
+
+/**
+ * Structural mirror of InteractiveCanvasAnnotation (schema/annotations.ts):
+ * one thread, whose `body`/`createdBy` are the opening post and whose
+ * `replies` carry everything said since, oldest first.
+ */
 export interface AgentSessionAnnotation {
   id: string;
   intent: string;
@@ -30,6 +42,7 @@ export interface AgentSessionAnnotation {
     | { kind: "region"; region: AgentRect };
   status?: string;
   createdBy?: "human" | "agent" | "system";
+  replies?: AgentSessionAnnotationReply[];
   [key: string]: unknown;
 }
 
@@ -67,12 +80,22 @@ export type AgentSessionStatus =
 
 /** Structural mirror of CanvasAgentPatchOperation (canvas/actions). */
 export type AgentPatchOperation =
+  | { type: "updateDescription"; description: string }
   | { type: "addObject"; object: Record<string, unknown> }
   | { type: "updateObject"; objectId: string; patch: Record<string, unknown> }
   | { type: "removeObject"; objectId: string }
   | { type: "addConnection"; connection: Record<string, unknown> }
   | { type: "updateConnection"; connectionId: string; patch: Record<string, unknown> }
-  | { type: "removeConnection"; connectionId: string };
+  | { type: "removeConnection"; connectionId: string }
+  // Annotation threads. A thread that disappears with its target rides the
+  // removeObject/removeConnection cascade, so there is no removal variant.
+  | { type: "addAnnotation"; annotation: Record<string, unknown> }
+  | { type: "appendAnnotationReply"; annotationId: string; reply: Record<string, unknown> }
+  | {
+      type: "setAnnotationStatus";
+      annotationId: string;
+      status: "open" | "applied" | "resolved";
+    };
 
 /** One committed proposal: the harness's final output for studio to apply. */
 export interface AgentProposal {
@@ -97,7 +120,7 @@ export interface AgentSessionState {
   baselineHash: string;
   /** Number of draft revisions proposed so far. */
   proposalCount: number;
-  /** The committed proposal, once the agent called commit. */
+  /** The committed proposal, once the agent finalized with outcome committed. */
   proposal: AgentProposal | null;
   error: string | null;
 }
@@ -151,7 +174,10 @@ export interface AgentDeltaEvent {
   lint: string;
 }
 
-/** Emitted when the agent asks for a render of the current draft. */
+/**
+ * Reserved: renders are pushed with apply results, so nothing emits this
+ * today; the type stays so existing SSE consumers keep compiling.
+ */
 export interface AgentRenderingEvent {
   type: "rendering";
   sessionId: string;
@@ -165,15 +191,28 @@ export interface AgentProposalReadyEvent {
   proposal: AgentProposal;
 }
 
+/**
+ * Emitted whenever the draft's annotation threads change — a thread opened, a
+ * reply appended, a status set. Carries the full thread list so studio can
+ * re-render the queue without re-reading the draft.
+ */
+export interface AgentAnnotationsEvent {
+  type: "annotations";
+  sessionId: string;
+  annotations: AgentSessionAnnotation[];
+}
+
 export interface AgentErrorEvent {
   type: "error";
   sessionId: string;
   message: string;
 }
 
+/** Emitted when the agent finalized with outcome none: no proposal was made. */
 export interface AgentAbandonedEvent {
   type: "abandoned";
   sessionId: string;
+  /** The agent's operator-facing explanation (the finalize message). */
   reason: string;
 }
 
@@ -190,6 +229,7 @@ export type AgentSessionEvent =
   | AgentDeltaEvent
   | AgentRenderingEvent
   | AgentProposalReadyEvent
+  | AgentAnnotationsEvent
   | AgentErrorEvent
   | AgentAbandonedEvent
   | AgentStatusEvent;

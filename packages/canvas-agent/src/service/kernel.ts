@@ -21,6 +21,7 @@ import {
 import { createKernel, type KernelInstance } from "@agent-kernel/kernel";
 
 import { boardStateLoader } from "../agent/loaders/board-state";
+import { capabilitiesLoader } from "../agent/loaders/capabilities";
 import { editorStateLoader } from "../agent/loaders/editor-state";
 import { styleGuideLoader } from "../agent/loaders/style-guide";
 import { userRequestsLoader } from "../agent/loaders/user-requests";
@@ -33,8 +34,35 @@ export const REPO_ROOT = resolve(import.meta.dir, "..", "..", "..", "..");
 export const AGENT_KERNEL_DIR = join(REPO_ROOT, ".agent-kernel");
 export const PI_SESSIONS_DIR = join(AGENT_KERNEL_DIR, "pi-sessions");
 export const PI_AGENT_DIR = join(REPO_ROOT, ".pi-agent");
-export const CANVASES_DIR = join(REPO_ROOT, "canvases");
+export const CANVASES_DIR =
+  Bun.env.CANVAS_AGENT_CANVASES_DIR ?? join(REPO_ROOT, "canvases");
 export const AGENT_CATALOG_DIR = join(import.meta.dir, "..", "agent", "catalog");
+
+export const AGENT_THINKING_LEVELS = [
+  "off",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+] as const;
+export type AgentThinkingLevel = (typeof AGENT_THINKING_LEVELS)[number];
+
+function agentThinkingOverride(raw: string | undefined): AgentThinkingLevel | undefined {
+  if (raw === undefined) return undefined;
+  if ((AGENT_THINKING_LEVELS as readonly string[]).includes(raw)) {
+    return raw as AgentThinkingLevel;
+  }
+  throw new Error(
+    `CANVAS_AGENT_THINKING must be one of ${AGENT_THINKING_LEVELS.join(", ")}; got ${
+      JSON.stringify(raw)
+    }.`,
+  );
+}
+
+export const AGENT_THINKING_OVERRIDE = agentThinkingOverride(
+  Bun.env.CANVAS_AGENT_THINKING,
+);
 
 /**
  * The `layout` model alias resolves to the model served by the codex-lb
@@ -77,7 +105,13 @@ export function createLayoutKernel(
       aliases: { layout: LAYOUT_MODEL },
       prices: { [LAYOUT_MODEL]: { inputPerMTok: 1.25, outputPerMTok: 10 } },
     },
-    loaders: [editorStateLoader, userRequestsLoader, styleGuideLoader, boardStateLoader],
+    loaders: [
+      editorStateLoader,
+      userRequestsLoader,
+      capabilitiesLoader,
+      styleGuideLoader,
+      boardStateLoader,
+    ],
     toolRuntime,
     piSessionsDir: PI_SESSIONS_DIR,
     piAgentDir: PI_AGENT_DIR,

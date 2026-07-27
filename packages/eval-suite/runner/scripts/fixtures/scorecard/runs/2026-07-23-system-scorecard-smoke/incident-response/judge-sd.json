@@ -1,0 +1,12 @@
+{
+  "axis": "sd",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "score": null,
+  "verdict": {
+    "skipped_reason": "e1: system scenario has no follow-up edits"
+  },
+  "flags": [
+    "SKIPPED(e1: system scenario has no follow-up edits)"
+  ]
+}

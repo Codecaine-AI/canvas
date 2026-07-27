@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 5.5,
+    "delta_sentence": "Compared with the nearer gc-decomp-harness reference, this board has similarly strong semantic regions and color coding but lacks its clear hierarchy, generous corridors, and disciplined edge routing.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The frame is substantially filled and the major horizontal bands are visible, but the lower half is packed tightly while the upper routing band contains conspicuous unused vertical space."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 5,
+        "note": "FAIL: Many nodes have adequate internal padding, but several edge-label chips sit against region boundaries or neighboring routes, and the dense lower transitions are difficult to read at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 7,
+        "note": "Tinted containers clearly distinguish global routing, governance, three regions, global data, and failover outcomes, providing real semantic grouping despite some overlapping section extents."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Blue, green, orange, purple, red, and teal are used consistently enough to distinguish infrastructure, success, control, failure, and data families, though the number of active hues adds visual load."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5,
+        "note": "FAIL: Several arrows terminate around bends and container boundaries in ways that expose routing mechanics, with floating-looking chips and ambiguous long-line joins near the regional and failover areas."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5.5,
+        "note": "FAIL: The three regional panels establish a useful register, but irregular node spacing, uneven vertical density, and the crowded lower-right outcome cluster weaken the overall rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 4.5,
+        "note": "FAIL: Long blue and orange perimeter routes traverse multiple sections, hug boundaries, and pass behind or alongside unrelated content, making several cross-region flows difficult to trace unambiguously."
+      }
+    ],
+    "rank_order_sanity_note": "The assigned scores and visual ordering agree: gc-decomp-harness ranks first, intent-classification-2 second, and the board under grade third because its strong grouping and color are outweighed by substantially denser routing and weaker finish."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 664
+  },
+  "flags": []
+}

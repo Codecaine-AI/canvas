@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-07-23-system-smoke",
+  "tier": "system",
+  "status": "completed",
+  "started_at": "2026-07-24T01:06:37.539Z",
+  "finished_at": "2026-07-24T01:15:36.292Z",
+  "scenarios": {
+    "incident-response": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 97825,
+      "finished_at": "2026-07-24T01:15:36.284Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

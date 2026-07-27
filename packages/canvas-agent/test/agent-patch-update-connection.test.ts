@@ -59,4 +59,29 @@ describe("handleApplyAgentPatch updateConnection", () => {
     expect(next.lastChange?.changedConnectionIds).toEqual(["connection"]);
     expect(next.history.past).toHaveLength(1);
   });
+
+  test("an explicit undefined waypoints patch clears stored steering", () => {
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [{ ...connect("connection", "a", "b"), waypoints: [[80, 112]] }],
+    );
+    const state = createInteractiveCanvasState(document);
+
+    const next = handleApplyAgentPatch(state, {
+      type: "canvas.applyAgentPatch",
+      operations: [
+        {
+          type: "updateConnection",
+          connectionId: "connection",
+          // The reducer merges connection patches by spread, so an own
+          // `waypoints: undefined` overwrites the stored steering — this is
+          // the clearing shape the document differ emits.
+          patch: { waypoints: undefined },
+        },
+      ],
+    });
+
+    expect(next.document.connections[0]!.waypoints).toBeUndefined();
+    expect(next.lastChange?.changedConnectionIds).toEqual(["connection"]);
+  });
 });

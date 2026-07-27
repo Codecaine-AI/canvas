@@ -18,14 +18,14 @@
         "b-r5-evidence-8"
       ],
       "props": {
-        "covers": "align pins peers to one shared centerline, even across section boundaries: register detection within 8px tolerance, median-center solving, and the order rules the solver must keep.",
+        "covers": "Alignment is a visual peer signal: centers share a line, exact geometry is copied from the digest, and the result is judged after each section batch rather than inferred by a register operation or lint.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "align register",
-          "cross-branch centerline",
-          "solver order",
-          "detectTiers"
+          "peer alignment",
+          "shared centerline",
+          "digest geometry",
+          "render judgment"
         ]
       }
     },
@@ -51,7 +51,7 @@
       },
       "text": [
         {
-          "insert": "Peers can be pinned to one shared centerline — even across section boundaries, which nested containers alone can never say."
+          "insert": "Place peers with their centers on one line. Alignment communicates equivalence only when it supports the section structure and the diagram's reading direction."
         }
       ]
     },
@@ -62,63 +62,26 @@
       "props": {},
       "text": [
         {
-          "insert": "Detect:",
+          "insert": "Mechanism:",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " three or more non-section nodes from at least two different leaf groups whose cross-axis centers sit within one register ("
+          "insert": " the "
         },
         {
-          "insert": "TIER_REGISTER_TOLERANCE",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/fit.ts",
-              "symbol": "TIER_REGISTER_TOLERANCE"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " = 8px; 4px is the corpus norm, 8 tolerates authoring noise). Both axes work: "
-        },
-        {
-          "insert": "align y",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is a horizontal row register, "
-        },
-        {
-          "insert": "align x",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " a column register. "
-        },
-        {
-          "insert": "Spell:",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "align y: 6 15",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " at the left margin, after the tree."
+          "insert": " asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly, copying exact peer coordinates and sizes from the latest BOARD digest. There is no align operation, automatic alignment pass, or dedicated alignment diagnostic."
         }
       ]
     },
@@ -129,13 +92,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Expand:",
+          "insert": "Build:",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " solved as constraints after the split pass — members shift onto the shared register, taken as the members' median center; a grid member's lattice register wins when present. Order rules the solver must keep:"
+          "insert": " choose the row or column that best serves the diagram's reading direction, place the peers in their section's content batch, and inspect the pushed render. Exact alignment is aesthetic guidance rather than a diagnostic, so the agent must judge the signal visually. Preserve these composition constraints:"
         }
       ]
     },
@@ -148,7 +111,7 @@
       },
       "text": [
         {
-          "insert": "Same-axis aligns are declared in ascending register order and may never leapfrog each other on expansion."
+          "insert": "Keep the diagram's reading order intact; alignment must not make arrows reverse direction or scramble the sequence."
         }
       ]
     },
@@ -161,7 +124,7 @@
       },
       "text": [
         {
-          "insert": "A member crossing a leaf-sibling on the way to its register carries that sibling along — leaf-internal order is inviolable."
+          "insert": "Keep each group inside its section. Cross-section visual alignment may reinforce a flow, but it never replaces section membership or grouping."
         }
       ]
     },
@@ -174,7 +137,7 @@
       },
       "text": [
         {
-          "insert": "Members pinned by an align on an axis are excluded from fan pitching and carry-along on that axis."
+          "insert": "Copy the chosen peer's exact digest center and pitch instead of estimating a nearby register; the 16px grid is only the quantization step."
         }
       ]
     },
@@ -185,33 +148,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: "
-        },
-        {
-          "insert": "gc-decomp-harness",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/gc-decomp-harness.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": "' hero row at y-center 392 (runner CLI, scheduler, worker pool, compile+validate, and the exact-match decision — spanning section-hero's subtrees); gc's y=604 register (pi-provider pill, toolpack, checkpoint — three different columns); intent-2's three global action registers (y-centers 1256 / 1480 / 1672, spanning both halves of the layered section); the researcher's doc row (y=880 across the Agent State and Sub Agents sections). Pitch along the register runs 192-320 between chip-sized members. The example-align board in the "
-        },
-        {
-          "insert": "align reference",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/10-language/70-align",
-              "label": "align"
-            }
-          }
-        },
-        {
-          "insert": " shows the cross-section register live."
+          "insert": "Verification: the latest result is the geometry truth, including after a fit_section call. Compare peer centers in the digest and judge a look's render before building the next section."
         }
       ]
     }

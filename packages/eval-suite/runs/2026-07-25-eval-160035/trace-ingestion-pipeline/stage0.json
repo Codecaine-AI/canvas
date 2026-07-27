@@ -1,0 +1,766 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-160035.trace-ingestion-pipeline",
+  "title": "2026-07-25-eval-160035 · trace-ingestion-pipeline",
+  "description": "# Distributed trace ingestion\nA left-to-right pipeline showing host agents surviving regional outages, authenticated ingest into a durable trace-partitioned log, trace assembly and tail sampling, unbiased metrics extraction, searchable storage, and alerting. Dashed paths show outage recovery and saturation controls; branches distinguish retained traces from metrics computed for every trace.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Distributed trace ingestion",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2208
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "edge",
+      "type": "section",
+      "text": "1 · Host instrumentation & outage survival",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 112,
+        "y": 144,
+        "width": 816,
+        "height": 480
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "section",
+      "text": "2 · Regional ingest gate",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1072,
+        "y": 144,
+        "width": 816,
+        "height": 480
+      }
+    },
+    {
+      "id": "log",
+      "type": "section",
+      "text": "3 · Durable trace log",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2032,
+        "y": 144,
+        "width": 816,
+        "height": 480
+      }
+    },
+    {
+      "id": "assembly",
+      "type": "section",
+      "text": "4 · Trace assembly",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 112,
+        "y": 784,
+        "width": 816,
+        "height": 512
+      }
+    },
+    {
+      "id": "sampling",
+      "type": "section",
+      "text": "5 · Tail sampling & fairness",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1072,
+        "y": 784,
+        "width": 816,
+        "height": 512
+      }
+    },
+    {
+      "id": "storage",
+      "type": "section",
+      "text": "6 · Storage & cardinality control",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2032,
+        "y": 784,
+        "width": 816,
+        "height": 512
+      }
+    },
+    {
+      "id": "metrics",
+      "type": "section",
+      "text": "7 · Unbiased metrics, query & alerting",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 112,
+        "y": 1456,
+        "width": 1296,
+        "height": 512
+      }
+    },
+    {
+      "id": "resilience",
+      "type": "section",
+      "text": "8 · Self-observation & saturation policy",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1552,
+        "y": 1456,
+        "width": 1296,
+        "height": 512
+      }
+    },
+    {
+      "id": "services",
+      "type": "icon",
+      "text": "Instrumented services",
+      "color": "blue",
+      "parentId": "edge",
+      "geometry": {
+        "x": 160,
+        "y": 240,
+        "width": 288,
+        "height": 96
+      },
+      "icon": "server"
+    },
+    {
+      "id": "agent",
+      "type": "process",
+      "text": "Batch + compress agent",
+      "color": "blue",
+      "parentId": "edge",
+      "geometry": {
+        "x": 560,
+        "y": 240,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "text": "Bounded disk buffer",
+      "color": "gray",
+      "parentId": "edge",
+      "geometry": {
+        "x": 352,
+        "y": 432,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "auth",
+      "type": "process",
+      "text": "Authenticate",
+      "color": "orange",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1120,
+        "y": 240,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "limit",
+      "type": "process",
+      "text": "Tenant rate limit",
+      "color": "orange",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1504,
+        "y": 240,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "validate",
+      "type": "decision",
+      "text": "Validate schema",
+      "color": "orange",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1392,
+        "y": 432,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "partition",
+      "type": "process",
+      "text": "Partition by trace ID",
+      "color": "teal",
+      "parentId": "log",
+      "geometry": {
+        "x": 2080,
+        "y": 240,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "durablelog",
+      "type": "database",
+      "text": "Durable span log",
+      "color": "teal",
+      "parentId": "log",
+      "geometry": {
+        "x": 2480,
+        "y": 240,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "lognote",
+      "type": "sticky",
+      "text": "**Trace locality**\nEvery span for one trace stays in the same partition.",
+      "color": "teal",
+      "parentId": "log",
+      "geometry": {
+        "x": 2240,
+        "y": 416,
+        "width": 384,
+        "height": 112
+      }
+    },
+    {
+      "id": "window",
+      "type": "predefined-process",
+      "text": "Completion window",
+      "color": "violet",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 160,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "restore",
+      "type": "process",
+      "text": "Restore parent-child tree",
+      "color": "violet",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 560,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "emit",
+      "type": "decision",
+      "text": "Root seen or window expired",
+      "color": "violet",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 320,
+        "y": 1088,
+        "width": 352,
+        "height": 112
+      }
+    },
+    {
+      "id": "sampler",
+      "type": "process",
+      "text": "Tail-based sampler",
+      "color": "yellow",
+      "parentId": "sampling",
+      "geometry": {
+        "x": 1120,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "keep",
+      "type": "process",
+      "text": "Errors · slow · small share",
+      "color": "green",
+      "parentId": "sampling",
+      "geometry": {
+        "x": 1520,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "floors",
+      "type": "sticky",
+      "text": "**Tenant fairness**\nRetention floors protect quiet tenants from noisy neighbors.",
+      "color": "yellow",
+      "parentId": "sampling",
+      "geometry": {
+        "x": 1280,
+        "y": 1088,
+        "width": 384,
+        "height": 112
+      }
+    },
+    {
+      "id": "cardinality",
+      "type": "process",
+      "text": "Cardinality guard",
+      "color": "green",
+      "parentId": "storage",
+      "geometry": {
+        "x": 2080,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "hot",
+      "type": "database",
+      "text": "Hot trace storage",
+      "color": "green",
+      "parentId": "storage",
+      "geometry": {
+        "x": 2480,
+        "y": 880,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "cold",
+      "type": "database",
+      "text": "Cold trace storage",
+      "color": "gray",
+      "parentId": "storage",
+      "geometry": {
+        "x": 2288,
+        "y": 1088,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "extract",
+      "type": "process",
+      "text": "Metrics extractor",
+      "color": "pink",
+      "parentId": "metrics",
+      "geometry": {
+        "x": 160,
+        "y": 1552,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "series",
+      "type": "database",
+      "text": "Rate · errors · latency",
+      "color": "pink",
+      "parentId": "metrics",
+      "geometry": {
+        "x": 560,
+        "y": 1552,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "query",
+      "type": "process",
+      "text": "Search · dependencies · series",
+      "color": "pink",
+      "parentId": "metrics",
+      "geometry": {
+        "x": 960,
+        "y": 1552,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "process",
+      "text": "Lag · occupancy · rates · drops",
+      "color": "red",
+      "parentId": "resilience",
+      "geometry": {
+        "x": 1600,
+        "y": 1552,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "shed",
+      "type": "decision",
+      "text": "Persistent saturation",
+      "color": "red",
+      "parentId": "resilience",
+      "geometry": {
+        "x": 2000,
+        "y": 1552,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "priority",
+      "type": "sticky",
+      "text": "**Load-shedding priority**\n1. Ordinary retention yields first\n2. Preserve error traces\n3. Preserve metrics extraction",
+      "color": "red",
+      "parentId": "resilience",
+      "geometry": {
+        "x": 2368,
+        "y": 1536,
+        "width": 448,
+        "height": 128
+      }
+    },
+    {
+      "id": "querynote",
+      "type": "sticky",
+      "text": "**Query & alert experience**\nTrace search · service dependencies · derived series · alerts linked to exemplar traces",
+      "color": "pink",
+      "parentId": "metrics",
+      "geometry": {
+        "x": 400,
+        "y": 1760,
+        "width": 640,
+        "height": 112
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "services",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "agent",
+        "anchor": "left"
+      },
+      "label": "spans",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "disk",
+        "anchor": "top"
+      },
+      "label": "buffer on outage",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "disk",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth",
+        "anchor": "left"
+      },
+      "label": "drain after recovery",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "agent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "auth",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "limit",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "limit",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "validate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "validate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "partition",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "partition",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "durablelog",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "durablelog",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "window",
+        "anchor": "top"
+      },
+      "label": "out of order spans",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "window",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "restore",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "restore",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "emit",
+        "anchor": "top"
+      },
+      "label": "complete / incomplete",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "emit",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "sampler",
+        "anchor": "left"
+      },
+      "label": "assembled trace",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "emit",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "top"
+      },
+      "label": "every trace",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "sampler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "keep",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "keep",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "cardinality",
+        "anchor": "left"
+      },
+      "label": "retained traces",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "cardinality",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "hot",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "hot",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "cold",
+        "anchor": "top"
+      },
+      "label": "age out",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "extract",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "series",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "series",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "query",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "telemetry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "shed",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "shed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "priority",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

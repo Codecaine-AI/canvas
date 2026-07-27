@@ -25,14 +25,12 @@ describe("real document helpers", () => {
     const section = box("section", 0, 0, 480, 320, "section");
     const child = { ...box("child", 64, 96), parentId: "section" };
     const sticky = { ...box("note", 64, 400, 160, 160, "sticky"), parentId: null };
-    const marker = box("marker", 300, 400, 32, 32, "annotation-marker");
-    const document = makeDocument([section, child, sticky, marker]);
+    const document = makeDocument([section, child, sticky]);
 
     expect(document.objects.map(kindOf)).toEqual([
       "section",
       "node",
       "sticky",
-      "annotationish",
     ]);
     expect(document.objects.find((object) => object.id === "child")).toMatchObject({
       parentId: "section",
@@ -42,22 +40,21 @@ describe("real document helpers", () => {
     expect(childrenOf(document, "section")[0]).toBe(child);
   });
 
-  test("finds the locked background section itself, preferring the root", () => {
+  test("finds the base section, preferring the parentless root", () => {
     const nested = {
       ...box("nested-frame", 32, 32, 320, 240, "section"),
-      locked: "background" as const,
       parentId: "page",
     };
     const page = {
       ...box("page", 0, 0, 640, 480, "section"),
-      locked: "background" as const,
     };
     const document = makeDocument([nested, page]);
     expect(pageFrameOf(document)).toBe(page);
     expect(pageFrameOf(document)?.geometry).toEqual({ x: 0, y: 0, width: 640, height: 480 });
 
-    const frameless = makeDocument([box("plain", 0, 0, 480, 320, "section")]);
-    expect(pageFrameOf(frameless)).toBeNull();
+    const plain = makeDocument([box("plain", 0, 0, 480, 320, "section")]);
+    expect(pageFrameOf(plain)?.id).toBe("plain");
+    expect(pageFrameOf(makeDocument([box("loose", 0, 0)]))).toBeNull();
   });
 
   test("children and siblings follow stored membership and normalize nullish roots", () => {
@@ -65,15 +62,13 @@ describe("real document helpers", () => {
     const a = { ...box("a", 32, 96), parentId: "section" };
     const b = { ...box("b", 240, 96), parentId: "section" };
     const sticky = { ...box("note", 448, 96, 160, 160, "sticky"), parentId: "section" };
-    const marker = { ...box("marker", 608, 96, 32, 32, "annotation-marker"), parentId: "section" };
     const outside = { ...box("outside", 900, 0), parentId: undefined };
-    const document = makeDocument([section, a, b, sticky, marker, outside]);
+    const document = makeDocument([section, a, b, sticky, outside]);
 
     expect(childrenOf(document, "section").map((object) => object.id)).toEqual([
       "a",
       "b",
       "note",
-      "marker",
     ]);
     expect(siblingsOf(document, "a").map((object) => object.id)).toEqual(["b"]);
     expect(siblingsOf(document, "outside").map((object) => object.id)).toEqual(["section"]);
@@ -166,6 +161,7 @@ describe("formatBoardDigest", () => {
         status: "open",
         body: "Keep this as the entry point",
         createdBy: "human",
+        replies: [],
       },
     ] satisfies InteractiveCanvasAnnotation[];
 
@@ -177,7 +173,7 @@ describe("formatBoardDigest", () => {
 
   test("renders placeholders for an empty board and a frameless board", () => {
     const frameless = formatBoardDigest(makeDocument([box("only", 0, 0)]));
-    expect(frameless).toContain("BOARD · no locked frame");
+    expect(frameless).toContain("BOARD · no base section");
     expect(frameless).toContain('  only rectangle "only" 0,0 160×96');
     expect(frameless).toContain("EDGES\n  (none)");
 
@@ -192,13 +188,13 @@ describe("formatBoardDigest", () => {
     expect(digest).toContain('  solo section "Solo" 0,0 480×320\n    (empty)');
   });
 
-  test("clips long text with a visible elided-length marker", () => {
+  test("renders long text in full, collapsing whitespace to one line", () => {
     const digest = formatBoardDigest(makeDocument([
       { ...box("wordy", 0, 0), text: `multi\nline ${"x".repeat(200)}` },
     ]));
-    expect(digest).toContain("multi line");
-    expect(digest).toMatch(/…\(\+\d+ch\)/);
-    expect(digest).not.toContain("x".repeat(100));
+    expect(digest).toContain(`multi line ${"x".repeat(200)}`);
+    expect(digest).not.toContain("\nline");
+    expect(digest).not.toMatch(/…\(\+\d+ch\)/);
   });
 });
 
@@ -221,5 +217,27 @@ describe("digest characterization", () => {
       ]),
     );
     expect(actual).toEqual(DIAGNOSTICS_TEXT_SNAPSHOTS);
+  });
+});
+
+describe("digest resilience", () => {
+  test("formats objects and edges with a missing text/label without throwing", () => {
+    const document = {
+      schemaVersion: 1,
+      id: "resilience",
+      title: "resilience",
+      mode: "diagram",
+      objects: [
+        { id: "a", type: "section", geometry: { x: 0, y: 0, width: 480, height: 320 } },
+        { id: "b", type: "process", geometry: { x: 32, y: 48, width: 184, height: 96 } },
+      ],
+      connections: [
+        { id: "w", from: { objectId: "a" }, to: { objectId: "b" } },
+      ],
+      annotations: [],
+    } as never;
+    const digest = formatBoardDigest(document);
+    expect(digest).toContain('a section ""');
+    expect(digest).toContain("EDGES");
   });
 });

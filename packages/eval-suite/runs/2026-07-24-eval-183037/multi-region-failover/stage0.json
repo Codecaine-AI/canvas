@@ -1,0 +1,1441 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-183037.multi-region-failover",
+  "title": "2026-07-24-eval-183037 · multi-region-failover",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-183037 · multi-region-failover",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 128,
+        "y": 80,
+        "width": 2976,
+        "height": 1856
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "edge",
+      "type": "section",
+      "text": "Global traffic edge",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 240,
+        "y": 128,
+        "width": 2672,
+        "height": 208
+      }
+    },
+    {
+      "id": "region-a",
+      "type": "section",
+      "text": "Region A · multi-AZ",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 480,
+        "width": 848,
+        "height": 656
+      }
+    },
+    {
+      "id": "region-b",
+      "type": "section",
+      "text": "Region B · multi-AZ",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1168,
+        "y": 480,
+        "width": 848,
+        "height": 656
+      }
+    },
+    {
+      "id": "region-c",
+      "type": "section",
+      "text": "Region C · multi-AZ",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2192,
+        "y": 480,
+        "width": 848,
+        "height": 656
+      }
+    },
+    {
+      "id": "global-data",
+      "type": "section",
+      "text": "Global data, events & payments",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 1152,
+        "width": 1376,
+        "height": 368
+      }
+    },
+    {
+      "id": "control",
+      "type": "section",
+      "text": "Global control plane & safety gates",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1680,
+        "y": 1136,
+        "width": 1392,
+        "height": 432
+      }
+    },
+    {
+      "id": "recovery",
+      "type": "section",
+      "text": "Failover, failback & operations",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 160,
+        "y": 1600,
+        "width": 2912,
+        "height": 304
+      }
+    },
+    {
+      "id": "users",
+      "type": "icon",
+      "text": "Customers",
+      "color": "blue",
+      "parentId": "edge",
+      "geometry": {
+        "x": 256,
+        "y": 192,
+        "width": 128,
+        "height": 96
+      },
+      "icon": "person"
+    },
+    {
+      "id": "dns",
+      "type": "icon",
+      "text": "Global DNS\nhealth routing",
+      "color": "blue",
+      "parentId": "edge",
+      "geometry": {
+        "x": 672,
+        "y": 192,
+        "width": 224,
+        "height": 96
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "edge-router",
+      "type": "process",
+      "text": "Anycast edge\nnearest healthy ingress",
+      "color": "blue",
+      "parentId": "edge",
+      "geometry": {
+        "x": 1264,
+        "y": 192,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "capacity",
+      "type": "predefined-process",
+      "text": "Capacity guard + load shedding",
+      "color": "orange",
+      "parentId": "edge",
+      "geometry": {
+        "x": 2080,
+        "y": 192,
+        "width": 320,
+        "height": 96
+      }
+    },
+    {
+      "id": "health-policy",
+      "type": "decision",
+      "text": "Region eligible?",
+      "color": "orange",
+      "parentId": "edge",
+      "geometry": {
+        "x": 2656,
+        "y": 176,
+        "width": 224,
+        "height": 128
+      }
+    },
+    {
+      "id": "a-ingress",
+      "type": "icon",
+      "text": "Ingress",
+      "color": "blue",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 160,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "a-web",
+      "type": "process",
+      "text": "Web app",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 384,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-api",
+      "type": "process",
+      "text": "API gateway",
+      "color": "blue",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 608,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-id",
+      "type": "internal-storage",
+      "text": "Identity cache",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 832,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-catalog",
+      "type": "process",
+      "text": "Catalog",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 160,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-cart",
+      "type": "process",
+      "text": "Cart",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 384,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-checkout",
+      "type": "process",
+      "text": "Checkout",
+      "color": "orange",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 608,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-order",
+      "type": "process",
+      "text": "Order coordinator",
+      "color": "orange",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 832,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-workers",
+      "type": "predefined-process",
+      "text": "Worker pool",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 160,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-bus",
+      "type": "icon",
+      "text": "Event bus",
+      "color": "violet",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 384,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "send"
+    },
+    {
+      "id": "a-redis",
+      "type": "database",
+      "text": "Redis cluster",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 608,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "a-collector",
+      "type": "icon",
+      "text": "Independent collector",
+      "color": "green",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 832,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "a-resilience",
+      "type": "sticky",
+      "text": "**Regional resilience**\n- service discovery\n- circuit breakers\n- AZ isolation\n- config/keys cached with expiry",
+      "color": "teal",
+      "parentId": "region-a",
+      "geometry": {
+        "x": 160,
+        "y": 1024,
+        "width": 800,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-ingress",
+      "type": "icon",
+      "text": "Ingress",
+      "color": "blue",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1184,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "b-web",
+      "type": "process",
+      "text": "Web app",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1408,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-api",
+      "type": "process",
+      "text": "API gateway",
+      "color": "blue",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1632,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-id",
+      "type": "internal-storage",
+      "text": "Identity cache",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1856,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-catalog",
+      "type": "process",
+      "text": "Catalog",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1184,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-cart",
+      "type": "process",
+      "text": "Cart",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1408,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-checkout",
+      "type": "process",
+      "text": "Checkout",
+      "color": "orange",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1632,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-order",
+      "type": "process",
+      "text": "Order coordinator",
+      "color": "orange",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1856,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-workers",
+      "type": "predefined-process",
+      "text": "Worker pool",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1184,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-bus",
+      "type": "icon",
+      "text": "Event bus",
+      "color": "violet",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1408,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "send"
+    },
+    {
+      "id": "b-redis",
+      "type": "database",
+      "text": "Redis cluster",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1632,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "b-collector",
+      "type": "icon",
+      "text": "Independent collector",
+      "color": "green",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1856,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "b-resilience",
+      "type": "sticky",
+      "text": "**Regional resilience**\n- service discovery\n- circuit breakers\n- AZ isolation\n- config/keys cached with expiry",
+      "color": "teal",
+      "parentId": "region-b",
+      "geometry": {
+        "x": 1184,
+        "y": 1024,
+        "width": 800,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-ingress",
+      "type": "icon",
+      "text": "Ingress",
+      "color": "blue",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2208,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "c-web",
+      "type": "process",
+      "text": "Web app",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2432,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-api",
+      "type": "process",
+      "text": "API gateway",
+      "color": "blue",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2656,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-id",
+      "type": "internal-storage",
+      "text": "Identity cache",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2880,
+        "y": 528,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-catalog",
+      "type": "process",
+      "text": "Catalog",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2208,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-cart",
+      "type": "process",
+      "text": "Cart",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2432,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-checkout",
+      "type": "process",
+      "text": "Checkout",
+      "color": "orange",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2656,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-order",
+      "type": "process",
+      "text": "Order coordinator",
+      "color": "orange",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2880,
+        "y": 720,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-workers",
+      "type": "predefined-process",
+      "text": "Worker pool",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2208,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-bus",
+      "type": "icon",
+      "text": "Event bus",
+      "color": "violet",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2432,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "send"
+    },
+    {
+      "id": "c-redis",
+      "type": "database",
+      "text": "Redis cluster",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2656,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      }
+    },
+    {
+      "id": "c-collector",
+      "type": "icon",
+      "text": "Independent collector",
+      "color": "green",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2880,
+        "y": 912,
+        "width": 128,
+        "height": 80
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "c-resilience",
+      "type": "sticky",
+      "text": "**Regional resilience**\n- service discovery\n- circuit breakers\n- AZ isolation\n- config/keys cached with expiry",
+      "color": "teal",
+      "parentId": "region-c",
+      "geometry": {
+        "x": 2208,
+        "y": 1024,
+        "width": 800,
+        "height": 80
+      }
+    },
+    {
+      "id": "catalog-store",
+      "type": "document-stack",
+      "text": "Globally replicated\ndocument store",
+      "color": "violet",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 160,
+        "y": 1200,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "cart-store",
+      "type": "database",
+      "text": "Multi-region KV\ncart owner + conditional writes",
+      "color": "violet",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 400,
+        "y": 1200,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "order-db",
+      "type": "database",
+      "text": "Regional SQL\norder + outbox atomic commit",
+      "color": "orange",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 672,
+        "y": 1200,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "cdc",
+      "type": "predefined-process",
+      "text": "CDC to warm replicas",
+      "color": "violet",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 944,
+        "y": 1200,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "event-bridge",
+      "type": "predefined-process",
+      "text": "Replication bridge\ndedupe · quarantine · replay",
+      "color": "violet",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 1200,
+        "y": 1200,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "payment-adapter",
+      "type": "process",
+      "text": "Global payment adapter\nidempotency key",
+      "color": "blue",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 160,
+        "y": 1392,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "pay-a",
+      "type": "icon",
+      "text": "Payment provider 1",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 512,
+        "y": 1392,
+        "width": 176,
+        "height": 96
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "pay-b",
+      "type": "icon",
+      "text": "Payment provider 2",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 800,
+        "y": 1392,
+        "width": 176,
+        "height": 96
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "dlq",
+      "type": "icon",
+      "text": "Regional DLQ\nmetadata → ops account",
+      "color": "gray",
+      "parentId": "global-data",
+      "geometry": {
+        "x": 1088,
+        "y": 1392,
+        "width": 240,
+        "height": 96
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "control-plane",
+      "type": "icon",
+      "text": "Global control plane",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 1696,
+        "y": 1200,
+        "width": 192,
+        "height": 96
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "signals",
+      "type": "document-stack",
+      "text": "Probes · collectors · DB lag · bus lag",
+      "parentId": "control",
+      "geometry": {
+        "x": 1968,
+        "y": 1200,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "classifier",
+      "type": "decision",
+      "text": "Failure scope",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 2288,
+        "y": 1184,
+        "width": 192,
+        "height": 128
+      }
+    },
+    {
+      "id": "traffic-remove",
+      "type": "process",
+      "text": "Remove region\nfrom new traffic",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 2560,
+        "y": 1200,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "lease",
+      "type": "icon",
+      "text": "Quorum writer lease\nsingle holder",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 2848,
+        "y": 1200,
+        "width": 192,
+        "height": 96
+      },
+      "icon": "key"
+    },
+    {
+      "id": "rpo-gate",
+      "type": "decision",
+      "text": "Lag within RPO?",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 1824,
+        "y": 1408,
+        "width": 192,
+        "height": 128
+      }
+    },
+    {
+      "id": "promote",
+      "type": "process",
+      "text": "Promote replica\nthen change DNS / edge",
+      "color": "green",
+      "parentId": "control",
+      "geometry": {
+        "x": 2144,
+        "y": 1408,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "audit",
+      "type": "database",
+      "text": "Immutable global audit",
+      "color": "violet",
+      "parentId": "control",
+      "geometry": {
+        "x": 2512,
+        "y": 1408,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "milestones",
+      "type": "icon",
+      "text": "Paging · incident · status",
+      "color": "orange",
+      "parentId": "control",
+      "geometry": {
+        "x": 2848,
+        "y": 1408,
+        "width": 192,
+        "height": 96
+      },
+      "icon": "bolt"
+    },
+    {
+      "id": "detect-loss",
+      "type": "process",
+      "text": "Detect + classify\nhome-region loss",
+      "color": "red",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 176,
+        "y": 1680,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "pause-checkout",
+      "type": "process",
+      "text": "Pause checkout\ncarts + catalog remain available",
+      "color": "orange",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 592,
+        "y": 1680,
+        "width": 288,
+        "height": 96
+      }
+    },
+    {
+      "id": "move-lease",
+      "type": "process",
+      "text": "Move writer lease\npromote + resume outbox",
+      "color": "green",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1056,
+        "y": 1680,
+        "width": 272,
+        "height": 96
+      }
+    },
+    {
+      "id": "rejoin",
+      "type": "process",
+      "text": "Rejoin as read replica\ncatch up + checksums + offsets",
+      "color": "blue",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1504,
+        "y": 1680,
+        "width": 304,
+        "height": 96
+      }
+    },
+    {
+      "id": "shadow",
+      "type": "process",
+      "text": "Shadow traffic\nbefore serving users",
+      "color": "blue",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1984,
+        "y": 1680,
+        "width": 256,
+        "height": 96
+      }
+    },
+    {
+      "id": "failback",
+      "type": "decision",
+      "text": "Controlled writer return?",
+      "color": "orange",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 2416,
+        "y": 1664,
+        "width": 256,
+        "height": 128
+      }
+    },
+    {
+      "id": "ops-rules",
+      "type": "sticky",
+      "text": "### Safety invariants\n- Checkout/order recovery outrank catalog personalization.\n- Existing order IDs retry safely; payment idempotency prevents duplicates.\n- Expired identity material blocks privileged writes, not public health checks.\n- Original-region health **never** implies writer failback; operator override is audited.",
+      "color": "yellow",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 2752,
+        "y": 1648,
+        "width": 288,
+        "height": 224
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-users-dns",
+      "from": {
+        "objectId": "users",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dns",
+        "anchor": "left"
+      },
+      "label": "resolve",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-dns-edge",
+      "from": {
+        "objectId": "dns",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "edge-router",
+        "anchor": "left"
+      },
+      "label": "nearest healthy",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-edge-capacity",
+      "from": {
+        "objectId": "edge-router",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "capacity",
+        "anchor": "left"
+      },
+      "label": "admit",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-capacity-policy",
+      "from": {
+        "objectId": "capacity",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "health-policy",
+        "anchor": "left"
+      },
+      "label": "tested limits",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-edge-a",
+      "from": {
+        "objectId": "edge-router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "a-ingress",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-edge-b",
+      "from": {
+        "objectId": "edge-router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "b-ingress",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-edge-c",
+      "from": {
+        "objectId": "edge-router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "c-ingress",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-a-path",
+      "from": {
+        "objectId": "a-ingress",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "a-api",
+        "anchor": "left"
+      },
+      "label": "web → API",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-a-checkout",
+      "from": {
+        "objectId": "a-api",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "a-checkout",
+        "anchor": "top"
+      },
+      "label": "checkout",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-checkout-order",
+      "from": {
+        "objectId": "a-checkout",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "a-order",
+        "anchor": "left"
+      },
+      "label": "home region",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-order-db",
+      "from": {
+        "objectId": "a-order",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "order-db",
+        "anchor": "top"
+      },
+      "label": "atomic order + outbox",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-db-cdc",
+      "from": {
+        "objectId": "order-db",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "cdc",
+        "anchor": "left"
+      },
+      "label": "changes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-cdc-bridge",
+      "from": {
+        "objectId": "cdc",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "event-bridge",
+        "anchor": "left"
+      },
+      "label": "cross-region events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-payment",
+      "from": {
+        "objectId": "a-order",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "payment-adapter",
+        "anchor": "top"
+      },
+      "label": "idempotent request",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-pay-a",
+      "from": {
+        "objectId": "payment-adapter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pay-a",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-pay-b",
+      "from": {
+        "objectId": "payment-adapter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pay-b",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-signals",
+      "from": {
+        "objectId": "signals",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "control-plane",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-classify",
+      "from": {
+        "objectId": "control-plane",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "classifier",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-remove",
+      "from": {
+        "objectId": "classifier",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "traffic-remove",
+        "anchor": "left"
+      },
+      "label": "region unhealthy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-rpo",
+      "from": {
+        "objectId": "classifier",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rpo-gate",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-lease",
+      "from": {
+        "objectId": "rpo-gate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "lease",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-promote",
+      "from": {
+        "objectId": "lease",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-audit",
+      "from": {
+        "objectId": "promote",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "audit",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-ops",
+      "from": {
+        "objectId": "audit",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "milestones",
+        "anchor": "left"
+      },
+      "label": "page · incident · status",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-rec1",
+      "from": {
+        "objectId": "detect-loss",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pause-checkout",
+        "anchor": "left"
+      },
+      "label": "full loss",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-rec2",
+      "from": {
+        "objectId": "pause-checkout",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "move-lease",
+        "anchor": "left"
+      },
+      "label": "RPO + quorum",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rec3",
+      "from": {
+        "objectId": "move-lease",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rejoin",
+        "anchor": "left"
+      },
+      "label": "region recovers",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rec4",
+      "from": {
+        "objectId": "rejoin",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "shadow",
+        "anchor": "left"
+      },
+      "label": "validated",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rec5",
+      "from": {
+        "objectId": "shadow",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "failback",
+        "anchor": "left"
+      },
+      "label": "separate operation",
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

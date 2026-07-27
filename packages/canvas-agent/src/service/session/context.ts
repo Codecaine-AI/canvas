@@ -1,10 +1,11 @@
 /**
  * Session-context building blocks: crop/geometry guards, the wrecked-document
  * gate, draft-only page-frame injection (every frameless board gets a
- * locked-background root section at session start), and the spawn snapshots —
- * <board_state> (digest + lint report), <editor_state> (scope frame,
+ * base root section at session start), and the spawn snapshots —
+ * <board_state> (description + digest + lint report), <editor_state> (scope frame,
  * selection, viewport), and <user_requests> (document + invoke annotations
- * merged into the read-only request queue; document wins on id collision).
+ * merged into the session's status-bearing request queue; document wins on
+ * id collision).
  */
 import type {
   CanvasGeometry,
@@ -23,8 +24,13 @@ import { formatBoardDigest } from "../../board/digest";
 import { formatDiagnostics, runDiagnostics } from "../../board/lints/run";
 import type { Diagnostic } from "../../board/lints";
 
+import { formatBoardDescription } from "../../agent/loaders/board-state";
 import type { EditorStateSnapshot } from "../../agent/loaders/editor-state";
-import { formatUserRequests } from "../../agent/loaders/user-requests";
+import {
+  formatRequestQueue,
+  type RequestAuthor,
+  type RequestQueueEntry,
+} from "../../agent/loaders/user-requests";
 import type { AgentSessionAnnotation } from "../../protocol";
 import type { LayoutSession } from "./store";
 
@@ -155,7 +161,7 @@ export function wreckedDocumentError(
   }
 
   for (const object of draft.objects) {
-    if (object.type === "section" || object.type === "annotation-marker") continue;
+    if (object.type === "section") continue;
     if (!gateRelevant(restrictToIds, object.id)) continue;
     const { geometry } = object;
     if (!finiteGeometry(geometry)
@@ -171,7 +177,6 @@ export function wreckedDocumentError(
   const overlapCandidates = draft.objects.filter((object) => (
     object.type !== "section"
     && object.type !== "sticky"
-    && object.type !== "annotation-marker"
   ));
   for (let index = 0; index < overlapCandidates.length; index += 1) {
     for (let otherIndex = index + 1; otherIndex < overlapCandidates.length; otherIndex += 1) {
@@ -194,8 +199,8 @@ export function wreckedDocumentError(
     }
   }
 
-  const lockedFrames = sections.filter((section) => section.locked === "background");
-  const pageFrame = lockedFrames.find((section) => section.parentId == null) ?? lockedFrames[0];
+  const rootSections = sections.filter((section) => section.parentId == null);
+  const pageFrame = rootSections.length === 1 ? rootSections[0] : undefined;
   if (pageFrame) {
     const frame = pageFrame.geometry;
     for (const object of draft.objects) {
@@ -209,7 +214,7 @@ export function wreckedDocumentError(
       );
       if (overflow > 16) {
         problems.push(
-          `object "${object.id}" extends ${round2(overflow)}px past locked page frame `
+          `object "${object.id}" extends ${round2(overflow)}px past base section `
           + `"${pageFrame.id}" (maximum 16px).`,
         );
       }
@@ -245,7 +250,6 @@ export function injectedPageFrame(
 ): InteractiveCanvasObject | null {
   if (document.objects.some((object) => (
     object.type === "section"
-    && object.locked === "background"
     && object.parentId == null
   ))) return null;
 
@@ -287,7 +291,6 @@ export function injectedPageFrame(
     parentId: null,
     geometry,
     style: { shape: "section" },
-    locked: "background",
   };
 }
 
@@ -297,11 +300,22 @@ export function draftWithPageFrame(document: InteractiveCanvasDocument): Interac
 }
 
 /**
- * The spawn-time <board_state> payload: full digest + full lint report over
- * the current draft, recomputed per run so refinements get a fresh snapshot.
+ * The spawn-time <board_state> payload: description + full (untruncated)
+ * digest + the full lint report over the current draft, recomputed per run so
+ * refinements get a fresh snapshot.
+ *
+ * The snapshot also seeds the session's diagnostic baseline, so the first
+ * operation reports a delta against what the model was shown at spawn rather
+ * than restating the whole report it already has.
  */
 export function boardStateSnapshot(session: LayoutSession): string {
-  return `${formatBoardDigest(session.draft)}\n\n${formatDiagnostics(runDiagnostics(session.draft))}`;
+  const diagnostics = runDiagnostics(session.draft);
+  session.lastDiagnostics = diagnostics;
+  return [
+    formatBoardDescription(session.draft.description),
+    formatBoardDigest(session.draft),
+    formatDiagnostics(diagnostics),
+  ].join("\n\n");
 }
 
 export function editorSnapshot(session: LayoutSession): EditorStateSnapshot {
@@ -320,19 +334,56 @@ export function editorSnapshot(session: LayoutSession): EditorStateSnapshot {
   };
 }
 
+function requestAuthor(value: unknown): RequestAuthor {
+  return value === "agent" || value === "system" ? value : "human";
+}
+
 /**
- * The <user_requests> queue: the draft document's annotations merged with the
- * invoke-time session annotations (document wins on id collision — it is the
- * stored truth; invoke-only entries follow).
+ * Sync the session's request queue from the draft document's annotation
+ * threads merged with the invoke-time session annotations (document wins on id
+ * collision — it is the stored truth; invoke-only entries follow). Existing
+ * entries keep their alias, status, and note while their thread content is
+ * re-read; new threads join the queue as `open` with the next R-number.
+ * Entries never leave the queue: a request stays the operator's request even
+ * if its annotation vanishes from the draft, and the agent must still dispose
+ * it.
  */
-export function userRequestsSnapshot(session: LayoutSession): string {
+export function syncSessionRequests(session: LayoutSession): void {
   const documentAnnotations = (session.draft.annotations
     ?? []) as unknown as AgentSessionAnnotation[];
   const documentIds = new Set(documentAnnotations.map((annotation) => annotation.id));
   const invokeOnly = (session.annotations ?? []).filter(
     (annotation) => !documentIds.has(annotation.id),
   );
-  return formatUserRequests([...documentAnnotations, ...invokeOnly]);
+  const byId = new Map(session.requests.map((entry) => [entry.annotationId, entry]));
+  for (const annotation of [...documentAnnotations, ...invokeOnly]) {
+    const existing = byId.get(annotation.id);
+    if (existing) {
+      existing.target = annotation.target;
+      existing.intent = annotation.intent;
+      existing.body = annotation.body;
+      existing.createdBy = requestAuthor(annotation.createdBy);
+      existing.replies = annotation.replies ?? [];
+      continue;
+    }
+    const entry: RequestQueueEntry = {
+      alias: `R${session.requests.length + 1}`,
+      annotationId: annotation.id,
+      target: annotation.target,
+      intent: annotation.intent,
+      body: annotation.body,
+      createdBy: requestAuthor(annotation.createdBy),
+      replies: annotation.replies ?? [],
+      status: "open",
+    };
+    session.requests.push(entry);
+    byId.set(annotation.id, entry);
+  }
+}
+
+/** The <user_requests> boot block: the status-bearing request queue. */
+export function userRequestsSnapshot(session: LayoutSession): string {
+  return formatRequestQueue(session.requests);
 }
 
 /** Digest + diagnostics over the current draft. */

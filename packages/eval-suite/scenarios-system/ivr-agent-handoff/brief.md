@@ -1,0 +1,7 @@
+# Phone support with AI agent handoff
+
+We need a diagram of how our phone support system handles inbound calls through a telephony trunk. Before speaking, the call controller queries customer records by caller number. A match loads account context for a personalized greeting; a failed or unmatched lookup gets a generic greeting. The controller captures recording and transcription consent up front. A short voice menu captures intent through speech, with keypad entry when recognition is unreliable or audio is noisy.
+
+Routine intents pass to the AI voice agent, which converses in real time, retrieves account facts through a read-only lookup service, and completes a limited set of authorized self-service actions. An unresolved request, an explicit request for a person, or the agent's own low-confidence risk flag transfers the call to a human queue. The transfer carries the transcript, account context, detected intent, and work already completed so the caller does not repeat themselves. If no human is available within the queue's wait target, the system offers a callback instead of holding indefinitely.
+
+Every call is recorded and transcribed for quality review. Unresolved calls and abandoned calls feed a review loop that adjusts which intents the AI voice agent may handle. The diagram should make clear how a call proceeds from customer lookup, consent, and intent capture through AI self-service or human transfer, including callback handling and the review loop.

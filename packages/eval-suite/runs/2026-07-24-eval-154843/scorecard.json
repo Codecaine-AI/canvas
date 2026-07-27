@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-07-24-eval-154843",
+  "status": "running",
+  "fingerprint": {
+    "repo": "3751f3e+dirty",
+    "model": "codex-lb/gpt-5.6-sol @ low",
+    "prompt": "722c816f",
+    "lints": "58f95eeb",
+    "styles": "2e172a72"
+  },
+  "previous_run": {
+    "run_id": "2026-07-23-system-smoke",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 10,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "judge_calibration": {
+    "gc": 7.5,
+    "intent": 7,
+    "targets": {
+      "gc": 7.5,
+      "intent": 7
+    }
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "SD",
+      "order": 4
+    },
+    {
+      "code": "PH",
+      "order": 5
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "backpressured-data-pipeline",
+      "label": "backpressured-data-pipeline",
+      "status": "graded",
+      "scores": {
+        "SF": 8,
+        "RC": 8,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 9
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "canary-delivery",
+      "label": "canary-delivery",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 8,
+        "RD": 7.5,
+        "SD": 8,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED"
+      ]
+    },
+    {
+      "id": "event-driven-orders",
+      "label": "event-driven-orders",
+      "status": "graded",
+      "scores": {
+        "SF": 6,
+        "RC": 6,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "incident-response",
+      "label": "incident-response",
+      "status": "graded",
+      "scores": {
+        "SF": 8,
+        "RC": 9,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": 1,
+        "RC": 0,
+        "RD": 1,
+        "SD": null,
+        "PH": 1
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "monorepo-build-cache",
+      "label": "monorepo-build-cache",
+      "status": "graded",
+      "scores": {
+        "SF": 6.5,
+        "RC": 9,
+        "RD": 7,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "multi-region-failover",
+      "label": "multi-region-failover",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 8,
+        "RD": 5.5,
+        "SD": null,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "oauth-session-lifecycle",
+      "label": "oauth-session-lifecycle",
+      "status": "graded",
+      "scores": {
+        "SF": 7.5,
+        "RC": 6,
+        "RD": 6.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "webhook-delivery",
+      "label": "webhook-delivery",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 6,
+        "RD": 5.5,
+        "SD": 9,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": []
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 7.13,
+      "RC": 7.5,
+      "RD": 6.44,
+      "SD": 8.5,
+      "PH": 7.06
+    },
+    "deltas": {
+      "SF": 1,
+      "RC": 0,
+      "RD": 1,
+      "SD": null,
+      "PH": 1
+    },
+    "flags": []
+  },
+  "movements": [
+    {
+      "scenario": "incident-response",
+      "axis": "SF",
+      "previous": 7,
+      "current": 8,
+      "delta": 1,
+      "evidence": "The reconstruction recovers the complete architecture and main alert-to-learning path: monitoring and deduplication, primary paging and timed secondary escalation, acknowledgement and triage, false-alarm termination, incident-record creation, service-owner investigation and mitigation, on-call coordination and public communication, monitoring-based verification, gated resolution, record preservation, review, and follow-up tracking. The principal fidelity gaps concern operational semantics rather than system shape: concurrency between on-call and service-owner work is only implied, and failed-verification ownership is not explicitly returned to the service owner. A few board-specific organizational claims are more specific than the brief. The result is highly usable for engineering discussion and captures every critical path, but the retry ownership detail prevents it from being fully implementation-exact."
+    },
+    {
+      "scenario": "incident-response",
+      "axis": "RD",
+      "previous": 5.5,
+      "current": 6.5,
+      "delta": 1,
+      "evidence": "Compared with the nearer intent-classification-2 reference, this board provides stronger phase grouping and more deliberate semantic color, but its truncated text, awkward wrapping, and congested retry routing make it visibly less finished."
+    },
+    {
+      "scenario": "incident-response",
+      "axis": "PH",
+      "previous": 5,
+      "current": 6,
+      "delta": 1,
+      "evidence": "Mechanically clean tool usage: all 12 tool calls succeeded, with no rejected calls, retries, or parse/validation fights."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

@@ -9,10 +9,24 @@ prompt), `scenarios/s*.md` (the fixtures),
 `docs/agent-eval/2026-07-22-rule-eval/PROTOCOL.md` and `V4-TRIAL-PROTOCOL.md`.
 
 **Execution policy (effective 2026-07-22 evening): Codex executors** — the Fable main
-thread is the orchestrator; every scenario runner, judge (including report-writing and
-trial-report sessions), and mechanical eval worker is a separate
-`codex exec -m gpt-5.6-sol -c model_reasoning_effort="xhigh"` invocation. Orchestration,
-scorecard assembly, and final acceptance stay with the Fable main thread.
+thread is the orchestrator; every worker is a separate `codex exec -m gpt-5.6-sol`
+invocation. Reasoning effort by role:
+
+- **The SUT itself is never an eval worker**: build/edit sessions always go through the
+  harness on :4820, which runs its own configured model (the `layout` alias →
+  gpt-5.6-sol, thinking per `agent.json` — currently `high`). Runners drive it via the
+  API only; the eval never bypasses or reconfigures it. The harness model + thinking
+  belong in the SUT fingerprint.
+- **Scenario runners, report-writing/trial-report sessions, and mechanical eval
+  workers**: `-c model_reasoning_effort="xhigh"`.
+- **Judges (rating sessions)**: `-c model_reasoning_effort="low"` — a judge applies a
+  fixed rubric to fixed inputs and emits a score plus its evidence contract; effort
+  stays low across runs so judge calibration is comparable.
+
+Orchestration, scorecard assembly, and final acceptance stay with the Fable main
+thread. The shape of a run: boot the scenario runners in parallel (each driving its
+harness sessions sequentially), fan out the rating sessions over every finished
+scenario, then assemble the final scorecard.
 
 Historical note (2026-07-22): runs before that evening, plus the first half of
 `2026-07-22-v5-initial`, used Fable agents under the prior Fable-only policy. Preserve
@@ -26,7 +40,7 @@ judge-calibration comparisons are only meaningful across like executors.
 Operational notes verified 2026-07-22:
 
 - Pipe each worker prompt on stdin:
-  `codex exec -m gpt-5.6-sol -c model_reasoning_effort="xhigh" - < prompt.md`.
+  `codex exec -m gpt-5.6-sol -c model_reasoning_effort="<per role, see policy>" - < prompt.md`.
 - Add `-c sandbox_workspace_write.network_access=true` for any worker that must reach
   `:4000` or `:4820`; the default sandbox blocks localhost.
 - Workers outside a git repo (for example, the IC blind judge's isolation directory)
@@ -94,9 +108,12 @@ runs/<run-id>/
 
 ## 3. Session execution (per scenario)
 
-One **runner agent** per scenario owns steps 2–4 and writes `s<N>/sessions.md`.
-Scenarios are independent — run up to 3 runner agents in parallel (5-wide worked in
-round 1, but judge fan-out later is the real parallelism; keep harness load sane).
+One **runner executor** per scenario — its own `codex exec -m gpt-5.6-sol -c
+model_reasoning_effort="xhigh"` invocation, per the execution policy above — owns
+steps 2–4 and writes `s<N>/sessions.md`.
+Scenarios are independent — boot all runner executors in parallel (8-wide; 5-wide is
+round-1 precedent). If the harness visibly queues or slows, drop to 3-wide. Sessions
+within a scenario stay strictly sequential.
 Sessions within a scenario are strictly sequential.
 
 For the build session and then each edit, in fixture order:
@@ -134,7 +151,8 @@ For the build session and then each edit, in fixture order:
 ## 4. Grading (per scenario, after its sessions finish)
 
 One judge per axis file in `axes/` (multi-role axes like IC get one session per role),
-each **instantiated from `axes/JUDGE-PROMPT.md` + its axis file** and isolated to the
+each its own `codex exec` invocation at `low` effort (execution policy above),
+**instantiated from `axes/JUDGE-PROMPT.md` + its axis file** and isolated to the
 axis file's "Sees" list — the runner never hand-writes judge prompts, and the active
 axis set is simply the axis files present in `axes/`. Grading for a finished scenario can start while
 other scenarios are still running sessions.

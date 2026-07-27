@@ -15,12 +15,12 @@
         "b-fullexample-read-5"
       ],
       "props": {
-        "covers": "A complete v3 program exercising splits, sections, a grid, align, fan, and arrows — with the solved board and a read-aloud walkthrough of what the program says.",
+        "covers": "A complete composition description exercising splits, sections, a grid, align, fan, and arrows — with the example board and a read-aloud walkthrough of what the notation says.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "full example",
-          "worked program",
+          "worked composition",
           "read-aloud"
         ]
       }
@@ -45,7 +45,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every statement in one program — the tree, both alignment facts, and the arrows block:"
+          "insert": "Every pattern in one compact description — the tree, both alignment facts, and the arrows block:"
         }
       ]
     },
@@ -68,7 +68,7 @@
       "children": [],
       "props": {
         "src": "./assets/canvases/example-main.canvas.json",
-        "title": "The full example, solved"
+        "title": "The full example board"
       }
     },
     "b-fullexample-read-5": {

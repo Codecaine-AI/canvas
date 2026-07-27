@@ -10,9 +10,19 @@ export interface AnnotationPinsProps {
   zoom?: number;
 }
 
+/** How many turns a thread carries, opening post included. */
+function threadLength(replyCount: number): number {
+  return replyCount + 1;
+}
+
 /**
- * Editor-only world-overlay chips for the open agent request queue. The stage
+ * Editor-only world-overlay chips for the open annotation threads. The stage
  * overlay parent is pointer-events:none, so each chip explicitly opts back in.
+ *
+ * Both directions of the conversation get a pin in the same language — same
+ * size, shape, and placement. A thread the user opened is the dark request
+ * chip; a thread the agent opened is a question back, so it reads amber with a
+ * `?`, findable at a glance without a second visual vocabulary.
  */
 export function AnnotationPins({
   document,
@@ -33,7 +43,7 @@ export function AnnotationPins({
   return (
     <div
       data-annotation-pins=""
-      aria-label="Agent request notes"
+      aria-label="Annotation threads"
       style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
     >
       {annotations.map((annotation) => {
@@ -41,14 +51,31 @@ export function AnnotationPins({
         const object = objectById.get(annotation.target.objectId)!;
         const selected =
           selection.kind === "annotation" && selection.annotationId === annotation.id;
+        const askedByAgent = annotation.createdBy === "agent";
+        const turns = threadLength(annotation.replies.length);
+        // A single-turn thread is just its post; author labels earn their
+        // place once there is a conversation to attribute.
+        const transcript = turns === 1
+          ? annotation.body
+          : [
+            `${askedByAgent ? "Agent" : "You"}: ${annotation.body}`,
+            ...annotation.replies.map((reply) =>
+              `${reply.author === "agent" ? "Agent" : "You"}: ${reply.body}`),
+          ].join("\n");
         return (
           <button
             key={annotation.id}
             type="button"
             data-annotation-pin={annotation.id}
-            aria-label={`Agent note: ${annotation.body}`}
+            data-annotation-author={annotation.createdBy}
+            data-annotation-turns={turns}
+            aria-label={
+              askedByAgent
+                ? `Agent question: ${annotation.body}`
+                : `Agent note: ${annotation.body}`
+            }
             aria-pressed={selected}
-            title={annotation.body}
+            title={transcript}
             onPointerDown={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -72,8 +99,8 @@ export function AnnotationPins({
               justifyContent: "center",
               border: selected ? "2px solid #0D99FF" : "2px solid #FFFFFF",
               borderRadius: 999,
-              background: "#1D1D1D",
-              color: "#FFFFFF",
+              background: askedByAgent ? "#E8A33D" : "#1D1D1D",
+              color: askedByAgent ? "#1D1D1D" : "#FFFFFF",
               boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               padding: 0,
               pointerEvents: "auto",
@@ -84,7 +111,7 @@ export function AnnotationPins({
               boxSizing: "border-box",
             }}
           >
-            ◉
+            {askedByAgent ? "?" : "◉"}
           </button>
         );
       })}

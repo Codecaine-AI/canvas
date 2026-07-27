@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.backpressured-data-pipeline",
+  "title": "2026-07-24-eval-154843 · backpressured-data-pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · backpressured-data-pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2240,
+        "height": 1400
+      },
+      "style": {
+        "shape": "section"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

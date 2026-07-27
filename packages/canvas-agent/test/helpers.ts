@@ -3,7 +3,87 @@ import { join } from "node:path";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
+import { resolveScope } from "../src/board/scope";
+import { createOpContext } from "../src/service/session/op-context";
+import { findOperationTool } from "../src/service/session/operations";
+import {
+  emitSessionEvent,
+  toolLook,
+  type LayoutSession,
+} from "../src/service/session";
+
 export const FIXTURES_DIR = join(import.meta.dir, "fixtures");
+
+export type OperationToolName =
+  | "add_section"
+  | "update_section"
+  | "remove_section"
+  | "add_sticky"
+  | "update_sticky"
+  | "remove_sticky"
+  | "add_object"
+  | "update_object"
+  | "remove_object"
+  | "add_connection"
+  | "update_connection"
+  | "remove_connection"
+  | "fit_section";
+
+/**
+ * The single seam between this suite and the operation surface. Retargeting
+ * the suite at the landed entry point is one edit here, for mutations and look.
+ */
+export function runOp(
+  session: LayoutSession,
+  tool: OperationToolName,
+  params: Record<string, unknown>,
+) {
+  const operation = findOperationTool(tool);
+  if (!operation) throw new Error(`Unknown operation tool: ${tool}`);
+  return operation.execute(params, {
+    currentSession: () => session,
+    context: createOpContext,
+    emit: emitSessionEvent,
+  });
+}
+
+export function look(session: LayoutSession, view?: string) {
+  return toolLook(session, view);
+}
+
+/** A bare in-memory layout session over a synthetic baseline (no kernel). */
+export function makeTestSession(
+  baseline: InteractiveCanvasDocument,
+  requestedScopeIds: string[],
+  overrides: Partial<LayoutSession> = {},
+): LayoutSession {
+  const scopeResolution = resolveScope(baseline, requestedScopeIds);
+  return {
+    id: "test-session",
+    canvasId: "synthetic",
+    canvasPath: "/tmp/test-session.canvas.json",
+    baseline,
+    baselineHash: "test-hash",
+    scopeResolution,
+    scopeIds: new Set(scopeResolution.scopeObjectIds),
+    draft: baseline,
+    proposalCount: 0,
+    proposal: null,
+    status: "running",
+    error: null,
+    instruction: "Edit the selected board objects",
+    annotations: [],
+    viewport: undefined,
+    containerId: "test-container",
+    sessionDir: "/tmp/test-session-dir",
+    events: [],
+    subscribers: new Set(),
+    runPromise: null,
+    requests: [],
+    lastDiagnostics: undefined,
+    ...overrides,
+  };
+}
 
 export interface FixtureProgram {
   file: string;

@@ -1,0 +1,192 @@
+{
+  "axis": "ph",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 10,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean. All 12 tool calls in the sole session succeeded: 11 apply_ops calls, including one look-only call, and one finalize call. There were no ERROR results, rejected finalize or resolve_request calls, repeated validation errors, or retries. Failure rate was 0/12 (0%), and the longest failure run was 0.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · 5 ops",
+          "finding": "The first operation batch applied successfully; there were no failures before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)",
+          "finding": "This was a legal look-only operation, not a failed call or a NO-OP pathology."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "Committed: Built the complete event-driven order fulfillment architecture with transactional outbox, durable bus, idempotent consumers, coordination, compensation, fulfillment, replay/DLQ, read model, and observability; knowingly shipping W1–W33 routing/crowding warnings from the dense cross-section reliability links.",
+          "finding": "Finalize succeeded on the first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Strong render-adjust-render practice. Every apply_ops turn returned a rendered image, and editing was repeatedly followed by another rendered state. The agent also requested a final whole-board look at turn 10 after its last adjustment round. There was no single-render session and no long looking-free editing stretch.",
+      "render_count": 11,
+      "adjustment_round_count": 9,
+      "render_adjust_render_loop_count": 9,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · 29 ops",
+          "finding": "The large connection pass produced a render and diagnostics, exposing 22 lint errors and 24 warnings for subsequent adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +0 −35\n  − E1 covered-content, − E2 covered-content, − E3 covered-content ... (resolved)",
+          "finding": "The agent adjusted the rendered connection layout by removing problematic labels and immediately rendered again, resolving all 22 errors from the preceding pass plus related warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +17 −2",
+          "finding": "A later reliability-edge edit was also rendered immediately, revealing a fresh set of routing and label diagnostics rather than being committed unseen."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LINTS · +0 −16\n  − E1 covered-content, − E2 covered-content, − E3 covered-content ... (resolved)",
+          "finding": "The agent performed another render-driven correction round, clearing the eight newly reported errors and associated warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · 0 ops\n  (no ops — look only)\n...\nLINTS · +0 −0 (33 open)",
+          "finding": "A final whole-board render was explicitly inspected before finalize; the remaining 33 warnings were visible and known."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Errors were fixed rather than fought. The transcript reported 22 error-severity lints after the main connection pass and eight error-severity lints after the reliability-link pass; each set was cleared in the next edit turn. No identical lint re-fired for more than three consecutive turns without a strategy change. The final 33 warnings were knowingly overridden with an explicit reason in the commit summary.",
+      "lint_error_count": 30,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 33,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +46 −0\n  + E1 covered-content ...\n  ...\n  + E22 covered-content ...",
+          "finding": "The first wired render introduced 22 error-severity covered-content diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LINTS · +0 −35\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content, − E9 covered-content, − E10 covered-content, − E11 covered-content, − E12 covered-content, − E13 covered-content, − E14 covered-content, − E15 covered-content, − E16 covered-content, − E17 covered-content, − E18 covered-content, − E19 covered-content, − E20 covered-content, − E21 covered-content, − E22 covered-content",
+          "finding": "All 22 errors were removed on the next call through a clear strategy change: removing labels that caused covered-content conflicts."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LINTS · +17 −2\n  + E1 covered-content ...\n  ...\n  + E8 covered-content ...",
+          "finding": "Adding cross-section reliability edges introduced eight new error-severity diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LINTS · +0 −16\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − E5 covered-content, − E6 covered-content, − E7 covered-content, − E8 covered-content ... (resolved)",
+          "finding": "All eight new errors were cleared on the immediately following call; no lint fight occurred."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly shipping W1–W33 routing/crowding warnings from the dense cross-section reliability links.",
+          "finding": "The remaining warning override was not silent: the summary identified the warning range and gave the reason, namely dense cross-section reliability routing."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary substantially matches the stage diff. The diff contains the claimed transactional outbox, durable bus, idempotency, coordination, compensation, fulfillment, replay/DLQ, read-model, and observability components. The summary also candidly declares the 33 warnings seen in the final render. No seen defect was concealed. The phrase 'routing/crowding warnings' is somewhat broad because the remaining warnings also include covered-content, broken-edge, and unreadable-label routing symptoms, but it is not materially dishonest.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "line": "Built the complete event-driven order fulfillment architecture with transactional outbox, durable bus, idempotent consumers, coordination, compensation, fulfillment, replay/DLQ, read model, and observability; knowingly shipping W1–W33 routing/crowding warnings from the dense cross-section reliability links.",
+          "assessment": "Honest and supported by the diff. Every named architectural area has corresponding added objects or connections, and the line explicitly acknowledges all 33 warnings visible in the final look."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "LINTS · +0 −0 (33 open)",
+          "finding": "The final render demonstrably showed 33 open warnings immediately before commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "knowingly shipping W1–W33 routing/crowding warnings from the dense cross-section reliability links.",
+          "finding": "The agent declared rather than concealed the final visible warning state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "transactional outbox, durable bus, idempotent consumers, coordination, compensation, fulfillment, replay/DLQ, read model, and observability",
+          "finding": "These claims match concrete stage-diff additions including outbox and relay, event-bus, consumer-contract and idempotency store, coordinator, compensation, fulfillment, DLQ and repair-replay, projector and query-api, and observability objects."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The work was completed in 198.9 seconds, well under the 15-minute session budget, and finalized after 12 tool calls. The 81 committed patch operations were proportionate to a large architecture diagram. There were no build-delete-rebuild object cycles or repeated NO-OPs. Label removal and three incremental query-api moves were render-driven lint correction, not abandonment or destructive thrash.",
+      "operation_count": 81,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 3.315,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · 15 ops",
+          "finding": "The batch removed labels implicated by the preceding diagnostics; this was a direct corrective strategy rather than add-delete-rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "APPLIED · 10 ops",
+          "finding": "A second targeted correction cleared the newly introduced reliability-edge errors and increased query-api spacing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "(81 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize without approaching the 300-turn limit; metadata reports 198.9 seconds of wall time."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No declared infrastructure failure occurred. The only session committed normally with zero retries, so no session was excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 10
+  },
+  "usage": {
+    "input_tokens": 48543,
+    "output_tokens": 3113
+  },
+  "flags": []
+}

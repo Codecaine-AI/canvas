@@ -1,0 +1,505 @@
+{
+  "container_id": "b4a95d07-8642-5d05-bad7-bab805c0c25e",
+  "pi_sessions": [
+    {
+      "piSessionId": "019f95e5-74ee-747e-a48e-6887e87c923d",
+      "file": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.jsonl",
+      "startedAt": "2026-07-24T20:51:10.702Z",
+      "userMessages": [
+        {
+          "text": "Customers can now set a delivery rate limit independently for each endpoint. Deliveries that exceed an endpoint's allowance must wait without consuming a retry attempt, and resuming a paused endpoint must still respect its limit.",
+          "timestamp": "2026-07-24T20:51:10.709Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-24T20:51:31.229Z",
+          "thinking": "**Planning rate limit integration in dispatch**\n\n**Rearranging dispatch flow layout vertically**\n\n**Planning wait-to-allowance loop connections**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BtLFBmuAycO5fMH2JxWrQ2JT|fc_0082aa20189c5aed016a63d04fbc3c8198b614138790d947be",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateObject",
+                    "objectId": "endpoint-config",
+                    "patch": {
+                      "text": "Subscriptions + endpoint config + rate limit"
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "rate-check",
+                      "type": "decision",
+                      "text": "Endpoint allowance available?",
+                      "color": "yellow",
+                      "geometry": {
+                        "x": 528,
+                        "y": 704,
+                        "width": 240,
+                        "height": 112
+                      }
+                    }
+                  },
+                  {
+                    "type": "addObject",
+                    "object": {
+                      "id": "rate-wait",
+                      "type": "database",
+                      "text": "Durable rate-limit wait queue",
+                      "color": "teal",
+                      "geometry": {
+                        "x": 512,
+                        "y": 912,
+                        "width": 272,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateObject",
+                    "objectId": "delivery-queue",
+                    "patch": {
+                      "geometry": {
+                        "x": 512,
+                        "y": 1088,
+                        "width": 272,
+                        "height": 96
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateSticky",
+                    "stickyId": "paused-note",
+                    "patch": {
+                      "text": "**Paused + rate-limited endpoints**\n\nResume releases paused deliveries into the endpoint allowance check. Over-limit deliveries wait durably without consuming a retry attempt.",
+                      "geometry": {
+                        "x": 512,
+                        "y": 1216,
+                        "width": 272,
+                        "height": 144
+                      }
+                    }
+                  }
+                ],
+                "view": "dispatch-sec"
+              },
+              "resultText": "APPLIED · 5 ops\n  1. updateObject endpoint-config\n  2. addObject rate-check\n  3. addObject rate-wait\n  4. updateObject delivery-queue\n  5. updateSticky paused-note\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-154843 · webhook-delivery\" white 80,112 1808×928\n    ingress-sec section \"1 · Durable ingress\" blue 96,176 320×720\n      product icon \"Product services\" blue 128,224 240×96 icon=cube\n      ingress-api process \"Internal ingress API\" blue 128,368 240×80\n      event-store database \"Durable event record\" teal 128,496 240×96\n      accepted pill \"Acknowledge accepted\" green 128,656 240×64\n      ingress-note sticky \"**Transactional boundary** Persist the exact event payload and stable event identity before returning success.\" 112,752 272×112\n    dispatch-sec section \"2 · Fan-out & endpoint state\" teal 496,176 320×672\n      dispatcher process \"Dispatcher\" teal 512,224 272×80\n      endpoint-config database \"Subscriptions + endpoint config + rate limit\" 512,352 272×96\n      paused-check decision \"Endpoint paused?\" yellow 528,496 240×112\n      rate-check decision \"Endpoint allowance available?\" yellow 528,704 240×112\n    delivery-sec section \"3 · Delivery & retry loop\" orange 896,160 480×816\n      worker process \"Delivery worker\" orange 912,224 192×80\n      secret icon \"Active tenant secret\" violet 1152,208 192×112 icon=key\n      sign predefined-process \"Sign exact payload\" orange 912,384 192×80\n      customer icon \"Customer endpoint\" blue 1152,368 192×112 icon=globe\n      response decision \"2xx response?\" yellow 912,544 192×112\n      complete pill \"Complete delivery\" green 1152,560 192×64\n      retry-scheduler process \"Retry scheduler\" orange 912,720 192×80\n      attempt-limit decision \"Attempts remain?\" yellow 1152,704 192×112\n      retry-note sticky \"**Retry policy** Timeouts, network failures, and retryable responses use exponential backoff + jitter with a maximum attempt count.\" 912,848 432×96\n    failure-sec section \"4 · Dead letters & replay\" red 1440,160 416×480\n      dlq database \"Dead-letter queue\" red 1456,224 176×96\n      operator icon \"Operator\" 1664,208 160×112 icon=person\n      inspect process \"Inspect delivery\" red 1456,384 176×80\n      replay process \"Replay delivery\" orange 1664,384 160×80\n      dlq-note sticky \"**Preserved intact** Payload · endpoint · attempt history · last error Replay keeps the original event identity.\" 1456,496 368×112\n    observe-sec section \"5 · Status & operations\" violet 1440,640 416×320\n      status-history document-stack \"Tenant-visible status history\" violet 1456,704 176×96\n      metrics icon \"Operational metrics\" violet 1664,688 160×112 icon=activity\n      outcomes-note sticky \"Every delivery attempt and outcome updates both views.\" white 1456,848 368×80\n    rate-wait database \"Durable rate-limit wait queue\" teal 512,912 272×96\n  delivery-queue database \"Durable delivery queue\" teal 512,1088 272×96\n  paused-note sticky \"**Paused + rate-limited endpoints** Resume releases paused deliveries into the endpoint allowance check. Over-limit deliveries wait durably without consuming a retry attempt.\" 512,1216 272×144\nEDGES\n  e1 product→ingress-api \"publish event\" blue anchors=bottom→top\n  e2 ingress-api→event-store \"persist transactionally\" blue anchors=bottom→top\n  e3 event-store→accepted \"durable\" green anchors=bottom→top\n  e4 event-store→dispatcher — teal anchors=right→left\n  e5 dispatcher→endpoint-config \"expand subscriptions\" teal anchors=bottom→top\n  e6 endpoint-config→paused-check \"active config\" teal anchors=bottom→top\n  e7 paused-check→delivery-queue \"no · enqueue delivery\" teal anchors=bottom→top\n  e8 paused-check→paused-note — dashed orange anchors=left→left\n  e9 delivery-queue→worker — orange anchors=right→left\n  e10 worker→secret \"load active secret\" violet anchors=right→left\n  e11 secret→sign — violet anchors=bottom→right\n  e12 sign→customer — orange anchors=right→left\n  e13 customer→response — blue anchors=bottom→right\n  e14 response→complete — green anchors=right→left\n  e15 response→retry-scheduler \"retryable / network\" orange anchors=bottom→top\n  e16 retry-scheduler→attempt-limit \"backoff + jitter\" orange anchors=right→left\n  e17 attempt-limit→worker — orange anchors=top→bottom wp=1296,672→1376,672→1376,336→1008,336\n  e18 attempt-limit→dlq — red anchors=right→left\n  e19 response→dlq — red anchors=right→left wp=1120,520→1392,520→1392,272\n  e20 operator→inspect — anchors=bottom→top\n  e21 inspect→replay — orange anchors=right→left\n  e22 replay→delivery-queue \"replay · same event identity\" orange anchors=left→right\n  e23 complete→status-history — violet anchors=right→left wp=1392,592→1392,752\n  e24 status-history→metrics — violet anchors=right→left\nDELTA\n  page-frame  80,112 1808×896 → 80,112 1808×928\n  dispatch-sec  496,176 320×752 → 496,176 320×672\n  endpoint-config  text \"Subscriptions + endpoint config\" → \"Subscriptions + endpoint config + rate limit\"\n  delivery-queue  512,672 → 512,1088\n  delivery-queue  parentId dispatch-sec → —\n  paused-note  512,800 272×96 → 512,1216 272×144\n  paused-note  text \"**Paused endpoints**\\n\\nDeliveries remain durable and are released only after resume.\" → \"**Paused + rate-limited endpoints**\\n\\nResume releases paused deliveries into the endpoint allowance check. Over-limit deliveries wait durably without consuming a retry attempt.\"\n  paused-note  parentId dispatch-sec → —\n  + rate-check  decision 528,704 240×112 \"Endpoint allowance available?\"\n  + rate-wait  database 512,912 272×96 \"Durable rate-limit wait queue\"\nBOARD DIFF · base → draft · 7 ops\n  addObject rate-check\n  addObject rate-wait\n  updateSection page-frame  resized\n  updateSection dispatch-sec  resized\n  updateObject endpoint-config  retexted\n  updateObject delivery-queue  moved\n  updateSticky paused-note  moved · resized · retexted\nDIAGNOSTICS · 3 errors · 31 warnings\n  E1 covered-content: label \"no · enqueue delivery\" chip on e7 lies on e9's path for 30px (move the label with a waypoint or reroute e9 so the chip owns its wire)\n  E2 containment: delivery-queue extends 144px past the base section page-frame (maximum 16px) (move delivery-queue inside the frame)\n  E3 containment: paused-note extends 320px past the base section page-frame (maximum 16px) (move paused-note inside the frame)\n  W1 broken-edges: e11 and e19 run co-linear for 120px (0px apart) (offset one route so the two wires read separately)\n  W2 broken-edges: e18 and e23 run co-linear for 160px (8px apart) (offset one route so the two wires read separately)\n  W3 broken-edges: connector e8 hugs the left border of dispatch-sec for 296px (route e8 clear of dispatch-sec's frame so it reads as a wire, not a border)\n  W4 broken-edges: connector e17 hugs the right border of delivery-sec for 336px (route e17 clear of delivery-sec's frame so it reads as a wire, not a border)\n  W5 broken-edges: connector e22 hugs the left border of observe-sec for 320px (route e22 clear of observe-sec's frame so it reads as a wire, not a border)\n  W6 unreadable-labels: label \"publish event\" chip on e1 (149×30px) bleeds onto ingress-api: 48px of corridor where the chip needs 62px (open the product↔ingress-api corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"ingress-api\",\"patch\":{\"geometry\":{\"x\":128,\"y\":384,\"width\":240,\"height\":80}}}\n  W7 unreadable-labels: label \"persist transactionally\" chip on e2 (245×30px) bleeds onto ingress-api and event-store: 48px of corridor where the chip needs 62px (open the ingress-api↔event-store corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"event-store\",\"patch\":{\"geometry\":{\"x\":128,\"y\":512,\"width\":240,\"height\":96}}}\n  W8 unreadable-labels: label \"expand subscriptions\" chip on e5 (216×30px) bleeds onto dispatcher and endpoint-config: 48px of corridor where the chip needs 62px (open the dispatcher↔endpoint-config corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"endpoint-config\",\"patch\":{\"geometry\":{\"x\":512,\"y\":368,\"width\":272,\"height\":96}}}\n  W9 unreadable-labels: label \"active config\" chip on e6 (149×30px) bleeds onto endpoint-config and paused-check: 48px of corridor where the chip needs 62px (open the endpoint-config↔paused-check corridor to ≥62px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"paused-check\",\"patch\":{\"geometry\":{\"x\":528,\"y\":512,\"width\":240,\"height\":112}}}\n  W10 unreadable-labels: label \"load active secret\" chip on e10 (197×30px) bleeds onto worker and secret: 48px of corridor where the chip needs 229px (open the worker↔secret corridor to ≥229px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"secret\",\"patch\":{\"geometry\":{\"x\":1344,\"y\":208,\"width\":192,\"height\":112}}}\n  W11 unreadable-labels: label \"backoff + jitter\" chip on e16 (178×30px) bleeds onto retry-scheduler and attempt-limit: 48px of corridor where the chip needs 210px (open the retry-scheduler↔attempt-limit corridor to ≥210px so the chip and its 16px margins fit)\n    suggested op: {\"type\":\"updateObject\",\"objectId\":\"attempt-limit\",\"patch\":{\"geometry\":{\"x\":1328,\"y\":704,\"width\":192,\"height\":112}}}\n  W12 crowding: product and ingress-api sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the product↔ingress-api corridor to ≥96px)\n  W13 crowding: ingress-api and event-store sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the ingress-api↔event-store corridor to ≥96px)\n  W14 crowding: event-store and accepted sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the event-store↔accepted corridor to ≥96px)\n  W15 crowding: dispatcher and endpoint-config sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the dispatcher↔endpoint-config corridor to ≥96px)\n  W16 crowding: endpoint-config and paused-check sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the endpoint-config↔paused-check corridor to ≥96px)\n  W17 crowding: worker and secret sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the worker↔secret corridor to ≥80px)\n  W18 crowding: worker and sign sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the worker↔sign corridor to ≥96px)\n  W19 crowding: secret and customer sit 48px apart stacked where wires and labels need ≥96px of corridor to route between them (open the secret↔customer corridor to ≥96px)\n  W20 crowding: sign and customer sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the sign↔customer corridor to ≥80px)\n  W21 crowding: sign and response sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the sign↔response corridor to ≥96px)\n  W22 crowding: customer and complete sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the customer↔complete corridor to ≥96px)\n  W23 crowding: response and complete sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the response↔complete corridor to ≥80px)\n  W24 crowding: response and retry-scheduler sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the response↔retry-scheduler corridor to ≥96px)\n  W25 crowding: complete and attempt-limit sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the complete↔attempt-limit corridor to ≥96px)\n  W26 crowding: retry-scheduler and attempt-limit sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the retry-scheduler↔attempt-limit corridor to ≥80px)\n  W27 crowding: dlq and operator sit 32px apart side by side where wires and labels need ≥80px of corridor to route between them (open the dlq↔operator corridor to ≥80px)\n  W28 crowding: dlq and inspect sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the dlq↔inspect corridor to ≥96px)\n  W29 crowding: operator and replay sit 64px apart stacked where wires and labels need ≥96px of corridor to route between them (open the operator↔replay corridor to ≥96px)\n  W30 crowding: inspect and replay sit 32px apart side by side where wires and labels need ≥80px of corridor to route between them (open the inspect↔replay corridor to ≥80px)\n  W31 crowding: status-history and metrics sit 32px apart side by side where wires and labels need ≥80px of corridor to route between them (open the status-history↔metrics corridor to ≥80px)\nROUTES\n  e7  anchors bottom→top  path 648,608 → 648,684 → 804,684 → 804,1068 → 648,1068 → 648,1088  through none\n  e8  anchors left→left  path 528,552 → 504,552 → 496,552 → 496,1288 → 488,1288 → 512,1288  through none\n  e9  anchors right→left  path 784,1136 → 808,1136 → 848,1136 → 848,264 → 888,264 → 912,264  through none\n  e22  anchors left→right  path 1664,424 → 1648,424 → 1648,484 → 1436,484 → 1436,1200 → 1224,1200 → 1224,1136 → 784,1136  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.9.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.9.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-24T20:51:44.505Z",
+          "thinking": "**Fixing layout containment and resizing**\n\n**Clarifying paused-resume flow and resizing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dPiLx9coxyzymKZJxfBArIY6|fc_0082aa20189c5aed016a63d05b7ed88198a3619ca0878c2843",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "page-frame",
+                    "patch": {
+                      "geometry": {
+                        "x": 80,
+                        "y": 112,
+                        "width": 1808,
+                        "height": 1328
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateSection",
+                    "sectionId": "dispatch-sec",
+                    "patch": {
+                      "geometry": {
+                        "x": 496,
+                        "y": 176,
+                        "width": 320,
+                        "height": 1232
+                      }
+                    }
+                  },
+                  {
+                    "type": "removeConnection",
+                    "connectionId": "e7"
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e25",
+                      "from": {
+                        "objectId": "paused-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "rate-check",
+                        "anchor": "top"
+                      },
+                      "label": "no / resumed",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e26",
+                      "from": {
+                        "objectId": "rate-check",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "delivery-queue",
+                        "anchor": "right"
+                      },
+                      "label": "yes · enqueue",
+                      "color": "teal",
+                      "waypoints": [
+                        816,
+                        760,
+                        848,
+                        760,
+                        848,
+                        1136
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e27",
+                      "from": {
+                        "objectId": "rate-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "rate-wait",
+                        "anchor": "top"
+                      },
+                      "label": "no · wait",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e28",
+                      "from": {
+                        "objectId": "rate-wait",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "rate-check",
+                        "anchor": "left"
+                      },
+                      "label": "allowance replenished",
+                      "style": "dashed",
+                      "color": "teal",
+                      "waypoints": [
+                        480,
+                        960,
+                        480,
+                        760
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e8",
+                    "patch": {
+                      "from": {
+                        "objectId": "paused-check",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "paused-note",
+                        "anchor": "left"
+                      },
+                      "waypoints": [
+                        464,
+                        552,
+                        464,
+                        1288
+                      ]
+                    }
+                  }
+                ],
+                "view": "dispatch-sec"
+              },
+              "resultText": "apply_ops rejected; no operations were applied:\n- op 5: waypoints must be an array of [x, y] finite-number pairs.\n- op 7: waypoints must be an array of [x, y] finite-number pairs.\n- op 8: waypoints must be an array of [x, y] finite-number pairs.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-24T20:51:53.212Z",
+          "thinking": "**Retrying array processing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Z27iOcTQQn8McUC9DmXzLSkn|fc_0082aa20189c5aed016a63d0626fc0819895428fbe4c21a6bf",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateSection",
+                    "sectionId": "page-frame",
+                    "patch": {
+                      "geometry": {
+                        "x": 80,
+                        "y": 112,
+                        "width": 1808,
+                        "height": 1328
+                      }
+                    }
+                  },
+                  {
+                    "type": "updateSection",
+                    "sectionId": "dispatch-sec",
+                    "patch": {
+                      "geometry": {
+                        "x": 496,
+                        "y": 176,
+                        "width": 320,
+                        "height": 1232
+                      }
+                    }
+                  },
+                  {
+                    "type": "removeConnection",
+                    "connectionId": "e7"
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e25",
+                      "from": {
+                        "objectId": "paused-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "rate-check",
+                        "anchor": "top"
+                      },
+                      "label": "no / resumed",
+                      "color": "teal"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e26",
+                      "from": {
+                        "objectId": "rate-check",
+                        "anchor": "right"
+                      },
+                      "to": {
+                        "objectId": "delivery-queue",
+                        "anchor": "right"
+                      },
+                      "label": "yes · enqueue",
+                      "color": "teal",
+                      "waypoints": [
+                        [
+                          816,
+                          760
+                        ],
+                        [
+                          848,
+                          760
+                        ],
+                        [
+                          848,
+                          1136
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e27",
+                      "from": {
+                        "objectId": "rate-check",
+                        "anchor": "bottom"
+                      },
+                      "to": {
+                        "objectId": "rate-wait",
+                        "anchor": "top"
+                      },
+                      "label": "no · wait",
+                      "color": "orange"
+                    }
+                  },
+                  {
+                    "type": "addConnection",
+                    "connection": {
+                      "id": "e28",
+                      "from": {
+                        "objectId": "rate-wait",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "rate-check",
+                        "anchor": "left"
+                      },
+                      "label": "allowance replenished",
+                      "style": "dashed",
+                      "color": "teal",
+                      "waypoints": [
+                        [
+                          480,
+                          960
+                        ],
+                        [
+                          480,
+                          760
+                        ]
+                      ]
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e8",
+                    "patch": {
+                      "from": {
+                        "objectId": "paused-check",
+                        "anchor": "left"
+                      },
+                      "to": {
+                        "objectId": "paused-note",
+                        "anchor": "left"
+                      },
+                      "waypoints": [
+                        [
+                          464,
+                          552
+                        ],
+                        [
+                          464,
+                          1288
+                        ]
+                      ]
+                    }
+                  }
+                ],
+                "view": "dispatch-sec"
+              },
+              "resultText": "APPLIED · 8 ops\n  1. updateSection page-frame\n  2. updateSection dispatch-sec\n  3. removeConnection e7\n  4. addConnection e25\n  5. addConnection e26\n  6. addConnection e27\n  7. addConnection e28\n  8. updateConnection e8\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-154843 · webhook-delivery\" white 80,112 1808×1328\n    ingress-sec section \"1 · Durable ingress\" blue 96,176 320×720\n      product icon \"Product services\" blue 128,224 240×96 icon=cube\n      ingress-api process \"Internal ingress API\" blue 128,368 240×80\n      event-store database \"Durable event record\" teal 128,496 240×96\n      accepted pill \"Acknowledge accepted\" green 128,656 240×64\n      ingress-note sticky \"**Transactional boundary** Persist the exact event payload and stable event identity before returning success.\" 112,752 272×112\n    dispatch-sec section \"2 · Fan-out & endpoint state\" teal 496,176 320×1232\n      dispatcher process \"Dispatcher\" teal 512,224 272×80\n      endpoint-config database \"Subscriptions + endpoint config + rate limit\" 512,352 272×96\n      paused-check decision \"Endpoint paused?\" yellow 528,496 240×112\n      delivery-queue database \"Durable delivery queue\" teal 512,1088 272×96\n      paused-note sticky \"**Paused + rate-limited endpoints** Resume releases paused deliveries into the endpoint allowance check. Over-limit deliveries wait durably without consuming a retry attempt.\" 512,1216 272×144\n      rate-check decision \"Endpoint allowance available?\" yellow 528,704 240×112\n      rate-wait database \"Durable rate-limit wait queue\" teal 512,912 272×96\n    delivery-sec section \"3 · Delivery & retry loop\" orange 896,160 480×816\n      worker process \"Delivery worker\" orange 912,224 192×80\n      secret icon \"Active tenant secret\" violet 1152,208 192×112 icon=key\n      sign predefined-process \"Sign exact payload\" orange 912,384 192×80\n      customer icon \"Customer endpoint\" blue 1152,368 192×112 icon=globe\n      response decision \"2xx response?\" yellow 912,544 192×112\n      complete pill \"Complete delivery\" green 1152,560 192×64\n      retry-scheduler process \"Retry scheduler\" orange 912,720 192×80\n      attempt-limit decision \"Attempts remain?\" yellow 1152,704 192×112\n      retry-note sticky \"**Retry policy** Timeouts, network failures, and retryable responses use exponential backoff + jitter with a maximum attempt count.\" 912,848 432×96\n    failure-sec section \"4 · Dead letters & replay\" red 1440,160 416×480\n      dlq database \"Dead-letter queue\" red 1456,224 176×96\n      operator icon \"Operator\" 1664,208 160×112 icon=person\n      inspect process \"Inspect delivery\" red 1456,384 176×80\n      replay process \"Replay delivery\" orange 1664,384 160×80\n      dlq-note sticky \"**Preserved intact** Payload · endpoint · attempt history · last error Replay keeps the original event identity.\" 1456,496 368×112\n    observe-sec section \"5 · Status & operations\" violet 1440,640 416×320\n      status-history document-stack \"Tenant-visible status history\" violet 1456,704 176×96\n      metrics icon \"Operational metrics\" violet 1664,688 160×112 icon=activity\n      outcomes-note sticky \"Every delivery attempt and outcome updates both views.\" white 1456,848 368×80\nEDGES\n  e1 product→ingress-api \"publish event\" blue anchors=bottom→top\n  e2 ingress-api→event-store \"persist transactionally\" blue anchors=bottom→top\n  e3 event-store→accepted \"durable\" green anchors=bottom→top\n  e4 event-store→dispatcher — teal anchors=right→left\n  e5 dispatcher→endpoint-config \"expand subscriptions\" teal anchors=bottom→top\n  e6 endpoint-config→paused-check \"active config\" teal anchors=bottom→top\n  e8 paused-check→paused-note — dashed orange anchors=left→left wp=464,552→464,1288\n  e9 delivery-queue→worker — orange anchors=right→left\n  e10 worker→secret \"load active secret\" violet anchors=right→left\n  e11 secret→sign — violet anchors=bottom→right\n  e12 sign→customer — orange anchors=right→left\n  e13 customer→response — blue anchors=bottom→right\n  e14 response→complete — green anchors=right→left\n  e15 response→retry-scheduler \"retryable / network\" orange anchors=bottom→top\n  e16 retry-scheduler→attempt-limit \"backoff + jitter\" orange anchors=right→left\n  e17 attempt-limit→worker — orange anchors=top→bottom wp=1296,672→1376,672→1376,336→1008,336\n  e18 attempt-limit→dlq — red anchors=right→left\n  e19 response→dlq — red anchors=right→left wp=1120,520→1392,520→1392,272\n  e20 operator→inspect — anchors=bottom→top\n  e21 inspect→replay — orange anchors=right→left\n  e22 replay→delivery-queue \"replay · same event identity\" orange anchors=left→right\n  e23 complete→status-history — violet anchors=right→left wp=1392,592→1392,752\n  e24 status-history→metrics — violet anchors=right→left\n  e25 paused-check→rate-check \"no / resumed\" teal anchors=bottom→top\n  e26 rate-check→delivery-queue \"yes · enqueue\" teal anchors=right→right wp=816,760→848,760→848,1136\n  e27 rate-check→rate-wait \"no · wait\" orange anchors=bottom→top\n  e28 rate-wait→rate-check \"allowance replenished\" dashed teal anchors=left→left wp=480,960→480,760\nDELTA\n  page-frame  80,112 1808×928 → 80,112 1808×1328\n  dispatch-sec  496,176 320×672 → 496,176 320×1232\n  delivery-queue  parentId — → dispatch-sec\n  paused-note  parentId — → dispatch-sec\n  rate-wait  parentId page-frame → dispatch-sec\n  e8  wp none → 464,552→464,1288\n  + e25  paused-check → rate-check\n  + e26  rate-check → delivery-queue\n  + e27  rate-check → rate-wait\n  + e28  rate-wait → rate-check\n  − e7\nBOARD DIFF · base → draft · 13 ops\n  addObject rate-check\n  addObject rate-wait\n  updateSection page-frame  resized\n  updateSection dispatch-sec  resized\n  updateObject endpoint-config  retexted\n  updateObject delivery-queue  moved\n  updateSticky paused-note  moved · resized · retexted\n  updateConnection e8  waypoints\n  removeConnection e7\n  addConnection e25\n  addConnection e26\n  addConnection e27\n  addConnection e28\nLINTS · +6 −4\n  + E1 covered-content: label \"yes · enqueue\" chip on e26 covers rate-wait (route e26 around rate-wait or move the label with a waypoint)\n  + E2 covered-content: label \"yes · enqueue\" chip on e26 lies on e9's path for 30px (move the label with a waypoint or reroute e9 so the chip owns its wire)\n  + E3 covered-content: label \"allowance replenished\" chip on e28 lies on e8's path for 30px (move the label with a waypoint or reroute e8 so the chip owns its wire)\n  + W1 covered-content: label \"no · wait\" chip on e27 sits within 16px of label \"allowance replenished\" chip on e28 (separate the two edges so the chips read as two labels)\n  + W2 broken-edges: e27 and e28 run anti-parallel between rate-check and rate-wait (use one edge with a both-ends arrow, or offset the two routes)\n  + W18 crowding: delivery-queue and rate-wait sit 80px apart stacked where wires and labels need ≥96px of corridor to route between them (open the delivery-queue↔rate-wait corridor to ≥96px)\n  − E1 covered-content, − E2 containment, − E3 containment, − W3 broken-edges  (resolved)\nROUTES\n  e8  anchors left→left  path 528,552 → 464,552 → 464,1288 → 512,1288  through none\n  e25  anchors bottom→top  path 648,608 → 648,704  through none\n  e26  anchors right→right  path 768,760 → 816,760 → 848,760 → 848,1136 → 784,1136  through none\n  e27  anchors bottom→top  path 648,816 → 648,912  through none\n  e28  anchors left→left  path 512,960 → 480,960 → 480,760 → 528,760  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.17.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.17.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-24T20:52:02.908Z",
+          "thinking": "**Removing unnecessary labels to fix errors**\n\n**Adjusting delivery queue position**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_GcwyS8lpH11u2b3u1ymDCZCt|fc_0082aa20189c5aed016a63d0725be48198942b336d35e25735",
+              "toolName": "apply_ops",
+              "params": {
+                "ops": [
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e26",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e28",
+                    "patch": {
+                      "label": ""
+                    }
+                  },
+                  {
+                    "type": "updateConnection",
+                    "connectionId": "e8",
+                    "patch": {
+                      "waypoints": [
+                        [
+                          448,
+                          552
+                        ],
+                        [
+                          448,
+                          1288
+                        ]
+                      ]
+                    }
+                  }
+                ],
+                "view": "dispatch-sec"
+              },
+              "resultText": "APPLIED · 3 ops\n  1. updateConnection e26\n  2. updateConnection e28\n  3. updateConnection e8\nBOARD  # indent = containment · id type \"text\" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type\n  page-frame section \"2026-07-24-eval-154843 · webhook-delivery\" white 80,112 1808×1328\n    ingress-sec section \"1 · Durable ingress\" blue 96,176 320×720\n      product icon \"Product services\" blue 128,224 240×96 icon=cube\n      ingress-api process \"Internal ingress API\" blue 128,368 240×80\n      event-store database \"Durable event record\" teal 128,496 240×96\n      accepted pill \"Acknowledge accepted\" green 128,656 240×64\n      ingress-note sticky \"**Transactional boundary** Persist the exact event payload and stable event identity before returning success.\" 112,752 272×112\n    dispatch-sec section \"2 · Fan-out & endpoint state\" teal 496,176 320×1232\n      dispatcher process \"Dispatcher\" teal 512,224 272×80\n      endpoint-config database \"Subscriptions + endpoint config + rate limit\" 512,352 272×96\n      paused-check decision \"Endpoint paused?\" yellow 528,496 240×112\n      delivery-queue database \"Durable delivery queue\" teal 512,1088 272×96\n      paused-note sticky \"**Paused + rate-limited endpoints** Resume releases paused deliveries into the endpoint allowance check. Over-limit deliveries wait durably without consuming a retry attempt.\" 512,1216 272×144\n      rate-check decision \"Endpoint allowance available?\" yellow 528,704 240×112\n      rate-wait database \"Durable rate-limit wait queue\" teal 512,912 272×96\n    delivery-sec section \"3 · Delivery & retry loop\" orange 896,160 480×816\n      worker process \"Delivery worker\" orange 912,224 192×80\n      secret icon \"Active tenant secret\" violet 1152,208 192×112 icon=key\n      sign predefined-process \"Sign exact payload\" orange 912,384 192×80\n      customer icon \"Customer endpoint\" blue 1152,368 192×112 icon=globe\n      response decision \"2xx response?\" yellow 912,544 192×112\n      complete pill \"Complete delivery\" green 1152,560 192×64\n      retry-scheduler process \"Retry scheduler\" orange 912,720 192×80\n      attempt-limit decision \"Attempts remain?\" yellow 1152,704 192×112\n      retry-note sticky \"**Retry policy** Timeouts, network failures, and retryable responses use exponential backoff + jitter with a maximum attempt count.\" 912,848 432×96\n    failure-sec section \"4 · Dead letters & replay\" red 1440,160 416×480\n      dlq database \"Dead-letter queue\" red 1456,224 176×96\n      operator icon \"Operator\" 1664,208 160×112 icon=person\n      inspect process \"Inspect delivery\" red 1456,384 176×80\n      replay process \"Replay delivery\" orange 1664,384 160×80\n      dlq-note sticky \"**Preserved intact** Payload · endpoint · attempt history · last error Replay keeps the original event identity.\" 1456,496 368×112\n    observe-sec section \"5 · Status & operations\" violet 1440,640 416×320\n      status-history document-stack \"Tenant-visible status history\" violet 1456,704 176×96\n      metrics icon \"Operational metrics\" violet 1664,688 160×112 icon=activity\n      outcomes-note sticky \"Every delivery attempt and outcome updates both views.\" white 1456,848 368×80\nEDGES\n  e1 product→ingress-api \"publish event\" blue anchors=bottom→top\n  e2 ingress-api→event-store \"persist transactionally\" blue anchors=bottom→top\n  e3 event-store→accepted \"durable\" green anchors=bottom→top\n  e4 event-store→dispatcher — teal anchors=right→left\n  e5 dispatcher→endpoint-config \"expand subscriptions\" teal anchors=bottom→top\n  e6 endpoint-config→paused-check \"active config\" teal anchors=bottom→top\n  e8 paused-check→paused-note — dashed orange anchors=left→left wp=448,552→448,1288\n  e9 delivery-queue→worker — orange anchors=right→left\n  e10 worker→secret \"load active secret\" violet anchors=right→left\n  e11 secret→sign — violet anchors=bottom→right\n  e12 sign→customer — orange anchors=right→left\n  e13 customer→response — blue anchors=bottom→right\n  e14 response→complete — green anchors=right→left\n  e15 response→retry-scheduler \"retryable / network\" orange anchors=bottom→top\n  e16 retry-scheduler→attempt-limit \"backoff + jitter\" orange anchors=right→left\n  e17 attempt-limit→worker — orange anchors=top→bottom wp=1296,672→1376,672→1376,336→1008,336\n  e18 attempt-limit→dlq — red anchors=right→left\n  e19 response→dlq — red anchors=right→left wp=1120,520→1392,520→1392,272\n  e20 operator→inspect — anchors=bottom→top\n  e21 inspect→replay — orange anchors=right→left\n  e22 replay→delivery-queue \"replay · same event identity\" orange anchors=left→right\n  e23 complete→status-history — violet anchors=right→left wp=1392,592→1392,752\n  e24 status-history→metrics — violet anchors=right→left\n  e25 paused-check→rate-check \"no / resumed\" teal anchors=bottom→top\n  e26 rate-check→delivery-queue — teal anchors=right→right wp=816,760→848,760→848,1136\n  e27 rate-check→rate-wait \"no · wait\" orange anchors=bottom→top\n  e28 rate-wait→rate-check — dashed teal anchors=left→left wp=480,960→480,760\nDELTA\n  e8  wp 464,552→464,1288 → 448,552→448,1288\n  e26  label \"yes · enqueue\" → \"\"\n  e28  label \"allowance replenished\" → \"\"\nBOARD DIFF · base → draft · 13 ops\n  addObject rate-check\n  addObject rate-wait\n  updateSection page-frame  resized\n  updateSection dispatch-sec  resized\n  updateObject endpoint-config  retexted\n  updateObject delivery-queue  moved\n  updateSticky paused-note  moved · resized · retexted\n  updateConnection e8  waypoints\n  removeConnection e7\n  addConnection e25\n  addConnection e26\n  addConnection e27\n  addConnection e28\nLINTS · +0 −4\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − W1 covered-content  (resolved)\nROUTES\n  e8  anchors left→left  path 528,552 → 448,552 → 448,1288 → 512,1288  through none\nREQUESTS · none",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.21.1",
+                  "mimeType": "image/png"
+                },
+                {
+                  "id": "2026-07-24T20-51-10-702Z_019f95e5-74ee-747e-a48e-6887e87c923d.21.2",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-24T20:52:17.107Z",
+          "thinking": "**Finalizing surviving warnings list**\n\n**Clarifying overridden warning IDs for final message**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lTZ4nYED0ivf4EwvXPgu6kne|fc_0082aa20189c5aed016a63d07f65648198bb8c11f70724342d",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Added per-endpoint rate-limit configuration, allowance gating, durable no-attempt waiting/recheck flow, and pause-resume guidance; ships with the board’s pre-existing W1–W32 layout warnings except resolved W3, plus new W2 (anti-parallel recheck wires) and W18 (80px queue gap)."
+              },
+              "resultText": "Committed: Added per-endpoint rate-limit configuration, allowance gating, durable no-attempt waiting/recheck flow, and pause-resume guidance; ships with the board’s pre-existing W1–W32 layout warnings except resolved W3, plus new W2 (anti-parallel recheck wires) and W18 (80px queue gap). (13 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

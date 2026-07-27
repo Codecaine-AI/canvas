@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "webhook-delivery",
+  "run_id": "2026-07-24-eval-154843",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 5.5,
+    "delta_sentence": "Compared with the nearer intent-classification-2 reference, this board offers stronger semantic section tinting but lacks its clean branching structure, balanced frame use, and consistently unobstructed connectors.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5,
+        "note": "Failure: the upper half is densely packed while large lower-right and lower-center areas remain empty, with the unusually tall fan-out section pulling the composition downward."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 5.5,
+        "note": "Most nodes have adequate internal padding, but labels around the delivery worker, customer endpoint, and retry loop sit on or too near connectors and neighboring objects."
+      },
+      {
+        "name": "grouping",
+        "score": 7,
+        "note": "Five clearly titled pastel regions provide real semantic grouping, especially for ingress, endpoint state, delivery/retry, dead letters, and operations."
+      },
+      {
+        "name": "color",
+        "score": 6.5,
+        "note": "Blue, teal, orange, red, green, and purple are used meaningfully by function and outcome, though the many simultaneous hues become visually busy around the central delivery cluster."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 4.5,
+        "note": "Failure: opposing arrowheads and short exposed stubs appear beside the signing/customer-endpoint junction, while several merged routes around the endpoint and status branch expose routing machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5.5,
+        "note": "Vertical registers within individual regions are mostly coherent, but section heights vary abruptly and the crowded delivery cluster contrasts awkwardly with the long sparse lower corridors."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 4.5,
+        "note": "Failure: long replay and retry perimeter detours dominate the lower board, central routes overlap or converge ambiguously, and labels such as the active-secret and backoff text are crossed or clipped by wires."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 second at 7.0, and the board under grade third at 5.5."
+  },
+  "usage": {
+    "input_tokens": 16982,
+    "output_tokens": 758
+  },
+  "flags": []
+}

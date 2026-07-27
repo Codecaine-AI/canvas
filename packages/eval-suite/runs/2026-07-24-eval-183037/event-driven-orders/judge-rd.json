@@ -1,0 +1,63 @@
+{
+  "axis": "rd",
+  "scenario": "event-driven-orders",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeSurfaceQuality",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "calibration": {
+      "gc": 7.5,
+      "intent": 7
+    },
+    "score": 6.5,
+    "delta_sentence": "Compared with the nearer gc-decomp-harness reference, this board provides similarly strong regional grouping and semantic color but lacks its routing restraint, clear label air, and polished visual hierarchy.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 7,
+        "note": "The four upper workflow regions and full-width reliability band use most of the frame, though the broad routing gap between the upper system and lower band feels under-composed."
+      },
+      {
+        "name": "corridors_and_air",
+        "score": 6,
+        "note": "Many nodes have comfortable internal padding, but the coordination and fulfillment areas are crowded by closely spaced wires, arrowheads, and labels such as the warehouse and carrier annotations."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Distinct blue, cyan, violet, green, and peach tinted regions clearly separate intake, backbone, coordination, fulfillment, and reliability concerns."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Color is mostly semantic and consistent—green success, red cancellation, magenta compensation, and family-specific flows—although the number of simultaneous hues becomes visually noisy in the center."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Failure: several connectors terminate or turn at conspicuous routing points, dashed paths merge ambiguously around the coordinator, and the narrow floating terminal-order-rule badge reads as an unanchored artifact."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The major section boundaries and lower-row cards hold useful registers, but uneven node sizing, raw Markdown-like text, and the compressed center-right cluster interrupt the rhythm."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Failure: long orange, blue, teal, and magenta perimeter runs dominate the lower half, while overlapping and tightly parallel routes around the coordinator make several branch destinations difficult to trace."
+      }
+    ],
+    "rank_order_sanity_note": "The visual ordering and assigned scores agree: gc-decomp-harness ranks first at 7.5, intent-classification-2 second at 7.0, and the board under grade third at 6.5."
+  },
+  "usage": {
+    "input_tokens": 16137,
+    "output_tokens": 750
+  },
+  "flags": []
+}

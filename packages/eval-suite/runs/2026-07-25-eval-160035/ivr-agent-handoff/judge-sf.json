@@ -1,0 +1,344 @@
+{
+  "axis": "sf",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 7,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system handles inbound phone-support calls through a telephony trunk.",
+        "brief_evidence": "“phone support system handles inbound calls through a telephony trunk”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies an “Inbound telephony trunk” that receives the inbound phone call and sends it to the “Call controller,” with visible arrows establishing that direction.",
+        "note": "The entry boundary and inbound direction are explicit."
+      },
+      {
+        "brief_element": "A call controller governs initial call processing.",
+        "brief_evidence": "“the call controller queries customer records”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “Call controller” receiving the call from the trunk and initiating “Lookup by caller number.”",
+        "note": "Controller ownership of the initial lookup is correctly transmitted."
+      },
+      {
+        "brief_element": "The controller queries customer records by caller number before speaking to the caller.",
+        "brief_evidence": "“Before speaking, the call controller queries customer records by caller number.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed intake flow is “Inbound telephony trunk” → “Call controller” → “Lookup by caller number,” followed by consent and intent capture. The reconstruction also states that lookup occurs “before consent and intent capture.”",
+        "note": "The lookup key, owner, and pre-interaction ordering are all recoverable."
+      },
+      {
+        "brief_element": "A successful customer-record match loads account context.",
+        "brief_evidence": "“A match loads account context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Lookup by caller number,” later identifies “Transcript + call context,” and lists “account context” in the warm-transfer payload, but it does not reconstruct an explicit matched-lookup branch or a step that loads account context on a match.",
+        "note": "Account context exists elsewhere in the reconstructed system, but the lookup-match condition and loading operation are not communicated."
+      },
+      {
+        "brief_element": "A successful match causes a personalized greeting.",
+        "brief_evidence": "“for a personalized greeting”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists; no component, flow, constraint, or uncertainty mentions a personalized greeting.",
+        "note": "The matched-customer greeting behavior is absent."
+      },
+      {
+        "brief_element": "A failed customer-record lookup or an unmatched caller receives a generic greeting.",
+        "brief_evidence": "“a failed or unmatched lookup gets a generic greeting”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists; the reconstruction does not identify lookup success/failure branches or any generic greeting.",
+        "note": "The lookup degradation path and its caller-facing outcome are not recoverable."
+      },
+      {
+        "brief_element": "The controller captures recording consent up front.",
+        "brief_evidence": "“The controller captures recording and transcription consent up front.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Recording + transcript consent” directly after caller-number lookup and before the voice intent menu.",
+        "note": "Recording consent and its early ordering are explicit, although the visual section rather than the component label carries controller ownership."
+      },
+      {
+        "brief_element": "The controller captures transcription consent up front.",
+        "brief_evidence": "“The controller captures recording and transcription consent up front.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The same reconstructed component is explicitly labeled “Recording + transcript consent,” and the reconstruction states that it precedes intent collection.",
+        "note": "Transcription consent is clearly distinguished as part of the up-front consent step."
+      },
+      {
+        "brief_element": "A short voice menu captures caller intent through speech.",
+        "brief_evidence": "“A short voice menu captures intent through speech”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Short voice intent menu,” describes it as capturing intent, and follows its output through a connector labeled “detected intent.”",
+        "note": "The interaction mode, purpose, and output are transmitted."
+      },
+      {
+        "brief_element": "Keypad entry is used when speech recognition is unreliable or the audio is noisy.",
+        "brief_evidence": "“with keypad entry when recognition is unreliable or audio is noisy”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Keypad fallback,” an arrow from the voice menu to that fallback, and an output labeled “keypad intent,” but it only describes the trigger generically as when the voice menu “requires fallback.”",
+        "note": "The fallback route is clear, but its two specified activation conditions—unreliable recognition and noisy audio—are not recovered."
+      },
+      {
+        "brief_element": "Routine intents are routed to the AI voice agent.",
+        "brief_evidence": "“Routine intents pass to the AI voice agent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies an “AI-eligible routine...” routing box and a route labeled “yes · routine” entering “Real-time AI voice agent.”",
+        "note": "Routine-intent gating and destination are explicit."
+      },
+      {
+        "brief_element": "The AI voice agent converses with the caller in real time.",
+        "brief_evidence": "“which converses in real time”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Real-time AI voice agent” and assigns it responsibility for conducting the live AI voice interaction.",
+        "note": "The real-time conversational role is directly communicated."
+      },
+      {
+        "brief_element": "The AI retrieves account facts through a lookup service.",
+        "brief_evidence": "“retrieves account facts through a read-only lookup service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction shows the AI-agent area connected to “Read-only account facts” and says the agent accesses those facts, but it does not identify a distinct lookup-service component or service responsibility.",
+        "note": "Account-fact retrieval is evident, while the service boundary is softened into an information box."
+      },
+      {
+        "brief_element": "The account-fact lookup service is read-only.",
+        "brief_evidence": "“a read-only lookup service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction explicitly identifies “Read-only account facts” and records the constraint that account facts exposed in AI self-service are read-only.",
+        "note": "The no-write operational boundary is clear even though the service itself is not separately named."
+      },
+      {
+        "brief_element": "The AI can complete only a limited set of authorized self-service actions.",
+        "brief_evidence": "“completes a limited set of authorized self-service actions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Authorized self-service” and records that self-service is limited to authorized actions, but the visible wording does not independently establish that the authorized action set is limited in size or scope.",
+        "note": "Authorization is recovered; the explicit limited-set constraint is only implied."
+      },
+      {
+        "brief_element": "An unresolved request triggers transfer to a human queue.",
+        "brief_evidence": "“An unresolved request ... transfers the call to a human queue.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction lists “unresolved” under “Human transfer triggers” and traces the resulting route through “Warm context transfer” to “Human support queue.”",
+        "note": "Trigger, route, and human-queue outcome are all recovered."
+      },
+      {
+        "brief_element": "An explicit caller request for a person triggers transfer to a human queue.",
+        "brief_evidence": "“an explicit request for a person ... transfers the call to a human queue”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction lists “asks for person” under “Human transfer triggers” and identifies the warm-transfer route into “Human support queue.”",
+        "note": "The caller-controlled escalation condition is explicit."
+      },
+      {
+        "brief_element": "The AI agent's own low-confidence risk flag triggers transfer to a human queue.",
+        "brief_evidence": "“the agent's own low-confidence risk flag transfers the call to a human queue”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction lists “low-confidence risk” as a human-transfer trigger and traces the route to the human queue, but it does not explicitly recover that the AI agent itself owns or emits this flag.",
+        "note": "The trigger semantics and transfer outcome survive; trigger ownership is ambiguous."
+      },
+      {
+        "brief_element": "The human transfer carries the transcript.",
+        "brief_evidence": "“The transfer carries the transcript”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Warm-transfer payload” explicitly lists “Transcript.”",
+        "note": "The payload item is exact."
+      },
+      {
+        "brief_element": "The human transfer carries account context.",
+        "brief_evidence": "“The transfer carries ... account context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Warm-transfer payload” explicitly lists “account context.”",
+        "note": "The payload item is exact."
+      },
+      {
+        "brief_element": "The human transfer carries the detected intent.",
+        "brief_evidence": "“The transfer carries ... detected intent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Warm-transfer payload” explicitly lists “detected intent.”",
+        "note": "The payload item is exact."
+      },
+      {
+        "brief_element": "The human transfer carries work already completed.",
+        "brief_evidence": "“The transfer carries ... work already completed”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Warm-transfer payload” explicitly lists “work already completed.”",
+        "note": "The payload item is exact."
+      },
+      {
+        "brief_element": "The warm-transfer payload prevents the caller from having to repeat information.",
+        "brief_evidence": "“so the caller does not repeat themselves”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction accurately recovers all four payload items and describes preservation of call and warm-transfer artifacts, but it does not explicitly state the caller-facing no-repetition outcome.",
+        "note": "The mechanism is fully present, while its intended service outcome is implicit rather than explicit."
+      },
+      {
+        "brief_element": "The human queue has a wait target.",
+        "brief_evidence": "“within the queue's wait target”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists; the reconstruction identifies an “Agent availabl...” decision but no wait target, timer, threshold, or elapsed-wait condition.",
+        "note": "The queue service-level boundary is absent."
+      },
+      {
+        "brief_element": "If no human is available within the wait target, the system offers a callback.",
+        "brief_evidence": "“If no human is available within the queue's wait target, the system offers a callback”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction shows “Human support queue” → “Agent availabl...” and a branch labeled “no” → “Offer callback,” but it does not recover the requirement that unavailability persist through the queue's wait target.",
+        "note": "The callback branch and basic unavailability trigger survive, but the timing condition is lost."
+      },
+      {
+        "brief_element": "The callback option is used instead of holding the caller indefinitely.",
+        "brief_evidence": "“instead of holding indefinitely”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction routes the visible “no” availability branch to “Offer callback” and then “Scheduled callback,” but it does not explicitly identify indefinite holding as prohibited.",
+        "note": "The alternative outcome is present; the anti-indefinite-hold operational constraint is not stated."
+      },
+      {
+        "brief_element": "Every call is recorded.",
+        "brief_evidence": "“Every call is recorded”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Call recording” artifact, but its uncertainty list states that the recording line's exact source is unclear and cannot establish whether recording originates from or covers the whole call.",
+        "note": "Recording exists, but universal coverage of every call is not recoverable."
+      },
+      {
+        "brief_element": "Every call is transcribed.",
+        "brief_evidence": "“Every call is ... transcribed”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Transcript + call context” and a recording-to-transcript artifact flow, but it does not establish that every call is transcribed.",
+        "note": "Transcription artifacts are clear; universal application is not."
+      },
+      {
+        "brief_element": "Call recordings and transcriptions are used for quality review.",
+        "brief_evidence": "“for quality review”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies both “Call artifacts” and “Quality review,” but explicitly reports that overlapping dashed lines make the exact relationship between those artifacts and quality-review inputs indistinguishable.",
+        "note": "Both endpoints are present, but the data path connecting recordings and transcripts to review is ambiguous."
+      },
+      {
+        "brief_element": "Unresolved calls feed the review loop.",
+        "brief_evidence": "“Unresolved calls ... feed a review loop”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Review inputs” explicitly lists “unresolved calls” within the “Quality review & governance loop.”",
+        "note": "The review input is exact."
+      },
+      {
+        "brief_element": "Abandoned calls feed the review loop.",
+        "brief_evidence": "“and abandoned calls feed a review loop”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Review inputs” explicitly lists “abandoned calls” within the governance-loop section.",
+        "note": "The review input is exact."
+      },
+      {
+        "brief_element": "The review loop adjusts which intents the AI voice agent may handle.",
+        "brief_evidence": "“a review loop that adjusts which intents the AI voice agent may handle”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Quality review” and “Adjust AI intent allowlist,” and states that the latter changes which intents are allowed for AI handling.",
+        "note": "The governance action and its AI-routing scope are clearly transmitted."
+      },
+      {
+        "brief_element": "The main end-to-end flow proceeds from customer lookup through consent and intent capture, then branches to AI self-service or human transfer, with callback handling and a review loop.",
+        "brief_evidence": "“The diagram should make clear how a call proceeds from customer lookup, consent, and intent capture through AI self-service or human transfer, including callback handling and the review loop.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction recovers the ordered intake flow from trunk and lookup to consent and voice/keypad intent capture; the routine route into AI self-service; the trigger-driven warm transfer to a human queue; the no-agent callback path; and the quality-review/AI-allowlist loop.",
+        "note": "The overall architecture and principal branches are usable for design discussion despite missing lookup-greeting semantics, the queue wait target, and some artifact-link details."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "Quality findings are a distinct input to the governance review loop.",
+        "reconstruction_evidence": "The reconstruction's “Review inputs” component lists “unresolved calls,” “abandoned calls,” and “quality findings.”",
+        "why_unsupported": "The brief explicitly identifies unresolved and abandoned calls as review-loop inputs and says recordings and transcripts are used for quality review, but it does not define “quality findings” as a separate governance-loop input."
+      },
+      {
+        "claim": "The callback is necessarily scheduled as a terminal outcome.",
+        "reconstruction_evidence": "The reconstruction identifies “Scheduled callback” as the outcome after “Offer callback” and says a scheduled callback is created or represented.",
+        "why_unsupported": "The brief requires the system to offer a callback and mentions callback handling, but it does not state that every offer is accepted or that scheduling is the unconditional terminal outcome."
+      },
+      {
+        "claim": "Quality review and AI-intent allowlist adjustment exchange information bidirectionally.",
+        "reconstruction_evidence": "The reconstruction says “Quality review” sends feedback to “Adjust AI intent allowlist” and that the allowlist-adjustment process sends information or feedback back to “Quality review,” based on a bidirectional connector.",
+        "why_unsupported": "The brief supports review causing changes to which intents the AI may handle, but it does not specify a reverse information flow from allowlist adjustment back into quality review."
+      },
+      {
+        "claim": "The call recording flows into a combined transcript-and-call-context artifact.",
+        "reconstruction_evidence": "The reconstructed data flow states “A ‘Call recording’ artifact is produced or retained” and then “The recording flows to ‘Transcript + call context.’”",
+        "why_unsupported": "The brief states that calls are recorded and transcribed and separately requires account context in transfer, but it does not specify this artifact transformation or that call context is generated from the recording."
+      }
+    ],
+    "strongest_transmitted_behavior": "The board most strongly transmits the central routing and escalation behavior: intake and lookup lead through up-front consent and voice/keypad intent capture; routine eligible calls enter real-time AI self-service, while unresolved requests, requests for a person, and low-confidence risk conditions enter a warm human handoff carrying the four specified context items.",
+    "most_consequential_loss": "The most consequential loss is the queue timing semantic: the reconstruction reduces “no human available within the queue's wait target” to a generic agent-availability decision, omitting both the wait target and the explicit prohibition on holding indefinitely. The matched/unmatched lookup greeting branch is also entirely absent.",
+    "overall_summary": "The reconstruction preserves the complete high-level system shape, primary end-to-end route, AI-versus-human branching, transfer triggers, warm-transfer payload, callback option, and review-driven AI intent allowlist. It is therefore strong enough for an architecture discussion. Fidelity falls short of implementation readiness because the successful-versus-failed customer lookup behavior and both greeting outcomes are missing; keypad fallback triggers are generalized; the read-only lookup service boundary is softened; universal recording/transcription coverage and their review path are ambiguous; and the callback route omits the queue wait target. No system-defining contradiction is present, but several operational and degraded-mode semantics require clarification.",
+    "score": 7
+  },
+  "usage": {
+    "input_tokens": 13213,
+    "output_tokens": 10387
+  },
+  "flags": []
+}

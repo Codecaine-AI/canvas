@@ -1,0 +1,21 @@
+{
+  "name": "@codecaine-ai/eval-suite-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "baml-cli generate",
+    "judge": "bun src/cli.ts judge",
+    "smoke:judge": "bun scripts/smoke_judges.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@boundaryml/baml": "0.222.0",
+    "@resvg/resvg-js": "2.6.2"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.14",
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3"
+  }
+}

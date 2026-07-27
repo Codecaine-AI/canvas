@@ -1,0 +1,837 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-160035.llm-inference-gateway",
+  "title": "2026-07-25-eval-160035 · llm-inference-gateway",
+  "description": "# LLM inference gateway\n\nA capability-tier request flows left to right through identity stamping, tenant admission, deadline-aware queuing, cache lookup, prompt policy, and tier-aware routing into hosted or self-hosted capacity. The attempts panel shows pre-token failure classification, retryable fallback with the same idempotency key, and the no-silent-retry boundary once streaming starts. Circuit breakers and spend controls protect capacity; metering feeds billing and redacted audit storage. Dashed pink evaluation traffic is isolated from the client response.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "LLM inference gateway · routing, fallback, and accounting",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3360,
+        "height": 2080
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "edge-admission",
+      "type": "section",
+      "text": "1 · Edge & admission",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 96,
+        "y": 160,
+        "width": 576,
+        "height": 400
+      }
+    },
+    {
+      "id": "queue-cache",
+      "type": "section",
+      "text": "2 · Queue & cache",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 816,
+        "y": 160,
+        "width": 576,
+        "height": 400
+      }
+    },
+    {
+      "id": "routing-policy",
+      "type": "section",
+      "text": "3 · Routing & prompt policy",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1536,
+        "y": 160,
+        "width": 576,
+        "height": 400
+      }
+    },
+    {
+      "id": "capacity",
+      "type": "section",
+      "text": "4 · Eligible capacity",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2256,
+        "y": 160,
+        "width": 576,
+        "height": 400
+      }
+    },
+    {
+      "id": "attempt-control",
+      "type": "section",
+      "text": "5 · Attempts, fallback & stream",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 816,
+        "y": 720,
+        "width": 736,
+        "height": 416
+      }
+    },
+    {
+      "id": "protection",
+      "type": "section",
+      "text": "6 · Capacity protection",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2256,
+        "y": 720,
+        "width": 576,
+        "height": 416
+      }
+    },
+    {
+      "id": "accounting",
+      "type": "section",
+      "text": "7 · Metering & audit",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 816,
+        "y": 1328,
+        "width": 736,
+        "height": 400
+      }
+    },
+    {
+      "id": "evaluation",
+      "type": "section",
+      "text": "8 · Shadow evaluation",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2256,
+        "y": 1328,
+        "width": 576,
+        "height": 400
+      }
+    },
+    {
+      "id": "endpoint",
+      "type": "pill",
+      "text": "One capability endpoint",
+      "color": "blue",
+      "parentId": "edge-admission",
+      "geometry": {
+        "x": 144,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "identity",
+      "type": "process",
+      "text": "Auth · tenant · quota · request ID",
+      "color": "gray",
+      "parentId": "edge-admission",
+      "geometry": {
+        "x": 400,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "admission",
+      "type": "predefined-process",
+      "text": "Concurrency + token limits",
+      "color": "blue",
+      "parentId": "edge-admission",
+      "geometry": {
+        "x": 272,
+        "y": 400,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "deadline-queue",
+      "type": "internal-storage",
+      "text": "Deadline-aware queue",
+      "color": "yellow",
+      "parentId": "queue-cache",
+      "geometry": {
+        "x": 864,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "deadline-expired",
+      "type": "decision",
+      "text": "Deadline passed?",
+      "color": "red",
+      "parentId": "queue-cache",
+      "geometry": {
+        "x": 1120,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "response-cache",
+      "type": "database",
+      "text": "Exact + semantic cache",
+      "color": "yellow",
+      "parentId": "queue-cache",
+      "geometry": {
+        "x": 992,
+        "y": 400,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "router",
+      "type": "process",
+      "text": "Tier-aware backend router",
+      "color": "violet",
+      "parentId": "routing-policy",
+      "geometry": {
+        "x": 1584,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "route-signals",
+      "type": "document",
+      "text": "Health · latency · depth · price",
+      "color": "violet",
+      "parentId": "routing-policy",
+      "geometry": {
+        "x": 1840,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "prompt-assembler",
+      "type": "predefined-process",
+      "text": "Context + safety policy",
+      "color": "violet",
+      "parentId": "routing-policy",
+      "geometry": {
+        "x": 1712,
+        "y": 400,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "hosted",
+      "type": "icon",
+      "text": "Hosted provider accounts",
+      "color": "teal",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2304,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "self-hosted",
+      "type": "icon",
+      "text": "Self-hosted scheduler + pool",
+      "color": "teal",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2560,
+        "y": 240,
+        "width": 224,
+        "height": 80
+      },
+      "icon": "server"
+    },
+    {
+      "id": "residency",
+      "type": "hexagon",
+      "text": "Residency-eligible set",
+      "color": "teal",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2432,
+        "y": 400,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "dispatch",
+      "type": "process",
+      "text": "Dispatch attempt",
+      "color": "orange",
+      "parentId": "attempt-control",
+      "geometry": {
+        "x": 864,
+        "y": 800,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "failure-classifier",
+      "type": "decision",
+      "text": "Classify before first token",
+      "color": "orange",
+      "parentId": "attempt-control",
+      "geometry": {
+        "x": 1168,
+        "y": 800,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "fallback",
+      "type": "predefined-process",
+      "text": "Retry next backend",
+      "color": "orange",
+      "parentId": "attempt-control",
+      "geometry": {
+        "x": 864,
+        "y": 976,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "stream",
+      "type": "document",
+      "text": "Stream tokens visibly",
+      "color": "blue",
+      "parentId": "attempt-control",
+      "geometry": {
+        "x": 1168,
+        "y": 976,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "breaker",
+      "type": "octagon",
+      "text": "Circuit breaker state",
+      "color": "red",
+      "parentId": "protection",
+      "geometry": {
+        "x": 2304,
+        "y": 800,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "probes",
+      "type": "process",
+      "text": "Trickle shadow probes",
+      "color": "yellow",
+      "parentId": "protection",
+      "geometry": {
+        "x": 2560,
+        "y": 800,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "spend",
+      "type": "decision",
+      "text": "Cheapest, then reject",
+      "color": "red",
+      "parentId": "protection",
+      "geometry": {
+        "x": 2432,
+        "y": 976,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "meter",
+      "type": "document-stack",
+      "text": "Tokens · latency · backend · cost",
+      "color": "green",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 864,
+        "y": 1408,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "billing",
+      "type": "database",
+      "text": "Billing stream",
+      "color": "green",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 1168,
+        "y": 1408,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "audit",
+      "type": "database",
+      "text": "Redacted audit store",
+      "color": "gray",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 1016,
+        "y": 1584,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "mirror",
+      "type": "process",
+      "text": "Sample structured evals",
+      "color": "pink",
+      "parentId": "evaluation",
+      "geometry": {
+        "x": 2304,
+        "y": 1408,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "shadow",
+      "type": "icon",
+      "text": "Shadow backend",
+      "color": "pink",
+      "parentId": "evaluation",
+      "geometry": {
+        "x": 2560,
+        "y": 1408,
+        "width": 224,
+        "height": 80
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "shadow-note",
+      "type": "sticky",
+      "text": "**Isolation rule**\nShadow results never affect the client response.",
+      "color": "pink",
+      "parentId": "evaluation",
+      "geometry": {
+        "x": 2400,
+        "y": 1584,
+        "width": 288,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "endpoint",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "identity",
+        "anchor": "left"
+      },
+      "label": "capability tier",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "identity",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "admission",
+        "anchor": "top"
+      },
+      "label": "stamped request",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "admission",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "deadline-queue",
+        "anchor": "left"
+      },
+      "label": "excess waits",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "deadline-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "deadline-expired",
+        "anchor": "left"
+      },
+      "label": "deadline check",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "deadline-expired",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "endpoint",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1232,
+          640
+        ],
+        [
+          256,
+          640
+        ]
+      ]
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "deadline-queue",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "response-cache",
+        "anchor": "top"
+      },
+      "label": "admitted",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "response-cache",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "prompt-assembler",
+        "anchor": "left"
+      },
+      "label": "cache miss",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "prompt-assembler",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "router",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "router",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "route-signals",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "back"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "router",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "residency",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "residency",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "hosted",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "residency",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "self-hosted",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "dispatch",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1696,
+          672
+        ],
+        [
+          976,
+          672
+        ]
+      ]
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "dispatch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "failure-classifier",
+        "anchor": "left"
+      },
+      "label": "attempt",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "failure-classifier",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fallback",
+        "anchor": "right"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "failure-classifier",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "stream",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "fallback",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "dispatch",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "breaker",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "router",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2416,
+          640
+        ],
+        [
+          2144,
+          640
+        ],
+        [
+          2144,
+          608
+        ],
+        [
+          1696,
+          608
+        ]
+      ]
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "probes",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "breaker",
+        "anchor": "right"
+      },
+      "label": "half-open probes",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "stream",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "meter",
+        "anchor": "top"
+      },
+      "label": "usage + outcome",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "meter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "billing",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e22",
+      "from": {
+        "objectId": "meter",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "audit",
+        "anchor": "top"
+      },
+      "label": "redacted I/O",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e24",
+      "from": {
+        "objectId": "mirror",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "shadow",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink"
+    }
+  ],
+  "annotations": []
+}

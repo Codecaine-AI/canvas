@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-25-eval-160035",
+  "tier": "system",
+  "scenario": "code-review-agents",
+  "board_id": "eval.2026-07-25-eval-160035.code-review-agents",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-25T21:00:37.739Z",
+      "finished_at": "2026-07-25T21:04:52.008Z",
+      "wall_ms": 254892,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "7d3f1502-80d9-4024-a72f-ab774ca674b2"
+    ]
+  },
+  "finished_at": "2026-07-25T21:04:52.632Z",
+  "exit_code": 0
+}

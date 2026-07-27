@@ -130,7 +130,6 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "process":
     case "decision":
     case "sticky":
-    case "annotation-marker":
     // D16 — these were previously missing from this switch, meaning an
     // armed document/database tool silently failed to start a PlaceGesture.
     case "document":

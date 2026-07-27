@@ -1,0 +1,807 @@
+{
+  "axis": "rc",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Delivery starts when a protected branch produces a signed source revision.",
+        "brief_evidence": "Our delivery platform starts when a protected branch produces a signed source revision.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Trusted source",
+            "observation": "Shows “Protected branch policy” and “Signed source revision,” with the signed revision starting the delivery flow through a “verified trigger” arrow."
+          },
+          {
+            "source": "json",
+            "locator": "objects[source, protected-branch, signed-rev]; connection[e1]",
+            "observation": "The source section contains the protected-branch and signed-rev objects, and e1 connects signed-rev to the build with label “verified trigger.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "A pipeline coordinator runs the build, test, and security-gate pipeline.",
+        "brief_evidence": "The pipeline coordinator runs dependency installation, compilation, unit tests, integration tests, a software-composition scan, and an image vulnerability scan.",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2–3 and connecting flow",
+            "observation": "The coordinated sequence of build, test, and scan activities is visible, but no component or label identifies a “pipeline coordinator.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects and connections search for text/component “pipeline coordinator”",
+            "observation": "The required activities and their sequencing appear in objects install-compile, test-suite, sca-scan, and image-scan, but no pipeline-coordinator object or label exists."
+          }
+        ],
+        "note": "The coordination behavior is recognizable, but the stated responsible component is missing."
+      },
+      {
+        "id": "R3",
+        "requirement": "The pipeline installs dependencies.",
+        "brief_evidence": "runs dependency installation",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Build & test",
+            "observation": "Contains “Install dependencies + compile.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[install-compile]",
+            "observation": "Text explicitly includes “Install dependencies.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The pipeline compiles the source.",
+        "brief_evidence": "compilation",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Build & test",
+            "observation": "Contains “Install dependencies + compile,” followed by a “compiled” transition."
+          },
+          {
+            "source": "json",
+            "locator": "object[install-compile]; connection[e2]",
+            "observation": "Compilation is named in the object and e2 carries the result to testing with label “compiled.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The pipeline runs unit tests.",
+        "brief_evidence": "unit tests",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Build & test",
+            "observation": "Contains “Unit + integration tests.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[test-suite]",
+            "observation": "Text explicitly names unit tests."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The pipeline runs integration tests.",
+        "brief_evidence": "integration tests",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Build & test",
+            "observation": "Contains “Unit + integration tests.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[test-suite]",
+            "observation": "Text explicitly names integration tests."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "The pipeline runs a software-composition scan.",
+        "brief_evidence": "a software-composition scan",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Security gates",
+            "observation": "Contains a “Software-composition scan” gate."
+          },
+          {
+            "source": "json",
+            "locator": "object[sca-scan]",
+            "observation": "The scan is explicitly labeled and lies on the pass-only delivery path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The pipeline runs an image vulnerability scan.",
+        "brief_evidence": "an image vulnerability scan",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Security gates",
+            "observation": "Contains an “Image vulnerability scan” gate."
+          },
+          {
+            "source": "json",
+            "locator": "object[image-scan]",
+            "observation": "The image vulnerability scan is explicitly named."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Successful builds publish an immutable image to the registry.",
+        "brief_evidence": "Successful builds publish an immutable image ... to the registry.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Immutable publish",
+            "observation": "Shows an “Immutable image” reached only after “security gates pass,” but the destination is not labeled as a registry."
+          },
+          {
+            "source": "json",
+            "locator": "object[immutable-image]; connection[e5]; search of publish section and object text for “registry”",
+            "observation": "e5 connects the passed image scan to immutable-image. No registry object or registry destination label appears in the publish area."
+          }
+        ],
+        "note": "Image immutability and success-gated publication are present; the stated registry destination is missing."
+      },
+      {
+        "id": "R10",
+        "requirement": "Successful builds publish a provenance statement to the registry.",
+        "brief_evidence": "Successful builds publish ... a provenance statement to the registry.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Immutable publish",
+            "observation": "Shows “Provenance statement” below the immutable image with “publish attestation,” but no registry destination is named."
+          },
+          {
+            "source": "json",
+            "locator": "object[provenance]; connection[e6]; search of publish section and object text for “registry”",
+            "observation": "The provenance statement and publication relationship are present, but no registry object or destination label exists."
+          }
+        ],
+        "note": "The provenance artifact is represented, but its required registry destination is omitted."
+      },
+      {
+        "id": "R11",
+        "requirement": "A failed build or gate stops the revision and notifies its owner with the identity of the failed gate.",
+        "brief_evidence": "Failures stop the revision and notify its owner with the failed gate.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2–3, especially Image vulnerability scan",
+            "observation": "The image scan says “fail stops + notifies owner,” and onward flow is pass-gated. Equivalent failure handling is not shown for dependency installation, compilation, unit tests, integration tests, or the SCA scan, and the notification does not explicitly carry the failed gate."
+          },
+          {
+            "source": "json",
+            "locator": "object[image-scan]; connections[e2-e5]; search for failure edges and “failed gate”",
+            "observation": "Only image-scan contains stop/owner-notification text. No generic build-failure path or failed-gate payload is present."
+          }
+        ],
+        "note": "The image-scan failure case is covered, but the semantics are not generalized to all failures and the failed-gate detail is not explicit."
+      },
+      {
+        "id": "R12",
+        "requirement": "The release manager promotes the same built image into staging.",
+        "brief_evidence": "The release manager promotes the same image into a staging environment",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Transition from Section 4 to Section 5",
+            "observation": "The flow is labeled “promote same digest” and proceeds into staging preparation, but no release-manager component or label is shown."
+          },
+          {
+            "source": "json",
+            "locator": "connection[e7]; search of objects for “release manager”",
+            "observation": "e7 explicitly says “promote same digest,” but no object identifies the release manager."
+          }
+        ],
+        "note": "Same-image staging promotion is clear, but the stated responsible component is absent."
+      },
+      {
+        "id": "R13",
+        "requirement": "Database compatibility checks run before migration.",
+        "brief_evidence": "runs database compatibility checks before migration",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Staging preparation",
+            "observation": "“Database compatible?” precedes “Backward-compatible migration” via a “compatible” arrow."
+          },
+          {
+            "source": "json",
+            "locator": "objects[db-compat, migration]; connection[e8]",
+            "observation": "e8 orders the compatibility decision before migration."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Staging uses backward-compatible migrations.",
+        "brief_evidence": "applies backward-compatible migrations",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Staging preparation",
+            "observation": "Contains “Backward-compatible migration.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[migration]",
+            "observation": "The migration is explicitly labeled backward-compatible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The services are deployed into staging after migration.",
+        "brief_evidence": "deploys the services",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 5–6",
+            "observation": "The migration flows to “Deploy services to staging” with label “migrated.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[stage-deploy]; connection[e9]",
+            "observation": "e9 orders staging deployment after migration."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Staging executes smoke tests and contract tests after deployment.",
+        "brief_evidence": "executes smoke and contract tests",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6, Staging verification",
+            "observation": "“Deploy services to staging” flows to “Smoke + contract tests.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[stage-tests]; connection[e10]",
+            "observation": "The stage-tests object names both test types and e10 orders them after deployment."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "A failed staging check stops promotion and preserves staging logs and artifacts.",
+        "brief_evidence": "A failed staging check stops promotion and preserves staging logs and artifacts.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 and transition to Section 7",
+            "observation": "The staging tests state “failure preserves logs/artifacts,” while the only onward promotion path is labeled “staging passes.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[stage-tests]; connection[e11]",
+            "observation": "stage-tests explicitly states preservation on failure, and e11 permits progress to approval only when staging passes."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Production promotion requires an approved change record.",
+        "brief_evidence": "Production promotion requires an approved change record",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7, Production approval",
+            "observation": "Contains “Approved change record” on the only path to the signature check and canary launch."
+          },
+          {
+            "source": "json",
+            "locator": "object[change-record]; connections[e11-e13]",
+            "observation": "The approved change record lies in series before production canary launch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Production promotion uses a canary controller to send 5% of traffic to the new revision.",
+        "brief_evidence": "uses a canary controller to send five percent of traffic to the new revision",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8, Canary launch",
+            "observation": "Shows “Canary controller” leading to “Route 5% traffic” after production approval."
+          },
+          {
+            "source": "json",
+            "locator": "objects[canary-controller, traffic-5]; connection[e14]",
+            "observation": "The canary controller starts the 5% canary traffic step."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "The canary controller evaluates error rate, latency, saturation, and a business success metric.",
+        "brief_evidence": "evaluates error rate, latency, saturation, and a business success metric",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9, Observe & decide",
+            "observation": "The metric set is labeled “Error · latency · saturation · business success.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[metric-set]; connection[e15]",
+            "observation": "The four metric categories are explicitly named and connected from the canary traffic step."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Canary health is evaluated over consecutive observation windows.",
+        "brief_evidence": "over consecutive observation windows",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9 and incoming canary edge",
+            "observation": "The incoming edge says “observe windows,” and the decision asks “Consecutive windows healthy?”"
+          },
+          {
+            "source": "json",
+            "locator": "object[healthy-window]; connections[e15-e17]",
+            "observation": "The canary enters observation windows and reaches an explicit consecutive-window health decision."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Healthy observation windows increase canary traffic to 25%.",
+        "brief_evidence": "Healthy windows increase traffic to twenty-five",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 9–10",
+            "observation": "A “healthy” branch from the consecutive-window decision reaches “Increase to 25%.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[traffic-25]; connection[e18]",
+            "observation": "e18 maps healthy windows directly to the 25% step."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Subsequent healthy observation windows increase canary traffic to 50%.",
+        "brief_evidence": "Healthy windows increase traffic to ... fifty",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 10, Healthy progression",
+            "observation": "“Increase to 25%” proceeds through “next healthy windows” to “Increase to 50%.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[traffic-50]; connection[e19]",
+            "observation": "e19 explicitly requires the next healthy windows before reaching 50%."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Subsequent healthy observation windows increase traffic to 100%.",
+        "brief_evidence": "Healthy windows increase traffic to ... one hundred percent.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 10, Healthy progression",
+            "observation": "“Increase to 50%” proceeds through “next healthy windows” to “Complete primary region at 100%.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[traffic-100]; connection[e20]",
+            "observation": "e20 explicitly requires further healthy windows before the 100% step."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "A breached threshold freezes further rollout.",
+        "brief_evidence": "A breached threshold freezes further rollout",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Threshold-breached branch between Sections 9 and 11",
+            "observation": "The threshold-breached branch leaves the healthy progression path for rollback, but no explicit “freeze” action or frozen state is shown."
+          },
+          {
+            "source": "json",
+            "locator": "connection[e22]; search of objects and connections for “freeze” or “frozen”",
+            "observation": "e22 routes a threshold breach to rollback-lkg. No freeze-labeled object, state, or edge exists."
+          }
+        ],
+        "note": "Further healthy progression is bypassed, but the required rollout-freeze behavior is only implicit."
+      },
+      {
+        "id": "R26",
+        "requirement": "A breached threshold triggers rollback to the last known-good image.",
+        "brief_evidence": "triggers rollback to the last known-good image",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Threshold-breached edge into Section 11",
+            "observation": "The “threshold breached” path terminates at “Rollback to last known-good image.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[rollback-lkg]; connection[e22]",
+            "observation": "e22 directly links a threshold breach to rollback-lkg."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "The migration controller runs a compensating action only when the migration declared one safe.",
+        "brief_evidence": "the migration controller runs a compensating action only when the migration declared one safe",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 11, Pause & rollback",
+            "observation": "Rollback leads to a decision labeled “Safe compensating action declared?”, but no migration-controller component or action performed on the affirmative branch is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object[compensate]; connection[e24]; search for migration controller and outgoing compensation action",
+            "observation": "The safety condition is represented, but compensate has no outgoing edge to an executed compensating action and no migration-controller object exists."
+          }
+        ],
+        "note": "The conditional safety check is present; the responsible controller and actual compensating action are missing."
+      },
+      {
+        "id": "R28",
+        "requirement": "The traffic router, feature-flag service, and service registry agree on the active revision.",
+        "brief_evidence": "The traffic router, feature-flag service, and service registry must agree on the active revision.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 12, Control, audit & notify",
+            "observation": "Contains “Router + flags + registry agree,” reached by an “activate revision” flow."
+          },
+          {
+            "source": "json",
+            "locator": "object[active-revision]; connection[e25]",
+            "observation": "The object represents agreement among the three named control-plane elements for revision activation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Rollout state enters an audit log.",
+        "brief_evidence": "Rollout state ... enter an audit log",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 12",
+            "observation": "The active-revision state flows to “Audit log” with label “record state.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[audit-log]; connection[e26]",
+            "observation": "e26 records state in the audit log."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "Approvals enter the audit log.",
+        "brief_evidence": "approvals ... enter an audit log",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Production approval section and Section 12 audit-log area",
+            "observation": "The approved change record is shown, but there is no line or note sending that approval to the audit log."
+          },
+          {
+            "source": "json",
+            "locator": "connections incident to object[audit-log] and object[change-record]",
+            "observation": "audit-log receives only e26 from active-revision and e28 from rollback-lkg; change-record has no audit connection."
+          }
+        ],
+        "note": "The approval exists, but its required audit recording is not represented."
+      },
+      {
+        "id": "R31",
+        "requirement": "Metric decisions enter the audit log.",
+        "brief_evidence": "metric decisions ... enter an audit log",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Observe & decide section and Section 12 audit-log area",
+            "observation": "Metric and health decisions are shown, but no connection or note records them in the audit log."
+          },
+          {
+            "source": "json",
+            "locator": "connections incident to objects[metric-set, telemetry, healthy-window, audit-log]",
+            "observation": "No metric or health-decision object has an edge to audit-log, and no annotation states that metric decisions are audited."
+          }
+        ],
+        "note": "Metric evaluation is represented, but its audit requirement is missing."
+      },
+      {
+        "id": "R32",
+        "requirement": "Traffic changes enter the audit log.",
+        "brief_evidence": "traffic changes ... enter an audit log",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Canary launch, Healthy progression, and Section 12 audit-log area",
+            "observation": "Traffic changes at 5%, 25%, 50%, and 100% are visible, but none is connected or noted as entering the audit log."
+          },
+          {
+            "source": "json",
+            "locator": "connections incident to objects[traffic-5, traffic-25, traffic-50, traffic-100, audit-log]",
+            "observation": "No traffic-step object sends an audit event to audit-log; its only incoming edges are state and rollback recording."
+          }
+        ],
+        "note": "Traffic progression is shown, but audit recording of each traffic change is absent."
+      },
+      {
+        "id": "R33",
+        "requirement": "Rollback actions enter the audit log.",
+        "brief_evidence": "rollback actions enter an audit log",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Connection from Section 11 to Section 12",
+            "observation": "A dashed edge labeled “record rollback” connects rollback to the audit log."
+          },
+          {
+            "source": "json",
+            "locator": "connection[e28]",
+            "observation": "e28 connects rollback-lkg to audit-log with label “record rollback.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Operators receive notifications at every promotion, pause, failure, and recovery.",
+        "brief_evidence": "operators receive notifications at every promotion, pause, failure, and recovery.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 12, Control, audit & notify",
+            "observation": "The operator-notification flow is labeled “promotion · pause · failure · recovery.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[operator-notify]; connection[e27]",
+            "observation": "e27 reaches operator notifications and explicitly lists all four required event classes."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "If metric telemetry is unavailable, rollout pauses for operator review rather than assuming success.",
+        "brief_evidence": "If metric telemetry is unavailable, the rollout pauses for operator review instead of assuming success.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Telemetry decision and Section 11 pause path",
+            "observation": "The “Telemetry available?” decision has a dashed “unavailable · pause” branch to a manual pause step offering operator choices, while only the available branch reaches health evaluation."
+          },
+          {
+            "source": "json",
+            "locator": "objects[telemetry, pause-review]; connections[e17, e21]",
+            "observation": "e21 routes unavailable telemetry to pause-review; e17 permits health evaluation only when telemetry is available."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "An operator may resume rollout after telemetry recovers.",
+        "brief_evidence": "An operator may resume after telemetry recovers",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 11, pause manual-input step",
+            "observation": "The pause step says “resume after recovery or order rollback.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[pause-review]",
+            "observation": "Text explicitly permits resume after recovery."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "An operator may order a rollback while rollout is paused.",
+        "brief_evidence": "or order a rollback",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 11",
+            "observation": "The pause step offers “order rollback” and has an “operator orders rollback” edge to the last-known-good rollback step."
+          },
+          {
+            "source": "json",
+            "locator": "object[pause-review]; connection[e23]",
+            "observation": "e23 explicitly connects the paused operator decision to rollback-lkg."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "An operator cannot bypass failed security gates.",
+        "brief_evidence": "cannot bypass failed security gates",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 and security-gate pass path",
+            "observation": "The image vulnerability gate explicitly says “no bypass,” and publication is reached only via “security gates pass.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[image-scan]; connection[e5]",
+            "observation": "image-scan states “no bypass,” and e5 only advances on passed security gates."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "An operator cannot bypass image-signature verification.",
+        "brief_evidence": "cannot bypass ... image-signature verification.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 and transition to Section 8",
+            "observation": "“Image signature valid?” is on the sole production-canary path, whose outgoing edge is labeled “valid signature.”"
+          },
+          {
+            "source": "json",
+            "locator": "object[signature-check]; connection[e13]",
+            "observation": "The canary controller is reachable from signature-check only through e13, labeled “valid signature”; no bypass edge is present."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.8662,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The canary execution and recovery cluster is strongest: approved production entry, signature verification, 5% launch, all four metrics over consecutive windows, 25%/50%/100% progression, telemetry-unavailable pause, operator rollback, and rollback to the last known-good image are all represented in a connected flow.",
+    "most_consequential_gap": "The audit contract is incomplete: approvals, metric decisions, and traffic changes are not shown entering the audit log. Other notable partials are the lack of explicit rollout freezing, incomplete all-gate failure notification semantics, and omission of the actual safe compensating action.",
+    "coverage_summary": "Weighted coverage is 61.5 of 71 possible points (P = 0.8662). The board substantially covers the delivery pipeline, staging sequence, canary progression, telemetry failure handling, rollback, active-revision agreement, and operator controls. Coverage falls below the 0.90 anchor because three required audit-event categories are absent and several important qualifiers or responsible components are only partial. No system-defining requirement is absent or contradicted, so no cap applies.",
+    "score": 7
+  },
+  "usage": {
+    "input_tokens": 18598,
+    "output_tokens": 8406
+  },
+  "flags": []
+}

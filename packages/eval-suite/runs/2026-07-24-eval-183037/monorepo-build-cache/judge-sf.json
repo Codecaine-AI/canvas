@@ -1,0 +1,271 @@
+{
+  "axis": "sf",
+  "scenario": "monorepo-build-cache",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 7.5,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a monorepo build service.",
+        "brief_evidence": "“Our monorepo build service...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “A five-stage monorepo build-and-cache system,” and an outer boundary titled “Monorepo build & cache.”",
+        "note": "The system domain and overall purpose are accurately recovered."
+      },
+      {
+        "brief_element": "The build service supports both local developers and CI.",
+        "brief_evidence": "“Our monorepo build service supports local developers and CI.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction lists “Local developer” and “CI job” as two request sources converging on the change detector.",
+        "note": "Both requester classes and their shared entry into the system are clear."
+      },
+      {
+        "brief_element": "A change detector maps modified files to affected packages.",
+        "brief_evidence": "“A change detector maps modified files to affected packages...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction states that the “Change detector” determines affected packages from an incoming developer or CI request and points through “maps to” to “Affected packages.” It does not mention modified files as the detector’s specific input.",
+        "note": "The mapping output and component responsibility survive, but the file-change input is softened into a generic request."
+      },
+      {
+        "brief_element": "A build-graph service expands the affected packages to include required dependents.",
+        "brief_evidence": "“...a build-graph service expands those packages to include required dependents...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction gives the ordered flow “Affected packages” → “Build-graph service” → “required dependents” → “Dependents expanded.”",
+        "note": "The component, input, expansion responsibility, and output are all explicit."
+      },
+      {
+        "brief_element": "The build graph orders tasks by dependency.",
+        "brief_evidence": "“...and orders tasks by dependency.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies an “ordered DAG” flowing into a “Dependency-aware scheduler” and explicitly records dependency-aware scheduling.",
+        "note": "Dependency ordering is clearly communicated, even though it is represented as an ordered DAG rather than repeated verbatim."
+      },
+      {
+        "brief_element": "The scheduler assigns dependency-ready tasks to an elastic worker pool.",
+        "brief_evidence": "“The scheduler assigns ready tasks to an elastic worker pool...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states that the “Dependency-aware scheduler” emits “ready tasks” into task execution, where they are handled by the “Elastic worker pool.”",
+        "note": "Dispatch direction, readiness condition, scheduler, and worker-pool destination are recoverable."
+      },
+      {
+        "brief_element": "Unrelated branches of the build graph may run concurrently.",
+        "brief_evidence": "“...while allowing unrelated branches of the graph to run concurrently.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes the board note: “Concurrency — Unrelated graph branches run in parallel.”",
+        "note": "The intended graph-level concurrency rule is exact."
+      },
+      {
+        "brief_element": "Before executing a task, a worker calculates its content key.",
+        "brief_evidence": "“Before running a task, a worker calculates a content key...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction places “Calculate content key” after ready-task processing by the elastic worker pool and before “Cache hit?” and cache lookup.",
+        "note": "The key calculation is correctly positioned before cache decision and miss execution."
+      },
+      {
+        "brief_element": "The content key includes the task’s sources.",
+        "brief_evidence": "“...from its sources...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes the key-input note listing “Sources.”",
+        "note": "Exact key input recovered."
+      },
+      {
+        "brief_element": "The content key includes the task’s declared environment.",
+        "brief_evidence": "“...declared environment...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction quotes the key-input note listing “environment,” but does not preserve the qualification that the environment is declared.",
+        "note": "The environment is included, but the operational boundary limiting it to declared environment is not explicit."
+      },
+      {
+        "brief_element": "The content key includes the toolchain version.",
+        "brief_evidence": "“...toolchain version...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction quotes the key-input note listing “toolchain,” but not specifically the toolchain version.",
+        "note": "The toolchain dimension survives, while version specificity is softened."
+      },
+      {
+        "brief_element": "The content key includes the task command.",
+        "brief_evidence": "“...command...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes the key-input note listing “command.”",
+        "note": "Exact key input recovered."
+      },
+      {
+        "brief_element": "The content key includes dependency outputs.",
+        "brief_evidence": "“...and dependency outputs.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes the key-input note listing “dependency outputs.”",
+        "note": "The key’s dependency-sensitive behavior is explicit."
+      },
+      {
+        "brief_element": "The worker checks the remote cache using the calculated content key.",
+        "brief_evidence": "“It checks the remote cache...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records “Calculate content key,” a lookup/check path, “Cache hit?,” and a teal connector labeled “check” entering “Remote cache.”",
+        "note": "Although one connector label is partly occluded, the key-based remote-cache lookup sequence is recoverable."
+      },
+      {
+        "brief_element": "When a matching remote-cache result exists and is usable, the worker restores it rather than executing the task.",
+        "brief_evidence": "“...and restores a matching result when one exists.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Cache hit?,” a remote-cache and provenance route, and the outcome “Restore cached result,” but notes that no branch is explicitly labeled “hit” and that exact intermediate branch semantics are ambiguous.",
+        "note": "The restoration outcome is clear, but the precise positive-hit branch and matching-result condition require some inference."
+      },
+      {
+        "brief_element": "A cache miss executes the task in an isolated workspace.",
+        "brief_evidence": "“A miss executes in an isolated workspace...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction gives the explicit flow “Cache hit?” → branch labeled “miss” → “Execute in isolated workspace.”",
+        "note": "The miss branch and its execution boundary are exact."
+      },
+      {
+        "brief_element": "After successful execution, immutable task outputs are uploaded to the artifact store.",
+        "brief_evidence": "“...uploads immutable outputs to the artifact store...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records a teal output path from “Execute in isolated workspace” to “Immutable artifact store,” followed by a label “immutable outputs.”",
+        "note": "The storage destination and immutability property are explicit; the success route is distinct from the red failure route."
+      },
+      {
+        "brief_element": "The cache entry is published only after the task succeeds.",
+        "brief_evidence": "“...and publishes the cache entry only after the task succeeds.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction orders isolated execution before the immutable artifact store and then “Publish cache entry atomically,” while execution failure takes a separate route to “Task failed” and is described as never cached.",
+        "note": "The ordering and separate uncached failure route jointly communicate success-gated publication."
+      },
+      {
+        "brief_element": "Failed tasks are never cached.",
+        "brief_evidence": "“Failed tasks are never cached...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes the failure-policy note as “Never cached” and routes execution failure directly to “Task failed.”",
+        "note": "The failure caching policy is explicit."
+      },
+      {
+        "brief_element": "Failed tasks block their dependents.",
+        "brief_evidence": "“...block their dependents...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction reads the policy as “blocks dependent...” and interprets it as blocking dependent work, while noting that the final noun is truncated.",
+        "note": "The intended behavior is strongly implied but not fully readable in the board evidence."
+      },
+      {
+        "brief_element": "Failed-task logs are returned to the requesting local developer or CI job.",
+        "brief_evidence": "“...and return logs to the requesting developer or CI job.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for failure logs or for a return route from “Task failed” to the originating local developer or CI job.",
+        "note": "The failure path terminates at task failure and policy; its diagnostic feedback loop to the requester is lost."
+      },
+      {
+        "brief_element": "Cache entries carry provenance.",
+        "brief_evidence": "“Cache entries carry provenance...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records the remote-cache output as “entry + provenance” flowing to “Provenance trusted?”",
+        "note": "Provenance is visibly attached to cache entries and evaluated."
+      },
+      {
+        "brief_element": "Protected builds must not reuse cache results originating from untrusted forks.",
+        "brief_evidence": "“...so results from untrusted forks cannot be reused by protected builds...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Provenance trusted?” decision and a trust-dependent route toward “Restore cached result,” but explicitly notes that no yes/no branches or distinct untrusted-provenance outcome are visible.",
+        "note": "Generic provenance trust enforcement survives, but the specific untrusted-fork source, protected-build boundary, and rejection behavior are not recoverable."
+      },
+      {
+        "brief_element": "Concurrent workers may calculate the same content key.",
+        "brief_evidence": "“...concurrent workers calculating the same key...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction quotes a “Same-key safety” note beginning “Concurrent workers converge on one...” and identifies concurrent workers operating on the same key.",
+        "note": "The same-key concurrency scenario is communicated."
+      },
+      {
+        "brief_element": "Concurrent workers calculating the same key must converge on a single consistent cache entry.",
+        "brief_evidence": "“...must converge...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction reads “Concurrent workers converge on one...” but states that the object on which they converge is truncated and unspecified.",
+        "note": "Convergence is explicit, but convergence specifically on the cache entry is not fully recoverable."
+      },
+      {
+        "brief_element": "Same-key concurrency must not corrupt the cache entry.",
+        "brief_evidence": "“...without corrupting the entry.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Publish cache entry atomically” and a truncated same-key safety note, but does not recover an explicit statement that concurrent same-key workers cannot corrupt the entry.",
+        "note": "Atomic publication suggests protection, but the no-corruption guarantee and its direct connection to same-key concurrency require inference."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The system has exactly five stages.",
+        "reconstruction_evidence": "The system purpose calls it “A five-stage monorepo build-and-cache system,” and the reconstruction lists stages numbered 1 through 5.",
+        "why_unsupported": "The brief defines the architecture and behavior but does not prescribe or claim a five-stage decomposition. This is board-specific organizational detail rather than a brief requirement."
+      },
+      {
+        "claim": "Cache entries are published atomically.",
+        "reconstruction_evidence": "The reconstruction names a component “Publish cache entry atomically” and records atomic publication as an explicit constraint.",
+        "why_unsupported": "The brief requires concurrent same-key workers to converge without corrupting the entry, but does not specify atomic publication as the implementation mechanism."
+      }
+    ],
+    "strongest_transmitted_behavior": "The primary build path is transmitted very well: developer or CI request, affected-package detection, dependent expansion, dependency-aware scheduling, elastic concurrent execution, content-key calculation, remote-cache check, isolated miss execution, immutable artifact storage, and post-success cache publication.",
+    "most_consequential_loss": "The failure path does not return logs to the requesting developer or CI job. This removes the brief’s explicit diagnostic feedback loop and leaves failure handling operationally incomplete; the protected-build versus untrusted-fork trust boundary is also only generically represented.",
+    "overall_summary": "The reconstruction recovers the complete architectural shape and almost all critical happy-path and cache-miss behavior. Dependency ordering, ready-task scheduling, parallel graph branches, key composition, remote-cache lookup, isolated execution, immutable outputs, success-gated publication, and uncached failure are usable for engineering discussion. Fidelity falls short of full actionability because requester-bound failure logs are absent, the exact protected-build/untrusted-fork policy is softened into a generic provenance check, and same-key convergence/no-corruption semantics are truncated and partly inferred. No system-defining contradiction is present.",
+    "score": 7.5
+  },
+  "usage": {
+    "input_tokens": 11968,
+    "output_tokens": 7808
+  },
+  "flags": []
+}

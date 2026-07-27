@@ -7,7 +7,6 @@ export type InteractiveCanvasObjectType =
   | "process"
   | "decision"
   | "sticky"
-  | "annotation-marker"
   // D16 — expanded vocabulary for the reference diagrams (checkpoint 5):
   | "document"
   | "database"
@@ -67,30 +66,33 @@ export type CanvasArrowShapeDirection = CanvasShapeDirection;
  * with the label below. Exact ids per the Wave A
  * implementation brief; Wave B2 owns the actual glyph-path registry.
  */
-export type CanvasIconGlyph =
-  | "activity"
-  | "archive"
-  | "key"
-  | "chat"
-  | "cloud"
-  | "cpu"
-  | "database"
-  | "display"
-  | "mail"
-  | "file"
-  | "code"
-  | "bolt"
-  | "pin"
-  | "phone"
-  | "package"
-  | "coin"
-  | "shield"
-  | "send"
-  | "server"
-  | "cube"
-  | "gear"
-  | "drive"
-  | "terminal"
-  | "person"
-  | "wallet"
-  | "globe";
+export const CANVAS_ICON_GLYPHS = [
+  "activity",
+  "archive",
+  "key",
+  "chat",
+  "cloud",
+  "cpu",
+  "database",
+  "display",
+  "mail",
+  "file",
+  "code",
+  "bolt",
+  "pin",
+  "phone",
+  "package",
+  "coin",
+  "shield",
+  "send",
+  "server",
+  "cube",
+  "gear",
+  "drive",
+  "terminal",
+  "person",
+  "wallet",
+  "globe",
+] as const;
+
+export type CanvasIconGlyph = (typeof CANVAS_ICON_GLYPHS)[number];

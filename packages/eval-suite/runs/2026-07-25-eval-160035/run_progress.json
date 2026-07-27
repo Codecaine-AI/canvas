@@ -1,0 +1,102 @@
+{
+  "run_id": "2026-07-25-eval-160035",
+  "tier": "system",
+  "sut_thinking": "low",
+  "status": "completed",
+  "started_at": "2026-07-25T21:00:37.572Z",
+  "finished_at": "2026-07-25T21:12:58.141Z",
+  "scenarios": {
+    "agent-session-orchestration": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75827,
+      "finished_at": "2026-07-25T21:10:24.431Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "code-review-agents": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75828,
+      "finished_at": "2026-07-25T21:09:32.994Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "eval-harness-orchestration": {
+      "status": "graded",
+      "stages_done": [
+        "stage0",
+        "e1"
+      ],
+      "pid": 75829,
+      "finished_at": "2026-07-25T21:10:53.647Z",
+      "outcomes": {
+        "stage0": "committed",
+        "e1": "committed"
+      }
+    },
+    "ivr-agent-handoff": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75830,
+      "finished_at": "2026-07-25T21:08:36.583Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "llm-inference-gateway": {
+      "status": "graded",
+      "stages_done": [
+        "stage0",
+        "e1"
+      ],
+      "pid": 75831,
+      "finished_at": "2026-07-25T21:12:58.132Z",
+      "outcomes": {
+        "stage0": "committed",
+        "e1": "committed"
+      }
+    },
+    "rag-ingestion-retrieval": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75832,
+      "finished_at": "2026-07-25T21:08:51.345Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "sandboxed-tool-fleet": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75833,
+      "finished_at": "2026-07-25T21:09:00.137Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "trace-ingestion-pipeline": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 75834,
+      "finished_at": "2026-07-25T21:09:18.129Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

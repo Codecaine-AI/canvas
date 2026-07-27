@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-154843.oauth-session-lifecycle",
+  "title": "2026-07-24-eval-154843 · oauth-session-lifecycle",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-154843 · oauth-session-lifecycle",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 64,
+        "width": 2064,
+        "height": 1296
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "login-flow",
+      "type": "section",
+      "text": "1 · OAuth login and callback",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 112,
+        "width": 1840,
+        "height": 352
+      }
+    },
+    {
+      "id": "session-use",
+      "type": "section",
+      "text": "2 · Application session and service requests",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 384,
+        "y": 576,
+        "width": 1728,
+        "height": 320
+      }
+    },
+    {
+      "id": "token-refresh",
+      "type": "section",
+      "text": "3 · Provider token access and coordinated refresh",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 880,
+        "width": 1136,
+        "height": 384
+      }
+    },
+    {
+      "id": "revocation-audit",
+      "type": "section",
+      "text": "4 · Revocation and security audit",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1520,
+        "y": 896,
+        "width": 624,
+        "height": 432
+      }
+    },
+    {
+      "id": "browser",
+      "type": "icon",
+      "text": "Browser",
+      "color": "blue",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 128,
+        "height": 96
+      },
+      "icon": "display"
+    },
+    {
+      "id": "web-app",
+      "type": "rectangle",
+      "text": "Web application",
+      "color": "white",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 336,
+        "y": 176,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "auth-gateway",
+      "type": "predefined-process",
+      "text": "Auth gateway",
+      "color": "blue",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 592,
+        "y": 176,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "session-store",
+      "type": "database",
+      "text": "Session store\nstate + PKCE",
+      "color": "teal",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 848,
+        "y": 160,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "oauth-provider",
+      "type": "icon",
+      "text": "External OAuth provider",
+      "color": "violet",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1104,
+        "y": 160,
+        "width": 176,
+        "height": 112
+      },
+      "icon": "globe"
+    },
+    {
+      "id": "callback",
+      "type": "predefined-process",
+      "text": "Callback service",
+      "color": "blue",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1360,
+        "y": 176,
+        "width": 176,
+        "height": 80
+      }
+    },
+    {
+      "id": "token-vault",
+      "type": "database",
+      "text": "Encrypted token vault",
+      "color": "violet",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1616,
+        "y": 160,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "account-map",
+      "type": "process",
+      "text": "Map provider identity\nto internal account",
+      "color": "white",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1104,
+        "y": 336,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "login-event",
+      "type": "document",
+      "text": "Auditable login event",
+      "color": "orange",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1392,
+        "y": 336,
+        "width": 192,
+        "height": 96
+      }
+    },
+    {
+      "id": "session-cookie",
+      "type": "pill",
+      "text": "Secure HTTP-only\napplication session cookie",
+      "color": "green",
+      "parentId": "login-flow",
+      "geometry": {
+        "x": 1664,
+        "y": 336,
+        "width": 272,
+        "height": 96
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "predefined-process",
+      "text": "API gateway",
+      "color": "teal",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 400,
+        "y": 640,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "validate-session",
+      "type": "process",
+      "text": "Validate application session",
+      "color": "teal",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 704,
+        "y": 640,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "auth-context",
+      "type": "document",
+      "text": "Internal user ID +\nauthorization context",
+      "color": "white",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 1040,
+        "y": 624,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "downstream",
+      "type": "icon",
+      "text": "Downstream services",
+      "color": "gray",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 1376,
+        "y": 624,
+        "width": 208,
+        "height": 112
+      },
+      "icon": "server"
+    },
+    {
+      "id": "integration",
+      "type": "icon",
+      "text": "Provider integration",
+      "color": "violet",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 1696,
+        "y": 624,
+        "width": 208,
+        "height": 112
+      },
+      "icon": "cloud"
+    },
+    {
+      "id": "boundary-note",
+      "type": "sticky",
+      "text": "**Trust boundary**\n- Browser receives only the application cookie\n- Provider tokens stay out of general services",
+      "color": "yellow",
+      "parentId": "session-use",
+      "geometry": {
+        "x": 1728,
+        "y": 752,
+        "width": 352,
+        "height": 112
+      }
+    },
+    {
+      "id": "token-broker",
+      "type": "predefined-process",
+      "text": "Token broker",
+      "color": "violet",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 144,
+        "y": 944,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "expiry-check",
+      "type": "decision",
+      "text": "Token near expiry?",
+      "color": "yellow",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 432,
+        "y": 928,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "refresh-coordinator",
+      "type": "process",
+      "text": "Refresh coordinator",
+      "color": "violet",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 720,
+        "y": 944,
+        "width": 208,
+        "height": 80
+      }
+    },
+    {
+      "id": "account-lock",
+      "type": "icon",
+      "text": "Per-account lock",
+      "color": "orange",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 1024,
+        "y": 928,
+        "width": 176,
+        "height": 112
+      },
+      "icon": "key"
+    },
+    {
+      "id": "refresh-provider",
+      "type": "process",
+      "text": "Refresh once",
+      "color": "violet",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 144,
+        "y": 1136,
+        "width": 192,
+        "height": 80
+      }
+    },
+    {
+      "id": "rotate-refresh",
+      "type": "database",
+      "text": "Rotate stored\nrefresh token",
+      "color": "violet",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 432,
+        "y": 1120,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "wake-callers",
+      "type": "process",
+      "text": "Wake concurrent callers\nwith new result",
+      "color": "green",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 720,
+        "y": 1120,
+        "width": 224,
+        "height": 112
+      }
+    },
+    {
+      "id": "invalid-refresh",
+      "type": "decision",
+      "text": "Invalid refresh?",
+      "color": "red",
+      "parentId": "token-refresh",
+      "geometry": {
+        "x": 1040,
+        "y": 1120,
+        "width": 192,
+        "height": 112
+      }
+    },
+    {
+      "id": "logout",
+      "type": "pill",
+      "text": "Explicit logout",
+      "color": "orange",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1536,
+        "y": 944,
+        "width": 176,
+        "height": 64
+      }
+    },
+    {
+      "id": "admin-revoke",
+      "type": "pill",
+      "text": "Administrator revocation",
+      "color": "orange",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1760,
+        "y": 944,
+        "width": 240,
+        "height": 64
+      }
+    },
+    {
+      "id": "provider-notify",
+      "type": "pill",
+      "text": "Provider revocation notification",
+      "color": "orange",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1536,
+        "y": 1040,
+        "width": 272,
+        "height": 64
+      }
+    },
+    {
+      "id": "invalidate",
+      "type": "process",
+      "text": "Invalidate active sessions +\ncached authorization context",
+      "color": "red",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1840,
+        "y": 1040,
+        "width": 272,
+        "height": 96
+      }
+    },
+    {
+      "id": "audit-stream",
+      "type": "document-stack",
+      "text": "Security audit stream\n(no token values)",
+      "color": "orange",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1632,
+        "y": 1184,
+        "width": 256,
+        "height": 112
+      }
+    },
+    {
+      "id": "audit-note",
+      "type": "sticky",
+      "text": "**Audit failures**\n- state validation\n- token exchange\n- refresh\n- revocation",
+      "color": "yellow",
+      "parentId": "revocation-audit",
+      "geometry": {
+        "x": 1920,
+        "y": 1184,
+        "width": 192,
+        "height": 112
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "browser",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "web-app",
+        "anchor": "left"
+      },
+      "label": "start login",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "web-app",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth-gateway",
+        "anchor": "left"
+      },
+      "label": "login request",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "auth-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "session-store",
+        "anchor": "left"
+      },
+      "label": "store state + PKCE",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "session-store",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "oauth-provider",
+        "anchor": "left"
+      },
+      "label": "redirect",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "oauth-provider",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "callback",
+        "anchor": "left"
+      },
+      "label": "authorization code",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "callback",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "account-map",
+        "anchor": "top"
+      },
+      "label": "validate state + exchange with verifier",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "callback",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "token-vault",
+        "anchor": "left"
+      },
+      "label": "encrypt provider tokens",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "account-map",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "login-event",
+        "anchor": "left"
+      },
+      "label": "record login",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "login-event",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "session-cookie",
+        "anchor": "left"
+      },
+      "label": "issue session",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "session-cookie",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "api-gateway",
+        "anchor": "top"
+      },
+      "label": "subsequent request + cookie",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "api-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "validate-session",
+        "anchor": "left"
+      },
+      "label": "check session",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "validate-session",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth-context",
+        "anchor": "left"
+      },
+      "label": "valid",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "auth-context",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "downstream",
+        "anchor": "left"
+      },
+      "label": "identity + auth context only",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "downstream",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "integration",
+        "anchor": "left"
+      },
+      "label": "integration call",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "integration",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "token-broker",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1600,
+          800
+        ],
+        [
+          240,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "token-broker",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "expiry-check",
+        "anchor": "left"
+      },
+      "label": "read vault token",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "expiry-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "refresh-coordinator",
+        "anchor": "left"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "refresh-coordinator",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "account-lock",
+        "anchor": "left"
+      },
+      "label": "acquire lock",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "account-lock",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "refresh-provider",
+        "anchor": "top"
+      },
+      "label": "single refresh",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "refresh-provider",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rotate-refresh",
+        "anchor": "left"
+      },
+      "label": "new token pair",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "rotate-refresh",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "wake-callers",
+        "anchor": "left"
+      },
+      "label": "atomic rotation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e22",
+      "from": {
+        "objectId": "wake-callers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "invalid-refresh",
+        "anchor": "left"
+      },
+      "label": "or error",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e23",
+      "from": {
+        "objectId": "invalid-refresh",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "invalidate",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e24",
+      "from": {
+        "objectId": "logout",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "invalidate",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e25",
+      "from": {
+        "objectId": "admin-revoke",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "invalidate",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e26",
+      "from": {
+        "objectId": "provider-notify",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "invalidate",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e27",
+      "from": {
+        "objectId": "invalidate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "audit-stream",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

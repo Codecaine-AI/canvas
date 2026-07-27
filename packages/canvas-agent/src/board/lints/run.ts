@@ -1,8 +1,11 @@
 /**
  * Diagnostics runner — canvas document → Diagnostic[] via the lint
  * registry (./index LAYOUT_RULES), plus the DIAGNOSTICS text block. Called
- * per apply_ops batch, at spawn (<board_state>), by the board tool, and as
- * the E-tier commit gate.
+ * per operation, at spawn (<board_state>), and as the E-tier finalize gate
+ * (./index FINISHING_RULES).
+ *
+ * One diagnostic renders as one line — the measured fact plus its prose
+ * remedy — and the model chooses and encodes the fix.
  *
  * Id assignment is stable: errors first as E1..En, then warnings as W1..Wn,
  * in registry-rule order then the order the rule's positional scan emitted.
@@ -17,24 +20,32 @@ export function runDiagnostics(
   document: InteractiveCanvasDocument,
   rules: readonly LayoutRule[] = LAYOUT_RULES,
 ): Diagnostic[] {
-  const collected: { finding: Omit<Diagnostic, "id" | "quickfixAvailable">; quickfixAvailable: boolean }[] = [];
+  const collected: Omit<Diagnostic, "id">[] = [];
   for (const rule of rules) {
     for (const finding of rule.check(document)) {
-      collected.push({ finding, quickfixAvailable: typeof rule.quickfix === "function" });
+      collected.push(finding);
     }
   }
   const assign = (
     entries: typeof collected,
     prefix: "E" | "W",
-  ): Diagnostic[] => entries.map((entry, index) => ({
-    ...entry.finding,
+  ): Diagnostic[] => entries.map((finding, index) => ({
+    ...finding,
     id: `${prefix}${index + 1}`,
-    quickfixAvailable: entry.quickfixAvailable,
   }));
   return [
-    ...assign(collected.filter((entry) => entry.finding.severity === "error"), "E"),
-    ...assign(collected.filter((entry) => entry.finding.severity === "warning"), "W"),
+    ...assign(collected.filter((finding) => finding.severity === "error"), "E"),
+    ...assign(collected.filter((finding) => finding.severity === "warning"), "W"),
   ];
+}
+
+/**
+ * One diagnostic renders as one line — the measured fact plus its prose
+ * remedy. The model chooses and encodes the fix.
+ */
+export function diagnosticLines(diagnostic: Diagnostic): string[] {
+  const suggestion = diagnostic.suggestion ? ` (${diagnostic.suggestion})` : "";
+  return [`${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}${suggestion}`];
 }
 
 export function formatDiagnostics(diags: Diagnostic[]): string {
@@ -45,9 +56,7 @@ export function formatDiagnostics(diags: Diagnostic[]): string {
     `DIAGNOSTICS · ${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`,
   ];
   for (const diagnostic of diags) {
-    const suggestion = diagnostic.suggestion ? ` (${diagnostic.suggestion})` : "";
-    const quickfix = diagnostic.quickfixAvailable ? " [quickfix]" : "";
-    lines.push(`  ${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}${suggestion}${quickfix}`);
+    lines.push(...diagnosticLines(diagnostic).map((line) => `  ${line}`));
   }
   return lines.join("\n");
 }

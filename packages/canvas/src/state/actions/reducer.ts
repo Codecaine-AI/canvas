@@ -3,7 +3,12 @@
 import type { InteractiveCanvasDocument } from "../schema";
 import { reconcileSectionMembership } from "../section-membership";
 import { handleApplyAgentPatch } from "./agent-patch";
-import { handleAddAnnotation, handleRemoveAnnotation } from "./annotations";
+import {
+  handleAddAnnotation,
+  handleAppendAnnotationReply,
+  handleRemoveAnnotation,
+  handleSetAnnotationStatus,
+} from "./annotations";
 import { FIRST_USE_COLORS } from "../schema/object-defaults";
 import {
   handleAddConnection,
@@ -94,8 +99,8 @@ function shouldReconcileSectionMembership(action: CanvasAction): boolean {
     case "canvas.distributeSelection":
     case "canvas.fitSectionToChildren":
     case "canvas.setObjectType":
-    // Agent patches write geometry (add/update) and auto-fit affected sections — membership must
-    // re-derive; patch ops never write parentId themselves (agent-patch.ts).
+    // Agent patches write geometry (add/update) — membership must re-derive;
+    // patch ops never write parentId themselves (agent-patch.ts).
     case "canvas.applyAgentPatch":
       return true;
     case "canvas.updateObject":
@@ -116,7 +121,7 @@ function objectPatchTouchesSectionMembership(
 /**
  * Thin action switch — every case delegates to a named handler in its domain
  * module (./objects, ./geometry-ops, ./connections, ./annotations, ./history).
- * Only the trivial cases with no domain home (select/setTool/title/reset)
+ * Only the trivial cases with no domain home (select/setTool/title/description/reset)
  * stay inline.
  */
 function reduceCanvasAction(
@@ -135,6 +140,17 @@ function reduceCanvasAction(
     return withHistory(state, { ...state.document, title }, {
       source: "human",
       summary: "Renamed board",
+      changedObjectIds: [],
+      changedConnectionIds: [],
+      changedAnnotationIds: [],
+    });
+  }
+  if (action.type === "canvas.setDocumentDescription") {
+    const description = action.description.trim() || undefined;
+    if (state.document.description === description) return state;
+    return withHistory(state, { ...state.document, description }, {
+      source: "human",
+      summary: "Updated description",
       changedObjectIds: [],
       changedConnectionIds: [],
       changedAnnotationIds: [],
@@ -212,6 +228,14 @@ function reduceCanvasAction(
 
   if (action.type === "canvas.removeAnnotation") {
     return handleRemoveAnnotation(state, action);
+  }
+
+  if (action.type === "canvas.appendAnnotationReply") {
+    return handleAppendAnnotationReply(state, action);
+  }
+
+  if (action.type === "canvas.setAnnotationStatus") {
+    return handleSetAnnotationStatus(state, action);
   }
 
   if (action.type === "canvas.deleteSelection") {

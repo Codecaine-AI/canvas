@@ -8,7 +8,6 @@ describe("covered-content lint", () => {
     expect(coveredContent.id).toBe("covered-content");
     expect(coveredContent.tier).toBe("error");
     expect(coveredContent.guidance).toContain("exempt");
-    expect(coveredContent.quickfix).toBeUndefined();
   });
 
   // --- box-on-box (ported from rules-overlap) ---
@@ -45,7 +44,6 @@ describe("covered-content lint", () => {
       box("b", 224, 0),                              // apart
       box("wrap", 0, 0, 480, 320, "section"),        // sections exempt
       box("note", 40, 40, 160, 96, "sticky"),        // stickies exempt
-      box("pin", 60, 60, 24, 24, "annotation-marker"),
       { ...box("other", 8, 8), parentId: "wrap" },   // overlaps a, different parent
     ]));
     expect(findings).toHaveLength(0);

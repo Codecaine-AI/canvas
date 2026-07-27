@@ -10,18 +10,22 @@
       "children": [
         "b-r8-title-1",
         "b-r8-card-2",
+        "b-r8-target-5",
         "b-r8-body-3",
         "b-r8-sticky-4"
       ],
       "props": {
-        "covers": "Three size classes only — S chips at 0.72x, M standard members at 1x, L terminals and emphasis at 1.35x — ranked per leaf by area percentile, with the sticky 384x288 override where the drop default misrepresents the boards.",
+        "covers": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "size classes",
-          "SIZE_SCALE",
-          "area percentile",
-          "sticky override"
+          "content-first sizing",
+          "target node size",
+          "peer sizing",
+          "size as signal",
+          "bare type roster",
+          "explicit geometry",
+          "sticky sizing"
         ]
       }
     },
@@ -43,11 +47,22 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Three sizes only"
+        "title": "Size is information"
       },
       "text": [
         {
-          "insert": "S chips at 0.72x, M standard members at 1x, L terminals and emphasis at 1.35x. Cells of one grid always share a size."
+          "insert": "Size each box for what it says, then make peers match the largest member. Use a larger box only as a deliberate importance signal and an off-register size only as a deliberate exception."
+        }
+      ]
+    },
+    "b-r8-target-5": {
+      "id": "b-r8-target-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally — it is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the label needs, then match peers to the largest member. What a box says decides its size; what kind of thing it is decides nothing."
         }
       ]
     },
@@ -58,21 +73,33 @@
       "props": {},
       "text": [
         {
-          "insert": "The three classes are ranked per leaf by area percentile. S covers compact operands, icons, and action triangles (intent-2's 128x112 actions, gc's 160x64 curator). M is the workhorse process/pill/card size; template members of one lattice are always the same class. L marks end states and decision hubs (ink's 192x192 completion ellipses, gc's 256x112 exact-match decision, intent-2's 256x144 classify pentagons). Type extents come from the canvas drop defaults scaled by "
+          "insert": "Mechanism: the "
         },
         {
-          "insert": "SIZE_SCALE",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "SIZE_SCALE"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " (0.72 / 1 / 1.35)."
+          "insert": " defines content-first sizing and peer matching. The generated "
+        },
+        {
+          "insert": "capabilities roster",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/capabilities/vocabulary.generated.ts",
+              "symbol": "CAPABILITIES_OBJECTS_GENERATED"
+            }
+          }
+        },
+        {
+          "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. Patched rectangles quantize to the 16px grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
         }
       ]
     },
@@ -83,21 +110,7 @@
       "props": {},
       "text": [
         {
-          "insert": "One corpus override where the drop default misrepresents the boards: stickies expand from a 384x288 base ("
-        },
-        {
-          "insert": "SKETCH_TYPE_SIZE_OVERRIDES",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "SKETCH_TYPE_SIZE_OVERRIDES"
-            }
-          }
-        },
-        {
-          "insert": "). Corpus stickies run 336-608 wide and 112-688 tall, median about 400x320; the 176x128 drop default collapses every relation through a sticky rail."
+          "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short labels belong on objects; summaries, legends, callouts, explanations, and open questions belong on stickies."
         }
       ]
     }

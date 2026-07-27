@@ -5,14 +5,15 @@
 @source "./";
 
 /*
- * The agent-kernel viewer packages are machine-local `link:` deps resolving
- * to TS source in the sibling checkout; Tailwind never scans node_modules,
- * so their class usage must be named explicitly or the trace viewer / prompt
- * lab render naked.
+ * The linked viewer packages are machine-local `link:` deps resolving to TS
+ * source in sibling checkouts; Tailwind never scans node_modules, so their
+ * class usage must be named explicitly or the trace viewer / prompt lab
+ * render naked. prompt-kit is its own repo next to agent-kernel, not a
+ * package inside it.
  */
 @source "../../../../../agent-kernel/packages/viewer-shell/src";
 @source "../../../../../agent-kernel/packages/viewer-ui/src";
-@source "../../../../../agent-kernel/packages/prompt-kit/src";
+@source "../../../../../prompt-kit/src";
 
 /*
  * Shared-name token → Tailwind color mapping (the same mapping studio's

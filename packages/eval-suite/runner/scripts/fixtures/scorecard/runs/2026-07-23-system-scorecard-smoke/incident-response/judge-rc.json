@@ -1,0 +1,10 @@
+{
+  "axis": "rc",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "score": 9,
+  "verdict": {
+    "coverage_summary": "All system-defining requirements and nearly every supporting detail are represented."
+  },
+  "flags": []
+}

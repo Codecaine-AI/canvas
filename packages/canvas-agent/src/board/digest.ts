@@ -33,14 +33,14 @@ function rect(object: InteractiveCanvasObject): string {
 }
 
 /**
- * One-line, length-bounded rendering of a text field. Truncation is visible
- * (`…(+Nch)`) so elided length is never silent; `inspect` carries full text.
+ * One-line rendering of a text field: whitespace (including newlines)
+ * collapses to single spaces, but the full text always renders — the digest
+ * is the model's only text source, so nothing is elided. Tolerates a missing
+ * field: the digest formats whatever document it is handed and must never
+ * throw mid-session.
  */
-function clip(text: string, max = 64): string {
-  const oneLine = text.replace(/\s+/g, " ").trim();
-  if (oneLine.length <= max) return oneLine;
-  const kept = oneLine.slice(0, max - 1);
-  return `${kept}…(+${oneLine.length - kept.length}ch)`;
+function oneLine(text: string | undefined): string {
+  return (text ?? "").replace(/\s+/g, " ").trim();
 }
 
 function defaultColorFor(object: InteractiveCanvasObject): string {
@@ -63,12 +63,12 @@ function objectExtras(object: InteractiveCanvasObject): string[] {
   }
   if (object.direction !== undefined) extras.push(`dir=${object.direction}`);
   if (object.icon !== undefined) extras.push(`icon=${object.icon}`);
-  if (object.author !== undefined) extras.push(`author=${JSON.stringify(clip(object.author, 32))}`);
+  if (object.author !== undefined) extras.push(`author=${JSON.stringify(oneLine(object.author))}`);
   return extras;
 }
 
 function objectLine(object: InteractiveCanvasObject, depth: number): string {
-  const parts = [object.id, object.type, JSON.stringify(clip(object.text))];
+  const parts = [object.id, object.type, JSON.stringify(oneLine(object.text))];
   if (object.color !== undefined && object.color !== defaultColorFor(object)) {
     parts.push(object.color);
   }
@@ -99,7 +99,7 @@ function edgeExtras(connection: InteractiveCanvasConnection): string[] {
     extras.push(`arrow=${connection.arrow}`);
   }
   if (connection.role !== undefined) {
-    extras.push(`role=${JSON.stringify(clip(connection.role, 32))}`);
+    extras.push(`role=${JSON.stringify(oneLine(connection.role))}`);
   }
   if (connection.from.anchor !== undefined || connection.to.anchor !== undefined) {
     extras.push(`anchors=${endpointAnchor(connection, "from")}→${endpointAnchor(connection, "to")}`);
@@ -115,7 +115,7 @@ function edgeExtras(connection: InteractiveCanvasConnection): string[] {
 
 function edgeLine(connection: InteractiveCanvasConnection): string {
   const label = connection.label !== undefined && connection.label !== ""
-    ? JSON.stringify(clip(connection.label))
+    ? JSON.stringify(oneLine(connection.label))
     : "—";
   const parts = [
     connection.id,
@@ -129,7 +129,7 @@ function edgeLine(connection: InteractiveCanvasConnection): string {
 export function formatBoardDigest(document: InteractiveCanvasDocument): string {
   const lines: string[] = [];
   const frame = pageFrameOf(document);
-  const frameNote = frame ? "" : " · no locked frame";
+  const frameNote = frame ? "" : " · no base section";
   lines.push(`BOARD${frameNote}  ${DIGEST_GRAMMAR} · ${DIGEST_DEFAULTS_LEGEND}`);
 
   const knownIds = new Set(document.objects.map((object) => object.id));

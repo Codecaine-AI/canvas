@@ -49,6 +49,7 @@ const SESSION_MESSAGE_EVENT_TYPES = {
   delta: true,
   rendering: true,
   "proposal-ready": true,
+  annotations: true,
   abandoned: true,
   status: true,
 } satisfies Record<Exclude<AgentSessionEvent["type"], "error">, true>;

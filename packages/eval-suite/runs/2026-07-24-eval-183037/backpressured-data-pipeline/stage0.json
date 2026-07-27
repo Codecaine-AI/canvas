@@ -1,0 +1,996 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-24-eval-183037.backpressured-data-pipeline",
+  "title": "2026-07-24-eval-183037 · backpressured-data-pipeline",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-24-eval-183037 · backpressured-data-pipeline",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 112,
+        "y": 16,
+        "width": 2080,
+        "height": 1344
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources-ingest",
+      "type": "section",
+      "text": "1 · Producers & guarded ingest",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 64,
+        "width": 2016,
+        "height": 352
+      }
+    },
+    {
+      "id": "durable-transform",
+      "type": "section",
+      "text": "2 · Durable buffer & ordered transform",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 496,
+        "width": 2016,
+        "height": 368
+      }
+    },
+    {
+      "id": "load-serve",
+      "type": "section",
+      "text": "3 · Storage, warehouse & query",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 144,
+        "y": 976,
+        "width": 1392,
+        "height": 352
+      }
+    },
+    {
+      "id": "control-plane",
+      "type": "section",
+      "text": "Backpressure & operations",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1680,
+        "y": 960,
+        "width": 464,
+        "height": 368
+      }
+    },
+    {
+      "id": "app-producers",
+      "type": "icon",
+      "text": "Application producers",
+      "color": "blue",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 144,
+        "y": 176,
+        "width": 144,
+        "height": 96
+      },
+      "icon": "send"
+    },
+    {
+      "id": "partner-batch",
+      "type": "document-stack",
+      "text": "Partner batch uploads",
+      "color": "blue",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 144,
+        "y": 304,
+        "width": 144,
+        "height": 80
+      }
+    },
+    {
+      "id": "ingest-gateway",
+      "type": "process",
+      "text": "Ingest gateway\nAuth + tenant / receipt metadata",
+      "color": "blue",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 400,
+        "y": 224,
+        "width": 240,
+        "height": 112
+      }
+    },
+    {
+      "id": "schema-check",
+      "type": "decision",
+      "text": "Schema + record valid?",
+      "color": "yellow",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 768,
+        "y": 224,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "schema-registry",
+      "type": "database",
+      "text": "Schema registry",
+      "color": "violet",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 752,
+        "y": 112,
+        "width": 208,
+        "height": 80
+      }
+    },
+    {
+      "id": "durable-log",
+      "type": "database",
+      "text": "Partitioned durable log",
+      "color": "teal",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 1136,
+        "y": 224,
+        "width": 240,
+        "height": 112
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "database",
+      "text": "Unknown-schema quarantine",
+      "color": "orange",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 1536,
+        "y": 128,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "reject",
+      "type": "document",
+      "text": "Reject + explicit reason",
+      "color": "red",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 1536,
+        "y": 272,
+        "width": 240,
+        "height": 96
+      }
+    },
+    {
+      "id": "ingest-note",
+      "type": "sticky",
+      "text": "**Identity invariant**\nTenant, event, and receipt IDs are attached once and preserved through quarantine, repair, replay, and downstream deduplication.",
+      "color": "yellow",
+      "parentId": "sources-ingest",
+      "geometry": {
+        "x": 1840,
+        "y": 128,
+        "width": 272,
+        "height": 240
+      }
+    },
+    {
+      "id": "log-reader",
+      "type": "predefined-process",
+      "text": "Partition-ordered reader",
+      "color": "teal",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 160,
+        "y": 608,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "transform-workers",
+      "type": "process",
+      "text": "Stateless transform workers\nNormalize · redact · enrich",
+      "color": "teal",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 496,
+        "y": 592,
+        "width": 256,
+        "height": 128
+      }
+    },
+    {
+      "id": "reference-data",
+      "type": "database",
+      "text": "Versioned reference data",
+      "color": "violet",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 528,
+        "y": 752,
+        "width": 208,
+        "height": 80
+      }
+    },
+    {
+      "id": "transform-ok",
+      "type": "decision",
+      "text": "Transform succeeds?",
+      "color": "yellow",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 880,
+        "y": 600,
+        "width": 176,
+        "height": 112
+      }
+    },
+    {
+      "id": "dead-letter",
+      "type": "database",
+      "text": "Dead-letter stream\nError + original identity",
+      "color": "orange",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 880,
+        "y": 752,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "object-storage",
+      "type": "database",
+      "text": "Low-cost object storage\nReplay source",
+      "color": "blue",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 1216,
+        "y": 544,
+        "width": 240,
+        "height": 112
+      }
+    },
+    {
+      "id": "loading-queue",
+      "type": "database",
+      "text": "Warehouse loading queue",
+      "color": "violet",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 1216,
+        "y": 720,
+        "width": 240,
+        "height": 112
+      }
+    },
+    {
+      "id": "repair-replay",
+      "type": "process",
+      "text": "Review / repair / replay\nPreserve tenant + event ID",
+      "color": "orange",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 1600,
+        "y": 608,
+        "width": 272,
+        "height": 112
+      }
+    },
+    {
+      "id": "ordering-note",
+      "type": "sticky",
+      "text": "**Delivery contract**\n- Read each partition in order\n- Retry without identity changes\n- Downstream writes deduplicate by tenant + event ID",
+      "color": "teal",
+      "parentId": "durable-transform",
+      "geometry": {
+        "x": 1904,
+        "y": 560,
+        "width": 224,
+        "height": 224
+      }
+    },
+    {
+      "id": "warehouse-loaders",
+      "type": "predefined-process",
+      "text": "Warehouse loaders\nIdempotent batches",
+      "color": "violet",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 160,
+        "y": 1024,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "load-checkpoint",
+      "type": "database",
+      "text": "Load checkpoint",
+      "color": "teal",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 160,
+        "y": 1184,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "warehouse",
+      "type": "database",
+      "text": "Analytics warehouse\nCompleted partitions",
+      "color": "violet",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 512,
+        "y": 1024,
+        "width": 240,
+        "height": 112
+      }
+    },
+    {
+      "id": "query-service",
+      "type": "process",
+      "text": "Tenant query service",
+      "color": "blue",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 880,
+        "y": 1024,
+        "width": 224,
+        "height": 96
+      }
+    },
+    {
+      "id": "result-cache",
+      "type": "database",
+      "text": "Result cache\nCommon tenant queries",
+      "color": "blue",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 880,
+        "y": 1184,
+        "width": 224,
+        "height": 80
+      }
+    },
+    {
+      "id": "query-clients",
+      "type": "icon",
+      "text": "Analytics clients",
+      "color": "blue",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 1248,
+        "y": 1032,
+        "width": 144,
+        "height": 96
+      },
+      "icon": "display"
+    },
+    {
+      "id": "replay-note",
+      "type": "sticky",
+      "text": "**Reprocessing path**\nWhen transform logic changes, object storage is the source for replay; warehouse writes remain idempotent.",
+      "color": "violet",
+      "parentId": "load-serve",
+      "geometry": {
+        "x": 1216,
+        "y": 1168,
+        "width": 288,
+        "height": 128
+      }
+    },
+    {
+      "id": "metrics",
+      "type": "process",
+      "text": "Stage telemetry\nLag · reject · quarantine\nretry · throughput",
+      "color": "orange",
+      "parentId": "control-plane",
+      "geometry": {
+        "x": 1696,
+        "y": 1008,
+        "width": 208,
+        "height": 128
+      }
+    },
+    {
+      "id": "alerts",
+      "type": "icon",
+      "text": "Operational alerts",
+      "color": "orange",
+      "parentId": "control-plane",
+      "geometry": {
+        "x": 1984,
+        "y": 1024,
+        "width": 128,
+        "height": 96
+      },
+      "icon": "bolt"
+    },
+    {
+      "id": "backpressure-policy",
+      "type": "sticky",
+      "text": "**Backpressure ladder**\n1. Warehouse slowdown expands loading queue\n2. Transform consumption is reduced\n3. Near the durable-log retention safety limit, ingest returns explicit throttling responses\n\n**Never drop accepted data.**",
+      "color": "orange",
+      "parentId": "control-plane",
+      "geometry": {
+        "x": 1696,
+        "y": 1168,
+        "width": 416,
+        "height": 128
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-app-ingest",
+      "from": {
+        "objectId": "app-producers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest-gateway",
+        "anchor": "left"
+      },
+      "label": "events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-batch-ingest",
+      "from": {
+        "objectId": "partner-batch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ingest-gateway",
+        "anchor": "left"
+      },
+      "label": "batch records",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-ingest-check",
+      "from": {
+        "objectId": "ingest-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "schema-check",
+        "anchor": "left"
+      },
+      "label": "authenticated + tagged",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-registry-check",
+      "from": {
+        "objectId": "schema-registry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "schema-check",
+        "anchor": "top"
+      },
+      "label": "versioned schemas",
+      "style": "dashed",
+      "arrow": "none",
+      "color": "violet"
+    },
+    {
+      "id": "e-valid-log",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "durable-log",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-unknown-quarantine",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "quarantine",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1040,
+          208
+        ],
+        [
+          1456,
+          208
+        ]
+      ]
+    },
+    {
+      "id": "e-malformed-reject",
+      "from": {
+        "objectId": "schema-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reject",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1040,
+          352
+        ],
+        [
+          1456,
+          352
+        ]
+      ]
+    },
+    {
+      "id": "e-log-reader",
+      "from": {
+        "objectId": "durable-log",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "log-reader",
+        "anchor": "top"
+      },
+      "label": "partition order",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          1120,
+          432
+        ],
+        [
+          272,
+          432
+        ]
+      ]
+    },
+    {
+      "id": "e-reader-workers",
+      "from": {
+        "objectId": "log-reader",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "left"
+      },
+      "label": "consume",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ref-workers",
+      "from": {
+        "objectId": "reference-data",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "none",
+      "color": "violet"
+    },
+    {
+      "id": "e-workers-outcome",
+      "from": {
+        "objectId": "transform-workers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "transform-ok",
+        "anchor": "left"
+      },
+      "label": "normalized + redacted",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fail-dlq",
+      "from": {
+        "objectId": "transform-ok",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "dead-letter",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1088,
+          736
+        ],
+        [
+          1088,
+          848
+        ],
+        [
+          992,
+          848
+        ]
+      ]
+    },
+    {
+      "id": "e-ok-object",
+      "from": {
+        "objectId": "transform-ok",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "object-storage",
+        "anchor": "left"
+      },
+      "label": "success copy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-ok-queue",
+      "from": {
+        "objectId": "transform-ok",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "loading-queue",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-quarantine-repair",
+      "from": {
+        "objectId": "quarantine",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "repair-replay",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1488,
+          176
+        ],
+        [
+          1488,
+          448
+        ],
+        [
+          1736,
+          448
+        ]
+      ]
+    },
+    {
+      "id": "e-dlq-repair",
+      "from": {
+        "objectId": "dead-letter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "repair-replay",
+        "anchor": "left"
+      },
+      "label": "repair",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-repair-log",
+      "from": {
+        "objectId": "repair-replay",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "durable-log",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1808,
+          464
+        ],
+        [
+          1408,
+          464
+        ],
+        [
+          1408,
+          400
+        ],
+        [
+          1248,
+          400
+        ]
+      ]
+    },
+    {
+      "id": "e-queue-loaders",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "warehouse-loaders",
+        "anchor": "top"
+      },
+      "label": "idempotent batch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1336,
+          896
+        ],
+        [
+          272,
+          896
+        ]
+      ]
+    },
+    {
+      "id": "e-load-checkpoint",
+      "from": {
+        "objectId": "warehouse-loaders",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "load-checkpoint",
+        "anchor": "top"
+      },
+      "label": "commit offset",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-load-warehouse",
+      "from": {
+        "objectId": "warehouse-loaders",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "warehouse",
+        "anchor": "left"
+      },
+      "label": "commit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-warehouse-query",
+      "from": {
+        "objectId": "warehouse",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "query-service",
+        "anchor": "left"
+      },
+      "label": "completed partitions",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-cache-query",
+      "from": {
+        "objectId": "result-cache",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "query-service",
+        "anchor": "bottom"
+      },
+      "label": "cache hit / fill",
+      "style": "solid",
+      "arrow": "both",
+      "color": "blue"
+    },
+    {
+      "id": "e-query-clients",
+      "from": {
+        "objectId": "query-service",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "query-clients",
+        "anchor": "left"
+      },
+      "label": "tenant results",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-object-replay",
+      "from": {
+        "objectId": "object-storage",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "repair-replay",
+        "anchor": "left"
+      },
+      "label": "logic-change replay",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-metrics-alerts",
+      "from": {
+        "objectId": "metrics",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "alerts",
+        "anchor": "left"
+      },
+      "label": "thresholds",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-queue-backpressure",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "transform-workers",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1504,
+          864
+        ],
+        [
+          432,
+          864
+        ],
+        [
+          432,
+          736
+        ],
+        [
+          624,
+          736
+        ]
+      ]
+    },
+    {
+      "id": "e-log-throttle",
+      "from": {
+        "objectId": "durable-log",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "ingest-gateway",
+        "anchor": "top"
+      },
+      "label": "retention safety limit · throttle",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1248,
+          80
+        ],
+        [
+          520,
+          80
+        ]
+      ]
+    },
+    {
+      "id": "e-stage-metrics",
+      "from": {
+        "objectId": "loading-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "metrics",
+        "anchor": "top"
+      },
+      "label": "lag / retries / throughput",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1584,
+          880
+        ],
+        [
+          1800,
+          880
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

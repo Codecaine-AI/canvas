@@ -16,6 +16,8 @@ export type InteractiveCanvasDocument = {
   schemaVersion: 1;
   id: string;
   title?: string;
+  /** Markdown describing what the board represents, its pieces, and how it reads. */
+  description?: string;
   mode: InteractiveCanvasMode;
   viewport?: CanvasViewport;
   size?: {

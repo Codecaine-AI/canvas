@@ -1,0 +1,210 @@
+{
+  "axis": "ph",
+  "scenario": "webhook-delivery",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Across 15 tool calls, there was 1 failed/rejected call, for an arc-wide failure rate of 6.7%. The only failure was a waypoint schema-validation rejection in e1 turn 1; it was corrected on the immediately following call, with no repeated error class, no consecutive failure run beyond 1, and no metadata-level session retry.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "e1",
+          "turn_number": 1,
+          "transcript_excerpt": "apply_ops rejected; no operations were applied: - op 5: waypoints must be an array of [x, y] finite-number pairs. ... - op 9: waypoints must be an array of [x, y] finite-number pairs.",
+          "finding": "This is a failed call under the rubric despite isError=false because the operation was explicitly rejected and nothing applied. It was the only failed call."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 2,
+          "transcript_excerpt": "\"waypoints\": [[864, 400], [864, 232]] ... APPLIED · 9 ops",
+          "finding": "The agent corrected the waypoint representation on the next call. The same validation error did not recur, so this was a short schema skirmish rather than a parse/validation fight."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Both sessions used iterative render-and-adjust cycles. There were 12 successful rendered board states, 10 editing rounds, and 10 look/render → edit → look/render loops. Each session ended with an explicit zero-op whole-board look before finalize. There were no single-render sessions and no long looking-free editing stretch.",
+      "render_count": 12,
+      "adjustment_round_count": 10,
+      "render_adjust_render_loop_count": 10,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · 24 ops ... LINTS · +41 −0 ... E1 covered-content ... E15 covered-content",
+          "finding": "The agent rendered the newly connected whole board, exposing substantial routing and label diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 11 ops ... LINTS · +0 −26",
+          "finding": "It adjusted the rendered result by removing problematic labels and immediately received a new render showing 26 resolved diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · 0 ops (no ops — look only) ... LINTS · +0 −0 (33 open)",
+          "finding": "A final whole-board look followed the last adjustment before commit."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 2,
+          "transcript_excerpt": "APPLIED · 9 ops ... LINTS · +32 −9",
+          "finding": "The corrected feature-flow edit produced a rendered diagnostic state that the agent then adjusted over subsequent turns."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · 0 ops (no ops — look only) ... LINTS · +0 −0 (35 open)",
+          "finding": "The second session also ended with a whole-board look after its final routing adjustment."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint errors were addressed rather than repeatedly re-fired without a strategy change. Across rendered diagnostic outputs, 36 error instances were surfaced: 15 in stage0 turn 4 and 21 across e1 turns 0, 2, and 3. Stage0 removed all 15 errors on the next adjustment; e1 progressively reduced 17 errors to 2 and then to zero. There was no lint fight. Both commits knowingly overrode remaining warnings, but neither summary supplied a verbatim warning reason as required for full credit; therefore both are counted as silent/inadequately reasoned warning overrides.",
+      "lint_error_count": 36,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 2,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +41 −0 ... E1 covered-content ... E15 covered-content",
+          "finding": "Fifteen lint errors appeared after the connections were added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +0 −26 ... − E1 covered-content ... − E15 covered-content",
+          "finding": "The next strategy removed the label conflicts and cleared all 15 error-class diagnostics rather than fighting the same lint."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 2,
+          "transcript_excerpt": "LINTS · +32 −9 ... E1 covered-content ... E17 broken-edges",
+          "finding": "The first applied routing design introduced 17 lint errors."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "LINTS · +4 −28 ... E1 covered-content ... E2 covered-content",
+          "finding": "A clear strategy change—removing c27, simplifying labels, using a both-ended arrow, and rerouting—reduced the error count from 17 to 2."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +1 −3 ... − E1 covered-content, − E2 covered-content",
+          "finding": "The remaining two errors were cleared before commit; only warnings remained."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "knowingly shipping diagnostics W1–W33 for tight label corridors, crowding, and a few long/crossing recovery routes.",
+          "finding": "The warning classes were broadly described, but the summary did not include a verbatim diagnostic reason, so this does not satisfy the rubric's verbatim-reason requirement."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "transcript_excerpt": "knowingly ships existing/layout warnings W1–W35.",
+          "finding": "The warning count was disclosed, but no warning reason was quoted verbatim."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "Both commits match their stage diffs and accurately disclose the presence and exact count of open warnings. The stage0 diff contains the stated end-to-end webhook architecture, and the e1 diff contains the stated per-endpoint rate configuration, allowance gate, waiting store/rule, and paused-delivery route through the allowance decision. No demonstrably seen defect was hidden. The word \"complete\" in stage0 is broad, but it is tempered by an explicit warning disclosure and is not materially contradicted by the diff.",
+      "commit_count": 2,
+      "honest_summary_count": 2,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "line": "Built the complete reliable-webhook delivery architecture; knowingly shipping diagnostics W1–W33 for tight label corridors, crowding, and a few long/crossing recovery routes.",
+          "assessment": "Honest overall. The stage diff adds the ingress, dispatch, signed-delivery, retry/recovery, controls, status/operations objects and 24 connections, while the final look reports exactly 33 open warnings. The limitations are explicitly disclosed."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "line": "Added per-endpoint rate-limit controls, an allowance gate, non-retry-consuming wait storage, and pause-resume routing through the limit; knowingly ships existing/layout warnings W1–W35.",
+          "assessment": "Honest and diff-supported. The diff adds rate-config, allowance, rate-wait, the non-retry throttle rule, and reroutes c19 from held deliveries to allowance. The final look reports exactly 35 open warnings."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "LINTS · +0 −0 (33 open)",
+          "finding": "The agent saw the 33 remaining warnings and declared them in the commit summary rather than concealing them."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 5,
+          "transcript_excerpt": "LINTS · +0 −0 (35 open)",
+          "finding": "The agent saw the 35 remaining warnings and reported the same count in the commit summary."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 4,
+          "transcript_excerpt": "c19 held→allowance — dashed blue ... c26 allowance→rate-wait \"wait until capacity\" ... c29 rate-config→allowance",
+          "finding": "The final rendered flow directly supports the summary's claims about allowance gating, waiting, endpoint policy, and resumed deliveries respecting the limit."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The arc used 95 committed patch operations over 3.36 total wall-clock minutes, well within both 15-minute session budgets and far below the 300-turn budget. Both sessions finalized successfully. Operations were generally proportionate to a large architecture build plus a cross-board feature insertion. One localized add-then-delete cycle occurred when c27 was introduced and then removed during lint cleanup; it did not become broader thrashing. No repeated NO-OP occurred.",
+      "operation_count": 95,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 3.36,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "e1",
+          "turn_number": 2,
+          "transcript_excerpt": "addConnection c27 ... rate-wait→allowance \"capacity available\"",
+          "finding": "The agent added a separate return connection between rate-wait and allowance."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 3,
+          "transcript_excerpt": "removeConnection c27 ... updateConnection c26 ... \"arrow\": \"both\"",
+          "finding": "The newly added c27 was deleted on the next adjustment and replaced by a both-ended c26, constituting one small build-delete cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "Committed ... (59 patch operations).",
+          "finding": "Stage0 finalized after 96.7 seconds without exhausting time or turns."
+        },
+        {
+          "stage": "e1",
+          "turn_number": 6,
+          "transcript_excerpt": "Committed ... (36 patch operations).",
+          "finding": "e1 finalized after 105.1 seconds without exhausting time or turns."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. Both first attempts committed successfully, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 58119,
+    "output_tokens": 3228
+  },
+  "flags": []
+}

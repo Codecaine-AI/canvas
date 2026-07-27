@@ -14,15 +14,16 @@
         "b-step1-canvas-4"
       ],
       "props": {
-        "covers": "Step 1 of the worked example: one row split at 1:4 — a config lane pinned NW at its natural size (R7) with three stacked pills, and a stage section holding a placeholder sticky.",
+        "covers": "Step 1 of the worked example: a skeleton batch establishes Config and Stage, then separate section-fill batches add the Config pills and Stage sticky while each pushed render is reviewed.",
         "format": "mdx",
         "type": "design",
         "concepts": [
           "worked example",
-          "row split",
-          "hug lane",
-          "group",
-          "pill"
+          "apply_ops",
+          "sections first",
+          "auto-fit",
+          "pushed delta",
+          "section close-up"
         ]
       }
     },
@@ -46,25 +47,7 @@
       "props": {},
       "text": [
         {
-          "insert": "One row split: "
-        },
-        {
-          "insert": "row 1|4",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " puts two bands side by side at 1:4. The config section is pinned to the top-left corner with "
-        },
-        {
-          "insert": "hug=NW",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and stays at its natural size — the R7 lane. Inside it, three pills share the slot, stacked N / C / S with ladder gaps (R2). The stage section holds a placeholder sticky for what comes next."
+          "insert": "The agent studies the boot digest, full-board render, house exemplar, and vocabulary sheet, then sends the complete section skeleton: Config at the left and Stage at the right. After judging that pushed render, it fills Config in one batch with three same-role pills that copy one size and one repeated gap, judges the Config close-up, and only then fills Stage with its sticky. The coordinates use 16px grid units as quantization; content and peer relationships determine the geometry. Each payload below is one apply_ops call, validated atomically. A rejected call changes nothing and returns only rejection lines. Every successful call returns APPLIED, a fresh BOARD digest, DELTA, cumulative BOARD DIFF, diagnostic state, and REQUESTS; the first apply prints the full DIAGNOSTICS list and later calls print LINTS deltas. Document changes push a fresh full-board render, and view adds the requested close-up. No connection is touched, so ROUTES is absent. Any crowding warning on the compact vertical stack marks a physical corridor floor that the agent must open or name explicitly at finalize."
         }
       ]
     },
@@ -73,11 +56,11 @@
       "flavour": "code",
       "children": [],
       "props": {
-        "language": "text"
+        "language": "json"
       },
       "text": [
         {
-          "insert": "row 1|4\n  section 1 text=config label=\"Config\" hug=NW\n    group\n      item 2 text=checkout type=pill size=M at=N\n      item 3 text=goals type=pill size=M at=C\n      item 4 text=secrets type=pill size=M at=S\n  section 5 text=stage label=\"Stage\"\n    item 6 text=placeholder type=sticky size=M at=C\n\narrows"
+          "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"addSection\",\n        \"section\": {\n          \"id\": \"config\",\n          \"text\": \"Config\",\n          \"color\": \"gray\",\n          \"geometry\": { \"x\": 0, \"y\": 0, \"width\": 176, \"height\": 512 }\n        }\n      },\n      {\n        \"type\": \"addSection\",\n        \"section\": {\n          \"id\": \"stage\",\n          \"text\": \"Stage\",\n          \"color\": \"gray\",\n          \"geometry\": { \"x\": 304, \"y\": 0, \"width\": 720, \"height\": 576 }\n        }\n      }\n    ]\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"checkout\",\n          \"type\": \"pill\",\n          \"text\": \"checkout\",\n          \"geometry\": { \"x\": 32, \"y\": 176, \"width\": 112, \"height\": 48 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"goals\",\n          \"type\": \"pill\",\n          \"text\": \"goals\",\n          \"geometry\": { \"x\": 32, \"y\": 272, \"width\": 112, \"height\": 48 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"secrets\",\n          \"type\": \"pill\",\n          \"text\": \"secrets\",\n          \"geometry\": { \"x\": 32, \"y\": 368, \"width\": 112, \"height\": 48 }\n        }\n      }\n    ],\n    \"view\": \"config\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addSticky\",\n        \"sticky\": {\n          \"id\": \"placeholder\",\n          \"text\": \"placeholder\",\n          \"geometry\": { \"x\": 464, \"y\": 176, \"width\": 384, \"height\": 288 }\n        }\n      }\n    ],\n    \"view\": \"stage\"\n  }\n]"
         }
       ]
     },

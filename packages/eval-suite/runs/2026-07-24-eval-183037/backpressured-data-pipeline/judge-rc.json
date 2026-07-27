@@ -1,0 +1,749 @@
+{
+  "axis": "rc",
+  "scenario": "backpressured-data-pipeline",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The pipeline accepts events from application producers.",
+        "brief_evidence": "accepts events from application producers",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-left, section 1 · Producers & guarded ingest",
+            "observation": "Application producers are shown sending an arrow labeled \"events\" to the Ingest gateway."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=app-producers], objects[id=ingest-gateway], connections[id=e-app-ingest]",
+            "observation": "The application producer object connects directionally to the ingest gateway with label \"events\"."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "The pipeline accepts partner batch uploads.",
+        "brief_evidence": "and partner batch uploads",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-left, section 1 · Producers & guarded ingest",
+            "observation": "Partner batch uploads are shown feeding the Ingest gateway through a path labeled \"batch records\"."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=partner-batch], connections[id=e-batch-ingest]",
+            "observation": "Partner batch uploads connect directionally to the ingest gateway."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The ingest gateway authenticates producers.",
+        "brief_evidence": "An ingest gateway authenticates producers",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top ingest flow, Ingest gateway node",
+            "observation": "The gateway is labeled \"Auth + tenant / receipt metadata\"."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=ingest-gateway].text",
+            "observation": "The object text explicitly includes \"Auth\"."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The ingest gateway attaches tenant metadata.",
+        "brief_evidence": "attaches tenant and receipt metadata",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top ingest flow, Ingest gateway and Identity invariant note",
+            "observation": "The gateway names tenant metadata, and the identity note states that tenant IDs are attached once and preserved."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=ingest-gateway].text; objects[id=ingest-note].text",
+            "observation": "Both the gateway label and invariant note explicitly identify tenant metadata/ID attachment."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The ingest gateway attaches receipt metadata.",
+        "brief_evidence": "attaches tenant and receipt metadata",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top ingest flow, Ingest gateway and Identity invariant note",
+            "observation": "The gateway names receipt metadata, and the note says receipt IDs are attached once and preserved."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=ingest-gateway].text; objects[id=ingest-note].text",
+            "observation": "Receipt metadata and receipt IDs are explicitly present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "Each record is checked against the schema registry.",
+        "brief_evidence": "checks each record against the schema registry",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-center ingest validation area",
+            "observation": "Authenticated and tagged input reaches the \"Schema + record valid?\" decision, which is linked to the Schema registry."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=schema-check], objects[id=schema-registry], connections[id=e-ingest-check], connections[id=e-registry-check]",
+            "observation": "The schema-check decision receives ingested records and is associated with versioned schemas from the registry."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Valid records enter a partitioned durable log.",
+        "brief_evidence": "Valid records enter a partitioned durable log.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-center validation output",
+            "observation": "A forward path from the schema/record validity decision enters a node labeled \"Partitioned durable log\"."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=durable-log], connections[id=e-valid-log]",
+            "observation": "The validation decision connects directionally to the explicitly partitioned durable log."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Unknown-schema records wait in a quarantine store for review.",
+        "brief_evidence": "Unknown-schema records wait in a quarantine store for review",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Upper-right validation branch and middle-right repair flow",
+            "observation": "Unknown-schema records branch to \"Unknown-schema quarantine,\" which connects to \"Review / repair / replay.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quarantine], objects[id=repair-replay], connections[id=e-unknown-quarantine], connections[id=e-quarantine-repair]",
+            "observation": "The quarantine store and its directional review/repair/replay path are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Quarantining unknown-schema records does not block known traffic.",
+        "brief_evidence": "rather than blocking known traffic",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top-center validation fan-out",
+            "observation": "The board shows separate concurrent-looking branches from validation to the durable log and to quarantine, suggesting isolation of unknown-schema traffic."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-valid-log] and connections[id=e-unknown-quarantine]; search of all object text, connection labels, and annotations for \"block\", \"non-blocking\", or equivalent",
+            "observation": "Distinct valid and unknown-schema routes exist, but no explicit text or control notation states that quarantine cannot block the valid route."
+          }
+        ],
+        "note": "The separate branches convey the intended split, but the stated non-blocking qualifier is only implicit."
+      },
+      {
+        "id": "R10",
+        "requirement": "Malformed records are rejected with a reason.",
+        "brief_evidence": "malformed records are rejected with a reason",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Upper-right validation branch",
+            "observation": "A red branch from the record-validity decision terminates at \"Reject + explicit reason.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=reject], connections[id=e-malformed-reject]",
+            "observation": "The malformed/reject path is directional and the outcome explicitly includes a reason."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "Transform workers are stateless.",
+        "brief_evidence": "Stateless transform workers",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle-left, section 2 · Durable buffer & ordered transform",
+            "observation": "The worker node is explicitly labeled \"Stateless transform workers.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=transform-workers].text",
+            "observation": "The worker object's text explicitly states statelessness."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Transform workers read records from the durable log in partition order.",
+        "brief_evidence": "read the log in partition order",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Durable-log to transform section transition",
+            "observation": "The durable log feeds a \"Partition-ordered reader\" over a path labeled \"partition order,\" followed by consumption by the workers."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=log-reader], connections[id=e-log-reader], connections[id=e-reader-workers], objects[id=ordering-note]",
+            "observation": "The reader path originates at the durable log, feeds workers, and the delivery note says \"Read each partition in order.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Transform workers normalize records.",
+        "brief_evidence": "normalize records",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle transform-worker node",
+            "observation": "The worker responsibility list includes \"Normalize.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=transform-workers].text",
+            "observation": "Normalize is explicitly listed as a transform responsibility."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Transform workers remove sensitive fields.",
+        "brief_evidence": "remove sensitive fields",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle transform-worker node and outgoing transform label",
+            "observation": "The worker responsibility list includes \"redact,\" and output is labeled \"normalized + redacted.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=transform-workers].text; connections[id=e-workers-outcome].label",
+            "observation": "Redaction is explicitly shown as the removal treatment for sensitive data."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Transform workers enrich records from a versioned reference-data service.",
+        "brief_evidence": "enrich them from a versioned reference-data service",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle-left transform area",
+            "observation": "Workers list \"enrich\" and are linked to a node labeled \"Versioned reference data.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=transform-workers], objects[id=reference-data], connections[id=e-ref-workers]",
+            "observation": "The versioned reference-data component is directly associated with the enriching workers."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Transform failures go to a dead-letter stream.",
+        "brief_evidence": "Transform failures go to a dead-letter stream",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle transform outcome area",
+            "observation": "The \"Transform succeeds?\" decision has a failure branch to the Dead-letter stream."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=transform-ok], objects[id=dead-letter], connections[id=e-fail-dlq]",
+            "observation": "A directional connection leads from the transform outcome decision to the dead-letter stream."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Dead-lettered failures retain enough context for repair and replay.",
+        "brief_evidence": "with enough context for repair and replay",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle dead-letter and repair area",
+            "observation": "The dead-letter stream is labeled \"Error + original identity\" and connects by a path labeled \"repair\" to Review / repair / replay."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dead-letter].text; objects[id=repair-replay]; connections[id=e-dlq-repair]",
+            "observation": "Error and original identity context are retained, and an explicit repair/replay workflow is connected."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Successful transformed records are written to low-cost object storage.",
+        "brief_evidence": "Successful records are written both to low-cost object storage",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle transform success fan-out",
+            "observation": "The success decision sends a path labeled \"success copy\" to Low-cost object storage."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=object-storage], connections[id=e-ok-object]",
+            "observation": "A directional success output enters the object-storage node."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Successful transformed records are also written to a warehouse loading queue.",
+        "brief_evidence": "and to a warehouse loading queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle transform success fan-out",
+            "observation": "A second success branch enters the Warehouse loading queue."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=loading-queue], connections[id=e-ok-queue]",
+            "observation": "The transform success decision directionally feeds the loading queue in parallel with object storage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Warehouse loaders commit idempotent batches.",
+        "brief_evidence": "Warehouse loaders commit idempotent batches",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower-left warehouse loading flow",
+            "observation": "The loading queue feeds Warehouse loaders labeled \"Idempotent batches,\" which commit to the warehouse."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=warehouse-loaders].text; connections[id=e-queue-loaders]; connections[id=e-load-warehouse]",
+            "observation": "The loader object states idempotent batches and has an explicit commit connection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Warehouse loaders update a load checkpoint.",
+        "brief_evidence": "update a load checkpoint",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower-left beneath Warehouse loaders",
+            "observation": "The loaders connect to Load checkpoint with the label \"commit offset.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=load-checkpoint], connections[id=e-load-checkpoint]",
+            "observation": "A directional checkpoint-update path originates at the warehouse loaders."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Completed warehouse partitions are made available to the query service.",
+        "brief_evidence": "make completed partitions available to the query service",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower warehouse-to-query flow",
+            "observation": "Analytics warehouse, labeled \"Completed partitions,\" connects to Tenant query service over a path labeled \"completed partitions.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=warehouse], objects[id=query-service], connections[id=e-warehouse-query]",
+            "observation": "Completed partitions are explicitly passed from the warehouse to the query service."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "The query service uses a result cache for common tenant queries.",
+        "brief_evidence": "The query service uses a result cache for common tenant queries",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower-center query area",
+            "observation": "Tenant query service is bidirectionally linked to Result cache, labeled \"Common tenant queries,\" through \"cache hit / fill.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=result-cache], objects[id=query-service], connections[id=e-cache-query]",
+            "observation": "The cache is explicitly for common tenant queries and exchanges cache hits/fills with the query service."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Object storage remains the replay source when transformation logic changes.",
+        "brief_evidence": "object storage remains the replay source when transformation logic changes",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle-right object storage and lower reprocessing note",
+            "observation": "Object storage is labeled \"Replay source,\" connects via \"logic-change replay,\" and the Reprocessing path note repeats the transform-logic-change condition."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=object-storage], connections[id=e-object-replay], objects[id=replay-note]",
+            "observation": "Both the directional path and note explicitly identify object storage as the source when transform logic changes."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "The pipeline propagates backpressure rather than losing accepted data.",
+        "brief_evidence": "The pipeline must propagate backpressure instead of losing data.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section and red/dashed feedback paths",
+            "observation": "The board shows queue-to-transform and log-to-ingest feedback, while the policy note states \"Never drop accepted data.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=backpressure-policy].text; connections[id=e-queue-backpressure]; connections[id=e-log-throttle]",
+            "observation": "Explicit feedback mechanisms and a no-drop accepted-data invariant represent the backpressure contract."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "On warehouse slowdown, the loading queue expands first.",
+        "brief_evidence": "Warehouse slowdown first expands the loading queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower-right Backpressure ladder note",
+            "observation": "Step 1 explicitly says \"Warehouse slowdown expands loading queue.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=backpressure-policy].text",
+            "observation": "The first numbered policy step exactly states the queue-expansion behavior."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "After queue expansion, transform consumption is reduced.",
+        "brief_evidence": "then reduces transform consumption",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Backpressure ladder and loading-queue feedback path",
+            "observation": "Step 2 states \"Transform consumption is reduced,\" and a feedback arrow runs from the loading queue to transform workers."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=backpressure-policy].text; connections[id=e-queue-backpressure]",
+            "observation": "The numbered second step and corresponding queue-to-worker control path are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "Finally, when durable-log retention approaches its safety limit, ingest returns explicit throttling responses.",
+        "brief_evidence": "finally causes ingest to return explicit throttling responses when durable-log retention approaches its safety limit",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Top red feedback path and lower-right Backpressure ladder",
+            "observation": "The durable-log feedback to ingest is labeled \"retention safety limit · throttle,\" and step 3 specifies explicit throttling responses near the limit."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=backpressure-policy].text; connections[id=e-log-throttle]",
+            "observation": "The third numbered stage includes the condition, endpoint, and explicit response, reinforced by a durable-log-to-ingest feedback connection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Per-stage lag metrics feed operational alerts.",
+        "brief_evidence": "Per-stage lag ... metrics feed operational alerts.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section",
+            "observation": "Stage telemetry lists \"Lag\" and connects to Operational alerts through a path labeled \"thresholds.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics].text; objects[id=alerts]; connections[id=e-metrics-alerts]",
+            "observation": "The telemetry object is stage-scoped, includes lag, and feeds the alert object."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "Per-stage rejection metrics feed operational alerts.",
+        "brief_evidence": "Per-stage ... rejection ... metrics feed operational alerts.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section",
+            "observation": "Stage telemetry lists \"reject\" and connects to Operational alerts."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics].text; connections[id=e-metrics-alerts]",
+            "observation": "The stage telemetry text includes reject metrics and has a directional thresholds connection to alerts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Per-stage quarantine metrics feed operational alerts.",
+        "brief_evidence": "Per-stage ... quarantine ... metrics feed operational alerts.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section",
+            "observation": "Stage telemetry lists \"quarantine\" and feeds Operational alerts."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics].text; connections[id=e-metrics-alerts]",
+            "observation": "Quarantine is explicitly included in stage telemetry connected to alerts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Per-stage retry metrics feed operational alerts.",
+        "brief_evidence": "Per-stage ... retry ... metrics feed operational alerts.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section",
+            "observation": "Stage telemetry lists \"retry\" and connects to Operational alerts."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics].text; connections[id=e-metrics-alerts]",
+            "observation": "Retry is explicitly included in stage telemetry connected to alerts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Per-stage throughput metrics feed operational alerts.",
+        "brief_evidence": "Per-stage ... throughput metrics feed operational alerts.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Right-side Backpressure & operations section",
+            "observation": "Stage telemetry lists \"throughput\" and connects to Operational alerts."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=metrics].text; connections[id=e-metrics-alerts]",
+            "observation": "Throughput is explicitly included in stage telemetry connected to alerts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Replaying quarantined data preserves the original tenant and event identity.",
+        "brief_evidence": "Replaying quarantined ... data must preserve the original tenant and event identity",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Unknown-schema quarantine, Review / repair / replay node, and Identity invariant note",
+            "observation": "Quarantine feeds replay; the replay node says \"Preserve tenant + event ID,\" and the identity note says those IDs are preserved through quarantine and replay."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-quarantine-repair]; objects[id=repair-replay].text; objects[id=ingest-note].text",
+            "observation": "The quarantine replay route and original-identity preservation invariant are both explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Replaying dead-lettered data preserves the original tenant and event identity.",
+        "brief_evidence": "Replaying ... dead-lettered data must preserve the original tenant and event identity",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dead-letter stream, repair path, and Review / repair / replay node",
+            "observation": "The dead-letter stream retains \"original identity,\" feeds repair/replay, and the replay node explicitly preserves tenant and event ID."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=dead-letter].text; connections[id=e-dlq-repair]; objects[id=repair-replay].text",
+            "observation": "Original identity is retained on the dead-letter path and preserved during replay."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Preserved tenant and event identity enables downstream deduplication to continue working.",
+        "brief_evidence": "so downstream deduplication still works",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Identity invariant and Delivery contract notes",
+            "observation": "The identity note ties preservation to downstream deduplication, and the delivery contract says downstream writes deduplicate by tenant + event ID."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=ingest-note].text; objects[id=ordering-note].text",
+            "observation": "The board explicitly states both identity preservation through replay and downstream deduplication using tenant plus event ID."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9922,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The durable transform, dual-write, warehouse loading, replay, and ordered backpressure contract is fully represented with explicit components, directed paths, numbered policy stages, and identity-preservation notes.",
+    "most_consequential_gap": "R9 is only implicit: separate valid-log and quarantine branches suggest that unknown-schema traffic does not block known traffic, but the board never explicitly states or guarantees that non-blocking behavior.",
+    "coverage_summary": "Thirty-five of thirty-six atomic requirements are fully represented. The remaining supporting requirement is partial because the quarantine branch is visually isolated but its non-blocking effect on known traffic is not stated explicitly. No system-defining requirement is absent or contradicted, so no cap applies.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 13771,
+    "output_tokens": 7507
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

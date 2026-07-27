@@ -1,29 +1,31 @@
 # Eval suite — canvas layout agent
 
 Standing, repeatable evaluation for the layout agent (harness :4820, studio :4000).
-Designed 2026-07-22 against the v4/v5 system; grading anchored to the reference boards
-`gc-decomp-harness` (7.5) and `intent-classification-2` (7.0). Run it on any change to
-rules, prompt, lints, perception, or model config; diff the scorecards.
+Scenarios are briefs for real systems; the agent builds each board from a blank base
+canvas through the eval harness. Run it on any change to the prompt, capabilities,
+styles, lints, perception, or model config; diff the scorecards. Entry point:
+`make eval`.
 
 | file | what |
 |---|---|
-| [axes/](axes/README.md) | The grading axes, one file per axis in a canonical structure — currently **SQ** static quality ([sq.md](axes/sq.md), side-by-side vs references), **IC** information comprehension ([ic.md](axes/ic.md), blind PNG-only reconstruction scored against the fixture's comprehension key), **IF** intent fidelity ([if.md](axes/if.md), checklist vs canvas JSON), **ES** edit stability ([es.md](axes/es.md), out-of-scope churn per follow-up edit), **PH** process health ([ph.md](axes/ph.md), transcript honesty + mechanics). Shared rules in [axes/README.md](axes/README.md); judges are instantiated from [axes/JUDGE-PROMPT.md](axes/JUDGE-PROMPT.md) + one axis file, so adding/removing an axis = adding/removing a file. |
-| [RUNNER.md](RUNNER.md) | End-to-end protocol: preconditions + SUT fingerprint, fresh `eval-suite-*` canvas lifecycle, session execution + accept/materialize recipe, judge isolation, the diffable scorecard format, diff interpretation, suite maintenance. |
-| [scenarios/](scenarios/) | Eight frozen fixtures, complexity 1→5, each with a verbatim build instruction, ground-truth tables, comprehension key, IF checklist, and 2–3 follow-up edits with ES invariants. |
-| [dry-run-2026-07-22.md](dry-run-2026-07-22.md) | Rubric validation against the committed `eval-v4-*` boards: SQ spread 5.5–7.0 (within 0.5 of the round-1 evaluators on every board, independently), IC spread 6.5–10, and the discrimination analysis. Judge evidence in [dry-run/](dry-run/). |
+| [axes-system/](axes-system/) | The grading axes, one file per axis — **SF** system fidelity ([sf.md](axes-system/sf.md), brief-only reconstruction of the system), **RC** requirement coverage ([rc.md](axes-system/rc.md), atomic brief requirements vs the board), **RD** readability & craft ([rd.md](axes-system/rd.md), visual quality of the render), **SD** scope discipline ([sd.md](axes-system/sd.md), out-of-scope churn on follow-up edits), **PH** process health ([ph.md](axes-system/ph.md), transcript honesty + mechanics). Shared judge rules are inlined by the runner (`SHARED_JUDGE_RULES` in `runner/src/judge/inputs.ts`); adding/removing an axis = adding/removing a file. |
+| [scenarios-system/](scenarios-system/) | The scenario objects: one directory per scenario with `brief.md` (the instruction) and `config.json` (complexity, page size, tags, follow-up edits). |
+| [RUNNER.md](RUNNER.md) | Historical protocol notes from the codex-executor era; the live runner is `runner/` (BAML judges + scenario processes). |
+| [runner/](runner/) | The runner: `src/cli.ts suite | judge | scorecard | clean`, scenario processes, service pair (eval_file_api :4010, harness :4821), BAML judges, scorecard assembly. Spec in [runner-spec/](runner-spec/). |
+| [runs/](runs/) | Run artifacts: per-scenario stage renders, judge evidence, `scorecard.md`. |
+| [feedback/](feedback/) | Review findings and fix-round decision records. |
 
 ## Scenarios
 
-| id | genre | cx | probes |
+| id | cx | stages | board |
 |---|---|---|---|
-| s1-linear-flow | linear flow | 1 | pure composition; mid-flow insert; additive feedback edge |
-| s2-branching-flowchart | branching flowchart | 2 | branch add; failure-family restyle; **the nudge probe** (fine-grained control) |
-| s3-state-machine | state machine w/ cycles | 3 | declared self-loop badge substitution; **readability probe**; junction-machinery removal |
-| s4-swimlane | swimlane pipeline | 3 | lane insertion (skip-lane creation trap); additive skip edge; lane tightening |
-| s5-nested-arch | nested architecture + hub | 4 | containment discipline; **restyle-without-relayout probe**; satellite-only hub rebalance |
-| s6-org-tree | org tree | 3 | cross-panel re-parent; fan growth; gap equalization (registers + centering held) |
-| s7-telemetry-platform | composite: multi-region map | 5 | gc-decomp-class; region add in dead space; readability probe; feedback-corridor reroute |
-| s8-retrieval-designs | composite: comparative design | 5 | intent-2-class two-alternatives framing; frozen-panel fan add; panel rebalance |
+| ivr-agent-handoff | 1 | build | 1600×1000 |
+| eval-harness-orchestration | 2 | build + 1 edit | 1920×1200 |
+| sandboxed-tool-fleet | 2 | build | 1920×1200 |
+| rag-ingestion-retrieval | 3 | build | 2240×1400 |
+| trace-ingestion-pipeline | 3 | build | 2240×1400 |
+| code-review-agents | 4 | build | 2560×1600 |
+| llm-inference-gateway | 4 | build + 1 edit | 2560×1600 |
+| agent-session-orchestration | 5 | build | 3200×2000 |
 
-Fixtures are frozen: any wording change bumps that file's `fixture-rev` and voids
-run-over-run comparison for that scenario (RUNNER.md §7).
+Briefs are frozen: any wording change voids run-over-run comparison for that scenario.

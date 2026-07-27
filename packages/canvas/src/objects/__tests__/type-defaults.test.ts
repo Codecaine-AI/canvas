@@ -52,7 +52,6 @@ const EXPECTED: Record<
   process: { geometry: { x: 160, y: 160, width: 184, height: 96 }, label: "Process", shape: "rounded-rect" },
   decision: { geometry: { x: 160, y: 160, width: 160, height: 112 }, label: "Decision", shape: "diamond" },
   sticky: { geometry: { x: 180, y: 180, width: 176, height: 128 }, label: "Sticky", shape: "note" },
-  "annotation-marker": { geometry: { x: 220, y: 220, width: 40, height: 40 }, label: "Annotation", shape: "marker" },
   document: { geometry: { x: 160, y: 160, width: 160, height: 120 }, label: "Document", shape: "document" },
   database: { geometry: { x: 160, y: 160, width: 140, height: 120 }, label: "Database", shape: "database" },
   section: { geometry: { x: 80, y: 80, width: 480, height: 360 }, label: "Section", shape: "section" },

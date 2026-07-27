@@ -14,7 +14,7 @@
         "b-fan-canvas-4"
       ],
       "props": {
-        "covers": "The fan statement: a hub centered over its children with 64px clearance; dir= gives the side the children sit on, and declaration order becomes their left-to-right order on one shared line.",
+        "covers": "The fan pattern: a hub centered over children that share one line and one repeated gap; dir= describes their side, and declaration order describes their order along that line.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -45,7 +45,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Main value is the hub reference; "
+          "insert": "In this descriptive notation, the main value is the hub reference; "
         },
         {
           "insert": "dir=",
@@ -99,7 +99,7 @@
           }
         },
         {
-          "insert": ", two or more child references. The children land on one shared line, evenly spaced, and the hub centers over their midpoint with 64px of clearance (rule R6). The children's declaration order becomes their left-to-right order."
+          "insert": ", two or more child references. The children land on one shared line with one gap repeated exactly, and the hub centers over their midpoint. Choose enough clearance for each wire and direct edge label to pass cleanly. Equal child size plus equal gap marks them as peers; the centered hub reads as their parent. The children's declaration order becomes their order along the shared line."
         }
       ]
     },

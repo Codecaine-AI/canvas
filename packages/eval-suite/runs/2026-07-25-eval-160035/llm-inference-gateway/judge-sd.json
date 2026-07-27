@@ -1,0 +1,636 @@
+{
+  "axis": "sd",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-25-eval-160035",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeScopeDiscipline",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "edits": [
+      {
+        "stage": "e1",
+        "verdict": {
+          "requested_changes": [
+            {
+              "requirement": "Separate interactive and batch traffic during admission and scheduling.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "Requires the gateway to separate interactive and batch traffic during admission and scheduling."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[classify-traffic, interactive-lane, batch-lane]",
+                  "observation": "Adds an 'Interactive or batch?' decision and distinct 'Interactive priority lane' and 'Batch scheduling lane' objects."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.changed[e3] and connections.added[e25,e26]",
+                  "observation": "Admission now feeds the traffic classifier, which branches into the two scheduling lanes."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 5 · Traffic class scheduling",
+                  "observation": "The post-edit board visibly shows admission flowing into separate blue interactive and yellow batch paths."
+                }
+              ],
+              "note": "The requested class split is represented structurally rather than only by labels."
+            },
+            {
+              "requirement": "When capacity is constrained, interactive work preempts batch work.",
+              "status": "partial",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[interactive-lane, capacity-constrained]",
+                  "observation": "Adds an 'Interactive priority lane' and a 'Capacity constrained?' decision."
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e29b]",
+                  "observation": "Connects the interactive lane to the constrained-capacity decision."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "connections[e29b,e30]",
+                  "observation": "The constrained-capacity path proceeds to 'Parked batch state,' but there is no explicit connection from the batch lane into the preemption decision or an explicit preemption relationship between interactive and batch work."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "sections 5 and 6",
+                  "observation": "Priority and constrained-capacity concepts are visible, but the drawn flow can read as interactive traffic entering the parking sequence rather than explicitly displacing batch traffic."
+                }
+              ],
+              "note": "The intended semantics are suggested by section and node labels, but the system behavior is not fully explicit in the connection structure."
+            },
+            {
+              "requirement": "Displaced batch requests are parked with their state preserved instead of failing.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[batch-preemption, parked-batch, resume-batch]",
+                  "observation": "Adds a dedicated 'Batch preemption & resume' section, 'Parked batch state,' and 'Resume preserved work.'"
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[parked-batch,resume-batch]",
+                  "observation": "The object text explicitly communicates retained batch state and preserved work."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 6 · Batch preemption & resume",
+                  "observation": "The parking and preservation path is visibly distinct from the existing failure and retry area."
+                }
+              ],
+              "note": "No failure edge is added from the parked-batch sequence; the board instead presents stateful parking and preservation."
+            },
+            {
+              "requirement": "Parked batch requests resume when capacity returns.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e31,e32]",
+                  "observation": "Parked batch state flows to 'Resume preserved work,' which reconnects to the batch lane on an edge labeled 'capacity returns.'"
+                },
+                {
+                  "source": "post_json",
+                  "locator": "connection[e32]",
+                  "observation": "The resume edge terminates at batch-lane and explicitly carries the label 'capacity returns.'"
+                },
+                {
+                  "source": "post_png",
+                  "locator": "orange path between sections 6 and 5",
+                  "observation": "The post-edit board visibly loops resumed work back into batch scheduling."
+                }
+              ],
+              "note": "The requested recovery condition and return destination are both communicated."
+            },
+            {
+              "requirement": "Tenant spend ceilings and quota accounting apply to combined usage across both traffic classes.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[admission]",
+                  "observation": "Renames the admission control from 'Concurrency + token limits' to 'Combined quota + spend limits.'"
+                },
+                {
+                  "source": "diff",
+                  "locator": "connections.changed[e3]",
+                  "observation": "Combined quota and spend admission remains upstream of the interactive/batch classifier, so both branches pass through the same control."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "description",
+                  "observation": "States that requests flow through 'combined tenant quota/spend admission' before splitting into interactive and batch scheduling lanes."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 1 to section 5 flow",
+                  "observation": "The shared 'Combined quota + spend limits' node visibly precedes the class split."
+                }
+              ],
+              "note": "The common upstream admission position communicates combined enforcement across both classes."
+            }
+          ],
+          "changes": [
+            {
+              "object_id": "$document.description",
+              "object_kind": "document",
+              "classification": "requested",
+              "what_changed": "Rewrote the canvas description to summarize combined quota/spend admission, interactive/batch scheduling, constrained-capacity priority, state-preserving parking, and resume behavior.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "pre_json",
+                  "locator": "description",
+                  "observation": "The prior description had no interactive/batch separation or parking/resume behavior."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "description",
+                  "observation": "The new description directly documents all requested traffic-class behaviors."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "entire summary",
+                  "observation": "Declares interactive/batch lanes, preemption, parking/resume, and combined accounting."
+                }
+              ]
+            },
+            {
+              "object_id": "traffic-classes",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the '5 · Traffic class scheduling' section.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[traffic-classes]",
+                  "observation": "New section contains the requested traffic classification and scheduling lane objects."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the lane addition."
+                }
+              ]
+            },
+            {
+              "object_id": "batch-preemption",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the '6 · Batch preemption & resume' section.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[batch-preemption]",
+                  "observation": "New section contains constrained-capacity, parked-state, and resume objects."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "constrained-capacity preemption, state-preserving batch parking/resume",
+                  "observation": "Declares this behavior."
+                }
+              ]
+            },
+            {
+              "object_id": "classify-traffic",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added an 'Interactive or batch?' classification decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[classify-traffic]",
+                  "observation": "Adds the decision required to split traffic classes."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the class separation."
+                }
+              ]
+            },
+            {
+              "object_id": "interactive-lane",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added an 'Interactive priority lane' scheduling process.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[interactive-lane]",
+                  "observation": "Adds the requested interactive lane and identifies it as priority."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the lane addition."
+                }
+              ]
+            },
+            {
+              "object_id": "batch-lane",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a 'Batch scheduling lane' storage object.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[batch-lane]",
+                  "observation": "Adds the requested separate batch scheduling lane."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the lane addition."
+                }
+              ]
+            },
+            {
+              "object_id": "capacity-constrained",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a 'Capacity constrained?' decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[capacity-constrained]",
+                  "observation": "Represents the requested constrained-capacity condition."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "constrained-capacity preemption",
+                  "observation": "Declares the condition and behavior."
+                }
+              ]
+            },
+            {
+              "object_id": "parked-batch",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a database labeled 'Parked batch state.'",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[parked-batch]",
+                  "observation": "Directly communicates state-preserving parking for batch work."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "state-preserving batch parking/resume",
+                  "observation": "Declares this addition."
+                }
+              ]
+            },
+            {
+              "object_id": "resume-batch",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a 'Resume preserved work' process.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[resume-batch]",
+                  "observation": "Directly communicates resumption of preserved batch work."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "state-preserving batch parking/resume",
+                  "observation": "Declares this addition."
+                }
+              ]
+            },
+            {
+              "object_id": "attempt-control",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Renumbered the section title from 5 to 7 without changing geometry or content.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[attempt-control]",
+                  "observation": "Only the numeric prefix changed after insertion of new sections 5 and 6."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "Added interactive/batch admission lanes ... batch parking/resume",
+                  "observation": "The declared insertion of two new numbered sections necessitates downstream sequence renumbering."
+                }
+              ]
+            },
+            {
+              "object_id": "protection",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Renumbered the section title from 6 to 8 without changing geometry or content.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[protection]",
+                  "observation": "Only the numeric prefix changed to preserve section ordering."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 8 · Capacity protection",
+                  "observation": "The region otherwise retains its prior architecture."
+                }
+              ]
+            },
+            {
+              "object_id": "accounting",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Renumbered the section title from 7 to 9 without changing geometry or content.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[accounting]",
+                  "observation": "Only the numeric prefix changed after adding sections 5 and 6."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 9 · Metering & audit",
+                  "observation": "The accounting objects and paths remain otherwise unchanged."
+                }
+              ]
+            },
+            {
+              "object_id": "evaluation",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Renumbered the section title from 8 to 10 without changing geometry or content.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[evaluation]",
+                  "observation": "Only the numeric prefix changed after adding two earlier numbered sections."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "section 10 · Shadow evaluation",
+                  "observation": "The evaluation region remains otherwise unchanged."
+                }
+              ]
+            },
+            {
+              "object_id": "admission",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Changed the label from 'Concurrency + token limits' to 'Combined quota + spend limits.'",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[admission]",
+                  "observation": "The new label directly expresses combined quota and spend controls."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "combined quota/spend accounting",
+                  "observation": "Declares this control update."
+                }
+              ]
+            },
+            {
+              "object_id": "e25",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the interactive branch from the traffic classifier to the interactive lane.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e25]",
+                  "observation": "Structurally creates the interactive traffic branch."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the branch."
+                }
+              ]
+            },
+            {
+              "object_id": "e26",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the batch branch from the traffic classifier to the batch lane.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e26]",
+                  "observation": "Structurally creates the batch traffic branch."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the branch."
+                }
+              ]
+            },
+            {
+              "object_id": "e27",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a routed connection from the interactive lane to the existing deadline-aware queue.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e27]",
+                  "observation": "Rejoins interactive traffic with the existing downstream queue."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "blue route from section 5 to section 2",
+                  "observation": "The interactive path visibly rejoins the prior system."
+                }
+              ]
+            },
+            {
+              "object_id": "e28",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a routed connection from the batch lane to the existing deadline-aware queue.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e28]",
+                  "observation": "Rejoins batch traffic with the existing downstream queue."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "yellow route from section 5 to section 2",
+                  "observation": "The batch path visibly rejoins the prior system."
+                }
+              ]
+            },
+            {
+              "object_id": "e30",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a connection from constrained capacity to parked batch state.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e30]",
+                  "observation": "Communicates parking batch state under constrained capacity."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "constrained-capacity preemption, state-preserving batch parking/resume",
+                  "observation": "Declares this path."
+                }
+              ]
+            },
+            {
+              "object_id": "e31",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a connection from parked batch state to resume preserved work.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e31]",
+                  "observation": "Links stateful parking to the resume operation."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "state-preserving batch parking/resume",
+                  "observation": "Declares this path."
+                }
+              ]
+            },
+            {
+              "object_id": "e32",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a 'capacity returns' connection from resume preserved work back to the batch lane.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e32]",
+                  "observation": "Explicitly communicates the resume condition and reinsertion into batch scheduling."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "state-preserving batch parking/resume",
+                  "observation": "Declares this behavior."
+                }
+              ]
+            },
+            {
+              "object_id": "e29b",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added a routed connection from the interactive priority lane to the constrained-capacity decision.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[e29b]",
+                  "observation": "Attempts to represent interactive priority under constrained capacity."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "orange route from interactive lane to section 6",
+                  "observation": "The route is visible, though it does not explicitly show batch displacement."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "constrained-capacity preemption",
+                  "observation": "Declares the intended purpose of the route."
+                }
+              ]
+            },
+            {
+              "object_id": "e3",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Replaced the direct admission-to-deadline-queue path with an admission-to-traffic-classifier path.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.changed[e3]",
+                  "observation": "The edge now runs from admission to classify-traffic instead of directly to deadline-queue."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "Separating traffic during admission and scheduling plainly requires inserting the class split into the existing admission flow."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "interactive/batch admission lanes",
+                  "observation": "Declares the rerouted admission flow."
+                }
+              ]
+            }
+          ],
+          "collateral_change_count": 0,
+          "scope_summary": "The largest in-scope effect is the addition of two traffic-control regions that split admission into interactive and batch lanes and add constrained-capacity parking/resume behavior. Combined quota and spend enforcement is also moved into an explicit shared upstream admission label. The only surrounding changes are four downstream section-number updates, classified as necessary accommodations for inserting numbered sections 5 and 6. There is no collateral rework. However, the preemption semantic is only partial because the connection structure does not explicitly show batch work being displaced by interactive work; the interactive lane itself feeds the constrained-capacity decision and then the parked-batch path.",
+          "scoring_status": "scored",
+          "exclusion_reason": null,
+          "score": 6
+        }
+      }
+    ],
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 28158,
+    "output_tokens": 5196
+  },
+  "flags": []
+}

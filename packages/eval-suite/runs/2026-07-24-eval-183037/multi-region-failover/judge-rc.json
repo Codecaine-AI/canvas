@@ -1,0 +1,1049 @@
+{
+  "axis": "rc",
+  "scenario": "multi-region-failover",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The customer-facing commerce API operates in three regions.",
+        "brief_evidence": "“We operate a customer-facing commerce API in three regions.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Middle architecture row",
+            "observation": "The board visibly contains Region A, Region B, and Region C."
+          },
+          {
+            "source": "json",
+            "locator": "objects: region-a, region-b, region-c",
+            "observation": "Three regional sections are defined."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Global DNS and an anycast edge route users to the nearest healthy regional ingress.",
+        "brief_evidence": "“Global DNS and an anycast edge route users to the nearest healthy regional ingress.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global traffic edge",
+            "observation": "Customers flow through Global DNS to an Anycast edge labeled “nearest healthy ingress,” with branches to all three ingresses."
+          },
+          {
+            "source": "json",
+            "locator": "objects dns, edge-router; connections e-users-dns, e-dns-edge, e-edge-a, e-edge-b, e-edge-c",
+            "observation": "DNS and anycast routing are explicitly connected to each regional ingress."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "Each region has a regional ingress.",
+        "brief_evidence": "“Each region has a web application, API gateway, identity cache, catalog service, cart service, checkout service, order service, worker pool, event bus, Redis cluster, and an independent observability collector...” in the context of routing to a “regional ingress.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "Each regional panel contains an Ingress icon."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-ingress, b-ingress, c-ingress",
+            "observation": "One ingress object is parented to each region."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "Each region has a web application.",
+        "brief_evidence": "“Each region has a web application...”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Web app box appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-web, b-web, c-web",
+            "observation": "Three regional web application objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "Each region has an API gateway.",
+        "brief_evidence": "“Each region has a ... API gateway...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "An API gateway box appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-api, b-api, c-api",
+            "observation": "Three regional API gateway objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "Each region has an identity cache.",
+        "brief_evidence": "“Each region has a ... identity cache...”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "An Identity cache appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-id, b-id, c-id",
+            "observation": "Three identity-cache objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Each region has a catalog service.",
+        "brief_evidence": "“Each region has a ... catalog service...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Catalog box appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-catalog, b-catalog, c-catalog",
+            "observation": "Three regional catalog objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Each region has a cart service.",
+        "brief_evidence": "“Each region has a ... cart service...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Cart box appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-cart, b-cart, c-cart",
+            "observation": "Three regional cart objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Each region has a checkout service.",
+        "brief_evidence": "“Each region has a ... checkout service...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Checkout box appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-checkout, b-checkout, c-checkout",
+            "observation": "Three regional checkout objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "Each region has an order service.",
+        "brief_evidence": "“Each region has a ... order service...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "An Order coordinator appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-order, b-order, c-order",
+            "observation": "Three regional order-coordinator objects represent the order service."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "Each region has a worker pool.",
+        "brief_evidence": "“Each region has a ... worker pool...”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Worker pool appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-workers, b-workers, c-workers",
+            "observation": "Three regional worker-pool objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Each region has an event bus.",
+        "brief_evidence": "“Each region has a ... event bus...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "An Event bus appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-bus, b-bus, c-bus",
+            "observation": "Three regional event-bus objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Each region has a Redis cluster.",
+        "brief_evidence": "“Each region has a ... Redis cluster...”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "A Redis cluster appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-redis, b-redis, c-redis",
+            "observation": "Three regional Redis-cluster objects are present."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Each region has an independent observability collector.",
+        "brief_evidence": "“Each region has ... an independent observability collector...”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A, B, and C panels",
+            "observation": "An Independent collector appears in every region."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-collector, b-collector, c-collector",
+            "observation": "Three collectors are present, each parented to its own region."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Regional components are spread across multiple availability zones.",
+        "brief_evidence": "“...spread across multiple availability zones.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region section headers and resilience notes",
+            "observation": "All three headers say “multi-AZ,” and each resilience note includes “AZ isolation.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects region-a, region-b, region-c and a-resilience, b-resilience, c-resilience",
+            "observation": "Every region is labeled multi-AZ and contains an AZ-isolation note."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Regional service discovery and circuit breakers prevent a failing instance or availability zone from taking down the region.",
+        "brief_evidence": "“Regional service discovery and circuit breakers keep a failing instance or zone from taking down the region.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Regional resilience notes in all three regions",
+            "observation": "Each note explicitly lists service discovery, circuit breakers, and AZ isolation."
+          },
+          {
+            "source": "json",
+            "locator": "objects a-resilience, b-resilience, c-resilience",
+            "observation": "The repeated resilience notes encode the required instance/zone containment mechanisms."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Catalog reads come from a globally replicated document store.",
+        "brief_evidence": "“Catalog reads come from a globally replicated document store...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "A store is labeled “Globally replicated document store” alongside the regional Catalog services."
+          },
+          {
+            "source": "json",
+            "locator": "object catalog-store",
+            "observation": "The global data section contains the explicitly labeled replicated document store."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Catalog reads may continue from a local replica during inter-region isolation.",
+        "brief_evidence": "“...may continue from a local replica during inter-region isolation.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Failover, failback & operations sequence",
+            "observation": "The home-region-loss step says “carts + catalog remain available,” but does not identify a local catalog replica or specifically tie it to inter-region isolation."
+          },
+          {
+            "source": "json",
+            "locator": "object pause-checkout; searched objects and connections for “local replica” and catalog-store regional links",
+            "observation": "Catalog availability is stated, but no local-replica topology or isolation-specific catalog-read behavior is encoded."
+          }
+        ],
+        "note": "Continued catalog availability is present, but the local-replica endpoint and inter-region-isolation condition are missing."
+      },
+      {
+        "id": "R19",
+        "requirement": "Cart data uses a multi-region key-value store.",
+        "brief_evidence": "“Cart data uses a multi-region key-value store...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "A database is labeled “Multi-region KV.”"
+          },
+          {
+            "source": "json",
+            "locator": "object cart-store",
+            "observation": "The cart store is explicitly labeled as a multi-region KV store."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Cart storage uses per-cart ownership and conditional writes so concurrent updates are detected.",
+        "brief_evidence": "“...with per-cart ownership and conditional writes so concurrent updates are detected.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "The Multi-region KV box says “cart owner + conditional...”"
+          },
+          {
+            "source": "json",
+            "locator": "object cart-store",
+            "observation": "Its full text is “Multi-region KV / cart owner + conditional writes,” unambiguously encoding the concurrency-control mechanism."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Checkout creates orders in a single writable home region selected for each customer.",
+        "brief_evidence": "“Checkout creates orders in a single writable home region selected for each customer.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A checkout path and control-plane lease",
+            "observation": "Checkout flows to the Order coordinator with a “home region” label, and the lease is single-holder."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-checkout-order; object lease",
+            "observation": "A home-region checkout relationship and single writer are present, but no customer-selection rule is represented."
+          }
+        ],
+        "note": "The home-region and single-writer concepts are shown; selection of that home region per customer is not."
+      },
+      {
+        "id": "R22",
+        "requirement": "The home region atomically commits the order and its outbox event to its regional relational database.",
+        "brief_evidence": "“The home region commits an order and its outbox event atomically to its regional relational database...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Region A to Global data path",
+            "observation": "Order coordinator connects to “Regional SQL / order + outbox atomic...” with edge label “order + outbox.”"
+          },
+          {
+            "source": "json",
+            "locator": "object order-db; connection e-order-db",
+            "observation": "The database text and relationship explicitly state an atomic order-and-outbox commit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Database changes stream to warm replicas in the other two regions.",
+        "brief_evidence": "“...then streams database changes to warm replicas in the other two regions.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "Regional SQL connects by a “changes” edge to “CDC to warm replicas.”"
+          },
+          {
+            "source": "json",
+            "locator": "object cdc; connection e-db-cdc; searched connections from cdc to regional replicas",
+            "observation": "Streaming to warm replicas is represented, but neither replica endpoints nor the required count of two other regions is shown."
+          }
+        ],
+        "note": "The CDC behavior is clear, but the destination scope of exactly the other two regions is omitted."
+      },
+      {
+        "id": "R24",
+        "requirement": "A global payment adapter assigns an idempotency key before calling either of two external payment providers.",
+        "brief_evidence": "“Payment requests go through a global payment adapter that assigns an idempotency key before calling either of two external payment providers.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "The Global payment adapter is labeled “idempotency key” and has outgoing arrows to Payment provider 1 and Payment provider 2."
+          },
+          {
+            "source": "json",
+            "locator": "objects payment-adapter, pay-a, pay-b; connections e-payment, e-pay-a, e-pay-b",
+            "observation": "Topology places idempotency assignment at the adapter before either provider call."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "The global control plane receives health signals from synthetic probes, regional collectors, database replication monitors, and event-bus lag monitors.",
+        "brief_evidence": "“A global control plane receives health signals from synthetic probes, regional collectors, database replication monitors, and event-bus lag monitors.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "“Probes · collectors · DB lag · bus lag” feeds the Global control plane."
+          },
+          {
+            "source": "json",
+            "locator": "objects signals, control-plane; connection e-signals",
+            "observation": "All four source classes are named and directed into the control plane."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "The control plane distinguishes instance failure, availability-zone failure, regional service failure, database write failure, and full regional isolation.",
+        "brief_evidence": "“It distinguishes an instance failure, availability-zone failure, regional service failure, database write failure, and full regional isolation.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane and recovery sections",
+            "observation": "A generic “Failure scope” decision and “Detect + classify home-region loss” are present."
+          },
+          {
+            "source": "json",
+            "locator": "objects classifier, detect-loss; searched all object text and connection labels for the five named failure classes",
+            "observation": "The JSON does not enumerate instance, AZ, regional-service, database-write, and full-isolation classes."
+          }
+        ],
+        "note": "Classification is represented generically, but the five required distinguishable categories are not fully recorded."
+      },
+      {
+        "id": "R27",
+        "requirement": "The control plane can automatically remove a region from new traffic.",
+        "brief_evidence": "“The control plane can remove a region from new traffic automatically...”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "Failure scope flows to “Remove region from new traffic.”"
+          },
+          {
+            "source": "json",
+            "locator": "object traffic-remove; connection e-remove",
+            "observation": "The removal action and trigger are present, but no label or note explicitly says it is automatic."
+          }
+        ],
+        "note": "Removal from new traffic is shown; the stated automatic execution qualifier is missing."
+      },
+      {
+        "id": "R28",
+        "requirement": "Promoting a relational replica to writer requires a failover lease from the quorum store and confirmation that replication lag is within the recovery-point objective.",
+        "brief_evidence": "“...promoting a relational replica to writer requires a failover lease from the quorum store and confirmation that replication lag is within the recovery-point objective.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane and recovery flows",
+            "observation": "“Lag within RPO?” leads through the “Quorum writer lease” to “Promote replica”; the recovery edge also says “RPO + quorum.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects rpo-gate, lease, promote; connections e-rpo, e-lease, e-promote, e-rec2",
+            "observation": "Both required gates precede promotion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Only one region may hold the writer lease.",
+        "brief_evidence": "“Only one region may hold the writer lease.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "The lease is labeled “single holder.”"
+          },
+          {
+            "source": "json",
+            "locator": "object lease",
+            "observation": "Text reads “Quorum writer lease / single holder.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "DNS and edge routing change after promotion.",
+        "brief_evidence": "“DNS and edge routing change after promotion...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "The promotion step says “Promote replica then change DNS / edge.”"
+          },
+          {
+            "source": "json",
+            "locator": "object promote",
+            "observation": "The object text explicitly encodes the required ordering."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "After promotion, the order coordinator resumes from the promoted outbox without issuing duplicate payments.",
+        "brief_evidence": "“...the order coordinator resumes from the promoted outbox without issuing duplicate payments.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence and Safety invariants note",
+            "observation": "The lease-move step says “promote + resume outbox,” while the safety note says payment idempotency prevents duplicates."
+          },
+          {
+            "source": "json",
+            "locator": "objects move-lease, ops-rules",
+            "observation": "Outbox resumption and duplicate-payment prevention are both explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "During full home-region loss, existing carts remain available from the global store.",
+        "brief_evidence": "“During a full home-region loss, existing carts remain available from the global store...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence and global cart store",
+            "observation": "Full home-region loss leads to a step saying carts remain available, and the board contains the Multi-region KV cart store."
+          },
+          {
+            "source": "json",
+            "locator": "objects detect-loss, pause-checkout, cart-store; connection e-rec1",
+            "observation": "The loss condition, continued cart availability, and global store are all represented."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "During full home-region loss, catalog remains readable.",
+        "brief_evidence": "“...catalog stays readable...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "The post-loss pause step states “carts + catalog remain available.”"
+          },
+          {
+            "source": "json",
+            "locator": "object pause-checkout",
+            "observation": "Catalog availability is explicit during the full-loss sequence."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "During full home-region loss, checkout pauses until the writer lease moves.",
+        "brief_evidence": "“...checkout pauses until the writer lease moves.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "“Pause checkout” directly precedes “Move writer lease,” joined by an “RPO + quorum” gate."
+          },
+          {
+            "source": "json",
+            "locator": "objects pause-checkout, move-lease; connection e-rec2",
+            "observation": "The sequence unambiguously represents the pause-until-lease-move behavior."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Requests already carrying an order ID may be retried safely.",
+        "brief_evidence": "“Requests already carrying an order id may be retried safely.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Safety invariants note",
+            "observation": "The note states “Existing order IDs retry safely.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops-rules",
+            "observation": "The safe-retry rule is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Cross-region events use a replication bridge with deduplication, quarantine for schema incompatibility, and replay controls.",
+        "brief_evidence": "“Events crossing regions use a replication bridge with deduplication, quarantine for schema incompatibility, and replay controls.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "The Replication bridge is labeled “dedupe · quarantine · replay” and receives a “cross-region events” flow."
+          },
+          {
+            "source": "json",
+            "locator": "object event-bridge; connection e-cdc-bridge",
+            "observation": "Bridge, deduplication, quarantine, replay, and cross-region scope are present, but quarantine is not qualified as being for schema incompatibility."
+          }
+        ],
+        "note": "All mechanisms are shown, but the required schema-incompatibility condition for quarantine is omitted."
+      },
+      {
+        "id": "R37",
+        "requirement": "A dead-letter service retains exhausted worker messages in each region and copies their metadata to the operations account.",
+        "brief_evidence": "“A dead-letter service retains exhausted worker messages in each region and copies their metadata to the operations account.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global data, events & payments section",
+            "observation": "A “Regional DLQ / metadata → ops account” is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object dlq; searched regional panels and connections for worker-to-DLQ/exhaustion relationships",
+            "observation": "Regional scope and metadata copy are stated, but exhausted worker-message retention and explicit per-region DLQ instances are not fully shown."
+          }
+        ],
+        "note": "The DLQ and operations metadata copy are present; the exhaustion/retention behavior and repeated per-region topology are incomplete."
+      },
+      {
+        "id": "R38",
+        "requirement": "Configuration, feature flags, signing keys, and service identities originate in the control plane.",
+        "brief_evidence": "“Configuration, feature flags, signing keys, and service identities originate in the control plane...”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane and regional resilience notes",
+            "observation": "A Global control plane exists, and regional notes mention cached config/keys, but no origin/distribution path or feature flags/service identities is visible."
+          },
+          {
+            "source": "json",
+            "locator": "object control-plane and objects a-resilience, b-resilience, c-resilience; searched connections from control-plane to regions",
+            "observation": "Config and keys are named regionally, but the four artifact classes are not all named and their control-plane origin is not connected."
+          }
+        ],
+        "note": "Only config/keys and the control-plane component are present; origin and two artifact classes are missing."
+      },
+      {
+        "id": "R39",
+        "requirement": "Configuration, feature flags, signing keys, and service identities are cached regionally with explicit expiry behavior.",
+        "brief_evidence": "“...but are cached regionally with explicit expiry behavior.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Regional resilience notes",
+            "observation": "Each region says “config/keys cached with expiry.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects a-resilience, b-resilience, c-resilience",
+            "observation": "Regional caching and expiry are explicit for config/keys, but feature flags and service identities are not included in that repeated statement."
+          }
+        ],
+        "note": "Regional caching with expiry is shown for only part of the required material set."
+      },
+      {
+        "id": "R40",
+        "requirement": "Expired identity material stops privileged writes while allowing public health checks.",
+        "brief_evidence": "“Expired identity material stops privileged writes while allowing public health checks.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Safety invariants note",
+            "observation": "The note says expired identity material blocks privileged writes, not public health checks."
+          },
+          {
+            "source": "json",
+            "locator": "object ops-rules",
+            "observation": "The expiry failure behavior and health-check exception are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "Audit events enter an immutable global audit store.",
+        "brief_evidence": "“Audit events ... enter an immutable global audit store.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "An “Immutable global audit” database is present."
+          },
+          {
+            "source": "json",
+            "locator": "object audit",
+            "observation": "The audit destination is explicitly global and immutable."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R42",
+        "requirement": "The immutable audit store receives events from routing changes, lease decisions, database promotion, provider failover, replay, and operator overrides.",
+        "brief_evidence": "“Audit events from routing changes, lease decisions, database promotion, provider failover, replay, and operator overrides enter an immutable global audit store.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Control-plane promotion path and Safety invariants note",
+            "observation": "Promotion flows to the audit store, and the note says operator override is audited."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-audit; object ops-rules; searched all audit-bound connections and labels",
+            "observation": "No explicit audit inputs are shown for routing changes, lease decisions, provider failover, or replay."
+          }
+        ],
+        "note": "Database promotion and operator override are covered, but most required audit-source categories are not."
+      },
+      {
+        "id": "R43",
+        "requirement": "Paging, incident records, and the status service receive the same failover milestones.",
+        "brief_evidence": "“Paging, incident records, and the status service receive the same failover milestones.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global control plane & safety gates",
+            "observation": "A single downstream milestone path is labeled “page · incident · status” and terminates at “Paging · incident · status.”"
+          },
+          {
+            "source": "json",
+            "locator": "object milestones; connection e-ops",
+            "observation": "The three recipients share the same represented milestone feed."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R44",
+        "requirement": "Recovery covers failback as well as failover.",
+        "brief_evidence": "“Recovery must cover failback as well as failover.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Bottom section",
+            "observation": "The section is titled “Failover, failback & operations” and includes both loss/promotion and writer-return stages."
+          },
+          {
+            "source": "json",
+            "locator": "object recovery and recovery-sequence objects",
+            "observation": "Both failover and failback phases are represented."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R45",
+        "requirement": "The recovered region rejoins first as a read replica.",
+        "brief_evidence": "“The recovered region rejoins first as a read replica...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "After “region recovers,” the next step is “Rejoin as read replica.”"
+          },
+          {
+            "source": "json",
+            "locator": "object rejoin; connection e-rec3",
+            "observation": "The required first rejoin mode and ordering are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R46",
+        "requirement": "Before serving users, the recovered region catches up and validates checksums and event offsets.",
+        "brief_evidence": "“...catches up, validates checksums and event offsets...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "The rejoin step says “catch up + checksums + offsets” before the validated transition."
+          },
+          {
+            "source": "json",
+            "locator": "object rejoin; connection e-rec4",
+            "observation": "Catch-up and both validation types precede the next recovery stage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R47",
+        "requirement": "The recovered region receives shadow traffic before it can serve users.",
+        "brief_evidence": "“...and receives shadow traffic before it can serve users.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "A stage explicitly says “Shadow traffic before serving users.”"
+          },
+          {
+            "source": "json",
+            "locator": "object shadow",
+            "observation": "The ordering constraint is stated directly."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R48",
+        "requirement": "Returning writer ownership is a separate controlled operation.",
+        "brief_evidence": "“Returning writer ownership is a separate controlled operation...”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Recovery sequence",
+            "observation": "Shadow traffic leads via an edge labeled “separate operation” to “Controlled writer return?”"
+          },
+          {
+            "source": "json",
+            "locator": "object failback; connection e-rec5",
+            "observation": "Both the separation and controlled decision are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R49",
+        "requirement": "Original-region health never by itself implies writer failback.",
+        "brief_evidence": "“...it is never implied merely because the original region is healthy again.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Safety invariants note",
+            "observation": "The note states “Original-region health never implies writer failback.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops-rules",
+            "observation": "The prohibition is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R50",
+        "requirement": "Capacity safeguards prevent the two surviving regions from accepting more traffic than their tested limits.",
+        "brief_evidence": "“Capacity safeguards prevent the two surviving regions from accepting more traffic than their tested limits...”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global traffic edge",
+            "observation": "“Capacity guard + load shedding” leads through “tested limits” to regional eligibility."
+          },
+          {
+            "source": "json",
+            "locator": "objects capacity, health-policy; connections e-edge-capacity, e-capacity-policy",
+            "observation": "Tested-limit admission control is present, but the special boundary for exactly the two surviving regions is not stated."
+          }
+        ],
+        "note": "The tested-capacity safeguard is represented, but its two-survivor failover scope is omitted."
+      },
+      {
+        "id": "R51",
+        "requirement": "Load shedding protects checkout and order recovery ahead of catalog personalization.",
+        "brief_evidence": "“...load shedding protects checkout and order recovery ahead of catalog personalization.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Global traffic edge and Safety invariants note",
+            "observation": "The edge includes load shedding, and the safety note states that checkout/order recovery outrank catalog personalization."
+          },
+          {
+            "source": "json",
+            "locator": "objects capacity, ops-rules",
+            "observation": "The load-shedding mechanism and required priority order are both explicit."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The failover and failback safety sequence is the strongest cluster: quorum/RPO-gated promotion, single writer lease, post-promotion routing, outbox resumption, checkout pause, safe retries, read-replica rejoin, validation, shadow traffic, and controlled writer return are all represented.",
+    "most_consequential_gap": "Failure classification is only generic: the board does not enumerate the required instance, availability-zone, regional-service, database-write, and full-isolation categories.",
+    "coverage_summary": "The board represents the three-region service topology and nearly all core failover, data, payment, recovery, and safety behavior. Eleven requirements are partial, chiefly because specific qualifiers or scopes are omitted: local catalog replicas during isolation, per-customer home-region selection, exactly two warm replicas, the five failure classes, automatic traffic removal, schema-specific quarantine, complete configuration provenance, complete audit-source coverage, and the two-surviving-region capacity boundary. Weighted coverage is 80 of 89, or 0.8989. No system-defining requirement is absent or contradicted, so no cap applies; under the threshold rubric this maps to 7.",
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 17094,
+    "output_tokens": 10974
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

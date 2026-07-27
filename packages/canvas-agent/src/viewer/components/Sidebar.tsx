@@ -1,4 +1,4 @@
-export type View = "traces" | "session" | "config";
+export type View = "traces" | "config";
 
 type SidebarProps = {
   view: View;
@@ -7,7 +7,6 @@ type SidebarProps = {
 
 const NAV: { view: View; path: string; title: string }[] = [
   { view: "traces", path: "/traces", title: "Traces" },
-  { view: "session", path: "/session", title: "Session" },
   { view: "config", path: "/config", title: "Config" },
 ];
 

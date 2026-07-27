@@ -2,7 +2,7 @@
  * Headless layout-session driver (HARNESS-SETUP-PLAN §5 phase 3 — the exit
  * criterion). Runs a full session in-process (store + kernel directly, no
  * HTTP), streaming fitted/proposal/delta/lint events to stdout, writing each
- * render_draft PNG to the scratch dir, and printing the final patch
+ * pushed board-render PNG to the scratch dir, and printing the final patch
  * operations + summary.
  *
  *   bun run cli --canvas <id> --scope <id,id,…> --instruction "…" [--max-turns N]

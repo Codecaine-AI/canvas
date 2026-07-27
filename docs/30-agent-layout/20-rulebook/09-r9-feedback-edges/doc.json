@@ -14,14 +14,16 @@
         "b-r9-evidence-4"
       ],
       "props": {
-        "covers": "Feedback arrows exit the side facing their return corridor and detour around content on offsets drawn from {48, 80, 96, 128, 144, 192} — never through a box; forward flow routes through reserved corridors and the elbow router penalizes halo entry.",
+        "covers": "Feedback edges use direct labels, flow-facing endpoint steering, and clear return corridors; the ROUTES block and edge-related diagnostics judge the production-routed result.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "feedback edges",
-          "detours",
+          "direct edge labels",
           "return corridors",
-          "elbow router"
+          "connection steering",
+          "ROUTES",
+          "edge diagnostics"
         ]
       }
     },
@@ -43,11 +45,11 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Feedback detours on ladder offsets"
+        "title": "Feedback uses a clear return corridor"
       },
       "text": [
         {
-          "insert": "Feedback arrows exit the side that faces their return corridor and detour around content on offsets drawn from {48, 80, 96, 128, 144, 192} — never through a box."
+          "insert": "A feedback edge exits toward a clear return corridor, carries its meaning on the edge label, and routes without crossing boxes, merging with another run, or reading as a section border."
         }
       ]
     },
@@ -58,49 +60,70 @@
       "props": {},
       "text": [
         {
-          "insert": "Forward flow routes through reserved corridors — split gutters are emitted as routable corridors ("
+          "insert": "The "
         },
         {
-          "insert": "corridorRoutedEdges",
+          "insert": "connection capabilities",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "corridorRoutedEdges"
+              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/capabilities/kinds/connections.ts",
+              "symbol": "CONNECTIONS_SPEC"
             }
           }
         },
         {
-          "insert": "). The elbow router ("
+          "insert": " and "
         },
         {
-          "insert": "directElbow",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "directElbow"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": ") prefers the facing sides of the two boxes but may exit any free side — a flush grid cell's facing side is often walled in. Crossing a box outright is forbidden; merely entering its 6px clearance halo is penalized, so tight-but-legal squeezes stay available ("
+          "insert": " together define the mechanism: label edges directly, enter and exit on faces that point along the flow, reserve air for the return, and keep two runs from sharing a line. The router chooses sides when steering is omitted. When the route needs help, steer minimally in order — anchor, then endpoint position, then waypoints — and read the returned ROUTES polyline and through list before judging it done. Enforcement is measured on that production-routed polyline by "
         },
         {
-          "insert": "detourCandidates",
+          "insert": "broken-edges",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/route.ts",
-              "symbol": "detourCandidates"
+              "path": "packages/canvas-agent/src/board/lints/rules/broken-edges.ts",
+              "symbol": "rule"
             }
           }
         },
         {
-          "insert": "). Boxes physically overlapping an endpoint are unavoidable by definition and carry no routing signal."
+          "insert": ": a route through a non-endpoint box is an error that blocks a committed finalize, while shared runs, border hugging, stranded chips, and excessive crossings are warnings that must be fixed or explicitly overridden. "
+        },
+        {
+          "insert": "covered-content",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/covered-content.ts",
+              "symbol": "rule"
+            }
+          }
+        },
+        {
+          "insert": " separately catches a label chip covering a box, chip, or foreign routed wire. unreadable-labels checks whether a chip fits between its endpoints, and crowding warns when sibling gaps do not leave the minimum arrow corridor. Fixable findings carry ready-to-send "
+        },
+        {
+          "insert": "suggested op:",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " JSON."
         }
       ]
     },
@@ -111,7 +134,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: ink's \"calls are incorrect\" loop exits W and returns at a 144 offset; gc's regression loop returns through the 128 cluster corridor."
+          "insert": "Verification: add connections after section content is in place, then judge the returned ROUTES block and pushed render. A clean return has an empty through list, a readable direct label, and a path that owns its corridor."
         }
       ]
     }

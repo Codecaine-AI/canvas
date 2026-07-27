@@ -1,0 +1,928 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-25-eval-160035.agent-session-orchestration",
+  "title": "2026-07-25-eval-160035 · agent-session-orchestration",
+  "description": "# Long-lived agent session orchestration\n\nA left-to-right, top-to-bottom lifecycle map for sessions running through a shared control plane. The top row covers intake, placement, iterative model/tool execution, and client streaming with durable event replay. The middle row shows content-addressed checkpoints and forks, crash recovery with idempotent replay, and interruption into a safe resumable checkpoint. The bottom row shows child-session propagation and reaping, tree/workspace quota decisions with audit metering, and version-aware host draining. Dashed cross-section links show the control relationships between execution, durability, quotas, recovery, cancellation, child sessions, and deployment shutdown.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-25-eval-160035 · agent-session-orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "section",
+      "text": "1 · Session intake & placement",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 128,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "2 · Turn execution loop",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 128,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "streaming",
+      "type": "section",
+      "text": "3 · Streaming & reattach",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2176,
+        "y": 128,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "durability",
+      "type": "section",
+      "text": "4 · Durable state & branching",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 736,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "recovery",
+      "type": "section",
+      "text": "5 · Suspend, resume & recovery",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 736,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "interrupt",
+      "type": "section",
+      "text": "6 · Cancellation & safe release",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2176,
+        "y": 736,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "children",
+      "type": "section",
+      "text": "7 · Child-session tree",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 128,
+        "y": 1344,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "quota",
+      "type": "section",
+      "text": "8 · Quotas, audit & metering",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1152,
+        "y": 1344,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "drain",
+      "type": "section",
+      "text": "9 · Version-aware draining",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2176,
+        "y": 1344,
+        "width": 896,
+        "height": 480
+      }
+    },
+    {
+      "id": "api",
+      "type": "pill",
+      "text": "API session open",
+      "color": "blue",
+      "parentId": "intake",
+      "geometry": {
+        "x": 176,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "auth",
+      "type": "process",
+      "text": "Auth + workspace quotas",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 464,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "predefined-process",
+      "text": "Placement scheduler",
+      "color": "blue",
+      "parentId": "intake",
+      "geometry": {
+        "x": 752,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "assemble",
+      "type": "process",
+      "text": "Assemble model request",
+      "color": "violet",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1200,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "model",
+      "type": "process",
+      "text": "Model call / stream",
+      "color": "violet",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1488,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "tools",
+      "type": "predefined-process",
+      "text": "Execute permitted tools",
+      "color": "orange",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1776,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "fanout",
+      "type": "process",
+      "text": "Identical output fan-out",
+      "color": "teal",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2224,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "clientstream",
+      "type": "icon",
+      "text": "Live client stream",
+      "color": "blue",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2512,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      },
+      "icon": "display"
+    },
+    {
+      "id": "replay",
+      "type": "process",
+      "text": "Replay + reattach",
+      "color": "teal",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2800,
+        "y": 288,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "eventlog",
+      "type": "database",
+      "text": "Durable event log",
+      "color": "teal",
+      "parentId": "durability",
+      "geometry": {
+        "x": 176,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "checkpoint",
+      "type": "database",
+      "text": "Content-addressed checkpoint",
+      "color": "teal",
+      "parentId": "durability",
+      "geometry": {
+        "x": 464,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "fork",
+      "type": "document-stack",
+      "text": "Fork / immutable history",
+      "color": "violet",
+      "parentId": "durability",
+      "geometry": {
+        "x": 752,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "heartbeat",
+      "type": "process",
+      "text": "Heartbeat monitor",
+      "color": "orange",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1200,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "rehydrate",
+      "type": "process",
+      "text": "Rehydrate latest snapshot",
+      "color": "orange",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1488,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "idempotency",
+      "type": "process",
+      "text": "Replay with idempotency key",
+      "color": "orange",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1776,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "cancel",
+      "type": "octagon",
+      "text": "Cancel / interrupt",
+      "color": "red",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2224,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "abandon",
+      "type": "process",
+      "text": "Stop stream + tools",
+      "color": "orange",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2512,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "safecheck",
+      "type": "database",
+      "text": "Resumable checkpoint",
+      "color": "green",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2800,
+        "y": 896,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "parent",
+      "type": "process",
+      "text": "Parent orchestrator",
+      "color": "violet",
+      "parentId": "children",
+      "geometry": {
+        "x": 176,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "child",
+      "type": "document-stack",
+      "text": "Scoped child sessions",
+      "color": "violet",
+      "parentId": "children",
+      "geometry": {
+        "x": 464,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "reaper",
+      "type": "process",
+      "text": "Propagation + reaper",
+      "color": "red",
+      "parentId": "children",
+      "geometry": {
+        "x": 752,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "budget",
+      "type": "process",
+      "text": "Tree + workspace budgets",
+      "color": "yellow",
+      "parentId": "quota",
+      "geometry": {
+        "x": 1200,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "pause",
+      "type": "decision",
+      "text": "Pause for user decision",
+      "color": "orange",
+      "parentId": "quota",
+      "geometry": {
+        "x": 1488,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "meter",
+      "type": "database",
+      "text": "Audit, usage + cost",
+      "color": "teal",
+      "parentId": "quota",
+      "geometry": {
+        "x": 1776,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "oldhost",
+      "type": "process",
+      "text": "Old-version host",
+      "color": "gray",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2224,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "draining",
+      "type": "process",
+      "text": "Stop placements + drain",
+      "color": "orange",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2512,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    },
+    {
+      "id": "replace",
+      "type": "process",
+      "text": "Safe replacement",
+      "color": "green",
+      "parentId": "drain",
+      "geometry": {
+        "x": 2800,
+        "y": 1504,
+        "width": 208,
+        "height": 96
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "api",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "auth",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "auth",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "assemble",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "model",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "model",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "tools",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "tools",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1880,
+          512
+        ],
+        [
+          1304,
+          512
+        ]
+      ]
+    },
+    {
+      "id": "e7",
+      "from": {
+        "objectId": "model",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fanout",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e8",
+      "from": {
+        "objectId": "fanout",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "clientstream",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e9",
+      "from": {
+        "objectId": "fanout",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "eventlog",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e10",
+      "from": {
+        "objectId": "eventlog",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "replay",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e11",
+      "from": {
+        "objectId": "clientstream",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "replay",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "back"
+    },
+    {
+      "id": "e12",
+      "from": {
+        "objectId": "eventlog",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "checkpoint",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e13",
+      "from": {
+        "objectId": "checkpoint",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fork",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e14",
+      "from": {
+        "objectId": "heartbeat",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rehydrate",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e15",
+      "from": {
+        "objectId": "rehydrate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "idempotency",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e16",
+      "from": {
+        "objectId": "cancel",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "abandon",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e17",
+      "from": {
+        "objectId": "abandon",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "safecheck",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e18",
+      "from": {
+        "objectId": "parent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "child",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e19",
+      "from": {
+        "objectId": "child",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reaper",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e20",
+      "from": {
+        "objectId": "budget",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pause",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e21",
+      "from": {
+        "objectId": "pause",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "meter",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e22",
+      "from": {
+        "objectId": "oldhost",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "draining",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e23",
+      "from": {
+        "objectId": "draining",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "replace",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e24",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "budget",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e25",
+      "from": {
+        "objectId": "eventlog",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "meter",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e26",
+      "from": {
+        "objectId": "rehydrate",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "checkpoint",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e27",
+      "from": {
+        "objectId": "tools",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "parent",
+        "anchor": "top"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e28",
+      "from": {
+        "objectId": "cancel",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "model",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e29",
+      "from": {
+        "objectId": "draining",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "safecheck",
+        "anchor": "bottom"
+      },
+      "label": "",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

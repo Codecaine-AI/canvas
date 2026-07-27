@@ -14,14 +14,15 @@
         "b-r3-evidence-4"
       ],
       "props": {
-        "covers": "A section reserves a 64px header band and 48px side/bottom padding, degrades proportionally in cramped regions, and shrinks to hug its content; corpus top insets run 64-128.",
+        "covers": "Sections are the grouping and addressability mechanism: every idea has a section, content keeps clear air from its frame, and a finished section closes around its children when explicitly fitted.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
           "section trim",
-          "header band",
-          "padding",
-          "content hugging"
+          "section grouping",
+          "section addressability",
+          "air",
+          "explicit fit"
         ]
       }
     },
@@ -43,11 +44,11 @@
       "flavour": "constraint",
       "children": [],
       "props": {
-        "title": "Sections frame themselves"
+        "title": "Everything has a section"
       },
       "text": [
         {
-          "insert": "A section reserves a 64px header band for its label chip and pads content 48px on the sides and bottom — and it shrinks to hug whatever is inside."
+          "insert": "A section is the only container and the board's addressable grouping unit. Give every piece of content a home and keep air between children and the frame. A frame holds the space it is given; close it around its children with an explicit fit when the region is finished."
         }
       ]
     },
@@ -58,35 +59,47 @@
       "props": {},
       "text": [
         {
-          "insert": "The expander reserves "
+          "insert": "Mechanism: the "
         },
         {
-          "insert": "SECTION_HEADER = 64",
+          "insert": "aesthetic",
           "attributes": {
-            "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "SECTION_HEADER"
+              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "symbol": "style"
             }
           }
         },
         {
-          "insert": " and "
+          "insert": " makes sections the grouping signal and requires air at every border. Section capabilities define geometric membership and nested containment. Membership is reconciled from geometry after every operation. A section closes around its children only when "
         },
         {
-          "insert": "DEFAULT_PADDING = 48",
+          "insert": "fit_section",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/pipeline/expand.ts",
-              "symbol": "DEFAULT_PADDING"
+              "path": "packages/canvas-agent/src/service/session/operations/sections.ts",
+              "symbol": "fitSection"
             }
           }
         },
         {
-          "insert": " where the region affords it, and degrades proportionally in cramped regions — padding is capped at 12% of the region extent and the header at 16% of its height. Corpus top insets run 64-128 depending on label size."
+          "insert": " names it. That call fits only the named section, never its ancestors. The "
+        },
+        {
+          "insert": "containment",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/containment.ts"
+            }
+          }
+        },
+        {
+          "insert": " lint blocks children outside their section and content outside the locked page frame, and its suggestion points to the fit operation."
         }
       ]
     },
@@ -97,34 +110,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Evidence: gc "
-        },
-        {
-          "insert": "section-config",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (top inset 64, side 48), ink "
-        },
-        {
-          "insert": "section-input-adapter",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (side 48), intent-2 "
-        },
-        {
-          "insert": "section-direct",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (side 64)."
+          "insert": "Workflow: create the complete section skeleton before placing content. Fill one section at a time in reading order and judge its render before moving to the next; children move, and the frame closes around them when you fit it."
         }
       ]
     }

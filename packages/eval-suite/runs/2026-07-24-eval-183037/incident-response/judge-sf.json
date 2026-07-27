@@ -1,0 +1,325 @@
+{
+  "axis": "sf",
+  "scenario": "incident-response",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 8.5,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "A lightweight end-to-end incident-response process takes a SaaS team from alert detection through operational learning.",
+        "brief_evidence": "Heading: “Incident response from alert to learning.” Opening: “We need a lightweight incident-response process for a SaaS team.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose describes “a four-stage incident-response process for detecting and mobilizing responders, coordinating investigation and mitigation, verifying recovery and resolving the incident, then preserving records and tracking post-incident actions.” The four reconstructed stages cover detection, response, verification, resolution, and follow-up.",
+        "note": "The full lifecycle and intended incident-response domain are clearly recovered. The adjective “lightweight” and the SaaS-team context are not repeated, but they do not alter the depicted operational flow."
+      },
+      {
+        "brief_element": "Monitoring sends a high-confidence alert.",
+        "brief_evidence": "“Monitoring sends a high-confidence alert to the alert manager.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction states, “Monitoring produces an alert,” and identifies Monitoring as providing “the signal that initiates alert handling.” No reconstruction entry identifies the alert as high-confidence.",
+        "note": "The source and alert are recovered, but the explicit high-confidence constraint is lost."
+      },
+      {
+        "brief_element": "The monitoring alert is sent to the alert manager.",
+        "brief_evidence": "“Monitoring sends a high-confidence alert to the alert manager.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Detection and primary mobilization” flow says, “Monitoring produces an alert” and “The alert enters ‘Alert manager groups duplicates’ through the connection labeled ‘alert’.”",
+        "note": "The source, destination, and direction are all explicit."
+      },
+      {
+        "brief_element": "The alert manager groups duplicate alerts.",
+        "brief_evidence": "“The alert manager, which groups duplicates...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A reconstructed component is named “Alert manager groups duplicates” and is assigned responsibility for receiving alerts and grouping duplicate alerts.",
+        "note": "The component responsibility is recovered exactly."
+      },
+      {
+        "brief_element": "The alert manager pages the primary on-call engineer.",
+        "brief_evidence": "“The alert manager ... pages the primary on-call engineer.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Page primary on-call,” and the detection flow states that “The alert-management path proceeds to ‘Page primary on-call’.”",
+        "note": "Ownership and direction of the primary paging action are clear."
+      },
+      {
+        "brief_element": "The primary on-call engineer acknowledges the page.",
+        "brief_evidence": "“The on-call engineer acknowledges the page...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an “Ack ≤ 5 min?” check and says the primary path proceeds toward that acknowledgement check. It also lists uncertainty that “The normal acknowledgement branch ... is not visibly labeled.”",
+        "note": "Acknowledgement is clearly checked, but the positive act of acknowledgement and its normal branch are implicit rather than fully reconstructed."
+      },
+      {
+        "brief_element": "The on-call engineer performs initial triage after being paged and acknowledging.",
+        "brief_evidence": "“The on-call engineer acknowledges the page, performs an initial triage...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes the component “Initial triage” and places it downstream of the primary on-call and acknowledgement path in “Detection and primary mobilization.”",
+        "note": "The activity and its position in the normal response sequence are recovered, notwithstanding the unlabeled positive acknowledgement branch."
+      },
+      {
+        "brief_element": "Initial triage can determine that the alert is a false alarm.",
+        "brief_evidence": "The on-call engineer “either resolves a false alarm or declares an incident.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed flow performs “Initial triage,” evaluates “Real incid...,” and follows the “no” branch to “Resolve false....”",
+        "note": "The false-alarm branch and its decision point are clear despite truncated labels."
+      },
+      {
+        "brief_element": "A false alarm is resolved as a terminal non-incident outcome.",
+        "brief_evidence": "The on-call engineer “resolves a false alarm.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The failure-path reconstruction identifies the trigger as the real-incident decision being “no” and the outcome as the green rounded terminal labeled “Resolve false....”",
+        "note": "The non-incident terminal outcome is correctly recovered."
+      },
+      {
+        "brief_element": "If triage determines the event is real, the on-call engineer declares an incident.",
+        "brief_evidence": "The on-call engineer “either resolves a false alarm or declares an incident.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states that the “yes” branch from “Real incid...” leads to “Declare incident.”",
+        "note": "The branch condition, direction, and declaration action are recovered."
+      },
+      {
+        "brief_element": "Declaring an incident creates a shared incident record.",
+        "brief_evidence": "“A declared incident creates a shared incident record...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed declaration flow continues to “Shared incident record,” and the shared-record flow says, “Create or enter the ‘Shared incident record’ after incident declaration.”",
+        "note": "The creation semantics are slightly softened by “create or enter,” but the component and declaration-to-record relationship are unambiguous enough to recover the required behavior."
+      },
+      {
+        "brief_element": "A declared incident is assigned a service owner.",
+        "brief_evidence": "A declared incident “assigns a service owner.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Assign service owner” connected from “Shared incident record,” and its flow says, “From the shared incident record, assign the service owner.”",
+        "note": "The assignment and its incident-record context are recovered."
+      },
+      {
+        "brief_element": "The service owner investigates the incident.",
+        "brief_evidence": "The assigned service owner “investigates...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The service-owner flow orders “assign the service owner” followed by “The service owner investigates,” and the parallel-roles note assigns diagnosis to the service owner.",
+        "note": "The responsibility and sequence are explicit."
+      },
+      {
+        "brief_element": "The service owner applies mitigation.",
+        "brief_evidence": "The assigned service owner “investigates and applies mitigation.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction orders “Investigate” then “Apply mitigation,” and the parallel-roles constraint assigns “diagnosis + mitigation” to the service owner.",
+        "note": "The activity, owner, and order are recovered."
+      },
+      {
+        "brief_element": "The on-call engineer coordinates the incident response while the service owner works.",
+        "brief_evidence": "“The on-call engineer coordinates the response ... while the service owner works.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “On-call coordinates” and an explicit “Parallel roles” note assigning on-call to coordination and communications while the service owner handles diagnosis and mitigation.",
+        "note": "The role boundary and parallel execution are strongly transmitted."
+      },
+      {
+        "brief_element": "The on-call engineer keeps the public status page current during the response.",
+        "brief_evidence": "The on-call engineer “keeps the public status page current while the service owner works.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Update public status page,” connected from “On-call coordinates” by a path labeled “keep current.” The role note assigns communications to on-call.",
+        "note": "The owner, public communication channel, and ongoing-update responsibility are clear."
+      },
+      {
+        "brief_element": "On-call coordination and public communication proceed in parallel with service-owner investigation and mitigation.",
+        "brief_evidence": "“The on-call engineer coordinates the response and keeps the public status page current while the service owner works.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction explicitly records the note: “Parallel roles - On-call: coordination + comms - Service owner: diagnosis + mitigation.”",
+        "note": "The concurrency and responsibility split are recovered exactly."
+      },
+      {
+        "brief_element": "After mitigation, verification uses the same monitoring signals that generated the alert.",
+        "brief_evidence": "“Mitigation is verified against the same monitoring signals...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Verify same monitoring signals,” reached after “Apply mitigation” through a path labeled “verify.”",
+        "note": "Both the ordering after mitigation and signal-source constraint are explicit."
+      },
+      {
+        "brief_element": "The incident cannot be resolved until mitigation verification passes.",
+        "brief_evidence": "Mitigation is verified “before the incident can be resolved.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The mitigation verification flow evaluates the mitigation after checking monitoring signals, and only the branch labeled “passes” reaches “Resolve incident.”",
+        "note": "The verification gate on resolution is recovered without ambiguity."
+      },
+      {
+        "brief_element": "If mitigation verification fails, ownership returns to the service owner.",
+        "brief_evidence": "“If verification fails, ownership returns to the service owner...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a non-passing alternate route returning to “Apply mitigation,” and separately establishes that mitigation belongs to the service owner. It does not explicitly reconstruct a named ownership-transfer event.",
+        "note": "The operational return to service-owner work is inferable and likely intended, but the explicit ownership handoff is not directly stated."
+      },
+      {
+        "brief_element": "After failed verification, the service owner makes another mitigation attempt.",
+        "brief_evidence": "Ownership returns to the service owner “for another mitigation attempt.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed failure path routes from the non-passing mitigation evaluation back to “Apply mitigation,” with the outcome “Mitigation is applied again and verification is repeated.”",
+        "note": "The retry behavior is explicit."
+      },
+      {
+        "brief_element": "After another mitigation attempt, verification is repeated against the monitoring signals, forming a feedback loop.",
+        "brief_evidence": "“If verification fails, ownership returns to the service owner for another mitigation attempt,” combined with the requirement that mitigation be verified before resolution.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction explicitly describes a loop from failed evaluation to “Apply mitigation” and then back to “Verify same monitoring signals.”",
+        "note": "The recovery loop is fully recoverable."
+      },
+      {
+        "brief_element": "Successful verification allows the incident to be resolved.",
+        "brief_evidence": "Mitigation must be verified “before the incident can be resolved.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The branch labeled “passes” leads from the mitigation evaluation to “Resolve incident.”",
+        "note": "The successful terminal transition is explicit."
+      },
+      {
+        "brief_element": "Resolution closes the public status update.",
+        "brief_evidence": "“Resolution closes the public update...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction orders “Resolve incident” followed by “Close public update.”",
+        "note": "The resolution-to-public-closure relationship is recovered exactly."
+      },
+      {
+        "brief_element": "Resolution preserves the incident timeline.",
+        "brief_evidence": "Resolution “preserves the timeline in the incident record...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The post-resolution reconstruction follows a route labeled “preserve record” to “Preserve timeline.”",
+        "note": "The preservation action and its post-resolution placement are clear."
+      },
+      {
+        "brief_element": "The preserved timeline remains in the shared incident record.",
+        "brief_evidence": "Resolution “preserves the timeline in the incident record.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction separately identifies a “Shared incident record” and later a “Preserve timeline” action reached through a route labeled “preserve record,” but it does not explicitly state that the timeline is stored inside that same shared incident record.",
+        "note": "Record preservation is visible, but the exact storage boundary tying the timeline to the shared incident record is softened."
+      },
+      {
+        "brief_element": "Resolution schedules a post-incident review.",
+        "brief_evidence": "Resolution “schedules a post-incident review...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed learning sequence contains “Schedule post-incident review” after “Preserve timeline.”",
+        "note": "The required review scheduling is explicit."
+      },
+      {
+        "brief_element": "Actions produced by the post-incident review enter the follow-up tracker.",
+        "brief_evidence": "The post-incident review’s “actions enter the follow-up tracker.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction connects “Schedule post-incident review” to “Follow-up tracker” through a connection labeled “actions.”",
+        "note": "The action destination and ordering are recovered."
+      },
+      {
+        "brief_element": "The primary on-call engineer has five minutes to acknowledge the page.",
+        "brief_evidence": "“If the primary on-call engineer does not acknowledge within five minutes...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies the explicit constraint “Ack ≤ 5 min?” and states that primary acknowledgement is checked against a five-minute threshold.",
+        "note": "The timeout threshold is exact."
+      },
+      {
+        "brief_element": "Failure of the primary on-call engineer to acknowledge within five minutes triggers escalation.",
+        "brief_evidence": "“If the primary on-call engineer does not acknowledge within five minutes, the alert manager escalates...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed failure path uses the trigger “The primary on-call does not satisfy the ‘Ack ≤ 5 min?’ check” and routes downward to “Page secondary.”",
+        "note": "Although the visual branch lacks a printed timeout label, the reconstructed trigger correctly captures the failure condition."
+      },
+      {
+        "brief_element": "The alert manager performs the timeout escalation.",
+        "brief_evidence": "“The alert manager escalates to the secondary on-call engineer.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The escalation is placed within the alert-management and mobilization stage, following the alert manager’s primary paging path, but the reconstruction does not explicitly state that the alert manager itself owns the escalation action.",
+        "note": "The system placement strongly implies alert-manager ownership, but the ownership is not directly named in the reconstructed failure-path text."
+      },
+      {
+        "brief_element": "The timeout escalation pages the secondary on-call engineer.",
+        "brief_evidence": "The alert manager “escalates to the secondary on-call engineer.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction includes “Page secondary” and routes the failed acknowledgement check to that component.",
+        "note": "The escalation target and action are explicit."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "After the secondary on-call is paged, the secondary responder path proceeds directly to initial triage.",
+        "reconstruction_evidence": "The reconstructed failure path gives the ordered route “Ack ≤ 5 min? → Page secondary → Initial triage” and the outcome “The secondary responder is paged and the process continues to initial triage.”",
+        "why_unsupported": "The brief states only that the alert manager escalates to the secondary on-call engineer. It does not explicitly specify the secondary responder’s acknowledgement behavior or that the secondary proceeds directly to triage. This is a reasonable process interpretation, but it is a specific continuation absent from the brief."
+      },
+      {
+        "claim": "Record preservation occurs specifically from the closed-public-update area, making public-update closure the immediate predecessor of timeline preservation.",
+        "reconstruction_evidence": "The reconstruction says, “From the closed public-update area, follow the purple route labeled ‘preserve record’” and then preserve the timeline.",
+        "why_unsupported": "The brief makes closure of the public update, timeline preservation, and review scheduling consequences of resolution, but does not require public-update closure to causally precede record preservation."
+      }
+    ],
+    "strongest_transmitted_behavior": "The mitigation verification and retry loop is transmitted especially well: the service owner investigates and mitigates, the same monitoring signals verify the result, only a passing result permits resolution, and a non-passing result returns to another mitigation attempt and repeated verification.",
+    "most_consequential_loss": "The most consequential loss is softened ownership semantics at handoffs: the reconstruction shows failed verification returning to the service-owner mitigation activity and timeout escalation reaching the secondary, but it does not explicitly name the ownership return or clearly state that the alert manager owns the escalation.",
+    "overall_summary": "The reconstruction accurately communicates the complete architecture and all critical paths from monitoring through paging, triage, declaration, parallel coordination and mitigation, verification, resolution, and post-incident follow-up. Both major branches—the false-alarm termination and incident declaration—and both recovery paths—the five-minute secondary escalation and failed-verification mitigation loop—survive. Losses are limited to supporting precision: the alert’s high-confidence property is omitted, positive acknowledgement is represented mainly as a threshold check, ownership-transfer wording is softened, and the timeline is not explicitly located inside the shared incident record. Two minor causal continuations are more specific than the brief. The result is fully usable for engineering discussion and nearly actionable without clarification, but it falls short of exact fidelity.",
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 11969,
+    "output_tokens": 9273
+  },
+  "flags": []
+}

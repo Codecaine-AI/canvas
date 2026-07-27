@@ -21,7 +21,7 @@ import { createKernelReadRoutes } from "./routes/kernel-read";
 import { createSessionRoutes } from "./routes/sessions";
 import { createTranscriptRoutes } from "./routes/transcript";
 
-const port = Number(Bun.env.PORT ?? 4820);
+const port = Number(Bun.env.CANVAS_AGENT_PORT ?? Bun.env.PORT ?? 4820);
 
 const boot = await bootKernelDatabase();
 const store = new LayoutSessionStore(boot.db);

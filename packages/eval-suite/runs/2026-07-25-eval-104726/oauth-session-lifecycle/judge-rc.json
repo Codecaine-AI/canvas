@@ -1,0 +1,638 @@
+{
+  "axis": "rc",
+  "scenario": "oauth-session-lifecycle",
+  "run_id": "2026-07-25-eval-104726",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Use an external OAuth provider while retaining control of application sessions.",
+        "brief_evidence": "“uses an external OAuth provider while keeping application sessions under our control”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2, 4, and 5",
+            "observation": "The board separates the “External OAuth provider” from the application-controlled secure session cookie and API-gateway session validation."
+          },
+          {
+            "source": "json",
+            "locator": "objects oauth-provider, app-session, api-gateway, session-check",
+            "observation": "Distinct objects represent the external provider and the application session lifecycle."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "The browser starts login through the web application.",
+        "brief_evidence": "“The browser starts login through the web application”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Login initiation",
+            "observation": "A directed “start login” path runs from Browser to Web application."
+          },
+          {
+            "source": "json",
+            "locator": "connection e1",
+            "observation": "e1 connects browser to web-app with label “start login” and a forward arrow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The web application asks the auth gateway to initiate authentication.",
+        "brief_evidence": "“which asks the auth gateway”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Login initiation",
+            "observation": "A directed blue connection runs from Web application to Auth gateway."
+          },
+          {
+            "source": "json",
+            "locator": "connection e2",
+            "observation": "e2 connects web-app to auth-gateway with a forward arrow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The auth gateway creates and stores short-lived OAuth state and a PKCE challenge in the session store.",
+        "brief_evidence": "“create a short-lived state and PKCE challenge in the session store”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Auth gateway to Session store",
+            "observation": "The directed connection is labeled “store short-lived state + PKCE,” and the destination is “Session store: state + PKCE.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects auth-gateway, session-store; connection e3",
+            "observation": "e3 explicitly runs from auth-gateway to session-store with label “store short-lived state + PKCE.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "State and PKCE are stored before redirecting the browser authentication flow to the provider.",
+        "brief_evidence": "“before redirecting to the provider”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ordered sections 1 and 2 and paths leaving Auth gateway",
+            "observation": "Login initiation shows the state/PKCE storage step before the provider-authorization stage, with a directed path from Auth gateway to the external provider."
+          },
+          {
+            "source": "json",
+            "locator": "sections login-init and provider-auth; connections e3 and e4",
+            "observation": "e3 records state/PKCE storage and e4 directs the auth gateway to the provider in the numbered 1-to-2 sequence."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The OAuth provider authenticates the user.",
+        "brief_evidence": "“The provider authenticates the user”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Provider authorization",
+            "observation": "External OAuth provider connects to “Authenticate user” with label “authenticate.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects oauth-provider, provider-login; connection e5",
+            "observation": "e5 directly represents provider authentication."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "The provider returns an authorization code to a dedicated callback service.",
+        "brief_evidence": "“returns an authorization code to a dedicated callback service”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2 and 3",
+            "observation": "The provider authentication step issues an Authorization code, which follows a directed “callback” path to Dedicated callback service."
+          },
+          {
+            "source": "json",
+            "locator": "connections e6 and e7; objects auth-code and callback",
+            "observation": "e6 creates the code and e7 sends it to callback."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The callback service validates OAuth state.",
+        "brief_evidence": "“The callback validates state”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Callback & token exchange",
+            "observation": "Dedicated callback service connects to “Validate state + exchange with PKCE” through a path labeled “validate state.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects callback, validate-exchange; connection e8",
+            "observation": "e8 explicitly labels the callback action “validate state.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "The callback exchanges the authorization code using the PKCE verifier.",
+        "brief_evidence": "“exchanges the code using the PKCE verifier”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Callback & token exchange",
+            "observation": "The callback processing object is labeled “Validate state + exchange with PKCE,” immediately following receipt of the authorization code."
+          },
+          {
+            "source": "json",
+            "locator": "object validate-exchange and incoming connection e8",
+            "observation": "The predefined process explicitly includes exchange with PKCE in the callback flow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The callback sends provider tokens to an encrypted token vault.",
+        "brief_evidence": "“sends the provider tokens to an encrypted token vault”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, exchange process to Encrypted token vault",
+            "observation": "A directed orange path labeled “encrypt provider tokens” terminates at Encrypted token vault."
+          },
+          {
+            "source": "json",
+            "locator": "objects validate-exchange, token-vault; connection e9",
+            "observation": "e9 sends the result of callback validation/exchange to token-vault."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "The auth gateway maps the provider identity to an internal account.",
+        "brief_evidence": "“The auth gateway maps the provider identity to an internal account”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Identity mapping & session issuance",
+            "observation": "A “Map provider identity” process is present, but it is reached directly from the callback flow and neither its Auth gateway ownership nor the internal-account result is shown."
+          },
+          {
+            "source": "json",
+            "locator": "object identity-map; connection e10; searched connections involving auth-gateway",
+            "observation": "identity-map exists and receives e10 from callback. No connection or parent relationship associates it with auth-gateway, and no internal-account object or label exists."
+          }
+        ],
+        "note": "Identity mapping is recognizable, but the stated actor and internal-account outcome are missing."
+      },
+      {
+        "id": "R12",
+        "requirement": "The auth gateway writes an auditable login event.",
+        "brief_evidence": "“writes an auditable login event”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Identity mapping & session issuance",
+            "observation": "“Map provider identity” points to “Auditable login event,” but the Auth gateway is not identified as the writer."
+          },
+          {
+            "source": "json",
+            "locator": "object login-audit; connection e11; searched auth-gateway connections",
+            "observation": "e11 connects identity-map to login-audit. No JSON edge connects auth-gateway to login-audit."
+          }
+        ],
+        "note": "The auditable event is present, but responsibility is not assigned to the auth gateway as required."
+      },
+      {
+        "id": "R13",
+        "requirement": "The auth gateway issues the browser a secure, HTTP-only application session cookie.",
+        "brief_evidence": "“issues the browser a secure, HTTP-only application session cookie”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 and request path",
+            "observation": "A “Secure HTTP-only session cookie” is issued from the identity-mapping flow and used on requests, but no issuance path terminates at Browser and the Auth gateway is not shown as issuer."
+          },
+          {
+            "source": "json",
+            "locator": "object app-session; connections e12 and e13; searched browser and auth-gateway edges",
+            "observation": "e12 issues the app session from identity-map and e13 sends it toward api-gateway. No edge issues app-session from auth-gateway to browser."
+          }
+        ],
+        "note": "Cookie security properties and issuance exist, but both the required issuer and browser recipient are left implicit."
+      },
+      {
+        "id": "R14",
+        "requirement": "Application requests enter through the API gateway.",
+        "brief_evidence": "“Requests enter through the API gateway”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 4 and 5",
+            "observation": "The session cookie follows a directed “cookie on requests” path into API gateway."
+          },
+          {
+            "source": "json",
+            "locator": "connection e13",
+            "observation": "e13 terminates at api-gateway and is labeled “cookie on requests.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The API gateway validates the application session.",
+        "brief_evidence": "“which validates the application session”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Application request path",
+            "observation": "API gateway points to “Application session valid?” with label “validate session.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects api-gateway, session-check; connection e14",
+            "observation": "e14 explicitly represents session validation by the API gateway."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "The API gateway passes only the internal user identity and authorization context to downstream services.",
+        "brief_evidence": "“passes only the internal user identity and authorization context to downstream services”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, path from Application session valid? to Downstream services",
+            "observation": "The downstream arrow is unlabeled; no internal-user-identity, authorization-context, or “only” boundary annotation is visible."
+          },
+          {
+            "source": "json",
+            "locator": "connection e15 and full search of object texts, connection labels, and annotations",
+            "observation": "e15 has an empty label. No object or connection contains “internal user identity” or an authorization-context payload for downstream services; annotations is empty."
+          }
+        ],
+        "note": "The downstream path exists, but the required constrained payload is not represented."
+      },
+      {
+        "id": "R17",
+        "requirement": "Provider access tokens are retrieved by the token broker only when a downstream integration needs one.",
+        "brief_evidence": "“Provider access tokens are retrieved by a token broker only when a downstream integration needs one”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Provider token access",
+            "observation": "Downstream integration requests through Token broker and receives a “Provider access token (just in time)” on a path labeled “token only here,” but no retrieval path from Encrypted token vault to Token broker is drawn."
+          },
+          {
+            "source": "json",
+            "locator": "objects token-broker, integration, just-in-time-token; connections e17-e19; searched token-vault connections",
+            "observation": "e17-e19 represent integration-triggered just-in-time delivery. token-vault only has incoming e9 and has no connection to token-broker."
+          }
+        ],
+        "note": "The just-in-time brokered access condition is clear, but the stated retrieval of stored provider tokens by the broker is missing."
+      },
+      {
+        "id": "R18",
+        "requirement": "Provider access tokens never reach the browser or general application services.",
+        "brief_evidence": "“they never reach the browser or general application services”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1, 5, and 6",
+            "observation": "The provider-token path is isolated in the token-access section and terminates only at Downstream integration with the explicit label “token only here”; Browser and Downstream services are not token recipients."
+          },
+          {
+            "source": "json",
+            "locator": "connections e18-e19 and search of all edges incident to browser and downstream",
+            "observation": "The provider access token object only connects to integration. No token edge connects to browser or downstream general services."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "When a provider token nears expiry, a refresh coordinator handles refresh.",
+        "brief_evidence": "“When a provider token nears expiry, a refresh coordinator”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Transition from Section 6 to Section 7",
+            "observation": "A dashed path labeled “near expiry” runs from Token broker to Refresh coordinator."
+          },
+          {
+            "source": "json",
+            "locator": "connection e20",
+            "observation": "e20 connects token-broker to refresh-coordinator with label “near expiry.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "The refresh coordinator takes a per-account lock.",
+        "brief_evidence": "“takes a per-account lock”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Coordinated refresh",
+            "observation": "Refresh coordinator points to Per-account lock with label “lock account.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects refresh-coordinator, account-lock; connection e21",
+            "observation": "e21 explicitly represents acquisition of the per-account lock."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "The coordinator refreshes the provider token only once for concurrent demand.",
+        "brief_evidence": "“refreshes it once”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Coordinated refresh",
+            "observation": "The lock feeds a process labeled “Refresh once + rotate refresh token” through a path labeled “single refresh.”"
+          },
+          {
+            "source": "json",
+            "locator": "object rotate-token; connection e22",
+            "observation": "Both the process text and e22 label explicitly state one/single refresh."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "A successful refresh rotates the stored refresh token.",
+        "brief_evidence": "“rotates the stored refresh token”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Coordinated refresh",
+            "observation": "The refresh operation is explicitly labeled “Refresh once + rotate refresh token.”"
+          },
+          {
+            "source": "json",
+            "locator": "object rotate-token",
+            "observation": "The object text explicitly includes refresh-token rotation as part of the coordinated refresh."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "After the single refresh, concurrent callers are awakened with the new result.",
+        "brief_evidence": "“wakes concurrent callers with the new result”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire Section 7 · Coordinated refresh and its outgoing paths",
+            "observation": "The board shows locking, a single refresh, rotation, and a validity decision, but no waiting callers, wake/broadcast step, or delivery of the new result to concurrent callers."
+          },
+          {
+            "source": "json",
+            "locator": "objects and connections under parent refresh; full text search for concurrent, caller, wait, wake, and result delivery",
+            "observation": "Only refresh-coordinator, account-lock, rotate-token, and refresh-result are present. No concurrent-caller or wake-result structure exists."
+          }
+        ],
+        "note": "The deduplicated refresh is shown, but its required concurrency recovery behavior is omitted."
+      },
+      {
+        "id": "R24",
+        "requirement": "An invalid refresh revokes the application session and requires login again.",
+        "brief_evidence": "“An invalid refresh revokes the application session and requires login again.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 7 and 8",
+            "observation": "“Refresh valid?” has a red failure path to “Invalidate sessions + cached auth context,” which then leads to “Login required again.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects refresh-result, invalidate, login-required; connections e24 and e26",
+            "observation": "e24 routes the refresh decision to invalidation and e26 requires login afterward."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Explicit logout, administrator revocation, and provider revocation notifications all invalidate active sessions and cached authorization context.",
+        "brief_evidence": "“Explicit logout, administrator revocation, and provider revocation notifications all invalidate active sessions and cached authorization context.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Invalidation & security audit",
+            "observation": "“Logout · admin · provider notification” points via “revoke” to “Invalidate sessions + cached auth context.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects revoke-sources, invalidate; connection e25",
+            "observation": "All three trigger classes are grouped in revoke-sources and e25 directs them to invalidation of both sessions and cached context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Failed state checks are sent to the security audit stream.",
+        "brief_evidence": "“Failed state checks ... go to the security audit stream”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from callback validation/exchange to Security audit stream",
+            "observation": "The combined validation/exchange process is connected to the audit stream, but the edge is unlabeled and does not explicitly restrict the event to failed state checks."
+          },
+          {
+            "source": "json",
+            "locator": "connection e27; object validate-exchange",
+            "observation": "e27 connects validate-exchange to security-audit, but its label is empty and the source combines state validation with token exchange."
+          }
+        ],
+        "note": "Audit routing is recognizable, but the failure condition and state-check event type are not explicit."
+      },
+      {
+        "id": "R27",
+        "requirement": "Failed token exchanges are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... token exchanges ... go to the security audit stream”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from Validate state + exchange with PKCE to Security audit stream",
+            "observation": "The exchange process has an audit path, but that path is not labeled as a failed token exchange."
+          },
+          {
+            "source": "json",
+            "locator": "connection e27; object validate-exchange",
+            "observation": "The combined exchange object connects to security-audit, while e27 has no failure or event-type label."
+          }
+        ],
+        "note": "The relevant process reaches the audit stream, but failed-exchange semantics are only implied."
+      },
+      {
+        "id": "R28",
+        "requirement": "Failed refreshes are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... refreshes ... go to the security audit stream”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from Refresh valid? to Security audit stream",
+            "observation": "The refresh-result decision is connected to security audit, but the audit edge does not identify the invalid/failed branch."
+          },
+          {
+            "source": "json",
+            "locator": "connection e28",
+            "observation": "e28 connects refresh-result to security-audit with an empty label."
+          }
+        ],
+        "note": "Refresh auditing is shown, but the required failure condition is not unambiguous."
+      },
+      {
+        "id": "R29",
+        "requirement": "Failed revocations are sent to the security audit stream.",
+        "brief_evidence": "“Failed ... revocations go to the security audit stream”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8, Invalidate sessions + cached auth context to Security audit stream",
+            "observation": "The invalidation process has a dashed audit path, but there is no revocation-success decision or label identifying failed revocations."
+          },
+          {
+            "source": "json",
+            "locator": "connection e29 and objects invalidate, security-audit",
+            "observation": "e29 links invalidation to the audit stream with an empty label; no failure branch or failed-revocation object exists."
+          }
+        ],
+        "note": "Revocation/invalidation auditing is present, but failure-specific behavior is not explicit."
+      },
+      {
+        "id": "R30",
+        "requirement": "Security audit records must not expose token values.",
+        "brief_evidence": "“without exposing token values”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8, Security audit stream",
+            "observation": "The audit destination is explicitly labeled “Security audit stream (no token values).”"
+          },
+          {
+            "source": "json",
+            "locator": "object security-audit",
+            "observation": "The object text explicitly states “no token values.”"
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.8273,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R16",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R23",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The front-channel OAuth flow is strongly covered: browser initiation, state/PKCE storage, provider authentication, authorization-code callback, state validation, PKCE exchange, and encrypted token storage are represented as a coherent ordered sequence.",
+    "most_consequential_gap": "The API gateway’s downstream data-minimization contract is absent: the board never states that downstream services receive only internal identity and authorization context. The concurrent-refresh wake/result behavior is also absent.",
+    "coverage_summary": "Weighted coverage is 45.5 of 55 possible weight, P = 0.8273. This reaches the rubric’s raw 7-level threshold, but absent system-defining requirements R16 and R23 cap the result at 6. The core OAuth, session-validation, token-isolation, refresh-locking, invalidation, and no-token-values audit concepts are substantially represented. Important omissions prevent the board from serving as a complete visual acceptance record.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 12910,
+    "output_tokens": 7221
+  },
+  "flags": []
+}

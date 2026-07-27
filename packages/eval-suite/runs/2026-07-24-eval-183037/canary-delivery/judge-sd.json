@@ -1,0 +1,541 @@
+{
+  "axis": "sd",
+  "scenario": "canary-delivery",
+  "run_id": "2026-07-24-eval-183037",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeScopeDiscipline",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "edits": [
+      {
+        "stage": "e1",
+        "verdict": {
+          "requested_changes": [
+            {
+              "requirement": "Represent production as two distinct regions: primary and secondary.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 1",
+                  "observation": "The instruction states that production now runs in two regions."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[production] and objects.added[secondary-region]",
+                  "observation": "The existing production section was relabeled “3A · Primary-region canary & automatic rollback,” and a separate “3B · Secondary-region canary & scoped rollback” section was added."
+                },
+                {
+                  "source": "post_png",
+                  "locator": "production areas in the lower half",
+                  "observation": "The post-edit board visibly separates the primary and secondary regional canary systems."
+                }
+              ],
+              "note": "Both production regions are structurally and visually distinct."
+            },
+            {
+              "requirement": "Make the secondary-region canary begin only after the primary-region canary completes.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2, first clause",
+                  "observation": "The primary canary must complete before the secondary canary begins."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[success-note] and connections.added[s0]",
+                  "observation": "The primary completion note now says to begin the secondary canary, and s0 runs from that completion note to the secondary controller with label “primary complete · same revision.”"
+                },
+                {
+                  "source": "post_png",
+                  "locator": "green path from 3A to 3B",
+                  "observation": "A directed green connection visibly links primary completion to the secondary canary controller."
+                }
+              ],
+              "note": "The dependency is communicated as a directed system flow, not merely as a label."
+            },
+            {
+              "requirement": "Use the same revision for the secondary-region canary.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2, second clause",
+                  "observation": "The secondary canary must use the same revision."
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[id=success-note].text and connections[id=s0].label",
+                  "observation": "The completion note specifies “the same immutable revision,” and the transition is labeled “primary complete · same revision.”"
+                }
+              ],
+              "note": "The revision identity is explicitly carried across the regional transition."
+            },
+            {
+              "requirement": "On a secondary-region failure, roll back only the secondary region unless the shared business metric breaches.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3, first clause",
+                  "observation": "A secondary failure is region-scoped unless the shared business metric breaches."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[secondary-health, secondary-freeze, business-breach, secondary-rollback] and connections.added[s5,s6,s7]",
+                  "observation": "The secondary failure path freezes that rollout, tests the shared business metric, and sends the “no” branch to “Rollback secondary region only.”"
+                },
+                {
+                  "source": "post_png",
+                  "locator": "3B lower failure path",
+                  "observation": "The post-edit diagram visibly routes a secondary failure through the shared-metric decision to a secondary-only rollback."
+                }
+              ],
+              "note": "The isolated rollback is represented by an explicit decision branch and rollback process."
+            },
+            {
+              "requirement": "If the shared business metric breaches, roll back both regions to the last known-good image.",
+              "status": "satisfied",
+              "evidence": [
+                {
+                  "source": "instruction",
+                  "locator": "sentence 3, second clause",
+                  "observation": "A shared business-metric breach must return both regions to the last known-good image."
+                },
+                {
+                  "source": "diff",
+                  "locator": "objects.added[both-rollback] and connections.added[s8]",
+                  "observation": "The “yes” branch from “Shared business metric breached?” leads to “Rollback both regions to last known-good image.”"
+                },
+                {
+                  "source": "post_json",
+                  "locator": "objects[id=regional-policy].text",
+                  "observation": "The policy note reiterates that only a shared business-metric breach triggers rollback in both regions."
+                }
+              ],
+              "note": "Both the behavior and target image are explicitly communicated."
+            }
+          ],
+          "changes": [
+            {
+              "object_id": "page-frame",
+              "object_kind": "object",
+              "classification": "necessary_accommodation",
+              "what_changed": "Increased section height from 1392 to 1952 while retaining its position, width, title, and style.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=page-frame].geometry.height",
+                  "observation": "Height changed from 1392 to 1952 to contain the newly added secondary-region section."
+                },
+                {
+                  "source": "commit_summary",
+                  "locator": "summary",
+                  "observation": "The declared addition of sequential regional canaries necessarily requires additional board space."
+                }
+              ]
+            },
+            {
+              "object_id": "production",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing production section from generic production to “3A · Primary-region canary & automatic rollback.”",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=production].text",
+                  "observation": "Only the section text changed, identifying the existing flow as the primary region."
+                }
+              ]
+            },
+            {
+              "object_id": "canary-controller",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled “Canary controller” as “Primary canary controller.”",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=canary-controller].text",
+                  "observation": "The text now identifies this controller as belonging to the primary region."
+                }
+              ]
+            },
+            {
+              "object_id": "ramp",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing ramp as “Primary ramp 25% → 50% → 100%.”",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=ramp].text",
+                  "observation": "The ramp was region-qualified without geometry or style changes."
+                }
+              ]
+            },
+            {
+              "object_id": "rollback",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Relabeled the existing rollback as “Rollback primary to last known-good image.”",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=rollback].text",
+                  "observation": "The rollback was explicitly scoped to the primary region."
+                }
+              ]
+            },
+            {
+              "object_id": "success-note",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Replaced the generic recovery message with a primary-completion handoff stating that the secondary canary begins with the same immutable revision.",
+              "impact": "minor",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.changed[id=success-note].text",
+                  "observation": "The new text is “Primary complete” followed by the required secondary-canary handoff and same-revision condition."
+                },
+                {
+                  "source": "instruction",
+                  "locator": "sentence 2",
+                  "observation": "A primary-completion handoff is directly required to communicate sequential regional execution."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-region",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a separate secondary-region canary and scoped-rollback section.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-region]",
+                  "observation": "A new section titled “3B · Secondary-region canary & scoped rollback” was added."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-controller",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the secondary canary controller.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-controller]",
+                  "observation": "The new predefined process is labeled “Secondary canary controller.”"
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-traffic",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the secondary canary's 5% traffic stage.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-traffic]",
+                  "observation": "A 5% traffic pill was added inside the secondary-region canary."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-observe",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added independent secondary-region observation windows.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-observe]",
+                  "observation": "The new process is labeled “Independent observation windows.”"
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-health",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the secondary-region health decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-health]",
+                  "observation": "A decision labeled “Secondary healthy?” was added to branch success from failure."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-ramp",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the healthy secondary-region ramp to 100%.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-ramp]",
+                  "observation": "The process is labeled “Secondary ramp 25% → 50% → 100%.”"
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-freeze",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a freeze step for a failed secondary rollout.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-freeze]",
+                  "observation": "The red process is labeled “Freeze secondary rollout.”"
+                }
+              ]
+            },
+            {
+              "object_id": "business-breach",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the shared business-metric breach decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=business-breach]",
+                  "observation": "The decision asks “Shared business metric breached?” and controls rollback scope."
+                }
+              ]
+            },
+            {
+              "object_id": "secondary-rollback",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added the secondary-region-only rollback action.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=secondary-rollback]",
+                  "observation": "The process explicitly says “Rollback secondary region only.”"
+                }
+              ]
+            },
+            {
+              "object_id": "both-rollback",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added rollback of both regions to the last known-good image.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=both-rollback]",
+                  "observation": "The process text exactly communicates rollback of both regions to the last known-good image."
+                }
+              ]
+            },
+            {
+              "object_id": "regional-policy",
+              "object_kind": "object",
+              "classification": "requested",
+              "what_changed": "Added a policy note explaining isolated secondary rollback and the shared-metric exception.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "objects.added[id=regional-policy]",
+                  "observation": "The note states that a secondary failure is isolated and that only a shared business-metric breach rolls back both regions."
+                }
+              ]
+            },
+            {
+              "object_id": "s0",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the primary-completion transition to the secondary canary controller, labeled as the same revision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s0]",
+                  "observation": "The directed connection runs from success-note to secondary-controller and is labeled “primary complete · same revision.”"
+                }
+              ]
+            },
+            {
+              "object_id": "s1",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Connected the secondary controller to the secondary 5% traffic stage.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s1]",
+                  "observation": "The connection starts at secondary-controller and ends at secondary-traffic."
+                }
+              ]
+            },
+            {
+              "object_id": "s2",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Connected secondary traffic to independent observation windows.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s2]",
+                  "observation": "The connection starts at secondary-traffic and ends at secondary-observe."
+                }
+              ]
+            },
+            {
+              "object_id": "s3",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Connected secondary observation to the secondary health decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s3]",
+                  "observation": "The connection starts at secondary-observe and ends at secondary-health."
+                }
+              ]
+            },
+            {
+              "object_id": "s4",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the healthy branch from secondary health to the secondary ramp.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s4]",
+                  "observation": "The green connection is labeled “healthy” and ends at secondary-ramp."
+                }
+              ]
+            },
+            {
+              "object_id": "s5",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the failure branch from secondary health to freezing the secondary rollout.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s5]",
+                  "observation": "The red routed connection is labeled “failure” and ends at secondary-freeze."
+                }
+              ]
+            },
+            {
+              "object_id": "s6",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Connected the secondary freeze step to the shared business-metric decision.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s6]",
+                  "observation": "The red connection runs from secondary-freeze to business-breach."
+                }
+              ]
+            },
+            {
+              "object_id": "s7",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the no-breach branch to secondary-region-only rollback.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s7]",
+                  "observation": "The branch from business-breach is labeled “no” and ends at secondary-rollback."
+                }
+              ]
+            },
+            {
+              "object_id": "s8",
+              "object_kind": "connection",
+              "classification": "requested",
+              "what_changed": "Added the breach branch to rollback of both regions.",
+              "impact": "none",
+              "declared": true,
+              "evidence": [
+                {
+                  "source": "diff",
+                  "locator": "connections.added[id=s8]",
+                  "observation": "The routed branch from business-breach is labeled “yes” and ends at both-rollback."
+                }
+              ]
+            }
+          ],
+          "collateral_change_count": 0,
+          "scope_summary": "All atomic requests landed: the prior production flow was identified as primary, a separate secondary canary was added, the same revision is handed off only after primary completion, and secondary failure branches correctly between regional-only and both-region rollback. The largest in-scope effect is the new 3B secondary-region flow and its nine connections. There is no out-of-scope redesign; the only extra diff is the page-frame height increase, which is the minimum necessary accommodation to contain the added region. The commit summary declares the regional canaries and rollback policies represented by the diff.",
+          "scoring_status": "scored",
+          "exclusion_reason": null,
+          "score": 9
+        }
+      }
+    ],
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 32659,
+    "output_tokens": 4599
+  },
+  "flags": []
+}

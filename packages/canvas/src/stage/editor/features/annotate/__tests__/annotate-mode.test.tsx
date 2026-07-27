@@ -349,6 +349,7 @@ describe("InteractiveCanvasEditor annotation authoring", () => {
             body: "Remove after selection",
             status: "open",
             createdBy: "human",
+            replies: [],
           },
         ],
       };
@@ -394,6 +395,7 @@ describe("annotation pins", () => {
         body: "Align this with the section",
         status: "open",
         createdBy: "human",
+        replies: [],
       },
       {
         id: "resolved-agent-note",
@@ -402,6 +404,7 @@ describe("annotation pins", () => {
         body: "Already handled",
         status: "resolved",
         createdBy: "human",
+        replies: [],
       },
       {
         id: "ordinary-note",
@@ -410,6 +413,22 @@ describe("annotation pins", () => {
         body: "A regular note",
         status: "open",
         createdBy: "human",
+        replies: [],
+      },
+    ],
+  };
+
+  const agentThreadDocument: InteractiveCanvasDocument = {
+    ...canvasDocument,
+    annotations: [
+      {
+        id: "agent-question",
+        target: { kind: "object", objectId: "object-a" },
+        intent: "agent-request",
+        body: "Is this the retry path?",
+        status: "open",
+        createdBy: "agent",
+        replies: [{ id: "reply-1", author: "human", body: "yes, the retry path" }],
       },
     ],
   };
@@ -449,5 +468,94 @@ describe("annotation pins", () => {
       type: "canvas.select",
       selection: { kind: "annotation", annotationId: "open-agent-note" },
     });
+  });
+
+  it("gives an agent-opened thread its own pin treatment in the same pin language", () => {
+    const dispatch = mock((_action: CanvasAction) => {});
+    const { container } = render(
+      <AnnotationPins
+        document={agentThreadDocument}
+        selection={{ kind: "none" }}
+        dispatch={dispatch}
+      />,
+    );
+
+    const pin = container.querySelector('[data-annotation-pin="agent-question"]') as
+      HTMLButtonElement;
+    const requestPin = render(
+      <AnnotationPins
+        document={pinDocument}
+        selection={{ kind: "none" }}
+        dispatch={dispatch}
+      />,
+    ).container.querySelector('[data-annotation-pin="open-agent-note"]') as HTMLButtonElement;
+
+    expect(pin.dataset.annotationAuthor).toBe("agent");
+    expect(pin.dataset.annotationTurns).toBe("2");
+    expect(pin.textContent).toBe("?");
+    expect(pin.getAttribute("aria-label")).toBe("Agent question: Is this the retry path?");
+    expect(pin.title).toBe("Agent: Is this the retry path?\nYou: yes, the retry path");
+    // Same pin language: only the fill and glyph differ.
+    expect(pin.style.background).not.toBe(requestPin.style.background);
+    expect(pin.style.width).toBe(requestPin.style.width);
+    expect(pin.style.borderRadius).toBe(requestPin.style.borderRadius);
+  });
+});
+
+describe("annotation thread popup", () => {
+  const thread = {
+    id: "agent-question",
+    target: { kind: "object", objectId: "object-a" },
+    intent: "agent-request",
+    body: "Is this the retry path?",
+    status: "open",
+    createdBy: "agent",
+    replies: [{ id: "reply-1", author: "human", body: "yes" }],
+  } as const;
+
+  it("renders the transcript oldest first and posts a reply on Enter", () => {
+    const onReply = mock((_body: string) => {});
+    const onSave = mock((_body: string) => {});
+    render(
+      <AnnotationPopup
+        anchor={{ x: 0, y: 0 }}
+        targetLabel="Object A"
+        onSave={onSave}
+        onCancel={() => {}}
+        thread={thread}
+        onReply={onReply}
+      />,
+    );
+
+    const turns = [...document.querySelectorAll("[data-annotation-turn]")].map(
+      (turn) => turn.textContent,
+    );
+    expect(turns).toEqual(["AgentIs this the retry path?", "Youyes"]);
+
+    const box = screen.getByLabelText("Reply to the agent");
+    fireEvent.change(box, { target: { value: "the retry path" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    expect(onReply).toHaveBeenCalledWith("the retry path");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("composes an opening post when the target has no thread", () => {
+    const onSave = mock((_body: string) => {});
+    render(
+      <AnnotationPopup
+        anchor={{ x: 0, y: 0 }}
+        targetLabel="Object A"
+        onSave={onSave}
+        onCancel={() => {}}
+      />,
+    );
+
+    expect(document.querySelector("[data-annotation-thread]")).toBeNull();
+    const box = screen.getByLabelText("Note for the agent");
+    fireEvent.change(box, { target: { value: "Align this" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    expect(onSave).toHaveBeenCalledWith("Align this");
   });
 });

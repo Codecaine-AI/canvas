@@ -14,7 +14,7 @@
         "b-rowcol-canvas-4"
       ],
       "props": {
-        "covers": "The row and col statements: |-separated weights divide a region into proportional bands along the axis, exactly one child per weight, with automatic corridors kept between neighboring bands.",
+        "covers": "The row and col notation: |-separated weights describe proportional bands along the axis, exactly one child per weight, with clear corridors between neighboring bands.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
@@ -100,7 +100,7 @@
           }
         },
         {
-          "insert": " with no weights has no children. An empty corridor is kept between neighboring bands automatically, so connector lines have room to run."
+          "insert": " with no weights has no children. Keep an empty corridor between neighboring bands so connector lines have room to run."
         }
       ]
     },

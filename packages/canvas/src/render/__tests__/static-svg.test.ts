@@ -150,16 +150,20 @@ describe("renderDocumentToSvg", () => {
     expect(a.height).toBe(b.height);
   });
 
-  it("crops to a section and filters to its members + internal connectors", () => {
+  it("crops to a section, keeps members and retains boundary-crossing connections", () => {
     const { svg } = renderDocumentToSvg(fixtureDocument(), { sectionId: "sec-1" });
     expect(svg).toContain(">Start</tspan>");
     expect(svg).toContain(">OK?</tspan>");
-    // The sticky and the outside process are gone.
+    // The unconnected sticky is gone.
     expect(svg).not.toContain("alert");
-    expect(svg).not.toContain(">Outside</tspan>");
     expect(svg).not.toContain("feDropShadow");
-    // Only the intra-section connection remains (c2 crosses the boundary).
-    expect(count(svg, "<path ")).toBe(1);
+    // The camera still frames the section only (frame + default 32px padding)…
+    expect(svg).toContain('viewBox="-32 -32 544 424"');
+    // …but the boundary-crossing connection c2 renders alongside the internal
+    // one, clipped by the viewBox rather than dropped, and its outside
+    // endpoint comes along (clipped) so the route aims at the true object.
+    expect(count(svg, "<path ")).toBe(2);
+    expect(svg).toContain(">Outside</tspan>");
   });
 
   it("fit: 'content' crops to the members' bounds and omits the section frame", () => {
@@ -167,13 +171,16 @@ describe("renderDocumentToSvg", () => {
       sectionId: "sec-1",
       fit: "content",
     });
-    // Members and their internal connector survive.
+    // Members, their internal connector, and the boundary-crossing connector
+    // (clipped at the crop edge, outside endpoint retained) all render.
     expect(svg).toContain(">Start</tspan>");
     expect(svg).toContain(">OK?</tspan>");
-    expect(count(svg, "<path ")).toBe(1);
+    expect(count(svg, "<path ")).toBe(2);
+    expect(svg).toContain(">Outside</tspan>");
     // The section frame backdrop + title chip are gone.
     expect(svg).not.toContain("Zone &lt;A&gt;");
-    // Bounds fit the members (min 40,60 / max 420,312) + default 16px padding.
+    // Bounds still fit the members only (min 40,60 / max 420,312) + default
+    // 16px padding — boundary content never grows the crop.
     expect(svg).toContain('viewBox="24 44 412 284"');
   });
 
