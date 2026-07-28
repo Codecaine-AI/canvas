@@ -4,8 +4,9 @@
  * state-text grammar and render-delivery contract, the five-phase workflow,
  * and the closing reminders. Vocabulary rosters arrive through
  * <capabilities>, craft detail through <style_guide>, tool mechanics through
- * the tool descriptions, and live perception through operation results and
- * deliberate whole-board looks.
+ * the tool descriptions, and live perception through operation results, the
+ * state block's current-board and recent-change renders, and deliberate
+ * framed looks preserved in the recent conversation tail.
  *
  * Shape is part of the contract: each block of board state is its own
  * delimited subsection of the grammar, and every bullet and step carries one
@@ -21,7 +22,6 @@ const CATALOG_DIR = join(
   import.meta.dir,
   "..",
   "src",
-  "agent",
   "catalog",
   "layout-editor",
 );
@@ -83,13 +83,14 @@ function listItems(root: unknown): { id: string; text: string }[] {
 }
 
 describe("layout-editor prompt", () => {
-  test("the always-on registry is the five graph lints", () => {
+  test("the always-on registry is the six board lints", () => {
     expect(LAYOUT_RULES.map((rule) => rule.id)).toEqual([
       "covered-content",
       "containment",
       "broken-edges",
       "unreadable-labels",
       "crowding",
+      "clipped-text",
     ]);
   });
 
@@ -102,7 +103,7 @@ describe("layout-editor prompt", () => {
     ).toEqual([
       "purpose",
       "board_model",
-      "state_grammar",
+      "state_structure",
       "workflow",
     ]);
   });
@@ -138,6 +139,21 @@ describe("layout-editor prompt", () => {
       "all-or-nothing",
       "batch",
       "suggested op",
+      // The retired CRUD roster. The gesture surface replaced every one of
+      // these; fit_section is the only member of the old thirteen that
+      // survives, so it is deliberately absent from this list.
+      "add_section",
+      "update_section",
+      "remove_section",
+      "add_sticky",
+      "update_sticky",
+      "remove_sticky",
+      "add_object",
+      "update_object",
+      "remove_object",
+      "add_connection",
+      "update_connection",
+      "remove_connection",
     ]) {
       expect(raw.toLowerCase()).not.toContain(term.toLowerCase());
     }
@@ -170,12 +186,58 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("Draw every type, color, and glyph from the capabilities rosters");
     expect(text).toContain("Types and colors outside them are rejected");
     expect(text).toContain("An unknown glyph silently degrades the icon");
-    expect(text).toContain("Judge from your latest `look`");
+    expect(text).toContain(
+      "Judge the whole board from the first attached current-board render",
+    );
     expect(text).toContain("never from memory of an older turn");
     expect(text).toContain(
       "A request is answered by editing board content, never by editing the request",
     );
     expect(text).toContain("Every one is disposed with resolve_request");
+  });
+
+  test("teaches the 20 grid as snap-and-report, not a validation rule", () => {
+    const { text } = readPrompt();
+    expect(text).toContain("Every geometry number you write lands on a 20 grid");
+    expect(text).toContain("rounded to the nearest 20 before they land — snapped, never rejected");
+    expect(text).toContain(
+      "The result reports the numbers that actually applied, so read them back and compute the next gesture from those",
+    );
+    expect(text).toContain("Think in twenties");
+    // The exempt fields are fractions and metrics, not world coordinates.
+    expect(text).toContain("are fractions and measurements rather than grid units");
+  });
+
+  test("teaches bare placement and the deliberate steps after it", () => {
+    const { text } = readPrompt();
+    expect(text).toContain(
+      "A placement carries only what the gesture carries: the pick, the spot, and any text typed in the same motion",
+    );
+    expect(text).toContain("Size and color come from the creation defaults");
+    expect(text).toContain(
+      "Everything beyond the default is its own deliberate step afterwards",
+    );
+  });
+
+  test("teaches a lock as a don't-touch signal", () => {
+    const { text } = readPrompt();
+    expect(text).toContain("A lock the operator set is a don't-touch signal");
+    expect(text).toContain(
+      "Locking is a section-level gesture, so one lock covers the frame and everything inside it",
+    );
+    expect(text).toContain(
+      "Work around a locked region unless the request explicitly requires changing what it protects",
+    );
+  });
+
+  test("names the workflow tools the gesture surface added", () => {
+    const { text } = readPrompt();
+    expect(text).toContain(
+      "reply_annotation says one more thing in a thread that is still open",
+    );
+    expect(text).toContain("resolve_request is the only call that closes one");
+    expect(text).toContain("which set_board_title renames");
+    expect(text).toContain("Rename the board with set_board_title");
   });
 
   test("keeps craft numbers out of the prompt, in judgment language", () => {
@@ -226,17 +288,25 @@ describe("layout-editor prompt", () => {
   test("pins the diagnostics contract", () => {
     const { text } = readPrompt();
     expect(text).toContain(
-      "Five diagnostics run on every edit: covered-content, containment, broken-edges, unreadable-labels, and crowding.",
+      "Six diagnostics run on every edit: covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text.",
     );
     expect(text).toContain("A committed finalize runs one more, frame-slack");
-    expect(text).toContain("E* errors in your edited scope block a committed finalize");
-    expect(text).toContain("name every overridden id in the finalize message");
+    expect(text).toContain(
+      "All findings — E* errors and W* warnings — in your edited scope block a committed finalize and must be fixed.",
+    );
+    expect(text).toContain(
+      "Warnings are not overridable at commit: fix every scoped W* before finalizing.",
+    );
+    expect(text).toContain(
+      "Every open E* or W* in your edited scope blocks a committed finalize, including a frame-slack finding raised at finalize.",
+    );
+    expect(text).not.toContain("name every overridden id in the finalize message");
     expect(text).toContain("A finding names what is wrong and where; the fix is yours to choose");
   });
 
   test("gives every state block its own delimited subsection, in order", () => {
     const { nodes } = readPrompt();
-    const grammar = sectionByTag(nodes, "state_grammar");
+    const grammar = sectionByTag(nodes, "state_structure");
     const blocks = (grammar?.children as PromptNode[])
       .filter((child) => child.type === "section" && child.tag === "state_block")
       .map((child) => (child.attrs as { name?: string } | undefined)?.name);
@@ -247,14 +317,16 @@ describe("layout-editor prompt", () => {
       "BOARD DIFF",
       "LINTS",
       "ROUTES",
+      "MEASURES",
       "REQUESTS",
+      "VIEWS",
       "NO-OP and ERROR",
     ]);
   });
 
   test("specifies the state-text grammar the agent reads", () => {
     const { text } = readPrompt();
-    expect(text).toContain("An indented object tree where indentation is containment");
+    expect(text).toContain("Three children: <description> is the board description markdown");
     expect(text).toContain("Text is never truncated");
     expect(text).toContain("What the operation changed, derived by comparing the documents");
     expect(text).toContain("The <diff> block's cumulative base→draft change list");
@@ -262,30 +334,100 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("An operation returns `LINTS · +new −resolved`");
     expect(text).toContain("through none|ids");
     expect(text).toContain("REQUESTS · k/n disposed");
+    // The APPLIED headline is a gesture verb over the geometry that landed.
+    expect(text).toContain("`APPLIED · place_shape api-gw 240,480 280×100`");
+    expect(text).toContain("The verb is the gesture you performed");
+    expect(text).toContain("The numbers are the ones that landed after the grid snap");
+    expect(text).toContain("A note under the headline is report-only");
+    // ROUTES prints the numbered segments `shift_segment` addresses, and every
+    // routing call returns a fresh one so the next shift chains off the result.
+    expect(text).toContain(
+      "path A ─(s0 h y=240)→ (s1 v x=520) ─(s2 h y=300)→ B",
+    );
+    expect(text).toContain("`sN` is one straight run of the wire");
+    expect(text).toContain("That printed number is exactly what shift_segment writes");
+    expect(text).toContain(
+      "read it before sending another shift, and never take the next segment numbers from the digest above it",
+    );
+    // MEASURES is the readout a framed look returns.
+    expect(text).toContain("`MEASURES · section home 0,0 480×360`");
+    expect(text).toContain("`gaps x` and `gaps y` give the clear corridor");
+    expect(text).toContain("`pitch x` and `pitch y` give the repeat between rows and columns");
+    expect(text).toContain("`free` gives a framing section's unused margins");
     expect(text).toContain("`NO-OP · …` when the request was legal and there was nothing to do");
     expect(text).toContain("`ERROR · …` when it was not");
   });
 
   test("tells the true perception-delivery contract", () => {
     const { text, raw } = readPrompt();
-    // Section ③ is re-derived per request, so the prompt must not describe a
-    // spawn snapshot that ages, and must not send the model to `look` for the
-    // board text it already has this turn.
+    // Section ③ is re-derived per request, with the current board first and
+    // recent change history beneath it, so the prompt must not describe a
+    // snapshot that ages.
     expect(text).toContain(
       "Every request opens with a <state> block re-derived from the live board that instant",
     );
     expect(text).toContain("can never go stale under you");
-    expect(text).toContain("<instruction> the ask, <scope> what the operator selected");
+    expect(text).toContain("<instruction> the ask, <board> the digest");
+    expect(text).toContain(
+      "<views> the board as it stands now and the three most recent changes attached beneath it",
+    );
+    expect(text).toContain(
+      "first the board as it stands now, then up to three renders from the changes immediately before the current one",
+    );
+    expect(text).toContain(
+      "newest first and each captioned with the gesture summary that made it",
+    );
+    expect(text).toContain(
+      "If current-board rendering fails after an edit, the block reports the degradation and keeps the previous current-board render",
+    );
+    expect(text).toContain(
+      "`look`'s framed close-ups are returned with the tool result and stay visible in the recent conversation tail",
+    );
     expect(text).toContain(
       "An operation result is sized to the operation: its APPLIED line, its DELTA, its lint delta, and ROUTES for any wire it moved",
     );
     expect(text).toContain(
-      "`look` is the step back — a fresh full-board render and the routed truth for every connection",
+      "Send at most {{toolCallCap}} tool call(s) in one message.",
+    );
+    expect(text).not.toContain("Send at most three tool calls in one message.");
+    expect(text).not.toContain("tool calls in one message");
+    // `look` owns close study: one framed region per call, rendered and
+    // measured; the board render itself always rides the state block.
+    expect(text).toContain(
+      "`look` is the close-up — it frames exactly one region and returns that region rendered and measured, alongside the digest, the cumulative base→draft diff, the open findings, the routed truth for every connection, and the request queue",
     );
     expect(text).toContain(
-      "`look` carries the full-board render; a section close-up arrives on any call that names a view.",
+      "the board itself always arrives with your <state> block, never from `look`",
     );
-    expect(text).toContain("A failed or missing render is always explained in the result text");
+    expect(text).not.toContain("render of the whole board");
+    // The one framing knob and the promise the framed region carries.
+    expect(text).toContain(
+      "One knob frames the region: `view` names one or more section, object, or connection ids",
+    );
+    expect(text).toContain(
+      "a lone section id takes that section close up, and any other set frames the union of everything named",
+    );
+    expect(text).toContain(
+      "Name the smallest set that answers the question",
+    );
+    expect(text).toContain("it comes back rendered and with its MEASURES block");
+    // Framing is look's alone: a mutator's schema carries no `view`.
+    expect(text).toContain(
+      "Framing is `look`'s alone, since an edit takes no view argument and returns no picture",
+    );
+    expect(text).not.toContain("arrives on any mutating call that names a view");
+    // The state block carries the current board and recent changes while look
+    // carries board text and returns framed views for close study.
+    expect(text).not.toContain("No board text comes back from `look`");
+    expect(text).toContain(
+      "The first image attached beneath every <state> block is the board as it stands now, followed by up to three prior change renders; `look` carries the board text with it and returns its framed views and measurements in the tool result for close study",
+    );
+    expect(text).toContain(
+      "Edit from the small results and the current first image; use `look` when judgment needs a close-up or a measured region",
+    );
+    expect(text).toContain(
+      "A failed or missing `look` render is explained in its result text; a failed current-board render is explained in <views>",
+    );
     expect(text).not.toContain("carries the current state");
     expect(text).not.toContain("current full-board render (plus the requested close-up)");
     // The three retired context blocks are gone from the model's vocabulary.
@@ -318,7 +460,9 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("Merge the instruction and the open requests into one work list");
     expect(text).toContain("That list drives the run");
     expect(text).toContain("the instruction wins");
-    expect(text).toContain("Spend a `look` with a view when an area is too dense to read");
+    expect(text).toContain(
+      "Spend a `look` framing the area when it is too dense to read at full-board scale",
+    );
     expect(text).toContain(
       "There is no house reading direction to obey; arrows follow the flow you chose.",
     );
@@ -326,7 +470,8 @@ describe("layout-editor prompt", () => {
     expect(text).toContain("A refused call changes nothing");
     expect(text).toContain("The error names the tool and the field");
     expect(text).toContain("Every E* in your edited scope is fixed");
-    expect(text).toContain("Every surviving W* is named in the message");
+    expect(text).toContain("Every W* in your edited scope is fixed");
+    expect(text).not.toContain("Every surviving W* is named in the message");
     expect(text).toContain("Prefer a useful partial draft over outcome none");
   });
 

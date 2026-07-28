@@ -23,12 +23,58 @@ import { toBamlError } from "@boundaryml/baml"
 import type { Checked, Check } from "./types.js"
 import type { partial_types } from "./partial_types.js"
 import type * as types from "./types.js"
-import type {PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, SQCalibration, SQSubCheck, ScopeDisciplineEditVerdict, SurfaceQualityVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
+import type {CFSubCheck, CraftVerdict, PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RDSubCheck, ReadabilityVerdict, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, ScopeDisciplineEditVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
 import type TypeBuilder from "./type_builder.js"
 
 export class LlmResponseParser {
   constructor(private runtime: BamlRuntime, private ctxManager: BamlCtxManager) {}
 
+  
+  JudgeCraft(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): types.CraftVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeCraft",
+        llmResponse,
+        false,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as types.CraftVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeCraftAfterError(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): types.CraftVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeCraftAfterError",
+        llmResponse,
+        false,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as types.CraftVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
   
   JudgePromptHygiene(
       llmResponse: string,
@@ -71,6 +117,52 @@ export class LlmResponseParser {
         __baml_options__?.clientRegistry,
         __env__,
       ) as types.PHVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadability(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): types.ReadabilityVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeReadability",
+        llmResponse,
+        false,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as types.ReadabilityVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadabilityAfterError(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): types.ReadabilityVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeReadabilityAfterError",
+        llmResponse,
+        false,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as types.ReadabilityVerdict
     } catch (error) {
       throw toBamlError(error);
     }
@@ -163,52 +255,6 @@ export class LlmResponseParser {
         __baml_options__?.clientRegistry,
         __env__,
       ) as types.ScopeDisciplineEditVerdict
-    } catch (error) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQuality(
-      llmResponse: string,
-      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
-  ): types.SurfaceQualityVerdict {
-    try {
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-      return this.runtime.parseLlmResponse(
-        "JudgeSurfaceQuality",
-        llmResponse,
-        false,
-        this.ctxManager.cloneContext(),
-        __baml_options__?.tb?.__tb(),
-        __baml_options__?.clientRegistry,
-        __env__,
-      ) as types.SurfaceQualityVerdict
-    } catch (error) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQualityAfterError(
-      llmResponse: string,
-      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
-  ): types.SurfaceQualityVerdict {
-    try {
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-      return this.runtime.parseLlmResponse(
-        "JudgeSurfaceQualityAfterError",
-        llmResponse,
-        false,
-        this.ctxManager.cloneContext(),
-        __baml_options__?.tb?.__tb(),
-        __baml_options__?.clientRegistry,
-        __env__,
-      ) as types.SurfaceQualityVerdict
     } catch (error) {
       throw toBamlError(error);
     }
@@ -312,6 +358,52 @@ export class LlmStreamParser {
   constructor(private runtime: BamlRuntime, private ctxManager: BamlCtxManager) {}
 
   
+  JudgeCraft(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): partial_types.CraftVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeCraft",
+        llmResponse,
+        true,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as partial_types.CraftVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeCraftAfterError(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): partial_types.CraftVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeCraftAfterError",
+        llmResponse,
+        true,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as partial_types.CraftVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
   JudgePromptHygiene(
       llmResponse: string,
       __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
@@ -353,6 +445,52 @@ export class LlmStreamParser {
         __baml_options__?.clientRegistry,
         __env__,
       ) as partial_types.PHVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadability(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): partial_types.ReadabilityVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeReadability",
+        llmResponse,
+        true,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as partial_types.ReadabilityVerdict
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadabilityAfterError(
+      llmResponse: string,
+      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
+  ): partial_types.ReadabilityVerdict {
+    try {
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.parseLlmResponse(
+        "JudgeReadabilityAfterError",
+        llmResponse,
+        true,
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        __env__,
+      ) as partial_types.ReadabilityVerdict
     } catch (error) {
       throw toBamlError(error);
     }
@@ -445,52 +583,6 @@ export class LlmStreamParser {
         __baml_options__?.clientRegistry,
         __env__,
       ) as partial_types.ScopeDisciplineEditVerdict
-    } catch (error) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQuality(
-      llmResponse: string,
-      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
-  ): partial_types.SurfaceQualityVerdict {
-    try {
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-      return this.runtime.parseLlmResponse(
-        "JudgeSurfaceQuality",
-        llmResponse,
-        true,
-        this.ctxManager.cloneContext(),
-        __baml_options__?.tb?.__tb(),
-        __baml_options__?.clientRegistry,
-        __env__,
-      ) as partial_types.SurfaceQualityVerdict
-    } catch (error) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQualityAfterError(
-      llmResponse: string,
-      __baml_options__?: { tb?: TypeBuilder, clientRegistry?: ClientRegistry, env?: Record<string, string | undefined> }
-  ): partial_types.SurfaceQualityVerdict {
-    try {
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-      return this.runtime.parseLlmResponse(
-        "JudgeSurfaceQualityAfterError",
-        llmResponse,
-        true,
-        this.ctxManager.cloneContext(),
-        __baml_options__?.tb?.__tb(),
-        __baml_options__?.clientRegistry,
-        __env__,
-      ) as partial_types.SurfaceQualityVerdict
     } catch (error) {
       throw toBamlError(error);
     }

@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-07-28-eval-170417",
+  "status": "running",
+  "fingerprint": {
+    "repo": "2f674932+dirty",
+    "model": "codex-lb/gpt-5.6-sol @ low",
+    "prompt": "af28d0ed",
+    "lints": "d6b4248b",
+    "styles": "de7fa508",
+    "surface": "82bc455d",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-07-28-eval-164042",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 1,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "rag-ingestion-retrieval",
+      "label": "rag-ingestion-retrieval",
+      "status": "graded",
+      "scores": {
+        "SF": 5,
+        "RC": 6,
+        "RD": 6.5,
+        "CF": 6,
+        "SD": null,
+        "PH": 3
+      },
+      "deltas": {
+        "SF": -1,
+        "RC": -4,
+        "RD": 0,
+        "CF": -0.5,
+        "SD": null,
+        "PH": 0
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 5,
+      "RC": 6,
+      "RD": 6.5,
+      "CF": 6,
+      "SD": null,
+      "PH": 3
+    },
+    "deltas": {
+      "SF": -1,
+      "RC": -4,
+      "RD": 0,
+      "CF": -0.5,
+      "SD": null,
+      "PH": 0
+    },
+    "flags": []
+  },
+  "movements": [
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "SF",
+      "previous": 6,
+      "current": 5,
+      "delta": -1,
+      "evidence": "The board communicates the domain, major ownership boundaries, and primary ingestion-to-grounded-answer flow well enough for a design conversation. Version-consistent three-store publication, parallel hybrid retrieval, permission filtering, citations, feedback prioritization, and most of the rebuild topology survive. However, multiple system-defining operational paths are missing, especially quarantine, dead-letter recovery, partial-write repair, explicit low-confidence refusal, live-query continuity, and retention of the prior generation. The claimed routing of publication inconsistency into the model-rebuild path contradicts the brief's recovery ownership and invokes the system-defining failure-outcome cap. Engineers could agree on the happy-path architecture but would reconstruct materially different failure and recovery designs."
+    },
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "RC",
+      "previous": 10,
+      "current": 6,
+      "delta": -4,
+      "evidence": "The board substantially covers the primary RAG architecture, version-consistent three-store publication, permission-aware grounded retrieval, feedback prioritization, and atomic index rebuilding. Important operational qualifiers remain weak: source types and boilerplate removal are absent, quarantine does not show failure context or batch continuation, dead-letter storage lacks inputs and attempt history, overlap and several per-fragment metadata guarantees are incomplete, and rollback does not explicitly retain the prior generation. Weighted coverage is 66.5 of 82, or approximately 0.811; the absent system-defining batch-continuation requirement applies the RC cap of 6."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

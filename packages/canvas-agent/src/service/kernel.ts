@@ -20,9 +20,9 @@ import {
 } from "@agent-kernel/db";
 import { createKernel, type KernelInstance } from "@agent-kernel/kernel";
 
-import { capabilitiesLoader } from "../agent/loaders/capabilities";
-import { styleGuideLoader } from "../agent/loaders/style-guide";
-import type { LayoutToolRuntime } from "./tool-runtime";
+import { capabilitiesLoader } from "./loaders/capabilities";
+import { styleGuideLoader } from "./loaders/style-guide";
+import type { LayoutToolRuntime } from "./session/tools";
 
 export const KERNEL_ID = "canvas-agent";
 
@@ -33,7 +33,7 @@ export const PI_SESSIONS_DIR = join(AGENT_KERNEL_DIR, "pi-sessions");
 export const PI_AGENT_DIR = join(REPO_ROOT, ".pi-agent");
 export const CANVASES_DIR =
   Bun.env.CANVAS_AGENT_CANVASES_DIR ?? join(REPO_ROOT, "canvases");
-export const AGENT_CATALOG_DIR = join(import.meta.dir, "..", "agent", "catalog");
+export const AGENT_CATALOG_DIR = join(import.meta.dir, "..", "catalog");
 
 export const AGENT_THINKING_LEVELS = [
   "off",
@@ -59,6 +59,22 @@ function agentThinkingOverride(raw: string | undefined): AgentThinkingLevel | un
 
 export const AGENT_THINKING_OVERRIDE = agentThinkingOverride(
   Bun.env.CANVAS_AGENT_THINKING,
+);
+
+export function toolCallCapOverride(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === "1" || raw === "2" || raw === "3") {
+    return Number(raw);
+  }
+  throw new Error(
+    `CANVAS_AGENT_TOOL_CALL_CAP must be an integer from 1 to 3; got ${
+      JSON.stringify(raw)
+    }.`,
+  );
+}
+
+export const TOOL_CALL_CAP_OVERRIDE = toolCallCapOverride(
+  Bun.env.CANVAS_AGENT_TOOL_CALL_CAP,
 );
 
 /**

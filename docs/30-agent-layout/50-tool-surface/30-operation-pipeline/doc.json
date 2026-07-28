@@ -1,0 +1,663 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-50-tool-surface-30-operation-pipeline",
+  "title": "How an operation runs",
+  "root": "b-ts-pi-root",
+  "blocks": {
+    "b-ts-pi-root": {
+      "id": "b-ts-pi-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-ts-pi-title-1",
+        "b-ts-pi-lede-2",
+        "b-ts-pi-factory-heading-3",
+        "b-ts-pi-factory-body-4",
+        "b-ts-pi-factory-spec-5",
+        "b-ts-pi-factory-sealed-6",
+        "b-ts-pi-stages-heading-7",
+        "b-ts-pi-stages-body-8",
+        "b-ts-pi-stages-code-9",
+        "b-ts-pi-stages-reconcile-10",
+        "b-ts-pi-stages-commit-11",
+        "b-ts-pi-ctx-heading-12",
+        "b-ts-pi-ctx-body-13",
+        "b-ts-pi-ctx-lowering-14",
+        "b-ts-pi-ctx-redirect-15",
+        "b-ts-pi-ctx-lock-16",
+        "b-ts-pi-errors-heading-17",
+        "b-ts-pi-errors-table-18",
+        "b-ts-pi-envelope-heading-19",
+        "b-ts-pi-envelope-body-20",
+        "b-ts-pi-envelope-table-21",
+        "b-ts-pi-envelope-noop-22",
+        "b-ts-pi-envelope-zero-23",
+        "b-ts-pi-envelope-route-24",
+        "b-ts-pi-envelope-lint-25",
+        "b-ts-pi-envelope-scope-26",
+        "b-ts-pi-refusal-heading-27",
+        "b-ts-pi-refusal-body-28",
+        "b-ts-pi-refusal-repoint-29",
+        "b-ts-pi-wire-heading-30",
+        "b-ts-pi-wire-constraint-31",
+        "b-ts-pi-wire-body-32",
+        "b-ts-pi-gap-33"
+      ],
+      "props": {
+        "covers": "The shared factory behind every board mutator: the OperationSpec contract, the ordered stages runOperation executes, the OpContext validate/mutate discipline and the two courtesies a refusal owes, the three-tier error contract, the Applied / No-op / Error result envelope, and the wire constraints that keep every tool schema inlined and sealed.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "defineOperationTool",
+          "OperationSpec",
+          "OpContext",
+          "OpOutcome",
+          "result envelope",
+          "sealed schema",
+          "waypoint reconciliation"
+        ]
+      }
+    },
+    "b-ts-pi-title-1": {
+      "id": "b-ts-pi-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "How an operation runs"
+        }
+      ]
+    },
+    "b-ts-pi-lede-2": {
+      "id": "b-ts-pi-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every board mutator is built from one factory and runs one shared pipeline. A gesture contributes only what is unique to it — its schema fields, its state-dependent checks, and its mutation — and the factory owns everything else: how a refusal reads, when the draft is committed, what the model gets back, and which run-UX events fire. The payoff is that adding a gesture cannot accidentally change the shape of a result, and reading one gesture's file tells you the whole gesture."
+        }
+      ]
+    },
+    "b-ts-pi-factory-heading-3": {
+      "id": "b-ts-pi-factory-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The factory contract"
+        }
+      ]
+    },
+    "b-ts-pi-factory-body-4": {
+      "id": "b-ts-pi-factory-body-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A gesture is declared by handing "
+        },
+        {
+          "insert": "defineOperationTool",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/operation-tool.ts",
+              "symbol": "defineOperationTool"
+            }
+          }
+        },
+        {
+          "insert": " an "
+        },
+        {
+          "insert": "OperationSpec",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/operation-tool.ts",
+              "symbol": "OperationSpec"
+            }
+          }
+        },
+        {
+          "insert": ". The factory returns a descriptor the catalog can register verbatim: the snake_case name, a label derived from that name, the description as written, the parameter schema built from the spec's fields, and a sequential execution mode so call order is guaranteed. The description carries consequences only — the schema already states shape, so a description that restated fields would be a second copy of the truth."
+        }
+      ]
+    },
+    "b-ts-pi-factory-spec-5": {
+      "id": "b-ts-pi-factory-spec-5",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "OperationSpec\n  name         snake_case tool name\n  description  consequences only — never restate a field\n  fields       the operation's parameters, in full\n  validate(ctx, params) -> string[]     state-dependent checks; [] means valid\n  apply(ctx, params)    -> OpOutcome    the mutation; runs only when validate returned nothing\n\ndefineOperationTool(spec) -> descriptor\n  name · label · description\n  executionMode  \"sequential\"\n  parameters     Type.Object(spec.fields, { additionalProperties: false })\n  execute        runOperation(spec, params, host)"
+        }
+      ]
+    },
+    "b-ts-pi-factory-sealed-6": {
+      "id": "b-ts-pi-factory-sealed-6",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The wire schema is exactly the gesture's own arguments, sealed"
+      },
+      "text": [
+        {
+          "insert": "A mutator's parameters are its fields and nothing else, with unknown keys rejected rather than silently dropped. An unsealed root would accept whatever the model invents — a size on a placement, a peer id on a nudge — validate cleanly, and then do nothing with it, which reads to the model as a gesture that did something it did not do. Seeing the board is a separate call's job: a close-up rides on look, never on an edit, so no mutator carries a viewing argument at all."
+        }
+      ]
+    },
+    "b-ts-pi-stages-heading-7": {
+      "id": "b-ts-pi-stages-heading-7",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The stages"
+        }
+      ]
+    },
+    "b-ts-pi-stages-body-8": {
+      "id": "b-ts-pi-stages-body-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "runOperation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/operation-tool.ts",
+              "symbol": "runOperation"
+            }
+          }
+        },
+        {
+          "insert": " executes these in order. Schema validation has already happened in the runtime before execute is called, so shape errors never reach the factory and only state checks belong inside it. Each early return below leaves the draft exactly as it was and emits no event."
+        }
+      ]
+    },
+    "b-ts-pi-stages-code-9": {
+      "id": "b-ts-pi-stages-code-9",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "0  schema validation        (runtime, before execute — shape, types, enums, id format)\n1  resolve session          snapshot the current draft as `before`\n2  spec.validate            any error  → ERROR · <tool> — <lines>   [stop]\n3  spec.apply               status noop → NO-OP · <tool> <id> — <note>  [stop]\n4  reconcile waypoints      before → the mutated draft\n5  reconcile membership     parentId derived from geometry\n6  zero-delta check         before deep-equals after → NO-OP  [stop]\n7  commitDraft              assign the draft, refresh the board render\n8  operationPerception      DELTA · lint delta · ROUTES for a touched edge\n9  emit                     proposal event, then delta event"
+        }
+      ]
+    },
+    "b-ts-pi-stages-reconcile-10": {
+      "id": "b-ts-pi-stages-reconcile-10",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Stages 4 and 5 are the two post-mutation choke points, run in the reducer's own order. Waypoints go first: explicit connection waypoints are absolute world coordinates, so a gesture that moves or resizes an endpoint's owner leaves them stale. The reducer translates them on a rigid same-delta move and drops them on an asymmetric move or a resize, and that is what a committed proposal will do on replay — so running the same reconciliation here makes the polylines this result reports the committed truth rather than a draft-only fiction. Membership follows, because containment is derived from geometry rather than declared; since it writes only "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", it cannot disturb the waypoint verdict taken above it."
+        }
+      ]
+    },
+    "b-ts-pi-stages-commit-11": {
+      "id": "b-ts-pi-stages-commit-11",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "A draft write goes through one choke point"
+      },
+      "text": [
+        {
+          "insert": "The pipeline never assigns a draft directly. "
+        },
+        {
+          "insert": "commitDraft",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/perception/live-draft-view.ts",
+              "symbol": "commitDraft"
+            }
+          }
+        },
+        {
+          "insert": " assigns it and then unconditionally refreshes the current-board render for it, so no write can leave the state attachments carrying pixels of a board that no longer exists. A geometry-bearing gesture additionally records its raster into the change history; bookkeeping writes such as the title or a thread do not."
+        }
+      ]
+    },
+    "b-ts-pi-ctx-heading-12": {
+      "id": "b-ts-pi-ctx-heading-12",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "OpContext discipline"
+        }
+      ]
+    },
+    "b-ts-pi-ctx-body-13": {
+      "id": "b-ts-pi-ctx-body-13",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "OpContext",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/op-context.ts",
+              "symbol": "OpContext"
+            }
+          }
+        },
+        {
+          "insert": " is the operation's whole view of the world, and the split down its middle is strict. Validation helpers return "
+        },
+        {
+          "insert": "string[]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", where an empty array means valid, and never mutate the draft. Mutation helpers return "
+        },
+        {
+          "insert": "OpOutcome",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/op-context.ts",
+              "symbol": "OpOutcome"
+            }
+          }
+        },
+        {
+          "insert": " — either an applied draft with the summary the model will read, or a no-op with its note — and assume validation has passed, so they never repeat those checks. Validation errors are bare detail lines, because the factory owns the headline that names the tool."
+        }
+      ]
+    },
+    "b-ts-pi-ctx-lowering-14": {
+      "id": "b-ts-pi-ctx-lowering-14",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every mutator takes the summary as an argument rather than composing one, because a gesture cannot borrow a CRUD verb: a placement reports its post-snap geometry, a copy names its source, one delete verb covers three cascades, and the same text call writes an object's text or an edge's label. And every mutator is a spelling of one lowering path, so the draft applier stays the only thing in the system that touches a document. The one exception proves the rule — the section fit resolves its own geometry from the draft, so it owns both its summary and its no-op."
+        }
+      ]
+    },
+    "b-ts-pi-ctx-redirect-15": {
+      "id": "b-ts-pi-ctx-redirect-15",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "A kind gate owes a redirect"
+      },
+      "text": [
+        {
+          "insert": "When a gesture is refused because the id names the wrong kind, the diagnostic names the gesture that would do the comparable thing to that kind — a frame is restroked with change_section_border, a note is rewritten with update_text, an edge has no box to arrange so the redirect points at the two objects it joins. A refusal then costs one turn instead of a hunt through the roster. Every tool named in one of these messages must actually be on the roster, or the redirect sends the model somewhere that does not exist."
+        }
+      ]
+    },
+    "b-ts-pi-ctx-lock-16": {
+      "id": "b-ts-pi-ctx-lock-16",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "A lock gate owes its release path"
+      },
+      "text": [
+        {
+          "insert": "Lock refusals are the second family, and they carry two things: that the lock is a person's don't-touch mark rather than an accident of state, and the one call that lifts it. The message names the frame holding the lock and points at unlock, so the model can weigh unlocking against the request instead of hunting for a way around the refusal. The rule mirrors the interactive surface's own, which is the point — a gesture the pointer cannot perform is a gesture the agent cannot perform either."
+        }
+      ]
+    },
+    "b-ts-pi-errors-heading-17": {
+      "id": "b-ts-pi-errors-heading-17",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The three-tier error contract"
+        }
+      ]
+    },
+    "b-ts-pi-errors-table-18": {
+      "id": "b-ts-pi-errors-table-18",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Three layers, each with one responsibility — nothing appears in two",
+        "columns": [
+          "layer",
+          "owns",
+          "reaches the model as"
+        ],
+        "rows": [
+          [
+            "the tool schema",
+            "field presence, types, enums, id format, roster membership, complete geometry",
+            "a runtime validation error naming the tool, raised before execute"
+          ],
+          [
+            "spec.validate",
+            "existence, entity kind, lock state, board invariants",
+            "an ERROR result carrying the failing lines only — no mutation, no perception, no event"
+          ],
+          [
+            "spec.apply notes",
+            "non-fatal observations the mutation made along the way",
+            "notes indented under the APPLIED headline"
+          ]
+        ]
+      }
+    },
+    "b-ts-pi-envelope-heading-19": {
+      "id": "b-ts-pi-envelope-heading-19",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The result envelope"
+        }
+      ]
+    },
+    "b-ts-pi-envelope-body-20": {
+      "id": "b-ts-pi-envelope-body-20",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every mutator returns one of three classes, distinguished by headline so the model never has to infer from an empty delta what happened. The sizing is deliberate: repeating a full digest and a whole-board render after every call would multiply image tokens to re-show a board where one rectangle moved, while returning nothing recreates the blind-model failure the surface exists to prevent."
+        }
+      ]
+    },
+    "b-ts-pi-envelope-table-21": {
+      "id": "b-ts-pi-envelope-table-21",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Three result classes",
+        "columns": [
+          "class",
+          "headline",
+          "carries"
+        ],
+        "rows": [
+          [
+            "Applied",
+            "APPLIED · <summary>",
+            "any notes, the document-derived DELTA, the lint delta, and the routed truth for a touched edge; the draft is committed and one proposal event plus one delta event fire"
+          ],
+          [
+            "No-op",
+            "NO-OP · <tool> <id> — <note>",
+            "the note, plus the edge's current numbered polyline when the target was an edge"
+          ],
+          [
+            "Error",
+            "ERROR · <tool> — <lines>",
+            "the error lines only, flagged as an error result"
+          ]
+        ]
+      }
+    },
+    "b-ts-pi-envelope-noop-22": {
+      "id": "b-ts-pi-envelope-noop-22",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "A no-op is not an error"
+      },
+      "text": [
+        {
+          "insert": "Both classes leave the draft untouched and emit no event, so the difference is entirely in what they tell the model to do next. An error means the call was wrong — fix it and re-send. A no-op means the call was well-formed, legal, and there was simply nothing to do: an empty frame has nothing to fit around, an unlocked frame has no lock to release, an edge already on the auto-router has no manual route to drop. Reporting either as the other wastes a turn."
+        }
+      ]
+    },
+    "b-ts-pi-envelope-zero-23": {
+      "id": "b-ts-pi-envelope-zero-23",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Zero delta is a no-op, wherever it comes from. After both reconciliations the pipeline compares the pre-operation document against the result, and a patch that asked for exactly what the board already holds falls into the no-op class rather than printing an APPLIED headline over an empty delta. That pairing — a line claiming an edit above a delta showing none — is the most confusing thing the surface could hand the model, and it is why the check sits after reconciliation rather than before the mutation."
+        }
+      ]
+    },
+    "b-ts-pi-envelope-route-24": {
+      "id": "b-ts-pi-envelope-route-24",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A no-op on an edge still owes the model the wire's current shape. A routing gesture that asked for what the edge already has is exactly the moment the model needs the numbered polyline to aim its next call at, so the note is followed by that route. Object targets get nothing extra: their geometry is not a polyline, and the standing digest already carries it. The same principle holds on the applied path — every edge gesture returns the fresh numbered route, which is what lets a second correction chain off the result just read rather than off a printing the first correction made stale."
+        }
+      ]
+    },
+    "b-ts-pi-envelope-lint-25": {
+      "id": "b-ts-pi-envelope-lint-25",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The lint block is a delta, and its baseline derives from the pre-operation document. The session's recorded diagnostic set is a cache, not the definition: when it is absent, "
+        },
+        {
+          "insert": "lintDeltaBlock",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/perception/perception.ts",
+              "symbol": "lintDeltaBlock"
+            }
+          }
+        },
+        {
+          "insert": " runs the rules over the document as it stood ahead of this operation. A delta therefore means the same thing on every path into the pipeline, rather than depending on how the session happened to be constructed. Findings are compared by rule, targets, and message, so the block reports what this call introduced and what it resolved."
+        }
+      ]
+    },
+    "b-ts-pi-envelope-scope-26": {
+      "id": "b-ts-pi-envelope-scope-26",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "An edit is text, and says only what this call did"
+      },
+      "text": [
+        {
+          "insert": "The per-operation envelope does not restate the board and does not render it. The standing picture — the whole digest, the cumulative baseline-to-draft diff, the full finding list, the request queue — is re-derived into the state block attached to every request, and framed close-ups with their measurements come from look. An operation reports its own delta, its own lint movement, and the routes it moved, and stops there."
+        }
+      ]
+    },
+    "b-ts-pi-refusal-heading-27": {
+      "id": "b-ts-pi-refusal-heading-27",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Refusals that name the corrected call"
+        }
+      ]
+    },
+    "b-ts-pi-refusal-body-28": {
+      "id": "b-ts-pi-refusal-body-28",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Mutually exclusive arguments are the case JSON Schema cannot state without a root-level construct the wire rules forbid, so the validator is the gate and the refusal has to do the steering. Both such refusals spell the two legal calls out concretely, with the model's own ids substituted in, so what comes back is a corrected call rather than a re-read rule. "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/look.ts",
+              "symbol": "readSessionLook"
+            }
+          }
+        },
+        {
+          "insert": " frames exactly one region per call — a section or object by name, or a world rect — and refuses both knobs together and neither knob at all, each with the two legal shapes written out. "
+        },
+        {
+          "insert": "clone",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/place.ts",
+              "symbol": "clone"
+            }
+          }
+        },
+        {
+          "insert": " takes one position source: an absolute corner, an offset from the source, or neither for the paste offset — and when both arrive its refusal prints the two calls it could have meant, verbatim."
+        }
+      ]
+    },
+    "b-ts-pi-refusal-repoint-29": {
+      "id": "b-ts-pi-refusal-repoint-29",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Repointing an edge shows why some checks cannot be made from the arguments alone. A repoint patch usually carries one end, so distinctness has to be judged against the edge as it will stand — the side being moved against the side already stored on the draft. Comparing the patch to itself would let an edge land on the object its other end already occupies. The same operation makes one more thing explicit that the arguments do not say: when the ends actually move, a stored manual route described the old geometry, so the route is dropped in the patch itself, which is what carries the drop through the commit replay as well."
+        }
+      ]
+    },
+    "b-ts-pi-wire-heading-30": {
+      "id": "b-ts-pi-wire-heading-30",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Wire portability"
+        }
+      ]
+    },
+    "b-ts-pi-wire-constraint-31": {
+      "id": "b-ts-pi-wire-constraint-31",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Every schema is fully inlined and sealed"
+      },
+      "text": [
+        {
+          "insert": "Providers do not agree on how much of a tool's JSON Schema reaches the model. One forwards the schema verbatim and asks for non-strict validation; another rebuilds the input schema from scratch, keeping only the properties and the required list and discarding every other root-level key. Anything parked at the root of a schema therefore has to be assumed lost. So "
+        },
+        {
+          "insert": "schemas.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/schemas.ts"
+            }
+          }
+        },
+        {
+          "insert": " holds three hard rules: no shared definitions and no references, so reusing a constant copies its shape into the tool's schema rather than emitting a pointer; enums serialize as a single enum rather than as a union of constants; and payloads reject unknown keys while patches additionally demand at least one field."
+        }
+      ]
+    },
+    "b-ts-pi-wire-body-32": {
+      "id": "b-ts-pi-wire-body-32",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The consequence worth internalizing is that a schema constraint expressed at the root of a tool's parameters is guidance, not enforcement. That is why the mutual-exclusion cases above are validator-enforced and steered through the description, and why sealing is asserted structurally against the registered surface rather than trusted to survive the trip. What a schema can state — presence, type, roster membership, id grammar, geometry completeness — is stated there exactly once; everything state-dependent belongs to the operation's validator."
+        }
+      ]
+    },
+    "b-ts-pi-gap-33": {
+      "id": "b-ts-pi-gap-33",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Known gap: waypoints across a batch"
+      },
+      "text": [
+        {
+          "insert": "Waypoint reconciliation runs per operation, against the previous draft, while a commit replays the whole proposal. A sequence whose steps are each individually rigid but whose net movement is asymmetric can therefore keep its waypoints through the pipeline and lose them on replay. The gap is recorded at the call site in "
+        },
+        {
+          "insert": "runOperation",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/operation-tool.ts",
+              "symbol": "runOperation"
+            }
+          }
+        },
+        {
+          "insert": " so it cannot be rediscovered as a mystery; closing it means reconciling against the baseline the replay will use rather than against the immediately preceding draft."
+        }
+      ]
+    }
+  }
+}

@@ -27,6 +27,10 @@ export { FieldType, EnumBuilder, ClassBuilder }
 export default class TypeBuilder {
     private tb: _TypeBuilder;
     
+    CFSubCheck: ClassViewer<'CFSubCheck', "name" | "score" | "note">;
+    
+    CraftVerdict: ClassViewer<'CraftVerdict', "score" | "score_rationale" | "sub_checks">;
+    
     PHCommitHonestyFinding: ClassViewer<'PHCommitHonestyFinding', "assessment" | "commit_count" | "honest_summary_count" | "inflated_claim_count" | "undeclared_seen_defect_count" | "summary_lines" | "moments">;
     
     PHEconomyFinding: ClassViewer<'PHEconomyFinding', "assessment" | "operation_count" | "thrash_cycle_count" | "wall_time_minutes" | "over_budget_session_count" | "moments">;
@@ -51,6 +55,10 @@ export default class TypeBuilder {
     
     RCRequirementAssessment: ClassViewer<'RCRequirementAssessment', "id" | "requirement" | "brief_evidence" | "importance" | "status" | "representation_evidence" | "note">;
     
+    RDSubCheck: ClassViewer<'RDSubCheck', "name" | "score" | "note">;
+    
+    ReadabilityVerdict: ClassViewer<'ReadabilityVerdict', "score" | "score_rationale" | "sub_checks">;
+    
     RequirementCoverageVerdict: ClassViewer<'RequirementCoverageVerdict', "requirements" | "coverage_fraction" | "caps_applied" | "strongest_covered_cluster" | "most_consequential_gap" | "coverage_summary" | "score">;
     
     SDChangeAssessment: ClassViewer<'SDChangeAssessment', "object_id" | "object_kind" | "classification" | "what_changed" | "impact" | "declared" | "evidence">;
@@ -73,13 +81,7 @@ export default class TypeBuilder {
     
     SFUnsupportedClaim: ClassViewer<'SFUnsupportedClaim', "claim" | "reconstruction_evidence" | "why_unsupported">;
     
-    SQCalibration: ClassViewer<'SQCalibration', "gc" | "intent">;
-    
-    SQSubCheck: ClassViewer<'SQSubCheck', "name" | "score" | "note">;
-    
     ScopeDisciplineEditVerdict: ClassViewer<'ScopeDisciplineEditVerdict', "requested_changes" | "changes" | "collateral_change_count" | "scope_summary" | "scoring_status" | "exclusion_reason" | "score">;
-    
-    SurfaceQualityVerdict: ClassViewer<'SurfaceQualityVerdict', "calibration" | "score" | "delta_sentence" | "sub_checks" | "rank_order_sanity_note">;
     
     SystemFidelityVerdict: ClassViewer<'SystemFidelityVerdict', "elements" | "unsupported_claims" | "strongest_transmitted_behavior" | "most_consequential_loss" | "overall_summary" | "score">;
     
@@ -90,13 +92,21 @@ export default class TypeBuilder {
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "PHCommitHonestyFinding","PHEconomyFinding","PHFailedCallsRetriesFinding","PHInfraExclusions","PHLintEtiquetteFinding","PHPerceptionLoopFinding","PHSummaryLine","PHTranscriptMoment","PHVerdict","RCAppliedCap","RCRepresentationEvidence","RCRequirementAssessment","RequirementCoverageVerdict","SDChangeAssessment","SDEvidence","SDRequestedChangeAssessment","SFFidelityElementAssessment","SFReconstructedComponent","SFReconstructedConstraint","SFReconstructedFailurePath","SFReconstructedFlow","SFReconstructionUncertainty","SFUnsupportedClaim","SQCalibration","SQSubCheck","ScopeDisciplineEditVerdict","SurfaceQualityVerdict","SystemFidelityVerdict","SystemReconstruction",
+            "CFSubCheck","CraftVerdict","PHCommitHonestyFinding","PHEconomyFinding","PHFailedCallsRetriesFinding","PHInfraExclusions","PHLintEtiquetteFinding","PHPerceptionLoopFinding","PHSummaryLine","PHTranscriptMoment","PHVerdict","RCAppliedCap","RCRepresentationEvidence","RCRequirementAssessment","RDSubCheck","ReadabilityVerdict","RequirementCoverageVerdict","SDChangeAssessment","SDEvidence","SDRequestedChangeAssessment","SFFidelityElementAssessment","SFReconstructedComponent","SFReconstructedConstraint","SFReconstructedFailurePath","SFReconstructedFlow","SFReconstructionUncertainty","SFUnsupportedClaim","ScopeDisciplineEditVerdict","SystemFidelityVerdict","SystemReconstruction",
           ]),
           enums: new Set([
             
           ]),
           runtime: DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME
         });
+        
+        this.CFSubCheck = this.tb.classViewer("CFSubCheck", [
+          "name","score","note",
+        ]);
+        
+        this.CraftVerdict = this.tb.classViewer("CraftVerdict", [
+          "score","score_rationale","sub_checks",
+        ]);
         
         this.PHCommitHonestyFinding = this.tb.classViewer("PHCommitHonestyFinding", [
           "assessment","commit_count","honest_summary_count","inflated_claim_count","undeclared_seen_defect_count","summary_lines","moments",
@@ -146,6 +156,14 @@ export default class TypeBuilder {
           "id","requirement","brief_evidence","importance","status","representation_evidence","note",
         ]);
         
+        this.RDSubCheck = this.tb.classViewer("RDSubCheck", [
+          "name","score","note",
+        ]);
+        
+        this.ReadabilityVerdict = this.tb.classViewer("ReadabilityVerdict", [
+          "score","score_rationale","sub_checks",
+        ]);
+        
         this.RequirementCoverageVerdict = this.tb.classViewer("RequirementCoverageVerdict", [
           "requirements","coverage_fraction","caps_applied","strongest_covered_cluster","most_consequential_gap","coverage_summary","score",
         ]);
@@ -190,20 +208,8 @@ export default class TypeBuilder {
           "claim","reconstruction_evidence","why_unsupported",
         ]);
         
-        this.SQCalibration = this.tb.classViewer("SQCalibration", [
-          "gc","intent",
-        ]);
-        
-        this.SQSubCheck = this.tb.classViewer("SQSubCheck", [
-          "name","score","note",
-        ]);
-        
         this.ScopeDisciplineEditVerdict = this.tb.classViewer("ScopeDisciplineEditVerdict", [
           "requested_changes","changes","collateral_change_count","scope_summary","scoring_status","exclusion_reason","score",
-        ]);
-        
-        this.SurfaceQualityVerdict = this.tb.classViewer("SurfaceQualityVerdict", [
-          "calibration","score","delta_sentence","sub_checks","rank_order_sanity_note",
         ]);
         
         this.SystemFidelityVerdict = this.tb.classViewer("SystemFidelityVerdict", [

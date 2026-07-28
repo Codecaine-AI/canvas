@@ -1,0 +1,22 @@
+{
+  "axis": "sd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-174737",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeScopeDiscipline",
+    "attempts": 0
+  },
+  "score": null,
+  "verdict": {
+    "skipped_reason": "e1: system scenario has no follow-up edits"
+  },
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "flags": [
+    "SKIPPED(e1: system scenario has no follow-up edits)"
+  ]
+}

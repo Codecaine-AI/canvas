@@ -66,7 +66,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
@@ -80,7 +80,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/operations/sections.ts",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/sections.ts",
               "symbol": "fitSection"
             }
           }

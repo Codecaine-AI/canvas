@@ -34,16 +34,18 @@ import type {
   CreateAgentSessionRequest,
 } from "../../protocol";
 
-import type { RequestQueueEntry } from "../../agent/loaders/user-requests";
+import { emitBoardRenderTraceEvent } from "./board-trace";
+import type { RequestQueueEntry } from "./snapshots/user-requests";
 import {
   AGENT_KERNEL_DIR,
   AGENT_THINKING_OVERRIDE,
   CANVASES_DIR,
   REPO_ROOT,
+  TOOL_CALL_CAP_OVERRIDE,
   createLayoutKernel,
 } from "../kernel";
-import type { LayoutToolRuntime } from "../tool-runtime";
-import { bootPerception } from "./boot";
+import type { LayoutToolRuntime } from "./tools";
+import { bootPerception } from "./perception/boot";
 import {
   documentWithinCrop,
   draftWithPageFrame,
@@ -53,10 +55,10 @@ import {
   solvedFrame,
   syncSessionRequests,
   userRequestsSnapshot,
-} from "./context";
+} from "./snapshots/context";
 import { registerLayoutSession } from "./registry";
 import { createToolRuntime } from "./tools";
-import type { SessionView } from "./view-log";
+import type { SessionView } from "./perception/view-log";
 
 const AGENT_NAME = "layout-editor";
 /** World-space context ring around the scope frame for the ghost preview. */
@@ -69,6 +71,26 @@ export class HttpError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
   }
+}
+
+/** The eager full-board raster for the session's exact current draft. */
+export interface CurrentBoardRender {
+  png: Buffer;
+  /** Applied-change ordinal; zero for the spawn render. */
+  n: number;
+  /** Gesture summary that produced this board, or the spawn label. */
+  summary: string;
+  at: string;
+  /** Identity guard: immutable draft replacement invalidates these pixels. */
+  forDraft: InteractiveCanvasDocument;
+}
+
+/** One retained post-change full-board raster. */
+export interface ChangeRender {
+  n: number;
+  summary: string;
+  png: Buffer;
+  at: string;
 }
 
 export interface LayoutSession {
@@ -103,13 +125,19 @@ export interface LayoutSession {
   /** Diagnostics attached to the previous apply result, for LINTS delta reporting. */
   lastDiagnostics?: Diagnostic[];
   /**
-   * Rasters the model has been shown, newest last (./view-log). They live here
-   * rather than in the agent's state object because state must stay
-   * JSON-serializable; `render(state)` attaches the newest few from here.
+   * Rasters returned by look, newest last (./view-log). Their lightweight
+   * state refs describe recent tool results; the images themselves ride the
+   * recent conversation tail.
    */
   views: SessionView[];
   /** Monotonic capture counter behind SessionView.seq. */
   viewCount: number;
+  /** Eager in-memory full-board render, valid only for its immutable draft. */
+  currentBoard?: CurrentBoardRender;
+  /** Applied-change rasters, oldest first and bounded by CHANGE_RENDER_LOG_LIMIT. */
+  changeRenders: ChangeRender[];
+  /** Latest eager current-board raster failure, shown in the state <views> block. */
+  currentBoardRenderFailure?: string;
 }
 
 function sha256(input: string | Buffer): string {
@@ -241,6 +269,7 @@ export class LayoutSessionStore {
       requests: [],
       views: [],
       viewCount: 0,
+      changeRenders: [],
     };
     // Every operation reports its lint delta against a baseline, so the session
     // starts with one: the findings already on the board before the first edit.
@@ -402,11 +431,21 @@ export class LayoutSessionStore {
         workingDir: REPO_ROOT,
         displayLabel: "Layout Editor",
         reuseExistingSession: refine,
+        // Turn-by-turn board progress in the trace viewer: every turn end
+        // publishes the session's current full-board raster as an
+        // "app:board-render" event (./board-trace). Fire-and-forget — a trace
+        // publication failure never touches the run.
+        onTurnEnd: (turnCount) => {
+          void emitBoardRenderTraceEvent(this.db, session.currentBoard, turnCount);
+        },
         // v1 state persistence: .agent-kernel/state/<container>/layout-editor/state.json.
         stateRoot: REPO_ROOT,
         ...(AGENT_THINKING_OVERRIDE === undefined
           ? {}
           : { thinkingLevel: AGENT_THINKING_OVERRIDE }),
+        ...(TOOL_CALL_CAP_OVERRIDE === undefined
+          ? {}
+          : { variables: { toolCallCap: TOOL_CALL_CAP_OVERRIDE } }),
         // The working-picture keys (editorState, userRequests, boardState) are
         // read by the agent's state/ seed, not by context loaders — the same
         // snapshots, now on the state side of the request.

@@ -10,8 +10,45 @@ import {
   type InteractiveCanvasDocument,
 } from "../../../../canvas/src/state/schema.ts";
 
-export const EVAL_FILE_API_ORIGIN = "http://127.0.0.1:4010";
-export const EVAL_HARNESS_ORIGIN = "http://127.0.0.1:4821";
+/**
+ * The eval file API and the eval harness are spawned per run on ephemeral
+ * ports (queue.ts), so their origins are not fixed constants: the suite hands
+ * them to each scenario child in the environment. Reusing a service from an
+ * earlier run is what let a three-day-old tool surface answer a live eval, so
+ * there is deliberately no default origin to fall back to.
+ */
+export const EVAL_FILE_API_ORIGIN_ENV = "EVAL_FILE_API_ORIGIN";
+export const EVAL_HARNESS_ORIGIN_ENV = "EVAL_HARNESS_ORIGIN";
+
+export function requireServiceOrigin(
+  variable: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const raw = env[variable];
+  if (!raw || raw.trim() === "") {
+    throw new Error(
+      `${variable} must be set: eval services listen on per-run ephemeral ports, so the suite queue passes their origins to every scenario child.`,
+    );
+  }
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(`${variable} is not a valid URL: ${raw}`);
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(`${variable} must be an http(s) origin: ${raw}`);
+  }
+  return url.origin;
+}
+
+export function evalFileApiOrigin(env: NodeJS.ProcessEnv = process.env): string {
+  return requireServiceOrigin(EVAL_FILE_API_ORIGIN_ENV, env);
+}
+
+export function evalHarnessOrigin(env: NodeJS.ProcessEnv = process.env): string {
+  return requireServiceOrigin(EVAL_HARNESS_ORIGIN_ENV, env);
+}
 
 export type SessionStatus =
   | "running"
@@ -113,7 +150,7 @@ function jsonRequest(method: string, body?: unknown): RequestInit {
 }
 
 export class CanvasFileClient {
-  constructor(readonly origin = EVAL_FILE_API_ORIGIN) {}
+  constructor(readonly origin: string) {}
 
   async listCanvases(): Promise<{ canvases: Array<{ id: string }> }> {
     return await fetchJson(`${this.origin}/api/canvases`);
@@ -172,7 +209,7 @@ export class CanvasFileClient {
 }
 
 export class HarnessClient {
-  constructor(readonly origin = EVAL_HARNESS_ORIGIN) {}
+  constructor(readonly origin: string) {}
 
   private sessionsUrl(canvasId: string): string {
     return `${this.origin}/api/canvases/${encodeURIComponent(canvasId)}/agent/sessions`;

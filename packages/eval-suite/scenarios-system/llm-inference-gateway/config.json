@@ -4,12 +4,6 @@
     "width": 2560,
     "height": 1600
   },
-  "edits": [
-    {
-      "title": "Interactive and batch traffic",
-      "instruction": "The gateway now separates interactive and batch traffic during admission and scheduling. When capacity is constrained, interactive work preempts batch work, while displaced batch requests are parked with their state preserved and resumed when capacity returns instead of failing. Tenant spend ceilings and quota accounting still apply to combined usage across both classes."
-    }
-  ],
   "tags": [
     "architecture",
     "inference"

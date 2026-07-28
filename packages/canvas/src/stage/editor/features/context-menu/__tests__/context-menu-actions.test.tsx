@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { CanvasAction } from "../../../../../state/actions";
 import type {
@@ -8,7 +8,10 @@ import type {
 } from "../../../../../state/schema";
 import { CanvasContextMenu } from "../CanvasContextMenu";
 import type { SectionExportFormat } from "../section-export";
-import { useCanvasContextMenu } from "../use-canvas-context-menu";
+import {
+  useCanvasContextMenu,
+  type CanvasContextMenuApi,
+} from "../use-canvas-context-menu";
 
 const processObject: InteractiveCanvasObject = {
   id: "process-a",
@@ -17,11 +20,23 @@ const processObject: InteractiveCanvasObject = {
   geometry: { x: 0, y: 0, width: 120, height: 80 },
 };
 
+const stickyObject: InteractiveCanvasObject = {
+  id: "sticky-a",
+  type: "sticky",
+  text: "Sticky A",
+  geometry: { x: 0, y: 0, width: 160, height: 160 },
+};
+
 const sectionObject: InteractiveCanvasObject = {
   id: "section-a",
   type: "section",
   text: "Section A",
   geometry: { x: 0, y: 0, width: 320, height: 220 },
+};
+
+const lockedSectionObject: InteractiveCanvasObject = {
+  ...sectionObject,
+  locked: "all",
 };
 
 function makeDocument(object: InteractiveCanvasObject): InteractiveCanvasDocument {
@@ -39,6 +54,7 @@ function ContextMenuHarness({
   dispatch,
   exportSection,
   exportBoard,
+  onMenu,
 }: {
   object: InteractiveCanvasObject;
   dispatch: (action: CanvasAction) => void;
@@ -51,6 +67,7 @@ function ContextMenuHarness({
     document: InteractiveCanvasDocument,
     format: SectionExportFormat,
   ) => Promise<void>;
+  onMenu?: (menu: CanvasContextMenuApi) => void;
 }) {
   const canvasDocument = makeDocument(object);
   const menu = useCanvasContextMenu({
@@ -60,6 +77,7 @@ function ContextMenuHarness({
     exportSection,
     exportBoard,
   });
+  onMenu?.(menu);
   return (
     <div data-canvas-stage="true">
       <button
@@ -126,6 +144,80 @@ describe("CanvasContextMenu annotation authoring", () => {
 
     expect(screen.getByRole("menuitem", { name: "Note to AI…" })).toBeTruthy();
     expect(dispatch.mock.calls.some(([action]) => action.type === "canvas.addAnnotation")).toBe(false);
+  });
+});
+
+describe("CanvasContextMenu lock gating", () => {
+  it("offers both lock modes on an unlocked section", () => {
+    const dispatch = mock((_action: CanvasAction) => {});
+    openObjectMenu(<ContextMenuHarness object={sectionObject} dispatch={dispatch} />);
+
+    expect(screen.getByRole("menuitem", { name: "Lock all" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Lock background only" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Lock background only" }));
+    expect(dispatch.mock.calls.at(-1)?.[0]).toEqual({
+      type: "canvas.updateObject",
+      objectId: "section-a",
+      patch: { locked: "background" },
+    });
+  });
+
+  it("offers Unlock on a locked section", () => {
+    const dispatch = mock((_action: CanvasAction) => {});
+    openObjectMenu(<ContextMenuHarness object={lockedSectionObject} dispatch={dispatch} />);
+
+    expect(screen.queryByRole("menuitem", { name: "Lock all" })).toBeNull();
+    fireEvent.click(screen.getByRole("menuitem", { name: "Unlock" }));
+    expect(dispatch.mock.calls.at(-1)?.[0]).toEqual({
+      type: "canvas.updateObject",
+      objectId: "section-a",
+      patch: { locked: undefined },
+    });
+  });
+
+  // Lock protects a region of the board, so it is section-only (schema
+  // objects.ts declares `locked` that way; the selection toolbar agrees).
+  for (const object of [stickyObject, processObject]) {
+    it(`omits every lock entry on a ${object.type}`, () => {
+      const dispatch = mock((_action: CanvasAction) => {});
+      openObjectMenu(<ContextMenuHarness object={object} dispatch={dispatch} />);
+
+      // The menu is open on the non-section target…
+      expect(screen.getByRole("menuitem", { name: "Copy" })).toBeTruthy();
+      // …but carries no lock affordance.
+      expect(screen.queryByRole("menuitem", { name: "Lock all" })).toBeNull();
+      expect(screen.queryByRole("menuitem", { name: "Lock background only" })).toBeNull();
+      expect(screen.queryByRole("menuitem", { name: "Unlock" })).toBeNull();
+    });
+  }
+
+  it("no-ops setLockFromContextMenu when the target is not a section", () => {
+    const dispatch = mock((_action: CanvasAction) => {});
+    let menu: CanvasContextMenuApi | null = null;
+    openObjectMenu(
+      <ContextMenuHarness
+        object={processObject}
+        dispatch={dispatch}
+        onMenu={(api) => {
+          menu = api;
+        }}
+      />,
+    );
+
+    const api = menu as CanvasContextMenuApi | null;
+    expect(api?.contextObject?.id).toBe("process-a");
+    act(() => {
+      api?.setLockFromContextMenu("all");
+      api?.setLockFromContextMenu("background");
+      api?.setLockFromContextMenu(undefined);
+    });
+
+    expect(
+      dispatch.mock.calls.some(([action]) => action.type === "canvas.updateObject"),
+    ).toBe(false);
+    // The defensive gate returns before closing the menu, so it stays open.
+    expect(screen.getByRole("menu", { name: "Canvas context menu" })).toBeTruthy();
   });
 });
 

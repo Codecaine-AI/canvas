@@ -1,5 +1,10 @@
 import { Button } from "@codecaine-ai/canvas/ui/button";
-import { XIcon } from "@codecaine-ai/canvas/ui/icons";
+import { ExpandIcon, XIcon } from "@codecaine-ai/canvas/ui/icons";
+import {
+  AgentRenderViewer,
+  agentBoardRenderUrl,
+  useAgentRenderViewer,
+} from "./AgentRenderViewer";
 import { QueueView, type QueueViewProps } from "./QueueView";
 import {
   SessionView,
@@ -12,7 +17,7 @@ export interface AgentSidebarProps {
   status: AgentSessionViewStatus;
   onClose(): void;
   queue: Omit<QueueViewProps, "description" | "pinningTargetLabel">;
-  session: Omit<SessionViewProps, "status">;
+  session: Omit<SessionViewProps, "status" | "onOpenRender">;
   acceptedResult?: AgentAcceptedNotice | null;
   description?: string;
   pinningTargetLabel?: string | null;
@@ -51,6 +56,8 @@ export function AgentSidebar({
   pinningTargetLabel,
 }: AgentSidebarProps) {
   const showQueue = status === "idle" || status === "accepted" || status === "rejected";
+  const renderViewer = useAgentRenderViewer();
+  const currentSessionId = session.sessionId;
 
   return (
     <aside
@@ -70,16 +77,37 @@ export function AgentSidebar({
             {STATUS_LABELS[status]}
           </span>
         </div>
-        <Button
-          type="button"
-          size="icon-xs"
-          variant="ghost"
-          aria-label="Close Agent"
-          title="Close Agent"
-          onClick={onClose}
-        >
-          <XIcon className="h-3 w-3" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          {!showQueue && currentSessionId ? (
+            <Button
+              type="button"
+              size="xs"
+              variant="ghost"
+              className="text-muted-foreground"
+              aria-label="View current board"
+              title="View current board"
+              onClick={() =>
+                renderViewer.openRender({
+                  src: agentBoardRenderUrl(session.canvasId, currentSessionId),
+                  caption: "Current board",
+                })
+              }
+            >
+              <ExpandIcon className="h-3 w-3" />
+              Current board
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="icon-xs"
+            variant="ghost"
+            aria-label="Close Agent"
+            title="Close Agent"
+            onClick={onClose}
+          >
+            <XIcon className="h-3 w-3" />
+          </Button>
+        </div>
       </header>
 
       {showQueue ? (
@@ -103,8 +131,16 @@ export function AgentSidebar({
           />
         </div>
       ) : (
-        <SessionView {...session} status={status} />
+        <SessionView
+          {...session}
+          status={status}
+          onOpenRender={renderViewer.openRender}
+        />
       )}
+      <AgentRenderViewer
+        target={renderViewer.target}
+        onClose={renderViewer.closeRender}
+      />
     </aside>
   );
 }

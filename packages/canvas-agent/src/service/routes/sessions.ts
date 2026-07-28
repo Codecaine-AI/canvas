@@ -8,6 +8,9 @@
  *   POST /api/canvases/:id/agent/sessions/:sid/accept  rebase-check → ops | 409
  *   POST /api/canvases/:id/agent/sessions/:sid/reject  discard
  *   GET  /api/canvases/:id/agent/sessions/:sid/draft.svg
+ *   GET  /api/canvases/:id/agent/sessions/:sid/board.png
+ *   GET  /api/canvases/:id/agent/sessions/:sid/renders
+ *   GET  /api/canvases/:id/agent/sessions/:sid/renders/:n.png
  */
 import { Elysia } from "elysia";
 
@@ -150,6 +153,64 @@ export function createSessionRoutes(store: LayoutSessionStore) {
         return new Response(rendered.svg, {
           headers: {
             "content-type": "image/svg+xml; charset=utf-8",
+            "cache-control": "no-cache",
+          },
+        });
+      } catch (error) {
+        const { status, body: payload } = errorBody(error);
+        set.status = status;
+        return payload;
+      }
+    })
+    .get(`${base}/:sid/board.png`, ({ params, set }) => {
+      try {
+        const session = resolve(params.id, params.sid);
+        if (!session.currentBoard) {
+          throw new HttpError(404, `Session ${params.sid} has no current board render yet.`);
+        }
+        return new Response(Uint8Array.from(session.currentBoard.png), {
+          headers: {
+            "content-type": "image/png",
+            "cache-control": "no-cache",
+          },
+        });
+      } catch (error) {
+        const { status, body: payload } = errorBody(error);
+        set.status = status;
+        return payload;
+      }
+    })
+    .get(`${base}/:sid/renders`, ({ params, set }) => {
+      try {
+        const session = resolve(params.id, params.sid);
+        return {
+          renders: [...(session.changeRenders ?? [])]
+            .reverse()
+            .map(({ n, summary, at }) => ({ n, summary, at })),
+        };
+      } catch (error) {
+        const { status, body: payload } = errorBody(error);
+        set.status = status;
+        return payload;
+      }
+    })
+    .get(`${base}/:sid/renders/:n.png`, ({ params, set }) => {
+      try {
+        const session = resolve(params.id, params.sid);
+        // Elysia includes the dotted suffix in both this parameter's key and
+        // value, so preserve the public `:n.png` path and peel it before lookup.
+        const renderPath = params["n.png"];
+        const renderNumber = /^(\d+)\.png$/.exec(renderPath)?.[1];
+        const n = renderNumber === undefined ? Number.NaN : Number(renderNumber);
+        const rendered = Number.isSafeInteger(n)
+          ? (session.changeRenders ?? []).find((entry) => entry.n === n)
+          : undefined;
+        if (!rendered) {
+          throw new HttpError(404, `Unknown or evicted change render: ${renderPath}`);
+        }
+        return new Response(Uint8Array.from(rendered.png), {
+          headers: {
+            "content-type": "image/png",
             "cache-control": "no-cache",
           },
         });

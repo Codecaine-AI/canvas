@@ -1,0 +1,639 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-60-running",
+  "title": "Running the layout agent",
+  "root": "b-run-root",
+  "blocks": {
+    "b-run-root": {
+      "id": "b-run-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-run-title-1",
+        "b-run-lede-2",
+        "b-run-scope-3",
+        "b-run-harness-heading-4",
+        "b-run-harness-body-5",
+        "b-run-harness-code-6",
+        "b-run-harness-ports-7",
+        "b-run-viewer-heading-8",
+        "b-run-viewer-body-9",
+        "b-run-viewer-traces-10",
+        "b-run-viewer-config-11",
+        "b-run-viewer-offline-12",
+        "b-run-viewer-pin-13",
+        "b-run-cli-heading-14",
+        "b-run-cli-body-15",
+        "b-run-cli-code-16",
+        "b-run-cli-flags-17",
+        "b-run-cli-output-18",
+        "b-run-cli-renders-19",
+        "b-run-state-heading-20",
+        "b-run-state-models-21",
+        "b-run-state-kernel-22",
+        "b-run-state-ignore-23",
+        "b-run-catalog-heading-24",
+        "b-run-catalog-body-25",
+        "b-run-catalog-tree-26",
+        "b-run-catalog-derived-27",
+        "b-run-catalog-edit-28",
+        "b-run-catalog-hash-29"
+      ],
+      "props": {
+        "covers": "Operating the layout agent locally: starting the harness and the operator viewer, the two viewer views and their offline state, the headless session CLI and where its renders land, local model access, machine-local kernel state, and the on-disk catalog bundle with its prompt edit workflow.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "harness",
+          "operator viewer",
+          "headless CLI",
+          "catalog bundle",
+          "promptHash",
+          "kernel state"
+        ]
+      }
+    },
+    "b-run-title-1": {
+      "id": "b-run-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Running the layout agent"
+        }
+      ]
+    },
+    "b-run-lede-2": {
+      "id": "b-run-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The layout agent runs as a local harness process with an operator viewer beside it. Everything it needs is machine-local: a models process for inference, a gitignored state directory for traces and sessions, and a catalog bundle on disk that holds the prompt the agent runs with. This page is the operating manual for those pieces."
+        }
+      ]
+    },
+    "b-run-scope-3": {
+      "id": "b-run-scope-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "For what the session does once it is running — scope resolution, perception, operation results, finalize gates — see "
+        },
+        {
+          "insert": "Agent kernel architecture",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/40-kernel",
+              "label": "Agent kernel architecture"
+            }
+          }
+        },
+        {
+          "insert": ". For the editing gestures the model calls, see "
+        },
+        {
+          "insert": "the tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/00-overview",
+              "label": "The tool surface"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-run-harness-heading-4": {
+      "id": "b-run-harness-heading-4",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Starting the harness"
+        }
+      ]
+    },
+    "b-run-harness-body-5": {
+      "id": "b-run-harness-body-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The harness is the service process: the kernel instance plus the HTTP surface the studio and the viewer both talk to. The make harness target in the repo-root "
+        },
+        {
+          "insert": "Makefile",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "Makefile"
+            }
+          }
+        },
+        {
+          "insert": " installs and then runs it; the script underneath is dev:harness in the root "
+        },
+        {
+          "insert": "package.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "package.json"
+            }
+          }
+        },
+        {
+          "insert": ", which forwards to the package's own harness script. There is no watcher and no browser: the target starts one server and stays in the foreground."
+        }
+      ]
+    },
+    "b-run-harness-code-6": {
+      "id": "b-run-harness-code-6",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "make harness      # harness alone, foreground\nmake traces       # harness (if needed) + operator viewer\n\n# the scripts underneath\nbun run dev:harness        # → bun run --cwd packages/canvas-agent harness\nbun run dev:agent-viewer   # → bun run --cwd packages/canvas-agent viewer"
+        }
+      ]
+    },
+    "b-run-harness-ports-7": {
+      "id": "b-run-harness-ports-7",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The service answers on 127.0.0.1:4820"
+      },
+      "text": [
+        {
+          "insert": "The server binds loopback only and defaults to port 4820, overridable through CANVAS_AGENT_PORT and then PORT. "
+        },
+        {
+          "insert": "service/server.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/server.ts"
+            }
+          }
+        },
+        {
+          "insert": " exposes a /health endpoint returning the kernel id, which is what every other target probes to decide whether a harness is already up. The session, trace-read, transcript, and catalog routers all mount under the same server."
+        }
+      ]
+    },
+    "b-run-viewer-heading-8": {
+      "id": "b-run-viewer-heading-8",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The operator viewer"
+        }
+      ]
+    },
+    "b-run-viewer-body-9": {
+      "id": "b-run-viewer-body-9",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "make traces is the one command that brings up both halves. It curls /health on 4820: if a harness answers it says so and leaves that process alone, otherwise it starts one in the background under a trap that kills it on exit. Either way it then runs the viewer in the foreground on 4830. On macOS a background loop polls the viewer for up to fifteen seconds and opens it in a browser as soon as Vite answers. The viewer can also be run alone: dev:agent-viewer from the repo root, or the viewer script in "
+        },
+        {
+          "insert": "packages/canvas-agent/package.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/package.json"
+            }
+          }
+        },
+        {
+          "insert": " from inside the package."
+        }
+      ]
+    },
+    "b-run-viewer-traces-10": {
+      "id": "b-run-viewer-traces-10",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "/traces — the session list and the live trace workspace ("
+        },
+        {
+          "insert": "viewer/pages/TracesPage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/pages/TracesPage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "). One session's detail is a drill-in inside this view, not a separate address: pick a row and the page splits into list and trace panes with the canvas transcript extensions attached."
+        }
+      ]
+    },
+    "b-run-viewer-config-11": {
+      "id": "b-run-viewer-config-11",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "/config — the agent manifest, the prompt lab, the saved revision history, and the prompt-style sidebar ("
+        },
+        {
+          "insert": "viewer/pages/AgentConfigPage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/pages/AgentConfigPage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "). This is where prompt edits are made."
+        }
+      ]
+    },
+    "b-run-viewer-offline-12": {
+      "id": "b-run-viewer-offline-12",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "A viewer without a harness is a calm page, not a broken one"
+      },
+      "text": [
+        {
+          "insert": "Those two paths are the whole router: anything else, including the site root, resolves to traces. When the harness is down the Vite proxy answers 502 with an agent-service-is-not-running body, and the pages render a plain unavailable state — the panel says the service is not running and that data will appear once it comes up on port 4820. A service that answers but returns an unexpected shape gets its own distinct message, so a schema drift never reads as an outage. The wiring lives in "
+        },
+        {
+          "insert": "use-agent-json.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/hooks/use-agent-json.tsx"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-run-viewer-pin-13": {
+      "id": "b-run-viewer-pin-13",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The viewer's port and target are pinned"
+      },
+      "text": [
+        {
+          "insert": "The dev server takes 4830 with strictPort, so a stale process on that port fails the start rather than silently sliding to another number. Its proxy target is a constant in "
+        },
+        {
+          "insert": "vite.config.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/vite.config.ts"
+            }
+          }
+        },
+        {
+          "insert": " with no environment override, so a harness moved off 4820 by CANVAS_AGENT_PORT is a harness the viewer cannot reach. Move both together or neither."
+        }
+      ]
+    },
+    "b-run-cli-heading-14": {
+      "id": "b-run-cli-heading-14",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The headless CLI"
+        }
+      ]
+    },
+    "b-run-cli-body-15": {
+      "id": "b-run-cli-body-15",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A full layout session can be run against a real saved board without the studio. "
+        },
+        {
+          "insert": "src/cli.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/cli.ts"
+            }
+          }
+        },
+        {
+          "insert": " drives the same session store the HTTP surface drives, so a CLI run and a studio run exercise identical code. It needs no harness of its own."
+        }
+      ]
+    },
+    "b-run-cli-code-16": {
+      "id": "b-run-cli-code-16",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "cd packages/canvas-agent\n\n# what can I select?\nbun run cli --list-scopes agent-flows-2\n\n# run a session\nbun run cli --canvas agent-flows-2 \\\n  --scope box-1,box-2,box-3 \\\n  --instruction \"line these up and even out the spacing\"\n\n# usage as the CLI prints it\nbun run cli --canvas <id> --scope <id,id,…> --instruction \"…\" [--out-dir <dir>]\nbun run cli --list-scopes <id>"
+        }
+      ]
+    },
+    "b-run-cli-flags-17": {
+      "id": "b-run-cli-flags-17",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Five flags exist and each consumes the next argument. --list-scopes takes a canvas id, prints the selectable objects, and exits without running a session. A real run requires all three of --canvas, --scope (a comma-separated id list), and --instruction; --out-dir is the one optional knob. Any other flag is refused by name with a non-zero exit, so a mistyped option fails immediately instead of running with a silently dropped argument."
+        }
+      ]
+    },
+    "b-run-cli-output-18": {
+      "id": "b-run-cli-output-18",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Output is a stream of banner lines on stdout: the resolved scope with its object count, frame, and boundary-edge count; each proposal with its delta and lint report; a line per render as it is written; then the terminal status. A run that ends proposal-ready prints the model's summary and the final patch operations as formatted JSON, which is exactly what the studio would have been handed. The process exits zero for proposal-ready or abandoned and non-zero for anything else, so it composes into a script."
+        }
+      ]
+    },
+    "b-run-cli-renders-19": {
+      "id": "b-run-cli-renders-19",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Renders land relative to the working directory"
+      },
+      "text": [
+        {
+          "insert": "Every image the session pushes is written to disk and named for its session and render index. The destination is --out-dir when given, then the CLI_RENDER_DIR environment variable, and otherwise a cli-renders directory under a kernel state directory resolved from the current working directory. Because the resolution is cwd-relative, running from inside the package writes beside the package rather than at the repo root — pass --out-dir when the location matters. The pushing tool is the perception call, which is the only tool that renders."
+        }
+      ]
+    },
+    "b-run-state-heading-20": {
+      "id": "b-run-state-heading-20",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Model access and machine-local state"
+        }
+      ]
+    },
+    "b-run-state-models-21": {
+      "id": "b-run-state-models-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Inference goes through a local models process rather than a hosted provider: there are no provider keys and no login flow. The provider is declared as codex-lb in the repo-root .pi-agent/models.json, which names the local base URL, the request API, and the available models with their context and thinking capabilities. "
+        },
+        {
+          "insert": "service/kernel.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/kernel.ts"
+            }
+          }
+        },
+        {
+          "insert": " hands that directory to the kernel and registers a layout alias pointing at one provider-qualified model, together with its token prices. The catalog bundle names only the alias, so switching models is a one-line change in the kernel module and not an edit to the agent definition."
+        }
+      ]
+    },
+    "b-run-state-kernel-22": {
+      "id": "b-run-state-kernel-22",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Kernel runtime state lives in a repo-root .agent-kernel directory: the trace database and its write-ahead files, the kernel manifest, per-container agent state, the model process's session transcripts, and one directory per layout session. That directory is the answer to \"where did that run go\" — the viewer reads all of it through the harness rather than from disk."
+        }
+      ]
+    },
+    "b-run-state-ignore-23": {
+      "id": "b-run-state-ignore-23",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Neither state directory is tracked"
+      },
+      "text": [
+        {
+          "insert": ".agent-kernel/ and .pi-agent/ are both listed in "
+        },
+        {
+          "insert": ".gitignore",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": ".gitignore"
+            }
+          }
+        },
+        {
+          "insert": " as machine-local harness state, and the patterns are unanchored so a nested copy created by a CLI run is ignored too. Nothing in either directory is shared; a fresh checkout starts with no traces and configures its own model access."
+        }
+      ]
+    },
+    "b-run-catalog-heading-24": {
+      "id": "b-run-catalog-heading-24",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The catalog bundle on disk"
+        }
+      ]
+    },
+    "b-run-catalog-body-25": {
+      "id": "b-run-catalog-body-25",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "What the kernel discovers, dry-runs, and hot-swaps is a directory, not a code export. The layout agent is one bundle under src/catalog/, laid out as the sections of a request: an index, a prompt, the context assembled into every request, the tool registration, and the state shape with its render and rules. Reading the bundle top to bottom is the fastest way to see what a turn is made of."
+        }
+      ]
+    },
+    "b-run-catalog-tree-26": {
+      "id": "b-run-catalog-tree-26",
+      "flavour": "file-tree",
+      "children": [],
+      "props": {
+        "entries": [
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/agent.json",
+            "note": "the index: agent name, model alias, thinking level, turn ceiling, tool-call cap, and the state window"
+          },
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/prompt.json",
+            "note": "the canonical prompt document — the file a prompt edit actually changes"
+          },
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/system.md",
+            "note": "the rendered snapshot of prompt.json, regenerated rather than written"
+          },
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/context/",
+            "note": "what is assembled into every request: the capabilities block by kind, the style guide, and the reference-image declarations"
+          },
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/tools/",
+            "note": "registration only — roster loops over the descriptors the service defines, side-effect-free so the kernel can dry-run it at boot"
+          },
+          {
+            "path": "packages/canvas-agent/src/catalog/layout-editor/state/",
+            "note": "the state shape, its policy, the per-turn render blocks, and the conversation and outcome rules"
+          }
+        ]
+      }
+    },
+    "b-run-catalog-derived-27": {
+      "id": "b-run-catalog-derived-27",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Never hand-edit system.md"
+      },
+      "text": [
+        {
+          "insert": "prompt.json is the canonical prompt document and "
+        },
+        {
+          "insert": "system.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/system.md"
+            }
+          }
+        },
+        {
+          "insert": " is a derived snapshot of it — its first line says so, and the next regeneration overwrites anything typed into it. Edit the prompt through the catalog API, or regenerate the snapshot from the canonical document with "
+        },
+        {
+          "insert": "scripts/render-prompts-to-json.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/scripts/render-prompts-to-json.ts"
+            }
+          }
+        },
+        {
+          "insert": ". A hand-edited snapshot is a change that survives until the next save and then vanishes without a trace."
+        }
+      ]
+    },
+    "b-run-catalog-edit-28": {
+      "id": "b-run-catalog-edit-28",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The supported edit path is the viewer's /config page, reachable with make traces. The prompt lab writes through the kernel catalog API mounted by "
+        },
+        {
+          "insert": "routes/catalog.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/routes/catalog.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which re-canonicalizes the document, regenerates the rendered snapshot, records a revision, and returns the new promptHash. Because the catalog is read from disk, an edit is live for the next spawn without restarting the harness."
+        }
+      ]
+    },
+    "b-run-catalog-hash-29": {
+      "id": "b-run-catalog-hash-29",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "The promptHash is what makes a trace legible"
+      },
+      "text": [
+        {
+          "insert": "Every kernel session records the promptHash it ran with, and /config shows the saved revision behind that hash. That pairing is the reason a trace from last week can still be explained: the behavior in the transcript is attributable to an exact prompt revision rather than to whatever the file says today. When comparing two runs, compare their hashes first."
+        }
+      ]
+    }
+  }
+}

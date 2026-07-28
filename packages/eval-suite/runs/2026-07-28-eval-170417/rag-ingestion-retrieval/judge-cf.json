@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-170417",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board fits the 6 anchor because its structured stage grid and restrained semantic tints show deliberate composition, but the large lower dead band, uneven right-side extension, and visible routing ambiguities prevent it from reading as fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "Fail: most content occupies the upper and middle frame while a broad, nearly empty band remains across the bottom, with the tall rebuild panel creating an unbalanced rightward tail."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Pass: pale blue, cyan, green, purple, and orange consistently distinguish stage families, although the gray dashed feedback route lacks an explicit failure-red semantic."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Fail: the publication area contains a bracket-like vertical rail with tick marks, and several shared branch/merge routes around publication and feedback read ambiguously rather than as polished final wiring."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Fail: the two principal stage rows register well, but inconsistent panel heights, sparse interiors, the low isolated rebuild column, and awkward text wrapping such as “Term s” disrupt the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6905,
+    "output_tokens": 524
+  },
+  "flags": []
+}

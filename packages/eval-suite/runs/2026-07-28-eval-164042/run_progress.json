@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-07-28-eval-164042",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 3,
+  "tool_call_cap_source": "agent default",
+  "status": "completed",
+  "started_at": "2026-07-28T21:40:43.368Z",
+  "finished_at": "2026-07-28T21:48:47.238Z",
+  "scenarios": {
+    "rag-ingestion-retrieval": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 73360,
+      "finished_at": "2026-07-28T21:48:47.230Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

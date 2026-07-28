@@ -5,6 +5,8 @@ import {
   type CanvasAgentPatchOperation,
   type InteractiveCanvasState,
 } from "../actions";
+import { mergeObjectPatch } from "../actions/objects";
+import { CANVAS_GRID_SIZE, GEOMETRY_NORMALIZATION_GRID } from "../geometry";
 import type {
   InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
@@ -612,5 +614,80 @@ describe("canvas.applyAgentPatch", () => {
       explicitGeometry,
     );
     expect(next.history.past).toHaveLength(1);
+  });
+});
+
+/**
+ * D1 (gesture-surface plan) — the write path normalizes on
+ * GEOMETRY_NORMALIZATION_GRID (4), not on the UI's interaction grid (16), so
+ * the agent's 20 grid survives a patch and a commit replay byte-for-byte. The
+ * old 16-snap silently pulled 100 -> 96 and 300 -> 304 on every update.
+ */
+describe("mergeObjectPatch geometry normalization (D1)", () => {
+  const AGENT_GRID = 20;
+
+  it("normalizes on 4, and 4 divides both the interaction grid and the agent grid", () => {
+    expect(GEOMETRY_NORMALIZATION_GRID).toBe(4);
+    expect(CANVAS_GRID_SIZE % GEOMETRY_NORMALIZATION_GRID).toBe(0);
+    expect(AGENT_GRID % GEOMETRY_NORMALIZATION_GRID).toBe(0);
+  });
+
+  it("passes 20-grid geometry through unchanged", () => {
+    const object = makeObject({ id: "a" });
+    // Every one of these is a legal 20-grid value that is NOT a 16-grid value.
+    const geometry = { x: 240, y: 480, width: 300, height: 100 };
+    const merged = mergeObjectPatch(object, { geometry });
+    expect(merged.geometry).toEqual(geometry);
+  });
+
+  it("passes 16-grid geometry through unchanged too", () => {
+    const object = makeObject({ id: "a" });
+    const geometry = { x: 192, y: 48, width: 176, height: 96 };
+    const merged = mergeObjectPatch(object, { geometry });
+    expect(merged.geometry).toEqual(geometry);
+  });
+
+  it("rounds genuinely off-grid geometry to the nearest 4", () => {
+    const object = makeObject({ id: "a" });
+    const merged = mergeObjectPatch(object, {
+      geometry: { x: 241, y: 477, width: 187, height: 63 },
+    });
+    expect(merged.geometry).toEqual({ x: 240, y: 476, width: 188, height: 64 });
+    for (const value of Object.values(merged.geometry)) {
+      expect(value % GEOMETRY_NORMALIZATION_GRID).toBe(0);
+    }
+  });
+
+  it("keeps a whole 20-grid board intact across a full applyAgentPatch replay", () => {
+    const state = createInteractiveCanvasState({
+      schemaVersion: 1,
+      id: "twenty-grid-replay",
+      mode: "diagram",
+      objects: [
+        makeObject({
+          id: "frame",
+          type: "section",
+          geometry: { x: 0, y: 0, width: 900, height: 700 },
+        }),
+        makeObject({ id: "a", geometry: { x: 60, y: 100, width: 280, height: 100 } }),
+        makeObject({ id: "b", geometry: { x: 60, y: 340, width: 280, height: 100 } }),
+      ],
+      connections: [],
+    });
+
+    const targets = {
+      a: { x: 500, y: 100, width: 300, height: 60 },
+      b: { x: 500, y: 340, width: 300, height: 60 },
+    };
+    const next = apply(state, [
+      { type: "updateObject", objectId: "a", patch: { geometry: targets.a } },
+      { type: "updateObject", objectId: "b", patch: { geometry: targets.b } },
+    ]);
+
+    for (const [id, geometry] of Object.entries(targets)) {
+      expect(next.document.objects.find((object) => object.id === id)?.geometry).toEqual(
+        geometry,
+      );
+    }
   });
 });

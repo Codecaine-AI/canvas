@@ -10,7 +10,7 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { connectorBendSegments } from "./bend-editing";
-import { routeConnection } from "./routing";
+import { labelPointFor, routeConnection } from "./routing";
 import { CONNECTOR_DASH_PATTERN_PX } from "./def";
 import { resolveConnectorStroke } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
@@ -82,6 +82,9 @@ export function Connector({
   // Arrowheads inherit via the markers' fill="context-stroke" (see <defs>).
   const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
   const label = connection.label?.trim() ? connection.label : null;
+  // The pinned chip center (S1.1) — `routed.labelPoint` unless the connection
+  // carries a `labelPosition`.
+  const labelPoint = labelPointFor(routed, connection);
   const labelWidth = label ? connectionLabelWidth(label) : 0;
 
   return (
@@ -116,7 +119,7 @@ export function Connector({
         <g
           data-canvas-connection-label={connection.id}
           data-canvas-connection-id={connection.id}
-          transform={`translate(${routed.labelPoint.x} ${routed.labelPoint.y})`}
+          transform={`translate(${labelPoint.x} ${labelPoint.y})`}
           opacity={dimmed ? 0.35 : 1}
           style={{ pointerEvents: "all" }}
           onDoubleClick={(event) => {
@@ -182,7 +185,9 @@ export function ConnectorSelectionTrim({
   const bendSegments =
     safeZoom >= BEND_HANDLES_MIN_ZOOM
       ? connectorBendSegments(routed.points ?? [], {
-          labelPoint: label ? routed.labelPoint : null,
+          // Handles dodge the chip where it actually sits (S1.1 pin), not the
+          // route midpoint.
+          labelPoint: label ? labelPointFor(routed, connection) : null,
           labelClearancePx: label ? labelWidth / 2 + bendHandleLength / 2 : undefined,
         })
       : [];

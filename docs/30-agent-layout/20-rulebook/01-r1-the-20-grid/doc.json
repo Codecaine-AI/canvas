@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-20-rulebook-01-r1-the-20-grid",
+  "title": "R1 — The 20 grid",
+  "root": "b-r1-root",
+  "blocks": {
+    "b-r1-root": {
+      "id": "b-r1-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-r1-title-1",
+        "b-r1-card-2",
+        "b-r1-enforce-3",
+        "b-r1-evidence-4"
+      ],
+      "props": {
+        "covers": "The 20 grid is geometry quantization: every number a gesture writes to board geometry lands on a multiple of 20, while spacing is chosen from content and repeated peer geometry rather than from a grid-derived target.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "20 grid",
+          "snapping",
+          "route lattice"
+        ]
+      }
+    },
+    "b-r1-title-1": {
+      "id": "b-r1-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R1 — The 20 grid"
+        }
+      ]
+    },
+    "b-r1-card-2": {
+      "id": "b-r1-card-2",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Geometry lands on the 20 grid"
+      },
+      "text": [
+        {
+          "insert": "Object geometry uses the agent's 20 grid as a snap unit. It does not prescribe a gap, corridor width, or pitch: choose those for the content and flow, then express the resulting rectangles on-grid."
+        }
+      ]
+    },
+    "b-r1-enforce-3": {
+      "id": "b-r1-enforce-3",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Mechanism: the "
+        },
+        {
+          "insert": "aesthetic",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "symbol": "style"
+            }
+          }
+        },
+        {
+          "insert": " tells the agent to work in grid units and to match peers exactly: match_size copies a peer's dimensions, and every other coordinate comes from exact digest geometry. The gesture tools run every geometry-bearing value through "
+        },
+        {
+          "insert": "AGENT_GRID = 20",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/grid.ts",
+              "symbol": "AGENT_GRID"
+            }
+          }
+        },
+        {
+          "insert": " before it is lowered onto a document patch, and they snap rather than refuse: an off-grid value is corrected to the nearest multiple and the result reports the geometry that landed, so a correction is something the agent reads back rather than something it is told about. Not every number is a world distance — an endpoint fraction and a label's position along a routed path stay off the grid — and "
+        },
+        {
+          "insert": "the grid and creation defaults",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/20-grid-and-defaults",
+              "label": "The grid and creation defaults"
+            }
+          }
+        },
+        {
+          "insert": " enumerates which fields quantize and which are exempt. R1 is that quantization and nothing more: it decides where a number lands, never how much air the layout gets."
+        }
+      ]
+    },
+    "b-r1-evidence-4": {
+      "id": "b-r1-evidence-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Operational check: a geometry patch supplies the complete finite "
+        },
+        {
+          "insert": "{x, y, width, height}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rectangle. Operation results and looks report the post-snap geometry in their digest rows, which is the value to read when matching peers."
+        }
+      ]
+    }
+  }
+}

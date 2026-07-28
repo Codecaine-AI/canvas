@@ -1,11 +1,15 @@
 /**
- * Text rendering of a real InteractiveCanvasDocument for the model-visible
- * BOARD context block: an indented object tree (indentation = containment)
- * followed by one global EDGES block. Lossless over the op-writable surface —
- * every writable field is either rendered when set or covered by the
- * header-declared elided defaults (test/digest-completeness.test.ts is the
- * gate). User annotations are NOT part of the digest; they travel in the
- * separate <user_requests> block.
+ * Text renderings of a real InteractiveCanvasDocument for model-visible board
+ * state: an indented object tree (indentation = containment) and global edges.
+ * Lossless over the op-writable surface — every writable field is either
+ * rendered when set or covered by the header-declared elided defaults
+ * (test/digest-completeness.test.ts is the gate). User annotations are NOT
+ * part of the digest; they travel in the separate <user_requests> block.
+ *
+ * The type column speaks the FOLDED vocabulary (service/session/
+ * placeable-types.ts): the same names `place_shape` and `change_shape` accept,
+ * so a row can be edited by reading it. The document's `{type:"icon", icon}`
+ * split never appears — the glyph name is the type.
  */
 import type {
   InteractiveCanvasConnection,
@@ -14,17 +18,43 @@ import type {
 } from "@codecaine-ai/canvas/schema";
 import { OBJECT_TYPE_DEFAULTS } from "../../../canvas/src/state/schema/object-defaults";
 
+import { fromDocumentFields } from "../service/session/tools/placeable-types";
+import { formatNumberedRoute } from "./edge-route";
 import { kindOf, pageFrameOf } from "./helpers";
 
 /** Elided defaults, declared once in the digest header so elision is lossless. */
 export const DIGEST_DEFAULTS_LEGEND =
   "elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type";
 
+/**
+ * Declared once in the header so the numbered-segment notation on every edge
+ * line is self-teaching: `sN` is the segment index `shift_segment` takes,
+ * `h`/`v` its orientation, and the printed coordinate is the one a shift
+ * rewrites (a horizontal segment is pinned by its y, a vertical one by its x).
+ */
+export const DIGEST_ROUTE_LEGEND =
+  "edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index";
+
 const DIGEST_GRAMMAR =
   '# indent = containment · id type "text" [color] x,y w×h [k=v…]';
 
+const OBJECTS_DIGEST_LEGEND =
+  `${DIGEST_GRAMMAR} · elided defaults: color gray (sticky yellow) · shape per type`;
+
+const EDGES_DIGEST_LEGEND =
+  '# id from→to "label" + extras · elided defaults: solid gray arrow=forward · route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index';
+
 function fmt(value: number): string {
   return String(Math.round(value));
+}
+
+/**
+ * `fmt` rounds to whole world units, which is right for px and fatal for a
+ * 0..1 fraction (0.35 would print as 0). Fractions print at two decimals with
+ * trailing zeros trimmed, so 0.5 reads as "0.5" and 1 as "1".
+ */
+function fmtFraction(value: number): string {
+  return String(Math.round(value * 100) / 100);
 }
 
 function rect(object: InteractiveCanvasObject): string {
@@ -62,19 +92,58 @@ function objectExtras(object: InteractiveCanvasObject): string[] {
     extras.push(`layout=${parts.join(",")}`);
   }
   if (object.direction !== undefined) extras.push(`dir=${object.direction}`);
-  if (object.icon !== undefined) extras.push(`icon=${object.icon}`);
   if (object.author !== undefined) extras.push(`author=${JSON.stringify(oneLine(object.author))}`);
   return extras;
 }
 
 function objectLine(object: InteractiveCanvasObject, depth: number): string {
-  const parts = [object.id, object.type, JSON.stringify(oneLine(object.text))];
+  // The FOLDED name, never the raw `type`: a glyph object is `cloud`, not
+  // `icon` with an `icon=cloud` extra beside it. The glyph is not a second
+  // field the model has to read — the name IS the drawing.
+  const parts = [object.id, fromDocumentFields(object), JSON.stringify(oneLine(object.text))];
   if (object.color !== undefined && object.color !== defaultColorFor(object)) {
     parts.push(object.color);
   }
   parts.push(rect(object));
   parts.push(...objectExtras(object));
-  return `${"  ".repeat(depth + 1)}${parts.join(" ")}`;
+  return `${"  ".repeat(depth)}${parts.join(" ")}`;
+}
+
+function objectTreeLines(document: InteractiveCanvasDocument): string[] {
+  const lines: string[] = [];
+  const knownIds = new Set(document.objects.map((object) => object.id));
+  const childrenByParent = new Map<string | null, InteractiveCanvasObject[]>();
+  for (const object of document.objects) {
+    const parent = object.parentId != null && knownIds.has(object.parentId)
+      ? object.parentId
+      : null;
+    const bucket = childrenByParent.get(parent);
+    if (bucket) bucket.push(object);
+    else childrenByParent.set(parent, [object]);
+  }
+
+  const visited = new Set<string>();
+  const visit = (object: InteractiveCanvasObject, depth: number): void => {
+    if (visited.has(object.id)) return;
+    visited.add(object.id);
+    lines.push(objectLine(object, depth));
+    const children = childrenByParent.get(object.id) ?? [];
+    if (children.length === 0 && kindOf(object) === "section") {
+      lines.push(`${"  ".repeat(depth + 1)}(empty)`);
+    }
+    children.forEach((child) => visit(child, depth + 1));
+  };
+  const roots = childrenByParent.get(null) ?? [];
+  if (document.objects.length === 0) {
+    lines.push("(no objects)");
+  } else {
+    roots.forEach((root) => visit(root, 0));
+    // Containment cycles cannot survive membership reconciliation, but the
+    // digest must never silently drop an object if one ever appears.
+    document.objects.forEach((object) => visit(object, 0));
+  }
+
+  return lines;
 }
 
 function endpointAnchor(connection: InteractiveCanvasConnection, side: "from" | "to"): string {
@@ -110,10 +179,29 @@ function edgeExtras(connection: InteractiveCanvasConnection): string[] {
   if (connection.waypoints !== undefined && connection.waypoints.length > 0) {
     extras.push(`wp=${connection.waypoints.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join("→")}`);
   }
+  // The label-chip pin, elided at its default (absent = routed midpoint):
+  // `lp=<along>` or `lp=<along>@<offset>` when the chip is pushed off the wire.
+  if (connection.labelPosition !== undefined) {
+    const { along, offset } = connection.labelPosition;
+    extras.push(
+      offset === undefined || offset === 0
+        ? `lp=${fmtFraction(along)}`
+        : `lp=${fmtFraction(along)}@${fmt(offset)}`,
+    );
+  }
   return extras;
 }
 
-function edgeLine(connection: InteractiveCanvasConnection): string {
+/**
+ * `id from→to "label" [extras…]` and then, after a `·`, the ROUTED truth as
+ * numbered segments (`edge-route.ts` — the same string the ROUTES block and
+ * the routing ops print, so a segment index never means two things). The
+ * stored `wp=` extra stays: it is what the document holds, while the route is
+ * what the router drew from it.
+ */
+function edgeLine(
+  connection: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
+): string {
   const label = connection.label !== undefined && connection.label !== ""
     ? JSON.stringify(oneLine(connection.label))
     : "—";
@@ -123,52 +211,38 @@ function edgeLine(connection: InteractiveCanvasConnection): string {
     label,
     ...edgeExtras(connection),
   ];
-  return `  ${parts.join(" ")}`;
+  const route = formatNumberedRoute(connection, document);
+  return `${parts.join(" ")}${route === "" ? "" : ` · ${route}`}`;
+}
+
+export function formatBoardObjectsDigest(document: InteractiveCanvasDocument): string {
+  const frameNote = pageFrameOf(document) ? "" : " · no base section";
+  return [`${OBJECTS_DIGEST_LEGEND}${frameNote}`, ...objectTreeLines(document)].join("\n");
+}
+
+export function formatBoardEdgesDigest(document: InteractiveCanvasDocument): string {
+  if (document.connections.length === 0) return "";
+  return [
+    EDGES_DIGEST_LEGEND,
+    ...document.connections.map((connection) => edgeLine(connection, document)),
+  ].join("\n");
 }
 
 export function formatBoardDigest(document: InteractiveCanvasDocument): string {
   const lines: string[] = [];
   const frame = pageFrameOf(document);
   const frameNote = frame ? "" : " · no base section";
-  lines.push(`BOARD${frameNote}  ${DIGEST_GRAMMAR} · ${DIGEST_DEFAULTS_LEGEND}`);
+  lines.push(
+    `BOARD${frameNote}  ${DIGEST_GRAMMAR} · ${DIGEST_DEFAULTS_LEGEND} · ${DIGEST_ROUTE_LEGEND}`,
+  );
 
-  const knownIds = new Set(document.objects.map((object) => object.id));
-  const childrenByParent = new Map<string | null, InteractiveCanvasObject[]>();
-  for (const object of document.objects) {
-    const parent = object.parentId != null && knownIds.has(object.parentId)
-      ? object.parentId
-      : null;
-    const bucket = childrenByParent.get(parent);
-    if (bucket) bucket.push(object);
-    else childrenByParent.set(parent, [object]);
-  }
-
-  const visited = new Set<string>();
-  const visit = (object: InteractiveCanvasObject, depth: number): void => {
-    if (visited.has(object.id)) return;
-    visited.add(object.id);
-    lines.push(objectLine(object, depth));
-    const children = childrenByParent.get(object.id) ?? [];
-    if (children.length === 0 && kindOf(object) === "section") {
-      lines.push(`${"  ".repeat(depth + 2)}(empty)`);
-    }
-    children.forEach((child) => visit(child, depth + 1));
-  };
-  const roots = childrenByParent.get(null) ?? [];
-  if (document.objects.length === 0) {
-    lines.push("  (no objects)");
-  } else {
-    roots.forEach((root) => visit(root, 0));
-    // Containment cycles cannot survive membership reconciliation, but the
-    // digest must never silently drop an object if one ever appears.
-    document.objects.forEach((object) => visit(object, 0));
-  }
+  lines.push(...objectTreeLines(document).map((line) => `  ${line}`));
 
   lines.push("EDGES");
   if (document.connections.length === 0) {
     lines.push("  (none)");
   } else {
-    document.connections.forEach((connection) => lines.push(edgeLine(connection)));
+    document.connections.forEach((connection) => lines.push(`  ${edgeLine(connection, document)}`));
   }
 
   return lines.join("\n");

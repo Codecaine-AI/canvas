@@ -30,7 +30,7 @@ interface JudgeArgs {
 function usage(): string {
   return [
     "Usage:",
-    "  bun run src/cli.ts suite --run-id <id> [--sut-thinking low] [--scenarios <names>] [--parallel 8] [--judge-concurrency 30] [--previous <run-id>]",
+    "  bun run src/cli.ts suite --run-id <id> [--sut-thinking low] [--tool-call-cap <1|2|3>] [--scenarios <names>] [--parallel 8] [--judge-concurrency 30] [--previous <run-id>]",
     "  bun run src/cli.ts judge --run-id <id> [--scenario <name>] [--judge-concurrency 30] [--judge-model <id>] [--judge-base-url <url>] [--judge-effort low]",
     "  bun run src/cli.ts scorecard --run-id <id> [--previous <run-id>]",
     "  bun run src/cli.ts clean --run-id <id> | --all",

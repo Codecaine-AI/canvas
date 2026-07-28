@@ -207,7 +207,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }

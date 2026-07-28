@@ -3,7 +3,7 @@
  *
  * Lower-level document edits apply the internal patch grammar directly to a
  * draft. No section is resized implicitly: a frame keeps exactly the geometry
- * it is given until fitSection asks for a fit, which lands as an ordinary
+ * it is given until fit_section asks for a fit, which lands as an ordinary
  * geometry update. Membership reconciliation and fit geometry both come from
  * the canvas package, so this draft applier and studio's accept-time reducer
  * produce identical documents.
@@ -22,10 +22,13 @@ import { nextId } from "../../../../canvas/src/state/actions/helpers";
 import { mergeObjectPatch } from "../../../../canvas/src/state/actions/objects";
 
 import type { AgentPatchOperation } from "../../protocol";
+import { snapRectOutward } from "./tools/grid";
 
 /** Describe an internal patch operation for human-readable summaries. */
 export function describePatchOperation(operation: CanvasAgentPatchOperation): string {
   switch (operation.type) {
+    case "updateTitle":
+      return `updateTitle ${JSON.stringify(operation.title)}`;
     case "updateDescription":
       return operation.description.trim() === ""
         ? "updateDescription (cleared)"
@@ -66,6 +69,17 @@ export function applyOperationToDraft(
   label: string = operation.type,
 ): { document: InteractiveCanvasDocument; summary: string; touched: string[] } {
   switch (operation.type) {
+    case "updateTitle": {
+      // Trim-and-keep, exactly as the live reducer does (agent-patch.ts,
+      // canvas.updateDocumentTitle): a board is never renamed to nothing, so
+      // an empty title leaves the document alone.
+      const title = operation.title.trim();
+      return {
+        document: title === "" ? document : { ...document, title },
+        summary: title === "" ? `${label}: skipped (empty title)` : label,
+        touched: [],
+      };
+    }
     case "updateDescription":
       return {
         document: {
@@ -141,8 +155,10 @@ export function applyOperationToDraft(
       if (requested.from.objectId === requested.to.objectId) {
         return {
           document,
+          // Same rewrite as op-context's requireDistinctEndpoints: point at
+          // buildable alternatives. There is no "badge" object on this canvas.
           summary: `${label} ${requested.id}: skipped — self-loops are not supported by the connector router; `
-            + "represent the loop another way (e.g. a labeled badge or sticky on the state) or leave it out and say so",
+            + "say the loop in the node's own text, or place a sticky beside it, or leave it out and say so",
           touched: [requested.from.objectId],
         };
       }
@@ -164,7 +180,7 @@ export function applyOperationToDraft(
       return {
         document: { ...document, connections: [...document.connections, { ...requested, id }] },
         summary: duplicateOf
-          ? `${label} ${id} — WARNING: possible duplicate of ${duplicateOf.id}; use updateConnection to restyle an existing edge`
+          ? `${label} ${id} — WARNING: possible duplicate of ${duplicateOf.id}; use style_edge to restyle an existing edge`
           : `${label} ${id}`,
         touched: [requested.from.objectId, requested.to.objectId],
       };
@@ -280,18 +296,29 @@ export function applyOperationToDraft(
 }
 
 /**
- * The padding a fitted frame keeps around its children — the same rung the
- * system prompt asks for when a section is placed by hand, so closing a frame
- * and building one produce the same spacing. The canvas package's own default
- * serves the interactive fit-to-content control and is left alone.
+ * The air a fitted frame keeps around its children on the agent path. Both
+ * numbers are multiples of the agent grid, so a frame fitted around 20-grid
+ * children lands on the 20 grid.
+ *
+ * The two numbers are not the same kind of air: `padding` is the body air on
+ * the left/right/bottom, and `titleClearance` is the extra band above the first
+ * child that the title chip occupies. The canvas package defaults are 24 + 30
+ * (the chip is 3px inset + 27px tall — objects/text-slots.ts TITLE_CHIP), and
+ * both numbers here are >= the UI's, so an agent fit is never tighter than the
+ * interactive one.
  */
-const SECTION_FIT_PADDING = 48;
+const SECTION_FIT_PADDING = { padding: 40, titleClearance: 40 } as const;
 
 /**
- * Resolve fitSection against the draft: membership is derived from geometry,
+ * Resolve fit_section against the draft: membership is derived from geometry,
  * so the frame's children are read off a reconciled copy, and the fit lands
  * as an ordinary geometry update on that one section — no ancestor is
  * touched. Returns a note when there is nothing to fit.
+ *
+ * The fitted rect is snapped OUTWARD to the agent grid: an identity when the
+ * children are on grid (the normal case), and a grow-only correction when they
+ * are not (a frame closed around boxes a human drew by hand), so the snap can
+ * never bite into the very children the fit was measured around.
  */
 export function resolveFitSection(
   document: InteractiveCanvasDocument,
@@ -301,13 +328,33 @@ export function resolveFitSection(
   if (!section || section.type !== "section") {
     return { note: `skipped — no section "${sectionId}" on the board` };
   }
-  const geometry = sectionFitGeometry(
+  const fitted = sectionFitGeometry(
     reconcileSectionMembership(document),
     sectionId,
     SECTION_FIT_PADDING,
   );
+  const geometry = fitted ? snapRectOutward(fitted) : null;
   if (!geometry) {
-    return { note: "skipped — the section is empty, and a frame with no children has nothing to fit around; size it with updateSection instead" };
+    return { note: "skipped — the section is empty, and a frame with no children has nothing to fit around; size it with resize instead" };
   }
   return { internal: { type: "updateObject", objectId: sectionId, patch: { geometry } } };
+}
+
+/**
+ * `match_size(..., like: id)` — the size of the object being matched.
+ *
+ * The whole gesture is "make peers match" without hand-copied numbers, so the
+ * resolution is exactly this lookup; the descriptor owns the rest of the
+ * contract: the returned size runs through the agent quantizer (snapSize)
+ * before it is lowered, and the readability check runs on the snapped result.
+ * Returns null when the id names nothing on the board — the descriptor's
+ * positionable gate prevents resizing to a guess.
+ */
+export function resolveSizeLike(
+  document: InteractiveCanvasDocument,
+  sourceId: string,
+): { width: number; height: number } | null {
+  const source = document.objects.find((object) => object.id === sourceId);
+  if (!source) return null;
+  return { width: source.geometry.width, height: source.geometry.height };
 }

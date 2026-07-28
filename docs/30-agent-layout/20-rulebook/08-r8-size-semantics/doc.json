@@ -62,7 +62,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally — it is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the label needs, then match peers to the largest member. What a box says decides its size; what kind of thing it is decides nothing."
+          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally — it is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the label needs, then use match_size to match peers to the largest member without hand-copying its dimensions. What a box says decides its size; what kind of thing it is decides nothing."
         }
       ]
     },
@@ -80,7 +80,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
@@ -93,13 +93,13 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/capabilities/vocabulary.generated.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/vocabulary.generated.ts",
               "symbol": "CAPABILITIES_OBJECTS_GENERATED"
             }
           }
         },
         {
-          "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. Patched rectangles quantize to the 16px grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
+          "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. The rectangles that result quantize to the agent's 20 grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
         }
       ]
     },

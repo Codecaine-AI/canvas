@@ -10,26 +10,28 @@ import {
 } from "@boundaryml/baml";
 import { b } from "../../baml_client/index.js";
 import type {
+  CraftVerdict as GeneratedCraftVerdict,
   PHVerdict as GeneratedPHVerdict,
+  ReadabilityVerdict as GeneratedReadabilityVerdict,
   RequirementCoverageVerdict as GeneratedRequirementCoverageVerdict,
   ScopeDisciplineEditVerdict as GeneratedScopeDisciplineEditVerdict,
-  SurfaceQualityVerdict as GeneratedSurfaceQualityVerdict,
   SystemFidelityVerdict as GeneratedSystemFidelityVerdict,
   SystemReconstruction as GeneratedSystemReconstruction,
 } from "../../baml_client/types.js";
 import type {
   AnyJudgeEnvelope,
   AxisCode,
+  CraftVerdict,
   JudgeEnvelope,
   JudgeIdentity,
   JudgeUsage,
   PHVerdict,
+  ReadabilityVerdict,
   ReasoningEffort,
   RequirementCoverageVerdict,
   ScenarioId,
   ScopeDisciplineEditVerdict,
   ScopeDisciplineVerdict,
-  SurfaceQualityVerdict,
   SystemFidelityVerdict,
   SystemReconstruction,
 } from "../contract.ts";
@@ -179,32 +181,39 @@ function validateScore(score: number | null | undefined, field = "score"): strin
   return issues;
 }
 
-function validateSq(verdict: GeneratedSurfaceQualityVerdict): string[] {
-  const requiredNames = [
-    "frame_use",
-    "corridors_and_air",
-    "grouping",
-    "color",
-    "machinery_leakage",
-    "alignment_and_rhythm",
-    "edge_legibility",
-  ];
-  const issues = [
-    ...validateScore(verdict.score),
-    ...validateScore(verdict.calibration.gc, "calibration.gc"),
-    ...validateScore(verdict.calibration.intent, "calibration.intent"),
-  ];
+function validateVisualVerdict(
+  verdict: GeneratedReadabilityVerdict | GeneratedCraftVerdict,
+  requiredNames: string[],
+): string[] {
+  const issues = validateScore(verdict.score);
   const names = verdict.sub_checks.map((item) => item.name);
   if (JSON.stringify(names) !== JSON.stringify(requiredNames)) {
-    issues.push("sub_checks must contain the seven required names once, in rubric order");
+    issues.push("sub_checks must contain the four required names once, in rubric order");
   }
   for (const item of verdict.sub_checks) {
     issues.push(...validateScore(item.score, `sub_checks.${item.name}.score`));
     if (!item.note.trim()) issues.push(`sub_checks.${item.name}.note is empty`);
   }
-  if (!verdict.delta_sentence.trim()) issues.push("delta_sentence is empty");
-  if (!verdict.rank_order_sanity_note.trim()) issues.push("rank_order_sanity_note is empty");
+  if (!verdict.score_rationale.trim()) issues.push("score_rationale is empty");
   return issues;
+}
+
+function validateRd(verdict: GeneratedReadabilityVerdict): string[] {
+  return validateVisualVerdict(verdict, [
+    "corridors_and_air",
+    "grouping",
+    "edge_legibility",
+    "density_and_decomposition",
+  ]);
+}
+
+function validateCf(verdict: GeneratedCraftVerdict): string[] {
+  return validateVisualVerdict(verdict, [
+    "frame_use",
+    "color",
+    "machinery_leakage",
+    "alignment_and_rhythm",
+  ]);
 }
 
 function validateSystemReconstruction(
@@ -481,11 +490,6 @@ function normalizeScopeDisciplineEdit(
   };
 }
 
-function calibrationDrift(verdict: SurfaceQualityVerdict): boolean {
-  return Math.abs(verdict.calibration.gc - 7.5) > 0.5
-    || Math.abs(verdict.calibration.intent - 7.0) > 0.5;
-}
-
 export async function loadBamlImages(images: JudgeImageInput[]): Promise<BamlImage[]> {
   return Promise.all(images.map(async (image) => {
     const bytes = await readFile(image.path);
@@ -665,24 +669,24 @@ export class JudgeRunner {
     input: PreparedJudgeInput,
     rubric: string,
     sharedRules: string,
-  ): Promise<JudgeEnvelope<"rd", SurfaceQualityVerdict>> {
+  ): Promise<JudgeEnvelope<"rd", ReadabilityVerdict>> {
     if (input.skip_reason) {
       const envelope = skippedEnvelope(
         "rd",
         runId,
         scenario,
         this.client,
-        "JudgeSurfaceQuality",
+        "JudgeReadability",
         input.skip_reason,
-      ) as JudgeEnvelope<"rd", SurfaceQualityVerdict>;
+      ) as JudgeEnvelope<"rd", ReadabilityVerdict>;
       await writeEnvelope(scenarioDir, envelope);
       return envelope;
     }
     const images = await loadBamlImages(input.images);
-    const fire = () => this.#callWithValidation({
+    const result = await this.#callWithValidation({
       label: `${runId}-${scenario}-rd`,
       initial: (collector) =>
-        b.JudgeSurfaceQuality(
+        b.JudgeReadability(
           rubric,
           sharedRules,
           input.payload,
@@ -690,7 +694,7 @@ export class JudgeRunner {
           this.#callOptions(collector, "rd", scenario),
         ),
       afterError: (error, collector) =>
-        b.JudgeSurfaceQualityAfterError(
+        b.JudgeReadabilityAfterError(
           error,
           rubric,
           sharedRules,
@@ -698,31 +702,75 @@ export class JudgeRunner {
           images,
           this.#callOptions(collector, "rd", scenario),
         ),
-      validate: validateSq,
+      validate: validateRd,
     });
-    let result = await fire();
-    let totalAttempts = result.attempts;
-    let totalUsage = result.usage;
-    if (calibrationDrift(result.value)) {
-      try {
-        const calibrationRetry = await fire();
-        result = calibrationRetry;
-        totalAttempts += calibrationRetry.attempts;
-        totalUsage = sumUsage(totalUsage, calibrationRetry.usage);
-      } catch {
-        // The valid first verdict remains the only defensible record when re-calibration fails.
-      }
-    }
-    const verdict: SurfaceQualityVerdict = result.value;
-    const envelope: JudgeEnvelope<"rd", SurfaceQualityVerdict> = {
+    const verdict: ReadabilityVerdict = result.value;
+    const envelope: JudgeEnvelope<"rd", ReadabilityVerdict> = {
       axis: "rd",
       scenario,
       run_id: runId,
-      judge: judgeIdentity(this.client, "JudgeSurfaceQuality", totalAttempts),
+      judge: judgeIdentity(this.client, "JudgeReadability", result.attempts),
       score: verdict.score,
       verdict,
-      usage: totalUsage,
-      flags: calibrationDrift(verdict) ? ["CAL-DRIFT"] : [],
+      usage: result.usage,
+      flags: [],
+    };
+    await writeEnvelope(scenarioDir, envelope);
+    return envelope;
+  }
+
+  async #runCf(
+    runId: string,
+    scenario: ScenarioId,
+    scenarioDir: string,
+    input: PreparedJudgeInput,
+    rubric: string,
+    sharedRules: string,
+  ): Promise<JudgeEnvelope<"cf", CraftVerdict>> {
+    if (input.skip_reason) {
+      const envelope = skippedEnvelope(
+        "cf",
+        runId,
+        scenario,
+        this.client,
+        "JudgeCraft",
+        input.skip_reason,
+      ) as JudgeEnvelope<"cf", CraftVerdict>;
+      await writeEnvelope(scenarioDir, envelope);
+      return envelope;
+    }
+    const images = await loadBamlImages(input.images);
+    const result = await this.#callWithValidation({
+      label: `${runId}-${scenario}-cf`,
+      initial: (collector) =>
+        b.JudgeCraft(
+          rubric,
+          sharedRules,
+          input.payload,
+          images,
+          this.#callOptions(collector, "cf", scenario),
+        ),
+      afterError: (error, collector) =>
+        b.JudgeCraftAfterError(
+          error,
+          rubric,
+          sharedRules,
+          input.payload,
+          images,
+          this.#callOptions(collector, "cf", scenario),
+        ),
+      validate: validateCf,
+    });
+    const verdict: CraftVerdict = result.value;
+    const envelope: JudgeEnvelope<"cf", CraftVerdict> = {
+      axis: "cf",
+      scenario,
+      run_id: runId,
+      judge: judgeIdentity(this.client, "JudgeCraft", result.attempts),
+      score: verdict.score,
+      verdict,
+      usage: result.usage,
+      flags: [],
     };
     await writeEnvelope(scenarioDir, envelope);
     return envelope;
@@ -1097,13 +1145,28 @@ export class JudgeRunner {
           options.runId,
           scenario,
           inputs.scenario_dir,
-          "JudgeSurfaceQuality",
+          "JudgeReadability",
           () => this.#runRd(
             options.runId,
             scenario,
             inputs.scenario_dir,
             inputs.readability,
             inputs.rubrics.rd,
+            inputs.shared_rules,
+          ),
+        ),
+        this.#runAtAxisBoundary(
+          "cf",
+          options.runId,
+          scenario,
+          inputs.scenario_dir,
+          "JudgeCraft",
+          () => this.#runCf(
+            options.runId,
+            scenario,
+            inputs.scenario_dir,
+            inputs.craft,
+            inputs.rubrics.cf,
             inputs.shared_rules,
           ),
         ),

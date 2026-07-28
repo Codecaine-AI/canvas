@@ -1,0 +1,192 @@
+{
+  "axis": "ph",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-170417",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 3,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "There were 4 failed tool calls. One malformed reroute was corrected on the next reroute attempt, but the agent repeated the same explicitly named `look` validation error three consecutive times. The three `look` failures are one repeated error class and constitute a parse/validation fight. Session metadata reports no scenario retry.",
+      "failed_call_count": 4,
+      "rejected_call_count": 4,
+      "retry_count": 0,
+      "parse_validation_fight_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches publish-gate at 3140,750 and vector-search at 1000,1040, so the first corner must share an x or a y with 3140,750 and the last with 1000,1040.",
+          "finding": "A malformed reroute failed. The next attempt affecting this edge, at turn 6, used joinable points and applied successfully, so this error was corrected without repetition."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "The first close-up request supplied both legal selector knobs and was refused with explicit correction instructions."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "The same error class was repeated after the tool had explicitly said to drop one knob; an empty `view` still accompanied `at`."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "The same both-knobs `look` error was repeated a third consecutive time, despite the identical corrective message on turns 9 and 10."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "No framed close-up render succeeded. The agent performed dense whole-board construction and connector routing, then attempted QA only at the end; all three QA `look` calls failed. Consequently there was no successful edit → framed render → adjustment loop and no successful final QA render. Although standing board renders are supplied with state updates by the environment, the transcript shows lint-driven adjustments rather than any successful framed inspection of the dense publication, grounding, or rebuild regions.",
+      "render_count": 0,
+      "adjustment_round_count": 0,
+      "render_adjust_render_loop_count": 0,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · connect e-publish-query publish-gate→vector-search ... LINTS · +3 −0",
+          "finding": "Dense cross-board connector work generated overlapping-label and co-linear-wire lints, but no framed `look` was used on the region during the build."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · shift_segment e-generate-feedback ... − W2 broken-edges (resolved)",
+          "finding": "The agent did make targeted adjustments after lint feedback, but these were not preceded or followed by a successful framed render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "ERROR · look — one region per call",
+          "finding": "The first attempted QA close-up failed because both `at` and `view` were supplied."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "ERROR · look — one region per call",
+          "finding": "QA ended after the third failed close-up; the agent proceeded directly to finalize on turn 12 without obtaining a render."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was generally constructive: the initial crowding warnings were fixed by spacing the stores, and later label, covered-content, and broken-edge findings were addressed through label movement, segment shifts, reroutes, or removal of problematic labels. Five error-severity lint emissions appeared during routing, but no identical lint was re-fired for more than three consecutive turns without a strategy change, so this was not a lint fight. The final mutating operation reported the remaining warning resolved. No warnings were knowingly committed open, so there was no warning override requiring a verbatim summary reason.",
+      "lint_error_count": 5,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "LINTS · +1 −0\n  + W1 crowding: vector-index and fragment-store sit 40px apart stacked where wires and labels need ≥48px of corridor",
+          "finding": "The publication stores initially produced crowding warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · space_out vertical gap 60 · vector-index y=220, fragment-store y=400, keyword-index y=580 ... − W1 crowding, − W2 crowding (resolved)",
+          "finding": "The agent fixed both crowding warnings with a direct spacing strategy."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "LINTS · +3 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + W1 broken-edges: e-gaps-source and e-publish-query run co-linear for 1420px",
+          "finding": "The densest routing operation introduced two error-severity covered-content lints and one warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 6,
+          "transcript_excerpt": "APPLIED · reroute e-publish-query ... − E1 covered-content, − E3 covered-content, − W1 broken-edges (resolved)",
+          "finding": "A revised route cleared the earlier cross-board overlap errors, although it briefly introduced a border-hugging warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · reroute e-publish-query ... LINTS · +0 −1\n  − W1 broken-edges (resolved)",
+          "finding": "The last reported routing warning was resolved before commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "APPLIED · update_text e-confidence-generate ... LINTS · +0 −1\n  − W1 unreadable-labels (resolved)",
+          "finding": "The final outstanding unreadable-label warning was cleared rather than overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the major structures present in the stage diff: versioned ingestion and chunking, hybrid retrieval, ACL filtering, grounded cited generation, feedback prioritization, and rebuild promotion/rollback are all represented. The claim is broad but not inflated relative to the diff. No unresolved lint or demonstrably seen visual defect remained open at the end, so there is no undeclared seen defect. The summary does not claim the omitted detailed failure branches described in the board description.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "line": "Built a sectioned RAG system map covering versioned ingestion, hybrid permission-aware retrieval, grounded cited answers, feedback prioritization, and atomic background index rebuild/rollback flows.",
+          "assessment": "Honest and supported by the diff: the ten sections and their connections directly instantiate each named subsystem and flow."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "Committed: Built a sectioned RAG system map covering versioned ingestion, hybrid permission-aware retrieval, grounded cited answers, feedback prioritization, and atomic background index rebuild/rollback flows. (68 patch operations).",
+          "finding": "The finalized summary matches the committed additions and does not assert a visual QA pass or a fix absent from the diff."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "The rebuild lane creates a new index generation in the background, checks consistency, and atomically promotes it while preserving rollback",
+          "finding": "This description is supported by rebuild-coord → new-generation → consistent → promote and the promote-to-publication rollback-labeled connection."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed 68 patch operations in about 3.24 minutes, well inside the 15-minute and 300-turn budgets, with no session retry. The operation volume was proportionate to a large ten-section architecture diagram. There were no add-delete-rebuild cycles or repeated NO-OPs. The three consecutive malformed `look` attempts were avoidable validation thrash, but they did not cause abandonment or budget pressure.",
+      "operation_count": 68,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 3.24,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · space_out vertical gap 60",
+          "finding": "The agent adjusted existing objects rather than deleting and rebuilding them."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "ERROR · look — one region per call",
+          "finding": "This began a three-turn avoidable schema retry sequence, but not an add-delete-rebuild thrash cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "Committed ... (68 patch operations).",
+          "finding": "The work reached finalize after 194.3 seconds, far below the wall-time budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, container collision, proxy failure, stuck session, or other declared infrastructure failure appears in the payload. The only failures were agent-originated validation errors, so no session is excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 3
+  },
+  "usage": {
+    "input_tokens": 34567,
+    "output_tokens": 2980
+  },
+  "flags": []
+}

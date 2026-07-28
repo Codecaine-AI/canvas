@@ -4,30 +4,50 @@ import { join } from "node:path";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import { resolveScope } from "../src/board/scope";
-import { createOpContext } from "../src/service/session/op-context";
-import { findOperationTool } from "../src/service/session/operations";
+import { createOpContext } from "../src/service/session/tools/operations/op-context";
+import { findOperationTool } from "../src/service/session/tools/operations";
 import {
   emitSessionEvent,
   toolLook,
   type LayoutSession,
 } from "../src/service/session";
+import type { LookRequest } from "../src/service/session/tools";
 
 export const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 
+/** The gesture roster, in the groups `operations/index.ts` orders it by. */
 export type OperationToolName =
-  | "add_section"
-  | "update_section"
-  | "remove_section"
-  | "add_sticky"
-  | "update_sticky"
-  | "remove_sticky"
-  | "add_object"
-  | "update_object"
-  | "remove_object"
-  | "add_connection"
-  | "update_connection"
-  | "remove_connection"
-  | "fit_section";
+  // Place
+  | "place_section"
+  | "place_sticky"
+  | "place_shape"
+  | "clone"
+  | "connect"
+  // Arrange
+  | "move_to"
+  | "move_by"
+  | "resize"
+  | "match_size"
+  | "align"
+  | "space_out"
+  // Content & appearance
+  | "update_text"
+  | "change_color"
+  | "change_shape"
+  // Sections
+  | "fit_section"
+  | "change_section_border"
+  | "lock"
+  | "unlock"
+  // Edges
+  | "style_edge"
+  | "change_connection"
+  | "reroute"
+  | "shift_segment"
+  | "reset_route"
+  | "move_label"
+  // Delete
+  | "delete";
 
 /**
  * The single seam between this suite and the operation surface. Retargeting
@@ -47,8 +67,12 @@ export function runOp(
   });
 }
 
-export function look(session: LayoutSession, view?: string) {
-  return toolLook(session, view);
+/** `look(session, "home")` for one close-up, or `look(session, { view: [ids] })` for a union frame. */
+export function look(session: LayoutSession, request?: string | LookRequest) {
+  return toolLook(
+    session,
+    typeof request === "string" ? { view: request } : (request ?? {}),
+  );
 }
 
 /** A bare in-memory layout session over a synthetic baseline (no kernel). */
@@ -83,6 +107,7 @@ export function makeTestSession(
     lastDiagnostics: undefined,
     views: [],
     viewCount: 0,
+    changeRenders: [],
     ...overrides,
   };
 }

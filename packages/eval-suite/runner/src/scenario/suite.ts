@@ -3,9 +3,12 @@ import { resolve } from "node:path";
 
 import {
   SUT_THINKING_LEVELS,
+  TOOL_CALL_CAPS,
   type ReasoningEffort,
   type ScenarioId,
   type SutThinkingLevel,
+  type ToolCallCap,
+  type ToolCallCapSource,
 } from "../contract.ts";
 import {
   EVAL_CANVASES_DIR,
@@ -27,11 +30,12 @@ interface SuiteCommandOptions {
   runId: string;
   sutThinking: SutThinkingLevel;
   sutThinkingSource: "eval default" | "--sut-thinking";
+  toolCallCap: ToolCallCap;
+  toolCallCapSource: ToolCallCapSource;
   scenarios?: ScenarioId[];
   parallel: number;
   judgeConcurrency: number;
   previous?: string;
-  teardown: boolean;
   dryRun: boolean;
   judgeClient: JudgeClientOptions;
 }
@@ -45,6 +49,7 @@ const REASONING_EFFORTS = new Set<ReasoningEffort>([
   "xhigh",
 ]);
 const SUT_THINKING_LEVEL_SET = new Set<SutThinkingLevel>(SUT_THINKING_LEVELS);
+const TOOL_CALL_CAP_VALUES = new Set<string>(TOOL_CALL_CAPS.map(String));
 
 function valueAfter(argv: string[], index: number, flag: string): string {
   const value = argv[index + 1];
@@ -67,10 +72,11 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
   let rawScenarios: string[] | undefined;
   let sutThinking: SutThinkingLevel = "low";
   let sutThinkingSource: SuiteCommandOptions["sutThinkingSource"] = "eval default";
+  let toolCallCap: ToolCallCap = 3;
+  let toolCallCapSource: ToolCallCapSource = "agent default";
   let parallel = 8;
   let judgeConcurrency = 30;
   let previous: string | undefined;
-  let teardown = false;
   let dryRun = false;
   const judgeClient: JudgeClientOptions = {
     model: "gpt-5.6-sol",
@@ -99,6 +105,16 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
         }
         sutThinking = thinking;
         sutThinkingSource = "--sut-thinking";
+        index += 1;
+        break;
+      }
+      case "--tool-call-cap": {
+        const rawCap = valueAfter(argv, index, flag);
+        if (!TOOL_CALL_CAP_VALUES.has(rawCap)) {
+          throw new Error(`${flag} must be 1, 2, or 3.`);
+        }
+        toolCallCap = Number(rawCap) as ToolCallCap;
+        toolCallCapSource = "--tool-call-cap";
         index += 1;
         break;
       }
@@ -132,7 +148,8 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
         break;
       }
       case "--teardown":
-        teardown = true;
+        // Accepted for compatibility and ignored: the run's services are
+        // spawned per run and always stopped when the run ends.
         break;
       case "--dry-run":
         dryRun = true;
@@ -143,7 +160,7 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
   }
   if (!runId) {
     throw new Error(
-      "Usage: suite --run-id <id> [--sut-thinking <level>] [--scenarios <names>] [--parallel 8] [--judge-concurrency 30]",
+      "Usage: suite --run-id <id> [--sut-thinking <level>] [--tool-call-cap <1|2|3>] [--scenarios <names>] [--parallel 8] [--judge-concurrency 30]",
     );
   }
   const scenarios = rawScenarios
@@ -153,11 +170,12 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
     runId,
     sutThinking,
     sutThinkingSource,
+    toolCallCap,
+    toolCallCapSource,
     scenarios,
     parallel,
     judgeConcurrency,
     previous,
-    teardown,
     dryRun,
     judgeClient,
   };
@@ -201,11 +219,12 @@ export async function runSuiteCommand(argv: string[]): Promise<void> {
       runId: options.runId,
       sutThinking: options.sutThinking,
       sutThinkingSource: options.sutThinkingSource,
+      toolCallCap: options.toolCallCap,
+      toolCallCapSource: options.toolCallCapSource,
       fixtures: selected,
       parallel: options.parallel,
       judgeConcurrency: options.judgeConcurrency,
       previous: options.previous,
-      teardown: options.teardown,
       judgeClient: options.judgeClient,
       observer: display,
     });

@@ -47,6 +47,20 @@ export function all_succeeded<CheckName extends string>(checks: Record<CheckName
 export function get_checks<CheckName extends string>(checks: Record<CheckName, Check>): Check[] {
     return Object.values(checks)
 }
+export interface CFSubCheck {
+  name: "frame_use" | "color" | "machinery_leakage" | "alignment_and_rhythm"
+  score: number
+  note: string
+  
+}
+
+export interface CraftVerdict {
+  score: number
+  score_rationale: string
+  sub_checks: CFSubCheck[]
+  
+}
+
 export interface PHCommitHonestyFinding {
   assessment: string
   commit_count: number
@@ -157,6 +171,20 @@ export interface RCRequirementAssessment {
   
 }
 
+export interface RDSubCheck {
+  name: "corridors_and_air" | "grouping" | "edge_legibility" | "density_and_decomposition"
+  score: number
+  note: string
+  
+}
+
+export interface ReadabilityVerdict {
+  score: number
+  score_rationale: string
+  sub_checks: RDSubCheck[]
+  
+}
+
 export interface RequirementCoverageVerdict {
   requirements: RCRequirementAssessment[]
   coverage_fraction: number
@@ -247,19 +275,6 @@ export interface SFUnsupportedClaim {
   
 }
 
-export interface SQCalibration {
-  gc: number
-  intent: number
-  
-}
-
-export interface SQSubCheck {
-  name: "frame_use" | "corridors_and_air" | "grouping" | "color" | "machinery_leakage" | "alignment_and_rhythm" | "edge_legibility"
-  score: number
-  note: string
-  
-}
-
 export interface ScopeDisciplineEditVerdict {
   requested_changes: SDRequestedChangeAssessment[]
   changes: SDChangeAssessment[]
@@ -268,15 +283,6 @@ export interface ScopeDisciplineEditVerdict {
   scoring_status: "scored" | "excluded_refusal"
   exclusion_reason?: string | null
   score?: number | null
-  
-}
-
-export interface SurfaceQualityVerdict {
-  calibration: SQCalibration
-  score: number
-  delta_sentence: string
-  sub_checks: SQSubCheck[]
-  rank_order_sanity_note: string
   
 }
 
@@ -300,11 +306,15 @@ export interface SystemReconstruction {
   
 }
 
+export type CFSubCheckName = "frame_use" | "color" | "machinery_leakage" | "alignment_and_rhythm"
+
 export type RCEvidenceSource = "png" | "json"
 
 export type RCRequirementImportance = "system_defining" | "supporting"
 
 export type RCRequirementStatus = "represented" | "partial" | "absent" | "contradicted"
+
+export type RDSubCheckName = "corridors_and_air" | "grouping" | "edge_legibility" | "density_and_decomposition"
 
 export type SDChangeClassification = "requested" | "necessary_accommodation" | "collateral_rework"
 
@@ -323,5 +333,3 @@ export type SFBriefElementImportance = "system_defining" | "supporting"
 export type SFBriefElementStatus = "recovered" | "partial" | "missed" | "contradicted"
 
 export type SFFlowKind = "data" | "control" | "failure"
-
-export type SQSubCheckName = "frame_use" | "corridors_and_air" | "grouping" | "color" | "machinery_leakage" | "alignment_and_rhythm" | "edge_legibility"

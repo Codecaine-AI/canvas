@@ -28,7 +28,7 @@ const GUIDANCE = `A frame keeps exactly the geometry it is given, so one far lar
 - this finishing-pass warning fires only when fitting would reclaim at least two thirds
   (about ${Math.round(MIN_RECLAIMED_AREA * 100)}%) of the frame and its widest unused edge is
   at least ${MIN_EDGE_SLACK}px; a frame with room to spare is headroom, not a defect;
-- fitSection <id> closes the frame around the children already inside it and touches no ancestor;
+- fit_section <id> closes the frame around the children already inside it and touches no ancestor;
 - empty frames are out of scope because there is nothing to fit around, and children hanging
   outside their frame are containment's error;
 - compressing a frame before its siblings are placed makes a worse board than leaving slack —
@@ -46,7 +46,7 @@ export const rule: LayoutRule = {
     for (const section of document.objects) {
       if (kindOf(section) !== "section" || section.id === pageFrame?.id) continue;
 
-      // This is the production helper fitSection lowers to, so the lint and
+      // This is the production helper fit_section lowers to, so the lint and
       // remedy can never disagree about fitted geometry.
       const fit = sectionFitGeometry(document, section.id);
       if (!fit) continue;
@@ -85,7 +85,7 @@ export const rule: LayoutRule = {
         at: [section.id],
         where: section.geometry,
         message: `${section.id} is ${Math.round(frame.width)}×${Math.round(frame.height)} around children needing ${Math.round(fit.width)}×${Math.round(fit.height)} — ${Math.round(reclaimedArea * 100)}% of the frame is unused, ${Math.round(widest.value)}px of it on the ${widest.side}`,
-        suggestion: `fitSection ${section.id} closes the frame around the children already inside it — leave the slack if it is space you are still filling`,
+        suggestion: `fit_section ${section.id} closes the frame around the children already inside it — leave the slack if it is space you are still filling`,
       });
     }
 

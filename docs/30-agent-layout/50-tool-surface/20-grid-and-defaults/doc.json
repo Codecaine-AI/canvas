@@ -1,0 +1,596 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-50-tool-surface-20-grid-and-defaults",
+  "title": "The grid and creation defaults",
+  "root": "b-ts-gr-root",
+  "blocks": {
+    "b-ts-gr-root": {
+      "id": "b-ts-gr-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-ts-gr-title-1",
+        "b-ts-gr-lede-2",
+        "b-ts-gr-snap-heading-3",
+        "b-ts-gr-snap-body-4",
+        "b-ts-gr-snap-degenerate-5",
+        "b-ts-gr-lands-6",
+        "b-ts-gr-lands-corollary-7",
+        "b-ts-gr-table-heading-8",
+        "b-ts-gr-table-9",
+        "b-ts-gr-exempt-10",
+        "b-ts-gr-fit-heading-11",
+        "b-ts-gr-fit-body-12",
+        "b-ts-gr-fit-outward-13",
+        "b-ts-gr-three-heading-14",
+        "b-ts-gr-three-constraint-15",
+        "b-ts-gr-three-divisor-16",
+        "b-ts-gr-three-r1-17",
+        "b-ts-gr-defaults-heading-18",
+        "b-ts-gr-defaults-body-19",
+        "b-ts-gr-defaults-table-20",
+        "b-ts-gr-defaults-loadbearing-21",
+        "b-ts-gr-defaults-colors-22",
+        "b-ts-gr-defaults-backedge-23"
+      ],
+      "props": {
+        "covers": "The agent's 20px write grid: snap-not-reject, the rule that quantization is about what lands rather than what was typed, which fields quantize and which are deliberately exempt, how a fitted frame grows onto the grid, the three coexisting grids and their common divisor, and the per-kind size and color a bare placement lands at.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "agent grid",
+          "snap-not-reject",
+          "quantization",
+          "creation defaults",
+          "first-use colors",
+          "craft targets"
+        ]
+      }
+    },
+    "b-ts-gr-title-1": {
+      "id": "b-ts-gr-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The grid and creation defaults"
+        }
+      ]
+    },
+    "b-ts-gr-lede-2": {
+      "id": "b-ts-gr-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Two small modules decide what a board built by the agent physically looks like. The quantizer decides where every number it writes is allowed to land, and the creation defaults decide how big and what color a new object is when the gesture that placed it carried neither. Both exist for the same reason: the model should spend its turns on structure, not on inventing near-miss numbers."
+        }
+      ]
+    },
+    "b-ts-gr-snap-heading-3": {
+      "id": "b-ts-gr-snap-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Snap, not reject"
+        }
+      ]
+    },
+    "b-ts-gr-snap-body-4": {
+      "id": "b-ts-gr-snap-body-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every geometry-bearing gesture runs its values through the agent quantizer before they are lowered onto document patches. "
+        },
+        {
+          "insert": "AGENT_GRID",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/grid.ts",
+              "symbol": "AGENT_GRID"
+            }
+          }
+        },
+        {
+          "insert": " is 20, and nothing in the module throws or returns an error. An off-grid argument is silently corrected to the nearest multiple and the tool result reports the geometry that actually landed, so the model sees the correction rather than being told about it. A wasted turn on a validation error costs more than the correction does, and a board of round numbers is the whole point: a box is 300×60 at (240, 480), a nudge is ±20, a corridor opens to 120."
+        }
+      ]
+    },
+    "b-ts-gr-snap-degenerate-5": {
+      "id": "b-ts-gr-snap-degenerate-5",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Non-finite input is the one degenerate case. A coordinate or a gap resolves to 0 and a size to one grid unit, rather than propagating a NaN into the document. Sizes clamp at one grid unit on each side so a snap can never produce a zero- or negative-area box; a gap clamps at 0 instead, because boxes flush against one another is a meaning a size does not have."
+        }
+      ]
+    },
+    "b-ts-gr-lands-6": {
+      "id": "b-ts-gr-lands-6",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The grid is about what lands"
+      },
+      "text": [
+        {
+          "insert": "The rule is not \"arguments are rounded\" but \"every number that reaches board geometry is a multiple of 20\". For an absolute argument the two are the same thing; for a relative one they are not, and the result is what counts. "
+        },
+        {
+          "insert": "move_by 20",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " off a box at x=16 lands it at 40, not at 36, and "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " snaps the shared coordinate the row agrees on rather than the deltas that get each box there. A quantizer that snapped only its inputs would leave every hand-drawn box permanently off-grid, which is precisely the board the grid exists to clean up."
+        }
+      ]
+    },
+    "b-ts-gr-lands-corollary-7": {
+      "id": "b-ts-gr-lands-corollary-7",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The corollary runs the other way too, and it is why a single gesture can have one field snapped and one exempt. "
+        },
+        {
+          "insert": "move_label",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/edges.ts",
+              "symbol": "moveLabel"
+            }
+          }
+        },
+        {
+          "insert": " carries both: "
+        },
+        {
+          "insert": "along",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a 0..1 fraction of the routed path's arc length and lands on no grid at all, while "
+        },
+        {
+          "insert": "offset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a perpendicular displacement in world pixels and snaps like any other distance. Whether a field quantizes is decided by what the number is, not by which tool it arrived on."
+        }
+      ]
+    },
+    "b-ts-gr-table-heading-8": {
+      "id": "b-ts-gr-table-heading-8",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "What quantizes, and what does not"
+        }
+      ]
+    },
+    "b-ts-gr-table-9": {
+      "id": "b-ts-gr-table-9",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "The quantized and exempt fields",
+        "columns": [
+          "value",
+          "where it arrives",
+          "treatment"
+        ],
+        "rows": [
+          [
+            "the corner a placement lands on",
+            "at on place_section / place_sticky / place_shape",
+            "snapPoint"
+          ],
+          [
+            "the corner a copy lands on, however it was named",
+            "clone's at, by, or the default paste offset",
+            "snapPoint"
+          ],
+          [
+            "the corner a move lands on",
+            "move_to's target, move_by's destination (position plus delta)",
+            "snapPoint"
+          ],
+          [
+            "the size a box ends up with",
+            "size on place_section, width / height on resize, both dimensions match_size copies, the size clone copies",
+            "snapSize — clamped to at least one grid unit per side"
+          ],
+          [
+            "the shared coordinate a row agrees on, and each computed position",
+            "align, space_out",
+            "snapCoordinate"
+          ],
+          [
+            "the clear gap between neighbours",
+            "gap on space_out",
+            "snapGap — clamped at 0, since flush is a real request"
+          ],
+          [
+            "routing corners",
+            "points on reroute, the to target of shift_segment",
+            "snapPoint / snapCoordinate"
+          ],
+          [
+            "a label chip's perpendicular nudge",
+            "offset on move_label",
+            "snapCoordinate"
+          ],
+          [
+            "where an edge meets an object's side",
+            "Endpoint.position",
+            "exempt — a 0..1 fraction of a side, not a world distance"
+          ],
+          [
+            "how far along its route a label chip sits",
+            "along on move_label",
+            "exempt — a 0..1 fraction of arc length; the chip sizes itself to its text, so there is no box edge to land on"
+          ],
+          [
+            "text-fit measurements",
+            "the readability checks on resize / match_size / update_text",
+            "exempt — these measure real glyph runs, not grid units"
+          ],
+          [
+            "geometry the gesture does not write",
+            "the untouched dimension of a width-only resize, the first box of a space_out run, the descendants a frame carries",
+            "exempt — untouched values keep their exact relative geometry"
+          ]
+        ]
+      }
+    },
+    "b-ts-gr-exempt-10": {
+      "id": "b-ts-gr-exempt-10",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "A snapped fraction would be a bug"
+      },
+      "text": [
+        {
+          "insert": "The exemptions are not omissions. Rounding a 0..1 fraction to a multiple of 20 collapses it to 0, and rounding a text measurement changes the answer to \"does this fit\". The exempt list is the set of numbers that are not world distances, plus the geometry a gesture deliberately leaves alone: an off-grid child of an off-grid frame travels by its root's snapped delta and stays exactly where it was put relative to the frame."
+        }
+      ]
+    },
+    "b-ts-gr-fit-heading-11": {
+      "id": "b-ts-gr-fit-heading-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "A fitted frame grows onto the grid"
+        }
+      ]
+    },
+    "b-ts-gr-fit-body-12": {
+      "id": "b-ts-gr-fit-body-12",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "fit_section is the one gesture whose geometry is measured rather than supplied, so it is the one place the grid has to be defended from the other side. Its padding is chosen to be grid-multiple: 40 of body air on the left, right, and bottom, and a 40 band above the first child for the title chip, resolved in "
+        },
+        {
+          "insert": "resolveFitSection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/apply-ops.ts",
+              "symbol": "resolveFitSection"
+            }
+          }
+        },
+        {
+          "insert": ". Both numbers are at or above the interactive fit's own, so an agent fit is never tighter than the one a person performs, and a frame closed around 20-grid children lands on the 20 grid with no correction at all."
+        }
+      ]
+    },
+    "b-ts-gr-fit-outward-13": {
+      "id": "b-ts-gr-fit-outward-13",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "A fitted rect snaps outward, never nearest"
+      },
+      "text": [
+        {
+          "insert": "snapRectOutward floors the top-left and ceils the bottom-right, so every edge lands on a multiple and the snapped rect always contains the input. Rounding each field to the nearest multiple independently would be wrong here: an x nudged right and a width nudged down can together bite up to a grid unit off the far edge, which for a fitted frame means clipping into the very child it was measured around. Growing can only add air. On the normal path — on-grid children, grid-multiple padding — this is an identity; on the off-grid one, a frame closed around hand-drawn boxes, it is the safety net."
+        }
+      ]
+    },
+    "b-ts-gr-three-heading-14": {
+      "id": "b-ts-gr-three-heading-14",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Three grids coexist"
+        }
+      ]
+    },
+    "b-ts-gr-three-constraint-15": {
+      "id": "b-ts-gr-three-constraint-15",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Twenty, sixteen, four — and they must not be confused"
+      },
+      "text": [
+        {
+          "insert": "The agent writes on 20 ("
+        },
+        {
+          "insert": "AGENT_GRID",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/grid.ts",
+              "symbol": "AGENT_GRID"
+            }
+          }
+        },
+        {
+          "insert": "). An interactive pointer drag in the canvas snaps to 16 ("
+        },
+        {
+          "insert": "CANVAS_GRID_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "CANVAS_GRID_SIZE"
+            }
+          }
+        },
+        {
+          "insert": "). Every geometry write, whoever made it, is normalized to 4 ("
+        },
+        {
+          "insert": "GEOMETRY_NORMALIZATION_GRID",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "GEOMETRY_NORMALIZATION_GRID"
+            }
+          }
+        },
+        {
+          "insert": "). The agent grid governs one of the three and nothing else."
+        }
+      ]
+    },
+    "b-ts-gr-three-divisor-16": {
+      "id": "b-ts-gr-three-divisor-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "4 is chosen as the common divisor of the other two, and that choice is what makes the arrangement safe. Because 20 and 16 are both multiples of 4, a 20-grid box the agent wrote survives patch merging and a full reducer replay unchanged — the write path has nothing to correct. The practical consequence for the model is that the value a tool result reports is the value the document ends up holding, so a returned number can be reasoned against directly rather than re-read."
+        }
+      ]
+    },
+    "b-ts-gr-three-r1-17": {
+      "id": "b-ts-gr-three-r1-17",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The agent grid also has its own rule in the layout rulebook — "
+        },
+        {
+          "insert": "R1 — The 20 grid",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/20-rulebook/01-r1-the-20-grid",
+              "label": "R1 — The 20 grid"
+            }
+          }
+        },
+        {
+          "insert": " — which states it as a rule the model is held to: quantization decides where a number lands and never how much air a layout gets. That page is the rule; this page is the mechanism and the field-by-field list. The 16 grid appears in neither: it belongs to the interactive canvas, not to anything the agent writes."
+        }
+      ]
+    },
+    "b-ts-gr-defaults-heading-18": {
+      "id": "b-ts-gr-defaults-heading-18",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Creation defaults"
+        }
+      ]
+    },
+    "b-ts-gr-defaults-body-19": {
+      "id": "b-ts-gr-defaults-body-19",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "place_shape and place_sticky carry no size parameter and no color parameter: a placement is the pick and the click, and the typing where the kind is created with text. So "
+        },
+        {
+          "insert": "CREATION_DEFAULTS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/creation-defaults.ts",
+              "symbol": "CREATION_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": " is the entire answer to \"how big is a new node\". The table has one row per creation kind rather than one per document type, because the default size is a property of the kind, not of which pictogram it draws — every shape and every glyph collapses into one of the four."
+        }
+      ]
+    },
+    "b-ts-gr-defaults-table-20": {
+      "id": "b-ts-gr-defaults-table-20",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "What a bare placement lands as",
+        "columns": [
+          "kind",
+          "size",
+          "color",
+          "where the numbers come from"
+        ],
+        "rows": [
+          [
+            "shape",
+            "280 × 100",
+            "gray",
+            "the style guide's craft targets — a target node of 288 × 96, rounded to the grid (288 down to 280, 96 up to 100). Comfortably above the guide's own minimum node width of 224, which the UI's 184 × 96 process default is not."
+          ],
+          [
+            "sticky",
+            "180 × 120",
+            "yellow",
+            "the UI's own note default of 176 × 128, grid-rounded (176 up to 180, 128 down to 120). The craft targets size nodes and say nothing about notes, so the UI table is the honest source here."
+          ],
+          [
+            "section",
+            "480 × 360",
+            "gray",
+            "the UI's section default, already a grid multiple and passed through unchanged. A frame is meant to wrap other objects, and this footprint holds a two-to-three node column at the guide's frame padding without a fit."
+          ],
+          [
+            "icon",
+            "120 × 120",
+            "gray",
+            "the UI's icon default, already a grid multiple. An icon is a glyph with its text captioned beneath rather than a labelled box, so the node target does not apply: it stays square and small, and it reads the shape color bucket."
+          ]
+        ]
+      }
+    },
+    "b-ts-gr-defaults-loadbearing-21": {
+      "id": "b-ts-gr-defaults-loadbearing-21",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The defaults are load-bearing, not a convenience"
+      },
+      "text": [
+        {
+          "insert": "Two rules produce every number in the table, applied in order: prefer the style guide's craft targets over the UI's per-type table where the guide speaks, then round to a multiple of the agent grid so a placed object is already on-grid and every later move, resize, or match keeps it there. Preferring the guide is not a preference — the UI's per-type sizes sit below the guide's own node minimum, so a board built from UI defaults would start out failing the targets the agent is graded on. Neither source table is edited; this module is the enforcement, and whether the UI adopts these numbers is a separate product call."
+        }
+      ]
+    },
+    "b-ts-gr-defaults-colors-22": {
+      "id": "b-ts-gr-defaults-colors-22",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Colors come from the canvas package's per-kind first-use fallbacks, "
+        },
+        {
+          "insert": "FIRST_USE_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "FIRST_USE_COLORS"
+            }
+          }
+        },
+        {
+          "insert": " — the same values a fresh board gives an object a person drops on it before any color pick has been made. An agent-placed object and a hand-placed one therefore look identical on a fresh board, which is what keeps a reviewer's eye on the layout rather than on which tool put each box down. Recoloring is its own gesture afterwards, if the object earns it."
+        }
+      ]
+    },
+    "b-ts-gr-defaults-backedge-23": {
+      "id": "b-ts-gr-defaults-backedge-23",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "One deliberate back-edge into the catalog"
+      },
+      "text": [
+        {
+          "insert": "Creation defaults live service-side, so the service never depends on the swappable agent bundle for machinery. One narrow import runs the other way: "
+        },
+        {
+          "insert": "CRAFT_TARGETS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+              "symbol": "CRAFT_TARGETS"
+            }
+          }
+        },
+        {
+          "insert": " is read from the catalog's style guide, that data's canonical home, because the same numbers also feed the style-guide context block. Duplicating them service-side would let a board's target node width and the guidance describing it drift apart. Relocating craft targets outright is a separate call, not taken here."
+        }
+      ]
+    }
+  }
+}

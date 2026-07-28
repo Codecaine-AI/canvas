@@ -30,6 +30,8 @@ const defaultSystemArgs = parseSuiteArgs([
 ]);
 assert.equal(defaultSystemArgs.sutThinking, "low");
 assert.equal(defaultSystemArgs.sutThinkingSource, "eval default");
+assert.equal(defaultSystemArgs.toolCallCap, 3);
+assert.equal(defaultSystemArgs.toolCallCapSource, "agent default");
 const overriddenThinkingArgs = parseSuiteArgs([
   "--run-id",
   "2026-07-23-thinking-override",
@@ -48,6 +50,28 @@ assert.throws(
     ]),
   /Unsupported SUT thinking level/,
 );
+for (const cap of ["1", "2", "3"] as const) {
+  const overriddenCapArgs = parseSuiteArgs([
+    "--run-id",
+    `2026-07-23-tool-call-cap-${cap}`,
+    "--tool-call-cap",
+    cap,
+  ]);
+  assert.equal(overriddenCapArgs.toolCallCap, Number(cap));
+  assert.equal(overriddenCapArgs.toolCallCapSource, "--tool-call-cap");
+}
+for (const cap of ["0", "4", "two", "01", "1.0"]) {
+  assert.throws(
+    () =>
+      parseSuiteArgs([
+        "--run-id",
+        "2026-07-23-tool-call-cap-invalid",
+        "--tool-call-cap",
+        cap,
+      ]),
+    /--tool-call-cap must be 1, 2, or 3\./,
+  );
+}
 
 const proposalDocument: InteractiveCanvasDocument = {
   schemaVersion: 1,

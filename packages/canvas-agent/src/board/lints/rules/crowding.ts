@@ -3,6 +3,7 @@
  * labels to pass between them (warning tier).
  */
 import { kindOf } from "../../helpers";
+import { axisGap } from "../../measure";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 import type { LayoutRule } from "../types";
@@ -20,16 +21,7 @@ const MIN_HORIZONTAL_GAP = 80;
  */
 const MIN_VERTICAL_GAP = 48;
 
-type Axis = "x" | "y";
 type Rect = InteractiveCanvasObject["geometry"];
-
-/** Clear space between the two rects along `axis` (negative when they overlap). */
-function axisGap(a: Rect, b: Rect, axis: Axis): number {
-  if (axis === "x") {
-    return Math.max(a.x, b.x) - Math.min(a.x + a.width, b.x + b.width);
-  }
-  return Math.max(a.y, b.y) - Math.min(a.y + a.height, b.y + b.height);
-}
 
 function unionRect(a: Rect, b: Rect): Rect {
   const x = Math.min(a.x, b.x);

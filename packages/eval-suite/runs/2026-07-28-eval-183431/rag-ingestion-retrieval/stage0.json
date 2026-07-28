@@ -1,0 +1,832 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-28-eval-183431.rag-ingestion-retrieval",
+  "title": "RAG Knowledge Pipeline",
+  "description": "A left-to-right map of the RAG knowledge lifecycle: governed source ingestion, normalization and version handling, resilient chunking/embedding, version-consistent publication, permission-aware hybrid retrieval, grounded generation, feedback, and zero-downtime embedding-index rebuilds. Failure branches show quarantine, dead-letter reprocessing, partial-write repair/rollback, and low-confidence “I don’t know” behavior.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-28-eval-183431 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3600,
+        "height": 2200
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Governed Sources",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 160,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "normalize",
+      "type": "section",
+      "text": "2 · Normalize & Classify",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 780,
+        "y": 160,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "derive",
+      "type": "section",
+      "text": "3 · Chunk & Embed",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1440,
+        "y": 160,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "4 · Consistent Publication",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2100,
+        "y": 160,
+        "width": 560,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "5 · Retrieve & Answer",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2760,
+        "y": 160,
+        "width": 780,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "failures",
+      "type": "section",
+      "text": "Failure Handling & Reprocessing",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 900,
+        "width": 1180,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "Embedding Model Rebuild",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1440,
+        "y": 900,
+        "width": 1180,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "Feedback & Coverage",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2760,
+        "y": 900,
+        "width": 720,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "legend",
+      "type": "section",
+      "text": "Reading Guide",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1500,
+        "width": 3360,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "src-adapters",
+      "type": "folder",
+      "text": "Scheduled source adapters",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 180,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "arrival",
+      "type": "document-stack",
+      "text": "First import or update + ACLs",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 180,
+        "y": 460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "process",
+      "text": "Extract & normalize",
+      "color": "gray",
+      "parentId": "normalize",
+      "geometry": {
+        "x": 840,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hash-classify",
+      "type": "decision",
+      "text": "Content hash status?",
+      "color": "gray",
+      "parentId": "normalize",
+      "geometry": {
+        "x": 840,
+        "y": 460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "chunk",
+      "type": "document",
+      "text": "Versioned chunks + metadata",
+      "color": "gray",
+      "parentId": "derive",
+      "geometry": {
+        "x": 1500,
+        "y": 280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "predefined-process",
+      "text": "Rate-limited embedding batches",
+      "color": "gray",
+      "parentId": "derive",
+      "geometry": {
+        "x": 1500,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "vector-index",
+      "type": "icon",
+      "text": "Vector index",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2140,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "doc-store",
+      "type": "icon",
+      "text": "Fragment store",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2340,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "keyword-index",
+      "type": "icon",
+      "text": "Keyword index",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2540,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "question",
+      "type": "icon",
+      "text": "User question",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 2820,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "rewrite-search",
+      "type": "process",
+      "text": "Rewrite into searches",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 3140,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hybrid-retrieve",
+      "type": "predefined-process",
+      "text": "Hybrid retrieve, fuse & rerank",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 2820,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "grounded-answer",
+      "type": "document",
+      "text": "Grounded answer + citations",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 3240,
+        "y": 420,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "icon",
+      "text": "Quarantine + failure context",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 180,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "dead-letter",
+      "type": "icon",
+      "text": "Dead letter + attempt history",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 520,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "repair-rollback",
+      "type": "icon",
+      "text": "Repair or rollback partial writes",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 860,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "rebuild-coordinator",
+      "type": "icon",
+      "text": "Background rebuild coordinator",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1500,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "new-generation",
+      "type": "icon",
+      "text": "New index generation",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1840,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "atomic-promote",
+      "type": "icon",
+      "text": "Atomic promote; old retained",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2180,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "bolt"
+    },
+    {
+      "id": "feedback-signals",
+      "type": "icon",
+      "text": "Thumbs + citation usefulness",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 2820,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "coverage-gaps",
+      "type": "icon",
+      "text": "Coverage gaps prioritize ingestion",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 3140,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "pin"
+    },
+    {
+      "id": "guide-main",
+      "type": "sticky",
+      "text": "**Main flow** — governed content moves left → right through versioned publication to grounded answers.",
+      "color": "yellow",
+      "parentId": "legend",
+      "geometry": {
+        "x": 180,
+        "y": 1600,
+        "width": 600,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "guide-fail",
+      "type": "sticky",
+      "text": "**Failure paths** — quarantine, dead-letter retry, and repair/rollback keep bad or partial data unavailable.",
+      "color": "yellow",
+      "parentId": "legend",
+      "geometry": {
+        "x": 920,
+        "y": 1600,
+        "width": 600,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "guide-serve",
+      "type": "sticky",
+      "text": "**Serving rule** — permissions filter evidence; thin or low-scoring context returns “I don’t know.”",
+      "color": "yellow",
+      "parentId": "legend",
+      "geometry": {
+        "x": 1660,
+        "y": 1600,
+        "width": 600,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "guide-rebuild",
+      "type": "sticky",
+      "text": "**Rebuild rule** — build a consistent new generation, promote atomically, retain the prior generation for rollback.",
+      "color": "yellow",
+      "parentId": "legend",
+      "geometry": {
+        "x": 2400,
+        "y": 1600,
+        "width": 600,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-source-arrival",
+      "from": {
+        "objectId": "src-adapters",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "arrival",
+        "anchor": "top"
+      },
+      "label": "schedule / change event",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-arrival-extract",
+      "from": {
+        "objectId": "arrival",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "left"
+      },
+      "label": "content + ACLs",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-extract-hash",
+      "from": {
+        "objectId": "extract",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "hash-classify",
+        "anchor": "top"
+      },
+      "label": "normalized content",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-hash-chunk",
+      "from": {
+        "objectId": "hash-classify",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chunk",
+        "anchor": "left"
+      },
+      "label": "new / changed · supersede stale",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-embed",
+      "from": {
+        "objectId": "chunk",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "embed",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 0
+      }
+    },
+    {
+      "id": "e-embed-vector",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "vector-index",
+        "anchor": "left"
+      },
+      "label": "same version",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-doc",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right",
+        "position": [
+          1,
+          0.4
+        ]
+      },
+      "to": {
+        "objectId": "doc-store",
+        "anchor": "left",
+        "position": [
+          0,
+          0.4
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-keyword",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right",
+        "position": [
+          1,
+          0.6
+        ]
+      },
+      "to": {
+        "objectId": "keyword-index",
+        "anchor": "left",
+        "position": [
+          0,
+          0.6
+        ]
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2000,
+          540
+        ],
+        [
+          2000,
+          620
+        ],
+        [
+          2540,
+          620
+        ]
+      ]
+    },
+    {
+      "id": "e-question-rewrite",
+      "from": {
+        "objectId": "question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rewrite-search",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-hybrid",
+      "from": {
+        "objectId": "rewrite-search",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "hybrid-retrieve",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -20
+      }
+    },
+    {
+      "id": "e-vector-hybrid",
+      "from": {
+        "objectId": "vector-index",
+        "anchor": "right",
+        "position": [
+          1,
+          0.25
+        ]
+      },
+      "to": {
+        "objectId": "hybrid-retrieve",
+        "anchor": "left",
+        "position": [
+          0,
+          0.35
+        ]
+      },
+      "label": "vector",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": -20
+      }
+    },
+    {
+      "id": "e-keyword-hybrid",
+      "from": {
+        "objectId": "keyword-index",
+        "anchor": "right",
+        "position": [
+          1,
+          0.75
+        ]
+      },
+      "to": {
+        "objectId": "hybrid-retrieve",
+        "anchor": "top",
+        "position": [
+          0.75,
+          0
+        ]
+      },
+      "label": "keyword",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.2,
+        "offset": 60
+      }
+    },
+    {
+      "id": "e-hybrid-answer",
+      "from": {
+        "objectId": "hybrid-retrieve",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "grounded-answer",
+        "anchor": "left"
+      },
+      "label": "evidence",
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

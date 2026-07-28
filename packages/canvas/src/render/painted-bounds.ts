@@ -15,7 +15,7 @@
  * connectionLabelChipRect). Pure, deterministic, Node-safe — no DOM.
  */
 
-import { routeConnection } from "../connectors/routing";
+import { labelPointFor, routeConnection } from "../connectors/routing";
 import { belowExtendedBoundsPx } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { connectionLabelChipRect } from "./static-svg";
@@ -113,7 +113,10 @@ function routedConnectionBounds(
   if (!rect) return null;
 
   const label = connection.label?.trim() ? connection.label : null;
-  if (label) rect = unionRects(rect, connectionLabelChipRect(label, routed.labelPoint));
+  // The chip is measured where it is DRAWN — the `labelPosition` pin when the
+  // connection carries one, otherwise the routed midpoint. A pinned chip that
+  // sits off the wire still counts toward the painted extent.
+  if (label) rect = unionRects(rect, connectionLabelChipRect(label, labelPointFor(routed, connection)));
   return rect;
 }
 

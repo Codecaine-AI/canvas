@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-183431",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its structured sections, restrained semantic color, and strong registers feel deliberate, but broad dead bands and ambiguous routing in the publication/retrieval flows keep it from reading as fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "Failing: the content spans the width, but oversized vertical gaps between the main flow, support panels, and reading guide—plus substantial empty space below—leave the locked frame underused."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Pastel section tints consistently distinguish stages, with red reserved for failure handling and green for publication, though the gray flow lines do not reinforce distinct flow-family semantics."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "Failing: no crosshair glyphs are visible, but multiple parallel wires and tightly merged bends around the indexes and hybrid retrieval create ambiguous routing and exposed diagram machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7.5,
+        "note": "Top-stage panels and lower support modules hold clear horizontal registers, but the very sparse panel interiors and large inter-band gaps make the vertical rhythm feel looser than a pin-up-ready composition."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6905,
+    "output_tokens": 431
+  },
+  "flags": []
+}

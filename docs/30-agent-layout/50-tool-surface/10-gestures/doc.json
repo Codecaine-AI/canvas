@@ -1,0 +1,1871 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-50-tool-surface-10-gestures",
+  "title": "The gestures",
+  "root": "b-ts-ge-root",
+  "blocks": {
+    "b-ts-ge-root": {
+      "id": "b-ts-ge-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-ts-ge-title-1",
+        "b-ts-ge-lede-2",
+        "b-ts-ge-place-heading-3",
+        "b-ts-ge-place-payloads-4",
+        "b-ts-ge-place-code-5",
+        "b-ts-ge-place-icons-6",
+        "b-ts-ge-place-clone-7",
+        "b-ts-ge-place-connect-8",
+        "b-ts-ge-place-collision-9",
+        "b-ts-ge-place-selfloop-10",
+        "b-ts-ge-arrange-heading-11",
+        "b-ts-ge-arrange-code-12",
+        "b-ts-ge-arrange-move-13",
+        "b-ts-ge-arrange-resize-14",
+        "b-ts-ge-arrange-sizerules-15",
+        "b-ts-ge-arrange-match-16",
+        "b-ts-ge-arrange-split-17",
+        "b-ts-ge-arrange-refusals-18",
+        "b-ts-ge-content-heading-19",
+        "b-ts-ge-content-code-20",
+        "b-ts-ge-content-text-21",
+        "b-ts-ge-content-color-22",
+        "b-ts-ge-content-shape-23",
+        "b-ts-ge-sections-heading-24",
+        "b-ts-ge-sections-code-25",
+        "b-ts-ge-sections-border-26",
+        "b-ts-ge-sections-fit-27",
+        "b-ts-ge-sections-lock-28",
+        "b-ts-ge-sections-lock-table-29",
+        "b-ts-ge-sections-lock-refusal-30",
+        "b-ts-ge-edges-heading-31",
+        "b-ts-ge-edges-code-32",
+        "b-ts-ge-edges-split-33",
+        "b-ts-ge-edges-reroute-34",
+        "b-ts-ge-edges-shift-35",
+        "b-ts-ge-edges-repoint-36",
+        "b-ts-ge-edges-digest-code-37",
+        "b-ts-ge-edges-digest-38",
+        "b-ts-ge-edges-fresh-39",
+        "b-ts-ge-edges-label-40",
+        "b-ts-ge-delete-heading-41",
+        "b-ts-ge-delete-code-42",
+        "b-ts-ge-delete-cascades-43",
+        "b-ts-ge-finish-heading-44",
+        "b-ts-ge-finish-code-45",
+        "b-ts-ge-finish-look-46",
+        "b-ts-ge-finish-look-refusal-47",
+        "b-ts-ge-finish-look-board-48",
+        "b-ts-ge-finish-annotations-49",
+        "b-ts-ge-finish-standing-50",
+        "b-ts-ge-finish-finalize-51",
+        "b-ts-ge-finish-assumption-52"
+      ],
+      "props": {
+        "covers": "The per-group gesture contracts: bare placement payloads and the folded shape vocabulary, the geometry gestures and their text-fit warnings, the kind-agnostic content gestures, section framing and the lock matrix, the six edge gestures with the fresh-polyline contract, the delete cascades, and the perception, annotation, and run-ending calls.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "gesture contract",
+          "folded type vocabulary",
+          "lock matrix",
+          "fresh polyline",
+          "framed close-up",
+          "finalize gate"
+        ]
+      }
+    },
+    "b-ts-ge-title-1": {
+      "id": "b-ts-ge-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The gestures"
+        }
+      ]
+    },
+    "b-ts-ge-lede-2": {
+      "id": "b-ts-ge-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Every tool on the surface, group by group: what its payload carries, what it refuses, and the rules it shares with its neighbours. The signatures below are the model-facing shapes; each root schema is a sealed object with every shape inlined."
+        }
+      ]
+    },
+    "b-ts-ge-place-heading-3": {
+      "id": "b-ts-ge-place-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Place"
+        }
+      ]
+    },
+    "b-ts-ge-place-payloads-4": {
+      "id": "b-ts-ge-place-payloads-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Creation is per-kind because the payloads genuinely differ, but each placement carries "
+        },
+        {
+          "insert": "only what the UI's creation gesture carries",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the pick, the click, and the typing that happens in the same motion. Everything else comes from "
+        },
+        {
+          "insert": "creation-defaults.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/creation-defaults.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and every property beyond the default is its own later gesture — place, then resize, then recolor, then relabel. There is no "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on "
+        },
+        {
+          "insert": "place_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " because recoloring is "
+        },
+        {
+          "insert": "change_color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the top-left of the box, and membership is reconciled from geometry rather than declared."
+        }
+      ]
+    },
+    "b-ts-ge-place-code-5": {
+      "id": "b-ts-ge-place-code-5",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "place_section({ id: Id, text: string, at: Point, size?: Size })\nplace_sticky ({ id: Id, text: string, at: Point })\nplace_shape  ({ id: Id, type: ShapeType | Glyph, at: Point })\n\nclone({ sourceId: Id, id: Id, at?: Point, by?: Point, text?: string })\n\nconnect({ id: Id, from: Endpoint, to: Endpoint,\n          label?: string, style?: LineStyle, arrow?: Arrow, color?: Color })"
+        }
+      ]
+    },
+    "b-ts-ge-place-icons-6": {
+      "id": "b-ts-ge-place-icons-6",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Icons are shape types.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The model-facing "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " vocabulary is the shape roster with the glyph roster folded in, so placing "
+        },
+        {
+          "insert": "\"database\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " places that icon the same way placing "
+        },
+        {
+          "insert": "\"diamond\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " places a diamond. The document model's "
+        },
+        {
+          "insert": "{type: \"icon\", icon: glyph}",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " split is an internal mapping owned by "
+        },
+        {
+          "insert": "placeable-types.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/placeable-types.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and it appears in no model-facing formatter. The folded name also decides which defaults row is read: a glyph sizes as an icon, every other name sizes as a node."
+        }
+      ]
+    },
+    "b-ts-ge-place-clone-7": {
+      "id": "b-ts-ge-place-clone-7",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "clone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the make-another-one-of-these shortcut: the copy inherits the source's kind, size, color, shape type, direction, glyph, and border style, so a row of options matches without a number being re-specified. Exactly one of "
+        },
+        {
+          "insert": "at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (absolute corner) or "
+        },
+        {
+          "insert": "by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (offset from the source) may be given; naming both is refused with both legal calls spelled out, and naming neither takes the paste offset. "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " relabels the copy, and omitting it carries the source's text over. Two things a copy never carries: the edges attached to the source, and — for a section — its contents, because copying descendants without the edges between them would half-copy the structure. A copy is never locked, whatever the source is, and the source itself is only "
+        },
+        {
+          "insert": "measured",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": ", so a locked box is a valid source."
+        }
+      ]
+    },
+    "b-ts-ge-place-connect-8": {
+      "id": "b-ts-ge-place-connect-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "connect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is always a separate call after placement, so the trace shows the same two steps a person performs. Both endpoint objects must already be on the draft, and the validation error names the field that missed. A second edge over an existing from→to pair applies with a duplicate warning that names the existing edge and points at "
+        },
+        {
+          "insert": "style_edge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "connect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the one placement with a lock gate: a new edge carries no lock of its own, so it is gated by the regions its two ends sit in."
+        }
+      ]
+    },
+    "b-ts-ge-place-collision-9": {
+      "id": "b-ts-ge-place-collision-9",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "One name, one thing"
+      },
+      "text": [
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the only id the shape roster and the glyph roster share, and the bare name belongs to the glyph. The flowchart cylinder keeps a read-only outbound name, "
+        },
+        {
+          "insert": "database-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": a board already holding one digests and diffs losslessly, but "
+        },
+        {
+          "insert": "place_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "change_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " do not accept it. The mirror rule governs the next collision — the shape keeps the bare name and the glyph reaches as "
+        },
+        {
+          "insert": "<glyph>-icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Either way exactly one of a colliding pair is placeable, so no name ever means two things. The table is audited at import time in "
+        },
+        {
+          "insert": "placeable-types.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/placeable-types.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-ts-ge-place-selfloop-10": {
+      "id": "b-ts-ge-place-selfloop-10",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "An edge whose two ends name the same object is rejected: the connector router draws no loops. The refusal points at what this surface can actually build — say the loop in the node's own text, or place a sticky beside it — rather than at anything the document model has no object for ("
+        },
+        {
+          "insert": "requireDistinctEndpoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/op-context.ts",
+              "symbol": "requireDistinctEndpoints"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-heading-11": {
+      "id": "b-ts-ge-arrange-heading-11",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Arrange"
+        }
+      ]
+    },
+    "b-ts-ge-arrange-code-12": {
+      "id": "b-ts-ge-arrange-code-12",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "move_to({ id: Id, x: number, y: number })      // absolute; x,y = new top-left\nmove_by({ id: Id, dx: number, dy: number })    // relative nudge\n\nresize    ({ id: Id, width?: number, height?: number })\nmatch_size({ id: Id, like: Id })\n\nalign    ({ ids: Id[], edge: \"left\" | \"right\" | \"top\" | \"bottom\"\n                             | \"center_h\" | \"center_v\" })\nspace_out({ ids: Id[], axis: \"horizontal\" | \"vertical\", gap: number })"
+        }
+      ]
+    },
+    "b-ts-ge-arrange-move-13": {
+      "id": "b-ts-ge-arrange-move-13",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "move_to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sets a box's top-left corner; "
+        },
+        {
+          "insert": "move_by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " nudges it from where it already is. Moving a section "
+        },
+        {
+          "insert": "translates its descendants with it",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the frame and its contents travel as one, matching what dragging a frame does in the UI — so containment never changes on a move, and the result reports how many boxes the frame carried."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-resize-14": {
+      "id": "b-ts-ge-arrange-resize-14",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns explicit dimensions. The top-left corner stays fixed so the box grows or shrinks toward its bottom-right, and at least one dimension is required — a call with neither is refused as asking for no change. The dimension a call does not name is left exactly where it was. Resizing a section keeps the adopt-and-release semantics: the frame's new edges decide what it contains."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-sizerules-15": {
+      "id": "b-ts-ge-arrange-sizerules-15",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Size has rules"
+      },
+      "text": [
+        {
+          "insert": "A box exists to make its text readable, so "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "match_size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " measure the box that landed against the text already in it, using the renderer's own wrap and clamp decision ("
+        },
+        {
+          "insert": "text-fit.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/text-fit.ts"
+            }
+          }
+        },
+        {
+          "insert": ") rather than a bare minimum constant. Text that would clip attaches a warning naming the size the content needs. The check is report-only — the size still lands — and "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " runs the mirror image of it from the other direction, so the agent hears about an illegible box at the moment it makes one."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-match-16": {
+      "id": "b-ts-ge-arrange-match-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "match_size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns peer matching: it copies both dimensions from the box named by "
+        },
+        {
+          "insert": "like",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so matching a row to its largest member is N calls with no hand-copied numbers. The "
+        },
+        {
+          "insert": "like",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " source is measured, never written, and is therefore "
+        },
+        {
+          "insert": "never lock-gated",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the gate falls on the target instead. A box cannot be its own size source; that call is refused and redirected to "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-split-17": {
+      "id": "b-ts-ge-arrange-split-17",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The two spacing gestures divide cleanly: "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns the cross axis and never changes spacing along the flow, while "
+        },
+        {
+          "insert": "space_out",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns the flow axis and never touches the cross one. "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " puts the listed boxes on one shared edge or centerline; "
+        },
+        {
+          "insert": "space_out",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " re-pitches them in place, with the first box in positional order holding and every later one sliding so the clear gap between neighbours is exactly "
+        },
+        {
+          "insert": "gap",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The run grows or shrinks to suit; sections arrange by their own frame and carry their contents. "
+        },
+        {
+          "insert": "space_out",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the corridor-opening fix the crowding finding asks for, as one call instead of N hand-computed moves."
+        }
+      ]
+    },
+    "b-ts-ge-arrange-refusals-18": {
+      "id": "b-ts-ge-arrange-refusals-18",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Both refuse three things. A connection id is an error with a redirect rather than a silent skip — a wire has no box to position and re-routes itself whenever its ends move. A locked box among the ids refuses the whole arrangement rather than dropping out of it and leaving the row half-aligned, since every listed id is written. And both need at least two boxes that move "
+        },
+        {
+          "insert": "independently",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": ": ids that all travel inside one listed section collapse to a single unit, and the refusal says so instead of applying a no-op ("
+        },
+        {
+          "insert": "arrange.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/arrange.ts"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-ts-ge-content-heading-19": {
+      "id": "b-ts-ge-content-heading-19",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Content & appearance"
+        }
+      ]
+    },
+    "b-ts-ge-content-code-20": {
+      "id": "b-ts-ge-content-code-20",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "update_text ({ id: Id, text: string })\nchange_color({ id: Id, color: Color })\nchange_shape({ id: Id, patch: { type?: ShapeType | Glyph, direction?: Direction } })"
+        }
+      ]
+    },
+    "b-ts-ge-content-text-21": {
+      "id": "b-ts-ge-content-text-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One home per concern.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " writes every kind's text field — a sticky's body, a section's title, a shape's label, an edge's label — so it gates on existence and dispatches on kind inside. Empty text clears the field, and on an edge it removes the label rather than leaving an empty chip. Text that no longer fits its current box still applies, with a warning naming the size it would need. An edge label is the deliberate exception: a chip never truncates, it grows, so the verdict there is a crowding one and belongs to the unreadable-labels finding, which measures the routed corridor."
+        }
+      ]
+    },
+    "b-ts-ge-content-color-22": {
+      "id": "b-ts-ge-content-color-22",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "change_color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " recolors anything that carries a color, connections included — one pick from the board's closed roster, from which the renderer derives the fill, stroke, and text tones. Because color lives here, "
+        },
+        {
+          "insert": "style_edge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " has no color key to reach for and the two never overlap."
+        }
+      ]
+    },
+    "b-ts-ge-content-shape-23": {
+      "id": "b-ts-ge-content-shape-23",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "change_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " swaps what a shape is and which way it points, over the same folded vocabulary "
+        },
+        {
+          "insert": "place_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " uses: naming a glyph makes the object that icon, and naming a shape drops any glyph on it. It is shapes-only — sections, stickies, and edges are not targets. Only four types carry a facing at all: "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "parallelogram",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "chevron",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " point left or right, "
+        },
+        {
+          "insert": "triangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " up or down. A direction the new type cannot hold is dropped with a note saying what the object faces instead, and a facing type that ends up without one takes the same default the document validator applies on load."
+        }
+      ]
+    },
+    "b-ts-ge-sections-heading-24": {
+      "id": "b-ts-ge-sections-heading-24",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Sections"
+        }
+      ]
+    },
+    "b-ts-ge-sections-code-25": {
+      "id": "b-ts-ge-sections-code-25",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "fit_section          ({ id: Id })\nchange_section_border({ id: Id, border: \"solid\" | \"dashed\" | \"none\" })\n\nlock  ({ id: Id, mode: \"all\" | \"background\" })   // sections only\nunlock({ id: Id })                               // sections only"
+        }
+      ]
+    },
+    "b-ts-ge-sections-border-26": {
+      "id": "b-ts-ge-sections-border-26",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "change_section_border",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plumbs a section's existing "
+        },
+        {
+          "insert": "style.strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field. The schema and the handler accept "
+        },
+        {
+          "insert": "\"none\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " even though the UI flyout offers only solid and dashed ("
+        },
+        {
+          "insert": "SectionBorder",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/schemas.ts",
+              "symbol": "SectionBorder"
+            }
+          }
+        },
+        {
+          "insert": "). A frame with no border is invisible but fully real: it still owns its region, and membership is geometric, so nothing inside it changes hands. The patch names "
+        },
+        {
+          "insert": "strokeStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " alone, which merges per key on the way down and leaves the frame's shape and stroke width where they were."
+        }
+      ]
+    },
+    "b-ts-ge-sections-fit-27": {
+      "id": "b-ts-ge-sections-fit-27",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "fit_section({ id })",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " closes one frame around the children already inside it, and takes an "
+        },
+        {
+          "insert": "id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " like every other section gesture — no scope, no cascade argument. Ancestors keep their slack until they are fitted too. The full semantics, including what a childless frame returns and why no ancestor is touched, belong to "
+        },
+        {
+          "insert": "the kernel",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/40-kernel",
+              "label": "Agent kernel architecture"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-ts-ge-sections-lock-28": {
+      "id": "b-ts-ge-sections-lock-28",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Locking is a section-level gesture: you protect a region of the board, not a single box. Both "
+        },
+        {
+          "insert": "lock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "unlock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " require a section id, and that gate is load-bearing — the document schema accepts "
+        },
+        {
+          "insert": "locked",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on any object, so the tool boundary is where the section-level intent is enforced on this path, alongside the context menu's own section gate on the UI path. "
+        },
+        {
+          "insert": "\"background\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pins the frame itself and leaves its contents editable; "
+        },
+        {
+          "insert": "\"all\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " freezes the frame and every descendant. A lock a person set is a don't-touch signal: lift one only when the request cannot be carried out otherwise, and say that you did."
+        }
+      ]
+    },
+    "b-ts-ge-sections-lock-table-29": {
+      "id": "b-ts-ge-sections-lock-table-29",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "The lock matrix",
+        "columns": [
+          "the gesture writes",
+          "gated when"
+        ],
+        "rows": [
+          [
+            "an object's own geometry or content",
+            "that object carries any locked value — \"background\" included, so a background-locked frame refuses its own mutation"
+          ],
+          [
+            "a descendant of a frame",
+            "an ancestor section carries locked: \"all\". An ancestor's \"background\" lock gates nothing below it — that is the whole point of having two modes"
+          ],
+          [
+            "an edge, or an endpoint it is being pointed at",
+            "either endpoint object sits in a locked-all closure. \"background\" never gates an edge: it pins one frame's box, not the region"
+          ],
+          [
+            "a box it only measures (match_size's like, clone's source)",
+            "never — reading a box writes nothing, so a locked box is a valid source. The gate falls on the target"
+          ],
+          [
+            "lock / unlock",
+            "never — the release has to stay reachable"
+          ],
+          [
+            "a placement (place_*, clone)",
+            "never. A new id cannot be under a lock, and the frame it appears to land in is decided by membership reconcile, which already refuses to adopt into a section locked \"all\""
+          ]
+        ]
+      }
+    },
+    "b-ts-ge-sections-lock-refusal-30": {
+      "id": "b-ts-ge-sections-lock-refusal-30",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The gate is a runtime check in "
+        },
+        {
+          "insert": "op-context.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/op-context.ts"
+            }
+          }
+        },
+        {
+          "insert": ", transcribed from the UI's own manipulation test so both paths refuse the same edits. Every refusal names the frame holding the lock "
+        },
+        {
+          "insert": "and",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "unlock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as the one call that lifts it: a gate the model cannot see its way out of costs a turn."
+        }
+      ]
+    },
+    "b-ts-ge-edges-heading-31": {
+      "id": "b-ts-ge-edges-heading-31",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Edges"
+        }
+      ]
+    },
+    "b-ts-ge-edges-code-32": {
+      "id": "b-ts-ge-edges-code-32",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "style_edge       ({ id: Id, patch: { style?: LineStyle, arrow?: Arrow } })\nchange_connection({ id: Id, patch: { from?: Endpoint, to?: Endpoint } })\n\nreroute      ({ id: Id, points: Point[] })          // interior corners only\nshift_segment({ id: Id, segment: number, to: number })\nreset_route  ({ id: Id })\n\nmove_label({ id: Id, along: number | \"auto\", offset?: number })"
+        }
+      ]
+    },
+    "b-ts-ge-edges-split-33": {
+      "id": "b-ts-ge-edges-split-33",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Restyling a wire, repointing it, and cleaning up its route are separate motions on the real canvas, so they are separate calls here. "
+        },
+        {
+          "insert": "style_edge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " never touches where an edge lands, "
+        },
+        {
+          "insert": "change_connection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " never touches how it is drawn, and neither owns the elbows. Color and label are absent from all six — they are "
+        },
+        {
+          "insert": "change_color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Locks reach an edge through its ends: a connection carries no lock of its own, so every gesture here is refused when either endpoint object sits inside a locked-all closure."
+        }
+      ]
+    },
+    "b-ts-ge-edges-reroute-34": {
+      "id": "b-ts-ge-edges-reroute-34",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "reroute",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " replaces the interior corners wholesale; the two ends stay attached where they are. "
+        },
+        {
+          "insert": "Every leg must be orthogonal",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — consecutive corners share an x or a y, including the two legs that join the endpoints. Validation asks the router rather than a rulebook: it snaps the points, checks the consecutive-pair rule for a precise message, then routes a candidate edge and rejects anything the router would have quietly fallen back on. A rejection names where the router attaches each end, so the corrected call is computable from the error. A silently ignored route would be worse than a refusal: the edge would keep auto-routing while the model believed it had placed the wire."
+        }
+      ]
+    },
+    "b-ts-ge-edges-shift-35": {
+      "id": "b-ts-ge-edges-shift-35",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "shift_segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the fine instrument: it slides one segment perpendicular to itself, the way dragging its handle does. "
+        },
+        {
+          "insert": "segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the "
+        },
+        {
+          "insert": "sN",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " index the route prints, and "
+        },
+        {
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the segment's new x when it is vertical and its new y when it is horizontal, so orthogonality is preserved by construction. It drives the canvas package's own bend machinery with a synthetic drag, which is why a model-driven shift and a pointer-driven one land the same document patch, endpoint re-pins included. An index the edge does not have is refused with the available segments listed, and a near-diagonal run — which has no bend handle on stage either — is refused with a redirect to "
+        },
+        {
+          "insert": "reroute",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "reset_route",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Both refusals print the current route."
+        }
+      ]
+    },
+    "b-ts-ge-edges-repoint-36": {
+      "id": "b-ts-ge-edges-repoint-36",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "change_connection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " moves one end to another object, or to another side of the one it already meets; the edge alone moves and neither object changes. When the ends move it drops a stored manual route explicitly, with a note, because waypoints drawn for the old geometry describe nothing afterwards. Distinctness is judged against the edge as it will stand — the side being repointed against the side already stored — so a repoint cannot land on the object the other end occupies. "
+        },
+        {
+          "insert": "reset_route",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hands an edge back to the auto-router, dropping both the manual corners and any endpoint pins a route left behind, while keeping an anchor: choosing which side of a box an edge leaves is a stated intent, not routing debris. An edge that already carries neither returns a no-op saying so."
+        }
+      ]
+    },
+    "b-ts-ge-edges-digest-code-37": {
+      "id": "b-ts-ge-edges-digest-code-37",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "e1: A ─(s0 h y=240)→ (s1 v x=520) ─(s2 h y=300)→ B"
+        }
+      ]
+    },
+    "b-ts-ge-edges-digest-38": {
+      "id": "b-ts-ge-edges-digest-38",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The digest and the ROUTES block print each edge's routed polyline as numbered segments, which is what makes "
+        },
+        {
+          "insert": "shift_segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " nameable at all. The indices are the bend machinery's own segment indices — the same numbers the digest prints and the same ones the gesture accepts — formatted by "
+        },
+        {
+          "insert": "edge-route.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/edge-route.ts"
+            }
+          }
+        },
+        {
+          "insert": " and pinned by a parity test."
+        }
+      ]
+    },
+    "b-ts-ge-edges-fresh-39": {
+      "id": "b-ts-ge-edges-fresh-39",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The fresh-polyline contract"
+      },
+      "text": [
+        {
+          "insert": "Staleness is answered by the tool results, not by restricting turns: "
+        },
+        {
+          "insert": "every",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " gesture in the Edges group returns the edge's post-op numbered polyline, so a second shift in the same turn chains off the previous result instead of off a digest that aged the moment the first one applied. That includes the two gestures that move no geometry — a "
+        },
+        {
+          "insert": "style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "labelPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " write marks the edge touched — and it includes NO-OP results, because a "
+        },
+        {
+          "insert": "shift_segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " asking for where the segment already sits is exactly the moment the model needs the current numbering, not the moment to withhold it. A "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " write reports no route: those are content gestures and say nothing about how the wire runs."
+        }
+      ]
+    },
+    "b-ts-ge-edges-label-40": {
+      "id": "b-ts-ge-edges-label-40",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "move_label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pins the label chip somewhere other than the middle of its route. "
+        },
+        {
+          "insert": "along",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a fraction of the routed path — 0 is the "
+        },
+        {
+          "insert": "from",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " end, 1 the "
+        },
+        {
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " end, and a value outside that range is refused with the reason — while "
+        },
+        {
+          "insert": "\"auto\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " drops the pin and returns the chip to the routed midpoint. "
+        },
+        {
+          "insert": "offset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " nudges the chip perpendicular to the path in px, positive to the left of the from→to direction, and is ignored with "
+        },
+        {
+          "insert": "\"auto\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It is the one gesture that writes the connection's "
+        },
+        {
+          "insert": "labelPosition",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field."
+        }
+      ]
+    },
+    "b-ts-ge-delete-heading-41": {
+      "id": "b-ts-ge-delete-heading-41",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Delete"
+        }
+      ]
+    },
+    "b-ts-ge-delete-code-42": {
+      "id": "b-ts-ge-delete-code-42",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "delete({ id: Id })\n// object     → the object and every edge attached to it\n// section    → the frame and every descendant, with their edges\n// connection → the edge alone; the two objects it joined stay"
+        }
+      ]
+    },
+    "b-ts-ge-delete-cascades-43": {
+      "id": "b-ts-ge-delete-cascades-43",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Deleting is the same motion whatever it lands on, so it is one verb with three cascades chosen from the target's kind, and the result names what went with it. The board always keeps at least one section, so "
+        },
+        {
+          "insert": "the last section is refused",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — put its replacement down first. The cascades themselves live in the draft applier, which is the same code the accept-time reducer runs, so the descriptor chooses the removal rather than re-implementing it. The lock gate reads the named id, the same reach every other gesture has."
+        }
+      ]
+    },
+    "b-ts-ge-finish-heading-44": {
+      "id": "b-ts-ge-finish-heading-44",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Perceive, ask, finish"
+        }
+      ]
+    },
+    "b-ts-ge-finish-code-45": {
+      "id": "b-ts-ge-finish-code-45",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "look({ view?: Id, at?: Rect })       // exactly one knob\n\nadd_annotation  ({ objectId: Id, body: string })\nreply_annotation({ id: string, body: string })\nresolve_request ({ id: string, status: \"done\" | \"declined\", note: string })\n\nupdate_description({ description: string })\nset_board_title   ({ title: string })\n\nfinalize({ outcome: \"committed\" | \"none\", message: string })"
+        }
+      ]
+    },
+    "b-ts-ge-finish-look-46": {
+      "id": "b-ts-ge-finish-look-46",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the close-up. It changes nothing and frames exactly "
+        },
+        {
+          "insert": "one",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " region: "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " names a section or a single object — a section frames its own bounds, an object frames its bounds with a ring of context around them — and "
+        },
+        {
+          "insert": "at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " crops the camera to a world rect. The framed region comes back rendered "
+        },
+        {
+          "insert": "and",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " measured — per-pair gaps on each axis, row and column pitch, the section's free margins, ink share — so conformance is read rather than computed in context. The standing text payload rides along with every call: the digest, the cumulative baseline-to-draft diff, every open finding, how every edge actually routes, and the request queue."
+        }
+      ]
+    },
+    "b-ts-ge-finish-look-refusal-47": {
+      "id": "b-ts-ge-finish-look-refusal-47",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The two knobs are either/or, not composable. A call carrying both is refused and told to drop the one that is not the close-up it meant; a bare call with neither is refused and shown what each knob frames. Both refusals spell out the two legal calls concretely, so the model re-sends a corrected call rather than re-reading a rule ("
+        },
+        {
+          "insert": "look.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/look.ts"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-ts-ge-finish-look-board-48": {
+      "id": "b-ts-ge-finish-look-board-48",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "look never renders the whole board"
+      },
+      "text": [
+        {
+          "insert": "The current board always arrives with the "
+        },
+        {
+          "insert": "<state>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block, so there is nothing for a whole-board look to add and the tool does not offer one. That is what makes the one-region rule affordable rather than restrictive. The render cadence that keeps the attached board current is the kernel's, and is described in "
+        },
+        {
+          "insert": "Agent kernel architecture",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/40-kernel",
+              "label": "Agent kernel architecture"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-ts-ge-finish-annotations-49": {
+      "id": "b-ts-ge-finish-annotations-49",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "add_annotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " anchors a question to one object as a thread the user answers on their own time. It never waits: leave the question, proceed on the best reading, and name any open thread in the finalize message. Use it only where the answer would genuinely change the diagram — one or two per run at most. "
+        },
+        {
+          "insert": "reply_annotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " posts into an existing thread without moving its status, addressed by the thread's queue alias or its annotation id. "
+        },
+        {
+          "insert": "resolve_request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the closing move: it disposes one open queue entry as done or declined, and the note is required — one line for the operator saying what was done, or why it was declined."
+        }
+      ]
+    },
+    "b-ts-ge-finish-standing-50": {
+      "id": "b-ts-ge-finish-standing-50",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "update_description",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " replaces the board's standing account wholesale — the full replacement markdown, not a patch. "
+        },
+        {
+          "insert": "set_board_title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renames the board: the name shown above it, short, and what a person would call it. The pair goes together when the diagram's subject has moved on from the name it was created with."
+        }
+      ]
+    },
+    "b-ts-ge-finish-finalize-51": {
+      "id": "b-ts-ge-finish-finalize-51",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the only call that ends the run, and a successful one is terminal. "
+        },
+        {
+          "insert": "outcome \"committed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " proposes the current draft for operator review; it is blocked — and the run continues — while "
+        },
+        {
+          "insert": "any",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " diagnostic remains in the edited scope, warnings included, while any user-authored request is still open, or while the draft does not differ from the board. The findings it runs are the finishing roster in "
+        },
+        {
+          "insert": "board/lints/index.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/index.ts"
+            }
+          }
+        },
+        {
+          "insert": ", filtered to the edited scope ("
+        },
+        {
+          "insert": "finalize.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/finalize.ts"
+            }
+          }
+        },
+        {
+          "insert": "). A thread the agent opened is non-blocking, so an unanswered question never traps the run. "
+        },
+        {
+          "insert": "outcome \"none\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ends without a proposal and leaves the board untouched. "
+        },
+        {
+          "insert": "message",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is required for both outcomes: one plain-language line, a summary of what changed or the reason no proposal could be made."
+        }
+      ]
+    },
+    "b-ts-ge-finish-assumption-52": {
+      "id": "b-ts-ge-finish-assumption-52",
+      "flavour": "assumption",
+      "children": [],
+      "props": {
+        "confidence": "medium",
+        "title": "Finalize does not require a prior look"
+      },
+      "text": [
+        {
+          "insert": "Whether a committed "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " should require that the run framed at least one close-up first is an open question. It is unenforced: the gates check findings, open requests, and whether the draft differs from the board, and none of them asks whether the agent ever looked. A run can therefore commit on the board renders attached to its "
+        },
+        {
+          "insert": "<state>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " blocks alone, without a single measured region. Treat the absence of that gate as a decision not yet taken rather than as a decision against it."
+        }
+      ]
+    }
+  }
+}

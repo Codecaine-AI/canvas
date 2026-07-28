@@ -27,7 +27,6 @@ import {
   distanceToPolyline,
   elbowize,
   pathBoxViolationIds,
-  polylineMidpoint,
   routedPolyline,
   type Point,
 } from "../geometry";
@@ -128,7 +127,8 @@ function longestCoRun(a: AxisSegment[], b: AxisSegment[]): { run: number; separa
 
 const GUIDANCE = `Connectors must read. Blocking (error tier — blocks commit):
 - a connector that ploughs through a box;
-- zero-length, dangling, and self-loop edges — delete, reconnect, or badge them.
+- zero-length, dangling, and self-loop edges — delete or reconnect them; a self-loop's
+  meaning belongs in the node's own text, or on a sticky beside it.
 Warnings — wires must own their space:
 - two opposite edges between the same pair read as one ambiguous line; prefer a single
   edge with a both-ends arrow;
@@ -154,7 +154,8 @@ export const rule: LayoutRule = {
       if (points.length >= 2) routed.set(edge.id, points);
     }
 
-    // Through-box (ERROR) — the old lint crossing check, per edge.
+    // Through-box (error): a routed path crossing a box that is not one of its
+    // own endpoints, judged per edge.
     for (const edge of document.connections) {
       const fromId = edge.from.objectId;
       const toId = edge.to.objectId;
@@ -235,7 +236,7 @@ export const rule: LayoutRule = {
     // Every routing-debt check judges the same true renderer paths.
     const polylines = routed;
 
-    // Co-linear shared runs (warning, NEW): distinct-endpoint pairs whose
+    // Co-linear shared runs (warning): distinct-endpoint pairs whose
     // parallel segments sit ≤8px apart for ≥100px.
     for (let i = 0; i < document.connections.length; i += 1) {
       for (let j = i + 1; j < document.connections.length; j += 1) {
@@ -257,7 +258,7 @@ export const rule: LayoutRule = {
       }
     }
 
-    // Border-hugging (warning, NEW): an edge tracking one section border
+    // Border-hugging (warning): an edge tracking one section border
     // within 12px for ≥200px total.
     const sections = document.objects.filter((object) => kindOf(object) === "section");
     for (const edge of document.connections) {
@@ -296,17 +297,26 @@ export const rule: LayoutRule = {
       }
     }
 
-    // Stranded chips (warning, NEW): the chip midpoint estimate vs the
+    // Stranded chips (warning): where the chip is actually DRAWN vs the
     // axis-aligned wire actually drawn (elbowized polyline). Only diagonal
     // waypoint legs can diverge; elbow-routed edges are on-wire by
     // construction.
+    //
+    // A `labelPosition.offset` pushes the chip off the wire ON PURPOSE
+    // (that is how `move_label` clears a covered label), so the authored
+    // offset is spent as budget before the distance is judged. A pin whose
+    // drift is no more than what its author asked for is placed, not
+    // stranded; drift beyond it still reads as a broken route.
     for (const edge of document.connections) {
       const chip = chipFor(edge, document);
       const polyline = polylines.get(edge.id);
       if (!chip || !polyline) continue;
-      const mid = polylineMidpoint(polyline);
-      if (!mid) continue;
-      const distance = distanceToPolyline(mid, elbowize(polyline));
+      const chipCenter = {
+        x: chip.rect.x + chip.rect.width / 2,
+        y: chip.rect.y + chip.rect.height / 2,
+      };
+      const authoredOffset = Math.abs(edge.labelPosition?.offset ?? 0);
+      const distance = distanceToPolyline(chipCenter, elbowize(polyline)) - authoredOffset;
       if (distance <= STRANDED_DISTANCE) continue;
       findings.push({
         rule: "broken-edges",

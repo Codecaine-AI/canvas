@@ -24,7 +24,7 @@ import { toBamlError, BamlStream, BamlAbortError, Collector, ClientRegistry } fr
 import type { Checked, Check, RecursivePartialNull as MovedRecursivePartialNull } from "./types.js"
 import type { partial_types } from "./partial_types.js"
 import type * as types from "./types.js"
-import type {PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, SQCalibration, SQSubCheck, ScopeDisciplineEditVerdict, SurfaceQualityVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
+import type {CFSubCheck, CraftVerdict, PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RDSubCheck, ReadabilityVerdict, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, ScopeDisciplineEditVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
 import type TypeBuilder from "./type_builder.js"
 import { AsyncHttpRequest, AsyncHttpStreamRequest } from "./async_request.js"
 import { LlmResponseParser, LlmStreamParser } from "./parser.js"
@@ -97,6 +97,118 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
         }
 
         
+        async JudgeCraft(
+        rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+        __baml_options__?: BamlCallOptions<never>
+        ): Promise<types.CraftVerdict> {
+          try {
+          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+          const __signal__ = __options__.signal;
+
+          if (__signal__?.aborted) {
+          throw new BamlAbortError('Operation was aborted', __signal__.reason);
+          }
+
+          // Check if onTick is provided - route through streaming if so
+          if (__options__.onTick) {
+          const __stream__ = this.stream.JudgeCraft(
+          rubric,shared_rules,payload,attached_images,
+          __baml_options__
+          );
+
+          return await __stream__.getFinalResponse();
+          }
+
+          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+          [__options__.collector]) : [];
+          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+          const __env__: Record<string, string> = Object.fromEntries(
+            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+            );
+
+            // Resolve client option to clientRegistry (client takes precedence)
+            let __clientRegistry__ = __options__.clientRegistry;
+            if (__options__.client) {
+              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+              __clientRegistry__.setPrimary(__options__.client);
+            }
+
+            const __raw__ = await this.runtime.callFunction(
+            "JudgeCraft",
+            {
+            "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+            },
+            this.ctxManager.cloneContext(),
+            __options__.tb?.__tb(),
+            __clientRegistry__,
+            __collector__,
+            __options__.tags || {},
+            __env__,
+            __signal__,
+            __options__.watchers,
+            )
+            return __raw__.parsed(false) as types.CraftVerdict
+            } catch (error) {
+            throw toBamlError(error);
+            }
+            }
+            
+        async JudgeCraftAfterError(
+        previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+        __baml_options__?: BamlCallOptions<never>
+        ): Promise<types.CraftVerdict> {
+          try {
+          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+          const __signal__ = __options__.signal;
+
+          if (__signal__?.aborted) {
+          throw new BamlAbortError('Operation was aborted', __signal__.reason);
+          }
+
+          // Check if onTick is provided - route through streaming if so
+          if (__options__.onTick) {
+          const __stream__ = this.stream.JudgeCraftAfterError(
+          previous_error,rubric,shared_rules,payload,attached_images,
+          __baml_options__
+          );
+
+          return await __stream__.getFinalResponse();
+          }
+
+          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+          [__options__.collector]) : [];
+          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+          const __env__: Record<string, string> = Object.fromEntries(
+            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+            );
+
+            // Resolve client option to clientRegistry (client takes precedence)
+            let __clientRegistry__ = __options__.clientRegistry;
+            if (__options__.client) {
+              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+              __clientRegistry__.setPrimary(__options__.client);
+            }
+
+            const __raw__ = await this.runtime.callFunction(
+            "JudgeCraftAfterError",
+            {
+            "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+            },
+            this.ctxManager.cloneContext(),
+            __options__.tb?.__tb(),
+            __clientRegistry__,
+            __collector__,
+            __options__.tags || {},
+            __env__,
+            __signal__,
+            __options__.watchers,
+            )
+            return __raw__.parsed(false) as types.CraftVerdict
+            } catch (error) {
+            throw toBamlError(error);
+            }
+            }
+            
         async JudgePromptHygiene(
         rubric: string,shared_rules: string,payload: string,attached_images: Image[],
         __baml_options__?: BamlCallOptions<never>
@@ -204,6 +316,118 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
             __options__.watchers,
             )
             return __raw__.parsed(false) as types.PHVerdict
+            } catch (error) {
+            throw toBamlError(error);
+            }
+            }
+            
+        async JudgeReadability(
+        rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+        __baml_options__?: BamlCallOptions<never>
+        ): Promise<types.ReadabilityVerdict> {
+          try {
+          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+          const __signal__ = __options__.signal;
+
+          if (__signal__?.aborted) {
+          throw new BamlAbortError('Operation was aborted', __signal__.reason);
+          }
+
+          // Check if onTick is provided - route through streaming if so
+          if (__options__.onTick) {
+          const __stream__ = this.stream.JudgeReadability(
+          rubric,shared_rules,payload,attached_images,
+          __baml_options__
+          );
+
+          return await __stream__.getFinalResponse();
+          }
+
+          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+          [__options__.collector]) : [];
+          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+          const __env__: Record<string, string> = Object.fromEntries(
+            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+            );
+
+            // Resolve client option to clientRegistry (client takes precedence)
+            let __clientRegistry__ = __options__.clientRegistry;
+            if (__options__.client) {
+              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+              __clientRegistry__.setPrimary(__options__.client);
+            }
+
+            const __raw__ = await this.runtime.callFunction(
+            "JudgeReadability",
+            {
+            "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+            },
+            this.ctxManager.cloneContext(),
+            __options__.tb?.__tb(),
+            __clientRegistry__,
+            __collector__,
+            __options__.tags || {},
+            __env__,
+            __signal__,
+            __options__.watchers,
+            )
+            return __raw__.parsed(false) as types.ReadabilityVerdict
+            } catch (error) {
+            throw toBamlError(error);
+            }
+            }
+            
+        async JudgeReadabilityAfterError(
+        previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+        __baml_options__?: BamlCallOptions<never>
+        ): Promise<types.ReadabilityVerdict> {
+          try {
+          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+          const __signal__ = __options__.signal;
+
+          if (__signal__?.aborted) {
+          throw new BamlAbortError('Operation was aborted', __signal__.reason);
+          }
+
+          // Check if onTick is provided - route through streaming if so
+          if (__options__.onTick) {
+          const __stream__ = this.stream.JudgeReadabilityAfterError(
+          previous_error,rubric,shared_rules,payload,attached_images,
+          __baml_options__
+          );
+
+          return await __stream__.getFinalResponse();
+          }
+
+          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+          [__options__.collector]) : [];
+          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+          const __env__: Record<string, string> = Object.fromEntries(
+            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+            );
+
+            // Resolve client option to clientRegistry (client takes precedence)
+            let __clientRegistry__ = __options__.clientRegistry;
+            if (__options__.client) {
+              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+              __clientRegistry__.setPrimary(__options__.client);
+            }
+
+            const __raw__ = await this.runtime.callFunction(
+            "JudgeReadabilityAfterError",
+            {
+            "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+            },
+            this.ctxManager.cloneContext(),
+            __options__.tb?.__tb(),
+            __clientRegistry__,
+            __collector__,
+            __options__.tags || {},
+            __env__,
+            __signal__,
+            __options__.watchers,
+            )
+            return __raw__.parsed(false) as types.ReadabilityVerdict
             } catch (error) {
             throw toBamlError(error);
             }
@@ -428,118 +652,6 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
             __options__.watchers,
             )
             return __raw__.parsed(false) as types.ScopeDisciplineEditVerdict
-            } catch (error) {
-            throw toBamlError(error);
-            }
-            }
-            
-        async JudgeSurfaceQuality(
-        rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-        __baml_options__?: BamlCallOptions<never>
-        ): Promise<types.SurfaceQualityVerdict> {
-          try {
-          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-          const __signal__ = __options__.signal;
-
-          if (__signal__?.aborted) {
-          throw new BamlAbortError('Operation was aborted', __signal__.reason);
-          }
-
-          // Check if onTick is provided - route through streaming if so
-          if (__options__.onTick) {
-          const __stream__ = this.stream.JudgeSurfaceQuality(
-          rubric,shared_rules,payload,attached_images,
-          __baml_options__
-          );
-
-          return await __stream__.getFinalResponse();
-          }
-
-          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
-          [__options__.collector]) : [];
-          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-          const __env__: Record<string, string> = Object.fromEntries(
-            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-            );
-
-            // Resolve client option to clientRegistry (client takes precedence)
-            let __clientRegistry__ = __options__.clientRegistry;
-            if (__options__.client) {
-              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-              __clientRegistry__.setPrimary(__options__.client);
-            }
-
-            const __raw__ = await this.runtime.callFunction(
-            "JudgeSurfaceQuality",
-            {
-            "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-            },
-            this.ctxManager.cloneContext(),
-            __options__.tb?.__tb(),
-            __clientRegistry__,
-            __collector__,
-            __options__.tags || {},
-            __env__,
-            __signal__,
-            __options__.watchers,
-            )
-            return __raw__.parsed(false) as types.SurfaceQualityVerdict
-            } catch (error) {
-            throw toBamlError(error);
-            }
-            }
-            
-        async JudgeSurfaceQualityAfterError(
-        previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-        __baml_options__?: BamlCallOptions<never>
-        ): Promise<types.SurfaceQualityVerdict> {
-          try {
-          const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-          const __signal__ = __options__.signal;
-
-          if (__signal__?.aborted) {
-          throw new BamlAbortError('Operation was aborted', __signal__.reason);
-          }
-
-          // Check if onTick is provided - route through streaming if so
-          if (__options__.onTick) {
-          const __stream__ = this.stream.JudgeSurfaceQualityAfterError(
-          previous_error,rubric,shared_rules,payload,attached_images,
-          __baml_options__
-          );
-
-          return await __stream__.getFinalResponse();
-          }
-
-          const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
-          [__options__.collector]) : [];
-          const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-          const __env__: Record<string, string> = Object.fromEntries(
-            Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-            );
-
-            // Resolve client option to clientRegistry (client takes precedence)
-            let __clientRegistry__ = __options__.clientRegistry;
-            if (__options__.client) {
-              __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-              __clientRegistry__.setPrimary(__options__.client);
-            }
-
-            const __raw__ = await this.runtime.callFunction(
-            "JudgeSurfaceQualityAfterError",
-            {
-            "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-            },
-            this.ctxManager.cloneContext(),
-            __options__.tb?.__tb(),
-            __clientRegistry__,
-            __collector__,
-            __options__.tags || {},
-            __env__,
-            __signal__,
-            __options__.watchers,
-            )
-            return __raw__.parsed(false) as types.SurfaceQualityVerdict
             } catch (error) {
             throw toBamlError(error);
             }
@@ -783,6 +895,154 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
             }
 
             
+            JudgeCraft(
+            rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+            __baml_options__?: BamlCallOptions<never>
+            ): BamlStream<partial_types.CraftVerdict, types.CraftVerdict>
+              {
+              try {
+              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+              const __signal__ = __options__.signal;
+
+              if (__signal__?.aborted) {
+              throw new BamlAbortError('Operation was aborted', __signal__.reason);
+              }
+
+              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+              [__options__.collector]) : [];
+
+              let __onTickWrapper__: (() => void) | undefined;
+
+              // Create collector and wrap onTick if provided
+              if (__options__.onTick) {
+              const __tickCollector__ = new Collector("on-tick-collector");
+              __collector__ = [...__collector__, __tickCollector__];
+
+              __onTickWrapper__ = () => {
+              const __log__ = __tickCollector__.last;
+              if (__log__) {
+              try {
+              __options__.onTick!("Unknown", __log__);
+              } catch (error) {
+              console.error("Error in onTick callback for JudgeCraft", error);
+              }
+              }
+              };
+              }
+
+              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+              const __env__: Record<string, string> = Object.fromEntries(
+                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+                );
+
+                // Resolve client option to clientRegistry (client takes precedence)
+                let __clientRegistry__ = __options__.clientRegistry;
+                if (__options__.client) {
+                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+                  __clientRegistry__.setPrimary(__options__.client);
+                }
+
+                const __raw__ = this.runtime.streamFunction(
+                "JudgeCraft",
+                {
+                "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+                },
+                undefined,
+                this.ctxManager.cloneContext(),
+                __options__.tb?.__tb(),
+                __clientRegistry__,
+                __collector__,
+                __options__.tags || {},
+                __env__,
+                __signal__,
+                __onTickWrapper__,
+                )
+                return new BamlStream<partial_types.CraftVerdict, types.CraftVerdict>(
+                  __raw__,
+                  (a): partial_types.CraftVerdict => a,
+                  (a): types.CraftVerdict => a,
+                  this.ctxManager.cloneContext(),
+                  __options__.signal,
+                  )
+                  } catch (error) {
+                  throw toBamlError(error);
+                  }
+                  }
+                  
+            JudgeCraftAfterError(
+            previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+            __baml_options__?: BamlCallOptions<never>
+            ): BamlStream<partial_types.CraftVerdict, types.CraftVerdict>
+              {
+              try {
+              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+              const __signal__ = __options__.signal;
+
+              if (__signal__?.aborted) {
+              throw new BamlAbortError('Operation was aborted', __signal__.reason);
+              }
+
+              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+              [__options__.collector]) : [];
+
+              let __onTickWrapper__: (() => void) | undefined;
+
+              // Create collector and wrap onTick if provided
+              if (__options__.onTick) {
+              const __tickCollector__ = new Collector("on-tick-collector");
+              __collector__ = [...__collector__, __tickCollector__];
+
+              __onTickWrapper__ = () => {
+              const __log__ = __tickCollector__.last;
+              if (__log__) {
+              try {
+              __options__.onTick!("Unknown", __log__);
+              } catch (error) {
+              console.error("Error in onTick callback for JudgeCraftAfterError", error);
+              }
+              }
+              };
+              }
+
+              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+              const __env__: Record<string, string> = Object.fromEntries(
+                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+                );
+
+                // Resolve client option to clientRegistry (client takes precedence)
+                let __clientRegistry__ = __options__.clientRegistry;
+                if (__options__.client) {
+                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+                  __clientRegistry__.setPrimary(__options__.client);
+                }
+
+                const __raw__ = this.runtime.streamFunction(
+                "JudgeCraftAfterError",
+                {
+                "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+                },
+                undefined,
+                this.ctxManager.cloneContext(),
+                __options__.tb?.__tb(),
+                __clientRegistry__,
+                __collector__,
+                __options__.tags || {},
+                __env__,
+                __signal__,
+                __onTickWrapper__,
+                )
+                return new BamlStream<partial_types.CraftVerdict, types.CraftVerdict>(
+                  __raw__,
+                  (a): partial_types.CraftVerdict => a,
+                  (a): types.CraftVerdict => a,
+                  this.ctxManager.cloneContext(),
+                  __options__.signal,
+                  )
+                  } catch (error) {
+                  throw toBamlError(error);
+                  }
+                  }
+                  
             JudgePromptHygiene(
             rubric: string,shared_rules: string,payload: string,attached_images: Image[],
             __baml_options__?: BamlCallOptions<never>
@@ -923,6 +1183,154 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
                   __raw__,
                   (a): partial_types.PHVerdict => a,
                   (a): types.PHVerdict => a,
+                  this.ctxManager.cloneContext(),
+                  __options__.signal,
+                  )
+                  } catch (error) {
+                  throw toBamlError(error);
+                  }
+                  }
+                  
+            JudgeReadability(
+            rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+            __baml_options__?: BamlCallOptions<never>
+            ): BamlStream<partial_types.ReadabilityVerdict, types.ReadabilityVerdict>
+              {
+              try {
+              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+              const __signal__ = __options__.signal;
+
+              if (__signal__?.aborted) {
+              throw new BamlAbortError('Operation was aborted', __signal__.reason);
+              }
+
+              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+              [__options__.collector]) : [];
+
+              let __onTickWrapper__: (() => void) | undefined;
+
+              // Create collector and wrap onTick if provided
+              if (__options__.onTick) {
+              const __tickCollector__ = new Collector("on-tick-collector");
+              __collector__ = [...__collector__, __tickCollector__];
+
+              __onTickWrapper__ = () => {
+              const __log__ = __tickCollector__.last;
+              if (__log__) {
+              try {
+              __options__.onTick!("Unknown", __log__);
+              } catch (error) {
+              console.error("Error in onTick callback for JudgeReadability", error);
+              }
+              }
+              };
+              }
+
+              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+              const __env__: Record<string, string> = Object.fromEntries(
+                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+                );
+
+                // Resolve client option to clientRegistry (client takes precedence)
+                let __clientRegistry__ = __options__.clientRegistry;
+                if (__options__.client) {
+                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+                  __clientRegistry__.setPrimary(__options__.client);
+                }
+
+                const __raw__ = this.runtime.streamFunction(
+                "JudgeReadability",
+                {
+                "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+                },
+                undefined,
+                this.ctxManager.cloneContext(),
+                __options__.tb?.__tb(),
+                __clientRegistry__,
+                __collector__,
+                __options__.tags || {},
+                __env__,
+                __signal__,
+                __onTickWrapper__,
+                )
+                return new BamlStream<partial_types.ReadabilityVerdict, types.ReadabilityVerdict>(
+                  __raw__,
+                  (a): partial_types.ReadabilityVerdict => a,
+                  (a): types.ReadabilityVerdict => a,
+                  this.ctxManager.cloneContext(),
+                  __options__.signal,
+                  )
+                  } catch (error) {
+                  throw toBamlError(error);
+                  }
+                  }
+                  
+            JudgeReadabilityAfterError(
+            previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+            __baml_options__?: BamlCallOptions<never>
+            ): BamlStream<partial_types.ReadabilityVerdict, types.ReadabilityVerdict>
+              {
+              try {
+              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+              const __signal__ = __options__.signal;
+
+              if (__signal__?.aborted) {
+              throw new BamlAbortError('Operation was aborted', __signal__.reason);
+              }
+
+              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
+              [__options__.collector]) : [];
+
+              let __onTickWrapper__: (() => void) | undefined;
+
+              // Create collector and wrap onTick if provided
+              if (__options__.onTick) {
+              const __tickCollector__ = new Collector("on-tick-collector");
+              __collector__ = [...__collector__, __tickCollector__];
+
+              __onTickWrapper__ = () => {
+              const __log__ = __tickCollector__.last;
+              if (__log__) {
+              try {
+              __options__.onTick!("Unknown", __log__);
+              } catch (error) {
+              console.error("Error in onTick callback for JudgeReadabilityAfterError", error);
+              }
+              }
+              };
+              }
+
+              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+              const __env__: Record<string, string> = Object.fromEntries(
+                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+                );
+
+                // Resolve client option to clientRegistry (client takes precedence)
+                let __clientRegistry__ = __options__.clientRegistry;
+                if (__options__.client) {
+                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+                  __clientRegistry__.setPrimary(__options__.client);
+                }
+
+                const __raw__ = this.runtime.streamFunction(
+                "JudgeReadabilityAfterError",
+                {
+                "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+                },
+                undefined,
+                this.ctxManager.cloneContext(),
+                __options__.tb?.__tb(),
+                __clientRegistry__,
+                __collector__,
+                __options__.tags || {},
+                __env__,
+                __signal__,
+                __onTickWrapper__,
+                )
+                return new BamlStream<partial_types.ReadabilityVerdict, types.ReadabilityVerdict>(
+                  __raw__,
+                  (a): partial_types.ReadabilityVerdict => a,
+                  (a): types.ReadabilityVerdict => a,
                   this.ctxManager.cloneContext(),
                   __options__.signal,
                   )
@@ -1219,154 +1627,6 @@ export type RecursivePartialNull<T> = MovedRecursivePartialNull<T>
                   __raw__,
                   (a): partial_types.ScopeDisciplineEditVerdict => a,
                   (a): types.ScopeDisciplineEditVerdict => a,
-                  this.ctxManager.cloneContext(),
-                  __options__.signal,
-                  )
-                  } catch (error) {
-                  throw toBamlError(error);
-                  }
-                  }
-                  
-            JudgeSurfaceQuality(
-            rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-            __baml_options__?: BamlCallOptions<never>
-            ): BamlStream<partial_types.SurfaceQualityVerdict, types.SurfaceQualityVerdict>
-              {
-              try {
-              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-              const __signal__ = __options__.signal;
-
-              if (__signal__?.aborted) {
-              throw new BamlAbortError('Operation was aborted', __signal__.reason);
-              }
-
-              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
-              [__options__.collector]) : [];
-
-              let __onTickWrapper__: (() => void) | undefined;
-
-              // Create collector and wrap onTick if provided
-              if (__options__.onTick) {
-              const __tickCollector__ = new Collector("on-tick-collector");
-              __collector__ = [...__collector__, __tickCollector__];
-
-              __onTickWrapper__ = () => {
-              const __log__ = __tickCollector__.last;
-              if (__log__) {
-              try {
-              __options__.onTick!("Unknown", __log__);
-              } catch (error) {
-              console.error("Error in onTick callback for JudgeSurfaceQuality", error);
-              }
-              }
-              };
-              }
-
-              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-              const __env__: Record<string, string> = Object.fromEntries(
-                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-                );
-
-                // Resolve client option to clientRegistry (client takes precedence)
-                let __clientRegistry__ = __options__.clientRegistry;
-                if (__options__.client) {
-                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-                  __clientRegistry__.setPrimary(__options__.client);
-                }
-
-                const __raw__ = this.runtime.streamFunction(
-                "JudgeSurfaceQuality",
-                {
-                "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-                },
-                undefined,
-                this.ctxManager.cloneContext(),
-                __options__.tb?.__tb(),
-                __clientRegistry__,
-                __collector__,
-                __options__.tags || {},
-                __env__,
-                __signal__,
-                __onTickWrapper__,
-                )
-                return new BamlStream<partial_types.SurfaceQualityVerdict, types.SurfaceQualityVerdict>(
-                  __raw__,
-                  (a): partial_types.SurfaceQualityVerdict => a,
-                  (a): types.SurfaceQualityVerdict => a,
-                  this.ctxManager.cloneContext(),
-                  __options__.signal,
-                  )
-                  } catch (error) {
-                  throw toBamlError(error);
-                  }
-                  }
-                  
-            JudgeSurfaceQualityAfterError(
-            previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-            __baml_options__?: BamlCallOptions<never>
-            ): BamlStream<partial_types.SurfaceQualityVerdict, types.SurfaceQualityVerdict>
-              {
-              try {
-              const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-              const __signal__ = __options__.signal;
-
-              if (__signal__?.aborted) {
-              throw new BamlAbortError('Operation was aborted', __signal__.reason);
-              }
-
-              let __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector :
-              [__options__.collector]) : [];
-
-              let __onTickWrapper__: (() => void) | undefined;
-
-              // Create collector and wrap onTick if provided
-              if (__options__.onTick) {
-              const __tickCollector__ = new Collector("on-tick-collector");
-              __collector__ = [...__collector__, __tickCollector__];
-
-              __onTickWrapper__ = () => {
-              const __log__ = __tickCollector__.last;
-              if (__log__) {
-              try {
-              __options__.onTick!("Unknown", __log__);
-              } catch (error) {
-              console.error("Error in onTick callback for JudgeSurfaceQualityAfterError", error);
-              }
-              }
-              };
-              }
-
-              const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-              const __env__: Record<string, string> = Object.fromEntries(
-                Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-                );
-
-                // Resolve client option to clientRegistry (client takes precedence)
-                let __clientRegistry__ = __options__.clientRegistry;
-                if (__options__.client) {
-                  __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-                  __clientRegistry__.setPrimary(__options__.client);
-                }
-
-                const __raw__ = this.runtime.streamFunction(
-                "JudgeSurfaceQualityAfterError",
-                {
-                "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-                },
-                undefined,
-                this.ctxManager.cloneContext(),
-                __options__.tb?.__tb(),
-                __clientRegistry__,
-                __collector__,
-                __options__.tags || {},
-                __env__,
-                __signal__,
-                __onTickWrapper__,
-                )
-                return new BamlStream<partial_types.SurfaceQualityVerdict, types.SurfaceQualityVerdict>(
-                  __raw__,
-                  (a): partial_types.SurfaceQualityVerdict => a,
-                  (a): types.SurfaceQualityVerdict => a,
                   this.ctxManager.cloneContext(),
                   __options__.signal,
                   )

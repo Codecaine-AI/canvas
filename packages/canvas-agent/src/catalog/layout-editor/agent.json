@@ -1,0 +1,22 @@
+{
+	"$schema": "agent-kernel/agent-v1",
+	"name": "layout-editor",
+	"description": "Edits the scoped part of a canvas whiteboard per the operator's instruction: applies direct object and connection operations, checks delta and lint reports, judges renders, then commits a draft for review.",
+	"model": "layout",
+	"thinking": "high",
+	"maxTurns": 300,
+	"extensions": false,
+	"variables": {
+		"toolCallCap": {
+			"default": 1,
+			"description": "Maximum tool calls the agent may send in one assistant message (1–3)."
+		}
+	},
+	"state": {
+		"window": {
+			"strategy": "turns",
+			"maxTurns": 4,
+			"maxImages": 4
+		}
+	}
+}

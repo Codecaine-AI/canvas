@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { formatBoardDescription } from "../src/agent/loaders/board-state";
+import { formatBoardDescription } from "../src/service/session/snapshots/board-state";
 import { formatBoardDigest } from "../src/board/digest";
-import { boardStateSnapshot } from "../src/service/session/context";
-import { boardDiffBlock, lookPerception } from "../src/service/session/perception";
+import { boardStateSnapshot } from "../src/service/session/snapshots/context";
+import { boardDiffBlock, lookPerception } from "../src/service/session/perception/perception";
 import { emitSessionEvent } from "../src/service/session/store";
 import { toolUpdateDescription } from "../src/service/session/tools";
 import { makeTestSession } from "./helpers";

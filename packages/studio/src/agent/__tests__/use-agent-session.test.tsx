@@ -238,6 +238,49 @@ describe("useAgentSession", () => {
     expect(view.result.current.acceptedResult).toEqual(expectedResult);
   });
 
+  it("advances the preview refresh signal for every delta event", async () => {
+    const { view } = setup();
+    await act(async () => {
+      await view.result.current.start(payload);
+    });
+
+    expect(view.result.current.previewRefreshSignal).toBe(0);
+
+    act(() => {
+      event({
+        type: "delta",
+        sessionId: "session-1",
+        n: 1,
+        delta: "Moved card A.",
+        lint: "",
+      });
+    });
+    expect(view.result.current.previewRefreshSignal).toBe(1);
+
+    act(() => {
+      event({
+        type: "delta",
+        sessionId: "session-1",
+        n: 2,
+        delta: "Aligned card B.",
+        lint: "",
+      });
+    });
+    expect(view.result.current.previewRefreshSignal).toBe(2);
+
+    act(() => {
+      handlers?.onReset();
+      event({
+        type: "delta",
+        sessionId: "session-1",
+        n: 2,
+        delta: "Aligned card B.",
+        lint: "",
+      });
+    });
+    expect(view.result.current.previewRefreshSignal).toBe(3);
+  });
+
   it("keeps the last good proposal when a follow-up is abandoned", async () => {
     const { view } = setup();
     await act(async () => {

@@ -80,6 +80,7 @@ export type AgentSessionStatus =
 
 /** Structural mirror of CanvasAgentPatchOperation (canvas/actions). */
 export type AgentPatchOperation =
+  | { type: "updateTitle"; title: string }
   | { type: "updateDescription"; description: string }
   | { type: "addObject"; object: Record<string, unknown> }
   | { type: "updateObject"; objectId: string; patch: Record<string, unknown> }

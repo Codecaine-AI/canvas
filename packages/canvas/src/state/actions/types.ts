@@ -76,6 +76,12 @@ export type CanvasSelection =
   | { kind: "region"; region: CanvasGeometry };
 
 export type CanvasAgentPatchOperation =
+  /**
+   * The board rename, the agent-path twin of `canvas.updateDocumentTitle`.
+   * Same semantics as the human action: the title is trimmed, and an empty or
+   * unchanged title is a no-op rather than a cleared name.
+   */
+  | { type: "updateTitle"; title: string }
   | { type: "updateDescription"; description: string }
   | {
       type: "addObject";

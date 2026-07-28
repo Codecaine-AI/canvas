@@ -6,7 +6,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { CRAFT_TARGETS, STYLE_TOPICS } from "../src/agent/catalog/layout-editor/context/style-guide";
+import { CRAFT_TARGETS, STYLE_TOPICS } from "../src/catalog/layout-editor/context/style-guide";
 
 const EXPECTED_TOPIC_IDS = [
   "aesthetic",

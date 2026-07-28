@@ -6,7 +6,9 @@
  *
  * Chip rects are the RENDERER's chips, not an estimate: width
  * max(41, chars×9.6 + 2×12), height 30, centered on the route's own
- * `labelPoint`, and no chip at all for empty/whitespace labels — exactly
+ * effective label point (`labelPointFor`: the arc-length midpoint, or the
+ * connection's `labelPosition` pin), and no chip at all for
+ * empty/whitespace labels — exactly
  * what `connectionLabelWidth` + CONNECTION_LABEL_* in
  * packages/canvas/src/connectors/Connector.tsx draw on the stage and
  * packages/canvas/src/render/static-svg.ts draws in the headless preview
@@ -19,7 +21,7 @@
  * even without true overlap, so contact within 16px of a chip is a finding
  * too (warning tier; true overlap stays error tier).
  */
-import { routeConnection } from "../../../../canvas/src/connectors/routing.ts";
+import { labelPointFor, routeConnection } from "../../../../canvas/src/connectors/routing.ts";
 
 import type {
   InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject,
@@ -78,36 +80,6 @@ function overlaps(a: Rect, b: Rect): boolean {
     && b.x < a.x + a.width
     && a.y < b.y + b.height
     && b.y < a.y + a.height;
-}
-
-/**
- * Arc-length midpoint of a polyline — same math as the router's own
- * `labelPoint` (polylineHalfwayPoint). Chips themselves take the router's
- * labelPoint directly via `chipFor`; this helper remains for callers judging
- * arbitrary polylines (broken-edges' stranded-chip check).
- */
-export function polylineMidpoint(points: readonly Point[]): Point | undefined {
-  if (points.length === 0) return undefined;
-  if (points.length === 1) return points[0];
-  let total = 0;
-  const lengths: number[] = [];
-  for (let i = 1; i < points.length; i += 1) {
-    const length = Math.hypot(points[i]!.x - points[i - 1]!.x, points[i]!.y - points[i - 1]!.y);
-    lengths.push(length);
-    total += length;
-  }
-  let remaining = total / 2;
-  for (let i = 0; i < lengths.length; i += 1) {
-    if (remaining <= lengths[i]! || i === lengths.length - 1) {
-      const t = lengths[i]! === 0 ? 0 : remaining / lengths[i]!;
-      return {
-        x: points[i]!.x + (points[i + 1]!.x - points[i]!.x) * t,
-        y: points[i]!.y + (points[i + 1]!.y - points[i]!.y) * t,
-      };
-    }
-    remaining -= lengths[i]!;
-  }
-  return points[points.length - 1];
 }
 
 /**
@@ -179,8 +151,15 @@ export function pathBoxViolationIds(
 /**
  * The renderer's label chip for an edge, or undefined when it draws none
  * (no label, whitespace-only label — the renderer's own `label?.trim()`
- * gate — or a missing endpoint). Centered on the route's `labelPoint`,
- * i.e. exactly where Connector.tsx and static-svg.ts hang the chip.
+ * gate — or a missing endpoint). Centered on the route's EFFECTIVE label
+ * point (`labelPointFor`) — the arc-length midpoint, or the connection's
+ * `labelPosition` pin when it has one — i.e. exactly where Connector.tsx and
+ * static-svg.ts hang the chip. A pinned chip is judged where it is drawn, so
+ * `move_label` can actually clear an overlap the lints flagged.
+ *
+ * Every chip judgement in the lints goes through here, so the router's
+ * `labelPointFor` is the single label-point implementation in the tree and
+ * there is nothing for a lint to drift against.
  */
 export function chipFor(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
@@ -192,13 +171,14 @@ export function chipFor(
   const to = byId.get(edge.to.objectId);
   if (!from || !to) return undefined;
   const routed = routeConnection(from, to, edge, document.objects);
+  const labelPoint = labelPointFor(routed, edge);
   const width = chipWidth(label);
   return {
     edge,
     label,
     rect: {
-      x: routed.labelPoint.x - width / 2,
-      y: routed.labelPoint.y - CHIP_HEIGHT / 2,
+      x: labelPoint.x - width / 2,
+      y: labelPoint.y - CHIP_HEIGHT / 2,
       width,
       height: CHIP_HEIGHT,
     },

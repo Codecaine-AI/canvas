@@ -65,7 +65,7 @@
       "props": {},
       "text": [
         {
-          "insert": "An edit starts when the operator selects canvas objects and tells the studio what should change. The harness resolves that scope, opens a draft from the current document, and gives the model a complete textual and visual starting point. The model edits the draft directly through validated, id-addressed operations. Each applied operation returns a focused account of its effect, while look returns fresh whole-board state and renders for deliberate review. The saved board is not changed until a cumulative proposal passes the run gates and the operator accepts it."
+          "insert": "An edit starts when the operator selects canvas objects and tells the studio what should change. The harness resolves that scope, opens a draft from the current document, and gives the model a complete textual and visual starting point. The model edits the draft directly through validated, id-addressed operations. Each applied operation returns a focused account of its effect and re-renders the draft, so the standing picture — digest, cumulative diff, findings, and a render of the board as it stands — rides the state block into the next turn; look is the deliberate close-up on one region on top of it. The saved board is not changed until a cumulative proposal passes the run gates and the operator accepts it."
         }
       ]
     },
@@ -89,7 +89,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The studio owns the operator-facing session. The harness owns the baseline, scope, draft, request queue, and tool runtime. The model supplies layout judgment, while look asks the canvas renderer for the same routed visual truth used by the product."
+          "insert": "The studio owns the operator-facing session. The harness owns the baseline, scope, draft, request queue, and tool runtime. The model supplies layout judgment, and every picture it judges from — the board render riding each state block and the region look frames — comes from the canvas renderer, so the model reads the same routed visual truth the product draws."
         }
       ]
     },
@@ -99,11 +99,11 @@
       "children": [],
       "props": {
         "title": "One scoped edit, from instruction to proposal",
-        "caption": "The model edits a session draft through typed single-operation tools and uses look for whole-board judgment; finalize proposes the cumulative baseline-to-draft diff."
+        "caption": "The model edits a session draft through typed single-operation tools, judges the whole board from the render riding each state block, and spends look on one framed region at a time; finalize proposes the cumulative baseline-to-draft diff."
       },
       "text": [
         {
-          "insert": "sequenceDiagram\n  participant Studio as Operator / Studio\n  participant Harness as Harness session\n  participant Model\n  participant Renderer as Canvas renderer\n  Studio->>Harness: select objects, instruct, create session\n  Harness->>Harness: resolve scope, copy baseline, inject page frame, sync requests\n  Harness->>Renderer: renderBoardView(current draft)\n  Renderer-->>Harness: full-board PNG\n  Harness-->>Model: five context blocks + board image + exemplar + vocabulary sheet\n  loop study, edit, and review\n    Model->>Harness: typed mutator({ operation fields, view? })\n    Harness->>Harness: validate one operation\n    alt operation applies\n      Harness->>Harness: apply, reconcile membership, diff, lint\n      opt view supplied\n        Harness->>Renderer: render changed board\n        Renderer-->>Harness: painted-extent PNG\n      end\n      Harness-->>Model: APPLIED + DELTA + lint delta + scoped digest + optional render\n    else legal operation has nothing to do\n      Harness-->>Model: NO-OP + note only\n    else state validation fails\n      Harness-->>Model: ERROR + error lines only\n    end\n    Model->>Harness: look({ view? })\n    Harness->>Renderer: render full board and optional section close-up\n    Renderer-->>Harness: 1600px board + optional 1400px close-up\n    Harness-->>Model: full BOARD + BOARD DIFF + LINTS + ROUTES + REQUESTS + renders\n  end\n  opt dispose each user request\n    Model->>Harness: resolve_request(id, status, note)\n    Harness-->>Model: updated REQUESTS queue\n  end\n  Model->>Harness: finalize(committed, message)\n  Harness->>Harness: run scoped error gate, check requests, diff baseline to draft\n  alt error lint or open request remains\n    Harness-->>Model: blocked; run continues\n  else gates pass\n    Harness-->>Studio: proposal-ready(cumulative patch)\n    Studio-->>Studio: operator reviews the proposed board change\n  end"
+          "insert": "sequenceDiagram\n  participant Studio as Operator / Studio\n  participant Harness as Harness session\n  participant Model\n  participant Renderer as Canvas renderer\n  Studio->>Harness: select objects, instruct, create session\n  Harness->>Harness: resolve scope, copy baseline, inject page frame, sync requests\n  Harness->>Renderer: renderBoardView(current draft)\n  Renderer-->>Harness: full-board PNG\n  Harness-->>Model: five context blocks + board image + exemplar + vocabulary sheet\n  loop study, edit, and review\n    Harness-->>Model: state block: BOARD + BOARD DIFF + DIAGNOSTICS + REQUESTS + the board as it stands\n    Model->>Harness: one typed gesture({ operation fields })\n    Harness->>Harness: snap geometry to the 20 grid, validate one operation\n    alt operation applies\n      Harness->>Harness: apply, reconcile membership and waypoints, commit the draft, re-render, diff, lint\n      Harness-->>Model: APPLIED + notes + DELTA + lint delta + ROUTES\n    else legal operation has nothing to do\n      Harness-->>Model: NO-OP + note (edge gestures still return the fresh polyline)\n    else state validation fails\n      Harness-->>Model: ERROR + error lines only\n    end\n    opt study one region close up\n      Model->>Harness: look({ view }) or look({ at })\n      Harness->>Renderer: render the one framed region\n      Renderer-->>Harness: 1400px close-up\n      Harness-->>Model: close-up + MEASURES + BOARD + BOARD DIFF + DIAGNOSTICS + ROUTES + REQUESTS\n    end\n  end\n  opt dispose each user request\n    Model->>Harness: resolve_request(id, status, note)\n    Harness-->>Model: updated REQUESTS queue\n  end\n  Model->>Harness: finalize(committed, message)\n  Harness->>Harness: run the scoped finding gate, check requests, diff baseline to draft\n  alt any scoped finding or open request remains\n    Harness-->>Model: blocked; run continues\n  else gates pass\n    Harness-->>Studio: proposal-ready(cumulative patch)\n    Studio-->>Studio: operator reviews the proposed board change\n  end"
         }
       ]
     },
@@ -154,7 +154,7 @@
           }
         },
         {
-          "insert": " Five blocks arrive in order: editor_state, user_requests, capabilities, style_guide, and board_state. Nested XML children are indented four spaces. The capabilities block groups sections, stickies, objects, and connections; every kind has its description, operations, named functionality, and tips, while objects adds generated vocabulary and connections adds generated fields. The style guide carries one nested aesthetic topic: “Calm and uniform — uniformity is information.” It treats matched size and gap as a peer signal, sizes content first, repeats one gap per group, uses the 16px grid only for quantization, leaves air, groups through sections, reserves red for failure and green for success, and labels edges directly. board_state supplies the full digest and diagnostics. The image hook adds the current full-board render first, the house exemplar second, and the vocabulary contact sheet third; the sheet renders every type, icon glyph, and color plus connection demonstrations, including a wire ending on a section."
+          "insert": " Five blocks arrive in order: editor_state, user_requests, capabilities, style_guide, and board_state. Nested XML children are indented four spaces. The capabilities block comes in two halves: first the material — sections, stickies, objects, and connections, each with its description, named functionality, and tips, while objects adds generated vocabulary and connections adds generated fields — and then one gestures block, a child per verb group, naming each tool and what it does to the board. A kind block says what the thing is and names no tools; the gesture half is read off the registration roster, so it cannot drift from the surface. The style guide carries one nested aesthetic topic: “Calm and uniform — uniformity is information.” It treats matched size and gap as a peer signal, sizes content first, repeats one gap per group, uses the 20 grid only for quantization, leaves air, groups through sections, reserves red for failure and green for success, and labels edges directly. board_state supplies the full digest and diagnostics. The image hook adds the current full-board render first, the house exemplar second, and the vocabulary contact sheet third; the sheet renders every type, icon glyph, and color plus connection demonstrations, including a wire ending on a section."
         }
       ]
     },
@@ -173,7 +173,7 @@
           }
         },
         {
-          "insert": " Thirteen typed mutators provide add, update, and remove for sections, stickies, objects, and connections, plus fit_section; each call names one operation. look is the read-only inspection tool. Section and sticky operations imply their type, while object operations cover the closed shape-and-icon type roster. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line: the agent chooses complete finite geometry for the content and role."
+          "insert": " Twenty-five typed mutators are factored by editing gesture rather than by kind — place, arrange, content, sections, edges, delete — and each call is one gesture. look is the read-only inspection tool. Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the new object comes from defaults; the closed shape-and-icon type roster folds icon glyphs in under their own names. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line, and geometry the agent writes lands on its own 20 grid."
         }
       ]
     },
@@ -192,7 +192,7 @@
           }
         },
         {
-          "insert": " After every operation, section membership is reconciled from geometry. Sections hold exactly the geometry they are given and close around their children only when fit_section names them; ancestors keep their slack until named too. An applied operation returns its APPLIED line, the document-derived DELTA exposing reconciled parentId and anchor, endpoint-position, or waypoint steering changes, the lint delta, and a digest scoped to the touched section, with a render only when view was supplied. A no-op returns its note, and an error returns its error lines; neither changes the draft. look returns the whole board: a fresh digest, cumulative BOARD DIFF, complete lint list, routed truth, request queue, full-board render, and a requested section close-up. Lints explain what is wrong in prose; the model chooses the fix."
+          "insert": " After every operation, section membership and connection waypoints are both reconciled from geometry. Sections hold exactly the geometry they are given and close around their children only when fit_section names them; ancestors keep their slack until named too. An applied operation returns its APPLIED line, any notes, the document-derived DELTA exposing snapped geometry, reconciled parentId and anchor, endpoint-position, or waypoint steering changes, the lint delta, and ROUTES for any connection it touched — every edge gesture returns that edge's fresh numbered polyline, including on a no-op, so a second routing call in the same turn chains off the result rather than off a stale digest. A no-op returns its note, and an error returns its error lines; neither changes the draft. Every draft write goes through one commit choke point that assigns the draft and captures fresh pixels in the same move, so the state block on the next turn carries the board as it now stands together with the digest, the cumulative diff, the findings, and the queue. An edit takes no view argument and returns no picture: framing is look's alone, and one call frames one region — view for a section or a single object, at for a world rect — returning it rendered and measured beside that same standing text. Lints explain what is wrong in prose; the model chooses the fix."
         }
       ]
     },
@@ -211,7 +211,7 @@
           }
         },
         {
-          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires zero error-tier findings and no open requests, and proposes the cumulative baseline-to-draft patch. The agent fixes each warning or deliberately overrides it and names every surviving warning id in the finalize message. outcome none ends without a proposal and explains why."
+          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires every finding there to be cleared — warnings block exactly as errors do — and no user request left open, and proposes the cumulative baseline-to-draft patch. A blocked finalize leaves the run going, so the model fixes what it raised and calls again. outcome none ends without a proposal and explains why."
         }
       ]
     },
@@ -235,7 +235,20 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly sixteen tools: section, sticky, object, and connection add/update/remove mutators; fit_section; look; resolve_request; and finalize. The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. There is no separate rules section; required behavior lives in phase constraints. workflow organizes work into six state-driven phases: understand, survey, plan, build, finish, and finalize, with each phase carrying its objective, steps, and constraints. Build places the section skeleton first, fills one section at a time while judging a render, closes each finished region with fit_section, then adds connections, labels, and styling. Finish uses look to review touched sections and the full board, disposes requests, and resolves diagnostics."
+          "insert": "There are exactly thirty-two tools, factored by editing gesture rather than by kind: twenty-five board mutators across place, arrange, content, sections, edges, and delete; plus look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize. The full roster lives in "
+        },
+        {
+          "insert": "The gesture tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/00-overview",
+              "label": "The gesture tool surface"
+            }
+          }
+        },
+        {
+          "insert": ". The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. There is no separate rules section; required behavior lives in phase constraints. workflow organizes work into five state-driven phases: orientate, plan, build, qa, and finalize, with each phase carrying its objective, steps, and constraints. Build places the section skeleton first, fills one section at a time while judging a render, closes each finished region with fit_section, then adds connections, labels, and styling. QA judges the whole board from the render attached to the state block and each touched section from a framed look, and finalize disposes requests and resolves diagnostics."
         }
       ]
     },
@@ -267,7 +280,7 @@
           }
         },
         {
-          "insert": " look is the model's whole-board recall affordance and the deliberate step back for composition judgment. Its board digest is an indented containment tree followed by one EDGES block; the legend declares elided defaults, and object text is never truncated. Each look returns fresh whole-board state, cumulative change, complete lints, routed truth, requests, and renders; operation results stay focused on the region they touched."
+          "insert": " The standing picture arrives on its own: every turn's state block carries the board digest, the cumulative change, the complete lints, routed truth, the request queue, and a render of the board as it stands, followed by up to three prior post-change renders. The digest is an indented containment tree followed by one EDGES block; the legend declares elided defaults, and object text is never truncated. look is the deliberate close-up layered on that — exactly one region per call, view taking a section or a single object and at cropping to a world rect, either/or and never both — and the framed region comes back both rendered and measured: per-pair gaps on each axis, row and column pitch, the section's free margins, and ink share, so conformance is read rather than computed. Operation results stay focused on what they touched and carry no render at all."
         }
       ]
     },
@@ -286,7 +299,7 @@
           }
         },
         {
-          "insert": " The model writes thirteen entity-specific operation kinds. They lower to the six object-and-connection patch kinds used by the draft applier, document differ, and studio proposal wire. Geometry snaps to the 16px grid, and parentId supplied by the model is not authoritative because containment is reconciled from placement."
+          "insert": " The model writes twenty-five editing gestures. They lower to the six object-and-connection patch kinds used by the draft applier, document differ, and studio proposal wire. Geometry the model writes snaps to its own 20 grid before lowering, and parentId supplied by the model is not authoritative because containment is reconciled from placement."
         }
       ]
     },
@@ -324,7 +337,7 @@
           }
         },
         {
-          "insert": " Five always-on diagnostics check covered content, containment, broken edges, unreadable labels, and crowding against production geometry, and a committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Error-tier findings block a committed finalize in the edited scope. Warning-tier findings do not block, but the model must fix them or name each deliberate override in the finalize message."
+          "insert": " Six always-on diagnostics check covered content, containment, broken edges, unreadable labels, crowding, and clipped text against production geometry, and a committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, and names the measured box size that shows the text whole. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Every finding in the edited scope blocks a committed finalize, warnings included: the call is refused, the run continues, and the model fixes what it raised before calling again."
         }
       ]
     },
@@ -364,12 +377,12 @@
           "insert": ": the digest, lints, document diff, and scope resolver. The model-facing prompt, context assembly, capability rosters, single aesthetic topic, and tool declarations live under "
         },
         {
-          "insert": "packages/canvas-agent/src/agent",
+          "insert": "packages/canvas-agent/src/catalog",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent"
+              "path": "packages/canvas-agent/src/catalog"
             }
           }
         },
@@ -401,13 +414,56 @@
           "insert": "For the implementation record behind this front-door flow, continue to "
         },
         {
-          "insert": "40-kernel — Agent kernel architecture",
+          "insert": "Agent kernel architecture",
           "attributes": {
-            "code": true
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/40-kernel",
+              "label": "Agent kernel architecture"
+            }
           }
         },
         {
-          "insert": "."
+          "insert": ". The rest of the section: "
+        },
+        {
+          "insert": "Where the layout agent is headed",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/05-direction",
+              "label": "Where the layout agent is headed"
+            }
+          }
+        },
+        {
+          "insert": " sets the direction the surface is being built toward; "
+        },
+        {
+          "insert": "The gesture tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/00-overview",
+              "label": "The gesture tool surface"
+            }
+          }
+        },
+        {
+          "insert": " is the per-gesture contract tier — the roster, the grid and creation defaults, the operation pipeline, and the registration seam; and "
+        },
+        {
+          "insert": "Running the layout agent",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/60-running",
+              "label": "Running the layout agent"
+            }
+          }
+        },
+        {
+          "insert": " covers driving a run and reading what comes back."
         }
       ]
     }

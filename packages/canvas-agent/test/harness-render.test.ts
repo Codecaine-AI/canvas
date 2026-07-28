@@ -38,15 +38,8 @@ function makeBubbaStore(): {
   return { store, session };
 }
 
-function centerTask(
-  session: LayoutSession,
-  view?: string,
-): ReturnType<typeof runOp> {
-  return runOp(session, "update_object", {
-    objectId: "task-ml-a",
-    patch: { geometry: { x: 1116, y: 614, width: 200, height: 100 } },
-    view,
-  });
+function centerTask(session: LayoutSession): ReturnType<typeof runOp> {
+  return runOp(session, "move_to", { id: "task-ml-a", x: 1120, y: 620 });
 }
 
 function expectPng(png: Buffer | undefined): asserts png is Buffer {
@@ -55,21 +48,17 @@ function expectPng(png: Buffer | undefined): asserts png is Buffer {
 }
 
 describe("harness render boundary", () => {
-  test("look returns the board render and the requested section close-up", () => {
+  test("look returns exactly the requested section close-up", () => {
     const { session } = makeBubbaStore();
     const draftBefore = session.draft;
 
     const result = look(session, "section-ml-pending");
     expect(result.isError).not.toBe(true);
 
-    // Board render first, section close-up second.
-    expect(result.pngs).toHaveLength(2);
+    // The framed close-up is the one raster; the board rides the state block.
+    expect(result.pngs).toHaveLength(1);
     expectPng(result.pngs![0]);
-    expectPng(result.pngs![1]);
     expect(result.pngs![0]).toEqual(
-      rasterizeSvgToPng(renderBoardView(session.draft, { width: 1600 }).svg).png,
-    );
-    expect(result.pngs![1]).toEqual(
       rasterizeSvgToPng(
         renderSectionView(session.draft, "section-ml-pending", { width: 1400 }).svg,
       ).png,
@@ -78,31 +67,38 @@ describe("harness render boundary", () => {
     expect(session.events).toEqual([]);
   });
 
-  test("a mutator with view returns the requested section close-up", () => {
+  test("a mutator renders nothing; the close-up after it comes from look", () => {
     const { store, session } = makeBubbaStore();
 
-    const result = centerTask(session, "section-ml-pending");
+    const result = centerTask(session);
     expect(result.isError).not.toBe(true);
+    // A move carries the box whole: the corner lands on the agent's 20 grid and
+    // the fixture's own size is untouched.
     expect(session.draft.objects.find((object) => object.id === "task-ml-a")?.geometry).toEqual({
       x: 1120,
-      y: 608,
-      width: 208,
-      height: 96,
+      y: 620,
+      width: 544,
+      height: 64,
     });
 
-    expect(result.pngs).toHaveLength(1);
-    expectPng(result.pngs![0]);
-    expect(result.pngs![0]).toEqual(
+    // An edit is text. The close-up is a separate, deliberate call.
+    expect(result.pngs).toBeUndefined();
+
+    const seen = look(session, "section-ml-pending");
+    expect(seen.pngs).toHaveLength(1);
+    expectPng(seen.pngs![0]);
+    expect(seen.pngs![0]).toEqual(
       rasterizeSvgToPng(
         renderSectionView(session.draft, "section-ml-pending", { width: 1400 }).svg,
       ).png,
     );
 
+    // Height/viewBox follow the moved task geometry above.
     const ghost = store.draftSvg(session.id);
-    expect({ width: ghost.width, height: ghost.height }).toEqual({ width: 1400, height: 778 });
-    expect(ghost.svg).toContain('viewBox="784 352 864 480"');
+    expect({ width: ghost.width, height: ghost.height }).toEqual({ width: 1400, height: 639 });
+    expect(ghost.svg).toContain('viewBox="784 352 1008 460"');
     const ghostPng = rasterizeSvgToPng(ghost.svg);
-    expect({ width: ghostPng.width, height: ghostPng.height }).toEqual({ width: 1400, height: 778 });
+    expect({ width: ghostPng.width, height: ghostPng.height }).toEqual({ width: 1400, height: 639 });
     expectPng(ghostPng.png);
   });
 

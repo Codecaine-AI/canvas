@@ -1009,6 +1009,71 @@ function pointToward(from: CanvasPoint, to: CanvasPoint, length: number): Canvas
   };
 }
 
+/**
+ * The EFFECTIVE label-chip center for a connection — the single reader every
+ * chip consumer goes through (stage SVG chip, HTML overlay chip, static-SVG
+ * export, the inline label editor's anchor, painted bounds, and the agent's
+ * chip lints), so the drawn chip and every judgement about it can never
+ * disagree.
+ *
+ * Without `connection.labelPosition` this is exactly `routed.labelPoint`,
+ * the route's arc-length midpoint — the pre-S1.1 behavior, unchanged.
+ *
+ * With a pin, the routed polyline is walked to arc-length fraction `along`
+ * and the point is pushed `offset` px perpendicular to the LOCAL segment
+ * direction there. Positive offset is LEFT of travel (from → to): in this
+ * y-down world the unit normal is `(dy, -dx)`, so on a left-to-right run a
+ * positive offset lifts the chip upward.
+ *
+ * Degenerate routes (a single point, or every segment zero-length) have no
+ * direction to offset along, so they fall back to `routed.labelPoint`. A
+ * defensive clamp keeps `along` in range for callers that skipped the
+ * validator (drafts, tests).
+ */
+export function labelPointFor(
+  routed: RoutedConnection,
+  connection: Pick<InteractiveCanvasConnection, "labelPosition"> | undefined,
+): CanvasPoint {
+  const pin = connection?.labelPosition;
+  if (!pin || !Number.isFinite(pin.along)) return routed.labelPoint;
+
+  const points = routed.points ?? [routed.start, routed.end];
+  const segments: Array<{ start: CanvasPoint; end: CanvasPoint; length: number }> = [];
+  let totalLength = 0;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index]!;
+    const end = points[index + 1]!;
+    const length = distance(start, end);
+    if (length === 0) continue;
+    totalLength += length;
+    segments.push({ start, end, length });
+  }
+  if (segments.length === 0) return routed.labelPoint;
+
+  const along = clamp(pin.along, 0, 1);
+  const targetLength = totalLength * along;
+  let traveled = 0;
+  let hit = segments[segments.length - 1]!;
+  let distanceIntoSegment = hit.length;
+  for (const segment of segments) {
+    if (traveled + segment.length >= targetLength) {
+      hit = segment;
+      distanceIntoSegment = targetLength - traveled;
+      break;
+    }
+    traveled += segment.length;
+  }
+
+  const base = pointToward(hit.start, hit.end, distanceIntoSegment);
+  const offset = pin.offset;
+  if (offset === undefined || !Number.isFinite(offset) || offset === 0) return base;
+
+  // Left-hand normal of the local travel direction, y-down: (dy, -dx).
+  const dx = (hit.end.x - hit.start.x) / hit.length;
+  const dy = (hit.end.y - hit.start.y) / hit.length;
+  return { x: base.x + dy * offset, y: base.y - dx * offset };
+}
+
 function polylineHalfwayPoint(points: CanvasPoint[]): CanvasPoint {
   const segments = [];
   let totalLength = 0;

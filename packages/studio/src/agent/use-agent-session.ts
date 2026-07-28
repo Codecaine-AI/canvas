@@ -120,6 +120,8 @@ export interface UseAgentSessionResult {
   status: AgentSessionUiStatus;
   sessionId: string | null;
   events: AgentSessionEvent[];
+  /** Advances whenever the server may have updated the rendered draft. */
+  previewRefreshSignal: number;
   attempts: AgentSessionAttemptState[];
   /** The proposal committed by the current attempt, if it has one. */
   proposal: AgentProposal | null;
@@ -149,6 +151,7 @@ interface AgentSessionState {
   status: AgentSessionUiStatus;
   sessionId: string | null;
   events: AgentSessionEvent[];
+  previewRefreshSignal: number;
   attemptInstructions: string[];
   proposal: AgentProposal | null;
   lastGoodProposal: AgentProposal | null;
@@ -176,6 +179,7 @@ const INITIAL_STATE: AgentSessionState = {
   status: "idle",
   sessionId: null,
   events: [],
+  previewRefreshSignal: 0,
   attemptInstructions: [],
   proposal: null,
   lastGoodProposal: null,
@@ -263,8 +267,21 @@ function reduceState(
     case "reset":
       return INITIAL_STATE;
     case "event": {
-      const next = { ...state, events: [...state.events, action.event] };
       const event = action.event;
+      const next = {
+        ...state,
+        events: [...state.events, event],
+        previewRefreshSignal:
+          state.previewRefreshSignal +
+          (
+            event.type === "delta" ||
+            event.type === "proposal" ||
+            event.type === "rendering" ||
+            event.type === "proposal-ready"
+            ? 1
+            : 0
+          ),
+      };
 
       switch (event.type) {
         case "proposal-ready":
@@ -359,6 +376,8 @@ function toCanvasOperation(
   operation: AgentPatchOperation,
 ): CanvasAgentPatchOperation {
   switch (operation.type) {
+    case "updateTitle":
+      return { type: "updateTitle", title: operation.title };
     case "updateDescription":
       return {
         type: "updateDescription",
@@ -668,11 +687,11 @@ export function useAgentSession({
     () => groupAttempts(state.attemptInstructions, state.events),
     [state.attemptInstructions, state.events],
   );
-
   return {
     status: state.status,
     sessionId: state.sessionId,
     events: state.events,
+    previewRefreshSignal: state.previewRefreshSignal,
     attempts,
     proposal: state.proposal,
     lastGoodProposal: state.lastGoodProposal,

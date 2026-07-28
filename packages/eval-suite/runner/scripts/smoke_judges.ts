@@ -44,11 +44,14 @@ const VERDICT_SCHEMAS = {
     score: "float",
   },
   readability: {
-    calibration: { gc: "float", intent: "float" },
     score: "float",
-    delta_sentence: "string",
-    sub_checks: "7 × {name, score, note}",
-    rank_order_sanity_note: "string",
+    score_rationale: "string",
+    sub_checks: "4 × {name, score, note}",
+  },
+  craft: {
+    score: "float",
+    score_rationale: "string",
+    sub_checks: "4 × {name, score, note}",
   },
   scope_discipline: {
     requested_changes: "{requirement,status,evidence[],note}[]",
@@ -174,6 +177,7 @@ async function main(): Promise<void> {
     },
     requirement_coverage: inputSummary(inputs.requirement_coverage),
     readability: inputSummary(inputs.readability),
+    craft: inputSummary(inputs.craft),
     scope_discipline: {
       edits: inputs.scope_discipline_edits.map((edit) => ({
         stage: edit.stage,
@@ -223,12 +227,24 @@ async function main(): Promise<void> {
 
   const readabilityImages = await images(inputs.readability);
   requestPreview(
-    "RD JudgeSurfaceQuality prompt + schema",
-    await b.request.JudgeSurfaceQuality(
+    "RD JudgeReadability prompt + schema",
+    await b.request.JudgeReadability(
       inputs.rubrics.rd,
       inputs.shared_rules,
       inputs.readability.payload,
       readabilityImages,
+      requestOptions,
+    ),
+  );
+
+  const craftImages = await images(inputs.craft);
+  requestPreview(
+    "CF JudgeCraft prompt + schema",
+    await b.request.JudgeCraft(
+      inputs.rubrics.cf,
+      inputs.shared_rules,
+      inputs.craft.payload,
+      craftImages,
       requestOptions,
     ),
   );
@@ -261,24 +277,45 @@ async function main(): Promise<void> {
     if (inputs.readability.skip_reason) {
       throw new Error(`Cannot run live RD smoke: ${inputs.readability.skip_reason}`);
     }
-    const collector = new Collector(`smoke-${inputs.run_id}-${inputs.scenario}-rd`);
-    const verdict = await b.JudgeSurfaceQuality(
+    const rdCollector = new Collector(`smoke-${inputs.run_id}-${inputs.scenario}-rd`);
+    const rdVerdict = await b.JudgeReadability(
       inputs.rubrics.rd,
       inputs.shared_rules,
       inputs.readability.payload,
       readabilityImages,
       {
         ...requestOptions,
-        collector,
+        collector: rdCollector,
         tags: { pipeline: "eval-suite-smoke", axis: "rd", scenario: inputs.scenario },
       },
     );
     process.stdout.write("\n===== LIVE RD VERDICT =====\n");
     process.stdout.write(`${JSON.stringify({
-      verdict,
+      verdict: rdVerdict,
       usage: {
-        input_tokens: collector.usage.inputTokens ?? 0,
-        output_tokens: collector.usage.outputTokens ?? 0,
+        input_tokens: rdCollector.usage.inputTokens ?? 0,
+        output_tokens: rdCollector.usage.outputTokens ?? 0,
+      },
+    }, null, 2)}\n`);
+
+    const cfCollector = new Collector(`smoke-${inputs.run_id}-${inputs.scenario}-cf`);
+    const cfVerdict = await b.JudgeCraft(
+      inputs.rubrics.cf,
+      inputs.shared_rules,
+      inputs.craft.payload,
+      craftImages,
+      {
+        ...requestOptions,
+        collector: cfCollector,
+        tags: { pipeline: "eval-suite-smoke", axis: "cf", scenario: inputs.scenario },
+      },
+    );
+    process.stdout.write("\n===== LIVE CF VERDICT =====\n");
+    process.stdout.write(`${JSON.stringify({
+      verdict: cfVerdict,
+      usage: {
+        input_tokens: cfCollector.usage.inputTokens ?? 0,
+        output_tokens: cfCollector.usage.outputTokens ?? 0,
       },
     }, null, 2)}\n`);
   }

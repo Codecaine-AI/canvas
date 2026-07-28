@@ -65,27 +65,45 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
         },
         {
-          "insert": " defines the relational vocabulary: same size plus same gap means peers, a larger box means more important, an off-register box means exception, and a parent centers over its children. The agent realizes those relations with explicit geometry, copying exact peer size and pitch from the latest BOARD digest. Patched rectangles snap to the 16px grid as quantization. Every successful "
+          "insert": " defines the relational vocabulary: same size plus same gap means peers, a larger box means more important, an off-register box means exception, and a parent centers over its children. The agent realizes those relations with explicit geometry: match_size carries peer size, and the exact pitch comes from the latest BOARD digest. The rectangles that result snap to the agent's 20 grid as quantization. Every successful gesture returns a result from "
         },
         {
-          "insert": "the operation surface",
+          "insert": "operationPerception",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/perception.ts",
+              "path": "packages/canvas-agent/src/service/session/perception/perception.ts",
               "symbol": "operationPerception"
             }
           }
         },
         {
-          "insert": " result is sized to its own operation; a look returns the whole board, and a refused call carries only its error lines, so a look is how the board is recovered. No diagnostic enforces abstract peer alignment or equal-gap intent: the always-on diagnostics guard physical readability, and the renders remain the composition judge."
+          "insert": " sized to that one operation, and a refused call carries only its error lines. A look is a framed close-up of one region — a section or object by "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or a world rect by "
+        },
+        {
+          "insert": "at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", one or the other and never both — while the board render itself rides the state block, so the whole picture arrives without being asked for. No diagnostic enforces abstract peer alignment or equal-gap intent: the always-on diagnostics guard physical readability, and the renders remain the composition judge."
         }
       ]
     }

@@ -1,14 +1,16 @@
 /**
- * Emits src/agent/catalog/layout-editor/context/capabilities/
+ * Emits src/catalog/layout-editor/context/capabilities/
  * vocabulary.generated.ts
  * with the schema-derived fragments used by the OBJECTS and CONNECTIONS
  * sections of the <capabilities> context block. The source tables are the
  * same ones the operation schemas declare: OBJECT_TYPE_DEFAULTS (the
- * object-type table), CANVAS_COLORS (the closed color roster), the icon glyph
- * registry (valid `icon` field values + human labels), and the connection
- * enums. Roster lines carry name and default size only — the boot-time
- * contact sheet is the visual reference — plus a functional note on the few
- * types with an extra field contract.
+ * object-type table), the folded placeable roster (src/service/session/
+ * placeable-types.ts — icon glyphs ARE types here, no `icon` field is ever
+ * mentioned), CANVAS_COLORS (the closed color roster), the icon glyph
+ * registry (human labels), and the connection enums. Roster lines carry name
+ * and default size only — the boot-time contact sheet is the visual
+ * reference — plus a functional note on the few types with an extra field
+ * contract.
  *
  * The exhaustive Records below require every schema member to have a
  * display-group and enum roster entry. test/capabilities-generated.test.ts
@@ -27,10 +29,13 @@ import type {
 } from "@codecaine-ai/canvas/schema";
 import type { Anchor } from "../../canvas/src/state/schema/connections";
 import { OBJECT_TYPE_DEFAULTS } from "../../canvas/src/state/schema/object-defaults";
+import { ICON_GLYPHS } from "../../canvas/src/objects/shapes/icon/icon-glyphs";
 import {
-  ICON_GLYPHS,
-  ICON_GLYPH_IDS,
-} from "../../canvas/src/objects/shapes/icon/icon-glyphs";
+  PLACEABLE_GLYPH_TYPES,
+  PLACEABLE_SHAPE_TYPES,
+  glyphForPlaceableType,
+  type PlaceableGlyphType,
+} from "../src/service/session/tools/placeable-types";
 
 // ---------------------------------------------------------------------------
 // Connection enums — runtime lists checked against the schema types. Adding a
@@ -105,22 +110,41 @@ const EMITTED_GROUP_ORDER: readonly EmittedTypeGroup[] = [
   "flowchart", "geometric", "special",
 ];
 
+/**
+ * Group headings. "special" holds the icon family, and since the glyph roster
+ * is folded into the type vocabulary (placeable-types.ts) its heading names
+ * what those types draw rather than announcing a second field.
+ */
+const GROUP_HEADINGS: Record<EmittedTypeGroup, string> = {
+  flowchart: "flowchart:",
+  geometric: "geometric:",
+  special: "icons — a glyph with the text captioned beneath it:",
+};
+
+/**
+ * The roster lists exactly what the model may place, so it is filtered through
+ * the folded vocabulary rather than read straight off the schema table. Two
+ * kinds of name drop out: the `icon` carrier type — glyphs are folded in as
+ * types of their own (placeable-types.ts), so there is no name for "an icon
+ * without a glyph" to sit under — and any shape type whose name a glyph took in
+ * the collision audit, which is read-only and therefore not offered.
+ */
 function typesInGroup(group: TypeGroup): InteractiveCanvasObjectType[] {
+  const placeableShapes = new Set<string>(PLACEABLE_SHAPE_TYPES);
   return (Object.keys(OBJECT_TYPE_DEFAULTS) as InteractiveCanvasObjectType[])
-    .filter((type) => TYPE_GROUPS[type] === group);
+    .filter((type) => TYPE_GROUPS[type] === group && placeableShapes.has(type));
 }
 
 /**
  * Field contracts the contact sheet cannot show. The direction subsets
  * mirror the validator's acceptance (left|right for the horizontal pointers,
- * up|down for triangle); icon's glyph field is a hard validation requirement.
+ * up|down for triangle).
  */
 const FUNCTIONAL_NOTES: Partial<Record<InteractiveCanvasObjectType, string>> = {
   "arrow-shape": "points left or right via `direction`",
   chevron: "points left or right via `direction`",
   parallelogram: "leans left or right via `direction`",
   triangle: "points up or down via `direction`",
-  icon: "requires the `icon` field — one glyph per line below",
 };
 
 /** One roster line: the type name and any field contract — geometry is the agent's to choose. */
@@ -129,10 +153,16 @@ function typeEntry(type: InteractiveCanvasObjectType): string {
   return note === undefined ? type : `${type} — ${note}`;
 }
 
-/** Glyph id, plus its human label only when it says more than the id does. */
-function glyphEntry(id: (typeof ICON_GLYPH_IDS)[number]): string {
-  const label = ICON_GLYPHS[id].label;
-  return label.toLowerCase() === id ? id : `${id} (${label})`;
+/**
+ * A folded glyph type, plus its human label only when it says more than the
+ * name does. The name is the type the model places — the glyph id it lowers
+ * to is this module's business, not the model's.
+ */
+function glyphEntry(placeableType: PlaceableGlyphType): string {
+  const glyph = glyphForPlaceableType(placeableType);
+  if (glyph === undefined) return placeableType;
+  const label = ICON_GLYPHS[glyph].label;
+  return label.toLowerCase() === placeableType ? placeableType : `${placeableType} (${label})`;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,13 +173,13 @@ function glyphEntry(id: (typeof ICON_GLYPH_IDS)[number]): string {
 export function buildObjectsGenerated(): string {
   const lines: string[] = ["types, one per line:"];
   for (const group of EMITTED_GROUP_ORDER) {
-    lines.push(`    ${group}:`);
+    lines.push(`    ${GROUP_HEADINGS[group]}`);
     for (const type of typesInGroup(group)) {
       lines.push(`        ${typeEntry(type)}`);
     }
     if (group === "special") {
-      for (const glyph of ICON_GLYPH_IDS) {
-        lines.push(`            ${glyphEntry(glyph)}`);
+      for (const placeableType of PLACEABLE_GLYPH_TYPES) {
+        lines.push(`        ${glyphEntry(placeableType)}`);
       }
     }
   }
@@ -157,7 +187,7 @@ export function buildObjectsGenerated(): string {
   for (const color of CANVAS_COLORS) {
     lines.push(`    ${color}`);
   }
-  lines.push("these rosters are closed — draw every type, color, and glyph from them");
+  lines.push("these rosters are closed — draw every type and color from them");
   return lines.join("\n");
 }
 
@@ -181,11 +211,11 @@ export function renderVocabularyModule(): string {
     " * GENERATED by scripts/generate-capabilities.ts — do not edit by hand.",
     " *",
     " * Schema-derived fragments for the OBJECTS and CONNECTIONS sections of",
-    " * the <capabilities> context block: the object-type roster (the",
-    " * boot-time contact sheet carries the looks — geometry is the agent's",
-    " * to choose), the closed color and icon-glyph rosters, and the",
-    " * connection field enums. The fragments use the same schema tables the",
-    " * operation schemas declare.",
+    " * the <capabilities> context block: the folded type roster — shapes with",
+    " * the icon glyphs folded in as types of their own (the boot-time contact",
+    " * sheet carries the looks — geometry is the agent's to choose) — the",
+    " * closed color roster, and the connection field enums. The fragments use",
+    " * the same schema tables the operation schemas declare.",
     " * Regenerate: bun scripts/generate-capabilities.ts",
     " */",
     "",
@@ -202,7 +232,7 @@ export function renderVocabularyModule(): string {
 
 const OUTPUT_FILE = join(
   resolve(import.meta.dir, ".."),
-  "src", "agent", "catalog", "layout-editor", "context", "capabilities",
+  "src", "catalog", "layout-editor", "context", "capabilities",
   "vocabulary.generated.ts",
 );
 

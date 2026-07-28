@@ -1,11 +1,12 @@
 import type {
   AnyJudgeEnvelope,
+  CraftVerdict,
   PHTranscriptMoment,
   PHVerdict,
+  ReadabilityVerdict,
   RequirementCoverageVerdict,
   ScopeDisciplineVerdict,
   SkippedVerdict,
-  SurfaceQualityVerdict,
   SystemFidelityVerdict,
   SystemReconstruction,
 } from "../contract.ts";
@@ -29,17 +30,13 @@ function evidenceList(evidence: Array<{ source: string; locator: string; observa
   return evidence.map((item) => `${item.source}:${item.locator} — ${item.observation}`).join("; ");
 }
 
-function renderRd(verdict: SurfaceQualityVerdict): string[] {
+function renderVisual(verdict: ReadabilityVerdict | CraftVerdict): string[] {
   return [
-    `Calibration: gc=${cell(verdict.calibration.gc)}, intent=${cell(verdict.calibration.intent)}`,
-    "",
-    `Delta: ${verdict.delta_sentence}`,
+    `Rationale: ${verdict.score_rationale}`,
     "",
     "| sub-check | score | finding |",
     "|---|---:|---|",
     ...verdict.sub_checks.map((item) => `| ${cell(item.name)} | ${cell(item.score)} | ${cell(item.note)} |`),
-    "",
-    `Rank-order sanity: ${verdict.rank_order_sanity_note}`,
   ];
 }
 
@@ -170,8 +167,8 @@ export function renderJudgeMarkdown(envelope: AnyJudgeEnvelope): string {
     lines.push(...renderSf(envelope.verdict));
   } else if (envelope.axis === "rc") {
     lines.push(...renderRc(envelope.verdict));
-  } else if (envelope.axis === "rd") {
-    lines.push(...renderRd(envelope.verdict));
+  } else if (envelope.axis === "rd" || envelope.axis === "cf") {
+    lines.push(...renderVisual(envelope.verdict));
   } else if (envelope.axis === "sd") {
     lines.push(...renderSd(envelope.verdict));
   } else {

@@ -144,3 +144,22 @@ body {
   /* Viewer panel titles use `font-display` (example: Bank Gothic stack). */
   --font-display: "Bank Gothic", "Eurostile", "Michroma", ui-sans-serif, system-ui, sans-serif;
 }
+
+/*
+ * Light theme (shared style rail): the App stamps data-theme on <html>. The
+ * shared style shell inlines the full token set, so this block only covers
+ * document-level statics the shell can't reach — the editor code-buffer vars
+ * (doc light palette, matching @agent-kernel/viewer-shell's light theme).
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --editor-bg: #fbfbf9;
+  --editor-fg: #1a1a19;
+  --editor-line-number: #898781;
+  --editor-line-number-active: #52514e;
+  --editor-gutter-bg: #fbfbf9;
+  --editor-rule: rgb(0 0 0 / 0.04);
+  --editor-guide: rgb(0 0 0 / 0.08);
+  --editor-landmark: rgb(0 0 0 / 0.028);
+}

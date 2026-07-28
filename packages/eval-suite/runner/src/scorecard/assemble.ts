@@ -2,7 +2,11 @@ import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { AnyJudgeEnvelope } from "../contract.ts";
+import type {
+  AnyJudgeEnvelope,
+  ToolCallCap,
+  ToolCallCapSource,
+} from "../contract.ts";
 
 const DEFAULT_EVAL_SUITE_DIR = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -35,13 +39,18 @@ interface SessionCounts {
   invalidInfra: number;
 }
 
-interface FingerprintSummary {
+export interface FingerprintSummary {
   line: string;
   repo: string;
   model: string;
   prompt: string;
   lints: string;
   styles: string;
+  /** Absent when reading a fingerprint.md written before the surface hash existed. */
+  surface?: string;
+  /** Absent when reading a fingerprint.md written before tool-call caps existed. */
+  toolCallCap?: ToolCallCap;
+  toolCallCapSource?: ToolCallCapSource;
 }
 
 interface ProgressSummary {
@@ -92,7 +101,13 @@ export interface ScorecardJson {
   schema_version: 1;
   run_id: string;
   status: string;
-  fingerprint: Omit<FingerprintSummary, "line">;
+  fingerprint: Omit<
+    FingerprintSummary,
+    "line" | "toolCallCap" | "toolCallCapSource"
+  > & {
+    tool_call_cap?: ToolCallCap;
+    tool_call_cap_source?: ToolCallCapSource;
+  };
   previous_run: {
     run_id: string | null;
     available: boolean;
@@ -101,11 +116,6 @@ export interface ScorecardJson {
     axes: string[];
   };
   sessions: SessionCounts;
-  judge_calibration: {
-    gc: number | null;
-    intent: number | null;
-    targets: { gc: 7.5; intent: 7 };
-  };
   axes: Array<{ code: string; order: number }>;
   scenarios: ScenarioAssembly[];
   means: {
@@ -245,7 +255,6 @@ export async function assembleScorecard(
   )
       ? ["PARTIAL"]
       : [];
-  const calibration = collectCalibration(judges);
 
   const json: ScorecardJson = {
     schema_version: 1,
@@ -257,6 +266,15 @@ export async function assembleScorecard(
       prompt: fingerprint.prompt,
       lints: fingerprint.lints,
       styles: fingerprint.styles,
+      ...(fingerprint.surface === undefined
+        ? {}
+        : { surface: fingerprint.surface }),
+      ...(fingerprint.toolCallCap === undefined
+        ? {}
+        : {
+            tool_call_cap: fingerprint.toolCallCap,
+            tool_call_cap_source: fingerprint.toolCallCapSource,
+          }),
     },
     previous_run: {
       run_id: selectedPreviousRunId ?? null,
@@ -266,11 +284,6 @@ export async function assembleScorecard(
       axes: previous?.axes ?? [],
     },
     sessions: progress.sessions,
-    judge_calibration: {
-      gc: calibration.gc,
-      intent: calibration.intent,
-      targets: { gc: 7.5, intent: 7 },
-    },
     axes: axes.map(({ code, order }) => ({ code, order })),
     scenarios: scenarioRows,
     means: {
@@ -295,7 +308,6 @@ export async function assembleScorecard(
     previous,
     axisSetChanged,
     comparable,
-    calibration,
     scenarioRows,
     scoreMeans,
     deltaMeans,
@@ -482,7 +494,7 @@ function incrementOutcome(counts: SessionCounts, value: unknown): void {
   }
 }
 
-async function readFingerprint(path: string): Promise<FingerprintSummary> {
+export async function readFingerprint(path: string): Promise<FingerprintSummary> {
   const markdown = await readFile(path, "utf8");
   const exactLine = markdown.match(/^SUT:\s*(.+)$/m)?.[1]?.trim();
   const repo = normalizedRepo(
@@ -504,15 +516,33 @@ async function readFingerprint(path: string): Promise<FingerprintSummary> {
       bulletValue(markdown, "style hash") ??
       "unknown",
   );
+  const surfaceBullet =
+    bulletValue(markdown, "surface") ?? bulletValue(markdown, "surface hash");
+  const surface =
+    surfaceBullet === undefined ? undefined : normalizedHash(surfaceBullet);
+  const toolCallCap = normalizedToolCallCap(
+    bulletValue(markdown, "tool-call cap"),
+  );
   return {
     line:
       exactLine ??
-      `${repo} · model ${model} · prompt ${prompt} · lints ${lints} · styles ${styles}`,
+      `${repo} · model ${model} · prompt ${prompt} · lints ${lints} · styles ${styles}` +
+        (surface === undefined ? "" : ` · surface ${surface}`) +
+        (toolCallCap === undefined
+          ? ""
+          : ` · tool-call cap ${toolCallCap.value} (${toolCallCap.source})`),
     repo,
     model,
     prompt,
     lints,
     styles,
+    ...(surface === undefined ? {} : { surface }),
+    ...(toolCallCap === undefined
+      ? {}
+      : {
+          toolCallCap: toolCallCap.value,
+          toolCallCapSource: toolCallCap.source,
+        }),
   };
 }
 
@@ -543,6 +573,22 @@ function normalizedFingerprintModel(markdown: string): string {
     ?? agentConfig?.match(/\bthinking\s+`([^`]+)`/i)?.[1]
     ?? "unknown";
   return `${model} @ ${thinking}`;
+}
+
+function normalizedToolCallCap(
+  value: string | undefined,
+): { value: ToolCallCap; source: ToolCallCapSource } | undefined {
+  if (value === undefined) return undefined;
+  const match = value.replaceAll("`", "").match(
+    /^([123])\s+\((agent default|--tool-call-cap)\)$/,
+  );
+  if (!match) {
+    throw new Error(`Invalid tool-call cap fingerprint value: ${value}`);
+  }
+  return {
+    value: Number(match[1]) as ToolCallCap,
+    source: match[2] as ToolCallCapSource,
+  };
 }
 
 function normalizedHash(value: string): string {
@@ -801,7 +847,7 @@ function strongestEvidence(verdict: unknown): string | null {
     "coverage_summary",
     "most_consequential_gap",
     "scope_summary",
-    "delta_sentence",
+    "score_rationale",
     "strongest_evidence",
     "evidence",
     "note",
@@ -894,27 +940,6 @@ function findLockstepPairs(
   return pairs;
 }
 
-function collectCalibration(
-  judges: Map<string, Map<string, JudgeEnvelope | null>>,
-): { gc: number | null; intent: number | null } {
-  const gcScores: number[] = [];
-  const intentScores: number[] = [];
-  for (const scenarioJudges of judges.values()) {
-    const calibratedJudge = scenarioJudges.get("SQ") ?? scenarioJudges.get("RD");
-    const verdict = recordValue(calibratedJudge?.verdict);
-    const calibration = recordValue(verdict?.calibration);
-    const gc = finiteNumber(calibration?.gc);
-    const intent = finiteNumber(calibration?.intent);
-    if (gc !== null) {
-      gcScores.push(gc);
-    }
-    if (intent !== null) {
-      intentScores.push(intent);
-    }
-  }
-  return { gc: mean(gcScores), intent: mean(intentScores) };
-}
-
 function renderMarkdown(input: {
   runId: string;
   axes: AxisDefinition[];
@@ -924,7 +949,6 @@ function renderMarkdown(input: {
   previous: PreviousScorecard | null;
   axisSetChanged: boolean;
   comparable: boolean;
-  calibration: { gc: number | null; intent: number | null };
   scenarioRows: ScenarioAssembly[];
   scoreMeans: Record<string, number | null>;
   deltaMeans: Record<string, number | null>;
@@ -941,7 +965,6 @@ function renderMarkdown(input: {
     previous,
     axisSetChanged,
     comparable,
-    calibration,
     scenarioRows,
     scoreMeans,
     deltaMeans,
@@ -968,7 +991,6 @@ function renderMarkdown(input: {
     `# Eval-suite scorecard — ${runId}`,
     `SUT: ${fingerprint.line}`,
     `Previous run: ${previousHeader} · Sessions: ${progress.sessions.ok} ok / ${progress.sessions.rejected} rejected / ${progress.sessions.abandoned} abandoned / ${progress.sessions.invalidInfra} invalid-infra`,
-    `Judge calibration: gc=${formatCalibration(calibration.gc)} intent=${formatCalibration(calibration.intent)} (target 7.5 / 7.0)`,
     "",
     `| ${headers.join(" | ")} |`,
     `|${headers.map(() => "---").join("|")}|`,
@@ -1111,10 +1133,6 @@ function formatMeanDelta(value: number | null): string {
   return `**${formatted}**`;
 }
 
-function formatCalibration(value: number | null): string {
-  return value === null ? "–" : value.toFixed(1);
-}
-
 function parseScoreCell(cell: string): number | null {
   const normalized = stripEmphasis(cell).trim();
   if (normalized === "" || normalized === "–" || normalized === "-") {
@@ -1170,10 +1188,6 @@ function numericCount(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0
     ? Math.trunc(value)
     : 0;
-}
-
-function finiteNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function round(value: number): number {

@@ -113,4 +113,42 @@ describe("lint chip / static renderer parity", () => {
     );
     expectRendererParity(document);
   });
+
+  /**
+   * S1.1 — a `labelPosition` pin moves the DRAWN chip, so it must move the
+   * LINTED chip by the same amount. Without this the lints would keep judging
+   * the midpoint and `move_label` could never clear a finding.
+   */
+  test("pinned label: the lint chip tracks the pin, exactly as the renderer does", () => {
+    const pinned = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0)],
+      [{ ...connect("e", "a", "b"), label: "handoff", labelPosition: { along: 0.2, offset: -40 } }],
+    );
+    expectRendererParity(pinned);
+
+    const unpinned = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0)],
+      [{ ...connect("e", "a", "b"), label: "handoff" }],
+    );
+    const pinnedRect = chipFor(pinned.connections[0]!, pinned)!.rect;
+    const unpinnedRect = chipFor(unpinned.connections[0]!, unpinned)!.rect;
+    // Same route, same label — only the pin differs, so the chip must have moved.
+    expect(pinnedRect).not.toEqual(unpinnedRect);
+    expect(pinnedRect.width).toBe(unpinnedRect.width);
+  });
+
+  test("an along-only pin at 0.5 is the midpoint the unpinned chip already used", () => {
+    const pinned = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0)],
+      [{ ...connect("e", "a", "b"), label: "handoff", labelPosition: { along: 0.5 } }],
+    );
+    const unpinned = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0)],
+      [{ ...connect("e", "a", "b"), label: "handoff" }],
+    );
+    const a = chipFor(pinned.connections[0]!, pinned)!.rect;
+    const b = chipFor(unpinned.connections[0]!, unpinned)!.rect;
+    expect(a.x).toBeCloseTo(b.x, 6);
+    expect(a.y).toBeCloseTo(b.y, 6);
+  });
 });

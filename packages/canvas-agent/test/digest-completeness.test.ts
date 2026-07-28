@@ -32,7 +32,7 @@ const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   locked: "rendered",
   direction: "rendered",
   author: "rendered",
-  icon: "rendered",
+  icon: "rendered", // folded INTO the type column — `cloud`, not `icon icon=cloud`
 };
 
 /** Compile-time exhaustive over the connection schema. */
@@ -46,6 +46,7 @@ const CONNECTION_FIELD_COVERAGE: Record<keyof InteractiveCanvasConnection, Cover
   role: "rendered",
   color: "legend",
   waypoints: "rendered",
+  labelPosition: "rendered", // lp=<along>[@<offset>]; absent = routed midpoint
 };
 
 /** Compile-time exhaustive over connection endpoints. */
@@ -113,8 +114,11 @@ describe("digest completeness invariant", () => {
     expect(digest).toContain("violet");
     expect(digest).toContain("dir=left");
     expect(digest).toContain("shape=chevron");
-    // icon glyph; sticky non-default color + author.
-    expect(digest).toContain("icon=cpu");
+    // The glyph IS the type column, so the split never shows: no bare `icon`
+    // type and no `icon=` extra beside it. Sticky non-default color + author.
+    expect(digest).toContain('brain cpu "brain" 240,64 96×96');
+    expect(digest).not.toContain("icon=");
+    expect(digest).not.toContain(" icon ");
     expect(digest).toContain("pink");
     expect(digest).toContain('author="Ford"');
   });
@@ -134,14 +138,26 @@ describe("digest completeness invariant", () => {
       role: "escalation",
       color: "orange" as const,
       waypoints: [[100, 48], [220, 48]] as Array<[number, number]>,
+      labelPosition: { along: 0.25, offset: -12 },
     };
     const digest = formatBoardDigest(
       makeDocument([box("a", 0, 0), box("b", 320, 0)], [edge]),
     );
 
     expect(digest).toContain(
-      '  flow a→b "handoff" dashed orange arrow=both role="escalation" anchors=right→top pos=auto→0.25,0 wp=100,48→220,48',
+      '  flow a→b "handoff" dashed orange arrow=both role="escalation" anchors=right→top pos=auto→0.25,0 wp=100,48→220,48 lp=0.25@-12',
     );
+  });
+
+  test("a label pin with no offset prints bare; an absent pin prints nothing", () => {
+    const pinned = { ...connect("pin", "a", "b"), label: "x", labelPosition: { along: 0.8 } };
+    const plain = { ...connect("plain", "a", "b"), label: "x" };
+    const digest = formatBoardDigest(
+      makeDocument([box("a", 0, 0), box("b", 320, 0)], [pinned, plain]),
+    );
+    expect(digest).toContain("lp=0.8");
+    expect(digest).not.toContain("lp=0.8@");
+    expect(digest.split("\n").find((line) => line.includes(" plain "))).not.toContain("lp=");
   });
 
   test("text fields render in full — nothing is truncated", () => {
@@ -183,7 +199,12 @@ describe("digest completeness invariant", () => {
     const lines = digest.split("\n");
     expect(lines).toContain('  a rectangle "a" 0,0 160×96');
     expect(lines).toContain('  b sticky "b" 320,0 176×128');
-    // Explicit solid/gray/forward collapse to the bare edge line.
-    expect(lines).toContain("  plain a→b —");
+    // Explicit solid/gray/forward collapse to the bare edge line; everything
+    // after the ` · ` is the derived numbered route, not a stored field.
+    const plainLine = lines.find((line) => line.startsWith("  plain "))!;
+    expect(plainLine.split(" · ")[0]).toBe("  plain a→b —");
+    expect(plainLine.split(" · ")[1]).toBe(
+      "a ─(s0 h y=48)→ ─(s1 h y=48)→ (s2 v x=240) ─(s3 h y=64)→ ─(s4 h y=64)→ b",
+    );
   });
 });

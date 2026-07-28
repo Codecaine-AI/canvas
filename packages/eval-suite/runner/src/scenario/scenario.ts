@@ -16,6 +16,8 @@ import {
   HarnessClient,
   HttpRequestError,
   applyProposalOperations,
+  evalFileApiOrigin,
+  evalHarnessOrigin,
   liveScopeObjectIds,
   materializeAcceptedProposal,
   proposalWouldDestroyContent,
@@ -701,8 +703,9 @@ export async function runScenario(options: {
   };
   await persistScenarioResult(resultPath, result);
 
-  const files = new CanvasFileClient();
-  const harness = new HarnessClient();
+  // Origins arrive from the suite queue, which owns the run's ephemeral ports.
+  const files = new CanvasFileClient(evalFileApiOrigin());
+  const harness = new HarnessClient(evalHarnessOrigin());
   await initializeBoard({
     files,
     fixture,

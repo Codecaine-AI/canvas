@@ -10,7 +10,7 @@ import {
   toolFinalize,
   type LayoutSession,
 } from "../src/service/session";
-import type { LayoutToolTextResult } from "../src/service/tool-runtime";
+import type { LayoutToolTextResult } from "../src/service/session/tools";
 import type { AgentSessionAnnotation } from "../src/protocol";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
@@ -33,7 +33,7 @@ function expectBlocked(result: LayoutToolTextResult, session: LayoutSession, det
   expect(session.events).toHaveLength(0);
 }
 
-describe("finalize committed — lint gate (error-tier diagnostics)", () => {
+describe("finalize committed — lint gate (all scoped diagnostics)", () => {
   test("blocks a parentId child that escapes its section", () => {
     const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
     const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
@@ -66,7 +66,7 @@ describe("finalize committed — lint gate (error-tier diagnostics)", () => {
     expectBlocked(result, session, "card extends 144px past the base section page");
   });
 
-  test("warnings never block; unresolved ones ride on the proposal", () => {
+  test("warning-tier findings block until fixed, then the same session commits", () => {
     const labeled = [{ ...connect("edge", "a", "b"), label: "go" }];
     const baseline = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
@@ -78,15 +78,32 @@ describe("finalize committed — lint gate (error-tier diagnostics)", () => {
       box("b", 240, 0, 192, 96, "process"),  // gap 48 — under the "go" chip's 76px need
     ], labeled);
 
-    const result = toolFinalize(session, "committed", "Ship with a named warning", emitSessionEvent);
+    const blocked = toolFinalize(session, "committed", "Tightened the flow", emitSessionEvent);
 
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("Committed:");
+    expectBlocked(
+      blocked,
+      session,
+      'W1 unreadable-labels: label "go" chip on edge (43×30px) bleeds onto a and b',
+    );
+
+    session.draft = makeDocument([
+      box("a", 0, 0, 192, 96, "process"),
+      box("b", 400, 0, 192, 96, "process"),
+    ], labeled);
+
+    const committed = toolFinalize(
+      session,
+      "committed",
+      "Tightened the flow with a readable label",
+      emitSessionEvent,
+    );
+
+    expect(committed.isError).toBeUndefined();
+    expect(committed.text).toContain("Committed:");
     expect(session.status).toBe("proposal-ready");
     expect(session.proposal).not.toBeNull();
-    expect(session.proposal!.summary).toBe("Ship with a named warning");
-    expect(session.proposal!.lint).toContain("W1 unreadable-labels:");
-    expect(session.proposal!.lint).toContain("48px of corridor where the chip needs 76px");
+    expect(session.proposal!.summary).toBe("Tightened the flow with a readable label");
+    expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
   });
 
   test("error-tier findings outside the scope do not block", () => {
@@ -118,19 +135,16 @@ describe("finalize committed — lint gate (error-tier diagnostics)", () => {
     ], [{ ...connect("edge", "a", "b"), label: "go" }]);
     const session = makeTestSession(baseline, ["a", "b"]);
 
-    const result = runOp(session, "update_object", {
-      objectId: "b",
-      patch: { geometry: { x: 208, y: 0, width: 160, height: 96 } },
-    });
+    const result = runOp(session, "move_to", { id: "b", x: 200, y: 0 });
 
     expect(result.isError).not.toBe(true);
-    expect(result.text).toContain("APPLIED · update_object b");
+    expect(result.text).toContain("APPLIED · move_to b");
     expect(result.text).toContain("DELTA");
     // The tightened gap trips both label fit and the arrow-corridor floor.
     expect(result.text).toContain("LINTS · +2 −0");
     expect(result.text).toContain('label "go" chip on edge (43×30px) bleeds onto a and b');
-    expect(result.text).toContain("W2 crowding: a and b sit 48px apart side by side");
-    expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(208);
+    expect(result.text).toContain("W2 crowding: a and b sit 40px apart side by side");
+    expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(200);
     expect(session.status).toBe("running");
     expect(session.proposal).toBeNull();
   });
@@ -173,6 +187,27 @@ describe("finalize committed — request gate", () => {
     expect(session.events.map((event) => event.type)).toEqual(["proposal-ready"]);
   });
 
+  test("does not block on an open agent-authored thread", () => {
+    const task = box("task", 0, 0, 184, 96, "process");
+    const session = makeTestSession(makeDocument([task]), ["task"], {
+      annotations: [{
+        ...requestAnnotation("agent-question", "task", "Should this be split further?"),
+        createdBy: "agent",
+      }],
+    });
+    syncSessionRequests(session);
+    session.draft = {
+      ...session.draft,
+      objects: [{ ...task, text: "edited" }],
+    };
+
+    const result = toolFinalize(session, "committed", "Edited the task", emitSessionEvent);
+
+    expect(result.isError).toBeUndefined();
+    expect(session.status).toBe("proposal-ready");
+    expect(session.events.map((event) => event.type)).toEqual(["proposal-ready"]);
+  });
+
   test("reports lint blockers and open requests together", () => {
     const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
     const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
@@ -197,20 +232,20 @@ describe("finalize committed — request gate", () => {
 describe("finalize committed — waypoint steering", () => {
   test("a waypoint-only steer commits a proposal whose op carries the waypoints", () => {
     const baseline = makeDocument(
-      [box("a", 0, 0, 192, 96, "process"), box("b", 416, 0, 192, 96, "process")],
+      [box("a", 0, 0, 200, 80, "process"), box("b", 400, 200, 200, 80, "process")],
       [connect("edge", "a", "b")],
     );
     const session = makeTestSession(baseline, ["a", "b"]);
 
-    const applied = runOp(session, "update_connection", {
-      connectionId: "edge",
-      patch: { waypoints: [[304, 200]] },
+    const applied = runOp(session, "reroute", {
+      id: "edge",
+      points: [[300, 40], [300, 240]],
     });
 
     expect(applied.isError).not.toBe(true);
-    expect(applied.text).toContain("APPLIED · update_connection edge");
+    expect(applied.text).toContain("APPLIED · reroute edge");
     // The steer is a real diff: DELTA names the steered connection.
-    expect(applied.text).toContain("edge  wp none → 304,200");
+    expect(applied.text).toContain("edge  wp none → 300,40");
 
     const result = toolFinalize(session, "committed", "Steered the edge", emitSessionEvent);
 
@@ -220,7 +255,7 @@ describe("finalize committed — waypoint steering", () => {
       {
         type: "updateConnection",
         connectionId: "edge",
-        patch: { waypoints: [[304, 200]] },
+        patch: { waypoints: [[300, 40], [300, 240]] },
       },
     ]);
 
@@ -231,7 +266,7 @@ describe("finalize committed — waypoint steering", () => {
       operations: session.proposal!.operations as CanvasAgentPatchOperation[],
     });
     expect(accepted.document.connections).toEqual([
-      { ...connect("edge", "a", "b"), waypoints: [[304, 200]] },
+      { ...connect("edge", "a", "b"), waypoints: [[300, 40], [300, 240]] },
     ]);
     expect(accepted.document.connections[0]!.waypoints)
       .toEqual(session.draft.connections[0]!.waypoints!);

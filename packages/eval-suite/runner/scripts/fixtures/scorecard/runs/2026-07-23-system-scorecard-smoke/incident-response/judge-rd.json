@@ -4,11 +4,30 @@
   "run_id": "2026-07-23-system-scorecard-smoke",
   "score": 5.5,
   "verdict": {
-    "calibration": {
-      "gc": 7.5,
-      "intent": 7
-    },
-    "delta_sentence": "The board is readable but uses the frame less effectively than the reference."
+    "score": 5.5,
+    "score_rationale": "Parseable but packed: chips sit close to edge traffic and two sections hold six nodes.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 5,
+        "note": "Stage gaps are tight in the escalation column."
+      },
+      {
+        "name": "grouping",
+        "score": 6,
+        "note": "Sections group correctly but two clusters rely on proximity alone."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "One co-linear pair on the retry path."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 5,
+        "note": "Ink near 24% with sections holding six nodes."
+      }
+    ]
   },
   "flags": []
 }

@@ -19,6 +19,7 @@ import {
   type Rect,
 } from "../geometry";
 import { kindOf } from "../../helpers";
+import { axisGap, type Axis } from "../../measure";
 
 import type {
   InteractiveCanvasConnection,
@@ -26,16 +27,6 @@ import type {
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
 import type { LayoutRule } from "../types";
-
-type Axis = "x" | "y";
-
-/** Clear space between the two rects along `axis` (negative when they overlap). */
-function axisGap(a: Rect, b: Rect, axis: Axis): number {
-  if (axis === "x") {
-    return Math.max(a.x, b.x) - Math.min(a.x + a.width, b.x + b.width);
-  }
-  return Math.max(a.y, b.y) - Math.min(a.y + a.height, b.y + b.height);
-}
 
 /** The axis the edge runs along: whichever separates the endpoints more. */
 function runAxis(from: InteractiveCanvasObject, to: InteractiveCanvasObject): Axis {

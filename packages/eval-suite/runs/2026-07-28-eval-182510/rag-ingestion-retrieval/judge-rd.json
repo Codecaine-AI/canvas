@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-182510",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its spacious, clearly sectioned layout remains readable with effort, but very small text and several long dashed detours prevent comfortable arm’s-length tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and label chips have generous surrounding air, though the small type and a few labels positioned near vertical edge traffic reduce arm’s-length fluency."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Eight numbered containers plus two large titled lower regions make membership immediately clear without requiring edge tracing."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "The main gray flow is mostly clean, but multiple red dashed failure routes make long perimeter-scale detours, run in close parallel, and force substantial backtracking."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 8,
+        "note": "Ink density is low and air dominates, with most sections holding only two to four nodes; the main failure is excessive unused canvas rather than crowding."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7001,
+    "output_tokens": 391
+  },
+  "flags": []
+}

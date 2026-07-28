@@ -1,9 +1,9 @@
 /**
  * The document differ: baseline vs draft → the ordered internal
  * CanvasAgentPatchOperation list that becomes the committed proposal
- * (`toolFinalize` in service/session/tools.ts is the consumer; the BOARD
- * DIFF block renders the same ops per apply, and studio replays them
- * through `canvas.applyAgentPatch` on accept).
+ * (`toolFinalize` in service/session/tools/workflow/finalize.ts is the
+ * consumer; the BOARD DIFF block renders the same ops per apply, and studio
+ * replays them through `canvas.applyAgentPatch` on accept).
  *
  * Commit always takes this document path. Comparison is order-independent
  * structural equality, so a field written back to an identical value
@@ -12,8 +12,20 @@
  * Channel policy: the document description, connection `waypoints`, and
  * annotation threads are compared and emitted; `parentId` is omitted because
  * it is derived from geometry and re-derived on accept.
+ *
+ * The one exception to "emit every changed channel" is `waypoints`, and it is
+ * there for the same reason `parentId` is omitted: the reducer DERIVES it.
+ * `reconcileConnectionWaypoints` is an always-on choke point in
+ * `reduceInteractiveCanvasState`, so on replay it re-runs over whatever this
+ * patch produces — translating the polyline on a rigid endpoint move, dropping
+ * it on an asymmetric one. Emitting a value the reducer is about to transform
+ * again is how a carried section's waypoints would land TWICE the delta the
+ * draft reported. So the channel is emitted only when the reducer's own
+ * reconcile would not already produce the draft's value; see
+ * `reducerReconciledWaypoints`.
  */
 import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import { reconcileConnectionWaypoints } from "../../../canvas/src/state/actions/waypoints";
 import type {
   InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
@@ -86,6 +98,7 @@ function cloneConnection(
     from: cloneEndpoint(connection.from),
     to: cloneEndpoint(connection.to),
     ...(connection.waypoints ? { waypoints: cloneWaypoints(connection.waypoints) } : {}),
+    ...(connection.labelPosition ? { labelPosition: { ...connection.labelPosition } } : {}),
   };
 }
 
@@ -140,6 +153,13 @@ function annotationOperations(
   return operations;
 }
 
+/**
+ * The op is what the REDUCER applies, so it names document channels — `type`
+ * and `icon` travel separately here, as the document holds them. That split is
+ * internal: the model-facing rendering of these ops folds the two into one
+ * word (session/perception.ts, BOARD DIFF), the way every model-facing
+ * formatter folds them (session/tools/placeable-types.ts).
+ */
 function objectPatch(
   baseline: InteractiveCanvasObject,
   draft: InteractiveCanvasObject,
@@ -166,9 +186,41 @@ function objectPatch(
   return patch;
 }
 
+/**
+ * What the live reducer's own waypoint reconcile will produce for each
+ * connection if this diff says nothing about waypoints at all.
+ *
+ * The document it reasons over is the one the reducer holds between applying
+ * the patch and running its post-reduce choke points: the draft's objects and
+ * connections, but with each surviving connection's BASELINE waypoints, since
+ * that is what an omitted channel leaves in place. A connection the draft adds
+ * carries its own waypoints through `addConnection` verbatim.
+ */
+function reducerReconciledWaypoints(
+  baseline: InteractiveCanvasDocument,
+  draft: InteractiveCanvasDocument,
+): Map<string, InteractiveCanvasConnection["waypoints"]> {
+  const baselineById = new Map(
+    baseline.connections.map((connection) => [connection.id, connection]),
+  );
+  const preReconcile: InteractiveCanvasDocument = {
+    ...draft,
+    connections: draft.connections.map((connection) => {
+      const before = baselineById.get(connection.id);
+      return before ? { ...connection, waypoints: before.waypoints } : connection;
+    }),
+  };
+  return new Map(
+    reconcileConnectionWaypoints(baseline, preReconcile).connections.map(
+      (connection) => [connection.id, connection.waypoints],
+    ),
+  );
+}
+
 function connectionPatch(
   baseline: InteractiveCanvasConnection,
   draft: InteractiveCanvasConnection,
+  reducerWaypoints: InteractiveCanvasConnection["waypoints"],
 ): Partial<Omit<InteractiveCanvasConnection, "id">> {
   const patch: Partial<Omit<InteractiveCanvasConnection, "id">> = {};
 
@@ -179,12 +231,24 @@ function connectionPatch(
   if (!structurallyEqual(baseline.from, draft.from)) patch.from = cloneEndpoint(draft.from);
   if (!structurallyEqual(baseline.to, draft.to)) patch.to = cloneEndpoint(draft.to);
   if (baseline.role !== draft.role) patch.role = draft.role;
-  // Waypoints are stored agent steering, so they diff like any other channel.
-  // A draft that drops them emits an explicit `waypoints: undefined` own
-  // property — the reducer merges patches by spread, so that clears the
-  // stored steering.
-  if (!structurallyEqual(baseline.waypoints, draft.waypoints)) {
+  // Waypoints are stored agent steering, but the reducer re-derives them from
+  // endpoint movement on every replay (see the module doc). Emit the channel
+  // only when that derivation would NOT already land on the draft's value: a
+  // draft that dropped them emits an explicit `waypoints: undefined` own
+  // property (the reducer merges patches by spread, so that clears the stored
+  // steering), while a rigid translation the reducer will redo itself is left
+  // to the reducer rather than written twice.
+  if (
+    !structurallyEqual(baseline.waypoints, draft.waypoints)
+    && !structurallyEqual(reducerWaypoints, draft.waypoints)
+  ) {
     patch.waypoints = draft.waypoints ? cloneWaypoints(draft.waypoints) : undefined;
+  }
+  // The label-chip pin is authored steering too: a draft that clears it emits
+  // an explicit `labelPosition: undefined`, which the spread-merging reducer
+  // reads as "back to the routed midpoint".
+  if (!structurallyEqual(baseline.labelPosition, draft.labelPosition)) {
+    patch.labelPosition = draft.labelPosition ? { ...draft.labelPosition } : undefined;
   }
 
   return patch;
@@ -209,12 +273,20 @@ export function diffDocuments(
   const draftConnections = new Map(
     draft.connections.map((connection) => [connection.id, connection]),
   );
+  const reducerWaypoints = reducerReconciledWaypoints(baseline, draft);
   const addObjectOps: CanvasAgentPatchOperation[] = [];
   const updateObjectOps: CanvasAgentPatchOperation[] = [];
   const updateConnectionOps: CanvasAgentPatchOperation[] = [];
   const removeConnectionOps: CanvasAgentPatchOperation[] = [];
   const removeObjectOps: CanvasAgentPatchOperation[] = [];
   const addConnectionOps: CanvasAgentPatchOperation[] = [];
+  const titleOps: CanvasAgentPatchOperation[] = [];
+  // The board's name is a document channel like its description. The live
+  // reducer refuses to rename a board to nothing, so a draft that somehow
+  // emptied its title emits no op rather than one that would be dropped.
+  if ((baseline.title ?? "") !== (draft.title ?? "") && (draft.title ?? "").trim() !== "") {
+    titleOps.push({ type: "updateTitle", title: draft.title ?? "" });
+  }
   const descriptionOps: CanvasAgentPatchOperation[] = [];
   if ((baseline.description ?? "") !== (draft.description ?? "")) {
     descriptionOps.push({ type: "updateDescription", description: draft.description ?? "" });
@@ -247,7 +319,11 @@ export function diffDocuments(
       });
       continue;
     }
-    const patch = connectionPatch(before, connection);
+    const patch = connectionPatch(
+      before,
+      connection,
+      reducerWaypoints.get(connection.id),
+    );
     if (Object.keys(patch).length > 0) {
       updateConnectionOps.push({
         type: "updateConnection",
@@ -268,6 +344,7 @@ export function diffDocuments(
   // Annotation ops come last: a thread anchors to an object or connection, so
   // every target the draft still carries already exists by the time they apply.
   return [
+    ...titleOps,
     ...descriptionOps,
     ...addObjectOps,
     ...updateObjectOps,

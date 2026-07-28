@@ -1,0 +1,855 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-50-tool-surface-00-overview",
+  "title": "The gesture tool surface",
+  "root": "b-ts-ov-root",
+  "blocks": {
+    "b-ts-ov-root": {
+      "id": "b-ts-ov-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-ts-ov-title-1",
+        "b-ts-ov-lede-2",
+        "b-ts-ov-consequence-matrix-3",
+        "b-ts-ov-consequence-structural-4",
+        "b-ts-ov-trace-5",
+        "b-ts-ov-roster-heading-6",
+        "b-ts-ov-roster-source-7",
+        "b-ts-ov-roster-table-8",
+        "b-ts-ov-absorbed-heading-9",
+        "b-ts-ov-absorbed-lede-10",
+        "b-ts-ov-absorbed-measure-11",
+        "b-ts-ov-absorbed-distribute-12",
+        "b-ts-ov-absorbed-route-13",
+        "b-ts-ov-scope-heading-14",
+        "b-ts-ov-scope-lede-15",
+        "b-ts-ov-scope-multi-16",
+        "b-ts-ov-scope-extend-17",
+        "b-ts-ov-scope-annotation-18",
+        "b-ts-ov-scope-close-19",
+        "b-ts-ov-tier-heading-20",
+        "b-ts-ov-tier-lede-21",
+        "b-ts-ov-tier-gestures-22",
+        "b-ts-ov-tier-grid-23",
+        "b-ts-ov-tier-pipeline-24",
+        "b-ts-ov-tier-registration-25"
+      ],
+      "props": {
+        "covers": "Why the layout agent's tools are factored by editing gesture rather than by CRUD per kind, the full thirty-two-tool roster in its registration order, the calls the surface absorbs rather than adds, the scope it deliberately excludes, and a map of the rest of this tier.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "gesture factoring",
+          "tool roster",
+          "capability matrix",
+          "structural parameters",
+          "surface scope"
+        ]
+      }
+    },
+    "b-ts-ov-title-1": {
+      "id": "b-ts-ov-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The gesture tool surface"
+        }
+      ]
+    },
+    "b-ts-ov-lede-2": {
+      "id": "b-ts-ov-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The agent's complete tool surface — every board-mutating gesture plus the perception, annotation, and run-lifecycle calls — is factored by "
+        },
+        {
+          "insert": "editing gesture",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " rather than by CRUD per kind. Each tool is one thing a person does in one motion on the real canvas: place a thing, move it, resize it, retitle it, slide a connector segment out of the way. Two consequences fall out of that framing."
+        }
+      ]
+    },
+    "b-ts-ov-consequence-matrix-3": {
+      "id": "b-ts-ov-consequence-matrix-3",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The tool list is the capability matrix.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " \"Can a section's border change?\" is answered by "
+        },
+        {
+          "insert": "change_section_border",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " existing and its schema naming its target kind — not by prose inside a catch-all patch."
+        }
+      ]
+    },
+    "b-ts-ov-consequence-structural-4": {
+      "id": "b-ts-ov-consequence-structural-4",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Required parameters are structural.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Every verb's schema states exactly what that gesture needs. There are no everything-optional patches."
+        }
+      ]
+    },
+    "b-ts-ov-trace-5": {
+      "id": "b-ts-ov-trace-5",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "A trace reads like an editing session"
+      },
+      "text": [
+        {
+          "insert": "A run's tool calls read as "
+        },
+        {
+          "insert": "place, place, connect, move_by, resize, change_color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the sequence a person would perform, in the order they would perform it. That is what the playback rail animates and what the eval judges read."
+        }
+      ]
+    },
+    "b-ts-ov-roster-heading-6": {
+      "id": "b-ts-ov-roster-heading-6",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The roster"
+        }
+      ]
+    },
+    "b-ts-ov-roster-source-7": {
+      "id": "b-ts-ov-roster-source-7",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The surface is thirty-two tools: twenty-five board-mutating gestures in six groups, listed by "
+        },
+        {
+          "insert": "operationTools",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/index.ts",
+              "symbol": "operationTools"
+            }
+          }
+        },
+        {
+          "insert": ", plus seven workflow calls listed by "
+        },
+        {
+          "insert": "workflowTools",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/index.ts",
+              "symbol": "workflowTools"
+            }
+          }
+        },
+        {
+          "insert": ". Those two arrays are the single source the agent catalog registers from and the "
+        },
+        {
+          "insert": "<capabilities>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block derives from, so a tool defined in a group module is not on the surface until it is listed there. The table below is their registration order, which is roughly the order a board gets built; "
+        },
+        {
+          "insert": "test/tool-schema-parity.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/test/tool-schema-parity.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " pins the roster and the structural invariants every schema satisfies."
+        }
+      ]
+    },
+    "b-ts-ov-roster-table-8": {
+      "id": "b-ts-ov-roster-table-8",
+      "flavour": "structured-table",
+      "children": [],
+      "props": {
+        "title": "Thirty-two tools, in registration order",
+        "columns": [
+          "tool",
+          "group",
+          "the gesture"
+        ],
+        "rows": [
+          [
+            "place_section",
+            "Place",
+            "draw a titled frame, which adopts whatever its edges already cover"
+          ],
+          [
+            "place_sticky",
+            "Place",
+            "drop a note with its text already on it"
+          ],
+          [
+            "place_shape",
+            "Place",
+            "the pick and the click — a shape or glyph at its default size, untitled"
+          ],
+          [
+            "clone",
+            "Place",
+            "copy one object's kind, size, and look onto a new id"
+          ],
+          [
+            "connect",
+            "Place",
+            "route an edge between two objects"
+          ],
+          [
+            "move_to",
+            "Arrange",
+            "put a box's top-left corner at a point on the board"
+          ],
+          [
+            "move_by",
+            "Arrange",
+            "nudge a box by an offset from where it already is"
+          ],
+          [
+            "resize",
+            "Arrange",
+            "re-size a box to explicit dimensions, holding its top-left corner"
+          ],
+          [
+            "match_size",
+            "Arrange",
+            "copy another box's width and height onto this one"
+          ],
+          [
+            "align",
+            "Arrange",
+            "put a row or column of boxes on one shared edge or centerline"
+          ],
+          [
+            "space_out",
+            "Arrange",
+            "re-pitch a run so the clear gap between neighbours is exactly what you ask for"
+          ],
+          [
+            "update_text",
+            "Content & appearance",
+            "write the text of anything that carries text"
+          ],
+          [
+            "change_color",
+            "Content & appearance",
+            "recolor anything that carries a color, edges included"
+          ],
+          [
+            "change_shape",
+            "Content & appearance",
+            "swap what a shape is, and which way it points"
+          ],
+          [
+            "fit_section",
+            "Sections",
+            "close a section around the children already inside it"
+          ],
+          [
+            "change_section_border",
+            "Sections",
+            "restroke a frame's border"
+          ],
+          [
+            "lock",
+            "Sections",
+            "protect a region — the frame alone, or the frame and everything in it"
+          ],
+          [
+            "unlock",
+            "Sections",
+            "release a section's lock"
+          ],
+          [
+            "style_edge",
+            "Edges",
+            "redraw an edge's line and arrowheads"
+          ],
+          [
+            "change_connection",
+            "Edges",
+            "repoint one end of an edge; neither endpoint object changes"
+          ],
+          [
+            "reroute",
+            "Edges",
+            "replace an edge's interior corners wholesale"
+          ],
+          [
+            "shift_segment",
+            "Edges",
+            "slide one numbered segment of the route sideways"
+          ],
+          [
+            "reset_route",
+            "Edges",
+            "hand an edge back to the auto-router"
+          ],
+          [
+            "move_label",
+            "Edges",
+            "pin the label chip along the routed path"
+          ],
+          [
+            "delete",
+            "Delete",
+            "remove one thing, with the cascade its kind implies"
+          ],
+          [
+            "look",
+            "Perceive, ask, finish",
+            "study one framed region close up — rendered and measured"
+          ],
+          [
+            "update_description",
+            "Perceive, ask, finish",
+            "replace the board's standing account wholesale"
+          ],
+          [
+            "set_board_title",
+            "Perceive, ask, finish",
+            "rename the board"
+          ],
+          [
+            "add_annotation",
+            "Perceive, ask, finish",
+            "anchor a question to one object as a thread the user answers later"
+          ],
+          [
+            "reply_annotation",
+            "Perceive, ask, finish",
+            "post a reply into a thread without moving its status"
+          ],
+          [
+            "resolve_request",
+            "Perceive, ask, finish",
+            "dispose one open request as done or declined, with a note"
+          ],
+          [
+            "finalize",
+            "Perceive, ask, finish",
+            "end the run, with a proposal or without one"
+          ]
+        ]
+      }
+    },
+    "b-ts-ov-absorbed-heading-9": {
+      "id": "b-ts-ov-absorbed-heading-9",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Absorbed, not added"
+        }
+      ]
+    },
+    "b-ts-ov-absorbed-lede-10": {
+      "id": "b-ts-ov-absorbed-lede-10",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Three calls a gesture surface might be expected to carry are not tools, because an existing tool already answers what they would ask. "
+        },
+        {
+          "insert": "match_size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the counterexample and is a real gesture on the roster: peer sizing is its own motion, and it earns its own verb."
+        }
+      ]
+    },
+    "b-ts-ov-absorbed-measure-11": {
+      "id": "b-ts-ov-absorbed-measure-11",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "measure",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lives inside "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s region readout. A framed region comes back rendered "
+        },
+        {
+          "insert": "and",
+          "attributes": {
+            "italic": true
+          }
+        },
+        {
+          "insert": " measured — per-pair gaps on each axis, row and column pitch, the section's free margins, ink share — so conformance is read rather than computed in context."
+        }
+      ]
+    },
+    "b-ts-ov-absorbed-distribute-12": {
+      "id": "b-ts-ov-absorbed-distribute-12",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "distribute",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is subsumed by "
+        },
+        {
+          "insert": "space_out",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Equalizing inside a fixed span can never open a gap, and the agent always knows its target gap from the craft targets, so the gesture that sets the pitch covers both jobs."
+        }
+      ]
+    },
+    "b-ts-ov-absorbed-route-13": {
+      "id": "b-ts-ov-absorbed-route-13",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "route_around",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is not on the surface. Route cleanup is deliberate elbow work — "
+        },
+        {
+          "insert": "shift_segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for one segment, "
+        },
+        {
+          "insert": "reroute",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for the whole path — not a hint handed to a solver."
+        }
+      ]
+    },
+    "b-ts-ov-scope-heading-14": {
+      "id": "b-ts-ov-scope-heading-14",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "What the surface excludes"
+        }
+      ]
+    },
+    "b-ts-ov-scope-lede-15": {
+      "id": "b-ts-ov-scope-lede-15",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Three capabilities sit outside the surface's scope. Each is buildable from what is on the roster, and each has a condition under which it is worth revisiting."
+        }
+      ]
+    },
+    "b-ts-ov-scope-multi-16": {
+      "id": "b-ts-ov-scope-multi-16",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Multi-id variants",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " of "
+        },
+        {
+          "insert": "move_to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move_by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "change_color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "delete",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — the UI's selection grammar. Batching would speed a run but cuts against one gesture, one operation; the two multi-id gestures that do exist, "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "space_out",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", take a list because the arrangement itself is the gesture. Revisit once single-id traces show where batching earns its keep."
+        }
+      ]
+    },
+    "b-ts-ov-scope-extend-17": {
+      "id": "b-ts-ov-scope-extend-17",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A quick-connect gesture",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — an "
+        },
+        {
+          "insert": "extend(fromId, id, direction, text?)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " that drops a blank same-styled copy one half-width away, already wired, in one history entry. The surface builds the same result as a "
+        },
+        {
+          "insert": "clone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " followed by a "
+        },
+        {
+          "insert": "connect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    },
+    "b-ts-ov-scope-annotation-18": {
+      "id": "b-ts-ov-scope-annotation-18",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Annotation-targeted creation and deletion.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": "add_annotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " anchors a thread to exactly one object — there are no intent or region targets — and "
+        },
+        {
+          "insert": "delete",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes board ids only, never an annotation id. A thread is disposed with "
+        },
+        {
+          "insert": "resolve_request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not removed."
+        }
+      ]
+    },
+    "b-ts-ov-scope-close-19": {
+      "id": "b-ts-ov-scope-close-19",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The roster is the boundary"
+      },
+      "text": [
+        {
+          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-five gestures are the only way the draft changes."
+        }
+      ]
+    },
+    "b-ts-ov-tier-heading-20": {
+      "id": "b-ts-ov-tier-heading-20",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The rest of this tier"
+        }
+      ]
+    },
+    "b-ts-ov-tier-lede-21": {
+      "id": "b-ts-ov-tier-lede-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "This page is the shape of the surface. Four sibling pages carry the contracts."
+        }
+      ]
+    },
+    "b-ts-ov-tier-gestures-22": {
+      "id": "b-ts-ov-tier-gestures-22",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The gestures",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/10-gestures",
+              "label": "The gestures"
+            }
+          }
+        },
+        {
+          "insert": " — the per-group contracts: every signature, what each gesture refuses, and the lock matrix."
+        }
+      ]
+    },
+    "b-ts-ov-tier-grid-23": {
+      "id": "b-ts-ov-tier-grid-23",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The grid and the creation defaults",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/20-grid-and-defaults",
+              "label": "The grid and the creation defaults"
+            }
+          }
+        },
+        {
+          "insert": " — which numbers quantize, which are exempt, and what a bare placement lands as."
+        }
+      ]
+    },
+    "b-ts-ov-tier-pipeline-24": {
+      "id": "b-ts-ov-tier-pipeline-24",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The operation pipeline",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/30-operation-pipeline",
+              "label": "The operation pipeline"
+            }
+          }
+        },
+        {
+          "insert": " — the stages every gesture runs through, and the three result classes they return."
+        }
+      ]
+    },
+    "b-ts-ov-tier-registration-25": {
+      "id": "b-ts-ov-tier-registration-25",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Registration and the seam",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/40-registration-and-seam",
+              "label": "Registration and the seam"
+            }
+          }
+        },
+        {
+          "insert": " — how the roster reaches the model, and where the gesture vocabulary gives way to the neutral delta vocabulary a document diff speaks."
+        }
+      ]
+    }
+  }
+}

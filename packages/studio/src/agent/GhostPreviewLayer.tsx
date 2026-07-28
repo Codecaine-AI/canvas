@@ -22,7 +22,7 @@ type DraftPreview = {
 export interface GhostPreviewLayerProps {
   canvasId: string;
   sessionId: string | null;
-  /** Increment when a proposal or rendering event arrives. */
+  /** Increment whenever an operation, proposal, or rendering event arrives. */
   refreshSignal: number;
   baselineDocument: InteractiveCanvasDocument;
   /** Pass the active proposal, or the last good proposal after an abandoned follow-up. */

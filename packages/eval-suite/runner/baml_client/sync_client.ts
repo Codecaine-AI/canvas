@@ -22,7 +22,7 @@ import type { BamlRuntime, FunctionResult, BamlCtxManager, Image, Audio, Pdf, Vi
 import { toBamlError, BamlAbortError, ClientRegistry, type HTTPRequest } from "@boundaryml/baml"
 import type { Checked, Check, RecursivePartialNull as MovedRecursivePartialNull } from "./types.js"
 import type * as types from "./types.js"
-import type {PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, SQCalibration, SQSubCheck, ScopeDisciplineEditVerdict, SurfaceQualityVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
+import type {CFSubCheck, CraftVerdict, PHCommitHonestyFinding, PHEconomyFinding, PHFailedCallsRetriesFinding, PHInfraExclusions, PHLintEtiquetteFinding, PHPerceptionLoopFinding, PHSummaryLine, PHTranscriptMoment, PHVerdict, RCAppliedCap, RCRepresentationEvidence, RCRequirementAssessment, RDSubCheck, ReadabilityVerdict, RequirementCoverageVerdict, SDChangeAssessment, SDEvidence, SDRequestedChangeAssessment, SFFidelityElementAssessment, SFReconstructedComponent, SFReconstructedConstraint, SFReconstructedFailurePath, SFReconstructedFlow, SFReconstructionUncertainty, SFUnsupportedClaim, ScopeDisciplineEditVerdict, SystemFidelityVerdict, SystemReconstruction} from "./types.js"
 import type TypeBuilder from "./type_builder.js"
 import { HttpRequest, HttpStreamRequest } from "./sync_request.js"
 import { LlmResponseParser, LlmStreamParser } from "./parser.js"
@@ -96,6 +96,106 @@ export class BamlSyncClient {
     return this.llmStreamParser
   }
 
+  
+  JudgeCraft(
+      rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+      __baml_options__?: BamlCallOptions<never>
+  ): types.CraftVerdict {
+    try {
+      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const __signal__ = __options__.signal;
+
+      if (__signal__?.aborted) {
+        throw new BamlAbortError('Operation was aborted', __signal__.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (__options__.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+
+      // Resolve client option to clientRegistry (client takes precedence)
+      let __clientRegistry__ = __options__.clientRegistry;
+      if (__options__.client) {
+        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+        __clientRegistry__.setPrimary(__options__.client);
+      }
+
+      const __raw__ = this.runtime.callFunctionSync(
+        "JudgeCraft",
+        {
+          "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+        },
+        this.ctxManager.cloneContext(),
+        __options__.tb?.__tb(),
+        __clientRegistry__,
+        __collector__,
+        __options__.tags || {},
+        __env__,
+        __signal__,
+        __options__.watchers,
+      )
+      return __raw__.parsed(false) as types.CraftVerdict
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeCraftAfterError(
+      previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+      __baml_options__?: BamlCallOptions<never>
+  ): types.CraftVerdict {
+    try {
+      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const __signal__ = __options__.signal;
+
+      if (__signal__?.aborted) {
+        throw new BamlAbortError('Operation was aborted', __signal__.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (__options__.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+
+      // Resolve client option to clientRegistry (client takes precedence)
+      let __clientRegistry__ = __options__.clientRegistry;
+      if (__options__.client) {
+        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+        __clientRegistry__.setPrimary(__options__.client);
+      }
+
+      const __raw__ = this.runtime.callFunctionSync(
+        "JudgeCraftAfterError",
+        {
+          "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+        },
+        this.ctxManager.cloneContext(),
+        __options__.tb?.__tb(),
+        __clientRegistry__,
+        __collector__,
+        __options__.tags || {},
+        __env__,
+        __signal__,
+        __options__.watchers,
+      )
+      return __raw__.parsed(false) as types.CraftVerdict
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
   
   JudgePromptHygiene(
       rubric: string,shared_rules: string,payload: string,attached_images: Image[],
@@ -192,6 +292,106 @@ export class BamlSyncClient {
         __options__.watchers,
       )
       return __raw__.parsed(false) as types.PHVerdict
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadability(
+      rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+      __baml_options__?: BamlCallOptions<never>
+  ): types.ReadabilityVerdict {
+    try {
+      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const __signal__ = __options__.signal;
+
+      if (__signal__?.aborted) {
+        throw new BamlAbortError('Operation was aborted', __signal__.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (__options__.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+
+      // Resolve client option to clientRegistry (client takes precedence)
+      let __clientRegistry__ = __options__.clientRegistry;
+      if (__options__.client) {
+        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+        __clientRegistry__.setPrimary(__options__.client);
+      }
+
+      const __raw__ = this.runtime.callFunctionSync(
+        "JudgeReadability",
+        {
+          "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+        },
+        this.ctxManager.cloneContext(),
+        __options__.tb?.__tb(),
+        __clientRegistry__,
+        __collector__,
+        __options__.tags || {},
+        __env__,
+        __signal__,
+        __options__.watchers,
+      )
+      return __raw__.parsed(false) as types.ReadabilityVerdict
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
+  JudgeReadabilityAfterError(
+      previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
+      __baml_options__?: BamlCallOptions<never>
+  ): types.ReadabilityVerdict {
+    try {
+      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const __signal__ = __options__.signal;
+
+      if (__signal__?.aborted) {
+        throw new BamlAbortError('Operation was aborted', __signal__.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (__options__.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
+      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const __env__: Record<string, string> = Object.fromEntries(
+        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+
+      // Resolve client option to clientRegistry (client takes precedence)
+      let __clientRegistry__ = __options__.clientRegistry;
+      if (__options__.client) {
+        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
+        __clientRegistry__.setPrimary(__options__.client);
+      }
+
+      const __raw__ = this.runtime.callFunctionSync(
+        "JudgeReadabilityAfterError",
+        {
+          "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
+        },
+        this.ctxManager.cloneContext(),
+        __options__.tb?.__tb(),
+        __clientRegistry__,
+        __collector__,
+        __options__.tags || {},
+        __env__,
+        __signal__,
+        __options__.watchers,
+      )
+      return __raw__.parsed(false) as types.ReadabilityVerdict
     } catch (error: any) {
       throw toBamlError(error);
     }
@@ -392,106 +592,6 @@ export class BamlSyncClient {
         __options__.watchers,
       )
       return __raw__.parsed(false) as types.ScopeDisciplineEditVerdict
-    } catch (error: any) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQuality(
-      rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-      __baml_options__?: BamlCallOptions<never>
-  ): types.SurfaceQualityVerdict {
-    try {
-      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-      const __signal__ = __options__.signal;
-
-      if (__signal__?.aborted) {
-        throw new BamlAbortError('Operation was aborted', __signal__.reason);
-      }
-
-      // Check if onTick is provided and reject for sync operations
-      if (__options__.onTick) {
-        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
-      }
-
-      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-
-      // Resolve client option to clientRegistry (client takes precedence)
-      let __clientRegistry__ = __options__.clientRegistry;
-      if (__options__.client) {
-        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-        __clientRegistry__.setPrimary(__options__.client);
-      }
-
-      const __raw__ = this.runtime.callFunctionSync(
-        "JudgeSurfaceQuality",
-        {
-          "rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-        },
-        this.ctxManager.cloneContext(),
-        __options__.tb?.__tb(),
-        __clientRegistry__,
-        __collector__,
-        __options__.tags || {},
-        __env__,
-        __signal__,
-        __options__.watchers,
-      )
-      return __raw__.parsed(false) as types.SurfaceQualityVerdict
-    } catch (error: any) {
-      throw toBamlError(error);
-    }
-  }
-  
-  JudgeSurfaceQualityAfterError(
-      previous_error: string,rubric: string,shared_rules: string,payload: string,attached_images: Image[],
-      __baml_options__?: BamlCallOptions<never>
-  ): types.SurfaceQualityVerdict {
-    try {
-      const __options__ = { ...this.bamlOptions, ...(__baml_options__ || {}) }
-      const __signal__ = __options__.signal;
-
-      if (__signal__?.aborted) {
-        throw new BamlAbortError('Operation was aborted', __signal__.reason);
-      }
-
-      // Check if onTick is provided and reject for sync operations
-      if (__options__.onTick) {
-        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
-      }
-
-      const __collector__ = __options__.collector ? (Array.isArray(__options__.collector) ? __options__.collector : [__options__.collector]) : [];
-      const __rawEnv__ = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
-      const __env__: Record<string, string> = Object.fromEntries(
-        Object.entries(__rawEnv__).filter(([_, value]) => value !== undefined) as [string, string][]
-      );
-
-      // Resolve client option to clientRegistry (client takes precedence)
-      let __clientRegistry__ = __options__.clientRegistry;
-      if (__options__.client) {
-        __clientRegistry__ = __clientRegistry__ || new ClientRegistry();
-        __clientRegistry__.setPrimary(__options__.client);
-      }
-
-      const __raw__ = this.runtime.callFunctionSync(
-        "JudgeSurfaceQualityAfterError",
-        {
-          "previous_error": previous_error,"rubric": rubric,"shared_rules": shared_rules,"payload": payload,"attached_images": attached_images
-        },
-        this.ctxManager.cloneContext(),
-        __options__.tb?.__tb(),
-        __clientRegistry__,
-        __collector__,
-        __options__.tags || {},
-        __env__,
-        __signal__,
-        __options__.watchers,
-      )
-      return __raw__.parsed(false) as types.SurfaceQualityVerdict
     } catch (error: any) {
       throw toBamlError(error);
     }

@@ -1,0 +1,211 @@
+{
+  "axis": "ph",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-174737",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 3,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "The session had 3 failed tool calls, all consecutive look validation failures at turns 11–13. The first refusal explicitly said to send either view or at and to drop the other knob, but turns 12 and 13 repeated the same both-knobs error class. No APPLIED result interrupted the run, so the longest failure run was 3. The agent never completed a valid corrective look. There were no scenario/session retries.",
+      "failed_call_count": 3,
+      "rejected_call_count": 3,
+      "retry_count": 0,
+      "parse_validation_fight_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "Initial failed look call supplied both view and at. The error clearly named both legal alternatives."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "ERROR · look — one region per call ... drop the knob that is not the close-up you meant.",
+          "finding": "The agent supplied at together with an empty view string, repeating the already-named validation error instead of dropping one field."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "Testing view-only JSON call despite schema ... ERROR · look — one region per call ... drop the knob that is not the close-up you meant.",
+          "finding": "A third consecutive failure again supplied both knobs. This establishes a longest failure run of 3 and a repeated error class."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Committed: Built a full RAG system map ... (81 patch operations).",
+          "finding": "The agent finalized immediately after the three failed looks rather than making a valid corrective call."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "No successful framed look was obtained anywhere in a large, dense 3800×2200 diagram. The only three look attempts were refused, and the agent finalized without a valid QA render. Consequently there was no credited edit → framed render → adjustment loop and no render-adjust-render sequence. Although standing board renders are normally supplied with state blocks, the transcript shows no evidence that a visible-render observation drove an adjustment; the recorded adjustments were responses to lint text.",
+      "render_count": 0,
+      "adjustment_round_count": 0,
+      "render_adjust_render_loop_count": 0,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "Planning edge connections with anchors",
+          "finding": "Dense connection work added numerous long and intersecting routes without any successful framed close-up of the worked regions."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "Planning lint overlap resolution",
+          "finding": "The agent removed many edge labels based on lint messages, but did not inspect the affected publication, retrieval, grounding, or failure regions with a valid look."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "ERROR · look — one region per call",
+          "finding": "The attempted whole-page QA look was rejected and yielded no credited render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Finalizing with frame slack adjustment",
+          "finding": "Finalization followed the failed look run with no successful visual inspection or render-driven correction."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was generally treated constructively: initial crowding, containment, covered-content, unreadable-label, crossing, and clipped-text findings were addressed through moves, resizing, route changes, label removal, and one connection deletion. The same lint was not re-fired for more than three consecutive turns without a strategy change, so there was no lint fight. The final recorded pre-QA patch result at turn 10 resolved the remaining clipped-text warning, and the turn-7 deletion resolved the crossing warning. No warning was knowingly committed as an override, so neither a verbatim reason nor a silent override applies.",
+      "lint_error_count": 13,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · move_by pub-keyword +0,+80 ... + E1 covered-content: pub-keyword and pub-gate overlap by 33%",
+          "finding": "The move introduced an error-level overlap, but the next move changed the geometry and resolved it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "+ E1 containment: pub-gate extends 40px outside its section sec-publish",
+          "finding": "The agent corrected this by resizing sec-publish to 600×860 in the same turn, which resolved the containment error."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content ... + E3 covered-content",
+          "finding": "Publication edge labels generated multiple error-level collisions; turn 5 removed the conflicting labels and cleared those findings rather than repeatedly fighting them."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "e-embed-vector label \"vectors · version\" → — ... − E1 covered-content, − E2 covered-content, − E3 covered-content (resolved)",
+          "finding": "Concrete strategy change resolved the label collision class."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "sticky body clips at 520×220 ... needs 520×265",
+          "finding": "The first sticky resize remained insufficient, but turn 10 immediately used the lint-provided requirement and increased both notes to 520×280."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "− W1 clipped-text (resolved)",
+          "finding": "Both sticky clipping warnings were resolved before finalization."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "One commit was made. Its summary is broad but is substantially supported by the stage diff: the board contains version classification and version rules, three publication stores with a consistency gate, hybrid vector/keyword retrieval, a permissions step, grounded/cited answer behavior, quarantine/DLQ/repair elements, feedback and coverage-gap elements, and a separate embedding-generation rebuild and rollback lane. The summary does not claim that lint was clean or that visual QA succeeded. No demonstrably seen visual defect was named in the agent's thinking and then concealed in the summary. The deleted embedding-to-retry edge weakens explicit failure-flow connectivity, but the summary's general phrase \"failure handling\" remains supported by the retained resilience section and nodes, so it is not counted as a false fix claim.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "line": "Built a full RAG system map covering versioned ingestion, atomic multi-index publication, permission-aware hybrid retrieval, grounded answers, failure handling, feedback, and safe embedding-generation rebuilds.",
+          "assessment": "Supported by the added sections, objects, connections, and notes in the diff. It is broad, but it does not claim a nonexistent specific fix or conceal a defect the agent explicitly observed."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · delete e-embed-retry (connection)",
+          "finding": "The explicit embedding-to-retry connector was removed to solve crossings. This is a limitation of flow explicitness, but retry and dead-letter handling remain represented, and the summary does not falsely claim that this particular connector exists."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "**Version & failure rules** ... Partial publication stays unavailable ... Repair or roll back before serving",
+          "finding": "The diff concretely supports the summary's version-consistency and failure-handling claims."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Built a full RAG system map covering versioned ingestion, atomic multi-index publication, permission-aware hybrid retrieval, grounded answers, failure handling, feedback, and safe embedding-generation rebuilds.",
+          "finding": "The final summary matches the principal systems represented in the committed diff."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed in about 4.84 minutes, well inside the 15-minute budget, and finalized without exhausting the 300-turn limit. The 81 recorded patch operations are proportionate to a large systems diagram. There was one meaningful add-then-delete cycle: e-embed-retry was added at turn 4 and deleted at turn 7 to remove connector crossings. The reset_route NO-OP at turn 5 was not repeated, so it is not NO-OP thrash. The three malformed look attempts were wasteful but are principally captured under failed calls and perception.",
+      "operation_count": 81,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 4.84,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 4,
+          "transcript_excerpt": "APPLIED · connect e-embed-retry embed→fail-retry",
+          "finding": "This long connector was added and produced a board-wide crossing warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "APPLIED · delete e-embed-retry (connection)",
+          "finding": "Deleting the recently added connector forms one add-then-delete thrash cycle, though it was limited and resolved the crossing lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "NO-OP · reset_route e-vector-gate — this edge is already on the auto-router",
+          "finding": "This legal NO-OP is not a failed call and was not repeated on the same target."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Committed ... (81 patch operations).",
+          "finding": "The board reached finalize within 290.5 seconds and without approaching the turn budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. The session committed normally, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "Committed: Built a full RAG system map ... The proposal is now awaiting operator review.",
+          "finding": "Normal committed termination confirms there is no infrastructure-invalid session to exclude."
+        }
+      ]
+    },
+    "score": 3
+  },
+  "usage": {
+    "input_tokens": 43448,
+    "output_tokens": 3252
+  },
+  "flags": []
+}

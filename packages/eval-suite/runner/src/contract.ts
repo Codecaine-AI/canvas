@@ -1,4 +1,4 @@
-export const AXIS_CODES = ["sf", "rc", "rd", "sd", "ph"] as const;
+export const AXIS_CODES = ["sf", "rc", "rd", "cf", "sd", "ph"] as const;
 
 export type AxisCode = (typeof AXIS_CODES)[number];
 export type ScenarioId = string;
@@ -19,6 +19,9 @@ export const SUT_THINKING_LEVELS = [
   "xhigh",
 ] as const;
 export type SutThinkingLevel = (typeof SUT_THINKING_LEVELS)[number];
+export const TOOL_CALL_CAPS = [1, 2, 3] as const;
+export type ToolCallCap = (typeof TOOL_CALL_CAPS)[number];
+export type ToolCallCapSource = "agent default" | "--tool-call-cap";
 
 export interface JudgeIdentity {
   model: string;
@@ -47,32 +50,34 @@ export interface JudgeEnvelope<A extends AxisCode, V> {
   flags: string[];
 }
 
-export interface SQCalibration {
-  gc: number;
-  intent: number;
-}
-
-export type SQSubCheckName =
-  | "frame_use"
+export type RDSubCheckName =
   | "corridors_and_air"
   | "grouping"
+  | "edge_legibility"
+  | "density_and_decomposition";
+
+export type CFSubCheckName =
+  | "frame_use"
   | "color"
   | "machinery_leakage"
-  | "alignment_and_rhythm"
-  | "edge_legibility";
+  | "alignment_and_rhythm";
 
-export interface SQSubCheck {
-  name: SQSubCheckName;
+export interface VisualSubCheck<Name extends string> {
+  name: Name;
   score: number;
   note: string;
 }
 
-export interface SurfaceQualityVerdict {
-  calibration: SQCalibration;
+export interface ReadabilityVerdict {
   score: number;
-  delta_sentence: string;
-  sub_checks: SQSubCheck[];
-  rank_order_sanity_note: string;
+  score_rationale: string;
+  sub_checks: Array<VisualSubCheck<RDSubCheckName>>;
+}
+
+export interface CraftVerdict {
+  score: number;
+  score_rationale: string;
+  sub_checks: Array<VisualSubCheck<CFSubCheckName>>;
 }
 
 export type SFFlowKind = "data" | "control" | "failure";
@@ -313,7 +318,8 @@ export interface PHVerdict {
 export type AnyJudgeEnvelope =
   | JudgeEnvelope<"sf", SystemFidelityVerdict>
   | JudgeEnvelope<"rc", RequirementCoverageVerdict>
-  | JudgeEnvelope<"rd", SurfaceQualityVerdict>
+  | JudgeEnvelope<"rd", ReadabilityVerdict>
+  | JudgeEnvelope<"cf", CraftVerdict>
   | JudgeEnvelope<"sd", ScopeDisciplineVerdict>
   | JudgeEnvelope<"ph", PHVerdict>;
 
@@ -337,6 +343,8 @@ export interface RunProgress {
   run_id: string;
   tier: "system";
   sut_thinking: SutThinkingLevel;
+  tool_call_cap: ToolCallCap;
+  tool_call_cap_source: ToolCallCapSource;
   status: "running" | "completed" | "failed";
   started_at: string;
   finished_at: string | null;

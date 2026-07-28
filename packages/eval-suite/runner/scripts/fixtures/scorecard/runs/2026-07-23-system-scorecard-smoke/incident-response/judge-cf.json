@@ -1,0 +1,33 @@
+{
+  "axis": "cf",
+  "scenario": "incident-response",
+  "run_id": "2026-07-23-system-scorecard-smoke",
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "Deliberate composition with one dead band of frame and a leaked junction glyph.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "Bottom quarter of the frame is empty."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Failure paths are consistently red-dashed."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "One crosshair junction glyph near the score gate."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Registers hold across the top two rows."
+      }
+    ]
+  },
+  "flags": []
+}

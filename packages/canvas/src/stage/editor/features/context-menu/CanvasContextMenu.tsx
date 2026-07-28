@@ -189,38 +189,45 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
               <CopyIcon className="h-4 w-4 text-muted-foreground" />
               Copy
             </button>
-            {contextObject.locked ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                onClick={() => setLockFromContextMenu(undefined)}
-              >
-                <UnlockIcon className="h-4 w-4 text-muted-foreground" />
-                Unlock
-              </button>
-            ) : (
-              <>
+            {/*
+             * Lock is a section-only gesture: you protect a region of the
+             * board, not a single object. The schema declares `locked` as
+             * section-only (state/schema/objects.ts) and the selection
+             * toolbar is gated the same way (objects/section/toolbar.ts).
+             */}
+            {contextObject.type === "section" &&
+              (contextObject.locked ? (
                 <button
                   type="button"
                   role="menuitem"
                   className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                  onClick={() => setLockFromContextMenu("all")}
+                  onClick={() => setLockFromContextMenu(undefined)}
                 >
-                  <LockIcon className="h-4 w-4 text-muted-foreground" />
-                  Lock all
+                  <UnlockIcon className="h-4 w-4 text-muted-foreground" />
+                  Unlock
                 </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
-                  onClick={() => setLockFromContextMenu("background")}
-                >
-                  <LockIcon className="h-4 w-4 text-muted-foreground" />
-                  Lock background only
-                </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                    onClick={() => setLockFromContextMenu("all")}
+                  >
+                    <LockIcon className="h-4 w-4 text-muted-foreground" />
+                    Lock all
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                    onClick={() => setLockFromContextMenu("background")}
+                  >
+                    <LockIcon className="h-4 w-4 text-muted-foreground" />
+                    Lock background only
+                  </button>
+                </>
+              ))}
             <div className="my-1 border-t border-border/60" />
             <button
               type="button"

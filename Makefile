@@ -89,7 +89,9 @@ docs:
 		bun tools/docs-framework/packages/docs-cli/src/index.ts serve --root docs --port 4810 --theme-locked; \
 	fi
 
-# Run the eval suite end-to-end; the runner spawns its services.
+# Run the eval suite end-to-end. The runner spawns its own file API + harness on
+# ephemeral ports for this run only and stops both when the run ends — it never
+# reuses the dev harness on :4820 or a service left over from an earlier run.
 eval: RUN_ID := $(shell date +%Y-%m-%d)-eval-$(shell date +%H%M%S)
 eval:
 	@echo "eval: starting run $(RUN_ID) in $(CURDIR)/packages/eval-suite/runs"

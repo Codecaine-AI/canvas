@@ -1,7 +1,7 @@
 /**
  * Diagnostics runner — canvas document → Diagnostic[] via the lint
  * registry (./index LAYOUT_RULES), plus the DIAGNOSTICS text block. Called
- * per operation, at spawn (<board_state>), and as the E-tier finalize gate
+ * per operation, at spawn (<board_state>), and as the committed-finalize gate
  * (./index FINISHING_RULES).
  *
  * One diagnostic renders as one line — the measured fact plus its prose

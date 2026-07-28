@@ -11,8 +11,7 @@
  *
  * The diagnostics runner calls each registry's lints in order and then floats
  * error-severity findings ahead of warnings when assigning ids, so registry
- * order drives id stability. The commit gate blocks on error-tier findings
- * only.
+ * order drives id stability. The commit gate blocks on every scoped finding.
  */
 import type { LayoutRule } from "./types";
 
@@ -21,6 +20,7 @@ import { rule as containment } from "./rules/containment";
 import { rule as brokenEdges } from "./rules/broken-edges";
 import { rule as unreadableLabels } from "./rules/unreadable-labels";
 import { rule as crowding } from "./rules/crowding";
+import { rule as clippedText } from "./rules/clipped-text";
 import { rule as frameSlack } from "./rules/frame-slack";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [
@@ -29,6 +29,7 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   brokenEdges,
   unreadableLabels,
   crowding,
+  clippedText,
 ];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];

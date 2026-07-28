@@ -12,10 +12,10 @@ import {
   readFile,
   readdir,
   rename,
-  unlink,
   writeFile,
 } from "node:fs/promises";
-import { dirname, relative, resolve } from "node:path";
+import { createServer } from "node:net";
+import { relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { spawn, type ChildProcess } from "node:child_process";
@@ -28,11 +28,14 @@ import type {
   ScenarioProgressStatus,
   StageId,
   SutThinkingLevel,
+  ToolCallCap,
+  ToolCallCapSource,
 } from "../contract.ts";
+import { AXIS_CODES } from "../contract.ts";
 import {
-  AXIS_CODES,
-  SUT_THINKING_LEVELS,
-} from "../contract.ts";
+  EVAL_FILE_API_ORIGIN_ENV,
+  EVAL_HARNESS_ORIGIN_ENV,
+} from "./harness.ts";
 import {
   EVAL_CANVASES_DIR,
   EVAL_SUITE_DIR,
@@ -43,7 +46,6 @@ import {
   type ScenarioFixture,
   type ScenarioResult,
 } from "./scenario.ts";
-import { snapshotReferences, type ReferenceSnapshotResult } from "./snapshot.ts";
 
 const execFileAsync = promisify(execFile);
 const RUNNER_DIR = resolve(REPO_ROOT, "packages", "eval-suite", "runner");
@@ -62,29 +64,34 @@ const HARNESS_SERVER_PATH = resolve(
   "service",
   "server.ts",
 );
-const EVAL_HARNESS_PORT = 4821;
-const EVAL_HARNESS_STATE_PATH = resolve(
+const LAYOUT_EDITOR_DIR = resolve(
   REPO_ROOT,
-  ".agent-kernel",
-  "eval-harness-state.json",
+  "packages",
+  "canvas-agent",
+  "src",
+  "catalog",
+  "layout-editor",
 );
 
-interface EvalHarnessState {
-  port: typeof EVAL_HARNESS_PORT;
-  pid: number;
-  thinking: SutThinkingLevel;
-  started_at: string;
-  run_id: string;
-  log_path: string;
-}
+type ServiceName = "eval file API" | "eval harness";
 
 interface ServiceHandle {
-  name: string;
+  name: ServiceName;
   spawned: boolean;
   pid: number | null;
+  port: number | null;
+  origin: string | null;
+  logPath: string | null;
   startedAt: string | null;
   healthCheckedAt: string;
   child: ChildProcess | null;
+}
+
+/** The per-run service pair, addressed by origin rather than by fixed port. */
+interface EvalServices {
+  handles: ServiceHandle[];
+  fileApiOrigin: string;
+  harnessOrigin: string;
 }
 
 export interface JudgeClientOptions {
@@ -97,11 +104,12 @@ export interface SuiteQueueOptions {
   runId: string;
   sutThinking: SutThinkingLevel;
   sutThinkingSource: "eval default" | "--sut-thinking";
+  toolCallCap: ToolCallCap;
+  toolCallCapSource: ToolCallCapSource;
   fixtures: ScenarioFixture[];
   parallel: number;
   judgeConcurrency: number;
   previous?: string;
-  teardown?: boolean;
   judgeClient: JudgeClientOptions;
   observer?: SuiteQueueObserver;
 }
@@ -333,9 +341,43 @@ function provisionHarnessExemplar(): void {
   copyFileSync(source, target);
 }
 
-async function fileApiHealthy(): Promise<boolean> {
+/**
+ * Reserve a loopback port by binding :0 and reading back the kernel's pick.
+ *
+ * Ports are chosen per run, which is what makes the service pair ephemeral: a
+ * run can never attach to a service left behind by an earlier run (a stale
+ * reused harness once served a three-day-old tool surface into a live eval),
+ * and two suite runs can execute concurrently without colliding on a port.
+ *
+ * The bind is released before the service starts, so the reservation is
+ * advisory — if something grabs the port in between, the service simply fails
+ * its health check and the run aborts. That is the intended failure mode:
+ * never adopt a listener this run did not spawn.
+ */
+export async function pickEphemeralPort(): Promise<number> {
+  return await new Promise<number>((resolvePort, rejectPort) => {
+    const probe = createServer();
+    probe.unref();
+    probe.once("error", rejectPort);
+    probe.listen({ host: "127.0.0.1", port: 0 }, () => {
+      const address = probe.address();
+      if (address === null || typeof address === "string") {
+        probe.close(() => rejectPort(new Error("Could not read an ephemeral port.")));
+        return;
+      }
+      const { port } = address;
+      probe.close((error) => (error ? rejectPort(error) : resolvePort(port)));
+    });
+  });
+}
+
+export function loopbackOrigin(port: number): string {
+  return `http://127.0.0.1:${port}`;
+}
+
+async function fileApiHealthy(origin: string): Promise<boolean> {
   try {
-    const response = await fetch("http://127.0.0.1:4010/health", {
+    const response = await fetch(`${origin}/health`, {
       signal: AbortSignal.timeout(2_000),
     });
     if (!response.ok) return false;
@@ -350,14 +392,11 @@ async function fileApiHealthy(): Promise<boolean> {
   }
 }
 
-async function harnessHealthy(): Promise<boolean> {
+async function harnessHealthy(origin: string): Promise<boolean> {
   try {
-    const response = await fetch(
-      `http://127.0.0.1:${EVAL_HARNESS_PORT}/health`,
-      {
-        signal: AbortSignal.timeout(2_000),
-      },
-    );
+    const response = await fetch(`${origin}/health`, {
+      signal: AbortSignal.timeout(2_000),
+    });
     if (!response.ok) return false;
     const payload = await response.json() as { status?: string; kernel?: string };
     return payload.status === "ok" && payload.kernel === "canvas-agent";
@@ -366,116 +405,23 @@ async function harnessHealthy(): Promise<boolean> {
   }
 }
 
-const SUT_THINKING_LEVEL_SET = new Set<SutThinkingLevel>(SUT_THINKING_LEVELS);
-
-function isEvalHarnessState(value: unknown): value is EvalHarnessState {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return false;
-  }
-  const state = value as Partial<EvalHarnessState>;
-  return state.port === EVAL_HARNESS_PORT
-    && typeof state.pid === "number"
-    && Number.isInteger(state.pid)
-    && state.pid > 0
-    && typeof state.thinking === "string"
-    && SUT_THINKING_LEVEL_SET.has(state.thinking as SutThinkingLevel)
-    && typeof state.started_at === "string"
-    && typeof state.run_id === "string"
-    && typeof state.log_path === "string";
-}
-
-async function readEvalHarnessState(): Promise<EvalHarnessState | null> {
-  let source: string;
-  try {
-    source = await readFile(EVAL_HARNESS_STATE_PATH, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-    throw error;
-  }
-  try {
-    const parsed: unknown = JSON.parse(source);
-    return isEvalHarnessState(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-async function writeEvalHarnessState(state: EvalHarnessState): Promise<void> {
-  await mkdir(dirname(EVAL_HARNESS_STATE_PATH), { recursive: true });
-  const tempPath = `${EVAL_HARNESS_STATE_PATH}.${process.pid}.${Date.now()}.tmp`;
-  await writeFile(tempPath, `${JSON.stringify(state, null, 2)}\n`);
-  await rename(tempPath, EVAL_HARNESS_STATE_PATH);
-}
-
-async function evalHarnessListenerPids(): Promise<number[]> {
-  try {
-    const { stdout } = await execFileAsync(
-      "lsof",
-      [
-        "-nP",
-        "-t",
-        `-iTCP:${EVAL_HARNESS_PORT}`,
-        "-sTCP:LISTEN",
-      ],
-      { cwd: REPO_ROOT },
-    );
-    return [...new Set(
-      stdout
-        .split(/\s+/)
-        .filter(Boolean)
-        .map(Number)
-        .filter((pid) => Number.isInteger(pid) && pid > 0),
-    )];
-  } catch (error) {
-    if ((error as { code?: number | string }).code === 1) return [];
-    throw error;
-  }
-}
-
-async function waitForEvalHarnessExit(timeoutMs: number): Promise<boolean> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if ((await evalHarnessListenerPids()).length === 0) return true;
-    await Bun.sleep(250);
-  }
-  return (await evalHarnessListenerPids()).length === 0;
-}
-
-async function stopEvalHarness(listenerPids: number[]): Promise<void> {
-  if (listenerPids.length === 0) {
-    throw new Error(
-      `Eval harness answered on :${EVAL_HARNESS_PORT}, but its listener process could not be identified.`,
-    );
-  }
-  for (const pid of listenerPids) {
-    try {
-      process.kill(pid, "SIGTERM");
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
-    }
-  }
-  if (await waitForEvalHarnessExit(10_000)) return;
-
-  for (const pid of await evalHarnessListenerPids()) {
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
-    }
-  }
-  if (!await waitForEvalHarnessExit(5_000)) {
-    throw new Error(`Eval harness on :${EVAL_HARNESS_PORT} did not stop.`);
-  }
+async function serviceHealthy(handle: ServiceHandle): Promise<boolean> {
+  if (!handle.origin) return false;
+  return handle.name === "eval harness"
+    ? await harnessHealthy(handle.origin)
+    : await fileApiHealthy(handle.origin);
 }
 
 function spawnService(options: {
-  name: string;
+  name: ServiceName;
   entryPath: string;
   logPath: string;
-  env?: NodeJS.ProcessEnv;
+  port: number;
+  env: NodeJS.ProcessEnv;
 }): ServiceHandle {
   const logFd = openSync(options.logPath, "a");
   const startedAt = new Date().toISOString();
+  // Detached so the whole service process group can be signalled at teardown.
   const child = spawn(process.execPath, [options.entryPath], {
     cwd: REPO_ROOT,
     env: { ...process.env, ...options.env },
@@ -488,6 +434,9 @@ function spawnService(options: {
     name: options.name,
     spawned: true,
     pid: child.pid ?? null,
+    port: options.port,
+    origin: loopbackOrigin(options.port),
+    logPath: options.logPath,
     startedAt,
     healthCheckedAt: startedAt,
     child,
@@ -515,158 +464,156 @@ async function waitForHealthy(options: {
   throw new Error(`${options.handle.name} did not become healthy before the startup deadline.`);
 }
 
-async function ensureService(options: {
-  name: string;
-  check: () => Promise<boolean>;
-  spawn: () => ServiceHandle;
-}): Promise<ServiceHandle> {
-  if (await options.check()) {
-    return {
-      name: options.name,
-      spawned: false,
-      pid: null,
-      startedAt: null,
-      healthCheckedAt: new Date().toISOString(),
-      child: null,
-    };
-  }
-  const handle = options.spawn();
-  await waitForHealthy({ handle, check: options.check });
-  return handle;
-}
-
-async function ensureEvalHarness(options: {
-  runId: string;
+/**
+ * Start one service for this run. There is no reuse branch by design: the
+ * suite always owns its services, so a healthy listener is never adopted.
+ */
+async function startService(options: {
+  name: ServiceName;
+  entryPath: string;
   servicesDir: string;
-  thinking: SutThinkingLevel;
+  logName: string;
+  port: number;
+  env: NodeJS.ProcessEnv;
+  check: (origin: string) => Promise<boolean>;
 }): Promise<ServiceHandle> {
-  if (await harnessHealthy()) {
-    const listenerPids = await evalHarnessListenerPids();
-    const state = await readEvalHarnessState();
-    const recordedState = state && listenerPids.includes(state.pid)
-      ? state
-      : null;
-    if (recordedState?.thinking === options.thinking) {
-      return {
-        name: "eval harness",
-        spawned: false,
-        pid: null,
-        startedAt: null,
-        healthCheckedAt: new Date().toISOString(),
-        child: null,
-      };
-    }
-    const recorded = recordedState
-      ? `recorded thinking ${recordedState.thinking}`
-      : "no recorded thinking";
-    process.stdout.write(
-      `eval harness :${EVAL_HARNESS_PORT} restarting (${recorded}; requested ${options.thinking}).\n`,
-    );
-    await stopEvalHarness(listenerPids);
-  }
-
-  const logPath = resolve(options.servicesDir, "harness.log");
+  const origin = loopbackOrigin(options.port);
   const handle = spawnService({
-    name: "eval harness",
-    entryPath: HARNESS_SERVER_PATH,
-    logPath,
-    env: {
-      CANVAS_AGENT_CANVASES_DIR: EVAL_CANVASES_DIR,
-      CANVAS_AGENT_PORT: String(EVAL_HARNESS_PORT),
-      CANVAS_AGENT_THINKING: options.thinking,
-    },
+    name: options.name,
+    entryPath: options.entryPath,
+    logPath: resolve(options.servicesDir, options.logName),
+    port: options.port,
+    env: options.env,
   });
   try {
-    await waitForHealthy({ handle, check: harnessHealthy });
-    if (!handle.pid || !handle.startedAt) {
-      throw new Error("Eval harness spawned without process identity.");
-    }
-    await writeEvalHarnessState({
-      port: EVAL_HARNESS_PORT,
-      pid: handle.pid,
-      thinking: options.thinking,
-      started_at: handle.startedAt,
-      run_id: options.runId,
-      log_path: relative(REPO_ROOT, logPath),
-    });
-    return handle;
+    await waitForHealthy({ handle, check: () => options.check(origin) });
   } catch (error) {
     await teardownServices([handle]);
     throw error;
   }
+  if (!handle.pid || !handle.startedAt) {
+    await teardownServices([handle]);
+    throw new Error(`${options.name} spawned without process identity.`);
+  }
+  process.stdout.write(
+    `${options.name} listening on ${origin} (pid ${handle.pid}; ephemeral, stopped at run end).\n`,
+  );
+  return handle;
 }
 
-async function ensureEvalServices(options: {
-  runId: string;
+/** Spawn the run's own file API + harness. One pair serves every scenario. */
+export function toolCallCapOverrideEnv(
+  toolCallCap: ToolCallCap,
+  toolCallCapSource: ToolCallCapSource,
+): Record<string, string> {
+  return toolCallCapSource === "--tool-call-cap"
+    ? { CANVAS_AGENT_TOOL_CALL_CAP: String(toolCallCap) }
+    : {};
+}
+
+async function startEvalServices(options: {
   runDir: string;
   sutThinking: SutThinkingLevel;
-}): Promise<ServiceHandle[]> {
+  toolCallCap: ToolCallCap;
+  toolCallCapSource: ToolCallCapSource;
+}): Promise<EvalServices> {
   provisionHarnessExemplar();
   const servicesDir = resolve(options.runDir, "services");
   await mkdir(servicesDir, { recursive: true });
   const handles: ServiceHandle[] = [];
   try {
-    handles.push(await ensureService({
+    const fileApiPort = await pickEphemeralPort();
+    handles.push(await startService({
       name: "eval file API",
-      check: fileApiHealthy,
-      spawn: () => spawnService({
-        name: "eval file API",
-        entryPath: EVAL_FILE_API_PATH,
-        logPath: resolve(servicesDir, "file-api.log"),
-        env: { EVAL_FILE_API_PORT: "4010" },
-      }),
-    }));
-    handles.push(await ensureEvalHarness({
-      runId: options.runId,
+      entryPath: EVAL_FILE_API_PATH,
       servicesDir,
-      thinking: options.sutThinking,
+      logName: "file-api.log",
+      port: fileApiPort,
+      env: { EVAL_FILE_API_PORT: String(fileApiPort) },
+      check: fileApiHealthy,
     }));
-    return handles;
+    const harnessPort = await pickEphemeralPort();
+    handles.push(await startService({
+      name: "eval harness",
+      entryPath: HARNESS_SERVER_PATH,
+      servicesDir,
+      logName: "harness.log",
+      port: harnessPort,
+      env: {
+        CANVAS_AGENT_CANVASES_DIR: EVAL_CANVASES_DIR,
+        CANVAS_AGENT_PORT: String(harnessPort),
+        CANVAS_AGENT_THINKING: options.sutThinking,
+        ...toolCallCapOverrideEnv(
+          options.toolCallCap,
+          options.toolCallCapSource,
+        ),
+      },
+      check: harnessHealthy,
+    }));
+    return {
+      handles,
+      fileApiOrigin: loopbackOrigin(fileApiPort),
+      harnessOrigin: loopbackOrigin(harnessPort),
+    };
   } catch (error) {
     await teardownServices(handles);
     throw error;
   }
 }
 
-async function teardownServices(handles: ServiceHandle[]): Promise<void> {
-  for (const handle of handles) {
-    if (!handle.spawned || !handle.pid) continue;
+function signalService(handle: ServiceHandle, signal: NodeJS.Signals): void {
+  if (!handle.spawned || !handle.pid) return;
+  try {
+    // The service leads its own process group (spawned detached).
+    process.kill(-handle.pid, signal);
+  } catch {
     try {
-      process.kill(-handle.pid, "SIGTERM");
+      process.kill(handle.pid, signal);
     } catch {
-      try {
-        process.kill(handle.pid, "SIGTERM");
-      } catch {
-        continue;
-      }
+      // Already gone.
     }
   }
-  const deadline = Date.now() + 10_000;
+}
+
+async function waitForServicesDown(
+  handles: ServiceHandle[],
+  timeoutMs: number,
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const stillHealthy = await Promise.all([
-      handles.some((handle) => handle.spawned && handle.name === "eval file API")
-        ? fileApiHealthy()
-        : false,
-      handles.some((handle) => handle.spawned && handle.name === "eval harness")
-        ? harnessHealthy()
-        : false,
-    ]);
-    if (!stillHealthy.some(Boolean)) break;
+    if (!(await Promise.all(handles.map(serviceHealthy))).some(Boolean)) {
+      return true;
+    }
     await Bun.sleep(250);
   }
-  const harness = handles.find((handle) =>
-    handle.spawned && handle.name === "eval harness"
-  );
-  if (harness?.pid && !await harnessHealthy()) {
-    const state = await readEvalHarnessState();
-    if (state?.pid === harness.pid) {
-      try {
-        await unlink(EVAL_HARNESS_STATE_PATH);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      }
-    }
-  }
+  return !(await Promise.all(handles.map(serviceHealthy))).some(Boolean);
+}
+
+/**
+ * Stop every service this run spawned. Always called — on success, on failure,
+ * and from the run's `finally` — so it reports a survivor on stderr instead of
+ * throwing over whatever outcome the run already has. A survivor cannot poison
+ * a later run: ports are ephemeral, so nothing will ever connect to it again.
+ */
+async function teardownServices(handles: ServiceHandle[]): Promise<void> {
+  const spawned = handles.filter((handle) => handle.spawned && handle.pid);
+  if (spawned.length === 0) return;
+  for (const handle of spawned) signalService(handle, "SIGTERM");
+  if (await waitForServicesDown(spawned, 10_000)) return;
+  for (const handle of spawned) signalService(handle, "SIGKILL");
+  if (await waitForServicesDown(spawned, 5_000)) return;
+  const stuck = spawned
+    .map((handle) => `${handle.name} (pid ${handle.pid}, ${handle.origin})`)
+    .join(", ");
+  process.stderr.write(`eval services did not stop: ${stuck}.\n`);
+}
+
+/**
+ * Signal-path teardown: handlers cannot await, so fire SIGTERM at each service
+ * group synchronously and let the services' own SIGTERM handlers close down.
+ */
+function teardownServicesSync(handles: ServiceHandle[]): void {
+  for (const handle of handles) signalService(handle, "SIGTERM");
 }
 
 async function recursiveFiles(path: string): Promise<string[]> {
@@ -710,6 +657,114 @@ async function gitFingerprint(): Promise<{ revision: string; dirty: boolean }> {
   return { revision, dirty: status.trim().length > 0 };
 }
 
+export interface FileFingerprint {
+  hash: string;
+  files: string[];
+}
+
+/**
+ * The SUT source hashes. Computed once per run and shared by the audit record
+ * written at service spawn (services/identity.json) and by fingerprint.md, so
+ * both describe exactly the same tree.
+ */
+export interface SourceFingerprints {
+  prompt: FileFingerprint;
+  lints: FileFingerprint;
+  styles: FileFingerprint;
+  surface: FileFingerprint;
+}
+
+async function collectSourceFingerprints(): Promise<SourceFingerprints> {
+  const [prompt, lints, styles, surface] = await Promise.all([
+    hashFiles([
+      resolve(LAYOUT_EDITOR_DIR, "prompt", "prompt.json"),
+      resolve(LAYOUT_EDITOR_DIR, "prompt", "system.md"),
+    ]),
+    hashFiles([
+      resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "lints"),
+    ]),
+    hashFiles([resolve(LAYOUT_EDITOR_DIR, "context", "style-guide")]),
+    hashFiles([
+      resolve(REPO_ROOT, "packages", "canvas-agent", "src", "service", "session"),
+      resolve(LAYOUT_EDITOR_DIR, "context", "capabilities"),
+      resolve(LAYOUT_EDITOR_DIR, "tools"),
+    ]),
+  ]);
+  return { prompt, lints, styles, surface };
+}
+
+export interface ServiceIdentityInput {
+  name: string;
+  pid: number | null;
+  port: number | null;
+  origin: string | null;
+  startedAt: string | null;
+  healthCheckedAt: string;
+  logPath: string | null;
+}
+
+export interface ServiceIdentity {
+  run_id: string;
+  written_at: string;
+  git: { revision: string; dirty: boolean };
+  hashes: { prompt: string; lint: string; style: string; surface: string };
+  services: Array<{
+    name: string;
+    pid: number | null;
+    port: number | null;
+    origin: string | null;
+    started_at: string | null;
+    health_checked_at: string;
+    log: string | null;
+  }>;
+}
+
+/**
+ * Identity is recorded for audit, never for reuse: nothing reads this file back
+ * to decide whether to adopt a service. It exists so a finished run can be
+ * tied to the exact processes and source tree that produced it.
+ */
+export function buildServiceIdentity(options: {
+  runId: string;
+  git: { revision: string; dirty: boolean };
+  fingerprints: SourceFingerprints;
+  services: ServiceIdentityInput[];
+  now?: Date;
+}): ServiceIdentity {
+  return {
+    run_id: options.runId,
+    written_at: (options.now ?? new Date()).toISOString(),
+    git: { ...options.git },
+    hashes: {
+      prompt: options.fingerprints.prompt.hash,
+      lint: options.fingerprints.lints.hash,
+      style: options.fingerprints.styles.hash,
+      surface: options.fingerprints.surface.hash,
+    },
+    services: options.services.map((service) => ({
+      name: service.name,
+      pid: service.pid,
+      port: service.port,
+      origin: service.origin,
+      started_at: service.startedAt,
+      health_checked_at: service.healthCheckedAt,
+      log: service.logPath === null ? null : relative(REPO_ROOT, service.logPath),
+    })),
+  };
+}
+
+export async function writeServiceIdentity(options: {
+  servicesDir: string;
+  identity: ServiceIdentity;
+}): Promise<string> {
+  await mkdir(options.servicesDir, { recursive: true });
+  const path = resolve(options.servicesDir, "identity.json");
+  const tempPath = `${path}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tempPath, `${JSON.stringify(options.identity, null, 2)}\n`);
+  await rename(tempPath, path);
+  return path;
+}
+
 function markdownFileList(title: string, files: string[]): string {
   return [
     `<details><summary>${title}</summary>`,
@@ -724,22 +779,15 @@ async function writeFingerprint(options: {
   runId: string;
   sutThinking: SutThinkingLevel;
   sutThinkingSource: SuiteQueueOptions["sutThinkingSource"];
+  toolCallCap: ToolCallCap;
+  toolCallCapSource: ToolCallCapSource;
   runDir: string;
   judgeClient: JudgeClientOptions;
   services: ServiceHandle[];
-  references: ReferenceSnapshotResult[];
   git: { revision: string; dirty: boolean };
+  fingerprints: SourceFingerprints;
 }): Promise<void> {
-  const agentConfigPath = resolve(
-    REPO_ROOT,
-    "packages",
-    "canvas-agent",
-    "src",
-    "agent",
-    "catalog",
-    "layout-editor",
-    "agent.json",
-  );
+  const agentConfigPath = resolve(LAYOUT_EDITOR_DIR, "agent.json");
   const agentConfig = JSON.parse(await readFile(agentConfigPath, "utf8")) as {
     model?: string;
     thinking?: string;
@@ -752,47 +800,9 @@ async function writeFingerprint(options: {
   const resolvedModel = kernelSource.match(
     /export const LAYOUT_MODEL\s*=\s*"([^"]+)"/,
   )?.[1] ?? agentConfig.model ?? "unknown";
-  const prompt = await hashFiles([
-    resolve(
-      REPO_ROOT,
-      "packages",
-      "canvas-agent",
-      "src",
-      "agent",
-      "catalog",
-      "layout-editor",
-      "prompt",
-      "prompt.json",
-    ),
-    resolve(
-      REPO_ROOT,
-      "packages",
-      "canvas-agent",
-      "src",
-      "agent",
-      "catalog",
-      "layout-editor",
-      "prompt",
-      "system.md",
-    ),
-  ]);
-  const lints = await hashFiles([
-    resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "lints"),
-  ]);
-  const styles = await hashFiles([
-    resolve(
-      REPO_ROOT,
-      "packages",
-      "canvas-agent",
-      "src",
-      "agent",
-      "catalog",
-      "layout-editor",
-      "context",
-      "style-guide",
-    ),
-  ]);
+  const { prompt, lints, styles, surface } = options.fingerprints;
   const harness = options.services.find((service) => service.name === "eval harness");
+  const fileApi = options.services.find((service) => service.name === "eval file API");
   const lines = [
     `# Eval-suite fingerprint — ${options.runId}`,
     "",
@@ -800,25 +810,24 @@ async function writeFingerprint(options: {
     "- tier: `system`",
     `- git: \`${options.git.revision}${options.git.dirty ? "+dirty" : ""}\``,
     `- SUT agent config: model \`${resolvedModel}\` @ \`${options.sutThinking}\` (${options.sutThinkingSource}; agent.json \`${agentConfig.thinking ?? "unknown"}\`), max turns \`${agentConfig.maxTurns ?? "unknown"}\``,
+    `- tool-call cap: ${options.toolCallCap} (${options.toolCallCapSource})`,
     `- prompt hash: \`${prompt.hash}\``,
     `- lint hash: \`${lints.hash}\``,
     `- style hash: \`${styles.hash}\``,
+    `- surface hash: \`${surface.hash}\``,
     `- judge client: model \`${options.judgeClient.model}\`, effort \`${options.judgeClient.effort}\`, base URL \`${options.judgeClient.baseUrl}\``,
     "- snapshot fonts: bundled Inter + system fallback (Helvetica default/sans-serif)",
-    `- harness start time: ${harness?.startedAt ?? `pre-existing; health checked ${harness?.healthCheckedAt ?? "unknown"}`}`,
+    `- harness start time: ${harness?.startedAt ?? "unknown"} (ephemeral, spawned for this run and stopped at run end)`,
+    `- eval services: harness \`${harness?.origin ?? "unknown"}\` pid \`${harness?.pid ?? "unknown"}\`, file API \`${fileApi?.origin ?? "unknown"}\` pid \`${fileApi?.pid ?? "unknown"}\` (see \`services/identity.json\`)`,
     `- eval canvas directory: \`${relative(REPO_ROOT, EVAL_CANVASES_DIR)}\``,
-    "",
-    "## Reference renders",
-    "",
-    ...options.references.map(
-      (reference) => `- \`${reference.id}\`: \`${reference.source}\``,
-    ),
     "",
     markdownFileList("Prompt files", prompt.files),
     "",
     markdownFileList("Active lint files", lints.files),
     "",
     markdownFileList("Active style files", styles.files),
+    "",
+    markdownFileList("Active tool-surface files", surface.files),
     "",
   ];
   await writeFile(resolve(options.runDir, "fingerprint.md"), lines.join("\n"));
@@ -827,12 +836,16 @@ async function writeFingerprint(options: {
 function initialProgress(
   runId: string,
   sutThinking: SutThinkingLevel,
+  toolCallCap: ToolCallCap,
+  toolCallCapSource: ToolCallCapSource,
   fixtures: ScenarioFixture[],
 ): RunProgress {
   return {
     run_id: runId,
     tier: "system",
     sut_thinking: sutThinking,
+    tool_call_cap: toolCallCap,
+    tool_call_cap_source: toolCallCapSource,
     status: "running",
     started_at: new Date().toISOString(),
     finished_at: null,
@@ -854,6 +867,7 @@ function spawnScenarioChild(options: {
   runId: string;
   scenario: ScenarioId;
   scenarioDir: string;
+  env: NodeJS.ProcessEnv;
 }): {
   child: ChildProcess;
   completion: Promise<{ code: number; signal: NodeJS.Signals | null }>;
@@ -871,7 +885,7 @@ function spawnScenarioChild(options: {
     ],
     {
       cwd: RUNNER_DIR,
-      env: process.env,
+      env: options.env,
       stdio: ["ignore", logFd, logFd],
     },
   );
@@ -991,11 +1005,13 @@ async function prepareRun(options: {
   runId: string;
   sutThinking: SutThinkingLevel;
   sutThinkingSource: SuiteQueueOptions["sutThinkingSource"];
+  toolCallCap: ToolCallCap;
+  toolCallCapSource: ToolCallCapSource;
   fixtures: ScenarioFixture[];
   judgeClient: JudgeClientOptions;
 }): Promise<{
   runDir: string;
-  services: ServiceHandle[];
+  services: EvalServices;
 }> {
   for (const fixture of options.fixtures) {
     boardIdFor(options.runId, fixture.scenario);
@@ -1008,27 +1024,41 @@ async function prepareRun(options: {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  const git = await gitFingerprint();
+  const [git, fingerprints] = await Promise.all([
+    gitFingerprint(),
+    collectSourceFingerprints(),
+  ]);
   await mkdir(runDir, { recursive: true });
-  const services = await ensureEvalServices({
-    runId: options.runId,
+  const services = await startEvalServices({
     runDir,
     sutThinking: options.sutThinking,
+    toolCallCap: options.toolCallCap,
+    toolCallCapSource: options.toolCallCapSource,
   });
   try {
-    const references = await snapshotReferences({ repoRoot: REPO_ROOT, runDir });
+    await writeServiceIdentity({
+      servicesDir: resolve(runDir, "services"),
+      identity: buildServiceIdentity({
+        runId: options.runId,
+        git,
+        fingerprints,
+        services: services.handles,
+      }),
+    });
     await writeFingerprint({
       runId: options.runId,
       sutThinking: options.sutThinking,
       sutThinkingSource: options.sutThinkingSource,
+      toolCallCap: options.toolCallCap,
+      toolCallCapSource: options.toolCallCapSource,
       runDir,
       judgeClient: options.judgeClient,
-      services,
-      references,
+      services: services.handles,
       git,
+      fingerprints,
     });
   } catch (error) {
-    await teardownServices(services);
+    await teardownServices(services.handles);
     throw error;
   }
   return { runDir, services };
@@ -1050,12 +1080,31 @@ export async function runSuiteQueue(
     runId,
     sutThinking: rawOptions.sutThinking,
     sutThinkingSource: rawOptions.sutThinkingSource,
+    toolCallCap: rawOptions.toolCallCap,
+    toolCallCapSource: rawOptions.toolCallCapSource,
     fixtures: rawOptions.fixtures,
     judgeClient: rawOptions.judgeClient,
   });
+  // Scenario children learn where this run's services listen; the ports are
+  // ephemeral, so nothing may assume a fixed origin.
+  const scenarioEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    [EVAL_FILE_API_ORIGIN_ENV]: services.fileApiOrigin,
+    [EVAL_HARNESS_ORIGIN_ENV]: services.harnessOrigin,
+  };
+  // The status display re-raises SIGINT after painting its final frame, which
+  // kills this process before the finally block runs — so the signal path gets
+  // its own synchronous teardown, registered ahead of that handler.
+  const interruptTeardown = (): void => {
+    teardownServicesSync(services.handles);
+  };
+  process.prependOnceListener("SIGINT", interruptTeardown);
+  process.prependOnceListener("SIGTERM", interruptTeardown);
   const progress = initialProgress(
     runId,
     rawOptions.sutThinking,
+    rawOptions.toolCallCap,
+    rawOptions.toolCallCapSource,
     rawOptions.fixtures,
   );
   const runtime = new Map<ScenarioId, ScenarioRuntimeStatus>(
@@ -1077,7 +1126,7 @@ export async function runSuiteQueue(
       progress,
       fixtures: rawOptions.fixtures,
       runtime,
-      services,
+      services: services.handles,
       judgeInFlight: activeJudgeRunner?.semaphore?.active ?? 0,
       judgeLimit: activeJudgeRunner?.semaphore?.capacity ?? judgeConcurrency,
     }));
@@ -1143,6 +1192,7 @@ export async function runSuiteQueue(
         runId,
         scenario: fixture.scenario,
         scenarioDir,
+        env: scenarioEnv,
       });
       scenarioRuntime.startedAt = new Date().toISOString();
       await progressWriter.update((current) => {
@@ -1272,7 +1322,10 @@ export async function runSuiteQueue(
   } finally {
     if (monitor) clearInterval(monitor);
     await monitorTail;
-    if (rawOptions.teardown) await teardownServices(services);
+    process.off("SIGINT", interruptTeardown);
+    process.off("SIGTERM", interruptTeardown);
+    // The services belong to this run and never outlive it.
+    await teardownServices(services.handles);
   }
   return { runId, progress, runDir };
 }
@@ -1295,7 +1348,13 @@ export async function runStubQueue(
     events.push(event);
     onEvent?.(event);
   };
-  const progress = initialProgress("2026-07-23-stub", "low", fixtures);
+  const progress = initialProgress(
+    "2026-07-23-stub",
+    "low",
+    3,
+    "agent default",
+    fixtures,
+  );
   const runtime = new Map<ScenarioId, ScenarioRuntimeStatus>(
     fixtures.map((fixture) => [
       fixture.scenario,
@@ -1310,24 +1369,20 @@ export async function runStubQueue(
       },
     ]),
   );
-  const services: ServiceHandle[] = [
-    {
-      name: "eval file API",
-      spawned: false,
-      pid: null,
-      startedAt: null,
-      healthCheckedAt: new Date().toISOString(),
-      child: null,
-    },
-    {
-      name: "eval harness",
-      spawned: false,
-      pid: null,
-      startedAt: null,
-      healthCheckedAt: new Date().toISOString(),
-      child: null,
-    },
-  ];
+  // Dry runs never touch a service; these placeholders only feed the display.
+  const services: ServiceHandle[] = (
+    ["eval file API", "eval harness"] as const
+  ).map((name) => ({
+    name,
+    spawned: false,
+    pid: null,
+    port: null,
+    origin: null,
+    logPath: null,
+    startedAt: null,
+    healthCheckedAt: new Date().toISOString(),
+    child: null,
+  }));
   let judgeInFlight = 0;
   const publish = (): void => {
     observer?.onStatus(buildQueueStatus({

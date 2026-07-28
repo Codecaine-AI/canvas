@@ -16,7 +16,7 @@ import {
   toolFinalize,
   type LayoutSession,
 } from "../src/service/session";
-import type { LayoutToolTextResult } from "../src/service/tool-runtime";
+import type { LayoutToolTextResult } from "../src/service/session/tools";
 import { resolveScope } from "../src/board/scope";
 import { box, makeDocument } from "./synthetic";
 
@@ -59,6 +59,7 @@ function makeStore(
     requests: [],
     views: [],
     viewCount: 0,
+    changeRenders: [],
   };
   const store = Object.create(LayoutSessionStore.prototype) as LayoutSessionStore;
   (store as unknown as { sessions: Map<string, LayoutSession> }).sessions = new Map([

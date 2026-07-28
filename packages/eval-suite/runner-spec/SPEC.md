@@ -61,17 +61,27 @@ together. It appears in every eval board id, `fingerprint.md`, `sessions.md`,
   Board ids follow the active scenario spec and must satisfy
   `/^[a-z0-9][a-z0-9._-]{0,63}$/`. Lowercase the label and fail before starting if an
   id would exceed 64 characters.
-- The runner uses dedicated service instances:
-  - Eval canvas file API on **:4010**, with `canvasesDir = canvases/evals/`.
-  - Eval harness on **:4821**, pointed at the same directory.
-- The queue health-checks both eval ports at startup. If either is down, it spawns
-  the service as a child process, writes service logs below
-  `runs/<run-id>/services/`, and leaves the service running unless `--teardown` is
-  passed.
-- At run start, reference renders required by an active rubric are snapshotted into
-  `runs/<run-id>/refs/` with GET-only access to the main studio API on :4000. If the
-  studio is unavailable, render the archived canvas locally and record the source in
-  `fingerprint.md`.
+- The runner uses dedicated service instances, spawned fresh for every run:
+  - Eval canvas file API, with `canvasesDir = canvases/evals/`.
+  - Eval harness, pointed at the same directory.
+- **Both services are ephemeral and hermetic per run.** The queue picks a free
+  loopback port for each (bind `:0`, read the assigned port), spawns the service as
+  its own child process, waits for `/health`, and **always** stops it when the run
+  ends — on success, on failure, and on SIGINT/SIGTERM. A service that is already
+  listening is never adopted: there is no reuse branch and no cross-run state file.
+  (A reused harness once served a three-day-old tool surface into a live run; that is
+  the defect this rule closes.) Because the ports are per run, two suite runs may
+  execute concurrently.
+- Nothing may assume a fixed eval port. The queue passes `EVAL_FILE_API_ORIGIN` and
+  `EVAL_HARNESS_ORIGIN` to each scenario child, and the harness clients take their
+  origin as a constructor argument.
+- One service pair serves every scenario of a run, including parallel ones.
+- Service logs go to `runs/<run-id>/services/{file-api,harness}.log`, and the spawned
+  identity — pid, port, origin, start time, git revision + dirty flag, and the
+  prompt/lint/style/surface hashes — is recorded in
+  `runs/<run-id>/services/identity.json`. That record is for audit only; nothing ever
+  reads it back to decide whether to reuse a service.
+- `--teardown` is accepted for compatibility and ignored; teardown is unconditional.
 - `clean` deletes matching `eval.*` board files from `canvases/evals/` only and must
   refuse to touch any other directory. Run artifact directories are never
   auto-deleted.
@@ -84,6 +94,10 @@ runs/<run-id>/
   scorecard.md
   scorecard.json
   fingerprint.md
+  services/
+    identity.json
+    file-api.log
+    harness.log
   <scenario>/
     stage-blank.json
     stage0.json
@@ -175,9 +189,8 @@ recorded with an assembler-visible `ERROR` flag rather than being silently omitt
 - Recompute deterministic score arithmetic from typed per-item verdict fields.
   When the completion's score differs from the recomputation by more than 0.25, use
   the recomputed value and add `SCORE-RECOMPUTED`.
-- For calibrated visual axes, retry once when a reference score drifts beyond the
-  rubric's tolerance. If the retry still drifts, keep the verdict and add
-  `CAL-DRIFT`.
+- Visual axes score each board absolutely against its rubric anchors; judges never
+  receive a comparison or reference board.
 - Write every verdict as both `judge-<axis>.json` and a rendered
   `judge-<axis>.md`. The JSON file is authoritative for the assembler.
 
@@ -198,10 +211,11 @@ recorded with an assembler-visible `ERROR` flag rather than being silently omitt
   retry, and 1 for a crash. Write `scenario_result.json` before exiting.
 - Start judging a scenario as soon as its child exits 0 or 2. After all scenarios
   finish grading, assemble the scorecard and finalize `run_progress.json`.
-- Complete all preconditions before mutating a board: service health, reference
-  renders required by the active rubrics, and `fingerprint.md` with the run id, git
-  revision and dirty state, agent configuration, prompt/lint/style hashes, resolved
-  judge client, and harness start time.
+- Complete all preconditions before mutating a board: the run's own services healthy,
+  `services/identity.json` written,
+  and `fingerprint.md` with the run id, git revision and dirty state, agent
+  configuration, prompt/lint/style/surface hashes, resolved judge client, and the
+  harness start time, pid and origin.
 
 ## Scorecard rules
 

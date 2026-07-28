@@ -13,7 +13,7 @@ import { join, relative, resolve } from "node:path";
 import { refreshCatalogPromptSnapshots } from "@agent-kernel/kernel";
 
 const packageRoot = resolve(import.meta.dir, "..");
-const catalogRoot = join(packageRoot, "src", "agent", "catalog");
+const catalogRoot = join(packageRoot, "src", "catalog");
 
 function main(): void {
   for (const result of refreshCatalogPromptSnapshots([catalogRoot])) {

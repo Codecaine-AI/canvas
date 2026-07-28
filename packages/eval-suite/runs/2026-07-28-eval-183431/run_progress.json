@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-07-28-eval-183431",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 3,
+  "tool_call_cap_source": "agent default",
+  "status": "running",
+  "started_at": "2026-07-28T23:34:33.063Z",
+  "finished_at": null,
+  "scenarios": {
+    "rag-ingestion-retrieval": {
+      "status": "judging",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 50437,
+      "finished_at": null,
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

@@ -75,13 +75,13 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
         },
         {
-          "insert": " asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly, copying exact peer coordinates and sizes from the latest BOARD digest. There is no align operation, automatic alignment pass, or dedicated alignment diagnostic."
+          "insert": " asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly: align puts a set of boxes on one edge or centerline, space_out sets the repeated gap along the flow axis, match_size copies a peer's dimensions, and any remaining coordinate comes from the latest BOARD digest. There is no automatic alignment pass and no dedicated alignment diagnostic."
         }
       ]
     },
@@ -137,7 +137,7 @@
       },
       "text": [
         {
-          "insert": "Copy the chosen peer's exact digest center and pitch instead of estimating a nearby register; the 16px grid is only the quantization step."
+          "insert": "Copy the chosen peer's exact digest center and pitch instead of estimating a nearby register; the agent's 20 grid is only the quantization step."
         }
       ]
     },

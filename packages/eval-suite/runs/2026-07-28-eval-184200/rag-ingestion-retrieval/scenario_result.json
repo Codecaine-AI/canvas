@@ -1,0 +1,12 @@
+{
+  "run_id": "2026-07-28-eval-184200",
+  "tier": "system",
+  "scenario": "rag-ingestion-retrieval",
+  "board_id": "eval.2026-07-28-eval-184200.rag-ingestion-retrieval",
+  "stages": [],
+  "outcomes": {},
+  "timings": {},
+  "session_ids": {},
+  "finished_at": "2026-07-28T23:42:01.375Z",
+  "exit_code": 1
+}

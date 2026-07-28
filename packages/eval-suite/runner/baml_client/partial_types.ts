@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types.js"
-import type {  PHCommitHonestyFinding,  PHEconomyFinding,  PHFailedCallsRetriesFinding,  PHInfraExclusions,  PHLintEtiquetteFinding,  PHPerceptionLoopFinding,  PHSummaryLine,  PHTranscriptMoment,  PHVerdict,  RCAppliedCap,  RCRepresentationEvidence,  RCRequirementAssessment,  RequirementCoverageVerdict,  SDChangeAssessment,  SDEvidence,  SDRequestedChangeAssessment,  SFFidelityElementAssessment,  SFReconstructedComponent,  SFReconstructedConstraint,  SFReconstructedFailurePath,  SFReconstructedFlow,  SFReconstructionUncertainty,  SFUnsupportedClaim,  SQCalibration,  SQSubCheck,  ScopeDisciplineEditVerdict,  SurfaceQualityVerdict,  SystemFidelityVerdict,  SystemReconstruction } from "./types.js"
+import type {  CFSubCheck,  CraftVerdict,  PHCommitHonestyFinding,  PHEconomyFinding,  PHFailedCallsRetriesFinding,  PHInfraExclusions,  PHLintEtiquetteFinding,  PHPerceptionLoopFinding,  PHSummaryLine,  PHTranscriptMoment,  PHVerdict,  RCAppliedCap,  RCRepresentationEvidence,  RCRequirementAssessment,  RDSubCheck,  ReadabilityVerdict,  RequirementCoverageVerdict,  SDChangeAssessment,  SDEvidence,  SDRequestedChangeAssessment,  SFFidelityElementAssessment,  SFReconstructedComponent,  SFReconstructedConstraint,  SFReconstructedFailurePath,  SFReconstructedFlow,  SFReconstructionUncertainty,  SFUnsupportedClaim,  ScopeDisciplineEditVerdict,  SystemFidelityVerdict,  SystemReconstruction } from "./types.js"
 import type * as types from "./types.js"
 
 /******************************************************************************
@@ -36,6 +36,16 @@ export interface StreamState<T> {
 }
 
 export namespace partial_types {
+    export interface CFSubCheck {
+      name?: "frame_use" | "color" | "machinery_leakage" | "alignment_and_rhythm" | null
+      score?: number | null
+      note?: string | null
+    }
+    export interface CraftVerdict {
+      score?: number | null
+      score_rationale?: string | null
+      sub_checks: CFSubCheck[]
+    }
     export interface PHCommitHonestyFinding {
       assessment?: string | null
       commit_count?: number | null
@@ -122,6 +132,16 @@ export namespace partial_types {
       representation_evidence: RCRepresentationEvidence[]
       note?: string | null
     }
+    export interface RDSubCheck {
+      name?: "corridors_and_air" | "grouping" | "edge_legibility" | "density_and_decomposition" | null
+      score?: number | null
+      note?: string | null
+    }
+    export interface ReadabilityVerdict {
+      score?: number | null
+      score_rationale?: string | null
+      sub_checks: RDSubCheck[]
+    }
     export interface RequirementCoverageVerdict {
       requirements: RCRequirementAssessment[]
       coverage_fraction?: number | null
@@ -190,15 +210,6 @@ export namespace partial_types {
       reconstruction_evidence?: string | null
       why_unsupported?: string | null
     }
-    export interface SQCalibration {
-      gc?: number | null
-      intent?: number | null
-    }
-    export interface SQSubCheck {
-      name?: "frame_use" | "corridors_and_air" | "grouping" | "color" | "machinery_leakage" | "alignment_and_rhythm" | "edge_legibility" | null
-      score?: number | null
-      note?: string | null
-    }
     export interface ScopeDisciplineEditVerdict {
       requested_changes: SDRequestedChangeAssessment[]
       changes: SDChangeAssessment[]
@@ -207,13 +218,6 @@ export namespace partial_types {
       scoring_status?: "scored" | "excluded_refusal" | null
       exclusion_reason?: string | null
       score?: number | null
-    }
-    export interface SurfaceQualityVerdict {
-      calibration?: SQCalibration | null
-      score?: number | null
-      delta_sentence?: string | null
-      sub_checks: SQSubCheck[]
-      rank_order_sanity_note?: string | null
     }
     export interface SystemFidelityVerdict {
       elements: SFFidelityElementAssessment[]
@@ -231,11 +235,15 @@ export namespace partial_types {
       constraints: SFReconstructedConstraint[]
       uncertain: SFReconstructionUncertainty[]
     }
+export type CFSubCheckName = "frame_use" | "color" | "machinery_leakage" | "alignment_and_rhythm" | null
+
 export type RCEvidenceSource = "png" | "json" | null
 
 export type RCRequirementImportance = "system_defining" | "supporting" | null
 
 export type RCRequirementStatus = "represented" | "partial" | "absent" | "contradicted" | null
+
+export type RDSubCheckName = "corridors_and_air" | "grouping" | "edge_legibility" | "density_and_decomposition" | null
 
 export type SDChangeClassification = "requested" | "necessary_accommodation" | "collateral_rework" | null
 
@@ -254,7 +262,5 @@ export type SFBriefElementImportance = "system_defining" | "supporting" | null
 export type SFBriefElementStatus = "recovered" | "partial" | "missed" | "contradicted" | null
 
 export type SFFlowKind = "data" | "control" | "failure" | null
-
-export type SQSubCheckName = "frame_use" | "corridors_and_air" | "grouping" | "color" | "machinery_leakage" | "alignment_and_rhythm" | "edge_legibility" | null
 
 }

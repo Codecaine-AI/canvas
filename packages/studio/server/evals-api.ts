@@ -21,9 +21,15 @@ const FILE_SEGMENT_PATTERN = /^[a-z0-9][a-z0-9._-]{0,127}$/i;
 const STAGE_FILE_PATTERN = /^(stage0|e\d+)\.(png|json)$/;
 const JUDGE_FILE_PATTERN = /^judge-([a-z0-9]+)\.json$/;
 
-/** The eval file API that serves live boards while a suite run is active. */
+/**
+ * The eval file API that serves live boards while a suite run is active. The
+ * runner spawns it per run on an ephemeral port and records the origin in
+ * `services/identity.json`; this constant is only the fallback for older runs
+ * recorded before that file existed.
+ */
 const LIVE_EVAL_API_ORIGIN = "http://127.0.0.1:4010";
 const LIVE_PROBE_TIMEOUT_MS = 400;
+const LOOPBACK_ORIGIN_PATTERN = /^http:\/\/127\.0\.0\.1:\d{1,5}$/;
 
 const FILE_CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".json": "application/json; charset=utf-8",
@@ -200,11 +206,27 @@ async function summarizeRun(runsDir: string, runId: string): Promise<EvalRunSumm
   };
 }
 
-/** True when the live eval file API on :4010 answers within the timeout. */
-function probeLiveEvalApi(): Promise<boolean> {
+/** The run's own eval file API origin, when it recorded one. */
+async function recordedLiveEvalApiOrigin(runDir: string): Promise<string | null> {
+  const identity = await readJsonFile(
+    resolve(runDir, "services", "identity.json"),
+  );
+  if (!isRecord(identity) || !Array.isArray(identity.services)) return null;
+  for (const service of identity.services) {
+    if (!isRecord(service) || service.name !== "eval file API") continue;
+    const origin = service.origin;
+    if (typeof origin === "string" && LOOPBACK_ORIGIN_PATTERN.test(origin)) {
+      return origin;
+    }
+  }
+  return null;
+}
+
+/** True when the live eval file API answers within the timeout. */
+function probeLiveEvalApi(origin: string): Promise<boolean> {
   return new Promise((resolveProbe) => {
     const request = httpGet(
-      LIVE_EVAL_API_ORIGIN,
+      origin,
       { timeout: LIVE_PROBE_TIMEOUT_MS },
       (response) => {
         response.resume();
@@ -263,10 +285,12 @@ async function handleRunDetail(runsDir: string, runId: string, res: ServerRespon
 
   const progressRecord = isRecord(progress) ? progress : null;
   const status = stringOrNull(progressRecord?.status) ?? "unknown";
-  const live =
-    status === "running"
-      ? { available: await probeLiveEvalApi(), origin: LIVE_EVAL_API_ORIGIN }
-      : null;
+  let live: { available: boolean; origin: string } | null = null;
+  if (status === "running") {
+    const origin =
+      (await recordedLiveEvalApiOrigin(runDir)) ?? LIVE_EVAL_API_ORIGIN;
+    live = { available: await probeLiveEvalApi(origin), origin };
+  }
 
   sendJson(res, 200, {
     run_id: runId,

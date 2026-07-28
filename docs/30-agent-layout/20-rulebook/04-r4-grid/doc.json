@@ -74,13 +74,13 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
         },
         {
-          "insert": " says same size plus same gap means peers. Size for content first, make every peer match the largest member, and copy a peer's exact digest geometry instead of estimating a near match. The 16px grid quantizes the resulting rectangles; it does not choose the gap."
+          "insert": " says same size plus same gap means peers. Size for content first, then match_size every peer to the largest member and read exact digest geometry for the rest instead of estimating a near match. The agent's 20 grid quantizes the resulting rectangles; it does not choose the gap."
         }
       ]
     },

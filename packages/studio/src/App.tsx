@@ -574,13 +574,6 @@ export function App() {
     }
     return null;
   }, [agentSession.events]);
-  const agentPreviewRefreshSignal = useMemo(
-    () =>
-      agentSession.events.filter(
-        ({ type }) => type === "proposal" || type === "rendering" || type === "proposal-ready",
-      ).length,
-    [agentSession.events],
-  );
   const visibleAgentProposal =
     agentSession.proposal ?? (agentSession.abandonment ? agentSession.lastGoodProposal : null);
 
@@ -805,7 +798,7 @@ export function App() {
             <GhostPreviewLayer
               canvasId={route.id}
               sessionId={agentSession.sessionId}
-              refreshSignal={agentPreviewRefreshSignal}
+              refreshSignal={agentSession.previewRefreshSignal}
               baselineDocument={agentBaselineDocument ?? activeDocument}
               proposal={visibleAgentProposal}
               workFrame={agentWorkFrame}
@@ -853,6 +846,8 @@ export function App() {
                       onRun: handleRunAgent,
                     }}
                     session={{
+                      canvasId: route.name === "canvas" ? route.id : "",
+                      sessionId: agentSession.sessionId,
                       attempts: agentSession.attempts,
                       baselineDocument: agentBaselineDocument ?? activeDocument,
                       proposal: agentSession.proposal,

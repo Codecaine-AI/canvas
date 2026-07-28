@@ -67,7 +67,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/capabilities/kinds/connections.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/kinds/connections.ts",
               "symbol": "CONNECTIONS_SPEC"
             }
           }
@@ -80,7 +80,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }

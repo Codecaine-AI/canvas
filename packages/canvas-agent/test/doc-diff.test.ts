@@ -164,6 +164,61 @@ describe("diffDocuments", () => {
     expect(operation.patch.waypoints).toBeUndefined();
   });
 
+  test("a labelPosition pin diffs like any other authored channel", () => {
+    const baseline = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [{ ...connect("pinned", "a", "b"), label: "handoff" }],
+    );
+    const draft = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [{ ...connect("pinned", "a", "b"), label: "handoff", labelPosition: { along: 0.3, offset: -16 } }],
+    );
+
+    expect(diffDocuments(baseline, draft)).toEqual([
+      {
+        type: "updateConnection",
+        connectionId: "pinned",
+        patch: { labelPosition: { along: 0.3, offset: -16 } },
+      },
+    ]);
+  });
+
+  test("clearing a labelPosition emits an explicit undefined the apply spread clears with", () => {
+    const baseline = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [{ ...connect("pinned", "a", "b"), labelPosition: { along: 0.3 } }],
+    );
+    const draft = makeDocument(
+      [box("a", 0, 0), box("b", 192, 0)],
+      [connect("pinned", "a", "b")],
+    );
+
+    const operations = diffDocuments(baseline, draft);
+    expect(operations).toHaveLength(1);
+    const operation = operations[0] as Extract<
+      (typeof operations)[number],
+      { type: "updateConnection" }
+    >;
+    expect(Object.keys(operation.patch)).toEqual(["labelPosition"]);
+    expect(operation.patch.labelPosition).toBeUndefined();
+  });
+
+  test("an added connection carries its labelPosition, deep-copied", () => {
+    const addedConnection: InteractiveCanvasConnection = {
+      ...connect("pinned", "a", "b"),
+      label: "handoff",
+      labelPosition: { along: 0.75, offset: 20 },
+    };
+    const baseline = makeDocument([box("a", 0, 0), box("b", 192, 0)]);
+    const draft = makeDocument([box("a", 0, 0), box("b", 192, 0)], [addedConnection]);
+
+    const operations = diffDocuments(baseline, draft);
+    const add = operations[0] as Extract<(typeof operations)[number], { type: "addConnection" }>;
+    expect(add.type).toBe("addConnection");
+    expect(add.connection.labelPosition).toEqual({ along: 0.75, offset: 20 });
+    expect(add.connection.labelPosition).not.toBe(addedConnection.labelPosition);
+  });
+
   test("structurally equal waypoints produce no op even across distinct arrays", () => {
     const baseline = makeDocument(
       [box("a", 0, 0), box("b", 192, 0)],

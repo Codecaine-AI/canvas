@@ -37,9 +37,9 @@ function regionOf(
 }
 
 const GUIDANCE = `A section contains its children, and the page contains everything:
-- content sitting across a section boundary belongs somewhere — move the child where it
-  goes, or, when the frame is what is wrong, resize it deliberately with updateSection or
-  fitSection; a section never resizes itself;
+- content sitting across a section boundary belongs somewhere — move_to the child where it
+  goes, or, when the frame is what is wrong, size it deliberately with resize or
+  fit_section; a section never resizes itself;
 - the base section is the page: keep everything within it, or grow it (${FRAME_TOLERANCE}px of bleed is
   tolerated; more is an error that blocks commit).`;
 
@@ -61,7 +61,7 @@ export const rule: LayoutRule = {
           at: [child.id, section.id],
           where: regionOf(child),
           message: `${child.id} extends ${round2(overflow)}px outside its section ${section.id}`,
-          suggestion: `move ${child.id} back inside ${section.id}, or grow ${section.id} to hold it — fitSection ${section.id} closes the frame around what is already inside`,
+          suggestion: `move_to ${child.id} back inside ${section.id}, or resize ${section.id} to hold it — fit_section ${section.id} closes the frame around what is already inside`,
         });
       }
     }
@@ -78,7 +78,7 @@ export const rule: LayoutRule = {
           at: [object.id, frameNode.id],
           where: regionOf(object),
           message: `${object.id} extends ${round2(overflow)}px past the base section ${frameNode.id} (maximum ${FRAME_TOLERANCE}px)`,
-          suggestion: `move ${object.id} inside ${frameNode.id}, or grow ${frameNode.id} to hold the diagram — the base section is the page, and it is yours to size`,
+          suggestion: `move_to ${object.id} inside ${frameNode.id}, or resize ${frameNode.id} to hold the diagram — the base section is the page, and it is yours to size`,
         });
       }
     }

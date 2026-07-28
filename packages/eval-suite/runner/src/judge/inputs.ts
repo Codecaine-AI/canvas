@@ -18,7 +18,7 @@ const SHARED_JUDGE_RULES = [
   "Use the 1–10 rubric exactly; half-points are allowed.",
   "Every score must include the axis output contract and concrete evidence.",
   "Exclude declared infrastructure failures from scoring.",
-  "For reference-calibrated readability, re-score both references and flag calibration drift beyond ±0.5.",
+  "Visual axes are scored absolutely against their rubric anchors; no comparison or reference board exists.",
 ].join("\n");
 
 export interface JudgeImageInput {
@@ -49,6 +49,7 @@ export interface GatheredJudgeInputs {
   sf_scorer_base: PreparedJudgeInput;
   requirement_coverage: PreparedJudgeInput;
   readability: PreparedJudgeInput;
+  craft: PreparedJudgeInput;
   scope_discipline_edits: PreparedEditInput[];
   skipped_scope_discipline_edits: Array<{ stage: `e${number}`; reason: string }>;
   prompt_hygiene: PreparedJudgeInput;
@@ -198,11 +199,12 @@ async function readSystemScenario(scenario: ScenarioId): Promise<{
 
 async function loadRubrics(): Promise<Record<AxisCode, string>> {
   const paths: Record<AxisCode, string> = {
-    sf: resolve(SYSTEM_AXES_ROOT, "sf.md"),
-    rc: resolve(SYSTEM_AXES_ROOT, "rc.md"),
-    rd: resolve(SYSTEM_AXES_ROOT, "rd.md"),
-    sd: resolve(SYSTEM_AXES_ROOT, "sd.md"),
-    ph: resolve(SYSTEM_AXES_ROOT, "ph.md"),
+    sf: resolve(SYSTEM_AXES_ROOT, "system-fidelity.md"),
+    rc: resolve(SYSTEM_AXES_ROOT, "requirement-coverage.md"),
+    rd: resolve(SYSTEM_AXES_ROOT, "readability.md"),
+    cf: resolve(SYSTEM_AXES_ROOT, "craft.md"),
+    sd: resolve(SYSTEM_AXES_ROOT, "scope-discipline.md"),
+    ph: resolve(SYSTEM_AXES_ROOT, "process-health.md"),
   };
   return Object.fromEntries(
     await Promise.all(
@@ -340,8 +342,6 @@ export async function gatherScenarioJudgeInputs(
   const finalJsonPath = finalStage ? resolve(scenarioDir, `${finalStage}.json`) : resolve(scenarioDir, "missing.json");
   const finalPngPath = finalStage ? resolve(scenarioDir, `${finalStage}.png`) : resolve(scenarioDir, "missing.png");
   const finalCanvas = finalStage ? await readJsonIfPresent(finalJsonPath) : null;
-  const gcRefPath = resolve(runDir, "refs", "gc-decomp-harness.png");
-  const intentRefPath = resolve(runDir, "refs", "intent-classification-2.png");
   const promptHygiene = await buildPromptHygieneInput({
     runId: options.runId,
     scenario: options.scenario,
@@ -374,25 +374,21 @@ export async function gatherScenarioJudgeInputs(
       rcMissing,
     );
 
-    const rdMissing: string[] = [];
-    missingPath(finalPngPath, "final PNG", rdMissing);
-    missingPath(gcRefPath, "gc-decomp-harness reference PNG", rdMissing);
-    missingPath(intentRefPath, "intent-classification-2 reference PNG", rdMissing);
-    const readability = prepared(
-      {
-        attachment_manifest: [
-          { index: 1, role: "board under grade" },
-          { index: 2, role: "gc-decomp-harness reference", calibration_target: 7.5 },
-          { index: 3, role: "intent-classification-2 reference", calibration_target: 7.0 },
-        ],
-      },
-      [
-        { label: "board under grade", path: finalPngPath },
-        { label: "gc-decomp-harness reference", path: gcRefPath },
-        { label: "intent-classification-2 reference", path: intentRefPath },
-      ],
-      rdMissing,
-    );
+    const buildBoardVisualInput = (): PreparedJudgeInput => {
+      const missing: string[] = [];
+      missingPath(finalPngPath, "final PNG", missing);
+      return prepared(
+        {
+          attachment_manifest: [
+            { index: 1, role: "board under grade" },
+          ],
+        },
+        [{ label: "board under grade", path: finalPngPath }],
+        missing,
+      );
+    };
+    const readability = buildBoardVisualInput();
+    const craft = buildBoardVisualInput();
 
     const scopeDisciplineEdits: PreparedEditInput[] = [];
     const skippedScopeDisciplineEdits: Array<{ stage: `e${number}`; reason: string }> = [];
@@ -463,6 +459,7 @@ export async function gatherScenarioJudgeInputs(
     sf_scorer_base: sfScorerBase,
     requirement_coverage: requirementCoverage,
     readability,
+    craft,
     scope_discipline_edits: scopeDisciplineEdits,
     skipped_scope_discipline_edits: skippedScopeDisciplineEdits,
     prompt_hygiene: promptHygiene,

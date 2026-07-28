@@ -5,8 +5,14 @@ import type {
   AgentSessionEvent,
 } from "@codecaine-ai/canvas-agent/protocol";
 import { Button } from "@codecaine-ai/canvas/ui/button";
-import { ChevronDownIcon } from "@codecaine-ai/canvas/ui/icons";
+import { ChevronDownIcon, ExpandIcon } from "@codecaine-ai/canvas/ui/icons";
 import { Input } from "@codecaine-ai/canvas/ui/input";
+import {
+  AgentRenderViewer,
+  agentOperationRenderUrl,
+  type AgentRenderTarget,
+  useAgentRenderViewer,
+} from "./AgentRenderViewer";
 import { DeltaCard } from "./DeltaCard";
 import { describeEvent } from "./stream-copy";
 import type {
@@ -30,6 +36,8 @@ export type AgentAcceptedNotice = Pick<AgentAcceptResult, "summary" | "rebased">
 
 export interface SessionViewProps {
   status: AgentSessionViewStatus;
+  canvasId: string;
+  sessionId: string | null;
   attempts: readonly AgentSessionViewAttempt[];
   baselineDocument: InteractiveCanvasDocument;
   proposal: AgentProposal | null;
@@ -46,6 +54,8 @@ export interface SessionViewProps {
   onDiscardConflict(): void | Promise<void>;
   onTryAgainOnCurrentBoard(): void | Promise<void>;
   onStartOver?: (instruction: string) => void | Promise<void>;
+  /** AgentSidebar supplies this so its header and feed share one render viewer. */
+  onOpenRender?: (target: AgentRenderTarget) => void;
 }
 
 function Banner({ children }: { children: ReactNode }) {
@@ -60,7 +70,46 @@ function BannerActions({ children }: { children: ReactNode }) {
   return <div className="mt-3 flex flex-wrap gap-2">{children}</div>;
 }
 
-function DeltaEventLine({ event }: { event: Extract<AgentSessionEvent, { type: "delta" }> }) {
+function ViewOperationRenderButton({
+  canvasId,
+  event,
+  onOpenRender,
+}: {
+  canvasId: string;
+  event: Extract<AgentSessionEvent, { type: "delta" }>;
+  onOpenRender(target: AgentRenderTarget): void;
+}) {
+  const label = `View render after operation ${event.n}`;
+
+  return (
+    <Button
+      type="button"
+      size="icon-xs"
+      variant="ghost"
+      className="shrink-0 text-muted-foreground hover:text-foreground"
+      aria-label={label}
+      title={label}
+      onClick={() =>
+        onOpenRender({
+          src: agentOperationRenderUrl(canvasId, event.sessionId, event.n),
+          caption: `Board after operation ${event.n}`,
+        })
+      }
+    >
+      <ExpandIcon className="h-3 w-3" />
+    </Button>
+  );
+}
+
+function DeltaEventLine({
+  canvasId,
+  event,
+  onOpenRender,
+}: {
+  canvasId: string;
+  event: Extract<AgentSessionEvent, { type: "delta" }>;
+  onOpenRender(target: AgentRenderTarget): void;
+}) {
   const lines = event.delta
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -68,31 +117,73 @@ function DeltaEventLine({ event }: { event: Extract<AgentSessionEvent, { type: "
   const firstLine = lines[0] ?? "Checked the proposed changes.";
 
   if (lines.length <= 1) {
-    return <p className="text-xs leading-relaxed text-muted-foreground">{firstLine}</p>;
+    return (
+      <div className="flex items-start gap-1.5">
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+          {firstLine}
+        </p>
+        <ViewOperationRenderButton
+          canvasId={canvasId}
+          event={event}
+          onOpenRender={onOpenRender}
+        />
+      </div>
+    );
   }
 
   return (
-    <details className="group text-xs text-muted-foreground">
-      <summary className="flex cursor-pointer list-none items-start gap-1.5 leading-relaxed hover:text-foreground [&::-webkit-details-marker]:hidden">
-        <ChevronDownIcon className="mt-0.5 h-3 w-3 shrink-0 transition-transform group-open:rotate-180" />
-        <span>{firstLine}</span>
-      </summary>
-      <div className="mt-1 whitespace-pre-wrap pl-[18px] text-[11px] leading-relaxed">
-        {lines.slice(1).join("\n")}
-      </div>
-    </details>
+    <div className="flex items-start gap-1.5">
+      <details className="group min-w-0 flex-1 text-xs text-muted-foreground">
+        <summary className="flex cursor-pointer list-none items-start gap-1.5 leading-relaxed hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <ChevronDownIcon className="mt-0.5 h-3 w-3 shrink-0 transition-transform group-open:rotate-180" />
+          <span>{firstLine}</span>
+        </summary>
+        <div className="mt-1 whitespace-pre-wrap pl-[18px] text-[11px] leading-relaxed">
+          {lines.slice(1).join("\n")}
+        </div>
+      </details>
+      <ViewOperationRenderButton
+        canvasId={canvasId}
+        event={event}
+        onOpenRender={onOpenRender}
+      />
+    </div>
   );
 }
 
-function EventLine({ event }: { event: AgentSessionEvent }) {
-  if (event.type === "delta") return <DeltaEventLine event={event} />;
+function EventLine({
+  canvasId,
+  event,
+  onOpenRender,
+}: {
+  canvasId: string;
+  event: AgentSessionEvent;
+  onOpenRender(target: AgentRenderTarget): void;
+}) {
+  if (event.type === "delta") {
+    return (
+      <DeltaEventLine
+        canvasId={canvasId}
+        event={event}
+        onOpenRender={onOpenRender}
+      />
+    );
+  }
   const description = describeEvent(event);
   return description ? (
     <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
   ) : null;
 }
 
-function AttemptGroup({ attempt }: { attempt: AgentSessionViewAttempt }) {
+function AttemptGroup({
+  attempt,
+  canvasId,
+  onOpenRender,
+}: {
+  attempt: AgentSessionViewAttempt;
+  canvasId: string;
+  onOpenRender(target: AgentRenderTarget): void;
+}) {
   return (
     <section className="space-y-2.5">
       <div className="ml-8 rounded-xl rounded-tr-sm bg-primary px-3 py-2 text-xs leading-relaxed text-primary-foreground">
@@ -101,7 +192,12 @@ function AttemptGroup({ attempt }: { attempt: AgentSessionViewAttempt }) {
       </div>
       <div className="space-y-2 border-l border-border/70 pl-3">
         {attempt.events.map((event, index) => (
-          <EventLine key={`${event.type}-${index}`} event={event} />
+          <EventLine
+            key={`${event.type}-${index}`}
+            canvasId={canvasId}
+            event={event}
+            onOpenRender={onOpenRender}
+          />
         ))}
         {attempt.events.length === 0 ? (
           <p className="text-xs leading-relaxed text-muted-foreground">Getting started…</p>
@@ -113,6 +209,7 @@ function AttemptGroup({ attempt }: { attempt: AgentSessionViewAttempt }) {
 
 export function SessionView({
   status,
+  canvasId,
   attempts,
   baselineDocument,
   proposal,
@@ -129,8 +226,11 @@ export function SessionView({
   onDiscardConflict,
   onTryAgainOnCurrentBoard,
   onStartOver,
+  onOpenRender,
 }: SessionViewProps) {
   const [refinement, setRefinement] = useState("");
+  const localRenderViewer = useAgentRenderViewer();
+  const openRender = onOpenRender ?? localRenderViewer.openRender;
   const fallbackProposal = abandoned ? lastGoodProposal : null;
   const visibleProposal = proposal ?? fallbackProposal;
   const isRunning = status === "running";
@@ -222,7 +322,12 @@ export function SessionView({
 
         <div className="space-y-5">
           {attempts.map((attempt, index) => (
-            <AttemptGroup key={`${index}-${attempt.instruction}`} attempt={attempt} />
+            <AttemptGroup
+              key={`${index}-${attempt.instruction}`}
+              attempt={attempt}
+              canvasId={canvasId}
+              onOpenRender={openRender}
+            />
           ))}
         </div>
 
@@ -261,6 +366,12 @@ export function SessionView({
           </div>
         </div>
       ) : null}
+      {onOpenRender ? null : (
+        <AgentRenderViewer
+          target={localRenderViewer.target}
+          onClose={localRenderViewer.closeRender}
+        />
+      )}
     </div>
   );
 }

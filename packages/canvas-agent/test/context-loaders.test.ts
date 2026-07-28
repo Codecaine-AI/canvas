@@ -17,19 +17,19 @@ import {
   CRAFT_TARGETS,
   STYLE_TOPICS,
   type CraftTargets,
-} from "../src/agent/catalog/layout-editor/context/style-guide";
+} from "../src/catalog/layout-editor/context/style-guide";
 import {
   formatCraftTargets,
   formatStyleGuide,
   styleGuideLoader,
-} from "../src/agent/loaders/style-guide";
+} from "../src/service/loaders/style-guide";
 import {
   USER_REQUESTS_EMPTY,
   formatRequestQueue,
   type RequestQueueEntry,
-} from "../src/agent/loaders/user-requests";
-import { formatCapabilities } from "../src/agent/loaders/capabilities";
-import { context as layoutEditorContext } from "../src/agent/catalog/layout-editor/context";
+} from "../src/service/session/snapshots/user-requests";
+import { formatCapabilities } from "../src/service/loaders/capabilities";
+import { context as layoutEditorContext } from "../src/catalog/layout-editor/context";
 
 const RESOLVE_CTX = { cwd: "/" };
 
@@ -319,7 +319,7 @@ describe("layout-editor context sidecar", () => {
   });
 
   test("a board payload is never delivered as a context image", async () => {
-    // Working picture rides section ③ through the session view log; even if a
+    // Working picture rides section ③ from the eager session render; even if a
     // stale caller put one here it must not become a pinned context image.
     const images = await layoutEditorContext.assembleImages!(
       [],

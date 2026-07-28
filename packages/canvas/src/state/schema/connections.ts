@@ -46,4 +46,24 @@ export type InteractiveCanvasConnection = {
    * an obstacle-avoiding route. Each entry is a [x, y] world coordinate.
    */
   waypoints?: Array<[number, number]>;
+  /**
+   * Optional pin for the label chip along the ROUTED path (S1.1). Absent —
+   * the default — leaves the chip at the route's arc-length midpoint, which
+   * is what every board drew before this field existed.
+   *
+   * - `along` is a fraction in [0, 1] of the routed polyline's total arc
+   *   length: 0 is the start anchor, 1 the end anchor, 0.5 the midpoint.
+   * - `offset` (optional, finite px, default 0) pushes the chip
+   *   perpendicular to the local segment direction at `along`. **Sign
+   *   convention: positive is LEFT of the travel direction** (from → to).
+   *   In the canvas's y-down world that is the unit vector `(dy, -dx)` of
+   *   the normalized segment direction — so on a left-to-right horizontal
+   *   run a positive offset lifts the chip upward.
+   *
+   * Written by the agent's `move_label` gesture; the UI has no editor for it
+   * yet. Out-of-range `along` is dropped by the validator (warning), never
+   * clamped, so a malformed pin falls back to the midpoint rather than
+   * silently landing somewhere the author did not ask for.
+   */
+  labelPosition?: { along: number; offset?: number };
 };

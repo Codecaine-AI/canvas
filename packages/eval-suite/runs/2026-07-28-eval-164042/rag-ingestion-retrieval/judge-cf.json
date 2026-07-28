@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-164042",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its orderly registers, clean routing, and flow-specific colors show deliberate composition, but broad dead bands, sparse oversized containers, and pervasive label truncation keep it from reading as fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "Failing: content spans most of the width, but the large gaps between rows and substantial empty area below the final section leave the locked frame underused."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Blue, teal dashed, purple, and orange consistently distinguish flow families, while the repeated yellow cards remain coherent rather than decorative."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8,
+        "note": "No crosshair junctions, exposed waypoints, or ambiguous wire merges are visible; arrowheads terminate cleanly at section boundaries."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The two main rows and bottom sequence hold strong horizontal registers, but uneven container widths, sparse interiors, and many ellipsized labels weaken the finished rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7433,
+    "output_tokens": 490
+  },
+  "flags": []
+}

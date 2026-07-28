@@ -13,22 +13,22 @@ export {
   userRequestsSnapshot,
   wreckedDocumentError,
   type WreckedDocumentOptions,
-} from "./context";
+} from "./snapshots/context";
 
 export {
   applyOperationToDraft,
   describePatchOperation,
   resolveFitSection,
+  resolveSizeLike,
 } from "./apply-ops";
 
 export {
   boardDiffBlock,
   documentDelta,
-  LOOK_STATE_POINTER,
   lookPerception,
   operationPerception,
   type DocumentDelta,
-} from "./perception";
+} from "./perception/perception";
 
 export {
   forgetLayoutSession,
@@ -42,41 +42,51 @@ export {
   recordSessionView,
   VIEW_LOG_LIMIT,
   type SessionView,
-} from "./view-log";
+} from "./perception/view-log";
 
 export {
-  classifyOperation,
+  captureCurrentBoard,
+  CHANGE_RENDER_LOG_LIMIT,
+  commitDraft,
+  liveDraftView,
+  storeCurrentBoardPng,
+  type LiveDraftView,
+} from "./perception/live-draft-view";
+
+export {
+  classifyDelta,
+  DELTA_KINDS,
+  deltaTargetId,
   entityKindOf,
-  MODEL_OPERATION_KINDS,
-  operationTargetId,
   SHAPE_OBJECT_TYPES,
+  type BoardDelta,
+  type DeltaKind,
   type EntityKind,
-  type ModelOperation,
-  type ModelOperationKind,
-} from "./op-surface";
+} from "./perception/op-surface";
 
 export {
   createLayoutToolState,
   createToolRuntime,
   toolAddAnnotation,
   toolFinalize,
+  toolLook,
   toolOperation,
+  toolReplyAnnotation,
   toolResolveRequest,
+  toolSetBoardTitle,
   toolUpdateDescription,
   type LayoutToolHost,
   type LayoutToolState,
 } from "./tools";
-
-export { toolLook } from "./look";
 
 export {
   bootPerception,
   houseStyleExemplar,
   type BootImages,
   type BootPerception,
-} from "./boot";
+} from "./perception/boot";
 
-export { vocabularyContactSheet } from "./contact-sheet";
+export { vocabularyContactSheet } from "./perception/contact-sheet";
 
 export {
   BOARD_VIEW_WIDTH,
@@ -84,4 +94,4 @@ export {
   renderBoardView,
   renderSectionView,
   type RenderedView,
-} from "./views";
+} from "./perception/views";

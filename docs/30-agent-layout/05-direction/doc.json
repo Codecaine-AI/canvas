@@ -1,0 +1,840 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-05-direction",
+  "title": "Where the layout agent is headed",
+  "root": "b-dir-root",
+  "blocks": {
+    "b-dir-root": {
+      "id": "b-dir-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-dir-title-1",
+        "b-dir-lede-2",
+        "b-dir-session-heading-3",
+        "b-dir-session-intro-4",
+        "b-dir-flow-ask-5",
+        "b-dir-flow-source-6",
+        "b-dir-flow-review-7",
+        "b-dir-flow-annotate-8",
+        "b-dir-flow-continue-9",
+        "b-dir-principles-heading-10",
+        "b-dir-principle-intent-11",
+        "b-dir-principle-ground-12",
+        "b-dir-loop-heading-13",
+        "b-dir-loop-intro-14",
+        "b-dir-phase-orientate-15",
+        "b-dir-phase-plan-16",
+        "b-dir-phase-build-17",
+        "b-dir-phase-qa-18",
+        "b-dir-phase-finalize-19",
+        "b-dir-loop-reentry-20",
+        "b-dir-description-heading-21",
+        "b-dir-description-intent-22",
+        "b-dir-description-terms-23",
+        "b-dir-description-reentry-24",
+        "b-dir-annotations-heading-25",
+        "b-dir-annotation-threads-26",
+        "b-dir-annotation-restraint-27",
+        "b-dir-annotation-nonblocking-28",
+        "b-dir-eval-heading-29",
+        "b-dir-eval-intent-30",
+        "b-dir-eval-rule-31",
+        "b-dir-eval-assumption-32",
+        "b-dir-craft-heading-33",
+        "b-dir-craft-rule-34",
+        "b-dir-craft-firewall-35",
+        "b-dir-craft-floor-36",
+        "b-dir-later-heading-37",
+        "b-dir-later-intro-38",
+        "b-dir-later-blocking-39",
+        "b-dir-later-code-40",
+        "b-dir-later-oncanvas-41",
+        "b-dir-later-hosttargets-42",
+        "b-dir-siblings-43"
+      ],
+      "props": {
+        "covers": "The layout agent's product direction: what a working session is for, the two standing principles behind it, why the loop runs in five state-navigated phases, the roles the board description and annotation threads play, how eval subjects are chosen, where craft numbers are allowed to live, and which capabilities are deliberately excluded for now.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "intent-level request",
+          "board description",
+          "annotation thread",
+          "five-phase loop",
+          "craft targets",
+          "eval subject domain",
+          "deliberate exclusion"
+        ]
+      }
+    },
+    "b-dir-title-1": {
+      "id": "b-dir-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Where the layout agent is headed"
+        }
+      ]
+    },
+    "b-dir-lede-2": {
+      "id": "b-dir-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The layout agent is built toward one end experience: a person says what a diagram should say, and the diagram appears, is discussed, and improves. Every design decision in the system points at that experience. This page holds the direction itself — the flow being built toward, the principles that fall out of it, and the capabilities that are deliberately left out for now so the ones that matter arrive well made."
+        }
+      ]
+    },
+    "b-dir-session-heading-3": {
+      "id": "b-dir-session-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "What a session is for"
+        }
+      ]
+    },
+    "b-dir-session-intro-4": {
+      "id": "b-dir-session-intro-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "A session is a conversation about a picture, not a remote control for a canvas. The full arc it aims at runs in five moves. Not every move is exercised in every session, and not all of them are reachable yet — but the shape of the system is the shape of this arc."
+        }
+      ]
+    },
+    "b-dir-flow-ask-5": {
+      "id": "b-dir-flow-ask-5",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The user asks for a diagram at the level of intent.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " “Diagram this system,” not a node-level specification. The ask names a subject and a purpose; it does not name boxes, counts, or positions."
+        }
+      ]
+    },
+    "b-dir-flow-source-6": {
+      "id": "b-dir-flow-source-6",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Source material, when supplied, is read before building.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The agent takes in code or other material, confirms what the diagram should say through a few clarifying exchanges, and only then builds."
+        }
+      ]
+    },
+    "b-dir-flow-review-7": {
+      "id": "b-dir-flow-review-7",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The user reviews the result and gives feedback.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The board that comes back is a proposal to react to, not a finished artifact to accept or discard whole."
+        }
+      ]
+    },
+    "b-dir-flow-annotate-8": {
+      "id": "b-dir-flow-annotate-8",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The agent leaves questions on the objects they are about.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " Where it needs follow-up while building, it anchors an annotation to that part of the diagram, opening a thread the user answers in place rather than in a separate channel."
+        }
+      ]
+    },
+    "b-dir-flow-continue-9": {
+      "id": "b-dir-flow-continue-9",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The exchange keeps going.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " A board is a long-lived thing worked on across many sessions, so each run has to be able to pick up where the last one left off without the user restating what the diagram is for."
+        }
+      ]
+    },
+    "b-dir-principles-heading-10": {
+      "id": "b-dir-principles-heading-10",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Two principles fall out of that flow"
+        }
+      ]
+    },
+    "b-dir-principle-intent-11": {
+      "id": "b-dir-principle-intent-11",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Requests are intent, not geometry"
+      },
+      "text": [
+        {
+          "insert": "The agent owns the whole translation from “how this system functions” into pieces, sections, vocabulary, and layout. Nothing on the request side — an operator instruction, a queued user request, or an eval seed brief — should need to mention nodes, counts, or coordinates to get a good board. A request that specifies geometry has taken the judgment the agent exists to supply. This is what makes the plan phase load-bearing rather than decorative."
+        }
+      ]
+    },
+    "b-dir-principle-ground-12": {
+      "id": "b-dir-principle-ground-12",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "The description is the shared ground"
+      },
+      "text": [
+        {
+          "insert": "Agent and user converge on what the diagram is saying through a persistent board description, not by re-inferring intent from geometry on every run. The description is the artifact both parties point at when they disagree about what the picture should show, and it is the reason a returning agent can orientate without being retold the premise. It lives as a field on the board document ("
+        },
+        {
+          "insert": "packages/canvas/src/state/schema/document.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/document.ts"
+            }
+          }
+        },
+        {
+          "insert": "), so it rides the ordinary draft-and-commit flow like every other piece of board state."
+        }
+      ]
+    },
+    "b-dir-loop-heading-13": {
+      "id": "b-dir-loop-heading-13",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Why the loop has these five phases"
+        }
+      ]
+    },
+    "b-dir-loop-intro-14": {
+      "id": "b-dir-loop-intro-14",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The workflow in "
+        },
+        {
+          "insert": "prompt/system.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/system.md"
+            }
+          }
+        },
+        {
+          "insert": " runs orientate, plan, build, qa, finalize. The division is not arbitrary sequencing: each phase isolates one kind of judgment so that a failure in one does not contaminate the others."
+        }
+      ]
+    },
+    "b-dir-phase-orientate-15": {
+      "id": "b-dir-phase-orientate-15",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Orientate",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates understanding from acting. Reading the instruction, the open requests, the board, and the description is its own step because a run that starts editing before it knows what the diagram is trying to say produces confident work on the wrong premise."
+        }
+      ]
+    },
+    "b-dir-phase-plan-16": {
+      "id": "b-dir-phase-plan-16",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Plan",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates decomposition from placement. Choosing which sections carry the message, which pieces belong in each, and which vocabulary — types, icons, colors — expresses that process is the intellectual work the intent-level ask delegates. Doing it while placing objects collapses it into whatever the first few coordinates happened to suggest."
+        }
+      ]
+    },
+    "b-dir-phase-build-17": {
+      "id": "b-dir-phase-build-17",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Build",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates working from pretty. Its objective is a diagram that is correct and complete: sections down first, content filled section by section in reading order, then connections, then labels and styling. It is judged on whether the thing says the right thing, not on whether it looks finished."
+        }
+      ]
+    },
+    "b-dir-phase-qa-18": {
+      "id": "b-dir-phase-qa-18",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "QA",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates aesthetics from correctness, and is judged from renders rather than from the digest. Diagnostics own the hard findings; this pass owns whether the board actually looks clean — uniform spacing, peers on one register, matched sizes, wires routed the way someone drawing by hand would route them, elbows square and few. A clean lint report is not the same as a clean-looking board, which is exactly why the aesthetic judgment gets a phase of its own."
+        }
+      ]
+    },
+    "b-dir-phase-finalize-19": {
+      "id": "b-dir-phase-finalize-19",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Finalize",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates shipping from checking that the picture communicates. It is an explain-through: walk the diagram as if explaining it to someone, hold that walk against the description, and see whether information really flows the way the description claims. A mismatch means one of the two is wrong and sends the run back into the loop. Committing is the exit condition of this phase, not a phase of its own."
+        }
+      ]
+    },
+    "b-dir-loop-reentry-20": {
+      "id": "b-dir-loop-reentry-20",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "State navigates the loop, not turn count"
+      },
+      "text": [
+        {
+          "insert": "The phases are a loop entered wherever the board needs work, not a checklist walked once. A phase with nothing to do is skipped — a small tweak may need no planning at all — and a problem found late sends the run back to the phase that can fix it and forward again through the ones after it. That re-entry is what lets one mechanism serve both a fresh build and a two-line correction on an existing board, and it is why the agent reads the pushed state block and the result that just landed to decide where it is, rather than tracking its own position."
+        }
+      ]
+    },
+    "b-dir-description-heading-21": {
+      "id": "b-dir-description-heading-21",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The board description"
+        }
+      ]
+    },
+    "b-dir-description-intent-22": {
+      "id": "b-dir-description-intent-22",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The description is a small living document: what the diagram represents, its pieces, and how it reads. It is written as the board is built rather than reported afterwards, and trued up before a commit — the account of the work in progress, kept honest as the shape settles. Its first version is essentially the intake, drawn from what the user asked for; a board with no description has simply not been described yet. It is loosely templated markdown, guided by the prompt rather than enforced by schema."
+        }
+      ]
+    },
+    "b-dir-description-terms-23": {
+      "id": "b-dir-description-terms-23",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "soft",
+        "title": "The description reads in the diagram's own terms"
+      },
+      "text": [
+        {
+          "insert": "There is no house reading direction to impose. A diagram may run linear, layered, branching, or circular, so the description says how this one flows instead of forcing it into top-to-bottom or left-to-right vocabulary it does not fit. The same restraint governs the plan phase: the agent decides how a diagram reads and says so in a sentence, and the arrows follow that choice."
+        }
+      ]
+    },
+    "b-dir-description-reentry-24": {
+      "id": "b-dir-description-reentry-24",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "The description is the re-entry ground"
+      },
+      "text": [
+        {
+          "insert": "It serves two purposes at once. A returning agent orientates from the description instead of reverse-engineering intent out of geometry — the geometry is only the description's current expression, not its source. And it is the ground for clarifying exchanges: when a question is asked about the board, the description is the shared text both sides are arguing about. It surfaces in the AI panel ("
+        },
+        {
+          "insert": "packages/studio/src/agent/AgentSidebar.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/agent/AgentSidebar.tsx"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-dir-annotations-heading-25": {
+      "id": "b-dir-annotations-heading-25",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Annotations are the conversation medium"
+        }
+      ]
+    },
+    "b-dir-annotation-threads-26": {
+      "id": "b-dir-annotation-threads-26",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "An annotation is a conversation anchored to an object, and it runs in both directions. Either party can open one; the record carries an opening post, its author, everything said since, and a status that closes it ("
+        },
+        {
+          "insert": "packages/canvas/src/state/schema/annotations.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/annotations.ts"
+            }
+          }
+        },
+        {
+          "insert": "). The user posts in a thread; the agent can reply with a question, resolve the thread, or answer it by editing the board. Anchoring matters: a question about a particular part of a diagram belongs on that part of the diagram, where the answer is obvious in context, rather than in a chat log the user has to re-situate."
+        }
+      ]
+    },
+    "b-dir-annotation-restraint-27": {
+      "id": "b-dir-annotation-restraint-27",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Restraint is the point of the feature"
+      },
+      "text": [
+        {
+          "insert": "Agent-opened threads are for the few things that genuinely need the operator to decide. Asking whether every name is right, object by object, is a failure of judgment rather than diligence, and a board strewn with pins is a worse outcome than a board with one good question on it. Over-annotating is a UX failure the prompt guards against explicitly, not an excess to be tolerated."
+        }
+      ]
+    },
+    "b-dir-annotation-nonblocking-28": {
+      "id": "b-dir-annotation-nonblocking-28",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Threads never block a run"
+      },
+      "text": [
+        {
+          "insert": "The agent leaves the question, proceeds on its best guess, and names the open question in the finalize message. The run does not wait for an answer. The user replies on their own time, and the next run picks the thread up while orientating. Asynchrony is what makes anchored questions affordable: because asking costs the run nothing, the agent can ask when it genuinely does not know instead of guessing to avoid a stall."
+        }
+      ]
+    },
+    "b-dir-eval-heading-29": {
+      "id": "b-dir-eval-heading-29",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Choosing eval subjects"
+        }
+      ]
+    },
+    "b-dir-eval-intent-30": {
+      "id": "b-dir-eval-intent-30",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Scenario briefs are written at the level of intent — “diagram how X functions” — and never name nodes or counts, because the orientate and plan phases are precisely what a brief is meant to exercise. A brief that specifies structure measures the agent's obedience instead of its judgment. Subjects come from AI engineering and distributed systems: complex, agent-shaped systems of the kind the layout agent is meant to serve. Each subject is a directory holding its brief and configuration ("
+        },
+        {
+          "insert": "packages/eval-suite/scenarios-system/rag-ingestion-retrieval/brief.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite/scenarios-system/rag-ingestion-retrieval/brief.md"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ]
+    },
+    "b-dir-eval-rule-31": {
+      "id": "b-dir-eval-rule-31",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Scenario subjects are genre-mates, never the real systems"
+      },
+      "text": [
+        {
+          "insert": "A scenario stands next to the systems the operator actually works on without being one of them: same genre, same class of complexity, different subject. The decompilation system is the standing example of the exclusion — it is not a scenario, because the operator makes that diagram themselves. Keeping the suite off the real systems keeps evaluation and production work independent: a board the operator builds by hand stays a piece of work rather than an answer key, and a scenario stays a measurement rather than a rehearsal of one known board."
+        }
+      ]
+    },
+    "b-dir-eval-assumption-32": {
+      "id": "b-dir-eval-assumption-32",
+      "flavour": "assumption",
+      "children": [],
+      "props": {
+        "confidence": "medium",
+        "title": "Genre-mates exercise the same layout difficulty"
+      },
+      "text": [
+        {
+          "insert": "The rule assumes that a subject drawn from the same genre poses the layout agent the same problems as the real system it stands beside — comparable piece counts, comparable branching, comparable need for grouping and named flow. If a scenario turns out to be materially easier than the work it proxies, the subject is wrong rather than the rule."
+        }
+      ]
+    },
+    "b-dir-craft-heading-33": {
+      "id": "b-dir-craft-heading-33",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Craft numbers are style, not prompt prose"
+        }
+      ]
+    },
+    "b-dir-craft-rule-34": {
+      "id": "b-dir-craft-rule-34",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "Presentation numbers live in the injected style guide"
+      },
+      "text": [
+        {
+          "insert": "The hard dimensions a finished board sits at — node size and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share, pieces per section — are one structured value in "
+        },
+        {
+          "insert": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+              "symbol": "CRAFT_TARGETS"
+            }
+          }
+        },
+        {
+          "insert": ", rendered into the injected style guide beside the aesthetic prose topic. The system prompt explains behavior; presentation numbers are style. The phases therefore reference the injected targets in judgment language rather than restating them — build places at one uniform size and gap, where the style guide's targets are what uniform means, and QA judges spacing uniformity against those same targets. One shape holds every number the agent is asked to hit, so a target cannot drift between the prose that motivates it and the block that states it."
+        }
+      ]
+    },
+    "b-dir-craft-firewall-35": {
+      "id": "b-dir-craft-firewall-35",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "severity": "hard",
+        "title": "The viewer's prompt-editor styling is firewalled from craft targets"
+      },
+      "text": [
+        {
+          "insert": "The style rail in the prompt viewer ("
+        },
+        {
+          "insert": "packages/canvas-agent/src/viewer/pages/PromptStyleSidebar.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/pages/PromptStyleSidebar.tsx"
+            }
+          }
+        },
+        {
+          "insert": ") is a cosmetic system for reading and editing prompts. It is deliberately unrelated to what the agent is told about board dimensions, and it must never host craft targets. Routing layout numbers through a prompt-editor's appearance settings would make the board's proportions a side effect of how someone likes their editor to look."
+        }
+      ]
+    },
+    "b-dir-craft-floor-36": {
+      "id": "b-dir-craft-floor-36",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Targets sit above floors, on every axis"
+      },
+      "text": [
+        {
+          "insert": "Craft targets are where a composition aims; the diagnostic registry owns the clearances below which a route cannot pass or a frame cannot hold its children. The two must not coincide: a target equal to a lint floor makes the ideal board indistinguishable from a barely-legal one, and leaves no room for the agent to be wrong by a little without being wrong at all. Every target is set above the floor on its own axis."
+        }
+      ]
+    },
+    "b-dir-later-heading-37": {
+      "id": "b-dir-later-heading-37",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Deliberately excluded for now"
+        }
+      ]
+    },
+    "b-dir-later-intro-38": {
+      "id": "b-dir-later-intro-38",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "These are parts of the session arc above that the system builds toward but does not carry. Each is excluded on purpose, with a reason and a revisit intent — not an oversight to be filled in opportunistically."
+        }
+      ]
+    },
+    "b-dir-later-blocking-39": {
+      "id": "b-dir-later-blocking-39",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Blocking agent-initiated questions.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " A synchronous ask-and-wait, where a run halts until the operator answers, is not supported. Annotation threads are the asynchronous form of the same need and cover it without holding a run open across human latency. The blocking form is revisited only if a class of question is found that genuinely cannot be answered after the fact by editing the board."
+        }
+      ]
+    },
+    "b-dir-later-code-40": {
+      "id": "b-dir-later-code-40",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The code-reading intake flow.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The second move of the session arc — the agent ingesting source material, confirming what the diagram should say, and building from that — is not built. The description already carries the output such an intake would produce, so the intake can be added ahead of the pipeline it feeds rather than requiring it to be redesigned."
+        }
+      ]
+    },
+    "b-dir-later-oncanvas-41": {
+      "id": "b-dir-later-oncanvas-41",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "On-canvas display of the board description.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The description is read in the AI panel and does not appear on the board itself. Putting it on the canvas raises questions the layout system has no answer for yet — whether it is an object subject to layout, how it renders in exports, and whether the agent may move it — so it stays a panel-side artifact until those are settled."
+        }
+      ]
+    },
+    "b-dir-later-hosttargets-42": {
+      "id": "b-dir-later-hosttargets-42",
+      "flavour": "list-item",
+      "children": [],
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Host-editable craft targets.",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " The targets are a static value, identical for every session. Making them host-supplied is a contained change once there is demand: the targets ride the same per-session payload channel that already carries injected context in "
+        },
+        {
+          "insert": "packages/canvas-agent/src/catalog/layout-editor/context/index.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/index.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the style-guide loader becomes non-static so it reads them per request, and a canvas-owned rail gives the operator somewhere to set them. Keeping them static until then means every board and every eval run is judged against the same proportions."
+        }
+      ]
+    },
+    "b-dir-siblings-43": {
+      "id": "b-dir-siblings-43",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "For the mechanism this direction is expressed through — scope, draft, typed operations, and the finalize gate — read "
+        },
+        {
+          "insert": "30-agent-layout/00-overview",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/00-overview",
+              "label": "How the AI↔canvas layout system works"
+            }
+          }
+        },
+        {
+          "insert": ". For the harness that runs the loop, prompt assembly, and per-turn context, read "
+        },
+        {
+          "insert": "30-agent-layout/40-kernel",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/40-kernel",
+              "label": "Agent kernel architecture"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ]
+    }
+  }
+}

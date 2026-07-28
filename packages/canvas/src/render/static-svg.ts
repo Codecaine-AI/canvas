@@ -50,7 +50,7 @@ import {
   outlineSpecFor,
   ARROW_SHAPE_GEOMETRY,
 } from "../objects/geometry";
-import { routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
+import { labelPointFor, routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
 import { CONNECTOR_DASH_PATTERN_PX } from "../connectors/def";
 import {
   resolveConnectorStroke,
@@ -246,10 +246,17 @@ function paintsInsideViewBox(
 // at spaces, and a single word wider than the box breaks intra-word at the
 // overflow point. Whitespace runs collapse to single spaces, matching the
 // wrapped-line model the text-slot estimators use.
+//
+// `overflowBreakIndex` / `wrapTextLines` / `clampLines` are exported (they are
+// not on the package's public `./render` surface — deep-import them) so that
+// off-renderer consumers can ask "would this text clip in this box?" and get
+// the RENDERER's answer rather than a second implementation of it. The agent's
+// text-fit warnings (canvas-agent board/text-fit.ts) are built on exactly
+// these functions for that reason.
 // ---------------------------------------------------------------------------
 
 /** Longest prefix of `word` that fits `widthPx` (min 1 codepoint). */
-function overflowBreakIndex(
+export function overflowBreakIndex(
   word: string,
   widthPx: number,
   fontSizePx: number,
@@ -269,7 +276,8 @@ function overflowBreakIndex(
   return endIndex;
 }
 
-function wrapTextLines(
+/** Greedy word wrap of `text` into lines that fit `availableWidthPx`. */
+export function wrapTextLines(
   text: string,
   availableWidthPx: number,
   fontSizePx: number,
@@ -326,7 +334,7 @@ function wrapTextLines(
  * (mirrors the app's -webkit-line-clamp): trailing characters drop until the
  * line plus the ellipsis — measured at its real advance — fits the width.
  */
-function clampLines(
+export function clampLines(
   lines: string[],
   maxLines: number,
   widthPx: number,
@@ -444,7 +452,12 @@ const NO_TEXT_TYPES = new Set<InteractiveCanvasObject["type"]>([
   "summing-junction",
 ]);
 
-function textSlotForObject(object: InteractiveCanvasObject): TextSlot | null {
+/**
+ * The slot this object's text renders into, or null for the pure-glyph types.
+ * Exported alongside the wrap/clamp primitives so off-renderer fit checks
+ * resolve the SAME slot the renderer paints into.
+ */
+export function textSlotForObject(object: InteractiveCanvasObject): TextSlot | null {
   if (NO_TEXT_TYPES.has(object.type)) return null;
   if (object.type === "icon") return BELOW_TEXT_SLOT;
   if (object.type === "arrow-shape") return ARROW_SHAPE_TEXT_SLOT;
@@ -453,7 +466,7 @@ function textSlotForObject(object: InteractiveCanvasObject): TextSlot | null {
 }
 
 /** The stage's render dispatch key: style.shape with the rounded-rect fallback. */
-function effectiveRenderShape(object: InteractiveCanvasObject): string {
+export function effectiveRenderShape(object: InteractiveCanvasObject): string {
   return object.style?.shape ?? "rounded-rect";
 }
 
@@ -1396,12 +1409,14 @@ function renderConnector(
     }
   }
 
-  // Label chip at the routed midpoint — mirrors the stage's SVG label chip
-  // (connectors/Connector.tsx).
+  // Label chip at the effective label point — the routed midpoint, or the
+  // connection's `labelPosition` pin when it has one. Mirrors the stage's SVG
+  // label chip (connectors/Connector.tsx), which reads the same helper.
   const label = connection.label?.trim() ? connection.label : null;
   if (label) {
-    const chip = connectionLabelChipRect(label, routed.labelPoint);
-    const { x, y } = routed.labelPoint;
+    const labelPoint = labelPointFor(routed, connection);
+    const chip = connectionLabelChipRect(label, labelPoint);
+    const { x, y } = labelPoint;
     parts.push(
       tag("rect", {
         x: chip.x,

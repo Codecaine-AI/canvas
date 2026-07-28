@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-182510",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board lands at 6 because its orderly registers and semantic failure routing show deliberate construction, but oversized lower containers, a broad empty bottom band, and long perimeter wires keep it from reading as a finished pin-up.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5,
+        "note": "Fail: the main workflow occupies the upper and middle frame, while stretched lower sections and substantial unused space near the bottom make the composition feel underfilled."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Red dashed routes consistently communicate failure handling and gray carries the primary flows, though the isolated blue feedback arrow is not integrated into a broader semantic color system."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "Fail: no junction crosshairs are visible, but several extremely long red dashed routes run around the board perimeter and read more like exposed routing infrastructure than polished flow composition."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "The two four-panel workflow rows hold strong horizontal and vertical registers, but the oversized sparse lower panels and tiny labels create an uneven density rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6905,
+    "output_tokens": 475
+  },
+  "flags": []
+}

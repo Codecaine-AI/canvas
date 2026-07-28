@@ -74,7 +74,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
@@ -97,7 +97,7 @@
           }
         },
         {
-          "insert": " geometry-derived membership decides which children a frame holds, and fit_section closes that frame around them when the region is finished. A section otherwise keeps exactly the geometry it is given, so the hug is a deliberate act rather than a consequence of moving a child. The 16px grid quantizes patched rectangles but does not determine the region's extent or its internal gap."
+          "insert": " geometry-derived membership decides which children a frame holds, and fit_section closes that frame around them when the region is finished. A section otherwise keeps exactly the geometry it is given, so the hug is a deliberate act rather than a consequence of moving a child. The agent's 20 grid quantizes the rectangles that are written but does not determine the region's extent or its internal gap."
         }
       ]
     },

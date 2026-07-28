@@ -12,7 +12,7 @@ import { isRecord, useAgentJson } from "./use-agent-json";
  * The route is feature-detected: while the harness doesn't serve it yet the
  * fetch 404s and the hook settles on "absent", which every consumer treats as
  * "render exactly what the viewer rendered before this feature existed" — no
- * error banners, at most a muted note in the inspector.
+ * error banners, wrapper panels, or placeholder rows.
  */
 
 export interface TranscriptImageRef {

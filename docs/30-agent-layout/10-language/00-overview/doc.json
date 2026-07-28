@@ -72,7 +72,7 @@
       "props": {},
       "text": [
         {
-          "insert": "These pages document the board's layout vocabulary and composition patterns. Their compact notation describes arrangements for people; it is not a machine interface, and the agent neither reads nor writes it. The agent edits sections, stickies, objects, and connections directly through the thirteen kind-specific operations exposed as "
+          "insert": "These pages document the board's layout vocabulary and composition patterns. Their compact notation describes arrangements for people; it is not a machine interface, and the agent neither reads nor writes it. The agent edits sections, stickies, objects, and connections directly through the twenty-five editing gestures exposed as "
         },
         {
           "insert": "the operation surface",
@@ -104,7 +104,7 @@
       },
       "text": [
         {
-          "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the digest rows around what it touched — while a look returns the whole board; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Five diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, and crowding — and a committed finalize adds frame-slack."
+          "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the routed truth for any edge it touched — while a look returns the whole board, its digest, and a measured close-up of any region it is asked to frame; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Six diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text — and a committed finalize adds frame-slack."
         }
       ]
     },

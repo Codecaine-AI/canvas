@@ -11,7 +11,7 @@ import {
   userRequestsSnapshot,
   type LayoutSession,
 } from "../src/service/session";
-import { USER_REQUESTS_EMPTY } from "../src/agent/loaders/user-requests";
+import { USER_REQUESTS_EMPTY } from "../src/service/session/snapshots/user-requests";
 import type { AgentSessionAnnotation } from "../src/protocol";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
@@ -222,13 +222,10 @@ describe("the queue in operation results", () => {
     const session = sessionWithQueue();
     toolResolveRequest(session, "R1", "done", "split it", emitSessionEvent);
 
-    const result = runOp(session, "update_object", {
-      objectId: "task",
-      patch: { text: "renamed" },
-    });
+    const result = runOp(session, "update_text", { id: "task", text: "renamed" });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · update_object task");
+    expect(result.text).toContain("APPLIED · update_text task");
     expect(result.text).not.toContain("REQUESTS ·");
     expect(result.text).not.toContain('R1 done "split it"');
   });

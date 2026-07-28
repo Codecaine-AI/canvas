@@ -1,6 +1,11 @@
 "use client";
 
-import { createObjectId, sectionDescendantIds, snapGeometry } from "../geometry";
+import {
+  createObjectId,
+  GEOMETRY_NORMALIZATION_GRID,
+  sectionDescendantIds,
+  snapGeometry,
+} from "../geometry";
 import type { CanvasObjectStyle, InteractiveCanvasConnection, InteractiveCanvasObject } from "../schema";
 import { removeConnection } from "./connections";
 import {
@@ -15,17 +20,22 @@ import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
 
 /**
- * Merge an object patch the way canvas.updateObject does: geometry snaps to
- * the grid, style patches merge per-key (undefined deletes). Shared with the
- * agent apply path (./agent-patch.ts) so agent updates behave exactly like
- * human ones.
+ * Merge an object patch the way canvas.updateObject does: geometry normalizes
+ * to GEOMETRY_NORMALIZATION_GRID, style patches merge per-key (undefined
+ * deletes). Shared with the agent apply path (./agent-patch.ts) so agent
+ * updates behave exactly like human ones.
+ *
+ * D1 — this is the write path, not an interaction path, so it rounds on 4 and
+ * not on CANVAS_GRID_SIZE. Both a UI drag's 16-grid result and an agent's
+ * 20-grid box are multiples of 4 and therefore pass through untouched; only
+ * genuinely off-grid values (hand-authored imports, legacy docs) move.
  */
 export function mergeObjectPatch(
   object: InteractiveCanvasObject,
   patch: Partial<Omit<InteractiveCanvasObject, "id">>,
 ): InteractiveCanvasObject {
   const geometry = patch.geometry
-    ? snapGeometry(patch.geometry)
+    ? snapGeometry(patch.geometry, GEOMETRY_NORMALIZATION_GRID)
       : object.geometry;
   const merged: InteractiveCanvasObject = {
     ...object,

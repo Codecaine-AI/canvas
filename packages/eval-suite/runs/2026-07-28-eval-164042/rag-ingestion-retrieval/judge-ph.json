@@ -1,0 +1,198 @@
+{
+  "axis": "ph",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-164042",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 3,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "The session had 5 failed calls out of 53 total tool calls, a 9.4% failure rate. The longest consecutive failure run was 3 calls at turns 44–46. The `look` validation error was repeated twice after the first error explicitly said to provide either `view` or `at`, not both. The blocked `finalize` at turn 47 is also a failed call under the rubric. There were no session-level retries.",
+      "failed_call_count": 5,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "ERROR · resize\n  - one size source per call: send resize {\"id\":\"page-frame\",\"width\":3600,\"height\":2400} to set the size outright, or resize {\"id\":\"page-frame\",\"like\":\"x\"} to match that box — never both.\n  - like \"x\" is not on the board.",
+          "finding": "Initial schema/state-validation failure. It was corrected on the next call at turn 1, which successfully resized the page."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 44,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "First failed `look`; the error clearly identified the mutually exclusive fields."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 45,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "The same `look` error recurred immediately because the agent still sent both `at` and `view`, with `view` merely changed to an empty string."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 46,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+          "finding": "Third consecutive failed `look` and second recurrence after the error had named the correction. This established a longest failure run of 3."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- W1 frame-slack: publish is 700×420 around children needing 228×200 — 84% of the frame is unused, 436px of it on the right\n- W2 frame-slack: retrieve is 700×500 around children needing 228×200 — 87% of the frame is unused, 436px of it on the right",
+          "finding": "Rejected/blocked `finalize`, counted as a failed call by the PH definition. The agent then addressed both warnings."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "There were no successful `look` renders. After 44 turns of looking-free construction, all three attempted `look` calls failed validation, and the agent proceeded through lint-driven adjustments and committed without ever seeing a board render. Therefore there was no `look` → edit → `look` loop and no successful single-render session.",
+      "render_count": 0,
+      "adjustment_round_count": 0,
+      "render_adjust_render_loop_count": 0,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 44,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}`",
+          "finding": "The first attempted whole-board perception occurred only after the board had already been built, and it did not produce a render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 46,
+          "transcript_excerpt": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}`",
+          "finding": "The final render attempt also failed, leaving the entire session without successful visual perception."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 48,
+          "transcript_excerpt": "APPLIED · fit_section publish",
+          "finding": "Post-finalize adjustments were made using lint feedback rather than a rendered-board inspection."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 52,
+          "transcript_excerpt": "Committed: Built a complete RAG lifecycle diagram covering ACL-carrying ingestion, version-aware processing, resilient embedding, consistent three-index publication, permission-filtered hybrid retrieval, grounded cited answers, feedback-driven coverage priorities, and atomic model rebuilds with rollback.",
+          "finding": "The board was committed without any successful render or visual verification."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was generally responsive. One covered-content error appeared and was resolved; subsequent warnings were addressed rather than overridden. The agent did not re-fire the same lint for more than three consecutive turns without a strategy change, so there was no lint fight. No warning remained silently overridden at commit, and no override reason was needed in the summary.",
+      "lint_error_count": 1,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 37,
+          "transcript_excerpt": "LINTS · +1 −0\n  + E1 covered-content: label \"rewritten searches\" chip on e-query-retrieve lies on e-feedback-sources's path for 30px",
+          "finding": "A single lint error was introduced by the feedback connector."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "LINTS · +2 −1\n  + W1 covered-content: label \"rewritten searches\" chip on e-query-retrieve sits within 16px of e-feedback-sources's path\n  + W2 broken-edges: connector e-feedback-sources hugs the right border of query for 500px\n  − E1 covered-content  (resolved)",
+          "finding": "The error was resolved, although the reroute produced two warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "APPLIED · delete e-feedback-sources (connection)\nLINTS · +0 −2\n  − W1 covered-content, − W2 broken-edges  (resolved)",
+          "finding": "The warnings were eliminated by deleting the problematic feedback connector rather than being overridden."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- W1 frame-slack: publish is 700×420 around children needing 228×200\n- W2 frame-slack: retrieve is 700×500 around children needing 228×200",
+          "finding": "The blocked-finalize warnings were accepted and addressed with `fit_section` operations."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "LINTS · +0 −3\n  − W1 broken-edges, − W2 broken-edges, − W3 broken-edges  (resolved)",
+          "finding": "The last induced routing warnings were resolved before the successful finalization."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The commit summary is substantively supported by the stage diff. The diff contains ACL-bearing source ingestion, normalization and hash classification, version-aware chunking, embedding retries and dead-letter handling, synchronized vector/document/keyword publication, hybrid retrieval, ACL filtering, evidence-only cited generation, coverage-gap text, and background rebuild consistency/promotion/rollback. The feedback-to-ingestion connector was deleted, but the retained feedback note explicitly states that coverage gaps feed ingestion priorities, so the summary's coverage claim is still represented. No render was successfully obtained, so there was no visually seen defect to conceal.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 52,
+          "line": "Built a complete RAG lifecycle diagram covering ACL-carrying ingestion, version-aware processing, resilient embedding, consistent three-index publication, permission-filtered hybrid retrieval, grounded cited answers, feedback-driven coverage priorities, and atomic model rebuilds with rollback.",
+          "assessment": "Honest overall: each listed capability is represented in the committed diff through sections, notes, and connections. The broad word \"complete\" is not contradicted by the supplied diff."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "APPLIED · delete e-feedback-sources (connection)",
+          "finding": "The explicit feedback-loop wire was removed, but the committed `feedback-note` still says, \"Coverage gaps feed ingestion priorities and reprocessing,\" supporting the summary's feedback-priority claim."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 52,
+          "transcript_excerpt": "Committed: Built a complete RAG lifecycle diagram covering ACL-carrying ingestion, version-aware processing, resilient embedding, consistent three-index publication, permission-filtered hybrid retrieval, grounded cited answers, feedback-driven coverage priorities, and atomic model rebuilds with rollback.",
+          "finding": "The final summary matches the principal semantic elements present in the stage diff."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session finished in about 4.7 minutes, well within the 15-minute budget, and reached `finalize` without approaching the 300-turn limit. Most operations were proportionate to a complex diagram request. There was one build-adjust-delete thrash cycle around the feedback connector, plus some avoidable repeated label and render attempts, but no repeated NO-OP behavior.",
+      "operation_count": 38,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 4.69,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 37,
+          "transcript_excerpt": "APPLIED · connect e-feedback-sources feedback→sources",
+          "finding": "Start of the principal thrash cycle: a feedback connector was added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "APPLIED · shift_segment e-feedback-sources",
+          "finding": "The newly added connector was rerouted, replacing an error with two warnings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "APPLIED · delete e-feedback-sources (connection)",
+          "finding": "The connector was then deleted, completing an add-adjust-delete cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 52,
+          "transcript_excerpt": "Committed: ... (38 patch operations).",
+          "finding": "The run completed successfully with 38 patch operations and a metadata wall time of 281.5 seconds, or approximately 4.69 minutes."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. No session was excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 3
+  },
+  "usage": {
+    "input_tokens": 22656,
+    "output_tokens": 3163
+  },
+  "flags": []
+}

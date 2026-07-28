@@ -244,6 +244,11 @@ export function useCanvasContextMenu({
     if (contextMenu?.kind !== "object") return;
     const object = document.objects.find((item) => item.id === contextMenu.objectId);
     if (!object) return;
+    // Lock is section-only (schema/objects.ts declares `locked` that way, and
+    // the selection toolbar only offers it on sections). The menu no longer
+    // renders the lock entries for other kinds; this is the defensive gate so
+    // no caller can write `locked` onto a non-section.
+    if (object.type !== "section") return;
     dispatch({
       type: "canvas.updateObject",
       objectId: object.id,

@@ -8,12 +8,14 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
 } from "../state/schema";
-import { routeConnection } from "./routing";
+import { labelPointFor, routeConnection } from "./routing";
 
 /**
- * Pill chip rendered at a connector's routed label point (world layer, so it
- * pans/zooms with the canvas). Double-clicking opens the inline label editor
- * (owned by the editor via `onConnectionDoubleClick`/`worldOverlay`).
+ * Pill chip rendered at a connector's effective label point — the route's
+ * arc-length midpoint, or the connection's `labelPosition` pin when it has
+ * one (`labelPointFor`) — in the world layer, so it pans/zooms with the
+ * canvas. Double-clicking opens the inline label editor (owned by the editor
+ * via `onConnectionDoubleClick`/`worldOverlay`).
  */
 export function ConnectionLabelChip({
   connection,
@@ -31,6 +33,7 @@ export function ConnectionLabelChip({
 }) {
   if (!connection.label) return null;
   const routed = routeConnection(fromObject, toObject, connection, obstacles);
+  const labelPoint = labelPointFor(routed, connection);
   return (
     <div
       data-canvas-connection-label={connection.id}
@@ -40,8 +43,8 @@ export function ConnectionLabelChip({
       }}
       style={{
         position: "absolute",
-        left: `${routed.labelPoint.x}px`,
-        top: `${routed.labelPoint.y}px`,
+        left: `${labelPoint.x}px`,
+        top: `${labelPoint.y}px`,
         transform: "translate(-50%, -50%)",
         background: "var(--background)",
         color: "var(--foreground)",

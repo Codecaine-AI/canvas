@@ -139,6 +139,48 @@ function normalizeConnectionStyle(value: unknown): CanvasConnectionStyle {
   return "solid";
 }
 
+/**
+ * S1.1 — the connection label-chip pin, soft-validated (the `color` /
+ * `style.strokeWidth` precedent): anything malformed is DROPPED with a
+ * warning rather than failing the document, because the fallback — the
+ * route's arc-length midpoint — is the behavior every board had before this
+ * field existed.
+ *
+ * `along` must be a finite number in [0, 1]. Out of range is dropped, not
+ * clamped: a clamped 1.7 would silently read as "pinned at the end", which
+ * is a claim the author never made. `offset` is any finite number (px,
+ * positive = left of travel); a malformed offset drops only the offset and
+ * keeps a valid `along`.
+ */
+function normalizeLabelPosition(
+  value: unknown,
+  path: string,
+  warnings: CanvasValidationIssue[],
+): { along: number; offset?: number } | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) {
+    warnings.push({ path, message: "labelPosition must be an object; it was dropped." });
+    return undefined;
+  }
+  const { along } = value;
+  if (!isFiniteNumber(along) || along < 0 || along > 1) {
+    warnings.push({
+      path: `${path}.along`,
+      message: "labelPosition.along must be a number in [0, 1]; the pin was dropped.",
+    });
+    return undefined;
+  }
+  if (value.offset === undefined) return { along };
+  if (!isFiniteNumber(value.offset)) {
+    warnings.push({
+      path: `${path}.offset`,
+      message: "labelPosition.offset must be a finite number; it was dropped.",
+    });
+    return { along };
+  }
+  return { along, offset: value.offset };
+}
+
 function isSectionStrokeStyle(value: unknown): value is CanvasSectionStrokeStyle {
   return value === "solid" || value === "dashed" || value === "none";
 }
@@ -509,6 +551,17 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       }
     }
 
+    // S1.1 — the label chip pin. Soft-validated like `color` above: a
+    // malformed or out-of-range pin is dropped with a warning and the chip
+    // falls back to the route's arc-length midpoint, which is never wrong,
+    // only unplaced. Dropping (rather than clamping `along`) keeps the
+    // failure legible — a clamped 1.7 would silently become "at the end".
+    const labelPosition = normalizeLabelPosition(
+      rawConnection.labelPosition,
+      `${path}.labelPosition`,
+      warnings,
+    );
+
     connections.push({
       id,
       from,
@@ -519,6 +572,9 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       role: typeof rawConnection.role === "string" ? rawConnection.role : undefined,
       color: connectionColor,
       waypoints,
+      // NOTE: this object literal is a whitelist — a field missing here is
+      // silently dropped on every load, no matter what the type says.
+      labelPosition,
     });
   }
 

@@ -1,0 +1,1224 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-28-eval-174737.rag-ingestion-retrieval",
+  "title": "RAG Ingestion, Retrieval & Grounded Answers",
+  "description": "A left-to-right system map showing how versioned, permission-carrying source content is ingested, normalized, classified, chunked, embedded, and atomically published across vector, document, and keyword stores. The lower lane covers quarantine, retries, dead letters, repair/rollback, and embedding-model rebuilds. The query lane rewrites questions, performs hybrid retrieval, reranks and permission-filters evidence, then produces cited grounded answers or an explicit “I don’t know”; feedback and coverage gaps loop back into ingestion priorities.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-28-eval-174737 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3800,
+        "height": 2200
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-sources",
+      "type": "section",
+      "text": "1 · Sources & arrival",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 160,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-extract",
+      "type": "section",
+      "text": "2 · Extract & normalize",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 860,
+        "y": 160,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-classify",
+      "type": "section",
+      "text": "3 · Version classification",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 160,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-chunk",
+      "type": "section",
+      "text": "4 · Chunk & embed",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2340,
+        "y": 160,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-publish",
+      "type": "section",
+      "text": "5 · Consistent publication",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3080,
+        "y": 160,
+        "width": 600,
+        "height": 860
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-query",
+      "type": "section",
+      "text": "6 · Question preparation",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 720,
+        "width": 600,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-retrieve",
+      "type": "section",
+      "text": "7 · Hybrid retrieval",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 860,
+        "y": 720,
+        "width": 600,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-ground",
+      "type": "section",
+      "text": "8 · Ground & answer",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 720,
+        "width": 600,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-feedback",
+      "type": "section",
+      "text": "9 · Feedback loop",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2340,
+        "y": 720,
+        "width": 600,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-failures",
+      "type": "section",
+      "text": "Resilience · quarantine, retries & repair",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1380,
+        "width": 1340,
+        "height": 600
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-rebuild",
+      "type": "section",
+      "text": "Embedding-model rebuild & generation switchover",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 1380,
+        "width": 2080,
+        "height": 600
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "src-adapters",
+      "type": "document-stack",
+      "text": "Scheduled + event source adapters",
+      "color": "gray",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 180,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "src-arrival",
+      "type": "manual-input",
+      "text": "Import/update + ACL envelope",
+      "color": "gray",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 180,
+        "y": 420,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "manual-input"
+      }
+    },
+    {
+      "id": "extract-normalize",
+      "type": "process",
+      "text": "Normalize formats & strip boilerplate",
+      "color": "gray",
+      "parentId": "sec-extract",
+      "geometry": {
+        "x": 920,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "extract-parse",
+      "type": "decision",
+      "text": "Parseable?",
+      "color": "gray",
+      "parentId": "sec-extract",
+      "geometry": {
+        "x": 920,
+        "y": 420,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "class-hash",
+      "type": "predefined-process",
+      "text": "Compute content hash",
+      "color": "gray",
+      "parentId": "sec-classify",
+      "geometry": {
+        "x": 1660,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "class-result",
+      "type": "decision",
+      "text": "New / changed / unchanged",
+      "color": "gray",
+      "parentId": "sec-classify",
+      "geometry": {
+        "x": 1660,
+        "y": 400,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "chunker",
+      "type": "document-stack",
+      "text": "Overlap chunks + headings, source, ACL, version",
+      "color": "gray",
+      "parentId": "sec-chunk",
+      "geometry": {
+        "x": 2400,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "icon",
+      "text": "Rate-limited embedding batches",
+      "color": "gray",
+      "parentId": "sec-chunk",
+      "geometry": {
+        "x": 2400,
+        "y": 400,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "pub-vector",
+      "type": "icon",
+      "text": "Vector index",
+      "color": "gray",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 3140,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "pub-doc",
+      "type": "icon",
+      "text": "Fragment + metadata store",
+      "color": "gray",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 3140,
+        "y": 420,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "pub-keyword",
+      "type": "icon",
+      "text": "Keyword index",
+      "color": "gray",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 3140,
+        "y": 620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "pub-gate",
+      "type": "decision",
+      "text": "All stores on same version?",
+      "color": "gray",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 3140,
+        "y": 820,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "query-user",
+      "type": "icon",
+      "text": "User question + identity",
+      "color": "gray",
+      "parentId": "sec-query",
+      "geometry": {
+        "x": 180,
+        "y": 800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "query-rewrite",
+      "type": "process",
+      "text": "Rewrite into 1+ searches",
+      "color": "gray",
+      "parentId": "sec-query",
+      "geometry": {
+        "x": 180,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ret-vector",
+      "type": "icon",
+      "text": "Vector lookup",
+      "color": "gray",
+      "parentId": "sec-retrieve",
+      "geometry": {
+        "x": 920,
+        "y": 800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "ret-keyword",
+      "type": "icon",
+      "text": "Keyword lookup",
+      "color": "gray",
+      "parentId": "sec-retrieve",
+      "geometry": {
+        "x": 1120,
+        "y": 800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "ret-fuse",
+      "type": "predefined-process",
+      "text": "Fuse + rerank candidates",
+      "color": "gray",
+      "parentId": "sec-retrieve",
+      "geometry": {
+        "x": 1000,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "ground-perms",
+      "type": "icon",
+      "text": "Apply user permissions",
+      "color": "gray",
+      "parentId": "sec-ground",
+      "geometry": {
+        "x": 1660,
+        "y": 800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "ground-confidence",
+      "type": "decision",
+      "text": "Enough strong evidence?",
+      "color": "gray",
+      "parentId": "sec-ground",
+      "geometry": {
+        "x": 1860,
+        "y": 800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "ground-generate",
+      "type": "icon",
+      "text": "Grounded answer + citations / I don’t know",
+      "color": "gray",
+      "parentId": "sec-ground",
+      "geometry": {
+        "x": 1760,
+        "y": 1000,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "feedback-signals",
+      "type": "icon",
+      "text": "Thumbs + citation usefulness",
+      "color": "gray",
+      "parentId": "sec-feedback",
+      "geometry": {
+        "x": 2400,
+        "y": 800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "feedback-gaps",
+      "type": "document",
+      "text": "Unanswered questions & coverage gaps",
+      "color": "gray",
+      "parentId": "sec-feedback",
+      "geometry": {
+        "x": 2600,
+        "y": 800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "feedback-priority",
+      "type": "arrow-shape",
+      "text": "Return gaps to ingestion priorities",
+      "color": "gray",
+      "parentId": "sec-feedback",
+      "geometry": {
+        "x": 2500,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "arrow-shape"
+      },
+      "direction": "right"
+    },
+    {
+      "id": "fail-quarantine",
+      "type": "icon",
+      "text": "Quarantine + failure context",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 180,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "fail-retry",
+      "type": "icon",
+      "text": "Retry transient failures",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 500,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "fail-dlq",
+      "type": "icon",
+      "text": "Dead letter: inputs + attempts",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 820,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "fail-repair",
+      "type": "icon",
+      "text": "Repair / rollback partial writes",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 1140,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "rebuild-model",
+      "type": "icon",
+      "text": "New embedding model",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 1760,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "cpu"
+    },
+    {
+      "id": "rebuild-coord",
+      "type": "icon",
+      "text": "Background rebuild coordinator",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 2120,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "rebuild-newgen",
+      "type": "icon",
+      "text": "New index generation",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 2480,
+        "y": 1480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "rebuild-consistent",
+      "type": "decision",
+      "text": "Complete + consistent?",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 2840,
+        "y": 1480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "rebuild-promote",
+      "type": "predefined-process",
+      "text": "Atomic generation promotion",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 3200,
+        "y": 1480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "rebuild-rollback",
+      "type": "icon",
+      "text": "Prior generation (rollback)",
+      "color": "gray",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 3200,
+        "y": 1740,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "note-version-failures",
+      "type": "sticky",
+      "text": "**Version & failure rules**\n- Unchanged: bypass chunk/embed\n- Changed: supersede prior; delete stale derived records\n- Partial publication stays unavailable\n- Repair or roll back before serving",
+      "color": "yellow",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 180,
+        "y": 1700,
+        "width": 520,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "note-rebuild-serving",
+      "type": "sticky",
+      "text": "**Serving during rebuild**\n- Live queries stay on current generation\n- Build new generation in background\n- Promote only after complete consistency\n- Keep prior generation for rollback",
+      "color": "yellow",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 1760,
+        "y": 1700,
+        "width": 520,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-src-arrive",
+      "from": {
+        "objectId": "src-adapters",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "src-arrival",
+        "anchor": "top"
+      },
+      "label": "schedule / change",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-arrive-normalize",
+      "from": {
+        "objectId": "src-arrival",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "extract-normalize",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-normalize-parse",
+      "from": {
+        "objectId": "extract-normalize",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "extract-parse",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-parse-hash",
+      "from": {
+        "objectId": "extract-parse",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "class-hash",
+        "anchor": "left"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-parse-quarantine",
+      "from": {
+        "objectId": "extract-parse",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail-quarantine",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-hash-result",
+      "from": {
+        "objectId": "class-hash",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "class-result",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-class-chunk",
+      "from": {
+        "objectId": "class-result",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chunker",
+        "anchor": "left"
+      },
+      "label": "new / changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-embed",
+      "from": {
+        "objectId": "chunker",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "embed",
+        "anchor": "top"
+      },
+      "label": "rate-limited batches",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-vector",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pub-vector",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-doc",
+      "from": {
+        "objectId": "chunker",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pub-doc",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-keyword",
+      "from": {
+        "objectId": "chunker",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pub-keyword",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-vector-gate",
+      "from": {
+        "objectId": "pub-vector",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pub-gate",
+        "anchor": "right"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-doc-gate",
+      "from": {
+        "objectId": "pub-doc",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "pub-gate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-key-gate",
+      "from": {
+        "objectId": "pub-keyword",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "pub-gate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-user-rewrite",
+      "from": {
+        "objectId": "query-user",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "query-rewrite",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-vector",
+      "from": {
+        "objectId": "query-rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ret-vector",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-key",
+      "from": {
+        "objectId": "query-rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ret-keyword",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retv-fuse",
+      "from": {
+        "objectId": "ret-vector",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ret-fuse",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retk-fuse",
+      "from": {
+        "objectId": "ret-keyword",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ret-fuse",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fuse-perms",
+      "from": {
+        "objectId": "ret-fuse",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ground-perms",
+        "anchor": "left"
+      },
+      "label": "ranked candidates",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-perms-confidence",
+      "from": {
+        "objectId": "ground-perms",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ground-confidence",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-confidence-answer",
+      "from": {
+        "objectId": "ground-confidence",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ground-generate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-answer-feedback",
+      "from": {
+        "objectId": "ground-generate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback-signals",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-feedback-gaps",
+      "from": {
+        "objectId": "feedback-signals",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback-gaps",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-gaps-priority",
+      "from": {
+        "objectId": "feedback-gaps",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "feedback-priority",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retry-dlq",
+      "from": {
+        "objectId": "fail-retry",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fail-dlq",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-gate-repair",
+      "from": {
+        "objectId": "pub-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail-repair",
+        "anchor": "top"
+      },
+      "label": "partial / mismatch",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-model-coord",
+      "from": {
+        "objectId": "rebuild-model",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-coord",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-coord-newgen",
+      "from": {
+        "objectId": "rebuild-coord",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-newgen",
+        "anchor": "left"
+      },
+      "label": "re-embed corpus",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-newgen-check",
+      "from": {
+        "objectId": "rebuild-newgen",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-consistent",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-check-promote",
+      "from": {
+        "objectId": "rebuild-consistent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-promote",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-promote-rollback",
+      "from": {
+        "objectId": "rebuild-promote",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rebuild-rollback",
+        "anchor": "top"
+      },
+      "label": "retain prior",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

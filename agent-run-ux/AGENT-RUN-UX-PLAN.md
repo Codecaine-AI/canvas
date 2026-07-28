@@ -358,9 +358,9 @@ structures B already creates.
 │ Steps                     ● Live │  header: live-follow chip (running only)
 ├──────────────────────────────────┤
 │ ○ Draft 1                        │  thin marker: run event, unnumbered
-│ ● 1 add_section [§ retrieval]    │  operation row: tool + typed target
-│ ● 2 add_connection [↗ in-parse]  │
-│ ▌● 3 update_object [□ parser]    │  ▌ selected — board renders step 3
+│ ● 1 place_section [§ retrieval]  │  operation row: tool + typed target
+│ ● 2 connect [↗ in-parse]         │
+│ ▌● 3 move_to [□ parser]          │  ▌ selected — board renders step 3
 │   ▾ x: 420→448 · y: 160→192      │  ▾ parameters + one-line delta
 │     Δ ~ parser moved 28,32       │
 │ ○ Draft 2                        │  thin marker: attempt boundary

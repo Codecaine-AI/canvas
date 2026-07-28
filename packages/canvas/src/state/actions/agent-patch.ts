@@ -55,6 +55,15 @@ function applyOperation(
   const { document } = accumulator;
 
   switch (operation.type) {
+    case "updateTitle": {
+      // Same rule the TopBar rename reduces by (reduceCanvasAction,
+      // canvas.updateDocumentTitle): trim, and treat an empty or unchanged
+      // title as nothing to do — a board is never left nameless.
+      const title = operation.title.trim();
+      if (!title || document.title === title) return;
+      accumulator.document = { ...document, title };
+      return;
+    }
     case "updateDescription": {
       const description = operation.description.trim() ? operation.description : undefined;
       if (document.description === description) return;

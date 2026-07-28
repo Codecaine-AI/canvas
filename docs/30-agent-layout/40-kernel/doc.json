@@ -52,10 +52,11 @@
         "b-kernel-review-preview-43",
         "b-kernel-review-verdict-44",
         "b-kernel-decisions-heading-66",
-        "b-kernel-decisions-table-67"
+        "b-kernel-decisions-table-67",
+        "b-kernel-decisions-seam-68"
       ],
       "props": {
-        "covers": "The live canvas-agent session lifecycle: scope resolution, draft page-frame injection, per-run boot perception, the sixteen-tool runtime, typed-operation lowering, tiered operation results, painted-extent cameras, static rendering, finalize gates, and the proposal handoff to the studio.",
+        "covers": "The live canvas-agent session lifecycle: scope resolution, draft page-frame injection, per-run boot perception, the thirty-two-tool gesture runtime, typed-gesture lowering, tiered operation results, painted-extent cameras, static rendering, finalize gates, and the proposal handoff to the studio.",
         "format": "mdx",
         "type": "design",
         "concepts": [
@@ -89,7 +90,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The kernel hosts a scoped, draft-based canvas editing session. The model begins with a current textual and visual snapshot, edits the draft through typed single-operation mutators, uses a deliberate look for whole-board truth, and can finish only by proposing a cumulative document diff or ending without a proposal."
+          "insert": "The kernel hosts a scoped, draft-based canvas editing session. The model begins with a current textual and visual snapshot, edits the draft through typed single-operation mutators, receives the standing board picture with every turn's state block, spends look on a deliberate close-up of one region, and can finish only by proposing a cumulative document diff or ending without a proposal."
         }
       ]
     },
@@ -150,7 +151,7 @@
       },
       "text": [
         {
-          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the sixteen tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
+          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-two tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
         }
       ]
     },
@@ -169,7 +170,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/context.ts",
+              "path": "packages/canvas-agent/src/service/session/snapshots/context.ts",
               "symbol": "draftWithPageFrame"
             }
           }
@@ -207,7 +208,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/boot.ts",
+              "path": "packages/canvas-agent/src/service/session/perception/boot.ts",
               "symbol": "bootPerception"
             }
           }
@@ -232,7 +233,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/context.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/index.ts",
               "symbol": "assembleImages"
             }
           }
@@ -249,7 +250,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains six nested phase blocks—understand, survey, plan, build, finish, and finalize—and each phase carries objective, steps, and constraints. There is no separate rules section; phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow.\n\nFive tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport; user_requests is the status-bearing annotation queue; capabilities nests sections, stickies, objects, and connections, each with description, ops, named functionality topics, generated vocabulary or fields where applicable, and tips; style_guide contains the single nested aesthetic topic; and board_state contains the full, untruncated board digest followed by the current lint report. The object roster lists bare type names so the agent chooses geometry; icon glyphs and colors are enumerated one per line. During editing, look is the authoritative whole-board recall affordance."
+          "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains five nested phase blocks—orientate, plan, build, qa, and finalize—and each phase carries objective, steps, and constraints. The phases run as a loop navigated by state rather than by turn count: a phase with nothing to do is skipped, and a problem found late sends the run back to the phase that can fix it. There is no separate rules section; phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow.\n\nFive tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport; user_requests is the status-bearing annotation queue; capabilities is material then gestures — the four kind blocks (sections, stickies, objects, connections) each with description, named functionality topics, generated vocabulary or fields where applicable, and tips, naming no tools; followed by one gestures block holding a child per verb group, derived from the registration roster; style_guide contains the single nested aesthetic topic; and board_state contains the full, untruncated board digest followed by the current lint report. The object roster lists bare type names so the agent chooses geometry; icon glyphs and colors are enumerated one per line. During editing the standing picture is pushed rather than fetched: each turn's state block carries the live board digest, the cumulative diff, the current findings, the request queue, and a render of the board as it stands, so recall costs no tool call and look is spent on a close-up instead."
         }
       ]
     },
@@ -262,7 +263,7 @@
       },
       "text": [
         {
-          "insert": "The sixteen-tool runtime"
+          "insert": "The thirty-two-tool runtime"
         }
       ]
     },
@@ -273,15 +274,28 @@
       "props": {},
       "text": [
         {
-          "insert": "The model has exactly sixteen tools. Sections, stickies, objects, and connections each expose add, update, and remove mutators; fit_section completes the thirteen mutators built from one shared operation factory. look, resolve_request, and finalize complete the surface. Their kernel declarations live in "
+          "insert": "The model has exactly thirty-two tools, factored by editing gesture rather than by kind. Twenty-five board mutators — place, arrange, content and appearance, sections, edges, delete — are built from one shared operation factory; look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
         },
         {
-          "insert": "agent/catalog/layout-editor/tools.ts",
+          "insert": "The gesture tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/00-overview",
+              "label": "The gesture tool surface"
+            }
+          }
+        },
+        {
+          "insert": "; their kernel declarations live in "
+        },
+        {
+          "insert": "catalog/layout-editor/tools/index.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/catalog/layout-editor/tools.ts"
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools/index.ts"
             }
           }
         },
@@ -289,17 +303,17 @@
           "insert": "; their session-bound implementations live in "
         },
         {
-          "insert": "service/session/tools.ts",
+          "insert": "service/session/tools/index.ts",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/tools.ts"
+              "path": "packages/canvas-agent/src/service/session/tools/index.ts"
             }
           }
         },
         {
-          "insert": ". The session tools retain request disposal and finalization. The runtime looks up the current layout session from the kernel run context, and every mutator carries the same optional view and declares sequential execution so call order is guaranteed."
+          "insert": ", with the twenty-five mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/. The runtime looks up the current layout session from the kernel run context. A mutator's wire schema is exactly its own gesture fields, sealed against keys it does not declare: an edit takes no view argument and returns no picture, because framing is look's alone. Every mutator declares sequential execution, so call order is guaranteed."
         }
       ]
     },
@@ -310,7 +324,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Each typed mutator names exactly one operation and accepts its operation-specific fields plus the shared optional view. One call applies one edit. look({ view? }) is the separate read-only perception call: it judges the full board and adds a named-section close-up when view is supplied."
+          "insert": "Each typed mutator names exactly one operation and accepts its operation-specific fields and nothing else. One call applies one edit, and an advisory per-turn allowance — one tool call by default, raisable to three — keeps a single message from planning several gestures against a board its own first call is about to change. look is the separate read-only call: it frames exactly one region, view naming a section or a single object and at cropping to a world rect, either/or per call, and returns that region rendered and measured. It never returns the board, which arrives with the state block instead."
         }
       ]
     },
@@ -356,7 +370,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The model surface is declaration-style and kind-specific. The classification seam in "
+          "insert": "The model surface is declaration-style and gesture-factored, while the document diff downstream of it is neither. The classification seam in "
         },
         {
           "insert": "op-surface.ts",
@@ -364,12 +378,12 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/op-surface.ts"
+              "path": "packages/canvas-agent/src/service/session/perception/op-surface.ts"
             }
           }
         },
         {
-          "insert": " renders the six-kind grammar in the model's terms; thirteen operation specs own per-operation state validation, and OpContext owns lowering to that grammar."
+          "insert": " holds the neutral delta vocabulary a document diff is allowed to speak — added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster: move_to, move_by, align, and space_out all land in the document as the same geometry change, so a diff cannot recover which gesture produced it. Twenty-five gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
         }
       ]
     },
@@ -382,7 +396,7 @@
       },
       "text": [
         {
-          "insert": "sections     add_section · update_section · remove_section\nstickies     add_sticky · update_sticky · remove_sticky\nobjects      add_object · update_object · remove_object\nconnections  add_connection · update_connection · remove_connection\nlayout       fit_section"
+          "insert": "place     place_section · place_sticky · place_shape · clone · connect\narrange   move_to · move_by · resize · match_size · align · space_out\ncontent   update_text · change_color · change_shape\nsections  fit_section · change_section_border · lock · unlock\nedges     style_edge · change_connection · reroute · shift_segment · reset_route · move_label\ndelete    delete\n\ndelta     addSection · updateSection · removeSection · fitSection\n          addSticky · updateSticky · removeSticky\n          addObject · updateObject · removeObject\n          addConnection · updateConnection · removeConnection"
         }
       ]
     },
@@ -393,7 +407,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Section and sticky operations imply their entity type and reject a type field on add. Object operations accept only the generated object-type roster, excluding section and sticky. Update and remove operations verify that the target is the expected kind; a wrong-kind target produces a steering error naming the correct operation family."
+          "insert": "The top block is the gesture roster the model calls; the bottom block is the delta vocabulary a diff speaks back. Place gestures imply their entity type and take no type field except place_shape, which accepts the folded roster: the shape types with the icon glyphs merged in under their own names, so placing database places that icon. The one name the two rosters shared goes to the glyph, and the flowchart shape it displaced keeps a read-only outbound name, database-shape. Gestures verify that their target is the expected kind; a wrong-kind target produces a steering error naming the gesture that does fit."
         }
       ]
     },
@@ -415,7 +429,20 @@
       "props": {},
       "text": [
         {
-          "insert": "remove_section rejects a locked background frame. When applied to another section, removal cascades through its descendants, their incident connections, and annotations that target removed objects or connections. Object and sticky removal likewise clears incident connections."
+          "insert": "delete is one verb whose cascade is chosen from the target's kind — a section takes its contents with it, an object or sticky takes its incident connections, a connection goes alone — and the board's last section is refused; the per-kind cascades and the lock matrix are enumerated in "
+        },
+        {
+          "insert": "The gestures",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/10-gestures",
+              "label": "The gestures"
+            }
+          }
+        },
+        {
+          "insert": ". Locks are enforced, not merely advised: a frame's own locked value refuses that frame's mutation in either mode, an ancestor locked all gates every descendant, and an edge is gated when either endpoint sits inside a locked-all closure — a background lock pins one frame's box and never gates an edge. Every refusal names the frame holding the lock and unlock as the one call that lifts it. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
         }
       ]
     },
@@ -426,7 +453,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The operation context maps section and sticky adds, updates, and removals onto addObject, updateObject, and removeObject with the appropriate implied type. Object and connection operations pass through. classifyOperation performs the inverse classification when cumulative diffs are rendered back in the model's grammar."
+          "insert": "The operation context lowers every gesture onto the internal patch grammar (addObject, updateObject, removeObject and their connection siblings), stamping implied types where a kind is structural. classifyDelta performs the inverse classification when cumulative diffs are rendered back as neutral delta verbs — a document diff cannot recover which gesture produced it."
         }
       ]
     },
@@ -486,7 +513,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Before execute, the runtime validates the tool schema. The shared factory then resolves the session and snapshots its draft; a state-validation failure returns ERROR with no mutation, perception, or event. The apply stage can return a no-op note and stop. A changing call reconciles membership from geometry, derives DELTA and the lint delta, reports routes for a touched connection, renders only when view was supplied, prints the request queue, and emits one run-UX event. Adds start with parentId null and object updates strip parentId because containment derives from geometry."
+          "insert": "Before execute, the runtime validates the tool schema. The shared factory then resolves the session and snapshots its draft; a state-validation failure returns ERROR with no mutation, perception, or event. The apply stage can return a no-op note and stop. A changing call reconciles waypoints and then membership from geometry, commits the new draft through the one choke point that assigns it and captures fresh board pixels in the same move, derives DELTA and the lint delta, reports routes for a touched connection, and emits one run-UX event. The result text carries no image of its own; the refreshed render reaches the model on the next state block. At every turn end the session also publishes that current-board raster as an app:board-render trace event, which the kernel harness consumes to show turn-by-turn board progress in the trace viewer; the publication is fire-and-forget, so a failure there never touches the run. Adds start with parentId null and object updates strip parentId because containment derives from geometry."
         }
       ]
     },
@@ -497,7 +524,7 @@
       "props": {},
       "text": [
         {
-          "insert": "fit_section reads the named frame's children from a membership-reconciled draft, computes the fitted geometry, and lands it as an ordinary geometry update on that one section. No ancestor is touched: fitting is a finishing move, and a cascade would compress a parent around whichever children happen to exist. A childless section returns a no-op note. Because the result lowers to a plain section geometry patch, nothing below the lowering line needs a special case."
+          "insert": "fit_section reads the named frame's children from a membership-reconciled draft, computes the fitted geometry, and lands it as an ordinary geometry update on that one section. No ancestor is touched: fitting is a finishing move, and a cascade would compress a parent around whichever children happen to exist — cascading fit is auto-fit at smaller scope, and the whole point of the explicit gesture is that geometry moves only where it is named. A childless section returns a no-op note. Because the result lowers to a plain section geometry patch, nothing below the lowering line needs a special case."
         }
       ]
     },
@@ -508,7 +535,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The factory derives DELTA by comparing the before and after documents rather than echoing the call. Consequently it reports direct edits together with 16px-snapped or fitted geometry, reconciled parentId, endpoint reassignment, anchors, endpoint positions, and waypoint changes. The APPLIED line names the operation, and any non-fatal observations follow as notes."
+          "insert": "The factory derives DELTA by comparing the before and after documents rather than echoing the call. Consequently it reports direct edits together with grid-snapped or fitted geometry, reconciled parentId, endpoint reassignment, anchors, endpoint positions, and waypoint changes. The snap is about what lands, not about the arguments: a relative gesture snaps the coordinate the box ends up on, so a nudge off an off-grid box lands on the grid rather than staying off it. The APPLIED line names the operation, and any non-fatal observations follow as notes."
         }
       ]
     },
@@ -519,7 +546,7 @@
       "props": {},
       "text": [
         {
-          "insert": "look is the only full-board perception result. It returns a fresh BOARD digest, the cumulative baseline-to-draft BOARD DIFF rendered from the same diffDocuments operations that a committed finalize proposes, the complete lint list in prose, routed truth, and the full request queue. It also carries a 1600px full-board render and, when view is supplied, a 1400px close-up of that section."
+          "insert": "look is the framed close-up. One call frames exactly one region: view names a section or a single object, at crops to a world rect, and the two are either/or — sending both, or neither, is refused with the two legal calls spelled out concretely so the model re-sends rather than re-reads a rule. The framed region comes back as a 1400px render and a MEASURES block — per-pair gaps on each axis, row and column pitch, the section's free rect, and ink share — beside the standing text truth: a fresh BOARD digest, the cumulative baseline-to-draft BOARD DIFF rendered from the same diffDocuments operations that a committed finalize proposes, the complete lint list in prose, routed truth, and the full request queue. It mutates nothing and emits no run event. The board itself is never a look result: the 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
         }
       ]
     },
@@ -530,7 +557,20 @@
       "props": {},
       "text": [
         {
-          "insert": "Every mutator returns one of three result classes, distinguished by headline. APPLIED · <tool> <id> carries the document-derived DELTA, lint delta, a digest scoped to the touched section, routed truth for a touched connection, the request queue, an optional full-board PNG when view was supplied, and one run-UX event. NO-OP · <tool> <id> — <note> carries the note only; ERROR · <tool> — <lines> carries the error lines only. Both leave the draft untouched and emit no event. Raster failures are written into the result text rather than silently dropping an expected image."
+          "insert": "Every mutator returns one of three result classes, distinguished by headline — APPLIED, NO-OP, or ERROR — and only the applied class changes the draft or emits an event; each envelope is sized to its own call rather than restating the standing picture the state block already carries. The three headlines and exactly what each one carries are set out in "
+        },
+        {
+          "insert": "The operation pipeline",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/30-operation-pipeline",
+              "label": "The operation pipeline"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ]
     },
@@ -648,7 +688,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A committed finalize runs the finishing registry—the five always-on diagnostics plus frame-slack, which asks whether a frame is far larger than its children need—then filters them to the baseline scope plus draft-created objects. Any error-tier finding in that edited scope blocks finalization. Warnings do not block; unresolved scoped warnings are carried in the proposal lint text. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap; stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
+          "insert": "A committed finalize runs the finishing registry—the six always-on diagnostics plus frame-slack, which asks whether a frame is far larger than its children need—then filters them to the baseline scope plus draft-created objects. Every finding surviving in that edited scope blocks finalization, warnings included: the call is refused, the run stays active, and the model fixes what it raised before calling again. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap; stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
         }
       ]
     },
@@ -659,7 +699,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every request must also be done or declined. Open queue entries block finalization beside error diagnostics. If the draft matches the baseline and no proposal already exists, there is nothing to propose and the committed finalize is rejected."
+          "insert": "Every user-authored request must also be done or declined, and open entries block finalization beside the scoped diagnostics; a thread the agent itself opened is a question left for the operator to answer on their own time, so it never traps the run. If the draft matches the baseline and no proposal already exists, there is nothing to propose and the committed finalize is rejected."
         }
       ]
     },
@@ -670,7 +710,7 @@
       "props": {},
       "text": [
         {
-          "insert": "On pass, finalize calls diffDocuments, stores the resulting six-operation patch with the model's summary and warning report, sets the session status to proposal-ready, and emits the proposal-ready event. outcome none sets status abandoned and emits the abandoned event. Those event names and proposal operation shapes are the stable service-to-studio wire."
+          "insert": "On pass, finalize calls diffDocuments, stores the resulting six-operation patch with the model's summary and the scoped lint report, sets the session status to proposal-ready, and emits the proposal-ready event. outcome none sets status abandoned and emits the abandoned event. Those event names and proposal operation shapes are the stable service-to-studio wire."
         }
       ]
     },
@@ -707,7 +747,44 @@
       },
       "text": [
         {
-          "insert": "service/session/store.ts           lifecycle, scope state, run, accept/reject\nservice/session/context.ts         page frame, boot snapshots, lint scope\nservice/session/boot.ts            board render, exemplar, vocabulary contact sheet\nservice/session/operation-tool.ts  shared mutator factory and per-operation pipeline\nservice/session/op-context.ts      validation and mutation helpers, six-kind lowering, fitting\nservice/session/schemas.ts         sealed payloads, patches, generated vocabulary\nservice/session/operations/        thirteen typed operation specs by kind group\nservice/session/tools.ts           look, request disposal, finalize gates\nagent/catalog/layout-editor/       model prompt, context sidecar, capabilities, sixteen tools\nboard/                             digest, lint registries, document diff, scope\ncanvas/src/render/                 painted bounds, named views, static SVG"
+          "insert": "service/session/store.ts                       lifecycle, scope state, run, accept/reject\nservice/session/board-trace.ts                 the app:board-render turn event\nservice/session/snapshots/context.ts           page frame, boot snapshots, lint scope\nservice/session/perception/boot.ts             board render, exemplar, vocabulary contact sheet\nservice/session/perception/live-draft-view.ts  the one draft-commit choke point and its board raster\nservice/session/perception/perception.ts       the operation and look result envelopes\nservice/session/perception/op-surface.ts       neutral delta vocabulary, delta classification\nservice/session/tools/operations/              twenty-five gesture specs by verb group, the shared\n                                               mutator factory, and the lowering helpers\nservice/session/tools/workflow/                look, annotation threads, request disposal, board\n                                               title, description, finalize gates\nservice/session/tools/schemas.ts               sealed payloads, patches, generated vocabulary\nservice/session/tools/grid.ts                  the agent's 20 grid\nservice/session/tools/creation-defaults.ts     what a bare placement lands as\ncatalog/layout-editor/                         model prompt, context sidecar, capabilities, state\n                                               block, thirty-two tool declarations\nboard/                                         digest, lint registries, document diff, scope\nprotocol.ts                                    the wire vocabulary shared with the host\nviewer/                                        the run viewer, over the service's HTTP routes\ncanvas/src/render/                             painted bounds, named views, static SVG"
+        }
+      ]
+    },
+    "b-kernel-decisions-seam-68": {
+      "id": "b-kernel-decisions-seam-68",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Two of those entries are the harness's outward-facing edges, and both are one-way. "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/lib/kernel-api.ts"
+            }
+          }
+        },
+        {
+          "insert": " reads the service over its HTTP routes and never the other way round: nothing under service/ imports the viewer, so a run behaves the same whether or not anyone is watching it. "
+        },
+        {
+          "insert": "protocol.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/protocol.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the wire vocabulary shared with the host — session DTOs, event shapes, and the delta report, as types only, with no runtime, pipeline, or kernel imports. The harness routes and the studio client both import from it, so the two ends of the wire cannot drift."
         }
       ]
     }

@@ -1,0 +1,1946 @@
+{
+  "container_id": "30b82f62-d31f-5a46-b1a5-0fcc8c436461",
+  "pi_sessions": [
+    {
+      "piSessionId": "019faac1-e000-7467-aa1d-825d2197bcbc",
+      "file": "2026-07-28T22-04-20-352Z_019faac1-e000-7467-aa1d-825d2197bcbc.jsonl",
+      "startedAt": "2026-07-28T22:04:20.352Z",
+      "userMessages": [
+        {
+          "text": "# Retrieval-augmented generation ingestion and query\n\nWe need a diagram of how our retrieval-augmented generation system carries knowledge from ingestion through grounded answers. Source adapters pull from document stores, wikis, ticket systems, and code repositories on schedules and change notifications. An arrival may be a first import or an update, and each source's access rules travel with it. Extraction normalizes formats and removes boilerplate. Unparseable documents enter quarantine with failure context while the rest of the batch continues.\n\nA content hash classifies each document as new, changed, or unchanged. Unchanged content bypasses expensive processing. A changed document supersedes its previous version, whose stale derived records are deleted. The chunker splits normalized content with overlap and preserves headings, source identity, permissions, and a version stamp on every fragment. The embedding service accepts rate-limited batches. Workers retry transient failures, then send persistently failing batches to a dead-letter store with inputs and attempt history for reprocessing.\n\nEach completed version writes vectors to a vector index, fragment text and metadata to a document store, and terms to a keyword index. Publication succeeds only when all three reflect the same version; partial writes remain unavailable and are repaired or rolled back before serving.\n\nWhen a user asks a question, the retrieval service rewrites it into one or more searches, runs vector and keyword lookups in parallel, fuses and reranks candidates, and applies the asking user's permissions before context reaches the generation service. Generation answers only from retrieved evidence and returns citations. If context is thin or every reranker score is low, it says it does not know. Feedback records thumb signals, the usefulness of cited fragments, and unanswered questions; the resulting coverage gaps return to ingestion priorities.\n\nWhen the embedding model changes, a rebuild coordinator re-embeds the corpus in the background into a new index generation. Live queries remain on the current generation until the rebuild is complete and consistent. Switchover atomically promotes the new generation, while the prior generation remains available for rollback.\n\nThe diagram should make clear how version-consistent content moves from ingestion through permission-aware retrieval to grounded answers, and how failed processing, index rebuilds, and low-confidence queries are handled.\n",
+          "timestamp": "2026-07-28T22:04:20.372Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-07-28T22:04:25.749Z",
+          "thinking": "**Planning page resizing before building**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6aQ2o8EjkKz6pe80q6EHZVzC|fc_085bdf02d98e4662016a692769645881998b7b5c1f33d21762",
+              "toolName": "resize",
+              "params": {
+                "height": 2200,
+                "id": "page-frame",
+                "like": "page-frame",
+                "width": 3600
+              },
+              "resultText": "APPLIED · resize page-frame → 3600×2200\n  like named the box being resized, so it was ignored and the explicit dimensions were used.\nDELTA\n  page-frame  32,32 2240×1400 → 32,32 3600×2200\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-07-28T22:04:37.890Z",
+          "thinking": "**Designing 10-section page skeleton**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LunGDCnnyo3pynzuXGF2lA7U|fc_085bdf02d98e4662016a692773e96c819993a443df2676ff9a",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  120,
+                  140
+                ],
+                "id": "sources",
+                "size": {
+                  "height": 420,
+                  "width": 560
+                },
+                "text": "1 · Sources & arrival"
+              },
+              "resultText": "APPLIED · place_section sources 120,140 560×420\nDELTA\n  + sources  section 120,140 560×420 \"1 · Sources & arrival\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_6IXu4761dFcAm5MTds1tTDo1|fc_085bdf02d98e4662016a692773e9a88199983ff715df0314f8",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  820,
+                  140
+                ],
+                "id": "normalize",
+                "size": {
+                  "height": 420,
+                  "width": 560
+                },
+                "text": "2 · Normalize & classify"
+              },
+              "resultText": "APPLIED · place_section normalize 820,140 560×420\nDELTA\n  + normalize  section 820,140 560×420 \"2 · Normalize & classify\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_FT9MudzQbCm2gZwIEhTrWCJj|fc_085bdf02d98e4662016a692773e9b081998f809d41146ab64c",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  1520,
+                  140
+                ],
+                "id": "prepare",
+                "size": {
+                  "height": 420,
+                  "width": 560
+                },
+                "text": "3 · Version & chunk"
+              },
+              "resultText": "APPLIED · place_section prepare 1520,140 560×420\nDELTA\n  + prepare  section 1520,140 560×420 \"3 · Version & chunk\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Ox7AgGHAnmkhyKRbgQpVjK6L|fc_085bdf02d98e4662016a692773e9bc819993795c2d2c29bf33",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  2220,
+                  140
+                ],
+                "id": "embed",
+                "size": {
+                  "height": 420,
+                  "width": 560
+                },
+                "text": "4 · Embed reliably"
+              },
+              "resultText": "APPLIED · place_section embed 2220,140 560×420\nDELTA\n  + embed  section 2220,140 560×420 \"4 · Embed reliably\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_jPWhiOE128ctVL1KmzlKD3Mb|fc_085bdf02d98e4662016a692773e9c4819986d39b554a921919",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  2920,
+                  140
+                ],
+                "id": "publish",
+                "size": {
+                  "height": 700,
+                  "width": 560
+                },
+                "text": "5 · Version-consistent publication"
+              },
+              "resultText": "APPLIED · place_section publish 2920,140 560×700\nDELTA\n  + publish  section 2920,140 560×700 \"5 · Version-consistent publication\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_xsKR5b87SstWifIpPFUPTtH4|fc_085bdf02d98e4662016a692773e9cc8199ab1335561b74802c",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  120,
+                  900
+                ],
+                "id": "query",
+                "size": {
+                  "height": 540,
+                  "width": 560
+                },
+                "text": "6 · Query planning"
+              },
+              "resultText": "APPLIED · place_section query 120,900 560×540\nDELTA\n  + query  section 120,900 560×540 \"6 · Query planning\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_E6qfZSrRrVw4CTkyH2od4P6I|fc_085bdf02d98e4662016a692773e9d481998bfbabdda60b3507",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  820,
+                  900
+                ],
+                "id": "retrieve",
+                "size": {
+                  "height": 540,
+                  "width": 560
+                },
+                "text": "7 · Hybrid retrieval"
+              },
+              "resultText": "APPLIED · place_section retrieve 820,900 560×540\nDELTA\n  + retrieve  section 820,900 560×540 \"7 · Hybrid retrieval\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Ler5RPeIv3xDdkrSaQ6Eb7ET|fc_085bdf02d98e4662016a692773e9dc819988a6bf30cecc0efd",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  1520,
+                  900
+                ],
+                "id": "ground",
+                "size": {
+                  "height": 540,
+                  "width": 560
+                },
+                "text": "8 · Permission-aware grounding"
+              },
+              "resultText": "APPLIED · place_section ground 1520,900 560×540\nDELTA\n  + ground  section 1520,900 560×540 \"8 · Permission-aware grounding\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_RkJxNecEw6ksaffgeATpBVrn|fc_085bdf02d98e4662016a692773e9e481998506aa7156849449",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  2220,
+                  900
+                ],
+                "id": "feedback",
+                "size": {
+                  "height": 540,
+                  "width": 560
+                },
+                "text": "9 · Feedback loop"
+              },
+              "resultText": "APPLIED · place_section feedback 2220,900 560×540\nDELTA\n  + feedback  section 2220,900 560×540 \"9 · Feedback loop\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_MohsobgqvnKLOBkg1TDuOxo9|fc_085bdf02d98e4662016a692773e9ec8199ab6a66508d363079",
+              "toolName": "place_section",
+              "params": {
+                "at": [
+                  2920,
+                  980
+                ],
+                "id": "rebuild",
+                "size": {
+                  "height": 900,
+                  "width": 560
+                },
+                "text": "10 · Embedding model rebuild"
+              },
+              "resultText": "APPLIED · place_section rebuild 2920,980 560×900\nDELTA\n  + rebuild  section 2920,980 560×900 \"10 · Embedding model rebuild\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-07-28T22:04:58.153Z",
+          "thinking": "**Planning parallel shape placement**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_FMMEPk0jLGK5PNgRU5eOYtCo|fc_085bdf02d98e4662016a692789d1008199b737e782e57ad3e7",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  180,
+                  220
+                ],
+                "id": "src-adapters",
+                "type": "document-stack"
+              },
+              "resultText": "APPLIED · place_shape src-adapters document-stack 180,220 280×100\nDELTA\n  + src-adapters  document-stack 180,220 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_HaUXaCSOsT8pAstcjGnuvWhF|fc_085bdf02d98e4662016a692789d1888199997921536b153b9a",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  180,
+                  380
+                ],
+                "id": "arrival",
+                "type": "manual-input"
+              },
+              "resultText": "APPLIED · place_shape arrival manual-input 180,380 280×100\nDELTA\n  + arrival  manual-input 180,380 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_PpEiQMV8hkyVb35nUTZsEEMI|fc_085bdf02d98e4662016a692789d1908199bd4b612e1d826c87",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  880,
+                  220
+                ],
+                "id": "extract",
+                "type": "process"
+              },
+              "resultText": "APPLIED · place_shape extract process 880,220 280×100\nDELTA\n  + extract  process 880,220 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Q2DRf5ECoVB1yHXUemZokoCR|fc_085bdf02d98e4662016a692789d19881998a468fd28cc300eb",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  880,
+                  380
+                ],
+                "id": "hash-classify",
+                "type": "decision"
+              },
+              "resultText": "APPLIED · place_shape hash-classify decision 880,380 280×100\nDELTA\n  + hash-classify  decision 880,380 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_S55hfVRKBdlo8vLfA1RL33VG|fc_085bdf02d98e4662016a692789d1cc8199a8ced9c5ff67106b",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1580,
+                  220
+                ],
+                "id": "version",
+                "type": "predefined-process"
+              },
+              "resultText": "APPLIED · place_shape version predefined-process 1580,220 280×100\nDELTA\n  + version  predefined-process 1580,220 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_ZYO0RowltLRL1rkMjliKgkmj|fc_085bdf02d98e4662016a692789d1d481998ba07f583888cdcf",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1580,
+                  380
+                ],
+                "id": "chunk",
+                "type": "document-stack"
+              },
+              "resultText": "APPLIED · place_shape chunk document-stack 1580,380 280×100\nDELTA\n  + chunk  document-stack 1580,380 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_1e4YlCdeJrUvuHz1oUZHzbqQ|fc_085bdf02d98e4662016a692789d1d881999a85fbb2b6b1eca2",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2280,
+                  220
+                ],
+                "id": "embed-batch",
+                "type": "process"
+              },
+              "resultText": "APPLIED · place_shape embed-batch process 2280,220 280×100\nDELTA\n  + embed-batch  process 2280,220 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_6XcTiuMjk4soFx2AdJ9lGNwH|fc_085bdf02d98e4662016a692789d1e08199b2582b3bc0cd7f43",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2280,
+                  380
+                ],
+                "id": "retry-dlq",
+                "type": "decision"
+              },
+              "resultText": "APPLIED · place_shape retry-dlq decision 2280,380 280×100\nDELTA\n  + retry-dlq  decision 2280,380 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_vVNWt8M1zN7o0ZNQ7NsHXvWm|fc_085bdf02d98e4662016a692789d1e48199a19fd312a416a085",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  220
+                ],
+                "id": "vector-index",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape vector-index database 2980,220 120×120\nDELTA\n  + vector-index  database 2980,220 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_udoi67zMuarM4OsTV1kwOp7O|fc_085bdf02d98e4662016a692789d1ec8199acca0e25f9efa7e3",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  380
+                ],
+                "id": "fragment-store",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape fragment-store database 2980,380 120×120\nDELTA\n  + fragment-store  database 2980,380 120×120 \"\"\nLINTS · +1 −0\n  + W1 crowding: vector-index and fragment-store sit 40px apart stacked where wires and labels need ≥48px of corridor to route between them (open the vector-index↔fragment-store corridor to ≥48px)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_am79tbbZl4NlL70SBoJ9hnjf|fc_085bdf02d98e4662016a692789d1f0819999dafd40325aeea3",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  540
+                ],
+                "id": "keyword-index",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape keyword-index database 2980,540 120×120\nDELTA\n  + keyword-index  database 2980,540 120×120 \"\"\nLINTS · +1 −0\n  + W2 crowding: fragment-store and keyword-index sit 40px apart stacked where wires and labels need ≥48px of corridor to route between them (open the fragment-store↔keyword-index corridor to ≥48px)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_i66EuJZFkN3WgdYlLlEvoa1O|fc_085bdf02d98e4662016a692789d1f8819995c0522f637d53c8",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  3140,
+                  700
+                ],
+                "id": "publish-gate",
+                "type": "decision"
+              },
+              "resultText": "APPLIED · place_shape publish-gate decision 3140,700 280×100\nDELTA\n  + publish-gate  decision 3140,700 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_lsCZHweFfqWQ1761onXHYFN7|fc_085bdf02d98e4662016a692789d1fc81999fdaac8a096589e2",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  180,
+                  980
+                ],
+                "id": "question",
+                "type": "person"
+              },
+              "resultText": "APPLIED · place_shape question person 180,980 120×120\nDELTA\n  + question  person 180,980 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_6xuh9cRkx4WEHRIsz1YVn0AY|fc_085bdf02d98e4662016a692789d20081999e9bfe70bcfe50c5",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  180,
+                  1180
+                ],
+                "id": "rewrite",
+                "type": "process"
+              },
+              "resultText": "APPLIED · place_shape rewrite process 180,1180 280×100\nDELTA\n  + rewrite  process 180,1180 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_vM4GrU4xDuM9rF9g7bpCX4gv|fc_085bdf02d98e4662016a692789d20881999fe4b2de0a9b20ee",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  880,
+                  980
+                ],
+                "id": "vector-search",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape vector-search database 880,980 120×120\nDELTA\n  + vector-search  database 880,980 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_wnzlIdbIO4qhQSQ8UJ9hCEb5|fc_085bdf02d98e4662016a692789d20c81998e047bf304dd39ba",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  880,
+                  1160
+                ],
+                "id": "keyword-search",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape keyword-search database 880,1160 120×120\nDELTA\n  + keyword-search  database 880,1160 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_hJYD2bpA5rvl4h7Rm9aGO8yg|fc_085bdf02d98e4662016a692789d2108199b8ee5e9727cfcc10",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1080,
+                  1320
+                ],
+                "id": "fuse-rerank",
+                "type": "process"
+              },
+              "resultText": "APPLIED · place_shape fuse-rerank process 1080,1320 280×100\nDELTA\n  + fuse-rerank  process 1080,1320 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_IbolVFlbSAhjEH87r2ocYmIs|fc_085bdf02d98e4662016a692789d2148199911352845f1e8469",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1580,
+                  980
+                ],
+                "id": "permission-filter",
+                "type": "shield"
+              },
+              "resultText": "APPLIED · place_shape permission-filter shield 1580,980 120×120\nDELTA\n  + permission-filter  shield 1580,980 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_zWc8S5k8Endh3lY6VBg0Mzqo|fc_085bdf02d98e4662016a692789d21c81999d3102765da14f50",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1580,
+                  1160
+                ],
+                "id": "confidence",
+                "type": "decision"
+              },
+              "resultText": "APPLIED · place_shape confidence decision 1580,1160 280×100\nDELTA\n  + confidence  decision 1580,1160 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Y6ceX0kYY3QFollVwF5QBMYC|fc_085bdf02d98e4662016a692789d22481998f7f615cdbf727f0",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  1780,
+                  1320
+                ],
+                "id": "generate",
+                "type": "chat"
+              },
+              "resultText": "APPLIED · place_shape generate chat 1780,1320 120×120\nDELTA\n  + generate  chat 1780,1320 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_htcZuOHSm3IuX8c7YNgjnV4g|fc_085bdf02d98e4662016a692789d25881998e86d2c42c4f0346",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2280,
+                  980
+                ],
+                "id": "feedback-record",
+                "type": "activity"
+              },
+              "resultText": "APPLIED · place_shape feedback-record activity 2280,980 120×120\nDELTA\n  + feedback-record  activity 2280,980 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_LahkkBZVnsEzKIGUxruyBAgy|fc_085bdf02d98e4662016a692789d25c8199b255eccc5ecc265e",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2280,
+                  1180
+                ],
+                "id": "coverage-gaps",
+                "type": "document"
+              },
+              "resultText": "APPLIED · place_shape coverage-gaps document 2280,1180 280×100\nDELTA\n  + coverage-gaps  document 2280,1180 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_3Or8BZ6qTZ5GEpSCDRE08MQQ|fc_085bdf02d98e4662016a692789d2648199a6fbcfb5fd4d033d",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  1060
+                ],
+                "id": "rebuild-coord",
+                "type": "gear"
+              },
+              "resultText": "APPLIED · place_shape rebuild-coord gear 2980,1060 120×120\nDELTA\n  + rebuild-coord  gear 2980,1060 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_4rSq0fBiBYsMWIQiWVbUB9Cw|fc_085bdf02d98e4662016a692789d2ec81999edc584f120bc31b",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  1260
+                ],
+                "id": "new-generation",
+                "type": "database"
+              },
+              "resultText": "APPLIED · place_shape new-generation database 2980,1260 120×120\nDELTA\n  + new-generation  database 2980,1260 120×120 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_fEmDIw0GvpvctGGNCjZG1fKO|fc_085bdf02d98e4662016a692789d2f48199ac3cfe0e66ce7a36",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  1460
+                ],
+                "id": "consistent",
+                "type": "decision"
+              },
+              "resultText": "APPLIED · place_shape consistent decision 2980,1460 280×100\nDELTA\n  + consistent  decision 2980,1460 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_DzYsg0ciSjtgyAnNmBZWTv9v|fc_085bdf02d98e4662016a692789d2f88199888e229fe6a51574",
+              "toolName": "place_shape",
+              "params": {
+                "at": [
+                  2980,
+                  1660
+                ],
+                "id": "promote",
+                "type": "predefined-process"
+              },
+              "resultText": "APPLIED · place_shape promote predefined-process 2980,1660 280×100\nDELTA\n  + promote  predefined-process 2980,1660 280×100 \"\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-07-28T22:05:25.258Z",
+          "thinking": "**Designing labels and adjusting vertical spacing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jyjR8MAnpt4Q6mY0YljP6fCW|fc_085bdf02d98e4662016a6927a4e4588199a9e6612f61d343f3",
+              "toolName": "update_text",
+              "params": {
+                "id": "src-adapters",
+                "text": "Source adapters"
+              },
+              "resultText": "APPLIED · update_text src-adapters\nDELTA\n  src-adapters  text \"\" → \"Source adapters\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_mFpHm6AtaHGbuecEog0VK2Cy|fc_085bdf02d98e4662016a6927a4e470819996536b90d38ef944",
+              "toolName": "update_text",
+              "params": {
+                "id": "arrival",
+                "text": "Import / update + ACLs"
+              },
+              "resultText": "APPLIED · update_text arrival\nDELTA\n  arrival  text \"\" → \"Import / update + ACLs\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_gsxfmXD8GCRv3aMqfHq7gji4|fc_085bdf02d98e4662016a6927a4e4808199b48175b3bec546b9",
+              "toolName": "update_text",
+              "params": {
+                "id": "extract",
+                "text": "Extract + normalize"
+              },
+              "resultText": "APPLIED · update_text extract\nDELTA\n  extract  text \"\" → \"Extract + normalize\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_uUGOa8fFRnanO2xHLf08qxGK|fc_085bdf02d98e4662016a6927a4e48c8199b233471fe3f633d0",
+              "toolName": "update_text",
+              "params": {
+                "id": "hash-classify",
+                "text": "New, changed, unchanged?"
+              },
+              "resultText": "APPLIED · update_text hash-classify\nDELTA\n  hash-classify  text \"\" → \"New, changed, unchanged?\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_3GbF1QZNQVNTnGH5KsFlD4OP|fc_085bdf02d98e4662016a6927a4e49c8199b95b08a497dca70d",
+              "toolName": "update_text",
+              "params": {
+                "id": "version",
+                "text": "Supersede + delete stale"
+              },
+              "resultText": "APPLIED · update_text version\nDELTA\n  version  text \"\" → \"Supersede + delete stale\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_ZSBnOUCYbVb8ZAItphHPpVJT|fc_085bdf02d98e4662016a6927a4e4a88199bcf75a0437d2e438",
+              "toolName": "update_text",
+              "params": {
+                "id": "chunk",
+                "text": "Chunk + preserve metadata"
+              },
+              "resultText": "APPLIED · update_text chunk\nDELTA\n  chunk  text \"\" → \"Chunk + preserve metadata\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_itcgGd3G85am23sfFnqjXZg4|fc_085bdf02d98e4662016a6927a4e4b48199bfc273eab2840d04",
+              "toolName": "update_text",
+              "params": {
+                "id": "embed-batch",
+                "text": "Rate-limited embedding"
+              },
+              "resultText": "APPLIED · update_text embed-batch\nDELTA\n  embed-batch  text \"\" → \"Rate-limited embedding\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_FGpx91gcrkzCtXa7bqMBLc0B|fc_085bdf02d98e4662016a6927a4e4c08199b11ddf858242d86d",
+              "toolName": "update_text",
+              "params": {
+                "id": "retry-dlq",
+                "text": "Retry succeeds?"
+              },
+              "resultText": "APPLIED · update_text retry-dlq\nDELTA\n  retry-dlq  text \"\" → \"Retry succeeds?\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_O2hXywXzlmDj9WU3XjNmRHmE|fc_085bdf02d98e4662016a6927a4e4cc8199bb79813522eb46b1",
+              "toolName": "update_text",
+              "params": {
+                "id": "vector-index",
+                "text": "Vectors"
+              },
+              "resultText": "APPLIED · update_text vector-index\nDELTA\n  vector-index  text \"\" → Vectors\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_nSe570inSULunAmnF71oc6vg|fc_085bdf02d98e4662016a6927a4e4d8819998619898f5de8b54",
+              "toolName": "update_text",
+              "params": {
+                "id": "fragment-store",
+                "text": "Fragments"
+              },
+              "resultText": "APPLIED · update_text fragment-store\nDELTA\n  fragment-store  text \"\" → Fragments\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_vp8LuFwKJqmkzM99ppP9UVbk|fc_085bdf02d98e4662016a6927a4e4e48199a18b08a3384d34cb",
+              "toolName": "update_text",
+              "params": {
+                "id": "keyword-index",
+                "text": "Terms"
+              },
+              "resultText": "APPLIED · update_text keyword-index\nDELTA\n  keyword-index  text \"\" → Terms\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_pE7FhlZaQOdfqhTXFfKM8vge|fc_085bdf02d98e4662016a6927a4e4f48199825a4ac106664961",
+              "toolName": "update_text",
+              "params": {
+                "id": "publish-gate",
+                "text": "Same version in all 3?"
+              },
+              "resultText": "APPLIED · update_text publish-gate\nDELTA\n  publish-gate  text \"\" → \"Same version in all 3?\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_C5eX4k9U4BqQqraxFZUtpF2v|fc_085bdf02d98e4662016a6927a4e500819989aa4d43ffda291c",
+              "toolName": "update_text",
+              "params": {
+                "id": "question",
+                "text": "User question"
+              },
+              "resultText": "APPLIED · update_text question\nDELTA\n  question  text \"\" → \"User question\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_LbIWHmEdEF2g5wXYFe1GKdhR|fc_085bdf02d98e4662016a6927a4e50c8199b2f1a835277027ce",
+              "toolName": "update_text",
+              "params": {
+                "id": "rewrite",
+                "text": "Rewrite into searches"
+              },
+              "resultText": "APPLIED · update_text rewrite\nDELTA\n  rewrite  text \"\" → \"Rewrite into searches\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_buJ10ADHC2kvBBSimsb39UYa|fc_085bdf02d98e4662016a6927a4e5188199b4e6a5d8bec1cd36",
+              "toolName": "update_text",
+              "params": {
+                "id": "vector-search",
+                "text": "Vector lookup"
+              },
+              "resultText": "APPLIED · update_text vector-search\nDELTA\n  vector-search  text \"\" → \"Vector lookup\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_LJwmi1clnU5MokovAD84oJml|fc_085bdf02d98e4662016a6927a4e5288199846d545d7522c8ca",
+              "toolName": "update_text",
+              "params": {
+                "id": "keyword-search",
+                "text": "Keyword lookup"
+              },
+              "resultText": "APPLIED · update_text keyword-search\nDELTA\n  keyword-search  text \"\" → \"Keyword lookup\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_tHW5Zgbt9Kx7vPjID2aayY9y|fc_085bdf02d98e4662016a6927a4e53481999a5a3de73c0000ed",
+              "toolName": "update_text",
+              "params": {
+                "id": "fuse-rerank",
+                "text": "Fuse + rerank"
+              },
+              "resultText": "APPLIED · update_text fuse-rerank\nDELTA\n  fuse-rerank  text \"\" → \"Fuse + rerank\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_cZaFAg2rSnGNwsFbSKILhRAa|fc_085bdf02d98e4662016a6927a4e540819982ddf5a8fe8d2f0f",
+              "toolName": "update_text",
+              "params": {
+                "id": "permission-filter",
+                "text": "Apply user ACLs"
+              },
+              "resultText": "APPLIED · update_text permission-filter\nDELTA\n  permission-filter  text \"\" → \"Apply user ACLs\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_RJPx4Dg49NolZwvO9cBc0t5x|fc_085bdf02d98e4662016a6927a4e54c81999fbde248adb5b1f8",
+              "toolName": "update_text",
+              "params": {
+                "id": "confidence",
+                "text": "Enough evidence?"
+              },
+              "resultText": "APPLIED · update_text confidence\nDELTA\n  confidence  text \"\" → \"Enough evidence?\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Q1QHDSOXvXKMOiOTJUH3dW1R|fc_085bdf02d98e4662016a6927a4e55c819989b1d479b9f06384",
+              "toolName": "update_text",
+              "params": {
+                "id": "generate",
+                "text": "Grounded answer + citations"
+              },
+              "resultText": "APPLIED · update_text generate\nDELTA\n  generate  text \"\" → \"Grounded answer + citations\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_6NppkCkOmG2a5rva8AR75kmo|fc_085bdf02d98e4662016a6927a4e5688199851e74f4f7f11f48",
+              "toolName": "update_text",
+              "params": {
+                "id": "feedback-record",
+                "text": "Thumbs + citation utility"
+              },
+              "resultText": "APPLIED · update_text feedback-record\nDELTA\n  feedback-record  text \"\" → \"Thumbs + citation utility\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Ng2YPlfuD9fJqYMNQY6fD5Lk|fc_085bdf02d98e4662016a6927a4e5748199a0b4de88f6c10fc4",
+              "toolName": "update_text",
+              "params": {
+                "id": "coverage-gaps",
+                "text": "Coverage gaps + unanswered"
+              },
+              "resultText": "APPLIED · update_text coverage-gaps\nDELTA\n  coverage-gaps  text \"\" → \"Coverage gaps + unanswered\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_uC8j02hwPhXU5lxwXbND69Vt|fc_085bdf02d98e4662016a6927a4e5848199b8e1ed82db6e3d02",
+              "toolName": "update_text",
+              "params": {
+                "id": "rebuild-coord",
+                "text": "Rebuild coordinator"
+              },
+              "resultText": "APPLIED · update_text rebuild-coord\nDELTA\n  rebuild-coord  text \"\" → \"Rebuild coordinator\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_4utLJMmm4Z7mMwkLMCkPKLAi|fc_085bdf02d98e4662016a6927a4e5908199a978c15f63029ddc",
+              "toolName": "update_text",
+              "params": {
+                "id": "new-generation",
+                "text": "New index generation"
+              },
+              "resultText": "APPLIED · update_text new-generation\nDELTA\n  new-generation  text \"\" → \"New index generation\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_MF5QiLRhvcCaG5T3yBhMp5Th|fc_085bdf02d98e4662016a6927a4e59c8199a487bfe9f1832e65",
+              "toolName": "update_text",
+              "params": {
+                "id": "consistent",
+                "text": "Rebuild complete + consistent?"
+              },
+              "resultText": "APPLIED · update_text consistent\nDELTA\n  consistent  text \"\" → \"Rebuild complete + consistent?\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_hjJOSkWyoHpqMf2rAG6oCLqc|fc_085bdf02d98e4662016a6927a4e5b88199bcfd86aed192e397",
+              "toolName": "update_text",
+              "params": {
+                "id": "promote",
+                "text": "Atomic promote / rollback"
+              },
+              "resultText": "APPLIED · update_text promote\nDELTA\n  promote  text \"\" → \"Atomic promote / rollback\"\nLINTS · +0 −0 (2 open)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_aFWUus3H746TTXoGX7g7dGl8|fc_085bdf02d98e4662016a6927a4e5c881999ff965e26536d517",
+              "toolName": "space_out",
+              "params": {
+                "axis": "vertical",
+                "gap": 60,
+                "ids": [
+                  "vector-index",
+                  "fragment-store",
+                  "keyword-index"
+                ]
+              },
+              "resultText": "APPLIED · space_out vertical gap 60 · vector-index y=220, fragment-store y=400, keyword-index y=580\nDELTA\n  fragment-store  2980,380 → 2980,400\n  keyword-index  2980,540 → 2980,580\nLINTS · +0 −2\n  − W1 crowding, − W2 crowding  (resolved)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_yeoNdrtKVMFD7vXIH7frWFtu|fc_085bdf02d98e4662016a6927a4e5d481999a3b41c1b14e3b41",
+              "toolName": "change_color",
+              "params": {
+                "color": "blue",
+                "id": "sources"
+              },
+              "resultText": "APPLIED · change_color sources\nDELTA\n  sources  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_HVbhSwTLbYc4DnGbBNC72XVT|fc_085bdf02d98e4662016a6927a4e5e08199a5951244b0d41c37",
+              "toolName": "change_color",
+              "params": {
+                "color": "blue",
+                "id": "normalize"
+              },
+              "resultText": "APPLIED · change_color normalize\nDELTA\n  normalize  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_6wCn7TAGZKrDzRS2EwU8fSiH|fc_085bdf02d98e4662016a6927a4e5ec8199900625d022e62fab",
+              "toolName": "change_color",
+              "params": {
+                "color": "teal",
+                "id": "prepare"
+              },
+              "resultText": "APPLIED · change_color prepare\nDELTA\n  prepare  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_wr6GDCPACEFdMyhn3iWkXr1n|fc_085bdf02d98e4662016a6927a4e5fc8199b93ae59ccdc18871",
+              "toolName": "change_color",
+              "params": {
+                "color": "teal",
+                "id": "embed"
+              },
+              "resultText": "APPLIED · change_color embed\nDELTA\n  embed  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_d1SYwaQJHLQ4v3q9ByqrJMnw|fc_085bdf02d98e4662016a6927a4e6088199afa1eac897a15f88",
+              "toolName": "change_color",
+              "params": {
+                "color": "green",
+                "id": "publish"
+              },
+              "resultText": "APPLIED · change_color publish\nDELTA\n  publish  color gray → green\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_9tZmYgtmlQX1soKp0X5eO8RD|fc_085bdf02d98e4662016a6927a4e6148199b865293ce1554265",
+              "toolName": "change_color",
+              "params": {
+                "color": "violet",
+                "id": "query"
+              },
+              "resultText": "APPLIED · change_color query\nDELTA\n  query  color gray → violet\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_DgBoV79nfrHWUxULFlZfshgf|fc_085bdf02d98e4662016a6927a4e61c8199bba45553d45460ba",
+              "toolName": "change_color",
+              "params": {
+                "color": "violet",
+                "id": "retrieve"
+              },
+              "resultText": "APPLIED · change_color retrieve\nDELTA\n  retrieve  color gray → violet\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_E3i1MVRwCEjokTlmux43nev4|fc_085bdf02d98e4662016a6927a4e6288199b93bbd340745fe21",
+              "toolName": "change_color",
+              "params": {
+                "color": "green",
+                "id": "ground"
+              },
+              "resultText": "APPLIED · change_color ground\nDELTA\n  ground  color gray → green\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_y26OTtba4Al6VZXG4P6W9V3V|fc_085bdf02d98e4662016a6927a4e63481999d8b1462da17dbda",
+              "toolName": "change_color",
+              "params": {
+                "color": "orange",
+                "id": "feedback"
+              },
+              "resultText": "APPLIED · change_color feedback\nDELTA\n  feedback  color gray → orange\nLINTS · clean",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Nh7yt7v1BFnG1CjqrqRJL2FZ|fc_085bdf02d98e4662016a6927a4e6408199b5e75e9f5ab083cc",
+              "toolName": "change_color",
+              "params": {
+                "color": "blue",
+                "id": "rebuild"
+              },
+              "resultText": "APPLIED · change_color rebuild\nDELTA\n  rebuild  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-07-28T22:06:12.348Z",
+          "thinking": "**Planning node additions and layout**\n\n**Implementing labeled branch anchors**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CU9Z8r4RNoceh5k68RRqkO1u|fc_085bdf02d98e4662016a6927d3fcb48199a07b1e946fee768d",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "src-adapters"
+                },
+                "id": "e-src-arrival",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "arrival"
+                }
+              },
+              "resultText": "APPLIED · connect e-src-arrival src-adapters→arrival\nDELTA\n  + e-src-arrival  src-adapters → arrival\nLINTS · clean\nROUTES\n  e-src-arrival  anchors bottom→top  path src-adapters (s0 v x=320) (s1 v x=320) (s2 v x=320) arrival  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_cAwuaXM9DOZ82hfRubdkI8dd|fc_085bdf02d98e4662016a6927d3fcc081999e15c5da1bb1e603",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "arrival"
+                },
+                "id": "e-arrival-extract",
+                "label": "scheduled / changed",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "extract"
+                }
+              },
+              "resultText": "APPLIED · connect e-arrival-extract arrival→extract\nDELTA\n  + e-arrival-extract  arrival → extract\nLINTS · clean\nROUTES\n  e-arrival-extract  anchors right→left  path arrival ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=670) ─(s3 h y=270)→ ─(s4 h y=270)→ extract  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_UufOSvmpZE3HcixIU56NbZ4R|fc_085bdf02d98e4662016a6927d3fcc881999fa99e0f880b17dc",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "extract"
+                },
+                "id": "e-extract-hash",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "hash-classify"
+                }
+              },
+              "resultText": "APPLIED · connect e-extract-hash extract→hash-classify\nDELTA\n  + e-extract-hash  extract → hash-classify\nLINTS · clean\nROUTES\n  e-extract-hash  anchors bottom→top  path extract (s0 v x=1020) (s1 v x=1020) (s2 v x=1020) hash-classify  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_BsrAKeGnFu5gcBScMlxx6BUd|fc_085bdf02d98e4662016a6927d3fccc8199852aa5fcead7e6c2",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "hash-classify"
+                },
+                "id": "e-hash-version",
+                "label": "new / changed",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "version"
+                }
+              },
+              "resultText": "APPLIED · connect e-hash-version hash-classify→version\nDELTA\n  + e-hash-version  hash-classify → version\nLINTS · clean\nROUTES\n  e-hash-version  anchors right→left  path hash-classify ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=1370) ─(s3 h y=270)→ ─(s4 h y=270)→ version  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_VhXqqV3er5RUuuf5MaJU7vFt|fc_085bdf02d98e4662016a6927d3fcd08199bab27b6997afdef2",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "version"
+                },
+                "id": "e-version-chunk",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "chunk"
+                }
+              },
+              "resultText": "APPLIED · connect e-version-chunk version→chunk\nDELTA\n  + e-version-chunk  version → chunk\nLINTS · clean\nROUTES\n  e-version-chunk  anchors bottom→top  path version (s0 v x=1720) chunk  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_mQiNPj0fAteq9nMrQwUE0kRr|fc_085bdf02d98e4662016a6927d3fcd88199bf47853df0f6fb30",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "chunk"
+                },
+                "id": "e-chunk-embed",
+                "label": "versioned fragments + ACLs",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "embed-batch"
+                }
+              },
+              "resultText": "APPLIED · connect e-chunk-embed chunk→embed-batch\nDELTA\n  + e-chunk-embed  chunk → embed-batch\nLINTS · clean\nROUTES\n  e-chunk-embed  anchors right→left  path chunk ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=2070) ─(s3 h y=270)→ ─(s4 h y=270)→ embed-batch  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_8MRk3Pyi75oAgHcWtMNL3nvn|fc_085bdf02d98e4662016a6927d3fcdc819995232871321f7b0c",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "embed-batch"
+                },
+                "id": "e-embed-retry",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "retry-dlq"
+                }
+              },
+              "resultText": "APPLIED · connect e-embed-retry embed-batch→retry-dlq\nDELTA\n  + e-embed-retry  embed-batch → retry-dlq\nLINTS · clean\nROUTES\n  e-embed-retry  anchors bottom→top  path embed-batch (s0 v x=2420) (s1 v x=2420) (s2 v x=2420) retry-dlq  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_HXlY3IAiAWhgE2ZS0KWXHnoa|fc_085bdf02d98e4662016a6927d3fce08199825f96cbb1b2734c",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "retry-dlq"
+                },
+                "id": "e-retry-vector",
+                "label": "success",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "vector-index"
+                }
+              },
+              "resultText": "APPLIED · connect e-retry-vector retry-dlq→vector-index\nDELTA\n  + e-retry-vector  retry-dlq → vector-index\nLINTS · clean\nROUTES\n  e-retry-vector  anchors right→left  path retry-dlq ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=2770) ─(s3 h y=280)→ ─(s4 h y=280)→ vector-index  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_8BPuuGVk4CerzaQloRVkgv5Y|fc_085bdf02d98e4662016a6927d3fce481999a0498d999d08185",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "retry-dlq"
+                },
+                "id": "e-retry-fragment",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "fragment-store"
+                }
+              },
+              "resultText": "APPLIED · connect e-retry-fragment retry-dlq→fragment-store\nDELTA\n  + e-retry-fragment  retry-dlq → fragment-store\nLINTS · clean\nROUTES\n  e-retry-fragment  anchors right→left  path retry-dlq ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=2770) ─(s3 h y=460)→ ─(s4 h y=460)→ fragment-store  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_wM5IeYlbTi8ocCsKwHKjRBUO|fc_085bdf02d98e4662016a6927d3fce881998e3c6f551fe5694e",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "retry-dlq"
+                },
+                "id": "e-retry-keyword",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "keyword-index"
+                }
+              },
+              "resultText": "APPLIED · connect e-retry-keyword retry-dlq→keyword-index\nDELTA\n  + e-retry-keyword  retry-dlq → keyword-index\nLINTS · clean\nROUTES\n  e-retry-keyword  anchors right→left  path retry-dlq ─(s0 h y=430)→ ─(s1 h y=430)→ (s2 v x=2770) ─(s3 h y=640)→ ─(s4 h y=640)→ keyword-index  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_1BCu2F85nxZBb4098hG7OXNq|fc_085bdf02d98e4662016a6927d3fcec8199b493293b5d8c08f4",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "vector-index"
+                },
+                "id": "e-vector-gate",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "publish-gate"
+                }
+              },
+              "resultText": "APPLIED · connect e-vector-gate vector-index→publish-gate\nDELTA\n  + e-vector-gate  vector-index → publish-gate\nLINTS · clean\nROUTES\n  e-vector-gate  anchors right→left  path vector-index ─(s0 h y=280)→ ─(s1 h y=280)→ (s2 v x=3120) ─(s3 h y=750)→ ─(s4 h y=750)→ publish-gate  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_oYepjJVMvWV5x7E8L1BNpxE5|fc_085bdf02d98e4662016a6927d3fcf081999f555e39a692c10c",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "fragment-store"
+                },
+                "id": "e-fragment-gate",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "publish-gate"
+                }
+              },
+              "resultText": "APPLIED · connect e-fragment-gate fragment-store→publish-gate\nDELTA\n  + e-fragment-gate  fragment-store → publish-gate\nLINTS · clean\nROUTES\n  e-fragment-gate  anchors right→left  path fragment-store ─(s0 h y=460)→ ─(s1 h y=460)→ (s2 v x=3120) ─(s3 h y=750)→ ─(s4 h y=750)→ publish-gate  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_9lETIfjUteSE1UKGMF3DF6If|fc_085bdf02d98e4662016a6927d3fcf88199b2fc783f55d0811a",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "keyword-index"
+                },
+                "id": "e-keyword-gate",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "publish-gate"
+                }
+              },
+              "resultText": "APPLIED · connect e-keyword-gate keyword-index→publish-gate\nDELTA\n  + e-keyword-gate  keyword-index → publish-gate\nLINTS · clean\nROUTES\n  e-keyword-gate  anchors right→left  path keyword-index ─(s0 h y=640)→ ─(s1 h y=640)→ (s2 v x=3120) ─(s3 h y=750)→ ─(s4 h y=750)→ publish-gate  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_oqomtgviuYBov85lmNugUDaR|fc_085bdf02d98e4662016a6927d3fcfc819991ea8a80c3d503d7",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "question"
+                },
+                "id": "e-question-rewrite",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "rewrite"
+                }
+              },
+              "resultText": "APPLIED · connect e-question-rewrite question→rewrite\nDELTA\n  + e-question-rewrite  question → rewrite\nLINTS · clean\nROUTES\n  e-question-rewrite  anchors bottom→top  path question (s0 v x=240) (s1 v x=240) ─(s2 h y=1152)→ (s3 v x=320) (s4 v x=320) rewrite  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_GWFzKDd64Yn5xvH0ePK4Amf0|fc_085bdf02d98e4662016a6927d3fd2c819987009fac63310bd3",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "rewrite"
+                },
+                "id": "e-rewrite-vector",
+                "label": "parallel",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "vector-search"
+                }
+              },
+              "resultText": "APPLIED · connect e-rewrite-vector rewrite→vector-search\nDELTA\n  + e-rewrite-vector  rewrite → vector-search\nLINTS · clean\nROUTES\n  e-rewrite-vector  anchors right→left  path rewrite ─(s0 h y=1230)→ ─(s1 h y=1230)→ (s2 v x=670) ─(s3 h y=1040)→ ─(s4 h y=1040)→ vector-search  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_t6CLCoEQYx1cJZNZA4quiIXf|fc_085bdf02d98e4662016a6927d3fd308199875508a50e0f3ff2",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "rewrite"
+                },
+                "id": "e-rewrite-keyword",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "keyword-search"
+                }
+              },
+              "resultText": "APPLIED · connect e-rewrite-keyword rewrite→keyword-search\nDELTA\n  + e-rewrite-keyword  rewrite → keyword-search\nLINTS · clean\nROUTES\n  e-rewrite-keyword  anchors right→left  path rewrite ─(s0 h y=1230)→ ─(s1 h y=1230)→ (s2 v x=670) ─(s3 h y=1220)→ ─(s4 h y=1220)→ keyword-search  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_MMMKELfqxSYw76oireltRsou|fc_085bdf02d98e4662016a6927d3fd388199b79349b40bb5aa9f",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "vector-search"
+                },
+                "id": "e-vsearch-fuse",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "fuse-rerank"
+                }
+              },
+              "resultText": "APPLIED · connect e-vsearch-fuse vector-search→fuse-rerank\nDELTA\n  + e-vsearch-fuse  vector-search → fuse-rerank\nLINTS · clean\nROUTES\n  e-vsearch-fuse  anchors right→left  path vector-search ─(s0 h y=1040)→ ─(s1 h y=1040)→ (s2 v x=1040) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse-rerank  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_p9MEMTo7bKt676xDDJlHpX5j|fc_085bdf02d98e4662016a6927d3fd3c8199b1c4020018f0460d",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "keyword-search"
+                },
+                "id": "e-ksearch-fuse",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "fuse-rerank"
+                }
+              },
+              "resultText": "APPLIED · connect e-ksearch-fuse keyword-search→fuse-rerank\nDELTA\n  + e-ksearch-fuse  keyword-search → fuse-rerank\nLINTS · clean\nROUTES\n  e-ksearch-fuse  anchors right→left  path keyword-search ─(s0 h y=1220)→ ─(s1 h y=1220)→ (s2 v x=1040) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse-rerank  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_egarkLelhjakKlhMcj0KtU9h|fc_085bdf02d98e4662016a6927d3fd408199a9d457810110d4ff",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "fuse-rerank"
+                },
+                "id": "e-fuse-acl",
+                "label": "ranked candidates",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "permission-filter"
+                }
+              },
+              "resultText": "APPLIED · connect e-fuse-acl fuse-rerank→permission-filter\nDELTA\n  + e-fuse-acl  fuse-rerank → permission-filter\nLINTS · clean\nROUTES\n  e-fuse-acl  anchors right→left  path fuse-rerank ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=1470) ─(s3 h y=1040)→ ─(s4 h y=1040)→ permission-filter  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_fqvxGv361YCH0YshZnyEdmLq|fc_085bdf02d98e4662016a6927d3fd448199a69371f6023d3e97",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "permission-filter"
+                },
+                "id": "e-acl-confidence",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "confidence"
+                }
+              },
+              "resultText": "APPLIED · connect e-acl-confidence permission-filter→confidence\nDELTA\n  + e-acl-confidence  permission-filter → confidence\nLINTS · clean\nROUTES\n  e-acl-confidence  anchors bottom→top  path permission-filter (s0 v x=1640) (s1 v x=1640) ─(s2 h y=1142)→ (s3 v x=1720) (s4 v x=1720) confidence  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_kVjM6YCBuRFKxu4aAVa3QqgC|fc_085bdf02d98e4662016a6927d3fd488199b606fb5df93f0722",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "confidence"
+                },
+                "id": "e-confidence-generate",
+                "label": "enough",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "generate"
+                }
+              },
+              "resultText": "APPLIED · connect e-confidence-generate confidence→generate\nDELTA\n  + e-confidence-generate  confidence → generate\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"enough\" chip on e-confidence-generate (82×30px) bleeds onto confidence: 60px of corridor where the chip needs 62px (open the confidence↔generate corridor to ≥62px so the chip and its 16px margins fit)\nROUTES\n  e-confidence-generate  anchors right→top  path confidence ─(s0 h y=1210)→ ─(s1 h y=1210)→ (s2 v x=1840) (s3 v x=1840) generate  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_25S1w8kmecBsXV5Sws5NmBHE|fc_085bdf02d98e4662016a6927d3fd5081998f96b17fdbca0cce",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "right",
+                  "objectId": "generate"
+                },
+                "id": "e-generate-feedback",
+                "label": "answer + citations",
+                "to": {
+                  "anchor": "left",
+                  "objectId": "feedback-record"
+                }
+              },
+              "resultText": "APPLIED · connect e-generate-feedback generate→feedback-record\nDELTA\n  + e-generate-feedback  generate → feedback-record\nLINTS · +1 −0\n  + W1 broken-edges: connector e-generate-feedback hugs the right border of ground for 340px (route e-generate-feedback clear of ground's frame so it reads as a wire, not a border)\nROUTES\n  e-generate-feedback  anchors right→left  path generate ─(s0 h y=1380)→ ─(s1 h y=1380)→ (s2 v x=2090) ─(s3 h y=1040)→ ─(s4 h y=1040)→ feedback-record  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_wgvOHOqe2vuC9Axxoj2LdGPE|fc_085bdf02d98e4662016a6927d3fd5881999239f5b1d950561f",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "feedback-record"
+                },
+                "id": "e-feedback-gaps",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "coverage-gaps"
+                }
+              },
+              "resultText": "APPLIED · connect e-feedback-gaps feedback-record→coverage-gaps\nDELTA\n  + e-feedback-gaps  feedback-record → coverage-gaps\nLINTS · +0 −0 (2 open)\nROUTES\n  e-feedback-gaps  anchors bottom→top  path feedback-record (s0 v x=2340) (s1 v x=2340) ─(s2 h y=1161)→ (s3 v x=2420) (s4 v x=2420) coverage-gaps  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Njjjkn23QezXyPy60ZXlNx0i|fc_085bdf02d98e4662016a6927d3fd5c8199b12e24efd09eeb69",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "top",
+                  "objectId": "coverage-gaps"
+                },
+                "id": "e-gaps-source",
+                "label": "prioritize gaps",
+                "style": "dashed",
+                "to": {
+                  "anchor": "bottom",
+                  "objectId": "src-adapters"
+                }
+              },
+              "resultText": "APPLIED · connect e-gaps-source coverage-gaps→src-adapters\nDELTA\n  + e-gaps-source  coverage-gaps → src-adapters\nLINTS · +0 −0 (2 open)\nROUTES\n  e-gaps-source  anchors top→bottom  path coverage-gaps (s0 v x=2420) ─(s1 h y=750)→ (s2 v x=480) ─(s3 h y=340)→ (s4 v x=320) src-adapters  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_27Y8RsVgBYTN7Lr6HG19JGZp|fc_085bdf02d98e4662016a6927d3fd6481999c3e15413ea7f147",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "rebuild-coord"
+                },
+                "id": "e-rebuild-new",
+                "label": "background re-embed",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "new-generation"
+                }
+              },
+              "resultText": "APPLIED · connect e-rebuild-new rebuild-coord→new-generation\nDELTA\n  + e-rebuild-new  rebuild-coord → new-generation\nLINTS · +1 −0\n  + W3 unreadable-labels: label \"background re-embed\" chip on e-rebuild-new (206×30px) bleeds onto new-generation: 80px of corridor where the chip needs 62px (open the rebuild-coord↔new-generation corridor to ≥62px so the chip and its 16px margins fit)\nROUTES\n  e-rebuild-new  anchors bottom→top  path rebuild-coord (s0 v x=3040) new-generation  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_N1EHbIAUktX5Bd0AKfKraMkM|fc_085bdf02d98e4662016a6927d3fd6c8199aa05195b7d7cd9ab",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "new-generation"
+                },
+                "id": "e-new-consistent",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "consistent"
+                }
+              },
+              "resultText": "APPLIED · connect e-new-consistent new-generation→consistent\nDELTA\n  + e-new-consistent  new-generation → consistent\nLINTS · +0 −0 (3 open)\nROUTES\n  e-new-consistent  anchors bottom→top  path new-generation (s0 v x=3040) (s1 v x=3040) ─(s2 h y=1432)→ (s3 v x=3120) (s4 v x=3120) consistent  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_Irgc7DTen70R2CFUGoF19Ybs|fc_085bdf02d98e4662016a6927d3fd708199b3f61e8664aa582b",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "bottom",
+                  "objectId": "consistent"
+                },
+                "id": "e-consistent-promote",
+                "label": "complete",
+                "to": {
+                  "anchor": "top",
+                  "objectId": "promote"
+                }
+              },
+              "resultText": "APPLIED · connect e-consistent-promote consistent→promote\nDELTA\n  + e-consistent-promote  consistent → promote\nLINTS · +0 −0 (3 open)\nROUTES\n  e-consistent-promote  anchors bottom→top  path consistent (s0 v x=3120) (s1 v x=3120) (s2 v x=3120) promote  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_rM5VGSbHm7H9i6uHVQe70N29|fc_085bdf02d98e4662016a6927d3fd748199b7817c5da32554e5",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "left",
+                  "objectId": "publish-gate"
+                },
+                "id": "e-publish-query",
+                "label": "current generation",
+                "to": {
+                  "anchor": "right",
+                  "objectId": "vector-search"
+                }
+              },
+              "resultText": "APPLIED · connect e-publish-query publish-gate→vector-search\nDELTA\n  + e-publish-query  publish-gate → vector-search\nLINTS · +3 −0\n  + E1 covered-content: label \"prioritize gaps\" chip on e-gaps-source lies on e-publish-query's path for 168px (move the label with a waypoint or reroute e-publish-query so the chip owns its wire)\n  + E2 covered-content: label \"current generation\" chip on e-publish-query lies on e-gaps-source's path for 197px (move the label with a waypoint or reroute e-gaps-source so the chip owns its wire)\n  + W1 broken-edges: e-gaps-source and e-publish-query run co-linear for 1420px (0px apart) (offset one route so the two wires read separately)\nROUTES\n  e-publish-query  anchors left→right  path publish-gate ─(s0 h y=750)→ (s1 v x=1000) vector-search  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_J3qaA31ZH5NdIPpgoYfkAQ5C|fc_085bdf02d98e4662016a6927d3fd788199acc484bf1b1cf261",
+              "toolName": "connect",
+              "params": {
+                "arrow": "forward",
+                "from": {
+                  "anchor": "top",
+                  "objectId": "promote"
+                },
+                "id": "e-promote-publish",
+                "label": "atomic switch / rollback",
+                "to": {
+                  "anchor": "bottom",
+                  "objectId": "publish-gate"
+                }
+              },
+              "resultText": "APPLIED · connect e-promote-publish promote→publish-gate\nDELTA\n  + e-promote-publish  promote → publish-gate\nLINTS · +1 −0\n  + E2 covered-content: label \"complete\" chip on e-consistent-promote lies on e-promote-publish's path for 30px (move the label with a waypoint or reroute e-promote-publish so the chip owns its wire)\nROUTES\n  e-promote-publish  anchors top→bottom  path promote (s0 v x=3120) ─(s1 h y=1580)→ (s2 v x=3280) publish-gate  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-07-28T22:06:35.599Z",
+          "thinking": "**Fixing label positioning and rerouting paths**\n\n**Refining e-promote-publish reroute coordinates**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BB2fB2gqz9Y2cWYGiATWegxU|fc_085bdf02d98e4662016a6927eb4b448199ab6acfe8bacb2091",
+              "toolName": "move_label",
+              "params": {
+                "along": 0.75,
+                "id": "e-confidence-generate",
+                "offset": 40
+              },
+              "resultText": "APPLIED · move_label e-confidence-generate → along 0.75, offset 40\nDELTA\n  e-confidence-generate  labelPosition — → {\"along\":0.75,\"offset\":40}\nLINTS · +0 −0 (7 open)\nROUTES\n  e-confidence-generate  anchors right→top  path confidence ─(s0 h y=1210)→ ─(s1 h y=1210)→ (s2 v x=1840) (s3 v x=1840) generate  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_UQFq16nKX0sxcpbWKWzCiHVa|fc_085bdf02d98e4662016a6927eb4c5481998e2a988b5376f09e",
+              "toolName": "move_label",
+              "params": {
+                "along": 0.35,
+                "id": "e-rebuild-new",
+                "offset": 80
+              },
+              "resultText": "APPLIED · move_label e-rebuild-new → along 0.35, offset 80\nDELTA\n  e-rebuild-new  labelPosition — → {\"along\":0.35,\"offset\":80}\nLINTS · +0 −1\n  − W4 unreadable-labels  (resolved)\nROUTES\n  e-rebuild-new  anchors bottom→top  path rebuild-coord (s0 v x=3040) new-generation  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_ojaL2lpkt7S78dJwAPdUbcyB|fc_085bdf02d98e4662016a6927eb4c5c81999c993e6084616bf7",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "e-generate-feedback",
+                "segment": 2,
+                "to": 2140
+              },
+              "resultText": "APPLIED · shift_segment e-generate-feedback\nDELTA\n  e-generate-feedback  wp none → 2140,1380→2140,1040\nLINTS · +0 −1\n  − W2 broken-edges  (resolved)\nROUTES\n  e-generate-feedback  anchors right→left  path generate ─(s0 h y=1380)→ (s1 v x=2140) ─(s2 h y=1040)→ feedback-record  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_TsSsD6FkO9rAKLpCFEDq741l|fc_085bdf02d98e4662016a6927eb4c648199880cb740bc70e488",
+              "toolName": "reroute",
+              "params": {
+                "id": "e-publish-query",
+                "points": [
+                  [
+                    2880,
+                    750
+                  ],
+                  [
+                    2880,
+                    840
+                  ],
+                  [
+                    1000,
+                    840
+                  ],
+                  [
+                    1000,
+                    1040
+                  ]
+                ]
+              },
+              "resultText": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches publish-gate at 3140,750 and vector-search at 1000,1040, so the first corner must share an x or a y with 3140,750 and the last with 1000,1040.",
+              "isError": true,
+              "images": []
+            },
+            {
+              "toolUseId": "call_nNwaw2zRrucw6R5zqQSn4Onq|fc_085bdf02d98e4662016a6927eb4c6c8199b436ef41099eae35",
+              "toolName": "reroute",
+              "params": {
+                "id": "e-promote-publish",
+                "points": [
+                  [
+                    3120,
+                    1600
+                  ],
+                  [
+                    3360,
+                    1600
+                  ],
+                  [
+                    3360,
+                    800
+                  ],
+                  [
+                    3280,
+                    800
+                  ]
+                ]
+              },
+              "resultText": "APPLIED · reroute e-promote-publish\nDELTA\n  e-promote-publish  wp none → 3120,1600→3360,1600→3360,800→3280,800\nLINTS · +1 −1\n  + E2 covered-content: label \"complete\" chip on e-consistent-promote lies on e-promote-publish's path for 75px (move the label with a waypoint or reroute e-promote-publish so the chip owns its wire)\n  − E2 covered-content  (resolved)\nROUTES\n  e-promote-publish  anchors top→bottom  path promote (s0 v x=3120) ─(s1 h y=1600)→ (s2 v x=3360) ─(s3 h y=800)→ publish-gate  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-07-28T22:06:43.571Z",
+          "thinking": "**Adjusting point shares and label offset**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_oMhtqKeGalPmiNGXaf1aV6Hf|fc_085bdf02d98e4662016a6927f3494c8199999c252a3f12aa4b",
+              "toolName": "reroute",
+              "params": {
+                "id": "e-publish-query",
+                "points": [
+                  [
+                    3140,
+                    840
+                  ],
+                  [
+                    1000,
+                    840
+                  ],
+                  [
+                    1000,
+                    1040
+                  ]
+                ]
+              },
+              "resultText": "APPLIED · reroute e-publish-query\nDELTA\n  e-publish-query  wp none → 3140,840→1000,840→1000,1040\nLINTS · +1 −3\n  + W1 broken-edges: connector e-publish-query hugs the bottom border of publish for 220px (route e-publish-query clear of publish's frame so it reads as a wire, not a border)\n  − E1 covered-content, − E3 covered-content, − W1 broken-edges  (resolved)\nROUTES\n  e-publish-query  anchors left→right  path publish-gate (s0 v x=3140) ─(s1 h y=840)→ (s2 v x=1000) vector-search  through none",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_a8n8wtqWOSX59gtvd82mOpeQ|fc_085bdf02d98e4662016a6927f3495c8199a6eba09278acb84d",
+              "toolName": "move_label",
+              "params": {
+                "along": 0.25,
+                "id": "e-consistent-promote",
+                "offset": 80
+              },
+              "resultText": "APPLIED · move_label e-consistent-promote → along 0.25, offset 80\nDELTA\n  e-consistent-promote  labelPosition — → {\"along\":0.25,\"offset\":80}\nLINTS · +2 −1\n  + E1 covered-content: label \"complete\" chip on e-consistent-promote lies on e-promote-publish's path for 101px (move the label with a waypoint or reroute e-promote-publish so the chip owns its wire)\n  + W3 unreadable-labels: label \"complete\" chip on e-consistent-promote (101×30px) bleeds onto consistent: 100px of corridor where the chip needs 62px (open the consistent↔promote corridor to ≥62px so the chip and its 16px margins fit)\n  − E1 covered-content  (resolved)\nROUTES\n  e-consistent-promote  anchors bottom→top  path consistent (s0 v x=3120) (s1 v x=3120) (s2 v x=3120) promote  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-07-28T22:06:49.779Z",
+          "thinking": "**Deciding on label clearing and routing updates**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SVHSKqEn5qgaXp5S9fRpvhZt|fc_085bdf02d98e4662016a6927f98038819982634cf4a300d18f",
+              "toolName": "update_text",
+              "params": {
+                "id": "e-consistent-promote",
+                "text": ""
+              },
+              "resultText": "APPLIED · update_text e-consistent-promote\nDELTA\n  e-consistent-promote  label complete → —\nLINTS · +0 −2\n  − E1 covered-content, − W3 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_5noR4pwXM163ZliWx3yyh130|fc_085bdf02d98e4662016a6927f9804c81998364b41c67718963",
+              "toolName": "reroute",
+              "params": {
+                "id": "e-publish-query",
+                "points": [
+                  [
+                    3140,
+                    880
+                  ],
+                  [
+                    1000,
+                    880
+                  ],
+                  [
+                    1000,
+                    1040
+                  ]
+                ]
+              },
+              "resultText": "APPLIED · reroute e-publish-query\nDELTA\n  e-publish-query  wp 3140,840→1000,840→1000,1040 → 3140,880→1000,880→1000,1040\nLINTS · +0 −1\n  − W1 broken-edges  (resolved)\nROUTES\n  e-publish-query  anchors left→right  path publish-gate (s0 v x=3140) ─(s1 h y=880)→ (s2 v x=1000) vector-search  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-07-28T22:07:04.416Z",
+          "thinking": "**Planning diagram improvements and DLQ notes**\n\n**Planning to add description and title**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_pF5GbLRsaRtGaZPmGupd7rrY|fc_085bdf02d98e4662016a692808246481998d078d9bd42a0daf",
+              "toolName": "update_text",
+              "params": {
+                "id": "e-confidence-generate",
+                "text": ""
+              },
+              "resultText": "APPLIED · update_text e-confidence-generate\nDELTA\n  e-confidence-generate  label enough → —\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_bjxdaYShWtJfBofeal9im3PL|fc_085bdf02d98e4662016a692808248c81998c63c65b78af1282",
+              "toolName": "set_board_title",
+              "params": {
+                "title": "RAG ingestion, retrieval, and rebuild"
+              },
+              "resultText": "APPLIED · updateTitle\nDELTA · title \"2026-07-28-eval-170417 · rag-ingestion-retrieval\" → \"RAG ingestion, retrieval, and rebuild\"",
+              "isError": false,
+              "images": []
+            },
+            {
+              "toolUseId": "call_CTKEjpDqkysyb1scaG84Fl1U|fc_085bdf02d98e4662016a692808249c819988a3651480d5f287",
+              "toolName": "update_description",
+              "params": {
+                "description": "# RAG ingestion, retrieval, and rebuild\n\nA left-to-right system map showing scheduled/change-driven source arrival with ACLs, normalization and content-hash classification, versioned chunking, reliable embedding, and publication gated on a consistent vector/fragment/keyword version. The lower flow follows a user question through parallel hybrid retrieval, fusion and reranking, permission filtering, evidence-gated grounded generation with citations, and a feedback loop that reprioritizes ingestion. The rebuild lane creates a new index generation in the background, checks consistency, and atomically promotes it while preserving rollback; decision branches represent bypass, quarantine/dead-letter recovery, partial-write repair, and low-confidence refusal paths."
+              },
+              "resultText": "APPLIED · updateDescription\nDELTA · description none → 768 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-07-28T22:07:09.189Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vRvT6oGkvddhBRlAfSZ5v6z3|fc_085bdf02d98e4662016a69280c8bb48199855a42054bb3e0c9",
+              "toolName": "look",
+              "params": {
+                "at": {
+                  "height": 1900,
+                  "width": 3500,
+                  "x": 40,
+                  "y": 80
+                },
+                "view": "page-frame"
+              },
+              "resultText": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+              "isError": true,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-07-28T22:07:14.852Z",
+          "thinking": "**Testing schema handling with nullable fields**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JymdTfm9cLYm0Otb5mycxdYF|fc_085bdf02d98e4662016a692812549c81998f7cb8cca5f7f672",
+              "toolName": "look",
+              "params": {
+                "at": {
+                  "height": 1900,
+                  "width": 3500,
+                  "x": 40,
+                  "y": 80
+                },
+                "view": ""
+              },
+              "resultText": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+              "isError": true,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-07-28T22:07:20.414Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_8rnqzEp5TIL7hedJudLcsjSZ|fc_085bdf02d98e4662016a6928163ca481999e18174356cecd37",
+              "toolName": "look",
+              "params": {
+                "at": {
+                  "height": 0,
+                  "width": 0,
+                  "x": 0,
+                  "y": 0
+                },
+                "view": "page-frame"
+              },
+              "resultText": "ERROR · look — one region per call: send either `look {\"view\": \"sec-flows\"}` or `look {\"at\": {\"x\":320,\"y\":480,\"width\":600,\"height\":400}}` — drop the knob that is not the close-up you meant.",
+              "isError": true,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-07-28T22:07:28.172Z",
+          "thinking": "**Finalizing frame and cleaning lints**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gWbYQ3e2LJnvkXN9cRxhvu4E|fc_085bdf02d98e4662016a69281da8a081999ed8e488f322a61e",
+              "toolName": "finalize",
+              "params": {
+                "message": "Built a sectioned RAG system map covering versioned ingestion, hybrid permission-aware retrieval, grounded cited answers, feedback prioritization, and atomic background index rebuild/rollback flows.",
+                "outcome": "committed"
+              },
+              "resultText": "Committed: Built a sectioned RAG system map covering versioned ingestion, hybrid permission-aware retrieval, grounded cited answers, feedback prioritization, and atomic background index rebuild/rollback flows. (68 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

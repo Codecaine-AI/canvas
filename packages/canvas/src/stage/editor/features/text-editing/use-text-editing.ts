@@ -4,7 +4,7 @@ import { useCallback, useState, type Dispatch, type SetStateAction } from "react
 import { objectDefFor } from "../../../../objects/object-def";
 import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
-import { routeConnection } from "../../../../connectors/routing";
+import { labelPointFor, routeConnection } from "../../../../connectors/routing";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -68,7 +68,12 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
     : undefined;
   const labelEditPoint =
     labelEditConnection && labelEditFromObject && labelEditToObject
-      ? routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects).labelPoint
+      // The inline editor opens over the chip, so it reads the same effective
+      // label point the chip is drawn at (S1.1 `labelPosition` pin included).
+      ? labelPointFor(
+          routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects),
+          labelEditConnection,
+        )
       : null;
 
   const openConnectionLabelEditor = useCallback(

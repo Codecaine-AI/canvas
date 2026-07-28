@@ -9,6 +9,7 @@
       "flavour": "paragraph",
       "children": [
         "b-worked-title-1",
+        "b-worked-stale-marker",
         "b-worked-lede-2",
         "b-worked-steps-heading-3",
         "b-worked-steps-item1-4",
@@ -317,6 +318,32 @@
         },
         {
           "insert": " changes only the hub stores and the route affected by the moved saves endpoint, while the cumulative BOARD DIFF still carries the entire seven-step proposal."
+        }
+      ]
+    },
+    "b-worked-stale-marker": {
+      "id": "b-worked-stale-marker",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "Stale — this worked example is a full generation behind"
+      },
+      "text": [
+        {
+          "insert": "Every page in this seven-stage example is written against the retired apply_ops batch surface and its per-kind add/update/remove operations. The agent edits through the thirty-two-tool editing-gesture surface ("
+        },
+        {
+          "insert": "The gesture tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-agent-layout/50-tool-surface/00-overview",
+              "label": "The gesture tool surface"
+            }
+          }
+        },
+        {
+          "insert": "): one gesture per call, bare place_* payloads, geometry on a 20 grid, and measured looks. The call payloads and the narrative below are kept only as a record of the earlier surface; re-recording the example against the gesture surface is its own follow-up."
         }
       ]
     }

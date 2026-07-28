@@ -1,5 +1,18 @@
 # RUNNER — standing eval suite for the canvas layout agent
 
+> **Historical — the manual codex-executor protocol.** The live runner is
+> `runner/` (`make eval`), specified in [`runner-spec/SPEC.md`](runner-spec/SPEC.md).
+> The fixed `:4000` / `:4820` origins named throughout this file were real for the
+> hand-driven protocol; the automated runner spawns its **own** file API and harness
+> per run on ephemeral ports and stops both when the run ends. Everything here about
+> run layout, grading, scorecard shape, and diff interpretation still holds — only the
+> service plumbing has moved on.
+>
+> The axis system has also moved on: the live axes are the files in
+> `axes-system/` (SF/RC/RD/CF/SD/PH), and visual axes are scored absolutely
+> against their rubric anchors — the reference boards, calibration targets,
+> `CAL-DRIFT` flag, and delta sentences described below no longer exist.
+
 How to execute the suite end-to-end against any change (rules, prompt, lints, perception,
 model config) and produce a scorecard that diffs cleanly against the previous run.
 
@@ -63,6 +76,12 @@ scenarios, some doubled for IC's two roles). Wall clock ≈ 2–4 h with scenari
 
 ## 1. Preconditions
 
+> These preconditions describe the manual codex-executor protocol, which drove the
+> long-lived dev services on :4000/:4820. The automated runner (`runner/`) no longer
+> works that way: it spawns its **own** file API and harness per run on ephemeral
+> ports, never reuses a service another run left behind, and always stops both when
+> the run ends. See `runner-spec/SPEC.md` for that contract.
+
 1. Studio file API up on :4000 (`make studio` or the shared handler server) — verify
    `GET /api/canvases` answers.
 2. Harness up on :4820 (`make harness`) — verify `GET /health` → `{"status":"ok"}`.
@@ -75,7 +94,12 @@ scenarios, some doubled for IC's two roles). Wall clock ≈ 2–4 h with scenari
    - eval executor model and reasoning effort
    - hash of the system prompt file(s), hash/listing of the active lint set and style
      files (post-v5: `src/lints/`, `src/styles/`)
-   - harness start time (a restart mid-run invalidates comparability — note it)
+   - a **surface hash** over the tool surface itself (`src/service/session/`,
+     `context/capabilities/`, `catalog/layout-editor/tools/`) — a roster change that
+     somehow skipped the prompt would otherwise look comparable to the run before it
+   - harness start time (a restart mid-run invalidates comparability — note it). The
+     automated runner records the spawned pid/port/origin in
+     `runs/<run-id>/services/identity.json` alongside these hashes.
 5. Create the run directory: `packages/eval-suite/runs/<YYYY-MM-DD>-<label>/`
    where `<label>` names the change under test (e.g. `2026-07-24-v5-lints`). Layout:
 

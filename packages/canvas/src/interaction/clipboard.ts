@@ -97,6 +97,12 @@ export function buildPastePayload(
 
   // W4 — explicit connection waypoints are absolute world coords: translate
   // them by the same paste offset as the objects so fans paste intact.
+  //
+  // S1.1 — `labelPosition` rides along untouched (the structuredClone above
+  // deep-copies it, and the spread carries it): `along` is a fraction of the
+  // route's own arc length and `offset` is relative to the local segment
+  // direction, so a translated copy re-routes to the same relative chip
+  // placement with no arithmetic.
   const connections = cloneValue(clipboard.connections).map((connection) => ({
     ...connection,
     waypoints: connection.waypoints?.map(([x, y]) => [x + dx, y + dy] as [number, number]),

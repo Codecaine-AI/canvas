@@ -1,0 +1,600 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-28-eval-164042.rag-ingestion-retrieval",
+  "title": "RAG ingestion, retrieval, and grounded answers",
+  "description": "# RAG ingestion, retrieval, and grounded answers\n\nThe board reads left to right across two main lanes. The top lane carries source arrivals and ACLs through normalization, content-hash classification, version-aware chunking, rate-limited embedding, and three-store version-consistent publication. The middle lane rewrites permission-bearing questions, performs parallel hybrid retrieval and reranking, filters evidence by the asking user’s access, and produces cited answers or an explicit “I don’t know.”\n\nFailure handling is embedded in the relevant stages: parse failures go to quarantine while batches continue; persistent embedding failures go to a dead-letter store; partial publication remains hidden until repaired or rolled back. Feedback records usefulness and unanswered questions and feeds coverage gaps back into ingestion priorities. The lower lane shows background re-embedding into a new generation, consistency validation, atomic promotion, and retention of the prior generation for rollback while live queries stay on the current generation.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-28-eval-164042 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3600,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Sources & arrivals",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 520,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "section",
+      "text": "2 · Extract & classify",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 760,
+        "y": 140,
+        "width": 520,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "versioning",
+      "type": "section",
+      "text": "3 · Version & chunk",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1420,
+        "y": 140,
+        "width": 520,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "section",
+      "text": "4 · Embed & retry",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 140,
+        "width": 520,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "5 · Version-consistent publication",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2760,
+        "y": 140,
+        "width": 260,
+        "height": 240
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "6 · Question & rewrite",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 760,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "retrieve",
+      "type": "section",
+      "text": "7 · Hybrid retrieval",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 780,
+        "y": 760,
+        "width": 260,
+        "height": 240
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ground",
+      "type": "section",
+      "text": "8 · Permission & grounding",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1600,
+        "y": 760,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "src-note",
+      "type": "sticky",
+      "text": "**Adapters**\n- Document stores\n- Wikis & tickets\n- Code repositories\n- Schedule + change events\n\nACLs travel with every arrival.",
+      "color": "yellow",
+      "parentId": "sources",
+      "geometry": {
+        "x": 160,
+        "y": 220,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "extract-note",
+      "type": "sticky",
+      "text": "**Normalize**\nExtract text, remove boilerplate.\n\n**Parse failure**\nQuarantine with failure context; batch continues.\n\nHash → new / changed / unchanged.",
+      "color": "yellow",
+      "parentId": "extract",
+      "geometry": {
+        "x": 820,
+        "y": 220,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "version-note",
+      "type": "sticky",
+      "text": "**Version rules**\n- Unchanged → bypass\n- Changed → supersede old version\n- Delete stale derived records\n\nChunk with overlap; preserve headings, source, ACLs, version stamp.",
+      "color": "yellow",
+      "parentId": "versioning",
+      "geometry": {
+        "x": 1480,
+        "y": 220,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "embed-note",
+      "type": "sticky",
+      "text": "**Embedding workers**\nRate-limited batches.\nRetry transient failures.\n\nPersistent failure → dead-letter store with inputs + attempt history for reprocessing.",
+      "color": "yellow",
+      "parentId": "embed",
+      "geometry": {
+        "x": 2140,
+        "y": 220,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "publish-note",
+      "type": "sticky",
+      "text": "**Three synchronized writes**\n- Vectors → vector index\n- Fragments + metadata → document store\n- Terms → keyword index\n\nPublish only when all share one version. Partial writes stay hidden; repair or roll back.",
+      "color": "yellow",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2800,
+        "y": 220,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "query-note",
+      "type": "sticky",
+      "text": "**User question**\nIdentity + permissions accompany request.\n\nRewrite into one or more searches; keep original intent.",
+      "color": "yellow",
+      "parentId": "query",
+      "geometry": {
+        "x": 160,
+        "y": 840,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "retrieve-note",
+      "type": "sticky",
+      "text": "**Parallel lookup**\nVector index + keyword index\n\nFuse candidates → rerank by relevance.\nLive queries use the current index generation.",
+      "color": "yellow",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 820,
+        "y": 840,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "ground-note",
+      "type": "sticky",
+      "text": "**Permission filter**\nApply asking user's ACLs before context leaves retrieval.\n\n**Grounding gate**\nThin context or low reranker scores → “I don't know.”",
+      "color": "yellow",
+      "parentId": "ground",
+      "geometry": {
+        "x": 1660,
+        "y": 840,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "answer",
+      "type": "section",
+      "text": "9 · Grounded answer",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2260,
+        "y": 760,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "answer-note",
+      "type": "sticky",
+      "text": "**Generation**\nAnswer only from retrieved evidence.\nReturn citations to source fragments.\n\nIf evidence is insufficient: explicitly say “I don't know.”",
+      "color": "yellow",
+      "parentId": "answer",
+      "geometry": {
+        "x": 2320,
+        "y": 840,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "10 · Feedback & coverage",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2920,
+        "y": 760,
+        "width": 520,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "feedback-note",
+      "type": "sticky",
+      "text": "**Signals**\nThumbs, cited-fragment usefulness, unanswered questions.\n\nCoverage gaps feed ingestion priorities and reprocessing.",
+      "color": "yellow",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 2980,
+        "y": 840,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "11 · Embedding-model rebuild & atomic switchover",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 760,
+        "y": 1500,
+        "width": 1800,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rebuild-start",
+      "type": "sticky",
+      "text": "**Model change**\nCoordinator snapshots corpus and re-embeds in background.\n\nLive queries remain on current generation.",
+      "color": "yellow",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 840,
+        "y": 1600,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rebuild-check",
+      "type": "sticky",
+      "text": "**Consistency check**\nNew vector generation must be complete and version-consistent before promotion.",
+      "color": "yellow",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1500,
+        "y": 1600,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rebuild-switch",
+      "type": "sticky",
+      "text": "**Atomic switchover**\nPromote new generation only when complete.\nKeep prior generation available for rollback.",
+      "color": "yellow",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2160,
+        "y": 1600,
+        "width": 180,
+        "height": 120
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-src-extract",
+      "from": {
+        "objectId": "sources",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "left"
+      },
+      "label": "arrivals + ACLs",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-extract-version",
+      "from": {
+        "objectId": "extract",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "versioning",
+        "anchor": "left"
+      },
+      "label": "normalized + hash",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-version-embed",
+      "from": {
+        "objectId": "versioning",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "embed",
+        "anchor": "left"
+      },
+      "label": "versioned fragments",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-embed-publish",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish",
+        "anchor": "left"
+      },
+      "label": "completed version",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-query-retrieve",
+      "from": {
+        "objectId": "query",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "retrieve",
+        "anchor": "left"
+      },
+      "label": "rewritten searches",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-retrieve-ground",
+      "from": {
+        "objectId": "retrieve",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ground",
+        "anchor": "left"
+      },
+      "label": "fused + reranked",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-ground-answer",
+      "from": {
+        "objectId": "ground",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "answer",
+        "anchor": "left"
+      },
+      "label": "permitted evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-answer-feedback",
+      "from": {
+        "objectId": "answer",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback",
+        "anchor": "left"
+      },
+      "label": "citations + outcome",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-publish-retrieve",
+      "from": {
+        "objectId": "publish",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retrieve",
+        "anchor": "top"
+      },
+      "label": "published indexes",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          2890,
+          680
+        ],
+        [
+          910,
+          680
+        ]
+      ]
+    },
+    {
+      "id": "e-rebuild-check",
+      "from": {
+        "objectId": "rebuild-start",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-check",
+        "anchor": "left"
+      },
+      "label": "new generation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-check-switch",
+      "from": {
+        "objectId": "rebuild-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rebuild-switch",
+        "anchor": "left"
+      },
+      "label": "complete + consistent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

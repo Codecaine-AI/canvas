@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-50-tool-surface-40-registration-and-seam",
+  "title": "Registration and the catalog seam",
+  "root": "b-ts-se-root",
+  "blocks": {
+    "b-ts-se-root": {
+      "id": "b-ts-se-root",
+      "flavour": "paragraph",
+      "children": [
+        "b-ts-se-title-1",
+        "b-ts-se-lede-2",
+        "b-ts-se-discovery-heading-3",
+        "b-ts-se-discovery-body-4",
+        "b-ts-se-shadow-5",
+        "b-ts-se-dryrun-6",
+        "b-ts-se-dryrun-defer-7",
+        "b-ts-se-bind-8",
+        "b-ts-se-principle-9",
+        "b-ts-se-loops-heading-10",
+        "b-ts-se-loops-body-11",
+        "b-ts-se-loops-code-12",
+        "b-ts-se-invariants-heading-13",
+        "b-ts-se-inv-order-14",
+        "b-ts-se-inv-inert-15",
+        "b-ts-se-inv-single-source-16",
+        "b-ts-se-inv-guard-17",
+        "b-ts-se-inv-cycle-18",
+        "b-ts-se-fingerprint-heading-19",
+        "b-ts-se-fingerprint-body-20",
+        "b-ts-se-cap-21"
+      ],
+      "props": {
+        "covers": "The catalog/service seam: how the kernel discovers a bundle's tools by filename convention, why boot dry-runs registration without a bound runtime, how the real runtime is bound per spawn, and the invariants that keep the registered surface honest — pinned order, an import-inert entry point, single-source rosters with a two-way completeness guard, the store-to-tools cycle, the eval surface hash, and the tool-call cap.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "catalog seam",
+          "bundle discovery",
+          "dry-run registration",
+          "toolRuntime binding",
+          "registration order",
+          "surface hash",
+          "tool-call cap"
+        ]
+      }
+    },
+    "b-ts-se-title-1": {
+      "id": "b-ts-se-title-1",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Registration and the catalog seam"
+        }
+      ]
+    },
+    "b-ts-se-lede-2": {
+      "id": "b-ts-se-lede-2",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The tool surface has one home, and it is service-side: the gesture descriptors and the workflow calls both live under the session's tools folder, each carrying its own name, label, description, and sealed parameter schema. The agent catalog contributes registration mechanics and nothing else. The seam between them is load-bearing rather than incidental, because the kernel never reaches the agent bundle through the module graph — it discovers the bundle on disk."
+        }
+      ]
+    },
+    "b-ts-se-discovery-heading-3": {
+      "id": "b-ts-se-discovery-heading-3",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How the kernel finds the tools"
+        }
+      ]
+    },
+    "b-ts-se-discovery-body-4": {
+      "id": "b-ts-se-discovery-body-4",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The service points the kernel at the agent catalog root. The kernel walks it for bundle manifests and resolves each bundle's sections by filename convention: the tools sidecar is either a flat "
+        },
+        {
+          "insert": "tools.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or a "
+        },
+        {
+          "insert": "tools/index.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " folder entry, checked in that order. The sidecar must export a register function, either as the default export or under the name tools. Nothing about this resolution is configured; the layout is the configuration."
+        }
+      ]
+    },
+    "b-ts-se-shadow-5": {
+      "id": "b-ts-se-shadow-5",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "A flat tools.ts must never exist beside the folder"
+      },
+      "text": [
+        {
+          "insert": "Because the file form is checked first, a stray flat tools.ts would silently shadow the folder: the kernel would resolve it, register whatever it declared, and the folder's roster would simply never load. There is no error and no warning at the registry — the surface would just be wrong, and the first symptom would be a model that cannot find a tool the code plainly defines. The rule is therefore absolute rather than stylistic: one form, and it is the folder."
+        }
+      ]
+    },
+    "b-ts-se-dryrun-6": {
+      "id": "b-ts-se-dryrun-6",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "At registry boot the kernel dry-runs the registration function to harvest the bundle's tool allowlist. It calls the function with a stub registrar whose registerTool only records names and whose hook installer does nothing, and — the part that shapes the code — with no runtime at all, so the runtime parameter is undefined. No session exists at that point, and none could: the allowlist has to be known before any spawn."
+        }
+      ]
+    },
+    "b-ts-se-dryrun-defer-7": {
+      "id": "b-ts-se-dryrun-defer-7",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Registration is side-effect-free, and the runtime lookup is deferred"
+      },
+      "text": [
+        {
+          "insert": "Registration must be constructible from static data alone: it may read descriptors and declare tools, and it may not touch a session, a draft, or a render. That is precisely why "
+        },
+        {
+          "insert": "requireRuntime",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools/runtime.ts",
+              "symbol": "requireRuntime"
+            }
+          }
+        },
+        {
+          "insert": " is called inside each tool's execute rather than once at registration: it defers \"is a runtime bound?\" to call time, where the answer is yes, and fails loudly there if the harness somehow bound none. Checking at registration would fail every boot."
+        }
+      ]
+    },
+    "b-ts-se-bind-8": {
+      "id": "b-ts-se-bind-8",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The real runtime is bound later and per spawn, through the kernel configuration's tool-runtime slot: the session store constructs the layout kernel with "
+        },
+        {
+          "insert": "createToolRuntime",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/create-runtime.ts",
+              "symbol": "createToolRuntime"
+            }
+          }
+        },
+        {
+          "insert": ". Each runtime method resolves which layout session it belongs to internally, through the kernel run context, so the catalog sidecar stays a thin declaration-and-dispatch layer with no session knowledge of its own. The seam therefore needs exactly three things: a path-stable, import-inert entry point; the runtime interface as the contract; and service-side implementations behind it."
+        }
+      ]
+    },
+    "b-ts-se-principle-9": {
+      "id": "b-ts-se-principle-9",
+      "flavour": "decision",
+      "children": [],
+      "props": {
+        "status": "accepted",
+        "title": "The catalog registers what the service defines"
+      },
+      "text": [
+        {
+          "insert": "No tool declares anything on the catalog side. Every descriptor — gesture or workflow call — carries its own name, label, description, and parameter schema service-side, and the catalog forwards them verbatim. The alternative, per-tool files on the catalog side, would put half of each tool's truth in the swappable bundle and half behind the runtime interface, and every schema change would then be a two-file edit across the seam. Keeping declarations service-side means the bundle can be swapped without the tool surface moving."
+        }
+      ]
+    },
+    "b-ts-se-loops-heading-10": {
+      "id": "b-ts-se-loops-heading-10",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Two loops and a result hook"
+        }
+      ]
+    },
+    "b-ts-se-loops-body-11": {
+      "id": "b-ts-se-loops-body-11",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Registration is two loops over two rosters, in the order the model meets the tools: the gestures first, then the workflow calls. A gesture's execute dispatches by name into the runtime's single operation entry point; a workflow tool invokes itself against the runtime, and finalize alone carries the flag that ends the run. Both paths convert their result into the kernel's content-block shape, lifting any rendered PNGs into image blocks. One sanctioned result hook mirrors a tool's error bit onto the persisted message, overriding only that bit and leaving the executed result's content and details untouched."
+        }
+      ]
+    },
+    "b-ts-se-loops-code-12": {
+      "id": "b-ts-se-loops-code-12",
+      "flavour": "code",
+      "children": [],
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "service/session/tools/\n  operations/   gesture descriptors  → operationTools\n  workflow/     everything else      → workflowTools\n  runtime.ts    the LayoutToolRuntime contract\n  create-runtime.ts  the binding the store hands the kernel\n\ncatalog/layout-editor/tools/\n  index.ts      the two registration loops + the result hook\n  runtime.ts    requireRuntime, toToolResult\n\nboot     dry-run registration, runtime === undefined → allowlist\nspawn    createToolRuntime(...) bound into the kernel config\ncall     requireRuntime(runtime).operation(name, params)"
+        }
+      ]
+    },
+    "b-ts-se-invariants-heading-13": {
+      "id": "b-ts-se-invariants-heading-13",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The invariants"
+        }
+      ]
+    },
+    "b-ts-se-inv-order-14": {
+      "id": "b-ts-se-inv-order-14",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "Registration order is pinned"
+      },
+      "text": [
+        {
+          "insert": "The registered names must come out as the gesture roster in its own order followed by the workflow roster in its own — look first, finalize last — with no duplicates. "
+        },
+        {
+          "insert": "tool-schema-parity.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/test/tool-schema-parity.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " asserts that exact sequence by driving registration through a recording registrar, and asserts two things no single tool file can show: that every root schema is a sealed object, and that no mutator declares a viewing argument, which lives on look alone. Order is not cosmetic — it is the order the model reads the surface in, and the surface it is given at boot."
+        }
+      ]
+    },
+    "b-ts-se-inv-inert-15": {
+      "id": "b-ts-se-inv-inert-15",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The entry point keeps both its default and its named export, because the kernel accepts either and a rename on one side would break discovery silently. It also stays import-inert: importing it declares tools and installs a hook, and does nothing else. The dry-run already imports the full descriptor tree, so keeping the entry point inert costs nothing at boot and is what makes the harvest safe."
+        }
+      ]
+    },
+    "b-ts-se-inv-single-source-16": {
+      "id": "b-ts-se-inv-single-source-16",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "The two rosters are single sources, and everything else is derived from them. "
+        },
+        {
+          "insert": "operationTools",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/index.ts",
+              "symbol": "operationTools"
+            }
+          }
+        },
+        {
+          "insert": " feeds the registration loop, the capabilities block's gesture reference — whose group order and within-group order are read back off the roster rather than restated — and the state block's op ledger, which classifies which tool results become ledger lines. "
+        },
+        {
+          "insert": "workflowTools",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/index.ts",
+              "symbol": "workflowTools"
+            }
+          }
+        },
+        {
+          "insert": " plays the same role for the calls that are not gestures. A tool added to a group module is not on the surface until it is listed in its roster, and the tests read the rosters too, so a roster edit propagates rather than drifts."
+        }
+      ]
+    },
+    "b-ts-se-inv-guard-17": {
+      "id": "b-ts-se-inv-guard-17",
+      "flavour": "constraint",
+      "children": [],
+      "props": {
+        "title": "The capabilities guard runs both ways"
+      },
+      "text": [
+        {
+          "insert": "The generated gesture reference in "
+        },
+        {
+          "insert": "capabilities/ops.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/ops.ts"
+            }
+          }
+        },
+        {
+          "insert": " keys hand-written consequence prose by tool name and checks completeness in both directions at import: a registered tool with no prose throws, and prose for a tool nobody registers throws too. Documentation that has drifted from the surface is a build failure rather than a lie the model reads — which matters more here than anywhere else, because this text is what the model believes its tools do."
+        }
+      ]
+    },
+    "b-ts-se-inv-cycle-18": {
+      "id": "b-ts-se-inv-cycle-18",
+      "flavour": "observation",
+      "children": [],
+      "props": {
+        "title": "The store-to-tools cycle, and the shape that keeps it safe"
+      },
+      "text": [
+        {
+          "insert": "There is a cycle between the session store and the tool surface, and it is deliberate. The store value-imports the runtime binding, because it is what hands the kernel a bound runtime at spawn; the tool files import the session only as a type, because they need its shape and never construct one. A type-only edge carries no runtime dependency, so the cycle never resolves at load time. Any change that turns one of those type imports into a value import turns a compile-time relationship into a load-order problem."
+        }
+      ]
+    },
+    "b-ts-se-fingerprint-heading-19": {
+      "id": "b-ts-se-fingerprint-heading-19",
+      "flavour": "heading",
+      "children": [],
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The surface hash and run comparability"
+        }
+      ]
+    },
+    "b-ts-se-fingerprint-body-20": {
+      "id": "b-ts-se-fingerprint-body-20",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "Each eval run records a surface hash alongside its prompt, lint, and style hashes. The surface hash covers the file contents of the whole session tree — the tool surface and the perception around it — together with the catalog's capabilities and tools directories, and it is written into both the run's fingerprint and the service identity record so the two always describe the same tree. It is computed in "
+        },
+        {
+          "insert": "queue.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite/runner/src/scenario/queue.ts",
+              "symbol": "collectSourceFingerprints"
+            }
+          }
+        },
+        {
+          "insert": ". Its purpose is negative: a roster change that somehow skipped the prompt would otherwise look comparable to the run before it. Because the hash is over file contents, it also moves on a pure reorganization that leaves the wire surface identical — the first run after one reads as surface-incomparable, and that is the intended conservative answer rather than a defect."
+        }
+      ]
+    },
+    "b-ts-se-cap-21": {
+      "id": "b-ts-se-cap-21",
+      "flavour": "paragraph",
+      "children": [],
+      "props": {},
+      "text": [
+        {
+          "insert": "One last surface-level knob: the number of tool calls the agent may send in a single assistant message is a prompt variable declared in the bundle manifest, overridable per run through an environment variable read in "
+        },
+        {
+          "insert": "kernel.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/kernel.ts",
+              "symbol": "TOOL_CALL_CAP_OVERRIDE"
+            }
+          }
+        },
+        {
+          "insert": " and threaded into the spawn. It is advisory: the cap is prose the model reads, not something registration or dispatch enforces, and a multi-call message is simply that many independent trips through the same pipeline. The default allowance of one means every call rides alone, and the prompt's own guidance is that a message may be shared only among genuinely independent gestures planned from the same board state — with look and finalize always alone. What makes chaining within a turn workable at a wider allowance is the routing contract: every edge gesture returns a fresh numbered polyline, so a second correction aims at the result just read rather than at a digest the first correction made stale."
+        }
+      ]
+    }
+  }
+}

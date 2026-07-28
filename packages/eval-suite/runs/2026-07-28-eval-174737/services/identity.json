@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-07-28-eval-174737",
+  "written_at": "2026-07-28T22:47:38.359Z",
+  "git": {
+    "revision": "2f674932",
+    "dirty": true
+  },
+  "hashes": {
+    "prompt": "09b7c1c8",
+    "lint": "d6b4248b",
+    "style": "de7fa508",
+    "surface": "789f67aa"
+  },
+  "services": [
+    {
+      "name": "eval file API",
+      "pid": 77002,
+      "port": 60795,
+      "origin": "http://127.0.0.1:60795",
+      "started_at": "2026-07-28T22:47:37.341Z",
+      "health_checked_at": "2026-07-28T22:47:37.851Z",
+      "log": "packages/eval-suite/runs/2026-07-28-eval-174737/services/file-api.log"
+    },
+    {
+      "name": "eval harness",
+      "pid": 77041,
+      "port": 60798,
+      "origin": "http://127.0.0.1:60798",
+      "started_at": "2026-07-28T22:47:37.853Z",
+      "health_checked_at": "2026-07-28T22:47:38.359Z",
+      "log": "packages/eval-suite/runs/2026-07-28-eval-174737/services/harness.log"
+    }
+  ]
+}

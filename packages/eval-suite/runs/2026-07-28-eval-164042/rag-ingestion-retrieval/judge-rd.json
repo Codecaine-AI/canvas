@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-164042",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at the 6–6.5 anchor because its spacious, clearly sectioned layout is readable with effort, but very small type, pervasive node-label truncation, and one long backtracking edge prevent comfortable arm’s-length reading.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Stages and label chips have generous clear space, but the oversized canvas makes the already small text difficult to read at arm’s length."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Light bordered regions with numbered headers make section membership immediately clear, including the distinct three-node rebuild section."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "Most colored edges are clean and uncrossed, but the dashed teal “published indexes” route makes a long horizontal backtrack across the board and several connections are visually interrupted by large section gaps."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "Ink density is low and sections contain only one to three nodes, but excessive unused canvas area shrinks the meaningful content and contributes to tiny, frequently ellipsized node labels."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7529,
+    "output_tokens": 411
+  },
+  "flags": []
+}

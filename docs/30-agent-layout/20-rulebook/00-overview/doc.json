@@ -26,11 +26,11 @@
         "b-rulebook-lab-body-20"
       ],
       "props": {
-        "covers": "R1-R10 as documentation lenses over the layout agent's actual mechanisms: the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and five layout diagnostics.",
+        "covers": "R1-R10 as documentation lenses over the layout agent's actual mechanisms: the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and the layout diagnostics.",
         "format": "mdx",
         "type": "reference",
         "concepts": [
-          "16px grid",
+          "20 grid",
           "uniform gaps",
           "section grouping",
           "peer lattice",
@@ -82,7 +82,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/agent/styles/aesthetic.ts",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
@@ -99,7 +99,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The capability blocks define the four entity kinds and their operations. The op path applies the mechanical invariants: geometry patches are complete finite rectangles, patched geometry snaps to the 16px grid, section membership is reconciled from geometry, sections keep the geometry they are given until fit_section closes one, and the locked page frame is protected. The "
+          "insert": "The capability blocks define the four entity kinds and their operations. The op path applies the mechanical invariants: geometry patches are complete finite rectangles, every number a gesture writes to geometry lands on the agent's 20 grid, section membership is reconciled from geometry, sections keep the geometry they are given until fit_section closes one, and the locked page frame is protected. The "
         },
         {
           "insert": "covered-content",
@@ -151,7 +151,7 @@
           }
         },
         {
-          "insert": ", and "
+          "insert": ", "
         },
         {
           "insert": "unreadable-labels",
@@ -160,6 +160,19 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas-agent/src/board/lints/rules/unreadable-labels.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "clipped-text",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/clipped-text.ts"
             }
           }
         },
@@ -199,17 +212,17 @@
       },
       "text": [
         {
-          "insert": "R1 — The 16px grid",
+          "insert": "R1 — The 20 grid",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "30-agent-layout/20-rulebook/01-r1-the-16px-grid",
-              "label": "R1 — The 16px grid"
+              "path": "30-agent-layout/20-rulebook/01-r1-the-20-grid",
+              "label": "R1 — The 20 grid"
             }
           }
         },
         {
-          "insert": " — object geometry is quantized to 16px; the grid is a snap unit, not a spacing prescription."
+          "insert": " — object geometry is quantized to the agent's 20 grid; the grid is a snap unit, not a spacing prescription."
         }
       ]
     },

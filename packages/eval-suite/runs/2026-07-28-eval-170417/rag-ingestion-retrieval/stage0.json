@@ -1,0 +1,1066 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-28-eval-170417.rag-ingestion-retrieval",
+  "title": "RAG ingestion, retrieval, and rebuild",
+  "description": "# RAG ingestion, retrieval, and rebuild\n\nA left-to-right system map showing scheduled/change-driven source arrival with ACLs, normalization and content-hash classification, versioned chunking, reliable embedding, and publication gated on a consistent vector/fragment/keyword version. The lower flow follows a user question through parallel hybrid retrieval, fusion and reranking, permission filtering, evidence-gated grounded generation with citations, and a feedback loop that reprioritizes ingestion. The rebuild lane creates a new index generation in the background, checks consistency, and atomically promotes it while preserving rollback; decision branches represent bypass, quarantine/dead-letter recovery, partial-write repair, and low-confidence refusal paths.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-28-eval-170417 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3600,
+        "height": 2200
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Sources & arrival",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 140,
+        "width": 560,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "normalize",
+      "type": "section",
+      "text": "2 · Normalize & classify",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 820,
+        "y": 140,
+        "width": 560,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "prepare",
+      "type": "section",
+      "text": "3 · Version & chunk",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1520,
+        "y": 140,
+        "width": 560,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "section",
+      "text": "4 · Embed reliably",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2220,
+        "y": 140,
+        "width": 560,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "5 · Version-consistent publication",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2920,
+        "y": 140,
+        "width": 560,
+        "height": 700
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "6 · Query planning",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 900,
+        "width": 560,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "retrieve",
+      "type": "section",
+      "text": "7 · Hybrid retrieval",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 820,
+        "y": 900,
+        "width": 560,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ground",
+      "type": "section",
+      "text": "8 · Permission-aware grounding",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1520,
+        "y": 900,
+        "width": 560,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "9 · Feedback loop",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2220,
+        "y": 900,
+        "width": 560,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "10 · Embedding model rebuild",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2920,
+        "y": 980,
+        "width": 560,
+        "height": 900
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "src-adapters",
+      "type": "document-stack",
+      "text": "Source adapters",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 180,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "arrival",
+      "type": "manual-input",
+      "text": "Import / update + ACLs",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 180,
+        "y": 380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "manual-input"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "process",
+      "text": "Extract + normalize",
+      "color": "gray",
+      "parentId": "normalize",
+      "geometry": {
+        "x": 880,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hash-classify",
+      "type": "decision",
+      "text": "New, changed, unchanged?",
+      "color": "gray",
+      "parentId": "normalize",
+      "geometry": {
+        "x": 880,
+        "y": 380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "version",
+      "type": "predefined-process",
+      "text": "Supersede + delete stale",
+      "color": "gray",
+      "parentId": "prepare",
+      "geometry": {
+        "x": 1580,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "chunk",
+      "type": "document-stack",
+      "text": "Chunk + preserve metadata",
+      "color": "gray",
+      "parentId": "prepare",
+      "geometry": {
+        "x": 1580,
+        "y": 380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "embed-batch",
+      "type": "process",
+      "text": "Rate-limited embedding",
+      "color": "gray",
+      "parentId": "embed",
+      "geometry": {
+        "x": 2280,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "retry-dlq",
+      "type": "decision",
+      "text": "Retry succeeds?",
+      "color": "gray",
+      "parentId": "embed",
+      "geometry": {
+        "x": 2280,
+        "y": 380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "vector-index",
+      "type": "icon",
+      "text": "Vectors",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2980,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "fragment-store",
+      "type": "icon",
+      "text": "Fragments",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2980,
+        "y": 400,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "keyword-index",
+      "type": "icon",
+      "text": "Terms",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2980,
+        "y": 580,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "publish-gate",
+      "type": "decision",
+      "text": "Same version in all 3?",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3140,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "question",
+      "type": "icon",
+      "text": "User question",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 180,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "rewrite",
+      "type": "process",
+      "text": "Rewrite into searches",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 180,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "vector-search",
+      "type": "icon",
+      "text": "Vector lookup",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 880,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "keyword-search",
+      "type": "icon",
+      "text": "Keyword lookup",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 880,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "fuse-rerank",
+      "type": "process",
+      "text": "Fuse + rerank",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 1080,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "permission-filter",
+      "type": "icon",
+      "text": "Apply user ACLs",
+      "color": "gray",
+      "parentId": "ground",
+      "geometry": {
+        "x": 1580,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "confidence",
+      "type": "decision",
+      "text": "Enough evidence?",
+      "color": "gray",
+      "parentId": "ground",
+      "geometry": {
+        "x": 1580,
+        "y": 1160,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "generate",
+      "type": "icon",
+      "text": "Grounded answer + citations",
+      "color": "gray",
+      "parentId": "ground",
+      "geometry": {
+        "x": 1780,
+        "y": 1320,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "feedback-record",
+      "type": "icon",
+      "text": "Thumbs + citation utility",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 2280,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "coverage-gaps",
+      "type": "document",
+      "text": "Coverage gaps + unanswered",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 2280,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "rebuild-coord",
+      "type": "icon",
+      "text": "Rebuild coordinator",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2980,
+        "y": 1060,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "new-generation",
+      "type": "icon",
+      "text": "New index generation",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2980,
+        "y": 1260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "consistent",
+      "type": "decision",
+      "text": "Rebuild complete + consistent?",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2980,
+        "y": 1460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "promote",
+      "type": "predefined-process",
+      "text": "Atomic promote / rollback",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2980,
+        "y": 1660,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-src-arrival",
+      "from": {
+        "objectId": "src-adapters",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "arrival",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-arrival-extract",
+      "from": {
+        "objectId": "arrival",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "left"
+      },
+      "label": "scheduled / changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-extract-hash",
+      "from": {
+        "objectId": "extract",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "hash-classify",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-hash-version",
+      "from": {
+        "objectId": "hash-classify",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "version",
+        "anchor": "left"
+      },
+      "label": "new / changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-version-chunk",
+      "from": {
+        "objectId": "version",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "chunk",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-embed",
+      "from": {
+        "objectId": "chunk",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "embed-batch",
+        "anchor": "left"
+      },
+      "label": "versioned fragments + ACLs",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-retry",
+      "from": {
+        "objectId": "embed-batch",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retry-dlq",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retry-vector",
+      "from": {
+        "objectId": "retry-dlq",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "vector-index",
+        "anchor": "left"
+      },
+      "label": "success",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retry-fragment",
+      "from": {
+        "objectId": "retry-dlq",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fragment-store",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retry-keyword",
+      "from": {
+        "objectId": "retry-dlq",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "keyword-index",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-vector-gate",
+      "from": {
+        "objectId": "vector-index",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fragment-gate",
+      "from": {
+        "objectId": "fragment-store",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-keyword-gate",
+      "from": {
+        "objectId": "keyword-index",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-question-rewrite",
+      "from": {
+        "objectId": "question",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rewrite",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-vector",
+      "from": {
+        "objectId": "rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "vector-search",
+        "anchor": "left"
+      },
+      "label": "parallel",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-keyword",
+      "from": {
+        "objectId": "rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "keyword-search",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-vsearch-fuse",
+      "from": {
+        "objectId": "vector-search",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fuse-rerank",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ksearch-fuse",
+      "from": {
+        "objectId": "keyword-search",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fuse-rerank",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fuse-acl",
+      "from": {
+        "objectId": "fuse-rerank",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "permission-filter",
+        "anchor": "left"
+      },
+      "label": "ranked candidates",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-acl-confidence",
+      "from": {
+        "objectId": "permission-filter",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "confidence",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-confidence-generate",
+      "from": {
+        "objectId": "confidence",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "generate",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-generate-feedback",
+      "from": {
+        "objectId": "generate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback-record",
+        "anchor": "left"
+      },
+      "label": "answer + citations",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2140,
+          1380
+        ],
+        [
+          2140,
+          1040
+        ]
+      ]
+    },
+    {
+      "id": "e-feedback-gaps",
+      "from": {
+        "objectId": "feedback-record",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "coverage-gaps",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-gaps-source",
+      "from": {
+        "objectId": "coverage-gaps",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "src-adapters",
+        "anchor": "bottom"
+      },
+      "label": "prioritize gaps",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rebuild-new",
+      "from": {
+        "objectId": "rebuild-coord",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "new-generation",
+        "anchor": "top"
+      },
+      "label": "background re-embed",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.35,
+        "offset": 80
+      }
+    },
+    {
+      "id": "e-new-consistent",
+      "from": {
+        "objectId": "new-generation",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "consistent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-consistent-promote",
+      "from": {
+        "objectId": "consistent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.25,
+        "offset": 80
+      }
+    },
+    {
+      "id": "e-publish-query",
+      "from": {
+        "objectId": "publish-gate",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "vector-search",
+        "anchor": "right"
+      },
+      "label": "current generation",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          3140,
+          880
+        ],
+        [
+          1000,
+          880
+        ],
+        [
+          1000,
+          1040
+        ]
+      ]
+    },
+    {
+      "id": "e-promote-publish",
+      "from": {
+        "objectId": "promote",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "bottom"
+      },
+      "label": "atomic switch / rollback",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          3120,
+          1600
+        ],
+        [
+          3360,
+          1600
+        ],
+        [
+          3360,
+          800
+        ],
+        [
+          3280,
+          800
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}
