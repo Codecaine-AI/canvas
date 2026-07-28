@@ -3,10 +3,25 @@
   "tier": "system",
   "scenario": "rag-ingestion-retrieval",
   "board_id": "eval.2026-07-28-eval-184200.rag-ingestion-retrieval",
-  "stages": [],
-  "outcomes": {},
-  "timings": {},
-  "session_ids": {},
-  "finished_at": "2026-07-28T23:42:01.375Z",
-  "exit_code": 1
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-28T23:42:01.387Z",
+      "finished_at": "2026-07-28T23:50:12.433Z",
+      "wall_ms": 491492,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "c0830e06-63a0-4e3e-be51-c0bb9392b3ae"
+    ]
+  },
+  "finished_at": "2026-07-28T23:50:12.880Z",
+  "exit_code": 0
 }

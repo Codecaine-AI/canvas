@@ -4,15 +4,20 @@
   "sut_thinking": "low",
   "tool_call_cap": 3,
   "tool_call_cap_source": "agent default",
-  "status": "running",
+  "status": "completed",
   "started_at": "2026-07-28T23:42:01.346Z",
-  "finished_at": null,
+  "finished_at": "2026-07-28T23:54:00.023Z",
   "scenarios": {
     "rag-ingestion-retrieval": {
-      "status": "building",
-      "stages_done": [],
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
       "pid": 92447,
-      "finished_at": null
+      "finished_at": "2026-07-28T23:54:00.012Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
     }
   }
 }

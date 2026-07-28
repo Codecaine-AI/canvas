@@ -1,0 +1,204 @@
+{
+  "axis": "ph",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-184200",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean on call validity: no tool call returned ERROR, no finalize or request was rejected, and the session had no retry. APPLIED calls carrying lint findings were correctly excluded from the failure count. There was no parse/schema-validation fight or repeated error class.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 4200×2400",
+          "finding": "The first operation applied successfully; there was no failed-call run before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "Committed: Built a clean, sectioned RAG lifecycle diagram covering version-consistent ingestion and publication, permission-aware hybrid retrieval, cited/low-confidence answers, failure recovery, feedback, and atomic embedding-generation rebuilds.",
+          "finding": "Finalize succeeded on its first attempt and was not blocked or retried."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session used two framed whole-board looks during QA, at turns 72 and 75. The first was followed by description and title edits and then a second render, giving one render-adjust-render loop, but those intervening edits were metadata rather than visual corrections. No section- or object-level close-up was used while constructing or routing the dense publication and retrieval regions, so the perception loop was substantially weaker than the 9–10 anchors despite standing-state feedback and clean final diagnostics.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "First explicit framed render arrived only after the 68-operation board build and routing work; there were no close-ups of the dense retrieval, publication, or exception-routing regions during construction."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The first QA render reported clean diagnostics and exposed the complete board structure and routes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 73,
+          "transcript_excerpt": "APPLIED · updateDescription",
+          "finding": "The agent made an adjustment after reading the first render, but it changed board metadata rather than geometry or visible route defects."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 75,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "A second whole-board QA render completed one render-adjust-render loop and again reported clean diagnostics."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was actively repaired rather than silently overridden. Approximately 17 error-severity lint occurrences were raised during construction, alongside numerous warnings, but final QA was clean. Several routing/label problems took multiple attempts, especially turns 21–24 and 52–59, yet the agent changed tactics through label movement, shortening, deletion, and rerouting; the same lint was not simply re-fired for more than three consecutive turns without a strategy change. No warning remained committed, so no override reason was required.",
+      "lint_error_count": 17,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 2,
+          "transcript_excerpt": "+ E1 containment: publish-gate extends 20px outside its section publish",
+          "finding": "The containment error was repaired on turn 3 by moving publish-gate 20px left."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "− E1 containment  (resolved)",
+          "finding": "The agent accepted and fixed the named containment issue rather than fighting it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 21,
+          "transcript_excerpt": "+ E1 covered-content: label \"terms · version\" chip on e-embed-keyword lies on e-embed-doc's path for 168px",
+          "finding": "A dense publication-route lint started a short positioning skirmish."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 24,
+          "transcript_excerpt": "− E1 covered-content  (resolved)",
+          "finding": "After changing label positions across turns 22–24, the error was resolved; the strategy changed rather than merely repeating an identical call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 55,
+          "transcript_excerpt": "APPLIED · reroute e-embed-retry",
+          "finding": "The agent switched from moving the conflicting context label to rerouting the exception edge, demonstrating a strategy change during the longer lint sequence."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "e-rewrite-vector  label searches → —\nLINTS · +0 −2",
+          "finding": "The remaining cross-route label conflict was eliminated by removing a nonessential label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 75,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "No lint warning or error was silently carried into the committed state."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary is broadly supported by the stage diff: the board contains sectioned ingestion, three-store publication with a consistency gate, hybrid retrieval, ACL filtering, cited and low-confidence answer paths, quarantine/retry/dead-letter handling, feedback artifacts, and a rebuild/consistency/atomic-promotion chain. The wording says the diagram is 'covering' these concepts rather than claiming every requested return edge exists, so it is not materially dishonest. 'Clean' is supported mechanically by clean final diagnostics, though it is mildly promotional language rather than a precise diff claim.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "line": "Built a clean, sectioned RAG lifecycle diagram covering version-consistent ingestion and publication, permission-aware hybrid retrieval, cited/low-confidence answers, failure recovery, feedback, and atomic embedding-generation rebuilds.",
+          "assessment": "Supported by the committed sections, objects, and connections and by the final 'DIAGNOSTICS · clean' result. The summary does not claim a specific edge or behavior absent from the diff."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "e-vector-gate vector-index→publish-gate ... e-doc-gate document-store→publish-gate ... e-keyword-gate keyword-index→publish-gate",
+          "finding": "Concrete route evidence supports the version-consistent publication claim."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "e-rewrite-vector query-rewrite→vector-search ... e-rewrite-keyword query-rewrite→keyword-search ... e-fuse-permission fuse-rerank→permission-filter",
+          "finding": "Concrete route evidence supports permission-aware hybrid retrieval."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "e-confidence-answer confidence→grounded-answer ... e-confidence-dontknow confidence→dont-know \"thin / low score\"",
+          "finding": "Concrete route evidence supports cited and low-confidence answer handling."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "e-rebuild-newgen rebuild-coordinator→new-generation ... e-newgen-check new-generation→consistency-check ... e-check-promote consistency-check→atomic-promote",
+          "finding": "Concrete route evidence supports the atomic embedding-generation rebuild claim."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session committed 70 patch operations in 491 seconds, approximately 8.18 minutes, comfortably within the 15-minute and 300-turn budgets. The operation count was plausible for a large multi-section architecture diagram. There was some iterative route and label tuning, but no build-delete-rebuild cycle, repeated NO-OP, or abandonment. The permission-filter move out and back and repeated label positioning were corrective iteration rather than rubric-defined operation thrash.",
+      "operation_count": 70,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 8.18,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 3,
+          "transcript_excerpt": "APPLIED · move_by permission-filter -20,+0",
+          "finding": "This fixed containment but introduced crowding; the later reversal and section resize were a bounded layout correction, not a delete/rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 5,
+          "transcript_excerpt": "APPLIED · resize retrieve → 1260×420",
+          "finding": "The agent resolved the containment-versus-crowding tradeoff by changing the enclosing section rather than continuing to oscillate the object."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "APPLIED · update_text e-rewrite-vector",
+          "finding": "Removing a troublesome optional label ended a routing adjustment sequence without deleting and rebuilding the edge."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "Committed: ... (70 patch operations).",
+          "finding": "The agent reached finalize well within both budgets."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session completed normally, committed successfully, and required no retry, so nothing was excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 56154,
+    "output_tokens": 3412
+  },
+  "flags": []
+}

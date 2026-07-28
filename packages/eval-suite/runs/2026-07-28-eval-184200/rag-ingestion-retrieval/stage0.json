@@ -1,0 +1,1124 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-28-eval-184200.rag-ingestion-retrieval",
+  "title": "RAG Ingestion, Retrieval & Grounded Answers",
+  "description": "# Retrieval-augmented generation: ingestion to grounded answers\n\nReads left to right across the serving path: source imports and ACLs are normalized, hash-classified, chunked with versioned metadata, embedded, and published only when vector, fragment, and keyword stores agree on one version. Queries are rewritten into parallel vector and keyword searches, fused and reranked, permission-filtered, then either produce a cited answer from strong evidence or an explicit “I don’t know.”\n\nDashed exception paths isolate unparseable content, retry transient embedding failures, dead-letter exhausted work, and rebuild a new embedding generation in the background before atomic promotion or rollback. Feedback and coverage gaps inform future ingestion priorities.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-28-eval-184200 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 4200,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "section",
+      "text": "1 · Sources & arrivals",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 140,
+        "width": 760,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "section",
+      "text": "2 · Extract & classify",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1020,
+        "y": 140,
+        "width": 760,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "derive",
+      "type": "section",
+      "text": "3 · Chunk & embed",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1920,
+        "y": 140,
+        "width": 760,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "4 · Version-consistent publication",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2820,
+        "y": 140,
+        "width": 1240,
+        "height": 360
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "5 · Query planning",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 700,
+        "width": 760,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "retrieve",
+      "type": "section",
+      "text": "6 · Hybrid retrieval & permissions",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1020,
+        "y": 700,
+        "width": 1260,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "answer",
+      "type": "section",
+      "text": "7 · Grounded answer",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2400,
+        "y": 700,
+        "width": 760,
+        "height": 460
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "8 · Feedback & coverage",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3300,
+        "y": 700,
+        "width": 760,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "failures",
+      "type": "section",
+      "text": "Failure handling & reprocessing",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1360,
+        "width": 1240,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "Embedding-model rebuild & atomic switchover",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1520,
+        "y": 1360,
+        "width": 1660,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "legend",
+      "type": "section",
+      "text": "Reading notes",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 3340,
+        "y": 1360,
+        "width": 720,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "source-adapters",
+      "type": "document-stack",
+      "text": "Source adapters",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 180,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document-stack"
+      }
+    },
+    {
+      "id": "arrival",
+      "type": "document",
+      "text": "Import / update + ACLs",
+      "color": "gray",
+      "parentId": "sources",
+      "geometry": {
+        "x": 600,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "normalize",
+      "type": "process",
+      "text": "Extract & normalize",
+      "color": "gray",
+      "parentId": "extract",
+      "geometry": {
+        "x": 1080,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hash-classify",
+      "type": "decision",
+      "text": "Content hash status",
+      "color": "gray",
+      "parentId": "extract",
+      "geometry": {
+        "x": 1460,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "chunk",
+      "type": "process",
+      "text": "Chunk + preserve metadata",
+      "color": "gray",
+      "parentId": "derive",
+      "geometry": {
+        "x": 1980,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "predefined-process",
+      "text": "Rate-limited embedding",
+      "color": "gray",
+      "parentId": "derive",
+      "geometry": {
+        "x": 2340,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "vector-index",
+      "type": "icon",
+      "text": "Vector index",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2880,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "document-store",
+      "type": "icon",
+      "text": "Fragment store",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3240,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "keyword-index",
+      "type": "icon",
+      "text": "Keyword index",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3600,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "publish-gate",
+      "type": "icon",
+      "text": "Consistent version",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3940,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "user-question",
+      "type": "icon",
+      "text": "User",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 180,
+        "y": 840,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "person"
+    },
+    {
+      "id": "query-rewrite",
+      "type": "process",
+      "text": "Rewrite into searches",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 540,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "vector-search",
+      "type": "predefined-process",
+      "text": "Vector lookup",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 1080,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "keyword-search",
+      "type": "predefined-process",
+      "text": "Keyword lookup",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 1440,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "fuse-rerank",
+      "type": "process",
+      "text": "Fuse + rerank",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 1800,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "permission-filter",
+      "type": "icon",
+      "text": "Apply user ACLs",
+      "color": "gray",
+      "parentId": "retrieve",
+      "geometry": {
+        "x": 2160,
+        "y": 840,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "confidence",
+      "type": "decision",
+      "text": "Enough strong evidence?",
+      "color": "gray",
+      "parentId": "answer",
+      "geometry": {
+        "x": 2460,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "grounded-answer",
+      "type": "icon",
+      "text": "Answer + citations",
+      "color": "gray",
+      "parentId": "answer",
+      "geometry": {
+        "x": 2820,
+        "y": 840,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    },
+    {
+      "id": "feedback-record",
+      "type": "document",
+      "text": "Signals + cited utility",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 3360,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "document"
+      }
+    },
+    {
+      "id": "coverage-gaps",
+      "type": "icon",
+      "text": "Coverage gaps",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 3720,
+        "y": 840,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "quarantine",
+      "type": "icon",
+      "text": "Quarantine",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 180,
+        "y": 1500,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "retry-workers",
+      "type": "icon",
+      "text": "Retry workers",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 540,
+        "y": 1500,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "dead-letter",
+      "type": "icon",
+      "text": "Dead-letter",
+      "color": "gray",
+      "parentId": "failures",
+      "geometry": {
+        "x": 900,
+        "y": 1500,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "rebuild-coordinator",
+      "type": "icon",
+      "text": "Rebuild coordinator",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1580,
+        "y": 1500,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "gear"
+    },
+    {
+      "id": "new-generation",
+      "type": "icon",
+      "text": "New generation",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1980,
+        "y": 1500,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "database"
+    },
+    {
+      "id": "consistency-check",
+      "type": "decision",
+      "text": "Complete + consistent?",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2300,
+        "y": 1500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "atomic-promote",
+      "type": "predefined-process",
+      "text": "Atomic promote / rollback",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2840,
+        "y": 1500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "reading-note",
+      "type": "sticky",
+      "text": "**Reading guide**\n- Solid arrows: serving path\n- Dashed arrows: exceptions / background work\n- Every fragment carries source, permissions, headings, and version\n- Only fully consistent versions become searchable",
+      "color": "yellow",
+      "parentId": "legend",
+      "geometry": {
+        "x": 3400,
+        "y": 1480,
+        "width": 560,
+        "height": 340
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "dont-know",
+      "type": "icon",
+      "text": "I don’t know",
+      "color": "gray",
+      "parentId": "answer",
+      "geometry": {
+        "x": 2820,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "chat"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-source-arrival",
+      "from": {
+        "objectId": "source-adapters",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "arrival",
+        "anchor": "left"
+      },
+      "label": "arrives",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-arrival-normalize",
+      "from": {
+        "objectId": "arrival",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "normalize",
+        "anchor": "left"
+      },
+      "label": "content + ACLs",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-normalize-hash",
+      "from": {
+        "objectId": "normalize",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "hash-classify",
+        "anchor": "left"
+      },
+      "label": "text",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-hash-chunk",
+      "from": {
+        "objectId": "hash-classify",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chunk",
+        "anchor": "left"
+      },
+      "label": "new / changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-embed",
+      "from": {
+        "objectId": "chunk",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "embed",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-vector",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "vector-index",
+        "anchor": "left"
+      },
+      "label": "vectors · version",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-doc",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "document-store",
+        "anchor": "top"
+      },
+      "label": "fragments · metadata",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-embed-keyword",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "keyword-index",
+        "anchor": "top"
+      },
+      "label": "terms · version",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.9,
+        "offset": 120
+      }
+    },
+    {
+      "id": "e-keyword-gate",
+      "from": {
+        "objectId": "keyword-index",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "left"
+      },
+      "label": "ready",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-user-rewrite",
+      "from": {
+        "objectId": "user-question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "query-rewrite",
+        "anchor": "left"
+      },
+      "label": "question",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-vector",
+      "from": {
+        "objectId": "query-rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "vector-search",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.25,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-rewrite-keyword",
+      "from": {
+        "objectId": "query-rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "keyword-search",
+        "anchor": "left"
+      },
+      "label": "parallel",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.55,
+        "offset": 120
+      }
+    },
+    {
+      "id": "e-vector-fuse",
+      "from": {
+        "objectId": "vector-search",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "fuse-rerank",
+        "anchor": "top"
+      },
+      "label": "vector candidates",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1220,
+          760
+        ],
+        [
+          1940,
+          760
+        ]
+      ]
+    },
+    {
+      "id": "e-keyword-fuse",
+      "from": {
+        "objectId": "keyword-search",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fuse-rerank",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-fuse-permission",
+      "from": {
+        "objectId": "fuse-rerank",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "permission-filter",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-permission-confidence",
+      "from": {
+        "objectId": "permission-filter",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "confidence",
+        "anchor": "left"
+      },
+      "label": "context",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.4,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-confidence-answer",
+      "from": {
+        "objectId": "confidence",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "grounded-answer",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-confidence-dontknow",
+      "from": {
+        "objectId": "confidence",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "dont-know",
+        "anchor": "left"
+      },
+      "label": "thin / low score",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-normalize-quarantine",
+      "from": {
+        "objectId": "normalize",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "quarantine",
+        "anchor": "top"
+      },
+      "label": "unparseable + context",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-embed-retry",
+      "from": {
+        "objectId": "embed",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retry-workers",
+        "anchor": "top"
+      },
+      "label": "transient failure",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2480,
+          600
+        ],
+        [
+          1000,
+          600
+        ],
+        [
+          1000,
+          1260
+        ],
+        [
+          600,
+          1260
+        ]
+      ]
+    },
+    {
+      "id": "e-vector-gate",
+      "from": {
+        "objectId": "vector-index",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-doc-gate",
+      "from": {
+        "objectId": "document-store",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish-gate",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-retry-deadletter",
+      "from": {
+        "objectId": "retry-workers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dead-letter",
+        "anchor": "left"
+      },
+      "label": "exhausted retries",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-rebuild-newgen",
+      "from": {
+        "objectId": "rebuild-coordinator",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "new-generation",
+        "anchor": "left"
+      },
+      "label": "background re-embed",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-newgen-check",
+      "from": {
+        "objectId": "new-generation",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "consistency-check",
+        "anchor": "left"
+      },
+      "label": "built",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-check-promote",
+      "from": {
+        "objectId": "consistency-check",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "atomic-promote",
+        "anchor": "left"
+      },
+      "label": "yes · atomic cutover",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-answer-feedback",
+      "from": {
+        "objectId": "grounded-answer",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback-record",
+        "anchor": "left"
+      },
+      "label": "thumbs + cited utility",
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}

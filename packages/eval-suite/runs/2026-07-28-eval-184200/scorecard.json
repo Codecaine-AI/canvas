@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-07-28-eval-184200",
+  "status": "running",
+  "fingerprint": {
+    "repo": "2f674932+dirty",
+    "model": "codex-lb/gpt-5.6-sol @ low",
+    "prompt": "93aa6b6d",
+    "lints": "d6b4248b",
+    "styles": "3446d051",
+    "surface": "fbd8e704",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-07-28-eval-174737",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 1,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "rag-ingestion-retrieval",
+      "label": "rag-ingestion-retrieval",
+      "status": "graded",
+      "scores": {
+        "SF": 6,
+        "RC": 5,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": -1.5,
+        "RC": -1,
+        "RD": 0,
+        "CF": -1,
+        "SD": null,
+        "PH": 5
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 6,
+      "RC": 5,
+      "RD": 6.5,
+      "CF": 6.5,
+      "SD": null,
+      "PH": 8
+    },
+    "deltas": {
+      "SF": -1.5,
+      "RC": -1,
+      "RD": 0,
+      "CF": -1,
+      "SD": null,
+      "PH": 5
+    },
+    "flags": []
+  },
+  "movements": [
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "SF",
+      "previous": 7.5,
+      "current": 6,
+      "delta": -1.5,
+      "evidence": "The board communicates the system's purpose, major components, primary end-to-end flow, permission boundary, consistent-publication gate, core failure destinations, low-confidence abstention, and the broad background rebuild mechanism. It is strong enough for an architecture discussion, but not an implementation plan. Several system-defining operational semantics are missing or only suggested: unchanged bypass, supersession and stale-record deletion, non-blocking batch quarantine, dead-letter payload and re-entry, repair or rollback of partial publication, feedback-to-ingestion prioritization, continued serving from the current generation during rebuild, and retention of the prior generation for rollback. There are no system-defining contradictions, and the main flow is reconstructable, but multiple important relationships require inference."
+    },
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "RC",
+      "previous": 6,
+      "current": 5,
+      "delta": -1,
+      "evidence": "The board clearly represents the main RAG serving path, three-store version-consistent publication, permission-aware hybrid retrieval, grounded responses, basic processing exceptions, and the rebuild promotion gate. However, enough operational requirements are missing that it cannot replace the brief in design review—especially document-version lifecycle behavior, partial-write recovery, batch continuation, the feedback-to-ingestion loop, and explicit current/prior generation serving boundaries."
+    },
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "CF",
+      "previous": 7.5,
+      "current": 6.5,
+      "delta": -1,
+      "evidence": "The board lands at 6.5 because its structured grid, restrained semantic color, and mostly steady registers feel deliberate, but visible routing waypoints and a substantial empty lower band keep it from reading as fully finished."
+    },
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "PH",
+      "previous": 3,
+      "current": 8,
+      "delta": 5,
+      "evidence": "Mechanically clean on call validity: no tool call returned ERROR, no finalize or request was rejected, and the session had no retry. APPLIED calls carrying lint findings were correctly excluded from the failure count. There was no parse/schema-validation fight or repeated error class."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-184200",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at the 6–6.5 anchor because its spacious, clearly sectioned layout is readable with effort, but very small text and several long dashed exception routes prevent comfortable arm’s-length reading.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "There is abundant open space around most nodes, but many labels and chips are extremely small at the full-board scale, and the “parallel” chip crowds the Section 6 header."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Large outlined and lightly tinted regions with numbered headers make the main stages and auxiliary workflows identifiable without tracing edges."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "The solid serving path is mostly clean, but the red dashed exception paths make long multi-turn detours across section boundaries, forcing backtracking and competing with nearby labels."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 8,
+        "note": "Ink density is low and most sections contain only two to four nodes, so decomposition is strong, though the oversized canvas makes the content and typography visually underscaled."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6684,
+    "output_tokens": 437
+  },
+  "flags": []
+}

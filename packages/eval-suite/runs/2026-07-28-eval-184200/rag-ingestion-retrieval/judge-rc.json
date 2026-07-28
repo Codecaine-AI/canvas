@@ -1,0 +1,738 @@
+{
+  "axis": "rc",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-184200",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The diagram must show knowledge moving end to end from ingestion through retrieval to grounded answers.",
+        "brief_evidence": "“diagram of how our retrieval-augmented generation system carries knowledge from ingestion through grounded answers”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Main board, sections 1–7",
+            "observation": "The board presents a left-to-right ingestion path through extraction, chunking, embedding, publication, query planning, retrieval, and grounded answer sections."
+          },
+          {
+            "source": "json",
+            "locator": "final_canvas.description; objects sections sources through answer; corresponding serving-path connections",
+            "observation": "The description explicitly states ingestion-to-grounded-answer behavior, and the object/connection graph encodes the end-to-end path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Source adapters must pull from document stores, wikis, ticket systems, and code repositories.",
+        "brief_evidence": "“Source adapters pull from document stores, wikis, ticket systems, and code repositories”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, “Source adapters”",
+            "observation": "A source-adapters component is shown, but the four requested source classes are not named."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=source-adapters] and full object-text search",
+            "observation": "The JSON contains “Source adapters” but no object, note, or connection naming document stores, wikis, ticket systems, or code repositories as sources."
+          }
+        ],
+        "note": "The adapter responsibility is present, but the stated source categories are omitted."
+      },
+      {
+        "id": "R3",
+        "requirement": "Source adapters must pull on schedules and change notifications.",
+        "brief_evidence": "“on schedules and change notifications”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 and inbound paths to “Source adapters”",
+            "observation": "No schedule, timer, notification, or change-event trigger is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects and connections searched for schedule, notification, trigger, timer, and change event",
+            "observation": "No matching trigger object, label, note, or connection exists."
+          }
+        ],
+        "note": "The board shows arrivals but not what initiates source pulls."
+      },
+      {
+        "id": "R4",
+        "requirement": "An arrival may be either a first import or an update.",
+        "brief_evidence": "“An arrival may be a first import or an update”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, arrival document",
+            "observation": "The arrival is labeled “Import / update + ACLs.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=arrival].text",
+            "observation": "The text is “Import / update + ACLs.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "Each source's access rules must travel with the arriving content.",
+        "brief_evidence": "“each source's access rules travel with it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 arrival and connection into extraction",
+            "observation": "The arrival includes “ACLs,” and the next arrow is labeled “content + ACLs.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=arrival]; connections[id=e-arrival-normalize]",
+            "observation": "The arrival text contains ACLs and the normalization connection explicitly carries “content + ACLs.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "Extraction must normalize formats and remove boilerplate.",
+        "brief_evidence": "“Extraction normalizes formats and removes boilerplate.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, “Extract & normalize”",
+            "observation": "Extraction and normalization are shown, but boilerplate removal is not stated."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=normalize] and full text search for boilerplate",
+            "observation": "The object says “Extract & normalize”; no JSON text mentions boilerplate removal."
+          }
+        ],
+        "note": "Format normalization is recognizable, but the explicit boilerplate-removal responsibility is missing."
+      },
+      {
+        "id": "R7",
+        "requirement": "Unparseable documents must enter quarantine with failure context.",
+        "brief_evidence": "“Unparseable documents enter quarantine with failure context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from extraction to Failure handling",
+            "observation": "The exception path terminates at “Quarantine” and is labeled “unparseable + context.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-normalize-quarantine]; objects[id=quarantine]",
+            "observation": "A dashed red connection from normalize to quarantine carries the label “unparseable + context.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The rest of a batch must continue when an unparseable document is quarantined.",
+        "brief_evidence": "“while the rest of the batch continues”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Extraction-to-quarantine exception path and main ingestion path",
+            "observation": "The diagram branches an unparseable item to quarantine but does not state that the remaining batch continues."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-normalize-quarantine] and all notes/descriptions searched for batch continuation",
+            "observation": "No connection label, object text, or note encodes continuation of the remaining batch."
+          }
+        ],
+        "note": "Quarantine is represented, but the required non-blocking batch behavior is not."
+      },
+      {
+        "id": "R9",
+        "requirement": "A content hash must classify every document as new, changed, or unchanged.",
+        "brief_evidence": "“A content hash classifies each document as new, changed, or unchanged.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, “Content hash status” decision and outgoing path",
+            "observation": "The hash decision is shown, but its visible outgoing classification only says “new / changed.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=hash-classify]; connections[id=e-hash-chunk]",
+            "observation": "The decision is “Content hash status,” while the only classification label is “new / changed”; unchanged is not encoded."
+          }
+        ],
+        "note": "Hash classification exists, but one of the three required outcomes is missing."
+      },
+      {
+        "id": "R10",
+        "requirement": "Unchanged content must bypass expensive processing.",
+        "brief_evidence": "“Unchanged content bypasses expensive processing.”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Outgoing paths from “Content hash status”",
+            "observation": "Only a new/changed path to chunking is visible; no unchanged bypass path or terminal is shown."
+          },
+          {
+            "source": "json",
+            "locator": "connections whose from.objectId is hash-classify; full text search for unchanged or bypass",
+            "observation": "The hash decision has only e-hash-chunk, labeled “new / changed”; no unchanged/bypass structure exists."
+          }
+        ],
+        "note": "The optimization and unchanged-control path are absent."
+      },
+      {
+        "id": "R11",
+        "requirement": "A changed document must supersede its previous version.",
+        "brief_evidence": "“A changed document supersedes its previous version”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Hash classification, publication, and version-consistency areas",
+            "observation": "Changed content is routed onward, but no supersession relationship to a previous version is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects, connections, description, and reading note searched for supersede or previous version",
+            "observation": "No supersession object, edge, or note is present."
+          }
+        ],
+        "note": "The board recognizes changed content but omits its lifecycle relationship to the old version."
+      },
+      {
+        "id": "R12",
+        "requirement": "When a document changes, stale derived records from the previous version must be deleted.",
+        "brief_evidence": "“whose stale derived records are deleted”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Changed-content path and three publication stores",
+            "observation": "No stale-record deletion or cleanup path is visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects and connections searched for stale, delete, cleanup, or derived-record removal",
+            "observation": "No deletion component, connection, label, or note exists."
+          }
+        ],
+        "note": "Required cleanup of old derived records is omitted."
+      },
+      {
+        "id": "R13",
+        "requirement": "The chunker must split normalized content with overlap.",
+        "brief_evidence": "“The chunker splits normalized content with overlap”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, “Chunk + preserve metadata”",
+            "observation": "Chunking is shown, but overlap is not stated anywhere."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=chunk], reading-note, description, and full text search for overlap",
+            "observation": "No JSON text or structure specifies overlapping chunks."
+          }
+        ],
+        "note": "The component exists, but its explicit overlap constraint is absent."
+      },
+      {
+        "id": "R14",
+        "requirement": "Every fragment must preserve headings, source identity, permissions, and a version stamp.",
+        "brief_evidence": "“preserves headings, source identity, permissions, and a version stamp on every fragment”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Reading notes",
+            "observation": "The note states: “Every fragment carries source, permissions, headings, and version.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=reading-note].text",
+            "observation": "The reading note explicitly lists source, permissions, headings, and version on every fragment."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The embedding service must accept rate-limited batches.",
+        "brief_evidence": "“The embedding service accepts rate-limited batches.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, embedding process",
+            "observation": "The process is labeled “Rate-limited embedding,” but batching is not stated."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=embed].text and nearby connections",
+            "observation": "Rate limiting is explicit; no object or connection identifies batches as the embedding input."
+          }
+        ],
+        "note": "Rate limiting is covered, but the batching requirement is not explicit."
+      },
+      {
+        "id": "R16",
+        "requirement": "Workers must retry transient embedding failures.",
+        "brief_evidence": "“Workers retry transient failures”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from embedding to “Retry workers”",
+            "observation": "The path is labeled “transient failure” and terminates at retry workers."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-embed-retry]; objects[id=retry-workers]",
+            "observation": "A dashed exception edge explicitly routes a transient embedding failure to Retry workers."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Persistently failing embedding batches must go to a dead-letter store with their inputs and attempt history so they can be reprocessed.",
+        "brief_evidence": "“then send persistently failing batches to a dead-letter store with inputs and attempt history for reprocessing”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Failure handling section",
+            "observation": "Retry workers send “exhausted retries” to “Dead-letter,” but the stored inputs, attempt history, and reprocessing path are not shown."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-retry-deadletter]; objects[id=dead-letter]; failure-section structure",
+            "observation": "The persistent-failure destination is represented, but no payload labels or outgoing reprocessing connection exist."
+          }
+        ],
+        "note": "Dead-letter routing is present; required diagnostic payload and reprocessing semantics are missing."
+      },
+      {
+        "id": "R18",
+        "requirement": "Each completed version must write vectors to a vector index.",
+        "brief_evidence": "“Each completed version writes vectors to a vector index”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, path into “Vector index”",
+            "observation": "The vector-index write is labeled “vectors · version.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-embed-vector]; objects[id=vector-index]",
+            "observation": "The connection to Vector index explicitly carries vectors and version."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Each completed version must write fragment text and metadata to a document store.",
+        "brief_evidence": "“fragment text and metadata to a document store”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, path into “Fragment store”",
+            "observation": "A publication write to the Fragment store is labeled “fragments · metadata.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-embed-doc]; objects[id=document-store]",
+            "observation": "The connection writes “fragments · metadata” to the fragment/document store."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Each completed version must write terms to a keyword index.",
+        "brief_evidence": "“terms to a keyword index”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, path into “Keyword index”",
+            "observation": "The keyword-index write is labeled “terms · version.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-embed-keyword]; objects[id=keyword-index]",
+            "observation": "The connection writes terms and version information to Keyword index."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Publication must succeed only when the vector index, document store, and keyword index all reflect the same version.",
+        "brief_evidence": "“Publication succeeds only when all three reflect the same version”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 and Reading notes",
+            "observation": "All three stores feed the “Consistent version” gate, and the note says only fully consistent versions become searchable."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=publish-gate], connections e-vector-gate/e-doc-gate/e-keyword-gate, objects[id=reading-note]",
+            "observation": "The three-store topology converges on a consistency gate, reinforced by an explicit searchable-only-when-consistent note."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Partial publication writes must remain unavailable and be repaired or rolled back before serving.",
+        "brief_evidence": "“partial writes remain unavailable and are repaired or rolled back before serving”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Version-consistent publication section and its outgoing/exception paths",
+            "observation": "The consistency gate is shown, but no partial-write state, repair path, rollback path, or explicit before-serving boundary appears in this section."
+          },
+          {
+            "source": "json",
+            "locator": "publish-section objects/connections and full text search for partial write, repair, or publication rollback",
+            "observation": "No publication repair/rollback structure exists; the only rollback text belongs to embedding-generation switchover."
+          }
+        ],
+        "note": "The happy-path consistency gate is present, but required partial-write failure and recovery semantics are omitted."
+      },
+      {
+        "id": "R23",
+        "requirement": "The retrieval service must rewrite a user question into one or more searches.",
+        "brief_evidence": "“the retrieval service rewrites it into one or more searches”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, user question to “Rewrite into searches”",
+            "observation": "The user question flows directly to a rewrite process that branches to retrieval searches."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=query-rewrite]; connections e-user-rewrite/e-rewrite-vector/e-rewrite-keyword",
+            "observation": "The rewrite object has outgoing paths to both vector and keyword searches, supporting one-or-more search generation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Vector and keyword lookups must run in parallel.",
+        "brief_evidence": "“runs vector and keyword lookups in parallel”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 5–6, branch from query rewrite",
+            "observation": "Separate Vector lookup and Keyword lookup paths are shown, with the branch labeled “parallel.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-rewrite-vector] and [id=e-rewrite-keyword]",
+            "observation": "Both searches originate from query-rewrite, and the keyword branch explicitly carries the “parallel” label."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "The retrieval service must fuse and rerank candidates.",
+        "brief_evidence": "“fuses and reranks candidates”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6, “Fuse + rerank”",
+            "observation": "Vector and keyword candidate paths converge on a Fuse + rerank process."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=fuse-rerank]; incoming connections e-vector-fuse/e-keyword-fuse",
+            "observation": "Both lookup outputs converge on the explicitly labeled fusion/reranking component."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "The asking user's permissions must be applied before retrieved context reaches generation.",
+        "brief_evidence": "“applies the asking user's permissions before context reaches the generation service”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 to Section 7",
+            "observation": "“Apply user ACLs” appears after reranking and before the context arrow enters the grounded-answer decision."
+          },
+          {
+            "source": "json",
+            "locator": "connections e-fuse-permission/e-permission-confidence; objects[id=permission-filter]",
+            "observation": "The graph orders fusion/reranking, user ACL application, then context delivery to the answer stage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Generation must answer only from retrieved evidence and return citations.",
+        "brief_evidence": "“Generation answers only from retrieved evidence and returns citations.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7, confidence gate and “Answer + citations”",
+            "observation": "Permission-filtered context enters an evidence-strength decision, whose positive branch produces Answer + citations."
+          },
+          {
+            "source": "json",
+            "locator": "final_canvas.description; objects[id=grounded-answer]; connections e-permission-confidence/e-confidence-answer",
+            "observation": "The description explicitly says queries “produce a cited answer from strong evidence,” and the graph routes retrieved context to Answer + citations."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "If context is thin or every reranker score is low, generation must say it does not know.",
+        "brief_evidence": "“If context is thin or every reranker score is low, it says it does not know.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7, negative confidence branch",
+            "observation": "The “Enough strong evidence?” decision sends “thin / low score” to “I don’t know.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=confidence], objects[id=dont-know], connection[id=e-confidence-dontknow]",
+            "observation": "The low-evidence branch is explicitly labeled “thin / low score” and terminates at “I don’t know.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Feedback must record thumb signals, usefulness of cited fragments, and unanswered questions.",
+        "brief_evidence": "“Feedback records thumb signals, the usefulness of cited fragments, and unanswered questions”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Connection from grounded answer to Feedback & coverage",
+            "observation": "The feedback path records “thumbs + cited utility,” but unanswered questions are not shown."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-answer-feedback]; objects[id=feedback-record]; full text search for unanswered",
+            "observation": "Thumbs and cited utility are explicit; no object, label, or note mentions unanswered questions."
+          }
+        ],
+        "note": "Two of the three required feedback categories are represented."
+      },
+      {
+        "id": "R30",
+        "requirement": "Coverage gaps derived from feedback must return to ingestion priorities.",
+        "brief_evidence": "“the resulting coverage gaps return to ingestion priorities”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Feedback & coverage section and paths back toward ingestion",
+            "observation": "A Coverage gaps node exists, but it has no incoming feedback edge and no return path to source or ingestion priorities."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=coverage-gaps]; all connections involving coverage-gaps; ingestion-area connections",
+            "observation": "No connection references coverage-gaps, and no ingestion-priority object or feedback loop exists."
+          }
+        ],
+        "note": "The gap concept is named, but the required operational feedback loop is absent."
+      },
+      {
+        "id": "R31",
+        "requirement": "When the embedding model changes, a rebuild coordinator must re-embed the corpus in the background into a new index generation.",
+        "brief_evidence": "“When the embedding model changes, a rebuild coordinator re-embeds the corpus in the background into a new index generation.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "“Embedding-model rebuild & atomic switchover” section",
+            "observation": "A Rebuild coordinator sends “background re-embed” work to a New generation."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=rebuild], objects[id=rebuild-coordinator], objects[id=new-generation], connection[id=e-rebuild-newgen]",
+            "observation": "The section title establishes the embedding-model-change context, and the dashed path explicitly represents background re-embedding into a new generation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Live queries must remain on the current index generation until the rebuild is complete and consistent.",
+        "brief_evidence": "“Live queries remain on the current generation until the rebuild is complete and consistent.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Rebuild section and main query-serving path",
+            "observation": "The new generation must pass “Complete + consistent?” before promotion, but no current-generation node or live-query attachment is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=consistency-check], connection[id=e-check-promote], and all query/rebuild connections",
+            "observation": "Completion and consistency gate promotion, but there is no connection demonstrating that live queries continue using the current generation meanwhile."
+          }
+        ],
+        "note": "The promotion precondition is represented; the live-query/current-generation operational boundary is not."
+      },
+      {
+        "id": "R33",
+        "requirement": "Switchover must atomically promote the new index generation.",
+        "brief_evidence": "“Switchover atomically promotes the new generation”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Rebuild section, consistency decision to final process",
+            "observation": "The positive path is labeled “yes · atomic cutover” and ends at “Atomic promote / rollback.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e-check-promote]; objects[id=atomic-promote]",
+            "observation": "The JSON explicitly encodes atomic cutover and atomic promotion after the consistency check."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "The prior index generation must remain available for rollback after switchover.",
+        "brief_evidence": "“while the prior generation remains available for rollback”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Final process in rebuild section",
+            "observation": "The process says “Atomic promote / rollback,” but no prior-generation store or retained rollback target is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=atomic-promote] and rebuild-section objects/connections",
+            "observation": "Rollback capability is named, but the graph contains no prior-generation object or availability/retention relationship."
+          }
+        ],
+        "note": "Rollback is mentioned, but the required continued availability of the prior generation is not fully represented."
+      }
+    ],
+    "coverage_fraction": 0.6721,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R8",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R10",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R11",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R12",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R22",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R30",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The permission-aware query and grounded-answer path is the strongest cluster: query rewriting, parallel vector and keyword retrieval, fusion and reranking, user ACL filtering, evidence-strength handling, cited answers, and the explicit “I don’t know” branch are all represented.",
+    "most_consequential_gap": "The most consequential gap is ingestion/version lifecycle failure semantics: unchanged bypass, changed-version supersession, stale-derived-record deletion, and partial-publication repair or rollback before serving are absent.",
+    "coverage_summary": "The board clearly represents the main RAG serving path, three-store version-consistent publication, permission-aware hybrid retrieval, grounded responses, basic processing exceptions, and the rebuild promotion gate. However, enough operational requirements are missing that it cannot replace the brief in design review—especially document-version lifecycle behavior, partial-write recovery, batch continuation, the feedback-to-ingestion loop, and explicit current/prior generation serving boundaries.",
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 14272,
+    "output_tokens": 8414
+  },
+  "flags": []
+}

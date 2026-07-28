@@ -1,0 +1,545 @@
+{
+  "axis": "sf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-28-eval-184200",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 6,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system carries knowledge from ingestion through grounded answers using retrieval-augmented generation.",
+        "brief_evidence": "“how our retrieval-augmented generation system carries knowledge from ingestion through grounded answers”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose identifies “a retrieval-augmented generation system that ingests governed source content” and proceeds through indexing, retrieval, and grounded answers.",
+        "note": "The overall domain and purpose are explicit."
+      },
+      {
+        "brief_element": "Source adapters pull content from document stores, wikis, ticket systems, and code repositories.",
+        "brief_evidence": "“Source adapters pull from document stores, wikis, ticket systems, and code repositories”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers a “Source adapters” component that supplies arriving source material, but names none of the four source classes.",
+        "note": "The adapter abstraction survives, but its required source coverage does not."
+      },
+      {
+        "brief_element": "Source adapters run both on schedules and in response to change notifications.",
+        "brief_evidence": "“on schedules and change notifications”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies scheduled pulls or change-notification triggers.",
+        "note": "Arrival triggering and cadence are absent."
+      },
+      {
+        "brief_element": "An arrival can represent either a first import or an update.",
+        "brief_evidence": "“An arrival may be a first import or an update”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component “Import / update + ACLs” is reconstructed as importing or updating arriving material.",
+        "note": "Both arrival modes are visible."
+      },
+      {
+        "brief_element": "Each source's access rules travel with the arriving content.",
+        "brief_evidence": "“each source's access rules travel with it”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Import / update + ACLs” and a flow labeled “content + ACLs.”",
+        "note": "The board clearly transmits governed content entering ingestion."
+      },
+      {
+        "brief_element": "Extraction normalizes source formats.",
+        "brief_evidence": "“Extraction normalizes formats”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed “Extract & normalize” component extracts and normalizes imported content into text.",
+        "note": "Normalization is explicit."
+      },
+      {
+        "brief_element": "Extraction removes boilerplate.",
+        "brief_evidence": "“and removes boilerplate”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies boilerplate removal.",
+        "note": "The extraction box communicates normalization but not this cleanup responsibility."
+      },
+      {
+        "brief_element": "Unparseable documents are sent to quarantine.",
+        "brief_evidence": "“Unparseable documents enter quarantine”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The failure path runs from the extraction area over a red dashed “unparseable + context” route to “Quarantine.”",
+        "note": "The quarantine trigger and destination are clear."
+      },
+      {
+        "brief_element": "Quarantined documents include failure context.",
+        "brief_evidence": "“with failure context”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The quarantine route is explicitly labeled “unparseable + context,” and the reconstructed outcome says the item and its context are quarantined.",
+        "note": "Failure context is preserved."
+      },
+      {
+        "brief_element": "The rest of an ingestion batch continues when a document is quarantined.",
+        "brief_evidence": "“while the rest of the batch continues”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that quarantine is per-document, non-blocking, or that the remaining batch continues.",
+        "note": "The exception route is visible, but its non-blocking batch semantics are not."
+      },
+      {
+        "brief_element": "A content hash classifies every document as new, changed, or unchanged.",
+        "brief_evidence": "“A content hash classifies each document as new, changed, or unchanged.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Content hash status” decision, but its recovered outgoing status is only “new / changed.”",
+        "note": "Hash classification is present, but the unchanged classification is omitted."
+      },
+      {
+        "brief_element": "Unchanged content bypasses expensive downstream processing.",
+        "brief_evidence": "“Unchanged content bypasses expensive processing.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction flow shows an unchanged branch or a bypass around chunking and embedding.",
+        "note": "A major ingestion control branch is absent."
+      },
+      {
+        "brief_element": "A changed document supersedes its previous version.",
+        "brief_evidence": "“A changed document supersedes its previous version”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry describes supersession of an old document version.",
+        "note": "Version replacement semantics cannot be recovered."
+      },
+      {
+        "brief_element": "Stale derived records belonging to a superseded version are deleted.",
+        "brief_evidence": "“whose stale derived records are deleted”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows deletion of old chunks, vectors, stored fragments, or keyword terms.",
+        "note": "The lifecycle of derived records on updates is missing."
+      },
+      {
+        "brief_element": "The chunker splits normalized content into overlapping fragments.",
+        "brief_evidence": "“The chunker splits normalized content with overlap”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers “Chunk + preserve metadata” and says it chunks new or changed text, but it does not mention overlap.",
+        "note": "Chunking survives; the overlap constraint does not."
+      },
+      {
+        "brief_element": "Every fragment preserves headings.",
+        "brief_evidence": "“preserves headings ... on every fragment”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reading-guide constraint is reconstructed as “Every fragment carries source, permissions, headings, and version.”",
+        "note": "Headings are explicitly retained."
+      },
+      {
+        "brief_element": "Every fragment preserves source identity.",
+        "brief_evidence": "“preserves ... source identity ... on every fragment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records the constraint that every fragment carries “source.”",
+        "note": "Source provenance is explicit."
+      },
+      {
+        "brief_element": "Every fragment preserves permissions.",
+        "brief_evidence": "“preserves ... permissions ... on every fragment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records the constraint that every fragment carries “permissions.”",
+        "note": "Per-fragment authorization metadata is explicit."
+      },
+      {
+        "brief_element": "Every fragment preserves a version stamp.",
+        "brief_evidence": "“preserves ... a version stamp on every fragment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction records the constraint that every fragment carries “version.”",
+        "note": "Per-fragment versioning is explicit."
+      },
+      {
+        "brief_element": "The embedding service accepts rate-limited batches.",
+        "brief_evidence": "“The embedding service accepts rate-limited batches.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Rate-limited embedding,” but does not explicitly recover batch-based submission.",
+        "note": "Rate limiting is clear; batching is not."
+      },
+      {
+        "brief_element": "Workers retry transient embedding failures.",
+        "brief_evidence": "“Workers retry transient failures”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red dashed “transient failure” path leads from rate-limited embedding to “Retry workers,” which are reconstructed as attempting reprocessing.",
+        "note": "The trigger and retry responsibility are clear."
+      },
+      {
+        "brief_element": "Persistently failing embedding batches are sent to a dead-letter store.",
+        "brief_evidence": "“then send persistently failing batches to a dead-letter store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed failure flow sends work from Retry workers over an “exhausted retries” route to “Dead-letter.”",
+        "note": "The terminal failure destination is visible, although the batch granularity is implicit."
+      },
+      {
+        "brief_element": "The dead-letter record retains the failed inputs.",
+        "brief_evidence": "“with inputs”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that the dead-letter store retains the original inputs.",
+        "note": "Dead-letter payload contents are unspecified."
+      },
+      {
+        "brief_element": "The dead-letter record retains attempt history.",
+        "brief_evidence": "“and attempt history”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that retry attempt history is retained.",
+        "note": "Operational diagnostics are missing."
+      },
+      {
+        "brief_element": "Dead-lettered batches can be reprocessed.",
+        "brief_evidence": "“for reprocessing”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The area is named “Failure handling & reprocessing,” but no readable return route or explicit dead-letter re-entry flow is recovered; the uncertainty list says the retry re-entry point is not established.",
+        "note": "Reprocessing is suggested by the group title, not made operationally actionable."
+      },
+      {
+        "brief_element": "Each completed content version writes vectors to a vector index.",
+        "brief_evidence": "“Each completed version writes vectors to a vector index”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Vector index” receives a publication flow labeled “vectors · version.”",
+        "note": "The vector write and version association are clear."
+      },
+      {
+        "brief_element": "Each completed content version writes fragment text and metadata to a document store.",
+        "brief_evidence": "“fragment text and metadata to a document store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A “Fragment store” is connected to a publication line labeled “fragments · metadata.”",
+        "note": "The reconstructed name differs from “document store” but communicates the intended responsibility."
+      },
+      {
+        "brief_element": "Each completed content version writes terms to a keyword index.",
+        "brief_evidence": "“and terms to a keyword index”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “Keyword index” connected to the publication path, with a nearby “terms · version” label.",
+        "note": "The intended keyword publication is recoverable despite slight bus-label ambiguity."
+      },
+      {
+        "brief_element": "Publication succeeds only when the vector index, document store, and keyword index all reflect the same version.",
+        "brief_evidence": "“Publication succeeds only when all three reflect the same version”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies a “Version-consistent publication” section, convergence of all three stores into “Consistent version,” and a reading-guide invariant that “Only fully consistent versions become searchable.”",
+        "note": "The critical publication gate is strongly transmitted."
+      },
+      {
+        "brief_element": "Partial publication writes remain unavailable to serving.",
+        "brief_evidence": "“partial writes remain unavailable”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed reading guide states that only fully consistent versions become searchable.",
+        "note": "This communicates that partial writes cannot be served."
+      },
+      {
+        "brief_element": "Partial publication writes are repaired or rolled back before serving.",
+        "brief_evidence": "“and are repaired or rolled back before serving”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows repair or rollback of partial writes in the normal three-store publication path. The separate “Atomic promote / rollback” component belongs to embedding-generation rebuilds.",
+        "note": "The availability gate survives, but the publication recovery procedure does not."
+      },
+      {
+        "brief_element": "A user's question enters the retrieval service.",
+        "brief_evidence": "“When a user asks a question, the retrieval service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A “User” sends a flow labeled “question” into the “Query planning” section.",
+        "note": "The query entry point is clear."
+      },
+      {
+        "brief_element": "The retrieval service rewrites the question into one or more searches.",
+        "brief_evidence": "“rewrites it into one or more searches”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component “Rewrite into searches” transforms the user question before retrieval.",
+        "note": "Plural searches are communicated by the component label."
+      },
+      {
+        "brief_element": "Vector and keyword lookups run in parallel.",
+        "brief_evidence": "“runs vector and keyword lookups in parallel”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Both “Vector lookup” and “Keyword lookup” are recovered, and a nearby label reads “parallel,” but the uncertainty list says the fan-out and arrow geometry do not establish whether execution is strictly parallel or partly sequential.",
+        "note": "The intended parallelism is suggested but not unambiguous."
+      },
+      {
+        "brief_element": "The retrieval service fuses vector and keyword candidates.",
+        "brief_evidence": "“fuses ... candidates”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Both lookup paths feed a component labeled “Fuse + rerank.”",
+        "note": "Hybrid candidate fusion is explicit."
+      },
+      {
+        "brief_element": "The retrieval service reranks fused candidates.",
+        "brief_evidence": "“and reranks candidates”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component is explicitly labeled “Fuse + rerank.”",
+        "note": "Reranking is explicit."
+      },
+      {
+        "brief_element": "The asking user's permissions are applied before retrieved context reaches generation.",
+        "brief_evidence": "“applies the asking user's permissions before context reaches the generation service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Apply user ACLs” appears after “Fuse + rerank” and before the flow labeled “context” enters the grounded-answer section.",
+        "note": "The authorization boundary and ordering are clear."
+      },
+      {
+        "brief_element": "The generation service answers only from retrieved evidence.",
+        "brief_evidence": "“Generation answers only from retrieved evidence”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Permission-filtered “context” enters “Enough strong evidence?” and then “Answer + citations,” and the section is named “Grounded answer,” but no explicit constraint says generation may use only that evidence.",
+        "note": "Grounding is strongly implied, but the exclusive-evidence boundary is not stated."
+      },
+      {
+        "brief_element": "Generated answers return citations.",
+        "brief_evidence": "“and returns citations”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The successful terminal component is explicitly labeled “Answer + citations.”",
+        "note": "Citation-bearing output is clear."
+      },
+      {
+        "brief_element": "Thin retrieved context triggers an 'I don't know' response.",
+        "brief_evidence": "“If context is thin ... it says it does not know.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A branch labeled “thin / low score” runs from “Enough strong evidence?” to “I don’t know.”",
+        "note": "The thin-context abstention path is explicit."
+      },
+      {
+        "brief_element": "An 'I don't know' response is also triggered when every reranker score is low.",
+        "brief_evidence": "“or every reranker score is low, it says it does not know”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The abstention branch includes “low score,” but does not state that every reranker score must be low.",
+        "note": "Low-score abstention survives, but its exact all-candidates threshold semantics are softened."
+      },
+      {
+        "brief_element": "Feedback records thumb signals.",
+        "brief_evidence": "“Feedback records thumb signals”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The answer emits “thumbs + cited utility” to “Signals + cited utility.”",
+        "note": "Thumb feedback is explicit."
+      },
+      {
+        "brief_element": "Feedback records the usefulness of cited fragments.",
+        "brief_evidence": "“the usefulness of cited fragments”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The feedback flow and destination explicitly include “cited utility.”",
+        "note": "Citation utility is visible."
+      },
+      {
+        "brief_element": "Feedback records unanswered questions.",
+        "brief_evidence": "“and unanswered questions”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows unanswered questions being recorded, including no visible feedback route from “I don’t know.”",
+        "note": "The abstention outcome is shown, but its feedback capture is not."
+      },
+      {
+        "brief_element": "Feedback produces coverage gaps.",
+        "brief_evidence": "“the resulting coverage gaps”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Coverage gaps” component appears beside “Signals + cited utility,” but the uncertainty list states there is no visible connecting arrow and ownership is unclear.",
+        "note": "Coverage gaps are named without a recoverable derivation flow."
+      },
+      {
+        "brief_element": "Coverage gaps feed back into ingestion priorities.",
+        "brief_evidence": "“coverage gaps return to ingestion priorities”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction flow connects “Coverage gaps” back to source adapters, ingestion planning, or an ingestion-priority component.",
+        "note": "The system's learning and prioritization feedback loop is absent."
+      },
+      {
+        "brief_element": "An embedding-model change triggers a corpus rebuild.",
+        "brief_evidence": "“When the embedding model changes, a rebuild coordinator re-embeds the corpus”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an “Embedding-model rebuild & atomic switchover” section and a “Rebuild coordinator,” but no explicit triggering arrow or event for the model change is recovered.",
+        "note": "The rebuild scenario is clear; its initiating event is implicit."
+      },
+      {
+        "brief_element": "A rebuild coordinator re-embeds the entire corpus in the background.",
+        "brief_evidence": "“a rebuild coordinator re-embeds the corpus in the background”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A blue dashed flow labeled “background re-embed” runs from “Rebuild coordinator” to “New generation.”",
+        "note": "Background rebuild coordination is explicit."
+      },
+      {
+        "brief_element": "Background re-embedding writes into a new index generation.",
+        "brief_evidence": "“into a new index generation”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The background re-embed flow terminates at the store labeled “New generation.”",
+        "note": "Generation isolation is visible."
+      },
+      {
+        "brief_element": "Live queries remain on the current index generation while the rebuild is in progress.",
+        "brief_evidence": "“Live queries remain on the current generation until the rebuild is complete and consistent.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects the query-serving path to a current generation or states that serving remains pinned there during rebuild.",
+        "note": "Serving continuity during rebuild cannot be recovered."
+      },
+      {
+        "brief_element": "The new generation cannot be promoted until the rebuild is complete and consistent.",
+        "brief_evidence": "“until the rebuild is complete and consistent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The rebuild path passes through “Complete + consistent?” before the “yes · atomic cutover” route.",
+        "note": "The promotion gate is explicit."
+      },
+      {
+        "brief_element": "Switchover atomically promotes the new index generation.",
+        "brief_evidence": "“Switchover atomically promotes the new generation”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The affirmative route is labeled “yes · atomic cutover” and leads to “Atomic promote / rollback.”",
+        "note": "Atomic promotion is clearly transmitted."
+      },
+      {
+        "brief_element": "The prior index generation remains available after switchover for rollback.",
+        "brief_evidence": "“while the prior generation remains available for rollback”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The process label includes “rollback,” but no prior-generation store, retention relationship, rollback destination, or trigger is visible; the uncertainty list explicitly notes that rollback details are not shown.",
+        "note": "Rollback is named, but the required retained prior generation and executable rollback path are absent."
+      },
+      {
+        "brief_element": "The main end-to-end flow carries version-consistent content from governed ingestion through permission-aware retrieval to grounded answers.",
+        "brief_evidence": "“The diagram should make clear how version-consistent content moves from ingestion through permission-aware retrieval to grounded answers”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction recovers a continuous architecture comprising “Sources & arrivals,” extraction and classification, chunking and embedding, “Version-consistent publication,” query planning, “Hybrid retrieval & permissions,” and “Grounded answer,” including content ACLs, consistent-version gating, user ACL application, and answer citations.",
+        "note": "The primary architecture and happy path are coherent and usable for design discussion."
+      },
+      {
+        "brief_element": "The system makes failed processing behavior clear.",
+        "brief_evidence": "“and how failed processing ... [is] handled”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Unparseable content routes to quarantine, transient embedding failures route to retry workers, and exhausted retries route to dead-letter; however, batch continuation, dead-letter payload/history, and the reprocessing return path are not recovered.",
+        "note": "Major failure destinations survive, but recovery semantics are incomplete."
+      },
+      {
+        "brief_element": "The system makes index rebuild behavior clear.",
+        "brief_evidence": "“and how ... index rebuilds ... are handled”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers background re-embedding, a new generation, consistency checking, and atomic cutover, but not live-query pinning to the current generation or explicit retention of the prior generation.",
+        "note": "The rebuild mechanism is recognizable but lacks important operational boundaries."
+      },
+      {
+        "brief_element": "The system makes low-confidence query handling clear.",
+        "brief_evidence": "“and how ... low-confidence queries are handled”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Enough strong evidence?” decision sends “thin / low score” cases to “I don’t know.”",
+        "note": "The abstention behavior is one of the board's clearest secondary paths."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The top-left diagram identifier denotes an evaluation/system diagram.",
+        "reconstruction_evidence": "The reconstruction introduces a “Diagram identifier” component and says it “Identifies the depicted evaluation/system diagram,” based on the label “2026-07-28-eval-184200 · rag-ingestion-retrieval.”",
+        "why_unsupported": "The brief does not describe an evaluation identifier or any system component with this responsibility. This is visual metadata rather than part of the software system."
+      }
+    ],
+    "strongest_transmitted_behavior": "The strongest transmitted behavior is the primary governed serving path: arrivals carry ACLs through extraction, chunking, rate-limited embedding, and three-store version-consistent publication; user questions are rewritten, sent through hybrid vector/keyword retrieval, fused and reranked, filtered by user ACLs, and resolved to either an answer with citations or an explicit low-confidence abstention.",
+    "most_consequential_loss": "The most consequential loss is the document-version update lifecycle: the reconstruction omits the unchanged-content bypass, changed-version supersession, and deletion of stale derived records. It also leaves publication repair/rollback unspecified, so engineers cannot determine how updates avoid duplicate or stale searchable records.",
+    "overall_summary": "The board communicates the system's purpose, major components, primary end-to-end flow, permission boundary, consistent-publication gate, core failure destinations, low-confidence abstention, and the broad background rebuild mechanism. It is strong enough for an architecture discussion, but not an implementation plan. Several system-defining operational semantics are missing or only suggested: unchanged bypass, supersession and stale-record deletion, non-blocking batch quarantine, dead-letter payload and re-entry, repair or rollback of partial publication, feedback-to-ingestion prioritization, continued serving from the current generation during rebuild, and retention of the prior generation for rollback. There are no system-defining contradictions, and the main flow is reconstructable, but multiple important relationships require inference.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 12771,
+    "output_tokens": 12386
+  },
+  "flags": []
+}
